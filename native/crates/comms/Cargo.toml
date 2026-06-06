@@ -1,0 +1,40 @@
+[package]
+name = "comms"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Graphshell domain layer for the Mere browser — a host-neutral comms model (conversations, messages, identities, drafts) over a ProtocolAdapter seam, with misfin and murm adapters behind features. Surfaced by the meerkat comms pane."
+documentation = "https://docs.rs/comms"
+keywords = ["graphshell", "comms", "messaging", "mere", "domain"]
+categories = ["gui"]
+
+[lib]
+path = "src/lib.rs"
+
+[features]
+# The in-memory adapter is a useful test double for downstream crates (the host
+# pane, a comms service). Available to this crate's own tests unconditionally.
+test-support = []
+# The murm adapter: cabals → conversations, posts → messages, live subscribe.
+# Pulls murm (tokio + iroh transport), so it is opt-in and absent from a wasm
+# build of the bare model.
+murm-adapter = ["dep:murm"]
+# The misfin adapter: a mailbox → conversations, gemmail → messages. Pulls the
+# misfin server feature (tokio + redb), so likewise opt-in.
+misfin-adapter = ["dep:misfin"]
+
+[dependencies]
+serde = { workspace = true }
+async-trait = "0.1"
+murm = { workspace = true, optional = true }
+# The misfin adapter reads the receive server's mailbox, so it needs the
+# `server` feature (MailboxStore + ReceivedMessage).
+misfin = { workspace = true, optional = true, features = ["server"] }
+
+[dev-dependencies]
+tokio = { version = "1", features = ["rt", "macros"] }
+serde_json = { workspace = true }
+# Build canned signed posts for the murm-adapter tests (keypairs + sign_post).
+# Light (ed25519 + blake3), no transport/iroh.
+identity = { workspace = true }
