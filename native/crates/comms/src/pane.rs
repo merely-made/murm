@@ -18,7 +18,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::comms::{AdapterFailure, Inbox};
-use crate::model::{Conversation, ConversationId, Draft, Message};
+use crate::model::{Conversation, ConversationId, Draft, Message, ProtocolKind};
 
 /// The edge a pane docks to.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
@@ -65,6 +65,19 @@ impl Default for DockState {
     }
 }
 
+/// The compose-new form's state: which protocol to send over, the recipient
+/// (a misfin `mailbox@host`; ignored for murm, which targets the cabal), and the
+/// body. The host owns the live editing buffers and syncs them in on send.
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct NewMessageForm {
+    /// The protocol the new message is sent over.
+    pub protocol: ProtocolKind,
+    /// The recipient address (misfin `mailbox@host`). Unused for murm.
+    pub to: String,
+    /// The message body.
+    pub body: String,
+}
+
 /// The comms pane's view state.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct CommsPane {
@@ -80,6 +93,19 @@ pub struct CommsPane {
     pub thread: Vec<Message>,
     /// The reply being composed for the selected conversation.
     pub draft: Draft,
+    /// A transient one-line outcome of the last send (e.g. "Delivered", "Mailbox
+    /// doesn't exist", "Send failed: …"), shown under the compose box. Cleared on
+    /// selecting another conversation. Useful where a send has no in-thread echo
+    /// (misfin: sent mail isn't kept locally).
+    pub send_status: Option<String>,
+    /// The open compose-new form, or `None` when not composing a new message.
+    pub new_message: Option<NewMessageForm>,
+    /// This install's misfin receive address (`me@<host>`), surfaced so the user
+    /// knows where peers send to reach them. `None` until the host reports it.
+    pub misfin_address: Option<String>,
+    /// This install's cabal join ticket, to share with a peer so they can join the
+    /// cabal. `None` until the networked cabal is up.
+    pub cabal_ticket: Option<String>,
 }
 
 impl CommsPane {
@@ -129,19 +155,57 @@ impl CommsPane {
     }
 
     /// Select a conversation: set it as open, clear the prior thread (the host
-    /// loads the new one), and aim a fresh draft at it.
+    /// loads the new one), aim a fresh draft at it, and drop any stale send status.
     pub fn select(&mut self, id: ConversationId) {
         self.draft = Draft::reply_to(id.clone());
         self.selected = Some(id);
         self.thread.clear();
+        self.send_status = None;
     }
 
     /// Clear the selection, returning to the list-only view (and dropping the
-    /// thread + draft).
+    /// thread + draft + send status).
     pub fn clear_selection(&mut self) {
         self.selected = None;
         self.thread.clear();
         self.draft = Draft::default();
+        self.send_status = None;
+    }
+
+    /// Set the transient send-outcome line shown under the compose box.
+    pub fn set_send_status(&mut self, status: impl Into<String>) {
+        self.send_status = Some(status.into());
+    }
+
+    /// Open the compose-new form (a fresh form; misfin by default), dropping any
+    /// open conversation so the form takes the pane.
+    pub fn open_new_message(&mut self) {
+        self.clear_selection();
+        self.new_message = Some(NewMessageForm::default());
+    }
+
+    /// Close the compose-new form.
+    pub fn close_new_message(&mut self) {
+        self.new_message = None;
+    }
+
+    /// Whether the compose-new form is open.
+    pub fn new_message_open(&self) -> bool {
+        self.new_message.is_some()
+    }
+
+    /// Set the protocol on the open compose-new form (a no-op when closed).
+    pub fn set_new_protocol(&mut self, protocol: ProtocolKind) {
+        if let Some(form) = self.new_message.as_mut() {
+            form.protocol = protocol;
+        }
+    }
+
+    /// Record this install's connect info from the host: the misfin receive address
+    /// and (when up) the cabal join ticket.
+    pub fn set_identity(&mut self, misfin_address: String, cabal_ticket: Option<String>) {
+        self.misfin_address = Some(misfin_address);
+        self.cabal_ticket = cabal_ticket;
     }
 
     /// The currently selected conversation id, if any.

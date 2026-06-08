@@ -50,7 +50,7 @@ pub use model::{
     Conversation, ConversationId, Direction, Draft, Identity, Message, MessageBody, MessageId,
     ProtocolKind,
 };
-pub use pane::{CommsPane, DockSide, DockState};
+pub use pane::{CommsPane, DockSide, DockState, NewMessageForm};
 
 /// Crate version.
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");

@@ -13,9 +13,10 @@ use serde::{Deserialize, Serialize};
 
 /// Which backend a conversation, identity, or message belongs to. Routing keys
 /// off this; new protocols (the mooting family) add variants here.
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ProtocolKind {
-    /// Misfin (gemini-style mail).
+    /// Misfin (gemini-style mail). The default for a fresh new-message form.
+    #[default]
     Misfin,
     /// Murm (Cable bilateral / small-group cabals).
     Murm,
