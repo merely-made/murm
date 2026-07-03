@@ -11,7 +11,9 @@
 //! adapter by [`ProtocolKind`].
 
 use crate::adapter::{AdapterError, ProtocolAdapter};
-use crate::model::{Conversation, ConversationId, Draft, Identity, Message, MessageId, ProtocolKind};
+use crate::model::{
+    Conversation, ConversationId, Draft, Identity, Message, MessageId, ProtocolKind,
+};
 
 /// A backend that failed during [`Comms::inbox`], paired with its protocol so the
 /// pane can show which one is down without dropping the conversations that loaded.

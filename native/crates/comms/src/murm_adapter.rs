@@ -21,8 +21,8 @@
 use async_trait::async_trait;
 
 use murm::{
-    hash_post, CabalHandle, CabalId, Ed25519PublicKey, MurmError, Post, PostId, PostKind,
-    SyncedCabal,
+    CabalHandle, CabalId, Ed25519PublicKey, MurmError, Post, PostId, PostKind, SyncedCabal,
+    hash_post,
 };
 
 use crate::adapter::{AdapterError, ProtocolAdapter};
@@ -162,7 +162,10 @@ impl ProtocolAdapter for MurmAdapter {
             let last_activity_ms = messages.iter().filter_map(|m| m.timestamp_ms).max();
             let mut participants: Vec<Identity> = Vec::new();
             for message in &messages {
-                if !participants.iter().any(|p| p.address == message.author.address) {
+                if !participants
+                    .iter()
+                    .any(|p| p.address == message.author.address)
+                {
                     participants.push(message.author.clone());
                 }
             }
@@ -178,13 +181,17 @@ impl ProtocolAdapter for MurmAdapter {
     }
 
     async fn messages(&self, conversation: &ConversationId) -> Result<Vec<Message>, AdapterError> {
-        let cabal = self.cabal_for(&conversation.key).ok_or(AdapterError::NotFound)?;
+        let cabal = self
+            .cabal_for(&conversation.key)
+            .ok_or(AdapterError::NotFound)?;
         self.messages_of(cabal)
     }
 
     async fn send(&self, draft: &Draft) -> Result<MessageId, AdapterError> {
         let conversation = draft.conversation.as_ref().ok_or(AdapterError::NotFound)?;
-        let cabal = self.cabal_for(&conversation.key).ok_or(AdapterError::NotFound)?;
+        let cabal = self
+            .cabal_for(&conversation.key)
+            .ok_or(AdapterError::NotFound)?;
         let post_id = cabal
             .sink
             .send_text(&self.channel, &draft.body)
@@ -233,7 +240,7 @@ fn hex(bytes: &[u8]) -> String {
 mod tests {
     use super::*;
     use identity::Ed25519Keypair;
-    use murm::{sign_post, ChannelName};
+    use murm::{ChannelName, sign_post};
 
     /// A canned cabal: fixed id, fixed "me" key, and a list of posts.
     struct FakeSink {

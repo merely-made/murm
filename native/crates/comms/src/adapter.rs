@@ -16,7 +16,9 @@
 
 use async_trait::async_trait;
 
-use crate::model::{Conversation, ConversationId, Draft, Identity, Message, MessageId, ProtocolKind};
+use crate::model::{
+    Conversation, ConversationId, Draft, Identity, Message, MessageId, ProtocolKind,
+};
 
 /// Why an adapter operation failed.
 #[derive(Clone, Debug, PartialEq, Eq)]

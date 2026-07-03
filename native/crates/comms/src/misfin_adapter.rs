@@ -25,7 +25,7 @@
 
 use async_trait::async_trait;
 
-use misfin::{parse_gemmail, MailboxStore, ReceivedMessage};
+use misfin::{MailboxStore, ReceivedMessage, parse_gemmail};
 
 use crate::adapter::{AdapterError, ProtocolAdapter};
 use crate::model::{
@@ -104,8 +104,7 @@ impl ProtocolAdapter for MisfinAdapter {
             let activity = message.received_at.saturating_mul(1_000);
             if let Some(existing) = conversations.iter_mut().find(|c| c.id.key == key) {
                 existing.unread += 1;
-                existing.last_activity_ms =
-                    existing.last_activity_ms.max(Some(activity));
+                existing.last_activity_ms = existing.last_activity_ms.max(Some(activity));
             } else {
                 let author = received_to_message(&message).author;
                 conversations.push(Conversation {
@@ -215,7 +214,10 @@ mod tests {
     #[tokio::test]
     async fn messages_for_a_correspondent_parse_subject_and_body() {
         let messages = adapter()
-            .messages(&ConversationId::new(ProtocolKind::Misfin, "ana@example.test"))
+            .messages(&ConversationId::new(
+                ProtocolKind::Misfin,
+                "ana@example.test",
+            ))
             .await
             .unwrap();
         assert_eq!(messages.len(), 2);

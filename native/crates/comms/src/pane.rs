@@ -308,7 +308,10 @@ mod tests {
             conversations: vec![conversation("still-here", 10)],
             failures: Vec::new(),
         });
-        assert!(pane.selected().is_none(), "the vanished selection is cleared");
+        assert!(
+            pane.selected().is_none(),
+            "the vanished selection is cleared"
+        );
         assert!(pane.thread.is_empty());
     }
 
@@ -322,7 +325,10 @@ mod tests {
             failures: Vec::new(),
         });
         assert_eq!(pane.selected(), Some(&id));
-        assert_eq!(pane.selected_conversation().map(|c| c.title.as_str()), Some("keep"));
+        assert_eq!(
+            pane.selected_conversation().map(|c| c.title.as_str()),
+            Some("keep")
+        );
     }
 
     #[test]
@@ -349,6 +355,9 @@ mod tests {
         assert!(pane.can_send());
         pane.clear_draft();
         assert!(!pane.can_send(), "body cleared after send");
-        assert_eq!(pane.draft.conversation, Some(ConversationId::new(ProtocolKind::Murm, "abc")));
+        assert_eq!(
+            pane.draft.conversation,
+            Some(ConversationId::new(ProtocolKind::Murm, "abc"))
+        );
     }
 }

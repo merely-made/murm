@@ -7,12 +7,12 @@
 
 use async_trait::async_trait;
 
+use crate::Comms;
 use crate::adapter::{AdapterError, ProtocolAdapter};
-use crate::in_memory::{sample_message, InMemoryAdapter};
+use crate::in_memory::{InMemoryAdapter, sample_message};
 use crate::model::{
     Conversation, ConversationId, Draft, Identity, Message, MessageId, ProtocolKind,
 };
-use crate::Comms;
 
 fn identity(protocol: ProtocolKind, address: &str) -> Identity {
     Identity::new(protocol, address)
@@ -56,7 +56,12 @@ fn two_backends() -> Comms {
         identity(ProtocolKind::Murm, "cabal-self"),
     )
     .with_conversation(
-        conversation(ProtocolKind::Murm, "cabal-abc", "Project cabal", Some(5_000)),
+        conversation(
+            ProtocolKind::Murm,
+            "cabal-abc",
+            "Project cabal",
+            Some(5_000),
+        ),
         vec![sample_message(
             "p1",
             identity(ProtocolKind::Murm, "peer-key"),
@@ -95,7 +100,10 @@ async fn messages_route_to_the_owning_backend() {
     assert_eq!(murm_msgs[0].body.text(), "hi over gossip");
 
     let misfin_msgs = comms
-        .messages(&ConversationId::new(ProtocolKind::Misfin, "ana@example.test"))
+        .messages(&ConversationId::new(
+            ProtocolKind::Misfin,
+            "ana@example.test",
+        ))
         .await
         .unwrap();
     assert_eq!(misfin_msgs[0].body.text(), "first mail");
@@ -179,14 +187,16 @@ impl ProtocolAdapter for FailingAdapter {
 
 #[tokio::test]
 async fn inbox_surfaces_a_failing_backend_without_dropping_others() {
-    let murm = InMemoryAdapter::new(
-        ProtocolKind::Murm,
-        identity(ProtocolKind::Murm, "self"),
-    )
-    .with_conversation(
-        conversation(ProtocolKind::Murm, "cabal-abc", "Project cabal", Some(5_000)),
-        vec![],
-    );
+    let murm = InMemoryAdapter::new(ProtocolKind::Murm, identity(ProtocolKind::Murm, "self"))
+        .with_conversation(
+            conversation(
+                ProtocolKind::Murm,
+                "cabal-abc",
+                "Project cabal",
+                Some(5_000),
+            ),
+            vec![],
+        );
     let comms = Comms::new()
         .with_adapter(Box::new(FailingAdapter))
         .with_adapter(Box::new(murm));
@@ -198,8 +208,5 @@ async fn inbox_surfaces_a_failing_backend_without_dropping_others() {
     // The failure is reported, not swallowed.
     assert_eq!(inbox.failures.len(), 1);
     assert_eq!(inbox.failures[0].protocol, ProtocolKind::Misfin);
-    assert!(matches!(
-        inbox.failures[0].error,
-        AdapterError::Backend(_)
-    ));
+    assert!(matches!(inbox.failures[0].error, AdapterError::Backend(_)));
 }

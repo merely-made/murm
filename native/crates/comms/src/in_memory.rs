@@ -46,8 +46,7 @@ impl InMemoryAdapter {
 
     /// Add a conversation and its messages.
     pub fn with_conversation(mut self, conversation: Conversation, messages: Vec<Message>) -> Self {
-        self.messages
-            .push((conversation.id.clone(), messages));
+        self.messages.push((conversation.id.clone(), messages));
         self.conversations.push(conversation);
         self
     }
@@ -77,27 +76,24 @@ impl ProtocolAdapter for InMemoryAdapter {
 
     async fn send(&self, draft: &Draft) -> Result<MessageId, AdapterError> {
         if !self.can_send {
-            return Err(AdapterError::Unsupported("receive-only backend".to_string()));
+            return Err(AdapterError::Unsupported(
+                "receive-only backend".to_string(),
+            ));
         }
-        let conversation = draft
-            .conversation
-            .as_ref()
-            .ok_or(AdapterError::NotFound)?;
+        let conversation = draft.conversation.as_ref().ok_or(AdapterError::NotFound)?;
         if !self.conversations.iter().any(|c| &c.id == conversation) {
             return Err(AdapterError::NotFound);
         }
         // A deterministic stand-in id; a real backend returns its content hash.
-        Ok(MessageId(format!("{}:{}", conversation.key, self.identity.address)))
+        Ok(MessageId(format!(
+            "{}:{}",
+            conversation.key, self.identity.address
+        )))
     }
 }
 
 /// A trivial incoming text message, for building fixtures.
-pub fn sample_message(
-    id: &str,
-    author: Identity,
-    body: &str,
-    timestamp_ms: u64,
-) -> Message {
+pub fn sample_message(id: &str, author: Identity, body: &str, timestamp_ms: u64) -> Message {
     Message {
         id: MessageId(id.to_string()),
         author,
