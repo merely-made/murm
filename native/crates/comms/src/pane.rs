@@ -208,6 +208,15 @@ impl CommsPane {
         self.cabal_ticket = cabal_ticket;
     }
 
+    /// Clear the surfaced connect info and transient compose state because comms went offline.
+    pub fn clear_identity(&mut self) {
+        self.misfin_address = None;
+        self.cabal_ticket = None;
+        self.send_status = None;
+        self.clear_selection();
+        self.close_new_message();
+    }
+
     /// The currently selected conversation id, if any.
     pub fn selected(&self) -> Option<&ConversationId> {
         self.selected.as_ref()
