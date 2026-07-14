@@ -61,7 +61,7 @@ impl CabalSink for CabalHandle {
         CabalHandle::history(self, channel)
     }
     async fn send_text(&self, channel: &str, text: &str) -> Result<PostId, MurmError> {
-        CabalHandle::send_text(self, channel, text)
+        CabalHandle::send_text(self, channel, text).await
     }
 }
 
