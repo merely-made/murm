@@ -1,5 +1,5 @@
 [package]
-name = "comms"
+name = "mere-comms"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
@@ -10,6 +10,7 @@ keywords = ["graphshell", "comms", "messaging", "mere", "domain"]
 categories = ["gui"]
 
 [lib]
+name = "comms"
 path = "src/lib.rs"
 
 [features]
