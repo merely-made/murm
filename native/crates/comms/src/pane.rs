@@ -1,6 +1,5 @@
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+// Copyright 2026 Mark Boykin
+// SPDX-License-Identifier: MIT OR Apache-2.0
 
 //! The comms pane's view state — the host-neutral view-model a host renders, the
 //! way `chrome`'s `ToolbarState` is rendered by meerkat.
