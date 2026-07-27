@@ -1,0 +1,22 @@
+# V7 hardware receipt: Murm owner-policy admission over a real Reticulum link
+# carried by two Tulle direct-PHY radios. Standalone because crates/probes is
+# excluded from the Mere workspace and this receipt spans the live Retinue
+# checkout.
+[package]
+name = "murm-direct-phy"
+version = "0.0.1"
+edition = "2024"
+license = "MIT OR Apache-2.0"
+publish = false
+
+[dependencies]
+identity = { package = "personae", path = "../../persona/personae" }
+murm = { path = "../../murm/murm", features = ["session-lane"] }
+notochord = { path = "../../system/notochord", features = ["tokio"] }
+retinue = { path = "../../../../retinue/crates/retinue", features = ["tulle-radio"] }
+transport = { package = "mere-transport", path = "../../murm/transport", features = ["notochord", "reticulum"] }
+tulle = { path = "../../../../retinue/crates/tulle", features = ["serial-async"] }
+tokio = { version = "1", features = ["io-util", "macros", "rt", "rt-multi-thread", "sync", "time"] }
+
+[patch."https://github.com/mark-ik/retinue.git"]
+retinue = { path = "../../../../retinue/crates/retinue" }
