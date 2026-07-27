@@ -9,7 +9,7 @@ use identity::delegation::{
 };
 use identity::{Ed25519Keypair, IdentityProvider, InMemoryProvider};
 use murm::{
-    Admission, CabalKey, ConversationEngine, Post, SessionOutcome, push_posts, serve_session,
+    CabalKey, ConversationEngine, Post, SessionOutcome, push_posts, serve_accepted_session,
 };
 use notochord::{
     DenyReason, LocalNetworkPolicy, NetworkId, ProfileRef, RequestedAction, RevocationLedger,
@@ -143,7 +143,7 @@ async fn accept_once(
         .expect("RF accept timed out")
         .expect("RF accept failed");
     assert_eq!(accepted.peer, None);
-    let (stream, facts) = accepted.into_session();
+    let facts = accepted.session_facts();
     assert!(
         facts.ingress.local_interface.is_some(),
         "the receiving radio interface must survive admission"
@@ -157,17 +157,14 @@ async fn accept_once(
     let ledger = RevocationLedger::new();
     tokio::time::timeout(
         Duration::from_secs(150),
-        serve_session(
-            stream,
+        serve_accepted_session(
+            accepted,
             &engine,
             cabal_id,
-            Admission {
-                policy: &owner_policy,
-                ledger: &ledger,
-                facts: &facts,
-                now_ms: NOW_MS,
-                active_sessions: 0,
-            },
+            &owner_policy,
+            &ledger,
+            NOW_MS,
+            0,
         ),
     )
     .await
