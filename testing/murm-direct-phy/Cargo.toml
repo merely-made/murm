@@ -18,5 +18,5 @@ transport = { package = "mere-transport", path = "../../murm/transport", feature
 tulle = { path = "../../../../retinue/crates/tulle", features = ["serial-async"] }
 tokio = { version = "1", features = ["io-util", "macros", "rt", "rt-multi-thread", "sync", "time"] }
 
-[patch."https://github.com/mark-ik/retinue.git"]
+[patch."https://github.com/merely-made/retinue.git"]
 retinue = { path = "../../../../retinue/crates/retinue" }
