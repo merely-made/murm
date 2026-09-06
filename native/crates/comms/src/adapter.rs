@@ -41,7 +41,7 @@ impl std::fmt::Display for AdapterError {
             AdapterError::NotFound => write!(formatter, "comms target not found"),
             AdapterError::Unsupported(message) => {
                 write!(formatter, "comms operation unsupported: {message}")
-            }
+            },
         }
     }
 }
