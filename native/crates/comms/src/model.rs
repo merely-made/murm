@@ -90,6 +90,63 @@ pub enum Direction {
     Outgoing,
 }
 
+/// Why an outgoing message remains queued before it reaches a radio or other
+/// carriage boundary.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub enum DeliveryQueueReason {
+    /// No currently usable carrier is available.
+    Offline,
+    /// The message is ready for a station or other carrier to accept it.
+    ReadyForCarriage,
+    /// Carriage requires a peer that is not presently available.
+    WaitingForPeer,
+}
+
+/// The latest delivery fact known for one message.
+///
+/// This is a projection value, not a read receipt. In particular, [`Unknown`](Self::Unknown)
+/// means the available records do not establish delivery state; it says nothing about whether a
+/// recipient has read the message. Transport-specific records retain any identifiers and modes
+/// needed to substantiate these facts.
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub enum DeliveryStatus {
+    /// Available records do not establish a delivery state.
+    #[default]
+    Unknown,
+    /// The message remains local pending carriage.
+    Queued(DeliveryQueueReason),
+    /// A radio carrier accepted the message for transmission.
+    HandedToRadio,
+    /// A propagation node accepted the message.
+    AcceptedByPropagationNode,
+    /// The message was fetched from a propagation node.
+    FetchedFromPropagationNode,
+    /// The message arrived through a direct exchange.
+    ReceivedDirect,
+    /// The sender cancelled the outstanding message.
+    Cancelled,
+    /// Delivery failed with the preserved backend detail.
+    Failed { detail: String },
+}
+
+impl DeliveryStatus {
+    /// A short, stable presentation label for the latest known delivery fact.
+    pub fn label(&self) -> &'static str {
+        match self {
+            Self::Unknown => "delivery unknown",
+            Self::Queued(DeliveryQueueReason::Offline) => "offline, queued",
+            Self::Queued(DeliveryQueueReason::ReadyForCarriage) => "queued for station",
+            Self::Queued(DeliveryQueueReason::WaitingForPeer) => "queued, waiting for peer",
+            Self::HandedToRadio => "handed to radio",
+            Self::AcceptedByPropagationNode => "accepted by propagation node",
+            Self::FetchedFromPropagationNode => "fetched from propagation node",
+            Self::ReceivedDirect => "received directly",
+            Self::Cancelled => "cancelled",
+            Self::Failed { .. } => "failed",
+        }
+    }
+}
+
 /// A message body plus the hint a renderer needs. Gemtext rides the same nematic
 /// engine the content card uses; plain text is shown as-is.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]

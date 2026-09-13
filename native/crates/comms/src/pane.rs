@@ -149,10 +149,10 @@ impl CommsPane {
     pub fn set_inbox(&mut self, inbox: Inbox) {
         self.inbox = inbox.conversations;
         self.failures = inbox.failures;
-        if let Some(selected) = &self.selected {
-            if !self.inbox.iter().any(|c| &c.id == selected) {
-                self.clear_selection();
-            }
+        if let Some(selected) = &self.selected
+            && !self.inbox.iter().any(|c| &c.id == selected)
+        {
+            self.clear_selection();
         }
     }
 

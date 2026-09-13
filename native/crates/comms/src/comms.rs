@@ -85,7 +85,7 @@ impl Comms {
             }
         }
         // Most recent first; `None` (no activity yet) sorts to the end.
-        conversations.sort_by(|a, b| b.last_activity_ms.cmp(&a.last_activity_ms));
+        conversations.sort_by_key(|conversation| std::cmp::Reverse(conversation.last_activity_ms));
         Inbox {
             conversations,
             failures,

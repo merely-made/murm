@@ -13,11 +13,71 @@ use crate::Comms;
 use crate::adapter::{AdapterError, ProtocolAdapter};
 use crate::in_memory::{InMemoryAdapter, sample_message};
 use crate::model::{
-    Conversation, ConversationId, Draft, Identity, Message, MessageId, ProtocolKind,
+    Conversation, ConversationId, DeliveryQueueReason, DeliveryStatus, Draft, Identity, Message,
+    MessageId, ProtocolKind,
 };
 
 fn identity(protocol: ProtocolKind, address: &str) -> Identity {
     Identity::new(protocol, address)
+}
+
+#[test]
+fn delivery_statuses_serialize_and_preserve_failure_detail() {
+    let status = DeliveryStatus::Failed {
+        detail: "radio window expired".to_string(),
+    };
+
+    let encoded = serde_json::to_string(&status).unwrap();
+    assert_eq!(
+        serde_json::from_str::<DeliveryStatus>(&encoded).unwrap(),
+        status
+    );
+}
+
+#[test]
+fn delivery_status_default_is_unknown_not_a_read_receipt() {
+    assert_eq!(DeliveryStatus::default(), DeliveryStatus::Unknown);
+    assert_eq!(DeliveryStatus::default().label(), "delivery unknown");
+}
+
+#[test]
+fn delivery_status_labels_cover_each_delivery_fact() {
+    let cases = [
+        (DeliveryStatus::Unknown, "delivery unknown"),
+        (
+            DeliveryStatus::Queued(DeliveryQueueReason::Offline),
+            "offline, queued",
+        ),
+        (
+            DeliveryStatus::Queued(DeliveryQueueReason::ReadyForCarriage),
+            "queued for station",
+        ),
+        (
+            DeliveryStatus::Queued(DeliveryQueueReason::WaitingForPeer),
+            "queued, waiting for peer",
+        ),
+        (DeliveryStatus::HandedToRadio, "handed to radio"),
+        (
+            DeliveryStatus::AcceptedByPropagationNode,
+            "accepted by propagation node",
+        ),
+        (
+            DeliveryStatus::FetchedFromPropagationNode,
+            "fetched from propagation node",
+        ),
+        (DeliveryStatus::ReceivedDirect, "received directly"),
+        (DeliveryStatus::Cancelled, "cancelled"),
+        (
+            DeliveryStatus::Failed {
+                detail: "radio window expired".to_string(),
+            },
+            "failed",
+        ),
+    ];
+
+    for (status, label) in cases {
+        assert_eq!(status.label(), label);
+    }
 }
 
 fn conversation(

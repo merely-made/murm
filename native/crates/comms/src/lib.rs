@@ -49,8 +49,8 @@ pub mod misfin_adapter;
 pub use adapter::{AdapterError, ProtocolAdapter};
 pub use comms::{AdapterFailure, Comms, Inbox};
 pub use model::{
-    Conversation, ConversationId, Direction, Draft, Identity, Message, MessageBody, MessageId,
-    ProtocolKind,
+    Conversation, ConversationId, DeliveryQueueReason, DeliveryStatus, Direction, Draft, Identity,
+    Message, MessageBody, MessageId, ProtocolKind,
 };
 pub use pane::{CommsPane, DockSide, DockState, NewMessageForm};
 
