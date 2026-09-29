@@ -10,10 +10,10 @@ use std::collections::BTreeMap;
 use std::sync::Arc;
 use std::time::Duration;
 
-use identity::delegation::{
+use identity::{Ed25519Keypair, IdentityProvider, InMemoryProvider};
+use insigne::delegation::{
     CapabilityScope, DelegationCertificate, DelegationParent, SignedDelegationCertificate,
 };
-use identity::{Ed25519Keypair, IdentityProvider, InMemoryProvider};
 use murm::{
     CabalKey, ConversationEngine, Post, SessionOutcome, push_posts, serve_accepted_session,
 };

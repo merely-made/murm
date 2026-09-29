@@ -10,6 +10,7 @@ license = "MPL-2.0"
 publish = false
 
 [dependencies]
+insigne = { path = "../../dramatis/insigne", features = ["verify"] }
 identity = { package = "personae", path = "../../persona/personae" }
 murm = { path = "../../murm/murm", features = ["session-lane"] }
 notochord = { path = "../../system/notochord", features = ["tokio"] }
