@@ -1,12 +1,13 @@
 //! Retinue's side of `oracle/interop_auto_sniff.py`: hear stock AutoInterface tokens.
 //!
 //! ```text
-//! auto_sniff DEVICE [--group G] [--scope S] [--count N] [--self-test]
+//! auto_sniff DEVICE [--group G] [--scope S] [--count N] [--any-source] [--self-test]
 //! ```
 //!
 //! Joins the discovery group on DEVICE beside stock (both sockets share the port) and
-//! checks N tokens: each must come from the link-local `select` adopts for DEVICE and equal
-//! `peering_token` over it. With `--self-test` it then runs a whole AutoInterface on DEVICE
+//! checks N tokens: each must equal `peering_token` over the link-local `select` adopts for
+//! DEVICE and come from it (`MATCH`). A right token from another source is `FOREIGN`, and
+//! counts only with `--any-source`. With `--self-test` it then runs a whole AutoInterface on DEVICE
 //! under a private group and reports whether its own multicast came back.
 
 use std::sync::Arc;
@@ -30,7 +31,7 @@ async fn main() -> Result<(), String> {
         devices: vec![device.clone()],
         ..AutoConfig::default()
     };
-    let (mut count, mut self_test) = (3, false);
+    let (mut count, mut self_test, mut any_source) = (3, false, false);
     while let Some(flag) = args.next() {
         let mut value = || args.next().ok_or(format!("{flag} needs a value"));
         match flag.as_str() {
@@ -38,6 +39,7 @@ async fn main() -> Result<(), String> {
             "--scope" => cfg.scope = Scope::from_config(&value()?).ok_or("unknown scope")?,
             "--count" => count = value()?.parse().map_err(|e| format!("{e}"))?,
             "--self-test" => self_test = true,
+            "--any-source" => any_source = true,
             other => return Err(format!("unknown flag {other}")),
         }
     }
@@ -64,9 +66,14 @@ async fn main() -> Result<(), String> {
             return Ok(());
         };
         let src = retinue::auto::descope(*src.ip());
-        let ok = src == ours.link_local && buf[..n] == expected;
-        println!("TOKEN {src} {n} {}", if ok { "MATCH" } else { "OTHER" });
-        matched += usize::from(ok);
+        let (token, own) = (buf[..n] == expected, src == ours.link_local);
+        let label = match (token, own) {
+            (false, _) => "OTHER",
+            (true, true) => "MATCH",
+            (true, false) => "FOREIGN",
+        };
+        println!("TOKEN {src} {n} {label}");
+        matched += usize::from(token && (own || any_source));
     }
     println!("SNIFF_OK {matched}");
 
