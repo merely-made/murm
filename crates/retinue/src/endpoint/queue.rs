@@ -3,10 +3,13 @@
 use alloc::vec::Vec;
 
 use std::collections::VecDeque;
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
 
 use crate::ifac::Ifac;
 use crate::packet::Packet;
+
+use super::iface_stats::InterfaceStats;
 
 /// A per-class tally.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
@@ -306,6 +309,9 @@ pub struct OutboundPackets {
     pub(super) queues: Arc<OutboundQueues>,
     pub(super) delivery_in_flight: bool,
     pub(super) ifac: Option<Ifac>,
+    /// The interface's complete-frame limit, access code included; shared with its record.
+    pub(super) frame_limit: Arc<AtomicUsize>,
+    pub(super) stats: Arc<InterfaceStats>,
 }
 
 impl OutboundPackets {
@@ -334,13 +340,22 @@ impl OutboundPackets {
         }
     }
 
-    /// Encode one queued packet for this interface, applying IFAC when configured.
+    /// Encode one queued packet for this interface, applying IFAC when configured. Counted
+    /// as transmitted: every carrier encodes exactly what it writes.
     pub fn encode(&self, packet: &Packet) -> crate::Result<Vec<u8>> {
         let logical = packet.encode();
-        match &self.ifac {
-            Some(ifac) => ifac.seal(&logical),
-            None => Ok(logical),
-        }
+        let wire = match &self.ifac {
+            Some(ifac) => ifac.seal(&logical)?,
+            None => logical,
+        };
+        self.stats.note_tx(wire.len());
+        Ok(wire)
+    }
+
+    /// The interface's complete-frame limit, access code included: the largest frame a
+    /// carrier should deframe or send.
+    pub fn frame_limit(&self) -> usize {
+        self.frame_limit.load(Ordering::Acquire)
     }
 
     /// Drop everything queued, counted as dropped: an offline carrier sends nothing

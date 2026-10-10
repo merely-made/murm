@@ -47,17 +47,43 @@ DATAGRAM_LAN_GATES = (
 )
 DATAGRAM_ROOT_GATES = (("auto-feth", "interop_auto_feth.py", []),)
 
+# Interface batch 2: one tuple per unit, each edited only by its owner. (name, script, args).
+# Every gate takes free ephemeral ports, so lanes may run in parallel.
+
+# V1: shared instance (A6) and tunnel synthesis (B6), on loopback TCP.
+LOCAL_GATES = ()
+
+# V2: path requests by interface mode and recursive discovery (A4), on loopback TCP.
+DISCOVERY_GATES = ()
+
+# V3: inbound priority lanes (B4) and per-interface statistics (C2), on loopback TCP.
+INGRESS_GATES = ()
+
+# V4: Pipe (C4), KISS on TCP (C5) and listen addresses (C7), on loopback and child stdio.
+STREAM_GATES = ()
+
+# V5: AX.25 KISS (B13) over ptys, RNode over TCP (B10) and telemetry (B11) over loopback;
+# macOS only, as the serial lane.
+RADIO_GATES = ()
+
+# V6: link MTU autoconfiguration (L1) and RNS config sections (B5), on loopback TCP.
+MTU_GATES = ()
+
+BATCH2_LANES = {"local": LOCAL_GATES, "discovery": DISCOVERY_GATES, "ingress": INGRESS_GATES,
+                "stream": STREAM_GATES, "radio": RADIO_GATES, "mtu": MTU_GATES}
+
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("lane", choices=("live", "outrider", "resource", "routing", "serial",
-                                         "datagram", "datagram-lan", "datagram-root"))
+                                         "datagram", "datagram-lan", "datagram-root",
+                                         *BATCH2_LANES))
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--raw-output", type=Path,
                         default=REPO / "validation/results/rns-1.5.7-repin")
     args = parser.parse_args()
-    if args.lane == "serial" and sys.platform != "darwin":
-        parser.error("the serial lane runs on macOS ptys only")
+    if args.lane in ("serial", "radio") and sys.platform != "darwin":
+        parser.error(f"the {args.lane} lane runs on macOS ptys only")
     assert version("rns") == "1.5.7", "requires rns==1.5.7"
     assert version("lxmf") == "1.2.0", "requires lxmf==1.2.0"
     args.output.mkdir(parents=True, exist_ok=False)
@@ -79,6 +105,9 @@ def main():
     elif args.lane == "datagram-lan":
         gates = [(name, ORACLE / script, extra) for name, script, extra in DATAGRAM_LAN_GATES]
         assert len(gates) == 2
+    elif args.lane in BATCH2_LANES:
+        gates = [(name, ORACLE / script, extra) for name, script, extra in BATCH2_LANES[args.lane]]
+        assert gates, f"the {args.lane} lane has no gates yet"
     elif args.lane == "datagram-root":
         gates = [(name, ORACLE / script, extra) for name, script, extra in DATAGRAM_ROOT_GATES]
         assert len(gates) == 1

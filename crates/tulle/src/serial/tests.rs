@@ -204,3 +204,20 @@ async fn a_supervised_link_reopens_after_a_fatal_device_error() {
     assert_eq!(pump.recv().await.unwrap().frame, b"after reopen");
     pump.shutdown().await.unwrap();
 }
+
+#[test]
+fn rnode_port_parses_rns_port_values() {
+    assert_eq!(
+        RNodePort::parse("TCP://rnode.local"),
+        Some(RNodePort::Tcp {
+            host: "rnode.local".into(),
+            port: RNODE_TCP_PORT
+        })
+    );
+    assert_eq!(
+        RNodePort::parse("/dev/ttyUSB0"),
+        Some(RNodePort::Serial("/dev/ttyUSB0".into()))
+    );
+    assert_eq!(RNodePort::parse("tcp://"), None);
+    assert_eq!(RNodePort::parse("ble://RNode 1234"), None);
+}

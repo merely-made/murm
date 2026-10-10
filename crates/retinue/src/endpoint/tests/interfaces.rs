@@ -85,6 +85,7 @@ fn ifac_overhead_counts_against_interface_frame_admission() {
         mode: InterfaceMode::Full,
         online: Arc::new(AtomicBool::new(true)),
         unsendable: AtomicU64::new(0),
+        stats: Arc::default(),
     };
 
     assert_eq!(
@@ -397,7 +398,15 @@ async fn a_stalled_writer_or_a_closed_reader_ends_the_pump() {
     let (reader, writer) = tokio::io::split(near);
     let started = tokio::time::Instant::now();
     assert_eq!(
-        pump::run(&ep.shared, id, &mut out, reader, writer).await,
+        pump::run(
+            &ep.shared,
+            id,
+            &mut out,
+            pump::Framing::Hdlc,
+            reader,
+            writer
+        )
+        .await,
         PumpEnd::WriteStall
     );
     assert_eq!(started.elapsed(), pump::DEAD_TIME);
@@ -407,7 +416,15 @@ async fn a_stalled_writer_or_a_closed_reader_ends_the_pump() {
     let (reader, writer) = tokio::io::split(near);
     out.discard();
     assert_eq!(
-        pump::run(&ep.shared, id, &mut out, reader, writer).await,
+        pump::run(
+            &ep.shared,
+            id,
+            &mut out,
+            pump::Framing::Hdlc,
+            reader,
+            writer
+        )
+        .await,
         PumpEnd::Eof
     );
 }
@@ -443,7 +460,17 @@ async fn an_unencodable_packet_is_counted_and_skipped() {
             }
         }
     };
-    let (end, received) = tokio::join!(pump::run(&ep.shared, id, &mut out, reader, writer), peer);
+    let (end, received) = tokio::join!(
+        pump::run(
+            &ep.shared,
+            id,
+            &mut out,
+            pump::Framing::Hdlc,
+            reader,
+            writer
+        ),
+        peer
+    );
     assert_eq!(end, PumpEnd::Eof);
     assert_eq!(received.payload, b"fits");
     let unsendable = ep

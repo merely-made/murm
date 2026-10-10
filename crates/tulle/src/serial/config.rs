@@ -46,6 +46,42 @@ impl Default for SerialPumpConfig {
     }
 }
 
+/// RNS's port for an RNode reached over TCP (`RNodeInterface.py` 1453).
+pub const RNODE_TCP_PORT: u16 = 7633;
+
+/// Where an RNode is reached: RNS's `port` key (`RNodeInterface.py` 170-193).
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum RNodePort {
+    /// A serial device path.
+    Serial(String),
+    /// `tcp://host`, on [`RNODE_TCP_PORT`] unless a test overrides it.
+    Tcp { host: String, port: u16 },
+}
+
+impl RNodePort {
+    /// Parse RNS's `port` value: `tcp://host` (scheme case-insensitive) or a device path.
+    /// `None` for `tcp://` without a host, which RNS would leave unresolved, and for
+    /// `ble://`, which is not supported.
+    pub fn parse(value: &str) -> Option<Self> {
+        let scheme = |name: &str| {
+            value
+                .get(..name.len())
+                .is_some_and(|head| head.eq_ignore_ascii_case(name))
+        };
+        if scheme("ble://") {
+            return None;
+        }
+        if scheme("tcp://") {
+            let host = &value["tcp://".len()..];
+            return (!host.is_empty()).then(|| Self::Tcp {
+                host: host.to_string(),
+                port: RNODE_TCP_PORT,
+            });
+        }
+        Some(Self::Serial(value.to_string()))
+    }
+}
+
 /// Observable lifecycle of the pump.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum PumpStatus {

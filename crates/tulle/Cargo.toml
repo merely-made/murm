@@ -13,9 +13,12 @@ categories = ["network-programming", "embedded"]
 [features]
 default = []
 serial-async = ["dep:serial2-tokio", "dep:tokio"]
+# An RNode reached over TCP (`RNodeInterface.py` 1452-1582): keepalive needs socket2.
+rnode-tcp = ["serial-async", "dep:socket2"]
 
 [dependencies]
 serial2-tokio = { version = "0.1.24", optional = true }
+socket2 = { version = "0.6", features = ["all"], optional = true }
 # `macros` is required by the library itself: the serial pumps use `tokio::select!`; `net`
 # opens a pty, which serial2 cannot configure on macOS, through tokio's unix pipe. Without
 # it `cargo test` still passes, because the dev-dependency below unifies the feature in, but a
