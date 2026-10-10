@@ -5,7 +5,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 //! The comms pane's view state — the host-neutral view-model a host renders, the
-//! way `chrome`'s `ToolbarState` is rendered by meerkat.
+//! way a host renders `chrome`'s `ToolbarState`.
 //!
 //! [`CommsPane`] holds the dock geometry, the conversation-list snapshot, the
 //! open thread, and the draft. The host fills the list / thread from
@@ -18,6 +18,8 @@
 //! rather than as a speculative catalog.
 
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+use std::sync::Arc;
 
 use crate::comms::{AdapterFailure, Inbox};
 use crate::model::{Conversation, ConversationId, Draft, Message, ProtocolKind};
@@ -80,9 +82,32 @@ pub struct NewMessageForm {
     pub body: String,
 }
 
+/// A local thread-load request. Its identity binds a completion to the pane's
+/// latest request, including a reload of the same conversation. Never durable.
+#[derive(Clone, Debug)]
+pub struct ThreadRequest {
+    conversation: ConversationId,
+    identity: Arc<()>,
+}
+
+impl ThreadRequest {
+    pub fn conversation(&self) -> &ConversationId {
+        &self.conversation
+    }
+}
+
+impl PartialEq for ThreadRequest {
+    fn eq(&self, other: &Self) -> bool {
+        self.conversation == other.conversation && Arc::ptr_eq(&self.identity, &other.identity)
+    }
+}
+
 /// The comms pane's view state.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct CommsPane {
+    /// Drafts belong to this view, separately from its current attention.
+    drafts: HashMap<ConversationId, Draft>,
+    pending_thread: Option<ThreadRequest>,
     /// Dock geometry (open / side / size / focus).
     pub dock: DockState,
     /// The conversation-list snapshot, recency-sorted, as the host last loaded it.
@@ -156,22 +181,37 @@ impl CommsPane {
         }
     }
 
-    /// Select a conversation: set it as open, clear the prior thread (the host
-    /// loads the new one), aim a fresh draft at it, and drop any stale send status.
+    /// Select a conversation, preserving the prior draft and restoring this
+    /// conversation's draft. Selecting it again leaves its edits and thread alone.
     pub fn select(&mut self, id: ConversationId) {
-        self.draft = Draft::reply_to(id.clone());
+        if self.selected.as_ref() == Some(&id) {
+            return;
+        }
+        self.park_draft();
+        self.draft = self
+            .drafts
+            .remove(&id)
+            .unwrap_or_else(|| Draft::reply_to(id.clone()));
         self.selected = Some(id);
         self.thread.clear();
+        self.pending_thread = None;
         self.send_status = None;
     }
 
-    /// Clear the selection, returning to the list-only view (and dropping the
-    /// thread + draft + send status).
+    /// Return to the list-only view. Deselecting preserves edits locally.
     pub fn clear_selection(&mut self) {
+        self.park_draft();
         self.selected = None;
         self.thread.clear();
+        self.pending_thread = None;
         self.draft = Draft::default();
         self.send_status = None;
+    }
+
+    fn park_draft(&mut self) {
+        if let Some(id) = self.draft.conversation.clone() {
+            self.drafts.insert(id, self.draft.clone());
+        }
     }
 
     /// Set the transient send-outcome line shown under the compose box.
@@ -210,12 +250,14 @@ impl CommsPane {
         self.cabal_ticket = cabal_ticket;
     }
 
-    /// Clear the surfaced connect info and transient compose state because comms went offline.
+    /// Explicitly unbind this identity and forget its transient compose state.
+    /// A temporary transport outage should preserve drafts and report a failure.
     pub fn clear_identity(&mut self) {
         self.misfin_address = None;
         self.cabal_ticket = None;
         self.send_status = None;
         self.clear_selection();
+        self.drafts.clear();
         self.close_new_message();
     }
 
@@ -224,12 +266,28 @@ impl CommsPane {
         self.selected.as_ref()
     }
 
-    /// Replace the open thread's messages — the host loads these for the selected
-    /// conversation. Ignored when nothing is selected.
-    pub fn set_thread(&mut self, messages: Vec<Message>) {
-        if self.selected.is_some() {
-            self.thread = messages;
+    /// Begin a load for the selected conversation. A newer request supersedes
+    /// the old one, even when its conversation is the same.
+    pub fn begin_thread_load(&mut self) -> Option<ThreadRequest> {
+        let request = ThreadRequest {
+            conversation: self.selected.clone()?,
+            identity: Arc::new(()),
+        };
+        self.pending_thread = Some(request.clone());
+        Some(request)
+    }
+
+    /// Apply only the latest requested thread. A late completion cannot attach
+    /// to a different selection, a reopened selection or another pane.
+    pub fn set_thread(&mut self, request: &ThreadRequest, messages: Vec<Message>) -> bool {
+        if self.pending_thread.as_ref() != Some(request)
+            || self.selected.as_ref() != Some(request.conversation())
+        {
+            return false;
         }
+        self.thread = messages;
+        self.pending_thread = None;
+        true
     }
 
     /// The selected conversation's metadata from the loaded list, if present.
@@ -248,6 +306,27 @@ impl CommsPane {
     pub fn clear_draft(&mut self) {
         self.draft.body.clear();
         self.draft.subject = None;
+    }
+
+    /// Acknowledge an exact submitted draft after the owner confirms success.
+    /// Preserve newer edits and a different selected conversation. Failures do
+    /// not call this method. This records no transport or read-receipt claim.
+    pub fn acknowledge_sent(&mut self, submitted: &Draft) -> bool {
+        let Some(id) = submitted.conversation.as_ref() else {
+            return false;
+        };
+        if self.draft.conversation.as_ref() == Some(id) {
+            if self.draft != *submitted {
+                return false;
+            }
+            self.clear_draft();
+            return true;
+        }
+        if self.drafts.get(id) == Some(submitted) {
+            self.drafts.remove(id);
+            return true;
+        }
+        false
     }
 
     /// Whether the draft is ready to send (has a target and non-empty body).
@@ -298,7 +377,7 @@ mod tests {
     #[test]
     fn select_aims_the_draft_and_clears_the_prior_thread() {
         let mut pane = CommsPane::new();
-        pane.set_thread(vec![message("x", "stale")]); // ignored: nothing selected
+        assert!(pane.begin_thread_load().is_none());
         assert!(pane.thread.is_empty());
 
         let id = ConversationId::new(ProtocolKind::Murm, "abc");
@@ -307,7 +386,8 @@ mod tests {
         assert_eq!(pane.draft.conversation, Some(id));
         assert!(pane.thread.is_empty());
 
-        pane.set_thread(vec![message("m1", "hi")]);
+        let request = pane.begin_thread_load().unwrap();
+        assert!(pane.set_thread(&request, vec![message("m1", "hi")]));
         assert_eq!(pane.thread.len(), 1);
     }
 
@@ -370,5 +450,71 @@ mod tests {
             pane.draft.conversation,
             Some(ConversationId::new(ProtocolKind::Murm, "abc"))
         );
+    }
+
+    #[test]
+    fn attention_changes_preserve_each_draft_and_identity_clear_forgets_them() {
+        let mut pane = CommsPane::new();
+        let a = conversation("a", 1).id;
+        let b = conversation("b", 2).id;
+        pane.select(a.clone());
+        pane.set_draft_body("Alice's draft");
+        pane.draft.subject = Some("subject".into());
+        pane.select(a.clone());
+        assert_eq!(pane.draft.body, "Alice's draft");
+        pane.select(b.clone());
+        pane.set_draft_body("Bob's draft");
+        pane.clear_selection();
+        pane.select(a.clone());
+        assert_eq!(pane.draft.body, "Alice's draft");
+        assert_eq!(pane.draft.subject.as_deref(), Some("subject"));
+        pane.set_inbox(Inbox {
+            conversations: vec![],
+            failures: vec![],
+        });
+        pane.select(b);
+        assert_eq!(pane.draft.body, "Bob's draft");
+        pane.clear_identity();
+        pane.select(a);
+        assert!(pane.draft.is_empty());
+    }
+
+    #[test]
+    fn delayed_thread_loads_cannot_attach_after_switch_reload_or_to_another_pane() {
+        let a = conversation("a", 1).id;
+        let mut pane = CommsPane::new();
+        pane.select(a.clone());
+        let old = pane.begin_thread_load().unwrap();
+        pane.select(conversation("b", 2).id);
+        pane.select(a.clone());
+        assert!(!pane.set_thread(&old, vec![message("x", "stale")]));
+        let first = pane.begin_thread_load().unwrap();
+        let last = pane.begin_thread_load().unwrap();
+        assert!(!pane.set_thread(&first, vec![message("x", "stale")]));
+        let mut other = CommsPane::new();
+        other.select(a);
+        other.begin_thread_load();
+        assert!(!other.set_thread(&last, vec![message("x", "wrong pane")]));
+        assert!(pane.set_thread(&last, vec![message("y", "fresh")]));
+        assert!(!pane.set_thread(&last, vec![]));
+    }
+
+    #[test]
+    fn delayed_send_acknowledgment_preserves_other_and_newer_edits() {
+        let mut pane = CommsPane::new();
+        let a = conversation("a", 1).id;
+        let b = conversation("b", 2).id;
+        pane.select(a.clone());
+        pane.set_draft_body("submitted");
+        let sent = pane.draft.clone();
+        pane.select(b);
+        pane.set_draft_body("other");
+        assert!(pane.acknowledge_sent(&sent));
+        assert_eq!(pane.draft.body, "other");
+        pane.select(a);
+        assert!(pane.draft.is_empty());
+        pane.set_draft_body("newer edit");
+        assert!(!pane.acknowledge_sent(&sent));
+        assert_eq!(pane.draft.body, "newer edit");
     }
 }
