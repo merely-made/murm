@@ -36,7 +36,8 @@ SERIAL_GATES = (
 # Datagram carriers (UDP, AutoInterface): (name, script, args). `datagram` runs anywhere
 # (loopback and offline vectors). `datagram-lan` needs en1 with IPv4 and an fe80 address,
 # and a macOS application firewall that admits the oracle Python and the example binaries.
-# `datagram-root` also needs feth pairs made as root (interop_auto_feth.py says how).
+# `datagram-root` also needs feth pairs made as root, each feth holding only its assigned
+# link-local (interop_auto_feth.py says how and refuses otherwise).
 DATAGRAM_GATES = (
     ("udp", "interop_udp.py", []),
     ("auto-vectors", "interop_auto_vectors.py", ["--check"]),
