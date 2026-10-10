@@ -10,10 +10,10 @@ license = "MPL-2.0"
 publish = false
 
 [dependencies]
-insigne = { path = "../../dramatis/insigne", features = ["verify"] }
-identity = { package = "personae", path = "../../persona/personae" }
+insigne = { git = "https://github.com/merely-made/dramatis.git", rev = "c1d620764315b4c750fcffea30b8c898b8bb73bc", features = ["verify"] }
+identity = { package = "personae", git = "https://github.com/merely-made/dramatis.git", rev = "c1d620764315b4c750fcffea30b8c898b8bb73bc" }
 murm = { path = "../../murm/murm", features = ["session-lane"] }
-notochord = { path = "../../system/notochord", features = ["tokio"] }
+notochord = { git = "https://github.com/merely-made/dramatis.git", rev = "c1d620764315b4c750fcffea30b8c898b8bb73bc", features = ["tokio"] }
 retinue = { path = "../../../../retinue/crates/retinue", features = ["tulle-radio"] }
 transport = { package = "mere-transport", path = "../../murm/transport", features = ["notochord", "reticulum"] }
 tulle = { path = "../../../../retinue/crates/tulle", features = ["serial-async"] }
