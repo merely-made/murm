@@ -22,6 +22,9 @@ pub enum ProtocolKind {
     Misfin,
     /// Murm (Cable bilateral / small-group cabals).
     Murm,
+    /// Commons' retained encrypted chat, projected under Moot authority.
+    /// This names the record grammar, independently of its carriage.
+    CommonsChat,
 }
 
 /// A party in a conversation — you or a peer. `address` is the backend-native

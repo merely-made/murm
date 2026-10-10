@@ -6,7 +6,8 @@
 
 //! # comms
 //!
-//! Graphshell domain module — a host-neutral comms model for the Mere browser.
+//! A host-neutral comms model for Mere applications, including Moot's
+//! authority-filtered Commons conversation view.
 //!
 //! It names the shapes the comms pane renders ([`Conversation`], [`Message`],
 //! [`Identity`], [`Draft`]) and the [`ProtocolAdapter`] seam that turns a backend
@@ -52,7 +53,7 @@ pub use model::{
     Conversation, ConversationId, DeliveryQueueReason, DeliveryStatus, Direction, Draft, Identity,
     Message, MessageBody, MessageId, ProtocolKind,
 };
-pub use pane::{CommsPane, DockSide, DockState, NewMessageForm};
+pub use pane::{CommsPane, DockSide, DockState, NewMessageForm, ThreadRequest};
 
 /// Crate version.
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
