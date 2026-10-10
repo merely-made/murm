@@ -17,9 +17,14 @@ use crate::iface::hdlc;
 use crate::node::InterfaceMode;
 
 use super::interface::InterfaceId;
-use super::pump::{PumpEnd, carry_tcp};
+use super::mtu::HwMtu;
+use super::pump::{Framing, PumpEnd, carry_tcp};
 use super::runtime::{Endpoint, endpoint_closed, track};
 use super::sockopt;
+
+/// RNS's bitrate guess for a TCP interface, which sets its hardware MTU (`TCPInterface.py`
+/// 76, 465).
+pub(super) const TCP_BITRATE_GUESS: u64 = 10_000_000;
 
 /// A TCP client interface: RNS's `TCPClientInterface` settings.
 #[derive(Clone, Debug)]
@@ -45,6 +50,9 @@ pub struct TcpClient {
     /// Attempts per outage before the interface is forgotten; `None` retries forever. RNS
     /// parses this but never stops (`TCPInterface.py` 276-299); here it is honoured.
     pub max_reconnect_tries: Option<u32>,
+    /// Frame with KISS rather than HDLC, to reach a KISS TNC over TCP (`kiss_framing`,
+    /// `TCPInterface.py` 55-67). Such a client synthesizes no tunnel (178-179).
+    pub kiss_framing: bool,
 }
 
 impl TcpClient {
@@ -59,6 +67,7 @@ impl TcpClient {
             connect_timeout: Duration::from_secs(5),
             reconnect_wait: Duration::from_secs(5),
             max_reconnect_tries: None,
+            kiss_framing: false,
         }
     }
 }
@@ -133,7 +142,15 @@ impl Endpoint {
             client.ifac.clone(),
             InterfaceMode::Full,
             stream.is_some(),
+            HwMtu::Auto {
+                bitrate: TCP_BITRATE_GUESS,
+            },
         );
+        let framing = if client.kiss_framing {
+            Framing::Kiss
+        } else {
+            Framing::Hdlc
+        };
         if !attached.registered {
             return Err(endpoint_closed());
         }
@@ -144,7 +161,7 @@ impl Endpoint {
             loop {
                 if let Some(connected) = stream.take() {
                     tries = 0;
-                    if carry_tcp(&shared, id, &online, &mut outbound, connected).await
+                    if carry_tcp(&shared, id, &online, &mut outbound, connected, framing).await
                         == PumpEnd::Closed
                     {
                         return;

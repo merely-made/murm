@@ -23,11 +23,14 @@ use crate::resource_transfer::PROOF_CACHE_ANSWERS;
 
 use super::announces::{AnnounceFreshnessState, HeldAnnounces};
 use super::dedup::{HashList, LinkPacketMemory, VERIFIED_ANNOUNCES};
+use super::discovery::Discovery;
 use super::facts::{LinkDirection, LinkFactKind, LinkRemoteFact, PeerAnnounce};
 use super::iface_policy::IfacePolicy;
 use super::inbound::{Accepted, AcceptedResource, InboundLinks};
+use super::inbound_queue::InboundTx;
 use super::interface::{Iface, InterfaceId, QueueAdmission};
 use super::known_destinations::BookPersistence;
+use super::local::LocalState;
 use super::paths::PathEntry;
 use super::queue::TrafficClass;
 use super::rebroadcast::Rebroadcasting;
@@ -37,6 +40,7 @@ use super::routing::{RoutingPolicy, RoutingStats};
 use super::single::{PendingReceipt, ReceivedSingle};
 use super::stream::StreamFault;
 use super::transit::{LinkBridge, ReverseEntry};
+use super::tunnel::Tunnels;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(super) enum Lifecycle {
@@ -112,8 +116,8 @@ pub(super) struct Shared {
     pub(super) announce_timebases: Mutex<HashMap<AddressHash, TimebaseGenerator>>,
     /// Every attached interface. Announces broadcast to all; link traffic targets one.
     pub(super) interfaces: Mutex<Vec<Iface>>,
-    /// The router's inbound channel: every interface's reader feeds `(interface, packet)`.
-    pub(super) router_tx: mpsc::Sender<(InterfaceId, Packet)>,
+    /// The router's inbound queue: every interface's reader feeds it.
+    pub(super) inbound_queue: InboundTx,
     /// Inbound accepted links (stream + destination), surfaced to `accept`.
     pub(super) accepted_tx: mpsc::UnboundedSender<Accepted>,
     /// Inbound accepted reliable links, surfaced to `accept_reliable_on_any`.
@@ -220,6 +224,12 @@ pub(super) struct Shared {
     /// can be included in an orderly shutdown.
     pub(super) active_resources: AtomicUsize,
     pub(super) resource_notify: tokio::sync::Notify,
+    /// Shared-instance client state.
+    pub(super) local: LocalState,
+    /// Tunnels kept for reconnecting clients.
+    pub(super) tunnels: Tunnels,
+    /// Path requests searched for on others' behalf.
+    pub(super) discovery: Discovery,
 }
 
 impl Shared {

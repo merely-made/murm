@@ -13,6 +13,6 @@ mod pump;
 #[cfg(test)]
 mod tests;
 
-pub use config::{PumpStatus, SerialPumpConfig};
+pub use config::{PumpStatus, RNODE_TCP_PORT, RNodePort, SerialPumpConfig};
 pub use error::{PumpError, TransmitError};
 pub use link::RNodeSerialLink;
