@@ -39,3 +39,8 @@ serde_json = { workspace = true }
 # Build canned signed posts for the murm-adapter tests (keypairs + sign_post).
 # Light (ed25519 + blake3), no transport/iroh.
 identity = { workspace = true }
+
+[target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
+# Native adapter receipt uses real Murm handles over an in-process transport.
+# Keep this fixture outside the portable model's Wasm dependency cone.
+transport = { workspace = true }
