@@ -7,9 +7,11 @@
 //! The murm adapter: cabals as conversations, posts as messages.
 //!
 //! A [`MurmAdapter`] presents a set of murm cabals as comms conversations. Each
-//! cabal is one conversation (its `"session"` channel by default); each
+//! cabal/channel is one conversation (`"session"` by default); each
 //! [`Text`](murm::PostKind::Text) post is a message. Control posts (join, leave,
 //! topic, info, delete) are not shown as messages in this pass.
+//! The owner read exposes missing-history diagnostics separately. This adapter
+//! preserves causal order but does not fold deletion or moderation effects.
 //!
 //! ## The cabal seam
 //!
@@ -23,8 +25,8 @@
 use async_trait::async_trait;
 
 use murm::{
-    CabalHandle, CabalId, Ed25519PublicKey, MurmError, Post, PostId, PostKind, SyncedCabal,
-    hash_post,
+    CabalHandle, CabalHistory, CabalId, ChannelName, Ed25519PublicKey, MurmError, Post, PostId,
+    PostKind, SyncedCabal, hash_post,
 };
 
 use crate::adapter::{AdapterError, ProtocolAdapter};
@@ -45,8 +47,8 @@ pub trait CabalSink: Send + Sync {
     fn cabal_id(&self) -> CabalId;
     /// This user's author key in the cabal (used to label a message Outgoing).
     fn author_key(&self) -> Result<Ed25519PublicKey, MurmError>;
-    /// The posts in `channel`, in delivery order.
-    fn history(&self, channel: &str) -> Vec<Post>;
+    /// A current causally ordered read, with missing-history diagnostics.
+    async fn history(&self, channel: &str) -> Result<CabalHistory, MurmError>;
     /// Author and store a text post in `channel`, returning its id.
     async fn send_text(&self, channel: &str, text: &str) -> Result<PostId, MurmError>;
 }
@@ -59,8 +61,8 @@ impl CabalSink for CabalHandle {
     fn author_key(&self) -> Result<Ed25519PublicKey, MurmError> {
         self.author_public_key()
     }
-    fn history(&self, channel: &str) -> Vec<Post> {
-        CabalHandle::history(self, channel)
+    async fn history(&self, channel: &str) -> Result<CabalHistory, MurmError> {
+        self.causal_history(channel).await
     }
     async fn send_text(&self, channel: &str, text: &str) -> Result<PostId, MurmError> {
         CabalHandle::send_text(self, channel, text).await
@@ -75,8 +77,8 @@ impl CabalSink for SyncedCabal {
     fn author_key(&self) -> Result<Ed25519PublicKey, MurmError> {
         self.handle().author_public_key()
     }
-    fn history(&self, channel: &str) -> Vec<Post> {
-        SyncedCabal::history(self, channel)
+    async fn history(&self, channel: &str) -> Result<CabalHistory, MurmError> {
+        self.handle().causal_history(channel).await
     }
     async fn send_text(&self, channel: &str, text: &str) -> Result<PostId, MurmError> {
         SyncedCabal::send_text(self, channel, text).await
@@ -87,6 +89,7 @@ impl CabalSink for SyncedCabal {
 pub struct MurmCabal {
     label: String,
     sink: Box<dyn CabalSink>,
+    channel: Option<String>,
 }
 
 /// Presents murm cabals as comms conversations.
@@ -107,42 +110,84 @@ impl MurmAdapter {
         }
     }
 
-    /// Read and write a non-default channel.
+    /// Read and write a non-default channel for entries added with `with_cabal`.
     pub fn with_channel(mut self, channel: impl Into<String>) -> Self {
         self.channel = channel.into();
         self
     }
 
-    /// Surface a cabal as a conversation labelled `label`.
+    /// Surface the adapter's default channel as a conversation labelled `label`.
     pub fn with_cabal(mut self, label: impl Into<String>, sink: Box<dyn CabalSink>) -> Self {
         self.cabals.push(MurmCabal {
             label: label.into(),
             sink,
+            channel: None,
         });
         self
     }
 
-    /// The cabal whose id (hex) matches `key`.
-    fn cabal_for(&self, key: &str) -> Option<&MurmCabal> {
-        self.cabals
-            .iter()
-            .find(|cabal| hex(cabal.sink.cabal_id().as_bytes()) == key)
+    /// Surface an explicit channel alongside other channels of the same cabal.
+    /// This channel is independent of the adapter's default `with_channel`.
+    pub fn with_cabal_in_channel(
+        mut self,
+        label: impl Into<String>,
+        channel: impl Into<String>,
+        sink: Box<dyn CabalSink>,
+    ) -> Self {
+        self.cabals.push(MurmCabal {
+            label: label.into(),
+            sink,
+            channel: Some(channel.into()),
+        });
+        self
     }
 
-    /// Map a cabal's channel history into messages, sorted by timestamp.
-    fn messages_of(&self, cabal: &MurmCabal) -> Result<Vec<Message>, AdapterError> {
+    fn channel_of<'a>(&'a self, cabal: &'a MurmCabal) -> &'a str {
+        cabal.channel.as_deref().unwrap_or(&self.channel)
+    }
+
+    /// Exact protocol, cabal and channel lookup; the identifier grants nothing.
+    fn cabal_for(&self, conversation: &ConversationId) -> Option<&MurmCabal> {
+        self.cabals.iter().find(|cabal| {
+            conversation_id(cabal.sink.cabal_id(), self.channel_of(cabal)) == *conversation
+        })
+    }
+
+    /// Observe the owner read without hiding its missing-history diagnostics.
+    pub async fn history(
+        &self,
+        conversation: &ConversationId,
+    ) -> Result<CabalHistory, AdapterError> {
+        let cabal = self.cabal_for(conversation).ok_or(AdapterError::NotFound)?;
+        let channel = self.channel_of(cabal);
+        if !ChannelName::is_valid_name(channel) {
+            return Err(AdapterError::Unsupported("invalid Murm channel".into()));
+        }
+        cabal
+            .sink
+            .history(channel)
+            .await
+            .map_err(|error| AdapterError::Backend(error.to_string()))
+    }
+
+    /// Map channel posts without changing the owner's causal order.
+    async fn messages_of(&self, cabal: &MurmCabal) -> Result<Vec<Message>, AdapterError> {
         let me = cabal
             .sink
             .author_key()
             .map_err(|error| AdapterError::Backend(error.to_string()))?
             .to_bytes();
-        let mut messages: Vec<Message> = cabal
-            .sink
-            .history(&self.channel)
+        let history = self
+            .history(&conversation_id(
+                cabal.sink.cabal_id(),
+                self.channel_of(cabal),
+            ))
+            .await?;
+        let messages: Vec<Message> = history
+            .posts
             .iter()
             .filter_map(|post| post_to_message(post, &me))
             .collect();
-        messages.sort_by_key(|message| message.timestamp_ms);
         Ok(messages)
     }
 }
@@ -160,9 +205,10 @@ impl ProtocolAdapter for MurmAdapter {
     async fn conversations(&self) -> Result<Vec<Conversation>, AdapterError> {
         let mut conversations = Vec::with_capacity(self.cabals.len());
         for cabal in &self.cabals {
-            let messages = self.messages_of(cabal)?;
+            let messages = self.messages_of(cabal).await?;
             let last_activity_ms = messages.iter().filter_map(|m| m.timestamp_ms).max();
             let mut participants: Vec<Identity> = Vec::new();
+            // Observed authors only, not a membership roster or live presence.
             for message in &messages {
                 if !participants
                     .iter()
@@ -172,7 +218,7 @@ impl ProtocolAdapter for MurmAdapter {
                 }
             }
             conversations.push(Conversation {
-                id: ConversationId::new(ProtocolKind::Murm, hex(cabal.sink.cabal_id().as_bytes())),
+                id: conversation_id(cabal.sink.cabal_id(), self.channel_of(cabal)),
                 title: cabal.label.clone(),
                 participants,
                 last_activity_ms,
@@ -183,24 +229,41 @@ impl ProtocolAdapter for MurmAdapter {
     }
 
     async fn messages(&self, conversation: &ConversationId) -> Result<Vec<Message>, AdapterError> {
-        let cabal = self
-            .cabal_for(&conversation.key)
-            .ok_or(AdapterError::NotFound)?;
-        self.messages_of(cabal)
+        let cabal = self.cabal_for(conversation).ok_or(AdapterError::NotFound)?;
+        self.messages_of(cabal).await
     }
 
     async fn send(&self, draft: &Draft) -> Result<MessageId, AdapterError> {
         let conversation = draft.conversation.as_ref().ok_or(AdapterError::NotFound)?;
-        let cabal = self
-            .cabal_for(&conversation.key)
-            .ok_or(AdapterError::NotFound)?;
+        let cabal = self.cabal_for(conversation).ok_or(AdapterError::NotFound)?;
+        if draft.is_empty() {
+            return Err(AdapterError::Unsupported("message body is empty".into()));
+        }
+        if draft.subject.is_some() {
+            return Err(AdapterError::Unsupported(
+                "Murm text carries no subject line".into(),
+            ));
+        }
+        let channel = self.channel_of(cabal);
+        if !ChannelName::is_valid_name(channel) {
+            return Err(AdapterError::Unsupported("invalid Murm channel".into()));
+        }
         let post_id = cabal
             .sink
-            .send_text(&self.channel, &draft.body)
+            .send_text(channel, &draft.body)
             .await
             .map_err(|error| AdapterError::Backend(error.to_string()))?;
         Ok(MessageId(hex(&post_id.0)))
     }
+}
+
+/// A private view address for the exact cabal/channel. The key is opaque to
+/// hosts, not a URL or a capability; use the adapter's listed identities.
+pub fn conversation_id(cabal: CabalId, channel: &str) -> ConversationId {
+    ConversationId::new(
+        ProtocolKind::Murm,
+        format!("{}/{channel}", hex(cabal.as_bytes())),
+    )
 }
 
 /// Map a single post to a message, or `None` for control posts (only `Text` posts
@@ -259,12 +322,16 @@ mod tests {
         fn author_key(&self) -> Result<Ed25519PublicKey, MurmError> {
             Ok(self.author)
         }
-        fn history(&self, channel: &str) -> Vec<Post> {
-            self.posts
-                .iter()
-                .filter(|post| post.kind.channel().map(|c| c.as_str()) == Some(channel))
-                .cloned()
-                .collect()
+        async fn history(&self, channel: &str) -> Result<CabalHistory, MurmError> {
+            Ok(CabalHistory {
+                posts: self
+                    .posts
+                    .iter()
+                    .filter(|post| post.kind.channel().map(|c| c.as_str()) == Some(channel))
+                    .cloned()
+                    .collect(),
+                ..Default::default()
+            })
         }
         async fn send_text(&self, _channel: &str, _text: &str) -> Result<PostId, MurmError> {
             Ok(PostId([7u8; 32]))
@@ -313,7 +380,10 @@ mod tests {
         };
         let adapter = MurmAdapter::new(Identity::new(ProtocolKind::Murm, "me"))
             .with_cabal("Project cabal", Box::new(sink));
-        (adapter, hex(&cabal_id))
+        (
+            adapter,
+            conversation_id(CabalId::new(cabal_id), DEFAULT_CHANNEL).key,
+        )
     }
 
     #[tokio::test]
@@ -337,12 +407,12 @@ mod tests {
             .messages(&ConversationId::new(ProtocolKind::Murm, cabal_hex))
             .await
             .unwrap();
-        // Join post is filtered; two text posts remain, time-sorted.
+        // Join post is filtered; the owner's ordering survives opposing clocks.
         assert_eq!(messages.len(), 2);
-        assert_eq!(messages[0].body.text(), "theirs");
-        assert_eq!(messages[0].direction, Direction::Incoming);
-        assert_eq!(messages[1].body.text(), "mine");
-        assert_eq!(messages[1].direction, Direction::Outgoing);
+        assert_eq!(messages[0].body.text(), "mine");
+        assert_eq!(messages[0].direction, Direction::Outgoing);
+        assert_eq!(messages[1].body.text(), "theirs");
+        assert_eq!(messages[1].direction, Direction::Incoming);
     }
 
     #[tokio::test]
@@ -361,5 +431,157 @@ mod tests {
             .messages(&ConversationId::new(ProtocolKind::Murm, "deadbeef"))
             .await;
         assert_eq!(result, Err(AdapterError::NotFound));
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    async fn real_cabal() -> (murm::Murm<transport::memory::MemoryTransport>, CabalHandle) {
+        use identity::{IdentityProvider as _, InMemoryProvider};
+        let identity = InMemoryProvider::from_seed([0x61; 32]);
+        let local = murm::PeerID::from_public_key(identity.master_public_key());
+        let peer = murm::PeerID::from_public_key(
+            InMemoryProvider::from_seed([0x62; 32]).master_public_key(),
+        );
+        let (transport, _) = transport::memory::MemoryTransport::pair(local, peer);
+        let runtime = murm::Murm::new(std::sync::Arc::new(identity), transport);
+        let cabal = runtime
+            .open_cabal(&murm::CabalKey::new([0x63; 32]))
+            .await
+            .unwrap();
+        (runtime, cabal)
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    #[tokio::test]
+    async fn real_channels_share_a_cabal_without_aliasing_order_drafts_or_dispatch() {
+        let (_runtime, cabal) = real_cabal().await;
+        let first = cabal.send_text_at("hall", "first", 9_000).await.unwrap();
+        cabal
+            .send_text_at("music", "different channel", 8_000)
+            .await
+            .unwrap();
+        let second = cabal.send_text_at("hall", "second", 1).await.unwrap();
+        let adapter = MurmAdapter::new(Identity::new(ProtocolKind::Murm, "local"))
+            .with_cabal_in_channel("Hall", "hall", Box::new(cabal.clone()))
+            .with_cabal_in_channel("Music", "music", Box::new(cabal.clone()));
+        let hall = conversation_id(*cabal.id(), "hall");
+        let music = conversation_id(*cabal.id(), "music");
+        assert_ne!(hall, music);
+        let messages = adapter.messages(&hall).await.unwrap();
+        assert_eq!(
+            messages
+                .iter()
+                .map(|message| message.id.clone())
+                .collect::<Vec<_>>(),
+            [MessageId(hex(&first.0)), MessageId(hex(&second.0))]
+        );
+        assert_eq!(
+            messages
+                .iter()
+                .map(|message| message.timestamp_ms)
+                .collect::<Vec<_>>(),
+            [Some(9_000), Some(1)]
+        );
+        assert!(
+            messages
+                .iter()
+                .all(|message| message.direction == Direction::Outgoing)
+        );
+        assert!(adapter.history(&hall).await.unwrap().pending.is_empty());
+
+        let comms = crate::Comms::new().with_adapter(Box::new(adapter));
+        let mut pane = crate::CommsPane::new();
+        pane.set_inbox(comms.inbox().await);
+        assert_eq!(pane.inbox.len(), 2);
+        pane.select(hall.clone());
+        pane.draft.body = "hall draft".into();
+        pane.select(music.clone());
+        pane.draft.body = "music draft".into();
+        pane.select(hall.clone());
+        assert_eq!(pane.draft.body, "hall draft");
+        let submitted = pane.draft.clone();
+        let sent = comms.send(&submitted).await.unwrap();
+        let read = cabal.causal_history("hall").await.unwrap();
+        assert_eq!(read.posts.len(), 3);
+        let stored = read.posts.last().unwrap();
+        assert_eq!(sent, MessageId(hex(&hash_post(stored).0)));
+        assert_eq!(stored.kind.channel().unwrap().as_str(), "hall");
+        assert!(matches!(&stored.kind, PostKind::Text { text, .. } if text == &submitted.body));
+        assert_eq!(cabal.causal_history("music").await.unwrap().posts.len(), 1);
+        pane.draft.body.push_str(" with newer edits");
+        assert!(!pane.acknowledge_sent(&submitted));
+        assert_eq!(pane.draft.body, "hall draft with newer edits");
+        pane.select(music);
+        assert_eq!(pane.draft.body, "music draft");
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    #[tokio::test]
+    async fn real_owner_is_untouched_by_wrong_addresses_or_unsupported_drafts() {
+        let (runtime, cabal) = real_cabal().await;
+        let adapter = MurmAdapter::new(Identity::new(ProtocolKind::Murm, "local"))
+            .with_cabal("Session", Box::new(cabal.clone()));
+        let target = conversation_id(*cabal.id(), DEFAULT_CHANNEL);
+        let foreign = ConversationId::new(ProtocolKind::CommonsChat, target.key.clone());
+        assert_eq!(
+            adapter.messages(&foreign).await,
+            Err(AdapterError::NotFound)
+        );
+        for address in [
+            foreign,
+            conversation_id(*cabal.id(), "other"),
+            ConversationId::new(ProtocolKind::Murm, hex(cabal.id().as_bytes())),
+        ] {
+            let mut draft = Draft::reply_to(address);
+            draft.body = "must not be authored".into();
+            assert_eq!(adapter.send(&draft).await, Err(AdapterError::NotFound));
+        }
+        let mut empty = Draft::reply_to(target.clone());
+        empty.body = " \n ".into();
+        assert!(matches!(
+            adapter.send(&empty).await,
+            Err(AdapterError::Unsupported(_))
+        ));
+        let mut subject = Draft::reply_to(target);
+        subject.body = "preserve this body".into();
+        subject.subject = Some("must not be discarded".into());
+        let original = subject.clone();
+        assert!(matches!(
+            adapter.send(&subject).await,
+            Err(AdapterError::Unsupported(_))
+        ));
+        assert_eq!(subject, original);
+        let invalid = MurmAdapter::new(Identity::new(ProtocolKind::Murm, "local"))
+            .with_channel("\n")
+            .with_cabal("Invalid", Box::new(cabal.clone()));
+        let invalid_id = conversation_id(*cabal.id(), "\n");
+        assert!(matches!(
+            invalid.messages(&invalid_id).await,
+            Err(AdapterError::Unsupported(_))
+        ));
+        let store = runtime
+            .conversation_engine()
+            .sync_store(cabal.id().as_bytes())
+            .unwrap();
+        assert_eq!(store.operation_count().await.unwrap(), 0);
+        assert!(
+            cabal
+                .causal_history(DEFAULT_CHANNEL)
+                .await
+                .unwrap()
+                .posts
+                .is_empty()
+        );
+        // The owner can disappear after selection/preparation. A valid address
+        // still cannot turn that stale view into successful authoring.
+        let mut pending = Draft::reply_to(conversation_id(*cabal.id(), DEFAULT_CHANNEL));
+        pending.body = "retry when the owner returns".into();
+        let original = pending.clone();
+        assert!(runtime.conversation_engine().close(cabal.id().as_bytes()));
+        assert!(matches!(
+            adapter.send(&pending).await,
+            Err(AdapterError::Backend(_))
+        ));
+        assert_eq!(pending, original);
+        assert_eq!(store.operation_count().await.unwrap(), 0);
     }
 }
