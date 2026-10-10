@@ -4,7 +4,7 @@ version.workspace = true
 edition.workspace = true
 license.workspace = true
 repository.workspace = true
-description = "Mere's comms domain layer — a host-neutral comms model (conversations, messages, identities, drafts) over a ProtocolAdapter seam, with misfin and murm adapters behind features. Surfaced by the meerkat comms pane."
+description = "Mere's portable comms model: conversations, messages, identities and local drafts, with opt-in Misfin and Murm adapters and a Moot Commons-chat consumer."
 documentation = "https://docs.rs/comms"
 keywords = ["graphshell", "comms", "messaging", "mere", "domain"]
 categories = ["gui"]
@@ -39,3 +39,8 @@ serde_json = { workspace = true }
 # Build canned signed posts for the murm-adapter tests (keypairs + sign_post).
 # Light (ed25519 + blake3), no transport/iroh.
 identity = { workspace = true }
+
+[target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
+# Native adapter receipt uses real Murm handles over an in-process transport.
+# Keep this fixture outside the portable model's Wasm dependency cone.
+transport = { workspace = true }

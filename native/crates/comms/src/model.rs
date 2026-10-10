@@ -22,6 +22,9 @@ pub enum ProtocolKind {
     Misfin,
     /// Murm (Cable bilateral / small-group cabals).
     Murm,
+    /// Commons' retained encrypted chat, projected under Moot authority.
+    /// This names the record grammar, independently of its carriage.
+    CommonsChat,
 }
 
 /// A party in a conversation — you or a peer. `address` is the backend-native
@@ -57,8 +60,8 @@ impl Identity {
 }
 
 /// A stable, protocol-qualified conversation identifier. `key` is the backend's
-/// own handle for the thread: a misfin correspondent addr-spec, a murm cabal id
-/// (hex). Routing uses `protocol`; the owning adapter interprets `key`.
+/// own handle for the thread: a misfin correspondent addr-spec or an exact
+/// murm cabal/channel address. Routing uses `protocol`; the adapter owns `key`.
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct ConversationId {
     pub protocol: ProtocolKind,
