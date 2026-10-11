@@ -114,3 +114,20 @@ Oracle-local copies retain their packages' notices.
 We acknowledge Mark Qvist and the Reticulum contributors for the protocol
 design, documentation, and reference implementations. This project is not
 affiliated with or endorsed by the upstream project.
+
+## Transport conformance corpus
+
+`testing/transport-conformance` is a separate host test workspace. Its imported
+vectors and independent peer retain their source revisions, licenses and
+content hashes in `vectors/manifest.json` and `interop/README.md`:
+
+- Official **BLAKE3** test vectors retain the upstream Apache-2.0 license in
+  `vectors/BLAKE3-LICENSE-APACHE-2.0.txt`.
+- **RFC 8032** test-vector code components retain the IETF Trust BSD-2-Clause
+  notice in `vectors/RFC-CODE-COMPONENTS-LICENSE.txt`.
+- **OpenRQ**, Copyright 2014 OpenRQ Team, is the independent Apache-2.0
+  RaptorQ peer. Its unmodified license is `interop/OpenRQ-LICENSE.txt`.
+  The pinned source archive and portable JDK are cached outside the repository;
+  they are test tooling and are not linked into production artifacts.
+
+The corpus manifest is the authoritative record of imported paths and hashes.

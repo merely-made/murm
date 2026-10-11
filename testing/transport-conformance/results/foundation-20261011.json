@@ -1,0 +1,203 @@
+{
+  "schema": "transport-conformance.receipt/v1",
+  "profile": "host-foundation-v1",
+  "description": "Official primitive vectors, RFC6330 metadata preflight, and bounded same-library composition",
+  "implementation": {
+    "corpus_manifest_sha256": "41760ad38447c5197af1e0030661e9ea5161540d3c8368593e1f0707d3a8fa20",
+    "dependency_versions": {
+      "blake3": "1.8.7",
+      "ed25519-dalek": "3.0.0",
+      "raptorq": "2.0.1"
+    },
+    "repository_revision": "7aa87f2e9fdd973e4729e610d7130189dc22c0a0",
+    "repository_worktree_dirty": true,
+    "runner": "transport-conformance 0.1.0",
+    "suite_source_blake3": "ca28b14b5a6a3958ce9fdd1549a594890c2897fd49f017abdf0a36cdc9ce8207",
+    "target_arch": "aarch64",
+    "target_os": "macos"
+  },
+  "coverage": {
+    "bounded_packet_profile": "one full symbol per packet; N=1; Al=4; F in 1..=65536; T<=256; ESI<=4095; Z<=16; source symbols per block<=256",
+    "full_raptorq_codec_conformance": false,
+    "independent_raptorq_encoder_interoperability": false,
+    "performance_benchmark": false,
+    "production_stack_integration": false,
+    "radio_hardware_qualification": false
+  },
+  "summary": {
+    "fail": 0,
+    "pass": 7,
+    "unsupported": 1
+  },
+  "cases": [
+    {
+      "id": "blake3.official.all-modes",
+      "specification": "https://github.com/BLAKE3-team/BLAKE3-specs/blob/master/blake3.pdf",
+      "section": "BLAKE3 official test_vectors/test_vectors.json",
+      "evidence_class": "known-answer",
+      "provenance": "official pinned upstream vectors; artifact hashes and license in vectors/manifest.json",
+      "implementation": "blake3 1.8.7",
+      "status": "pass",
+      "observations": {
+        "mode_comparisons": 105,
+        "modes": [
+          "hash",
+          "keyed_hash",
+          "derive_key"
+        ],
+        "official_input_lengths": 35,
+        "upstream_revision": "f55849f89cd85083c1c9daa2c5de20766f309c00"
+      }
+    },
+    {
+      "id": "ed25519.rfc8032.test-1",
+      "specification": "https://www.rfc-editor.org/rfc/rfc8032.html",
+      "section": "7.1 TEST 1",
+      "evidence_class": "known-answer",
+      "provenance": "RFC8032 published Ed25519 empty-message seed/public-key/signature vector",
+      "implementation": "ed25519-dalek 3.0.0",
+      "status": "pass",
+      "observations": {
+        "comparisons": [
+          "derived public key",
+          "deterministic signature",
+          "strict verification"
+        ],
+        "published_vectors": 1
+      }
+    },
+    {
+      "id": "ed25519.rfc8032.tamper",
+      "specification": "https://www.rfc-editor.org/rfc/rfc8032.html",
+      "section": "5.1.7; authored mutations of 7.1 TEST 1",
+      "evidence_class": "negative-vector",
+      "provenance": "suite-authored one-byte message and one-bit signature corruption of published TEST 1",
+      "implementation": "ed25519-dalek 3.0.0 verify_strict",
+      "status": "pass",
+      "observations": {
+        "authored_negative_cases": 2,
+        "mutations": [
+          "message changed from empty to 00",
+          "signature bit 0 flipped"
+        ]
+      }
+    },
+    {
+      "id": "raptorq.rfc6330.payload-id",
+      "specification": "https://www.rfc-editor.org/rfc/rfc6330.html",
+      "section": "3.1, 3.2",
+      "evidence_class": "wire-preflight",
+      "provenance": "suite-authored boundary octets derived from normative field widths and network byte order",
+      "implementation": "suite preflight and raptorq 2.0.1 PayloadId",
+      "status": "pass",
+      "observations": {
+        "integer_overflow_rejected": true,
+        "maximum_esi": 16777215,
+        "positive_boundaries": 3,
+        "rejected_lengths": [
+          0,
+          1,
+          3,
+          5,
+          8
+        ]
+      }
+    },
+    {
+      "id": "raptorq.rfc6330.oti",
+      "specification": "https://www.rfc-editor.org/rfc/rfc6330.html",
+      "section": "3.1, 3.3, 4.2, 4.4.1.2; Verified Technical erratum 5548",
+      "evidence_class": "wire-preflight",
+      "provenance": "suite-authored field/length/parameter cases; https://www.rfc-editor.org/errata/eid5548",
+      "implementation": "suite preflight and raptorq 2.0.1 ObjectTransmissionInformation",
+      "status": "pass",
+      "observations": {
+        "corrected_max_transfer_length": 942574504275,
+        "invalid_parameter_cases": 8,
+        "oti_octets": 12,
+        "positive_fields": true,
+        "rejected_lengths": [
+          0,
+          8,
+          11,
+          13,
+          20
+        ],
+        "rfc_allows_zero_transfer_length": true,
+        "verified_erratum": 5548
+      }
+    },
+    {
+      "id": "raptorq.bounded.packet-preflight",
+      "specification": "https://www.rfc-editor.org/rfc/rfc6330.html",
+      "section": "3.2, 4.4.2; suite bounded profile",
+      "evidence_class": "composition",
+      "provenance": "suite-authored exact-one-symbol packet, SBN, ESI, object and <=256 source-symbol/block work bounds; not complete RFC packet reception",
+      "implementation": "suite bounded adapter",
+      "status": "pass",
+      "observations": {
+        "complete_rfc_packet_receiver": false,
+        "esi_and_object_budgets_checked": true,
+        "exact_symbol_octets": 128,
+        "oversized_source_block_rejected_before_decoder": true,
+        "sbn_checked_before_decoder": true,
+        "source_symbols_per_block_budget": 256,
+        "truncated_and_multi_symbol_profile_packets_rejected": true
+      }
+    },
+    {
+      "id": "raptorq.bounded.loss-reorder-duplicate",
+      "specification": "https://www.rfc-editor.org/rfc/rfc6330.html",
+      "section": "4.4.3, 5; bounded same-library scenario",
+      "evidence_class": "composition",
+      "provenance": "suite-generated data encoded and decoded by the same raptorq library; no independent encoder oracle",
+      "implementation": "raptorq 2.0.1",
+      "status": "pass",
+      "observations": {
+        "encoder_and_decoder": "same raptorq 2.0.1 library",
+        "independent_interoperability": false,
+        "scenarios": [
+          {
+            "deliveries_including_duplicates": 74,
+            "distinct_delivered_packets": 37,
+            "incomplete_is_not_malformed": true,
+            "object_octets": 1024,
+            "offered_packets": 56,
+            "reconstructed_blake3": "acf3f6f7a5ad1018b4686d0e43f04992ee41db8451dde51773f574e9d74faa69",
+            "source_blocks": 2
+          },
+          {
+            "deliveries_including_duplicates": 108,
+            "distinct_delivered_packets": 54,
+            "incomplete_is_not_malformed": true,
+            "object_octets": 4097,
+            "offered_packets": 81,
+            "reconstructed_blake3": "901af07efdfe22d3a4b2e5302dbb5373deb6970b5e72c71bf4967bfa2a71618a",
+            "source_blocks": 2
+          },
+          {
+            "deliveries_including_duplicates": 148,
+            "distinct_delivered_packets": 74,
+            "incomplete_is_not_malformed": true,
+            "object_octets": 8191,
+            "offered_packets": 112,
+            "reconstructed_blake3": "03cb022cc0a4f786dfff9eaaf9b58ccac55079fe1d4f0f0ff60f752a6b5e3f88",
+            "source_blocks": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "raptorq.independent-encoder-interoperability",
+      "specification": "https://www.rfc-editor.org/rfc/rfc6330.html",
+      "section": "5, 5.8",
+      "evidence_class": "interoperability",
+      "provenance": "no imported independent OpenRQ vectors or other independent encoder corpus",
+      "implementation": "not available",
+      "status": "unsupported",
+      "observations": {
+        "reason": "No independent encoder vectors imported; same-library round trips are composition evidence only."
+      }
+    }
+  ]
+}
