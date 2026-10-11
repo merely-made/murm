@@ -57,7 +57,10 @@ LOCAL_GATES = ()
 DISCOVERY_GATES = ()
 
 # V3: inbound priority lanes (B4) and per-interface statistics (C2), on loopback TCP.
-INGRESS_GATES = ()
+INGRESS_GATES = (
+    ("inbound-priority", "interop_inbound_priority.py", []),
+    ("interface-stats", "interop_interface_stats.py", []),
+)
 
 # V4: Pipe (C4), KISS on TCP (C5) and listen addresses (C7), on loopback and child stdio.
 STREAM_GATES = ()
