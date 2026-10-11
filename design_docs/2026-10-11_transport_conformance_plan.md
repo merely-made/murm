@@ -6,8 +6,8 @@ source/repair symbol comparisons and 24 live cross-decoding scenarios in each
 direction. The offline suite verifies the imported corpus and replays the Rust
 side; the local process campaign executes both implementations. Broader RFC
 6330 coverage, production FEC delivery, scheduling and radio measurements remain
-open. Publication revisions and review links are recorded in the branch/PR
-history.
+open. Publication uses direct commits and pushes to `main`; validation runs
+locally. GitHub Actions and PRs are not part of this project's requested flow.
 
 Mark authorized orchestration and prefers implementing published standards when
 they cover the needed behavior. This plan turns the Reticulum/Dash composition
@@ -212,6 +212,11 @@ uses isolated branches from those fetched refs.
   Rust executable hash. The [reproduction guide](../testing/transport-conformance/interop/README.md)
   uses explicit bootstrap, archive verification, fresh Java compilation and a
   current locked offline Rust build. Missing tooling is an infrastructure
-  failure. The suite is registered in `validation/manifest.toml`, with scoped
-  CI for its offline cases and machine receipt. Broader TC1 qualification and
+  failure. The suite is registered in `validation/manifest.toml`, with local
+  offline cases and machine receipts. Broader TC1 qualification and
   TC2–TC7 remain open.
+- **2026-10-11, owner workflow correction:** removed the newly added transport
+  workflow, disabled GitHub Actions in Mere and Retinue, closed the temporary
+  draft PRs and published directly to `main`. Existing CI observations remain
+  historical evidence. Subsequent qualification uses local commands and
+  recorded receipts.
