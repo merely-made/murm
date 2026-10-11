@@ -5,7 +5,7 @@
 //!
 //! Prints `UP <transport id>`, `DEST <destination>` and `IFACE <id>`, then
 //! `ANNOUNCE <dest> <iface> <hops>` for each announce heard. Commands on stdin, one per line:
-//! `route <dest>`, `link <dest>` (open a link and send `ping` on it), `online`.
+//! `route <dest>` (answered `ROUTE <dest> <iface> <hops> <transport id or ->`), `link <dest>` (open a link and send `ping` on it), `online`.
 
 use std::io::BufRead;
 use std::sync::Arc;
@@ -47,10 +47,16 @@ async fn link(ep: Arc<Endpoint>, dest: AddressHash, held: Arc<Mutex<Vec<LinkStre
 fn command(ep: &Arc<Endpoint>, iface: InterfaceId, line: &str, held: &Arc<Mutex<Vec<LinkStream>>>) {
     let mut words = line.split_whitespace();
     match (words.next(), words.next().and_then(parse_dest)) {
-        (Some("route"), Some(dest)) => match ep.route_to(dest) {
-            Some((iface, hops)) => println!("ROUTE {dest} {iface} {hops}"),
-            None => println!("ROUTE {dest} none"),
-        },
+        (Some("route"), Some(dest)) => {
+            let facts = ep.route_facts_at(std::time::Instant::now());
+            match facts.iter().find(|f| f.destination == dest) {
+                Some(f) => {
+                    let via = f.transport.map_or_else(|| "-".into(), |t| t.to_string());
+                    println!("ROUTE {dest} {} {} {via}", f.interface, f.hops);
+                }
+                None => println!("ROUTE {dest} none"),
+            }
+        }
         (Some("link"), Some(dest)) => {
             tokio::spawn(link(Arc::clone(ep), dest, Arc::clone(held)));
         }

@@ -13,6 +13,11 @@ use std::sync::Mutex;
 use std::sync::atomic::Ordering;
 use std::time::{Duration, Instant};
 
+use crate::announce::{ANNOUNCE_NONCE_LEN, ANNOUNCE_TIMEBASE_MAX, AnnounceBlob};
+use crate::announce_freshness::{
+    AnnounceFreshness, AnnounceFreshnessAccept, AnnounceFreshnessCandidate,
+    AnnounceFreshnessDecision,
+};
 use crate::destination::DestinationName;
 use crate::hash::{AddressHash, HASH_LEN, full_hash};
 use crate::identity::{IDENTITY_LEN, Identity, PrivateIdentity, SIGNATURE_LEN};
@@ -22,13 +27,15 @@ use super::entropy::fill_random;
 use super::interface::InterfaceId;
 use super::paths::{PATH_TABLE_CAPACITY, PathEntry};
 use super::shared::Shared;
+use super::transit::make_room;
 
 /// A tunnel, and each path mirrored into it, lives this long unrefreshed (`TUNNEL_TIMEOUT`,
 /// `TUNNEL_PATH_TIMEOUT`, `Transport.py` 157-158).
 pub(super) const TUNNEL_TIMEOUT: Duration = Duration::from_secs(8 * 60 * 60);
 
 /// Tunnels kept at once. RNS keeps every one; a signed synthesis costs only a fresh identity,
-/// so this is bounded and the soonest to expire makes room.
+/// so this is bounded. Away tunnels make room first: an interface binds at most one tunnel,
+/// so one peer minting identities cannot evict the tunnels of clients still connected.
 const TUNNEL_CAPACITY: usize = 256;
 
 /// Paths kept across all tunnels; the oldest mirrored makes room.
@@ -55,6 +62,9 @@ struct Tunnel {
 struct Mirrored {
     entry: PathEntry,
     at: Instant,
+    /// The route's announce timebase, taken when the tunnel goes away; `None` while it is
+    /// bound, when the freshness row is still this route's own.
+    timebase: Option<u64>,
 }
 
 /// Tunnels this node keeps for its clients, by tunnel id.
@@ -120,6 +130,49 @@ fn verify(payload: &[u8]) -> Option<TunnelId> {
         .then(|| full_hash(&signed[..IDENTITY_LEN + HASH_LEN]))
 }
 
+/// The newest timebase `table` has accepted for `dest`, or `None` without a row. The table
+/// answers only comparisons (a candidate is accepted iff newer), so bisect them.
+fn row_timebase(table: &AnnounceFreshness, dest: AddressHash) -> Option<u64> {
+    let accepts = |timebase| {
+        let blob = AnnounceBlob::mint([0; ANNOUNCE_NONCE_LEN], timebase).expect("in range");
+        let candidate = AnnounceFreshnessCandidate {
+            destination: dest,
+            blob,
+        };
+        table.evaluate(candidate, true)
+    };
+    let first = AnnounceFreshnessDecision::Accept(AnnounceFreshnessAccept::FirstSighting);
+    if accepts(0) == first {
+        return None;
+    }
+    // Invariant: `lo` is not accepted, everything from `hi` up is.
+    let (mut lo, mut hi) = (0, ANNOUNCE_TIMEBASE_MAX + 1);
+    while hi - lo > 1 {
+        let mid = lo + (hi - lo) / 2;
+        if accepts(mid).is_accepted() {
+            hi = mid;
+        } else {
+            lo = mid;
+        }
+    }
+    Some(lo)
+}
+
+impl Tunnel {
+    /// The client is away (`void_tunnel_interface`, `Transport.py` 2813-2817). Each mirrored
+    /// route's timebase is taken now, while its freshness row is still its own; one without a
+    /// row is dropped, since a route never outlives its row.
+    fn void(&mut self, freshness: &AnnounceFreshness) {
+        if self.iface.take().is_none() {
+            return;
+        }
+        self.paths.retain(|dest, path| {
+            path.timebase = row_timebase(freshness, *dest);
+            path.timebase.is_some()
+        });
+    }
+}
+
 impl Tunnels {
     fn cull(table: &mut HashMap<TunnelId, Tunnel>, now: Instant) {
         table.retain(|_, tunnel| {
@@ -128,6 +181,20 @@ impl Tunnels {
                 .retain(|_, path| now.saturating_duration_since(path.at) < TUNNEL_TIMEOUT);
             now < tunnel.expires
         });
+    }
+
+    /// Make room for one more tunnel: the away one expiring soonest, else any.
+    fn make_room(table: &mut HashMap<TunnelId, Tunnel>) {
+        if table.len() < TUNNEL_CAPACITY {
+            return;
+        }
+        let victim = table
+            .iter()
+            .min_by_key(|(_, t)| (t.iface.is_some(), t.expires))
+            .map(|(id, _)| *id);
+        if let Some(victim) = victim {
+            table.remove(&victim);
+        }
     }
 
     /// Drop the oldest mirrored path across all tunnels once they hold the cap.
@@ -165,30 +232,32 @@ impl Shared {
     }
 
     /// Create tunnel `id` on `iface`, or re-point it there and restore its paths
-    /// (`Transport.py` 2820-2860). A path is restored if the current route has no fewer hops
-    /// or has expired, or if there is no current route and the mirrored one has not expired.
-    /// The timebase test (2846-2850) needs no timebases here: a route learned for the same
-    /// destination elsewhere removes the mirrored one, since freshness only admits a newer
-    /// emission. Lock order: tunnels, then the path table.
+    /// (`Transport.py` 2820-2860). A path is restored over a current route with more hops,
+    /// or an expired one, if its timebase is not older (2846-2850); with no current route, if
+    /// it is unexpired and its destination still has a freshness row. Restores obey the
+    /// path table's capacity. Lock order: freshness, tunnels, then the path table.
     fn handle_tunnel(&self, id: TunnelId, iface: InterfaceId, now: Instant) {
+        let freshness = self.announce_freshness.lock().unwrap();
         let mut table = self.tunnels.table.lock().unwrap();
         Tunnels::cull(&mut table, now);
+        if let Some(tunnel) = table.get_mut(&id).filter(|t| t.iface == Some(iface)) {
+            tunnel.expires = now + TUNNEL_TIMEOUT;
+            return;
+        }
         for tunnel in table.values_mut() {
             if tunnel.iface == Some(iface) {
-                tunnel.iface = None;
+                tunnel.void(&freshness.table);
             }
         }
-        if !table.contains_key(&id) && table.len() >= TUNNEL_CAPACITY {
-            let soonest = table.iter().min_by_key(|(_, t)| t.expires).map(|(k, _)| *k);
-            if let Some(soonest) = soonest {
-                table.remove(&soonest);
-            }
+        if !table.contains_key(&id) {
+            Tunnels::make_room(&mut table);
         }
         let tunnel = table.entry(id).or_insert_with(|| Tunnel {
             iface: None,
             paths: HashMap::new(),
             expires: now,
         });
+        tunnel.void(&freshness.table);
         tunnel.iface = Some(iface);
         tunnel.expires = now + TUNNEL_TIMEOUT;
         if tunnel.paths.is_empty() {
@@ -196,39 +265,59 @@ impl Shared {
         }
         let route_ttl = self.route_ttl();
         let mode = self.interface_mode(iface);
-        let restored = self.write_diagnostic(|| {
+        let (restored, evicted) = self.write_diagnostic(|| {
             let mut paths = self.path_table.lock().unwrap();
-            let mut restored = 0u64;
+            let (mut restored, mut evicted) = (0u64, 0u64);
             tunnel.paths.retain(|dest, mirrored| {
+                let not_older = || {
+                    let current = row_timebase(&freshness.table, *dest);
+                    current.is_some_and(|current| mirrored.timebase >= Some(current))
+                };
                 let keep = match paths.get(dest) {
                     Some(current) => {
-                        mirrored.entry.hops <= current.hops || !current.live_at(now, route_ttl)
+                        (mirrored.entry.hops <= current.hops || !current.live_at(now, route_ttl))
+                            && not_older()
                     }
-                    None => mirrored.entry.live_at(now, route_ttl),
+                    None => mirrored.entry.live_at(now, route_ttl) && not_older(),
                 };
-                if keep {
-                    paths.insert(
-                        *dest,
-                        PathEntry {
-                            iface,
-                            mode,
-                            ..mirrored.entry
-                        },
-                    );
-                    restored += 1;
+                if !keep {
+                    return false;
                 }
-                keep
+                if !paths.contains_key(dest)
+                    && make_room(
+                        &mut paths,
+                        PATH_TABLE_CAPACITY,
+                        |e| !e.live_at(now, route_ttl),
+                        |e| e.learned,
+                    )
+                    .is_some()
+                {
+                    evicted += 1;
+                }
+                let entry = PathEntry {
+                    iface,
+                    mode,
+                    ..mirrored.entry
+                };
+                paths.insert(*dest, entry);
+                mirrored.timebase = None;
+                restored += 1;
+                true
             });
-            (restored, restored > 0)
+            ((restored, evicted), restored > 0)
         });
-        self.routing_stats
+        let stats = &self.routing_stats;
+        stats
             .tunnel_paths_restored
             .fetch_add(restored, Ordering::Relaxed);
+        stats.paths_evicted.fetch_add(evicted, Ordering::Relaxed);
     }
 
     /// `dest`'s route was just learned or replaced as `entry`. Called outside the path-table
     /// lock. A route on a tunnel's interface is mirrored into it and refreshes it
-    /// (`Transport.py` 2463-2473); one elsewhere supersedes any mirrored copy (1040-1056).
+    /// (`Transport.py` 2463-2473). One elsewhere supersedes a bound tunnel's copy, since
+    /// freshness admitted it over that copy's route; an away tunnel's copy waits for the
+    /// timebase test on restore.
     pub(super) fn tunnel_path_learned(&self, dest: AddressHash, entry: &PathEntry) {
         let now = Instant::now();
         let mut table = self.tunnels.table.lock().unwrap();
@@ -237,10 +326,12 @@ impl Shared {
         }
         let mut owner = None;
         for (id, tunnel) in table.iter_mut() {
-            if tunnel.iface == Some(entry.iface) {
-                owner = Some(*id);
-            } else {
-                tunnel.paths.remove(&dest);
+            match tunnel.iface {
+                Some(bound) if bound == entry.iface => owner = Some(*id),
+                Some(_) => {
+                    tunnel.paths.remove(&dest);
+                }
+                None => {}
             }
         }
         let Some(owner) = owner else { return };
@@ -251,6 +342,7 @@ impl Shared {
             let mirrored = Mirrored {
                 entry: *entry,
                 at: now,
+                timebase: None,
             };
             tunnel.paths.insert(dest, mirrored);
             tunnel.expires = now + TUNNEL_TIMEOUT;
@@ -258,11 +350,12 @@ impl Shared {
     }
 
     /// Interface `id` is gone; its routes have been culled (`void_tunnel_interface`,
-    /// `Transport.py` 2813-2817).
+    /// `Transport.py` 2813-2817). Lock order: freshness, then tunnels.
     pub(super) fn tunnel_interface_lost(&self, id: InterfaceId) {
+        let freshness = self.announce_freshness.lock().unwrap();
         for tunnel in self.tunnels.table.lock().unwrap().values_mut() {
             if tunnel.iface == Some(id) {
-                tunnel.iface = None;
+                tunnel.void(&freshness.table);
             }
         }
     }
@@ -323,6 +416,49 @@ mod tests {
         assert_eq!(ep.interface_counters(iface).unwrap().protocol_violations, 1);
     }
 
+    /// Learn a route as an announce would: freshness first, under its lock.
+    fn learn(ep: &Endpoint, d: u8, iface: InterfaceId, hops: u8, timebase: u64) {
+        let candidate = AnnounceFreshnessCandidate {
+            destination: dest(d),
+            blob: AnnounceBlob::mint([d; ANNOUNCE_NONCE_LEN], timebase).unwrap(),
+        };
+        let mut freshness = ep.shared.announce_freshness.lock().unwrap();
+        let live = ep.shared.has_live_route(dest(d));
+        let AnnounceFreshnessDecision::Accept(accepted) = freshness.table.evaluate(candidate, live)
+        else {
+            panic!("refused");
+        };
+        freshness.table.record_accepted(candidate, accepted);
+        ep.shared.learn_path(dest(d), iface, hops, None);
+    }
+
+    fn mirrored(hops: u8, at: Instant) -> Mirrored {
+        let entry = PathEntry {
+            iface: 0,
+            transport: None,
+            hops,
+            learned: at,
+            mode: crate::node::InterfaceMode::Full,
+        };
+        Mirrored {
+            entry,
+            at,
+            timebase: None,
+        }
+    }
+
+    #[tokio::test]
+    async fn row_timebase_reads_the_newest_accepted() {
+        let ep = endpoint();
+        learn(&ep, 1, 0, 0, 1234);
+        learn(&ep, 2, 0, 0, ANNOUNCE_TIMEBASE_MAX);
+        let freshness = ep.shared.announce_freshness.lock().unwrap();
+        assert_eq!(row_timebase(&freshness.table, dest(1)), Some(1234));
+        let max = Some(ANNOUNCE_TIMEBASE_MAX);
+        assert_eq!(row_timebase(&freshness.table, dest(2)), max);
+        assert_eq!(row_timebase(&freshness.table, dest(3)), None);
+    }
+
     /// A client's routes survive its reconnect onto a new interface, with no new announce.
     #[tokio::test]
     async fn reappearing_tunnel_restores_its_paths() {
@@ -331,7 +467,7 @@ mod tests {
         let first = ep.attach_interface().id();
         route(&ep.shared, first, synthesis(&client, "c"));
         assert_eq!(ep.shared.tunnel_count(), 1);
-        ep.shared.learn_path(dest(1), first, 2, None);
+        learn(&ep, 1, first, 2, 10);
         ep.detach_interface(first);
         assert!(ep.route_to(dest(1)).is_none());
 
@@ -341,56 +477,94 @@ mod tests {
         assert_eq!(ep.routing_counters().tunnel_paths_restored, 1);
     }
 
+    /// The hops and timebase test of `Transport.py` 2836-2850, and the freshness row rule.
     #[tokio::test]
-    async fn restore_keeps_a_shorter_or_newer_route() {
+    async fn restore_needs_fewer_hops_and_a_timebase_not_older() {
         let ep = endpoint();
         let client = PrivateIdentity::from_secret_bytes(&[1; 64]);
         let (tunnel, other) = (ep.attach_interface().id(), ep.attach_interface().id());
         route(&ep.shared, tunnel, synthesis(&client, "c"));
-        ep.shared.learn_path(dest(1), tunnel, 3, None);
-        ep.shared.learn_path(dest(2), tunnel, 3, None);
-        // A shorter live route stays; the tunnel copy survives its own interface's loss.
+        for d in 1..=3 {
+            learn(&ep, d, tunnel, 3, 100);
+        }
         ep.detach_interface(tunnel);
-        ep.shared.path_table.lock().unwrap().insert(
-            dest(1),
-            PathEntry {
-                iface: other,
-                transport: None,
-                hops: 1,
-                learned: Instant::now(),
-                mode: crate::node::InterfaceMode::Full,
-            },
-        );
-        // A route learned for dest(2) elsewhere is newer and supersedes the mirrored one.
-        ep.shared.learn_path(dest(2), other, 5, None);
+        // A shorter route at the same emission stays.
+        learn(&ep, 1, other, 1, 100);
+        // A newer emission with more hops still wins.
+        learn(&ep, 2, other, 5, 101);
+        // An older emission heard in the gap, with more hops, is replaced.
+        learn(&ep, 3, other, 5, 99);
         let back = ep.attach_interface().id();
         route(&ep.shared, back, synthesis(&client, "c"));
         assert_eq!(ep.route_to(dest(1)), Some((other, 1)));
         assert_eq!(ep.route_to(dest(2)), Some((other, 5)));
-        assert_eq!(ep.routing_counters().tunnel_paths_restored, 0);
+        assert_eq!(ep.route_to(dest(3)), Some((back, 3)));
+        assert_eq!(ep.routing_counters().tunnel_paths_restored, 1);
+    }
+
+    #[tokio::test]
+    async fn a_route_without_a_freshness_row_is_not_restored() {
+        let ep = endpoint();
+        let client = PrivateIdentity::from_secret_bytes(&[1; 64]);
+        let first = ep.attach_interface().id();
+        route(&ep.shared, first, synthesis(&client, "c"));
+        ep.shared.learn_path(dest(1), first, 2, None);
+        ep.detach_interface(first);
+        let second = ep.attach_interface().id();
+        route(&ep.shared, second, synthesis(&client, "c"));
+        assert!(ep.route_to(dest(1)).is_none());
+    }
+
+    #[tokio::test]
+    async fn restores_obey_the_path_table_capacity() {
+        let ep = endpoint();
+        let client = PrivateIdentity::from_secret_bytes(&[1; 64]);
+        let (first, other) = (ep.attach_interface().id(), ep.attach_interface().id());
+        route(&ep.shared, first, synthesis(&client, "c"));
+        learn(&ep, 0, first, 1, 10);
+        ep.detach_interface(first);
+        for d in 1..=PATH_TABLE_CAPACITY as u8 {
+            learn(&ep, d, other, 1, 10);
+        }
+        let second = ep.attach_interface().id();
+        route(&ep.shared, second, synthesis(&client, "c"));
+        assert_eq!(ep.route_to(dest(0)), Some((second, 1)));
+        assert_eq!(
+            ep.shared.path_table.lock().unwrap().len(),
+            PATH_TABLE_CAPACITY
+        );
+        assert_eq!(ep.routing_counters().paths_evicted, 1);
+    }
+
+    #[test]
+    fn away_tunnels_make_room_first() {
+        let now = Instant::now();
+        let mut table = HashMap::new();
+        for n in 0..TUNNEL_CAPACITY {
+            let tunnel = Tunnel {
+                iface: (n > 0).then_some(n as InterfaceId),
+                paths: HashMap::new(),
+                expires: now + Duration::from_secs(TUNNEL_CAPACITY as u64 - n as u64),
+            };
+            table.insert([n as u8; HASH_LEN], tunnel);
+        }
+        Tunnels::make_room(&mut table);
+        assert!(!table.contains_key(&[0; HASH_LEN]), "the away one goes");
+        Tunnels::make_room(&mut table);
+        assert_eq!(table.len(), TUNNEL_CAPACITY - 1);
     }
 
     #[test]
     fn tunnels_and_paths_expire_after_eight_hours() {
         let start = Instant::now();
-        let mut table = HashMap::new();
-        let mut paths = HashMap::new();
-        let entry = PathEntry {
-            iface: 0,
-            transport: None,
-            hops: 0,
-            learned: start,
-            mode: crate::node::InterfaceMode::Full,
+        let paths = HashMap::from([(dest(1), mirrored(0, start))]);
+        let expires = start + TUNNEL_TIMEOUT * 2;
+        let tunnel = Tunnel {
+            iface: None,
+            paths,
+            expires,
         };
-        paths.insert(dest(1), Mirrored { entry, at: start });
-        table.insert(
-            [1; HASH_LEN],
-            Tunnel {
-                iface: None,
-                paths,
-                expires: start + TUNNEL_TIMEOUT + TUNNEL_TIMEOUT,
-            },
-        );
+        let mut table = HashMap::from([([1; HASH_LEN], tunnel)]);
         Tunnels::cull(&mut table, start + TUNNEL_TIMEOUT);
         assert!(table[&[1; HASH_LEN]].paths.is_empty());
         Tunnels::cull(&mut table, start + TUNNEL_TIMEOUT * 2);
@@ -400,28 +574,21 @@ mod tests {
     #[test]
     fn tunnel_paths_are_bounded_across_tunnels() {
         let start = Instant::now();
-        let mut table = HashMap::new();
-        let mut paths = HashMap::new();
-        for n in 0..TUNNEL_PATH_CAPACITY {
-            let entry = PathEntry {
-                iface: 0,
-                transport: None,
-                hops: 0,
-                learned: start,
-                mode: crate::node::InterfaceMode::Full,
-            };
-            let at = start + Duration::from_secs(n as u64);
-            paths.insert(dest(n as u8), Mirrored { entry, at });
-        }
+        let paths = (0..TUNNEL_PATH_CAPACITY)
+            .map(|n| {
+                (
+                    dest(n as u8),
+                    mirrored(0, start + Duration::from_secs(n as u64)),
+                )
+            })
+            .collect();
         let expires = start + TUNNEL_TIMEOUT;
-        table.insert(
-            [1; HASH_LEN],
-            Tunnel {
-                iface: None,
-                paths,
-                expires,
-            },
-        );
+        let tunnel = Tunnel {
+            iface: None,
+            paths,
+            expires,
+        };
+        let mut table = HashMap::from([([1; HASH_LEN], tunnel)]);
         Tunnels::make_path_room(&mut table);
         let held = &table[&[1; HASH_LEN]].paths;
         assert_eq!(held.len(), TUNNEL_PATH_CAPACITY - 1);
