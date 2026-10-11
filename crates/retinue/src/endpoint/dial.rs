@@ -7,6 +7,7 @@ use alloc::vec::Vec;
 use std::io;
 use std::net::SocketAddr;
 use std::sync::Arc;
+use std::sync::atomic::Ordering;
 use std::time::Duration;
 
 use tokio::net::{TcpStream, lookup_host};
@@ -16,11 +17,13 @@ use crate::ifac::Ifac;
 use crate::iface::hdlc;
 use crate::node::InterfaceMode;
 
-use super::interface::InterfaceId;
+use super::interface::{InterfaceId, QueueAdmission};
 use super::mtu::HwMtu;
 use super::pump::{Framing, PumpEnd, carry_tcp};
+use super::queue::TrafficClass;
 use super::runtime::{Endpoint, endpoint_closed, track};
 use super::sockopt;
+use super::tunnel::synthesis;
 
 /// RNS's bitrate guess for a TCP interface, which sets its hardware MTU (`TCPInterface.py`
 /// 76, 465).
@@ -69,6 +72,24 @@ impl TcpClient {
             max_reconnect_tries: None,
             kiss_framing: false,
         }
+    }
+
+    /// The name its tunnel is synthesized under: stable across reconnects and restarts, as
+    /// RNS's `str(interface)` is (`Interface.py` 181-183).
+    fn label(&self) -> String {
+        alloc::format!("TCPClientInterface[{}:{}]", self.host, self.port)
+    }
+}
+
+/// Queue a tunnel synthesis on a client that has just connected (`TCPInterface.py` 169-180,
+/// 298-299). A KISS client sends none, as its peer is a TNC (178-179).
+fn synthesize(shared: &super::shared::Shared, id: InterfaceId, label: &str) {
+    let pkt = synthesis(&shared.identity, label);
+    if shared.push_to(id, pkt, TrafficClass::Control) == QueueAdmission::Queued {
+        shared
+            .routing_stats
+            .tunnels_synthesized
+            .fetch_add(1, Ordering::Relaxed);
     }
 }
 
@@ -156,11 +177,19 @@ impl Endpoint {
         }
         let (id, online, mut outbound) = (attached.id, attached.online, attached.outbound);
         let shared = Arc::clone(&self.shared);
+        let label = client.label();
         let started = track(&self.shared, async move {
             let mut tries = 0u32;
             loop {
                 if let Some(connected) = stream.take() {
                     tries = 0;
+                    if !client.kiss_framing {
+                        // Online and discarded first, so carry_tcp keeps what is queued here.
+                        if !online.swap(true, Ordering::AcqRel) {
+                            outbound.discard();
+                        }
+                        synthesize(&shared, id, &label);
+                    }
                     if carry_tcp(&shared, id, &online, &mut outbound, connected, framing).await
                         == PumpEnd::Closed
                     {
