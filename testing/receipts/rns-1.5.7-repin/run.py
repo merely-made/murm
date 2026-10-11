@@ -60,7 +60,11 @@ DISCOVERY_GATES = ()
 INGRESS_GATES = ()
 
 # V4: Pipe (C4), KISS on TCP (C5) and listen addresses (C7), on loopback and child stdio.
-STREAM_GATES = ()
+STREAM_GATES = (
+    ("pipe", "interop_pipe.py", []),
+    ("tcp-kiss", "interop_tcp_kiss.py", []),
+    ("listen-device", "interop_listen_device.py", []),
+)
 
 # V5: AX.25 KISS (B13) over ptys, RNode over TCP (B10) and telemetry (B11) over loopback;
 # macOS only, as the serial lane.
