@@ -2,6 +2,10 @@
 
 use super::*;
 use crate::endpoint::paths::PATH_REQUEST_GATE;
+use crate::endpoint::{
+    IfacePolicy, InterfaceSelector, ListenPolicy, PathRequestPolicy, RoutingPolicy,
+};
+use crate::packet::HeaderType;
 
 /// A path request for one of our destinations is answered once per tag, on the interface
 /// it came in on only. Tagless requests and requests relayed past one hop are ignored.
@@ -203,4 +207,271 @@ async fn a_requested_destination_is_not_held_behind_a_burst() {
         !ep.shared
             .path_requested_within(requested.destination, Duration::ZERO)
     );
+}
+
+async fn next(iface: &mut Interface, within: Duration) -> Option<Packet> {
+    tokio::time::timeout(within, iface.next_outbound())
+        .await
+        .ok()
+        .flatten()
+}
+
+/// A transport that learns from `source` but relays nothing, so only answers leave.
+fn quiet_transport(seed: u8, requesters: Vec<InterfaceId>) -> Endpoint {
+    let ep = Endpoint::new(PrivateIdentity::from_secret_bytes(&[seed; 64]));
+    ep.set_routing_policy(RoutingPolicy {
+        allowed_ingress: InterfaceSelector::Only(requesters),
+        ..RoutingPolicy::transit()
+    });
+    ep
+}
+
+fn relayed(packet: &Packet, via: u8, hops: u8) -> Packet {
+    let mut copy = packet.clone();
+    copy.header_type = HeaderType::Type2;
+    copy.transport = Some(AddressHash::from_bytes([via; 16]));
+    copy.hops = hops;
+    copy
+}
+
+fn request(target: AddressHash, tag: u8) -> Packet {
+    crate::path::path_request(target, &[tag; crate::path::TAG_LEN])
+}
+
+/// A transport answers from the announce behind a live route, after the grace, on the
+/// requesting interface only, as a path response through itself (`Transport.py` 3486-3519).
+#[tokio::test(start_paused = true)]
+async fn a_transport_answers_from_its_announce_cache() {
+    let ep = quiet_transport(0x70, vec![]);
+    let mut source = ep.attach_interface();
+    let mut asker = ep.attach_interface();
+    let (packet, announce) = peer_announce(0x71, "cached");
+    route(&ep.shared, source.id(), relayed(&packet, 0xA1, 2));
+    let asked = tokio::time::Instant::now();
+    route(&ep.shared, asker.id(), request(announce.destination, 1));
+
+    let answer = next(&mut asker, Duration::from_secs(5))
+        .await
+        .expect("answered");
+    assert!(tokio::time::Instant::now() - asked >= Duration::from_millis(400));
+    assert_eq!(answer.context, crate::path::CTX_PATH_RESPONSE);
+    assert_eq!((answer.header_type, answer.hops), (HeaderType::Type2, 3));
+    assert_eq!(answer.transport, Some(ep.identity().hash()));
+    assert_eq!(answer.payload, packet.payload);
+    assert!(next(&mut source, Duration::from_secs(5)).await.is_none());
+    assert_eq!(ep.routing_counters().path_requests_answered, 1);
+
+    // An ordinary node keeps quiet.
+    ep.set_routing_policy(RoutingPolicy::none());
+    route(&ep.shared, asker.id(), request(announce.destination, 2));
+    assert!(next(&mut asker, Duration::from_secs(5)).await.is_none());
+}
+
+/// No answer leads back where the request came from: a route learned on the same roaming
+/// interface, or one through the requesting transport (`Transport.py` 3468-3484). A roaming
+/// requester otherwise waits 1.5 s more.
+#[tokio::test(start_paused = true)]
+async fn answers_never_point_back_at_the_requester() {
+    let ep = quiet_transport(0x72, vec![]);
+    let mut wire = ep.attach_interface();
+    let mut roaming = ep.attach_interface();
+    assert!(ep.set_interface_mode(roaming.id(), InterfaceMode::Roaming));
+    let (here, near) = peer_announce(0x73, "near");
+    route(&ep.shared, roaming.id(), here);
+    route(&ep.shared, roaming.id(), request(near.destination, 1));
+    let (there, far) = peer_announce(0x74, "far");
+    route(&ep.shared, wire.id(), relayed(&there, 0xB2, 1));
+    let mut from_next_hop = request(far.destination, 2);
+    from_next_hop.payload.splice(16..16, [0xB2; 16]);
+    route(&ep.shared, wire.id(), from_next_hop);
+    assert!(next(&mut roaming, Duration::from_secs(5)).await.is_none());
+    assert!(next(&mut wire, Duration::from_secs(5)).await.is_none());
+    assert_eq!(ep.routing_counters().path_requests_answered, 0);
+
+    let asked = tokio::time::Instant::now();
+    route(&ep.shared, roaming.id(), request(far.destination, 3));
+    assert!(next(&mut roaming, Duration::from_secs(5)).await.is_some());
+    assert!(tokio::time::Instant::now() - asked >= Duration::from_millis(1_900));
+}
+
+/// A request for an unknown destination heard on a gateway interface is searched for on the
+/// others, with its tag and our transport id; a second requester joins the first, and the
+/// announce goes back to both at once (`Transport.py` 1862-1884, 2430-2455, 3528-3583).
+#[tokio::test(start_paused = true)]
+async fn a_gateway_request_is_searched_and_answered_on_arrival() {
+    let ep = quiet_transport(0x75, vec![]);
+    let mut gateway = ep.attach_interface();
+    let mut out = ep.attach_interface();
+    let mut other = ep.attach_interface();
+    assert!(ep.set_interface_mode(gateway.id(), InterfaceMode::Gateway));
+    let (packet, announce) = peer_announce(0x76, "wanted");
+    let target = announce.destination;
+    route(&ep.shared, gateway.id(), request(target, 7));
+    for iface in [&mut out, &mut other] {
+        let search = next(iface, Duration::from_secs(1)).await.expect("searched");
+        let parsed = crate::path::PathRequest::parse(&search).unwrap();
+        assert_eq!(parsed.requestor, Some(ep.identity().hash()));
+        assert_eq!(parsed.tag(), Some(&[7; crate::path::TAG_LEN][..]));
+    }
+    assert!(next(&mut gateway, Duration::from_secs(1)).await.is_none());
+    route(&ep.shared, other.id(), request(target, 8));
+    assert!(
+        next(&mut out, Duration::from_secs(1)).await.is_none(),
+        "one search"
+    );
+    assert!(ep.shared.discovery.awaits(target));
+
+    route(&ep.shared, out.id(), relayed(&packet, 0xC3, 1));
+    for iface in [&mut gateway, &mut other] {
+        let answer = next(iface, Duration::from_millis(1))
+            .await
+            .expect("passed back");
+        assert_eq!(
+            (answer.context, answer.hops),
+            (crate::path::CTX_PATH_RESPONSE, 2)
+        );
+    }
+    assert!(!ep.shared.discovery.awaits(target));
+    assert_eq!(ep.routing_counters().path_requests_searched, 1);
+}
+
+/// FULL interfaces do not search unless `recursive` is set; BOUNDARY searches BOUNDARY and
+/// GATEWAY only (`Transport.py` 3420-3436).
+#[tokio::test(start_paused = true)]
+async fn the_requesting_mode_decides_the_search() {
+    let ep = quiet_transport(0x77, vec![]);
+    let asker = ep.attach_interface();
+    let mut gateway = ep.attach_interface();
+    let mut full = ep.attach_interface();
+    assert!(ep.set_interface_mode(gateway.id(), InterfaceMode::Gateway));
+    let calm = AnnounceIngressPolicy {
+        enabled: false,
+        ..AnnounceIngressPolicy::default()
+    };
+    assert!(ep.set_interface_ingress_policy(asker.id(), Some(calm)));
+    let target = AddressHash::from_bytes([0x78; 16]);
+    route(&ep.shared, asker.id(), request(target, 1));
+    assert!(next(&mut full, Duration::from_secs(1)).await.is_none());
+
+    assert!(ep.set_interface_mode(asker.id(), InterfaceMode::Boundary));
+    let target = AddressHash::from_bytes([0x7F; 16]);
+    route(&ep.shared, asker.id(), request(target, 2));
+    assert!(next(&mut gateway, Duration::from_secs(1)).await.is_some());
+    assert!(next(&mut full, Duration::from_secs(1)).await.is_none());
+
+    let recursive = PathRequestPolicy {
+        recursive: true,
+        ..PathRequestPolicy::default()
+    };
+    assert!(ep.set_interface_mode(asker.id(), InterfaceMode::Full));
+    assert!(ep.set_interface_path_request_policy(asker.id(), recursive));
+    route(
+        &ep.shared,
+        asker.id(),
+        request(AddressHash::from_bytes([0x79; 16]), 3),
+    );
+    assert!(next(&mut full, Duration::from_secs(1)).await.is_some());
+    assert_eq!(ep.routing_counters().path_requests_searched, 2);
+}
+
+/// Egress control withholds recursive requests past its rate, and a burst of requests on an
+/// interface flags it and stops it starting searches (`Interface.py` 213-250).
+#[tokio::test]
+async fn path_request_rates_limit_both_ways() {
+    let ep = quiet_transport(0x7A, vec![]);
+    let asker = ep.attach_interface();
+    let noisy = ep.attach_interface();
+    let out = ep.attach_interface();
+    for iface in [asker.id(), noisy.id()] {
+        assert!(ep.set_interface_mode(iface, InterfaceMode::Gateway));
+    }
+    let calm = AnnounceIngressPolicy {
+        enabled: false,
+        ..AnnounceIngressPolicy::default()
+    };
+    assert!(ep.set_interface_ingress_policy(asker.id(), Some(calm)));
+    let egress = PathRequestPolicy {
+        egress_control: true,
+        ..PathRequestPolicy::default()
+    };
+    assert!(ep.set_interface_path_request_policy(out.id(), egress));
+    assert!(ep.set_interface_outgoing(noisy.id(), false));
+    for seed in 0..6 {
+        let target = AddressHash::from_bytes([seed; 16]);
+        route(&ep.shared, asker.id(), request(target, seed));
+    }
+    let counters = ep.routing_counters();
+    assert_eq!(counters.path_requests_searched, 6);
+    assert_eq!(
+        counters.path_requests_egress_limited, 4,
+        "two sent, then 3 Hz is passed"
+    );
+    assert_eq!(out.outbound.queues.depth(), 2);
+    assert_eq!(counters.path_requests_ingress_limited, 0);
+
+    for seed in 6..10 {
+        let target = AddressHash::from_bytes([seed; 16]);
+        route(&ep.shared, noisy.id(), request(target, seed));
+    }
+    let counters = ep.routing_counters();
+    assert_eq!(counters.path_requests_searched, 8, "two before the burst");
+    assert_eq!(counters.path_requests_ingress_limited, 2);
+    assert_eq!(
+        ep.interface_counters(noisy.id())
+            .map(|c| c.path_request_burst),
+        Some(true)
+    );
+}
+
+/// Spawned TCP interfaces carry the listener's path-request policy (RNS copies the rates and
+/// `recursive_prs`, `TCPInterface.py` 587-650; its `IN` flag is never read in 1.5.7).
+#[tokio::test]
+async fn spawned_interfaces_inherit_the_path_request_policy() {
+    let ep = Endpoint::new(PrivateIdentity::from_secret_bytes(&[0x7B; 64]));
+    let (spawned, mut ids) = tokio::sync::mpsc::channel(1);
+    let path_requests = PathRequestPolicy {
+        recursive: true,
+        egress_control: true,
+        egress_hz: 2,
+        burst_hz_new: 1,
+        burst_hz: 4,
+    };
+    let iface = IfacePolicy {
+        path_requests,
+        ..IfacePolicy::default()
+    };
+    let policy = ListenPolicy {
+        mode: InterfaceMode::Gateway,
+        iface,
+        spawned: Some(spawned),
+        ..ListenPolicy::default()
+    };
+    let listener = ep
+        .listen_tcp_with("127.0.0.1:0".parse().unwrap(), policy)
+        .await
+        .unwrap();
+    let _client = tokio::net::TcpStream::connect(listener.local_addr())
+        .await
+        .unwrap();
+    let id = ids.recv().await.unwrap();
+    assert_eq!(ep.shared.iface_policy(id).path_requests, path_requests);
+}
+
+/// A forgotten route takes its cached announce with it.
+#[tokio::test]
+async fn the_announce_cache_follows_the_route() {
+    let ep = quiet_transport(0x7C, vec![]);
+    let iface = ep.attach_interface();
+    let (packet, announce) = peer_announce(0x7D, "evicted");
+    route(&ep.shared, iface.id(), packet);
+    assert!(
+        ep.shared
+            .discovery
+            .announces
+            .lock()
+            .unwrap()
+            .contains_key(&announce.destination)
+    );
+    ep.shared.forget_path(announce.destination);
+    assert!(ep.shared.discovery.announces.lock().unwrap().is_empty());
 }
