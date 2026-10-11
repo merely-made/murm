@@ -12,7 +12,8 @@ using actual coding/authentication, described in the
 TC4's bounded host prototype now passes one recovered signed V2 mesh job record
 to Mere's existing admission owner, preserving original bytes and identity.
 It observes insertion, duplicate arrival and three invalid-inner-record refusals;
-live carriers and wider restart/qualification work remain open.
+the continuation now carries these recovered bytes over real local QUIC.
+Additional carriers and wider restart/qualification work remain open.
 Publication uses direct commits and pushes to `main`; validation runs
 locally. GitHub Actions and PRs are not part of this project's requested flow.
 
@@ -135,7 +136,7 @@ eventual delivery without conditions.
 | TC1 | Independent RFC 6330 codec qualification | Selected OpenRQ `Al=1, N=1` campaign is implemented; exact symbol and bidirectional decode cases cover K-prime transitions, uneven two-block partition, padding and repair-only recovery. Pinned tooling and fixtures make those cases reproducible. Broader alignment, sub-block, ESI and resource coverage remains open before wider claims. |
 | TC2 | Portable corpus/adapters and existing carriers | External-process capability/byte/event contract; register existing stock-RNS oracle gates and a real QUIC independent-peer campaign. Optional features remain explicit. Result schemas and requirement traceability work across at least two implementation lineages; vector imports retain licenses. |
 | TC3 | Retained-repair prototype, implemented | Authored schedule and signed manifest/symbol arrays; actual codec; one-/multi-radio collection, loss/reorder/duplicates, sleep/drift/guards, late join, repair rotation, expiry and partial-state resume. Four selected experiments expose catch-up, floor cost and overload behavior. The profile and inputs may change; stable-contract evaluation is later work. |
-| TC4 | Signed-object receive prototype, implemented; wider evaluation open | The selected host example passes actual recovered original bytes/IDs to the existing mesh admission owner, observing insertion, duplicate arrival, wrong-mesh/body/signature refusals and in-process store reopen. Later evaluation covers expired transfers, actual two-carrier duplicates and fresh-process recovery after the contracts stabilize. |
+| TC4 | Signed-object receive and local QUIC prototypes, implemented; wider evaluation open | The selected host example passes actual recovered original bytes/IDs through bounded real QUIC to the existing mesh admission owner, observing insertion, duplicate arrival, wrong-mesh/body/signature refusals, pre-owner framing refusals and in-process store reopen. Later evaluation covers expired transfers, actual two-carrier duplicates and fresh-process recovery after the contracts stabilize. |
 | TC5 | Device resource profile | Selected codec/profile compiles for the actual target; measured peak heap/stack, decode time, retained storage and interrupt/radio coexistence fit named limits. no_std availability alone does not close this gate. |
 | TC6 | Physical multi-radio qualification | Named boards, firmware hashes, radios, antennas, channels and instruments; actual payload goodput, range, adjacent-channel isolation, retune/clock cost, collision behavior, power and source/repair airtime. Regulatory band/duty/power conditions are explicit. 1–2 Mbps remains a target until this campaign measures it at the intended range. |
 | TC7 | Optional full protocol adapters | Select real peers/use cases first. Each FLUTE/ALC, NORM, BPv7/BPSec, SCHC/LoRaWAN, CoAP/OSCORE or MLS branch gets its dependency closure, selected options, independent peer and its own conformance matrix. Their spec counts are not a mandate to implement them all. |
@@ -266,7 +267,28 @@ uses isolated branches from those fetched refs.
   In-process redb close/reopen preserves the accepted bytes and effect. Six
   small suite tests and strict scoped Clippy passed; the existing external
   smoke also covers saved recovered bytes after decoder-state expiry. This is
-  real host admission with modeled collection, not live carrier, worker/blob,
-  fresh-process restart, MCU or RF qualification. Next compose a bounded real
-  carrier handoff with this existing owner; expand evaluation once that shape
-  stabilizes.
+  real host admission with modeled collection; the original report does not
+  establish live carrier, worker/blob, fresh-process restart, MCU or RF
+  qualification. The real-carrier continuation below adds local QUIC without
+  expanding broader qualification.
+- **2026-10-11, bounded real QUIC handoff:** Mere's same receive example now
+  offers `--carrier quic`, carrying actual recovered bytes through production
+  p2panda-net/iroh `Transport` streams. Stickleback owns a generic bounded opaque
+  object-stream leaf; the receiving host checks ALPN/transport peer and clean
+  frame completion, then calls the existing independently scoped mesh admission
+  owner. An acknowledgement follows that owner's result; transport identity
+  never replaces the inner signed author. The selected report lives once at
+  `mere/crates/mesh/mesh/examples/retained_receive/quic-handoff-exploration-20261011.json`.
+  The finite host caps objects at 16 KiB, acknowledgements at 2 KiB, attempted
+  sessions at 12, request frames at 64 KiB and reserved request/reply frames at
+  128 KiB, with one in-flight exchange and explicit I/O/campaign deadlines.
+  Refused attempts consume those budgets. Actual loopback routes and active
+  paths are observed. Oversized, truncated and stalled streams stop before
+  admission, and subsequent valid transfers still reach the owner. The saved
+  run completed 11 attempts within its budgets and retained one operation and
+  one posted job. The object leaf's four scoped checks and the example's strict
+  scoped Clippy check pass; the full strict Stickleback crate lint encounters
+  two existing unchanged store lints, and passes with those lint classes
+  excluded. The example remains a bounded host composition prototype. The
+  global production accept queue, other carriers, cross-host service wiring,
+  worker/blob delivery, MCU and physical radio behavior retain their own work.

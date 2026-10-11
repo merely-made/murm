@@ -82,6 +82,31 @@ and `mere/crates/mesh/mesh/examples/retained_receive/README.md`. This does not
 transfer job blobs or execute a worker, and it uses modeled lanes rather than
 a live carrier.
 
+The subsequent real-carrier experiment adds the example's `--carrier quic`
+mode. Exact recovered bytes traverse production p2panda-net/iroh streams with
+loopback routes before the same receiver-owned decode/admission callback.
+Stickleback's generic one-object stream requires a bounded length, complete
+payload and clean FIN within one deadline. Protocol and authenticated carrier
+peer checks precede reading; the expected mesh remains a receiver choice and
+the original author remains the signed header's author. A bounded result
+acknowledgement follows the existing owner's decision. The report distinguishes
+that decision from sender acknowledgement receipt.
+
+The finite example caps 16 KiB objects, 2 KiB acknowledgements, 12 attempted
+sessions, 64 KiB request frames and 128 KiB reserved request/reply frames, with
+one in-flight object and explicit I/O/exchange/campaign deadlines. Oversized,
+truncated and stalled stream attempts consume the budget and stop before the
+owner; valid subsequent streams still reach admission. Source-bound observations
+live once in
+`mere/crates/mesh/mesh/examples/retained_receive/quic-handoff-exploration-20261011.json`.
+Actual local QUIC does not turn modeled radio slots into physical airtime or
+goodput. The production transport's global accepted-session queue is a
+separate host service admission concern.
+Actual-path observation is limited to two seconds within the exchange/campaign
+deadlines; empty actor snapshots may be retried, while an observed active route
+outside loopback fails immediately. The Mere guide owns the observation details
+and the intermediate undiagnostic failure's unresolved classification.
+
 ## Time, capacity and retention
 
 Time is an integer slot index. The modeled transmitter has parallel capacity
@@ -183,9 +208,10 @@ checked-in inputs, not an invariant every future scheduler must preserve:
 The early shape is a shared retained-object sender with priority and repair
 policy, explicit receiver opportunities, and authenticated generation envelopes.
 The owner-local receive example now demonstrates one recovered signed object
-entering the existing operation processor. The next useful slice connects a
-bounded real carrier to that opaque-byte handoff and independently chosen
-admission scope, before wider qualification.
+crossing a bounded real local QUIC handoff and entering the existing operation
+processor. The next useful slice exposes that bounded ingress in an owning host
+with explicit service/session admission, before other carriers or wider
+qualification.
 
 Run and record the campaign locally. GitHub Actions is disabled in Mere and
 Retinue by owner request; this work uses direct commits and pushes to `main`,
