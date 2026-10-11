@@ -34,6 +34,9 @@ validation_asset_globs = [
     "testing/transport-conformance/Cargo.lock",
     "testing/transport-conformance/metadata.toml",
     "testing/transport-conformance/src/*.rs",
+    "testing/transport-conformance/src/simulation/*.rs",
+    "testing/transport-conformance/scenarios/*.toml",
+    "testing/transport-conformance/scenarios/*.cddl",
     "testing/transport-conformance/vectors/*",
     "testing/transport-conformance/interop/*.py",
     "testing/transport-conformance/interop/*.java",
@@ -107,9 +110,18 @@ command = ["cargo", "run", "-p", "protocol-capacity-probe", "--features", "host"
 # not build the production protocol/firmware workspaces.
 [[suite]]
 id = "transport-conformance"
-tier = "pr"
+tier = "local"
 command = ["cargo", "test", "--manifest-path", "testing/transport-conformance/Cargo.toml", "--locked"]
-asset_globs = ["testing/transport-conformance/Cargo.toml", "testing/transport-conformance/Cargo.lock", "testing/transport-conformance/metadata.toml", "testing/transport-conformance/src/*.rs", "testing/transport-conformance/vectors/*"]
+asset_globs = ["testing/transport-conformance/Cargo.toml", "testing/transport-conformance/Cargo.lock", "testing/transport-conformance/metadata.toml", "testing/transport-conformance/src/*.rs", "testing/transport-conformance/src/simulation/*.rs", "testing/transport-conformance/scenarios/*.toml", "testing/transport-conformance/vectors/*"]
+
+# Authored channel/retention model with actual RaptorQ reconstruction. The
+# experiments record modeled slots/bytes and in-process saved-state resume;
+# they explore the prototype without RF benchmarks or application admission.
+[[suite]]
+id = "transport-retained-repair"
+tier = "local"
+command = ["cargo", "run", "--manifest-path", "testing/transport-conformance/Cargo.toml", "--locked", "--offline", "--", "--simulate"]
+asset_globs = ["testing/transport-conformance/src/simulation/*.rs", "testing/transport-conformance/scenarios/*.toml", "testing/transport-conformance/scenarios/*.cddl"]
 
 # Live independent peer replay requires a populated pinned-tool cache or an
 # explicitly selected local JDK. Bootstrap and capture are explicit operations;

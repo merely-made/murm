@@ -18,6 +18,7 @@ mod independent;
 pub mod interop;
 mod preflight;
 mod primitives;
+pub mod simulation;
 pub use preflight::{Oti, checked_packet, checked_payload_id, parse_payload_id};
 pub(crate) use preflight::{checked_packet_for_alignment, small_oti};
 use preflight::{oti_cases, packet_preflight_cases, payload_id_cases};
@@ -86,6 +87,16 @@ impl Receipt {
 
 pub fn case_catalog() -> Result<Vec<CaseMetadata>, String> {
     Ok(catalog()?.cases)
+}
+
+/// The authored retention/channel model has its own evidence class and receipt.
+pub fn run_simulation() -> Result<Value, String> {
+    let mut receipt = simulation::campaign::run_campaign()?;
+    receipt
+        .as_object_mut()
+        .ok_or("simulation campaign returned a non-object receipt")?
+        .insert("implementation".into(), implementation_identity());
+    Ok(receipt)
 }
 
 fn catalog() -> Result<Catalog, String> {
@@ -197,6 +208,42 @@ fn implementation_identity() -> Value {
         (
             "src/primitives.rs",
             include_bytes!("primitives.rs").as_slice(),
+        ),
+        (
+            "src/simulation/mod.rs",
+            include_bytes!("simulation/mod.rs").as_slice(),
+        ),
+        (
+            "src/simulation/types.rs",
+            include_bytes!("simulation/types.rs").as_slice(),
+        ),
+        (
+            "src/simulation/scheduler.rs",
+            include_bytes!("simulation/scheduler.rs").as_slice(),
+        ),
+        (
+            "src/simulation/receiver.rs",
+            include_bytes!("simulation/receiver.rs").as_slice(),
+        ),
+        (
+            "src/simulation/checkpoint.rs",
+            include_bytes!("simulation/checkpoint.rs").as_slice(),
+        ),
+        (
+            "src/simulation/wire.rs",
+            include_bytes!("simulation/wire.rs").as_slice(),
+        ),
+        (
+            "src/simulation/campaign.rs",
+            include_bytes!("simulation/campaign.rs").as_slice(),
+        ),
+        (
+            "scenarios/retained-repair-v1.toml",
+            include_bytes!("../scenarios/retained-repair-v1.toml").as_slice(),
+        ),
+        (
+            "scenarios/retained-repair-v1.cddl",
+            include_bytes!("../scenarios/retained-repair-v1.cddl").as_slice(),
         ),
         (
             "vectors/manifest.json",
