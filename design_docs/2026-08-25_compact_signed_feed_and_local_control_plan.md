@@ -1,7 +1,11 @@
 # Compact signed feed and local control plan
 
-**Date:** 2026-08-25. **Status:** plan; CF0/CF1 implemented and locally
-verified; later families remain unstarted.
+**Date:** 2026-08-25.
+
+**Status (2026-10-10):** plan; CF0/CF1 implemented and
+locally verified; later families remain unstarted. MC0 now separates the host
+canonical-operation control from the device portability and physical-carriage
+probe. No native embedded Mere result is claimed.
 
 **Authority:** the
 [permissive protocol survey](2026-08-25_permissive_radio_protocol_compatibility_survey.md)
@@ -270,6 +274,17 @@ durable-store consumption.
 
 ### MC0. Separate forcing-consumer decision
 
+**Source refresh, 2026-10-10:** Mere `4f70d5362` resolves iroh 1.3.0,
+`mere-p2panda-net` 0.7.5, and p2panda core/sync 0.7.1 from fork commit
+`1bec457efe7df4dd85f657902f7333ce857620d8`. The pinned sync crate already
+contains `api.rs` with log-height/range and ingestion helpers. Upstream's
+[September sync work](https://p2panda.org/2026/09/16/dash-router-sync-api.html)
+provides sneakernet, unicast, and broadcast examples. Reuse those primitives
+where they fit; this is not evidence that Dash Router, a radio delivery adapter,
+or a firmware p2panda runtime is adopted. The pinned core remains a `std`
+crate. Stickleback owns receive processing and policy-before-insert storage;
+an additional generic replication authority would duplicate that boundary.
+
 Establish the control case first: two root-signed p2panda operations, sequence
 zero and sequence one with a backlink, retain identical header/body bytes and
 operation ids across memory/IP and a Retinue Link or Resource loopback.
@@ -278,6 +293,20 @@ First test whether upstream `p2panda-core` can become `no_std + alloc` without
 changing its wire. If that cannot land cleanly, a temporary permissive Mere
 wire crate is acceptable only if desktop Stickleback consumes it too. A
 firmware-only reimplementation would create two canonical encoders.
+
+Then use one bounded observation as the device forcing consumer. Its author
+has a scoped device key, not the Persona root used by the host control case.
+Using a scoped-key test fixture, make the host and device produce and validate
+identical canonical operations; retain the original signed header/body bytes
+and id through LoRa and IP.
+Gateway forwarding does not replace device authorship. A separately
+re-originated foreign-protocol message records its source relationship instead.
+Run duplicate arrival through two carriers, writer/sequence/backlink tampering,
+bounded reassembly, interrupted transfer, and restart against Stickleback's
+existing admission path. Measure application flash, RAM/heap/stack, retained
+frontiers, signature/header overhead, and RF airtime before selecting compact
+carriage. Host loopback success and a physical device-to-radio-to-IP receipt
+remain distinct results.
 
 After MF0 and one real low-power Mere consumer exist, compare three choices:
 
@@ -332,6 +361,9 @@ Every fixture and donor note carries `official-doc`, `observed-wire`,
 
 ## Findings
 
+- **2026-10-10:** the current Mere lock and exact p2panda fork were inspected.
+  Iroh 1.3.0 and the newer sync primitives are already in the host graph;
+  canonical device authoring and embedded p2panda execution remain unproven.
 - **2026-08-25:** Stickleback already owns the host replicated-space mechanics;
   adding a generic feed runtime there would duplicate authority.
 - **2026-08-25:** Mere already has a Noise XX session layer and a separate
@@ -359,3 +391,5 @@ Every fixture and donor note carries `official-doc`, `observed-wire`,
 
 - **2026-08-25:** permissive sources and live Retinue/Mere seams audited; plan
   written. No implementation or wire migration started.
+- **2026-10-10:** refreshed MC0 against the current dependency graph and scoped
+  the device observation probe. This pass changed documentation only.
