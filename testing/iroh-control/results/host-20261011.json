@@ -1,0 +1,190 @@
+{
+  "cases": [
+    {
+      "evidence_class": "host-process-composition",
+      "id": "signed-status",
+      "observation": {
+        "known_good_generation": 7,
+        "outer_counter": 1
+      },
+      "status": "pass"
+    },
+    {
+      "evidence_class": "host-process-composition",
+      "id": "wrong-command-target",
+      "observation": "refused without journal change",
+      "status": "pass"
+    },
+    {
+      "evidence_class": "host-process-composition",
+      "id": "bad-command-signature",
+      "observation": "refused without journal change",
+      "status": "pass"
+    },
+    {
+      "evidence_class": "host-process-composition",
+      "id": "carrier-identity-versus-command-grant",
+      "observation": {
+        "authorized_signer_via_other_endpoint": "accepted",
+        "endpoint_acl": "not part of this probe",
+        "ungranted_signer": "refused"
+      },
+      "status": "pass"
+    },
+    {
+      "evidence_class": "host-process-composition",
+      "id": "outer-replay",
+      "observation": "refused against grant-restored counter",
+      "status": "pass"
+    },
+    {
+      "evidence_class": "host-process-composition",
+      "id": "bounded-stream-input",
+      "observation": {
+        "maximum_command_bytes": 365,
+        "rejected_bytes": 366
+      },
+      "status": "pass"
+    },
+    {
+      "evidence_class": "host-process-composition",
+      "id": "verified-malformed-inner",
+      "observation": {
+        "inner": "refused after durable outer admission",
+        "outer_counter": 3
+      },
+      "status": "pass"
+    },
+    {
+      "evidence_class": "host-process-composition",
+      "id": "public-client-apply-commit",
+      "observation": {
+        "known_good_generation": 8,
+        "outer_counter": 6
+      },
+      "status": "pass"
+    },
+    {
+      "evidence_class": "host-process-composition",
+      "id": "public-client-revert",
+      "observation": {
+        "known_good_generation": 8,
+        "outer_counter": 8
+      },
+      "status": "pass"
+    },
+    {
+      "evidence_class": "host-process-composition",
+      "id": "semantic-conflict",
+      "observation": {
+        "candidate": "unchanged",
+        "mutation": "refused",
+        "outer_counter": 11
+      },
+      "status": "pass"
+    },
+    {
+      "evidence_class": "host-process-composition",
+      "id": "lost-response-semantic-retry",
+      "observation": {
+        "additional_applies_on_retry": 0,
+        "candidate_generation": 10,
+        "commit_counter": 12,
+        "lost_response_counter": 9,
+        "retry_counter": 10
+      },
+      "status": "pass"
+    },
+    {
+      "evidence_class": "host-process-composition",
+      "id": "old-mutation-after-cache-replacement",
+      "observation": {
+        "additional_candidate": false,
+        "outer_counter": 13,
+        "reason": "TransactionExpired"
+      },
+      "status": "pass"
+    },
+    {
+      "evidence_class": "host-process-composition",
+      "id": "fresh-process-committed-reopen",
+      "observation": {
+        "fresh_process": true,
+        "known_good_generation": 10,
+        "old_wire": "refused",
+        "restored_outer_counter": 13,
+        "stable_endpoint_key": true
+      },
+      "status": "pass"
+    },
+    {
+      "evidence_class": "host-process-composition",
+      "id": "autonomous-expiry-with-unfinished-stream",
+      "observation": {
+        "known_good_generation": 10,
+        "observed_wait_ms": 1028,
+        "provisional_lifetime_ms": 1000,
+        "stream_timeout_ms": 3000
+      },
+      "status": "pass"
+    },
+    {
+      "evidence_class": "host-process-composition",
+      "id": "fresh-process-provisional-rollback",
+      "observation": {
+        "known_good_generation": 10,
+        "next_status_counter": 16,
+        "recovered_rollback": true,
+        "restored_outer_counter": 15
+      },
+      "status": "pass"
+    },
+    {
+      "evidence_class": "host-process-composition",
+      "id": "wrong-iroh-endpoint-key",
+      "observation": "transport failed before command admission",
+      "status": "pass"
+    }
+  ],
+  "date": "2026-10-11",
+  "elapsed_ms": 3462,
+  "implementation": {
+    "architecture": "aarch64",
+    "base_revision": "18720851676f51bb21077b9a31356054463c0d44",
+    "iroh": "1.3.0",
+    "platform": "macos",
+    "sha256": {
+      "Cargo.lock": "2fa999f2037c10b1898b63d599f15b0e809fcfe94bb293824b2d389df2dd597a",
+      "Cargo.toml": "a5d38d2f0e638d24e8c1f26fc7987113563c10818a9192d202b7538e0e1687df",
+      "src/board.rs": "fb6c20ea6556df9c3d4087b45f0b8526bf34e114cc38c409e81b99ef5a3390f3",
+      "src/campaign.rs": "45a5fb993260d51d3ecb9f0383e016aeae72e008168bb32dea88b5e501e7af29",
+      "src/carrier.rs": "d40107d3f2a9933b79e0c1de4ec35aaaffa7560738fc07f410a1fadbcac297d1",
+      "src/main.rs": "bc4e259f45cd3e61063a93d77a2020696f2b065ab712121fef6202bff742fa73"
+    }
+  },
+  "limitations": [
+    "Host composition only; no MCU build, hardware reset, RF, power or unattended qualification",
+    "Quiet owner and configuration applier are simulations; no physical radio is operated",
+    "Abrupt process restart is not a mid-write power-cut campaign",
+    "Probe ALPN and stream/reset mapping are local experiments, not a published protocol",
+    "Mutation helper does not expose retained-request retry; probe uses sign_request with a retained semantic request",
+    "Known fixture keys are test data; commissioning/key custody is not implemented",
+    "No relay, address discovery, NAT traversal, bare-noq or independent endpoint interop qualification"
+  ],
+  "profile": {
+    "alpn": "retinue-probe/control/1",
+    "board_queue_capacity": 4,
+    "io_timeout_ms": 3000,
+    "journal": "two 4096-byte fsynced files; existing A/B record and durable codecs",
+    "maximum_command_bytes": 365,
+    "maximum_network_sessions": 4,
+    "maximum_response_bytes": 256,
+    "route": "IPv4 loopback; direct addresses; relay and lookup disabled",
+    "server_endpoint_id": "db995fe25169d141cab9bbba92baa01f9f2e1ece7df4cb2ac05190f37fcc1f9d"
+  },
+  "schema": "retinue-iroh-control-probe/v1",
+  "summary": {
+    "failed": 0,
+    "passed": 16
+  }
+}
