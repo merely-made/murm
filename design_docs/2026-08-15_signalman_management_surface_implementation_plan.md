@@ -17,6 +17,10 @@ closes the narrower mixed-realization receipt; it does not substitute for S2's
 headed judgement.
 S3's five-section shell, owner settings, unavailable states, and headless
 navigation receipts are verified.
+The [2026-10-11 stack and custody refresh](2026-10-11_signalman_stack_refresh_plan.md)
+closes the stale nested build gate and replaces the desktop's wallet opening
+with Djinn-issued station keys and grants. Its absent/Locked receipts and
+local-seed negative control pass; S2's headed judgement remains open.
 This opens named gates for the direction in
 [Signalman as a management surface](2026-08-15_signalman_management_surface_direction.md).
 The standing Peer, Air, Assurance, and Distribution authorities remain intact.

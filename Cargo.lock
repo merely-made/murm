@@ -1807,7 +1807,7 @@ dependencies = [
 [[package]]
 name = "mere-comms"
 version = "0.0.1"
-source = "git+https://github.com/merely-made/mere.git?rev=ab067f1ea33e43cf97428616822d740de2561459#ab067f1ea33e43cf97428616822d740de2561459"
+source = "git+https://github.com/merely-made/mere.git?rev=43cd7f24afea6b2d3b54939f2093c098da50713b#43cd7f24afea6b2d3b54939f2093c098da50713b"
 dependencies = [
  "async-trait",
  "serde",

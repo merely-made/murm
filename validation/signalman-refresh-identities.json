@@ -1,0 +1,170 @@
+{
+  "retinue": [
+    {
+      "version": "0.3.0",
+      "source": null,
+      "manifest": "C:\\Users\\mark_\\Code\\repos\\retinue\\crates\\retinue\\Cargo.toml"
+    }
+  ],
+  "postilion": [
+    {
+      "version": "0.3.0",
+      "source": null,
+      "manifest": "C:\\Users\\mark_\\Code\\repos\\retinue\\crates\\postilion\\Cargo.toml"
+    }
+  ],
+  "outrider": [
+    {
+      "version": "0.3.0",
+      "source": null,
+      "manifest": "C:\\Users\\mark_\\Code\\repos\\retinue\\crates\\outrider\\Cargo.toml"
+    }
+  ],
+  "radio-hand": [
+    {
+      "version": "0.0.1",
+      "source": null,
+      "manifest": "C:\\Users\\mark_\\Code\\repos\\retinue\\crates\\radio-hand\\Cargo.toml"
+    }
+  ],
+  "selvage": [
+    {
+      "version": "0.1.0",
+      "source": null,
+      "manifest": "C:\\Users\\mark_\\Code\\repos\\retinue\\crates\\selvage\\Cargo.toml"
+    }
+  ],
+  "seneschal": [
+    {
+      "version": "0.2.0",
+      "source": null,
+      "manifest": "C:\\Users\\mark_\\Code\\repos\\retinue\\crates\\seneschal\\Cargo.toml"
+    }
+  ],
+  "tulle": [
+    {
+      "version": "0.2.0",
+      "source": null,
+      "manifest": "C:\\Users\\mark_\\Code\\repos\\retinue\\crates\\tulle\\Cargo.toml"
+    }
+  ],
+  "personae": [
+    {
+      "version": "0.3.0",
+      "source": "git+https://github.com/merely-made/dramatis.git?rev=0234e7eea6f2ddf2330a71b9425da01b06ae0391#0234e7eea6f2ddf2330a71b9425da01b06ae0391",
+      "manifest": "C:\\Users\\mark_\\.cargo\\git\\checkouts\\dramatis-c1632f2f3bdc2597\\0234e7e\\crates\\personae\\Cargo.toml"
+    }
+  ],
+  "gaz": [
+    {
+      "version": "0.0.2",
+      "source": "git+https://github.com/merely-made/dramatis.git?rev=0234e7eea6f2ddf2330a71b9425da01b06ae0391#0234e7eea6f2ddf2330a71b9425da01b06ae0391",
+      "manifest": "C:\\Users\\mark_\\.cargo\\git\\checkouts\\dramatis-c1632f2f3bdc2597\\0234e7e\\crates\\gaz\\Cargo.toml"
+    }
+  ],
+  "insigne": [
+    {
+      "version": "0.0.2",
+      "source": "git+https://github.com/merely-made/dramatis.git?rev=0234e7eea6f2ddf2330a71b9425da01b06ae0391#0234e7eea6f2ddf2330a71b9425da01b06ae0391",
+      "manifest": "C:\\Users\\mark_\\.cargo\\git\\checkouts\\dramatis-c1632f2f3bdc2597\\0234e7e\\crates\\insigne\\Cargo.toml"
+    }
+  ],
+  "notochord": [
+    {
+      "version": "0.1.1",
+      "source": "git+https://github.com/merely-made/dramatis.git?rev=0234e7eea6f2ddf2330a71b9425da01b06ae0391#0234e7eea6f2ddf2330a71b9425da01b06ae0391",
+      "manifest": "C:\\Users\\mark_\\.cargo\\git\\checkouts\\dramatis-c1632f2f3bdc2597\\0234e7e\\crates\\notochord\\Cargo.toml"
+    }
+  ],
+  "dramatis": [
+    {
+      "version": "0.0.3",
+      "source": "git+https://github.com/merely-made/dramatis.git?rev=0234e7eea6f2ddf2330a71b9425da01b06ae0391#0234e7eea6f2ddf2330a71b9425da01b06ae0391",
+      "manifest": "C:\\Users\\mark_\\.cargo\\git\\checkouts\\dramatis-c1632f2f3bdc2597\\0234e7e\\crates\\dramatis\\Cargo.toml"
+    }
+  ],
+  "muniment": [
+    {
+      "version": "0.1.2",
+      "source": "git+https://github.com/merely-made/mere.git?rev=43cd7f24afea6b2d3b54939f2093c098da50713b#43cd7f24afea6b2d3b54939f2093c098da50713b",
+      "manifest": "C:\\Users\\mark_\\.cargo\\git\\checkouts\\mere-9d8e871c24d9ba76\\43cd7f2\\crates\\eidetic\\muniment\\Cargo.toml"
+    }
+  ],
+  "chartulary": [
+    {
+      "version": "0.2.2",
+      "source": "git+https://github.com/merely-made/mere.git?rev=43cd7f24afea6b2d3b54939f2093c098da50713b#43cd7f24afea6b2d3b54939f2093c098da50713b",
+      "manifest": "C:\\Users\\mark_\\.cargo\\git\\checkouts\\mere-9d8e871c24d9ba76\\43cd7f2\\crates\\eidetic\\chartulary\\Cargo.toml"
+    }
+  ],
+  "layout-dom-api": [
+    {
+      "version": "0.1.1",
+      "source": "git+https://github.com/merely-made/genet.git?rev=cec760f4ae6ce336823bc2be250d9ab4e35a8a47#cec760f4ae6ce336823bc2be250d9ab4e35a8a47",
+      "manifest": "C:\\Users\\mark_\\.cargo\\git\\checkouts\\genet-0bbbe1b4c8511eb3\\cec760f\\components\\shared\\layout-dom\\Cargo.toml"
+    }
+  ],
+  "netrender": [
+    {
+      "version": "0.1.2",
+      "source": "git+https://github.com/merely-made/netrender.git?rev=46606610cd387e2e6956d8a3ebbcf442eab210d9#46606610cd387e2e6956d8a3ebbcf442eab210d9",
+      "manifest": "C:\\Users\\mark_\\.cargo\\git\\checkouts\\netrender-a79f0762881dec01\\4660661\\netrender\\Cargo.toml"
+    }
+  ],
+  "netrender-vello": [
+    {
+      "version": "0.11.0",
+      "source": "git+https://github.com/mark-ik/vello?rev=5862bba26c8a9f56f6a5fdc8ea6966b360a5d63a#5862bba26c8a9f56f6a5fdc8ea6966b360a5d63a",
+      "manifest": "C:\\Users\\mark_\\.cargo\\git\\checkouts\\vello-79c0d0e9216b3668\\5862bba\\research\\vello_research\\Cargo.toml"
+    }
+  ],
+  "vello_encoding": [
+    {
+      "version": "0.11.0",
+      "source": "git+https://github.com/mark-ik/vello?rev=5862bba26c8a9f56f6a5fdc8ea6966b360a5d63a#5862bba26c8a9f56f6a5fdc8ea6966b360a5d63a",
+      "manifest": "C:\\Users\\mark_\\.cargo\\git\\checkouts\\vello-79c0d0e9216b3668\\5862bba\\research\\vello_encoding\\Cargo.toml"
+    }
+  ],
+  "vello_shaders": [
+    {
+      "version": "0.11.0",
+      "source": "git+https://github.com/mark-ik/vello?rev=5862bba26c8a9f56f6a5fdc8ea6966b360a5d63a#5862bba26c8a9f56f6a5fdc8ea6966b360a5d63a",
+      "manifest": "C:\\Users\\mark_\\.cargo\\git\\checkouts\\vello-79c0d0e9216b3668\\5862bba\\research\\vello_shaders\\Cargo.toml"
+    }
+  ],
+  "wgpu": [
+    {
+      "version": "30.0.1",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "manifest": "C:\\Users\\mark_\\.cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\wgpu-30.0.1\\Cargo.toml"
+    }
+  ],
+  "wgpu-core": [
+    {
+      "version": "30.0.1",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "manifest": "C:\\Users\\mark_\\.cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\wgpu-core-30.0.1\\Cargo.toml"
+    }
+  ],
+  "wgpu-hal": [
+    {
+      "version": "30.0.1",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "manifest": "C:\\Users\\mark_\\.cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\wgpu-hal-30.0.1\\Cargo.toml"
+    }
+  ],
+  "wgpu-types": [
+    {
+      "version": "30.0.1",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "manifest": "C:\\Users\\mark_\\.cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\wgpu-types-30.0.1\\Cargo.toml"
+    }
+  ],
+  "naga": [
+    {
+      "version": "30.0.1",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "manifest": "C:\\Users\\mark_\\.cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\naga-30.0.1\\Cargo.toml"
+    }
+  ]
+}
