@@ -232,26 +232,43 @@ fn data_packet(seq: u8) -> Packet {
     single_packet(AddressHash::from_bytes([0x44; 16]), vec![seq])
 }
 
-/// The router drains data, then announces, then path requests (`Transport.py` 70-80).
+/// The router drains data, then announces, then path requests, then burst-limited path
+/// requests, and only the last are marked ingress-limited (`Transport.py` 70-80).
 #[tokio::test]
 async fn inbound_lanes_drain_in_priority_order() {
+    let ep = Endpoint::new(PrivateIdentity::from_secret_bytes(&[0x50; 64]));
+    let (calm, bursting) = (ep.attach_interface(), ep.attach_interface());
+    bursting
+        .stats
+        .path_request_burst
+        .store(true, Ordering::Relaxed);
     let (tx, mut rx) = super::super::inbound_queue::channel();
+    tx.bind(&ep.shared);
     let (announce, _) = peer_announce(0x51, "lanes");
-    tx.try_send(1, path_request_packet(1)).unwrap();
-    tx.try_send(1, announce).unwrap();
-    tx.try_send(1, data_packet(1)).unwrap();
-    assert_eq!(rx.heights(), [1, 1, 1, 0]);
+    tx.try_send(bursting.id(), path_request_packet(2)).unwrap();
+    tx.try_send(calm.id(), path_request_packet(1)).unwrap();
+    tx.try_send(calm.id(), announce).unwrap();
+    tx.try_send(calm.id(), data_packet(1)).unwrap();
+    assert_eq!(rx.heights(), [1, 1, 1, 1]);
     let mut order = Vec::new();
-    for _ in 0..3 {
+    for _ in 0..4 {
         let inbound = rx.recv().await.unwrap();
-        order.push((inbound.packet.packet_type, inbound.packet.destination_type));
+        let pkt = &inbound.packet;
+        order.push((
+            pkt.packet_type,
+            pkt.destination_type,
+            inbound.iface,
+            inbound.ingress_limited,
+        ));
     }
+    let (calm, bursting) = (calm.id(), bursting.id());
     assert_eq!(
         order,
         [
-            (PacketType::Data, DestinationType::Single),
-            (PacketType::Announce, DestinationType::Single),
-            (PacketType::Data, DestinationType::Plain),
+            (PacketType::Data, DestinationType::Single, calm, false),
+            (PacketType::Announce, DestinationType::Single, calm, false),
+            (PacketType::Data, DestinationType::Plain, calm, false),
+            (PacketType::Data, DestinationType::Plain, bursting, true),
         ]
     );
 }
@@ -348,4 +365,25 @@ async fn interface_counters_classify_traffic() {
     assert_eq!(c.ifac_violations, 1, "a flagged frame on a plain interface");
     assert!(c.online && c.mode == InterfaceMode::Full && !c.burst_active);
     assert!(alloc::format!("{c}").contains("\"ifac_violations\":1,"));
+}
+
+/// Frame failures are classified as stock does (`Transport.py` 1764-1794): an unflagged or
+/// wrongly keyed frame is an IFAC violation; a headerless or oversized one is a protocol one.
+#[tokio::test]
+async fn frame_failures_are_classified_as_stock_does() {
+    let ep = Endpoint::new(PrivateIdentity::from_secret_bytes(&[0x55; 64]));
+    let ifac = crate::ifac::Ifac::for_stream(Some("stats"), None).unwrap();
+    let wire = ep.attach_interface_with_ifac(2048, ifac).unwrap();
+    let sink = wire.sink();
+    let other = crate::ifac::Ifac::for_stream(Some("other"), None).unwrap();
+    let plain = data_packet(1).encode();
+    for frame in [plain.clone(), other.seal(&plain).unwrap()] {
+        assert!(sink.deliver_frame(&frame).is_err());
+    }
+    for frame in [vec![0x80, 0], vec![0x80; crate::packet::MTU + 64]] {
+        assert!(sink.deliver_frame(&frame).is_err());
+    }
+    let stats = ep.interface_counters(wire.id()).unwrap();
+    assert_eq!((stats.ifac_violations, stats.protocol_violations), (2, 2));
+    assert_eq!(stats.rx_packets, 4);
 }

@@ -1,7 +1,8 @@
 //! Per-interface traffic counters (`Interface.py` 98-180, 303-336; `Reticulum.py` 1498-1660).
 //!
-//! `rx_bytes` and `tx_bytes` count deframed carrier frames with their access code, as RNS's
-//! `rxb` and `txb` do, so they compare exactly with stock's `get_interface_stats`.
+//! `rx_bytes` and `tx_bytes` count deframed carrier frames with their access code. That
+//! matches stock's `rxb`; stock's `txb` also counts the carrier's framing (`TCPInterface.py`
+//! 320-329), so retinue's `tx_bytes` equals the peer's `rxb`, not its own `txb`.
 
 use core::fmt;
 
@@ -20,10 +21,11 @@ use super::runtime::Endpoint;
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 #[non_exhaustive]
 pub struct InterfaceCounters {
-    /// Received frames and their bytes, access code included (`rxb`).
+    /// Received deframed frames and their bytes, access code included (`rxb`).
     pub rx_bytes: u64,
     pub rx_packets: u64,
-    /// Transmitted frames and their bytes, access code included (`txb`).
+    /// Transmitted frames and their bytes, access code included but framing not, unlike
+    /// stock's `txb`: this equals the receiving peer's `rxb`.
     pub tx_bytes: u64,
     pub tx_packets: u64,
     /// Received announces and their bytes, without the access code (`arxc`, `arxb`).
@@ -86,9 +88,25 @@ impl fmt::Display for InterfaceCounters {
         }
         write!(
             f,
-            "\"burst_active\":{},\"path_request_burst\":{},\"online\":{},\"mode\":\"{:?}\"}}",
-            self.burst_active, self.path_request_burst, self.online, self.mode
+            "\"burst_active\":{},\"path_request_burst\":{},\"online\":{},\"mode\":\"{}\"}}",
+            self.burst_active,
+            self.path_request_burst,
+            self.online,
+            mode_name(self.mode)
         )
+    }
+}
+
+/// RNS's configuration name for `mode` (`Reticulum.py` 845-880), a fixed JSON-safe token.
+fn mode_name(mode: InterfaceMode) -> &'static str {
+    match mode {
+        InterfaceMode::Full => "full",
+        InterfaceMode::PointToPoint => "pointtopoint",
+        InterfaceMode::AccessPoint => "accesspoint",
+        InterfaceMode::Roaming => "roaming",
+        InterfaceMode::Boundary => "boundary",
+        InterfaceMode::Gateway => "gateway",
+        InterfaceMode::Internal => "internal",
     }
 }
 
