@@ -309,7 +309,7 @@ provisioning and physical acceptance. Total decoder peak allocation remains unme
 | Document | What it is |
 | --- | --- |
 | [Retinue Small plan](2026-07-31_retinue_small_plan.md) | Native-node authority. N0–N6; unplug leg and current figures open. |
-| [Wall-node management plan](2026-08-30_wall_node_management_plan.md) | WN0–WN8 authority for standalone V4, management, safe configuration and adapter control; October 10 proposes an iroh carrier over existing signed commands, with separate host/device evidence. |
+| [Wall-node management plan](2026-08-30_wall_node_management_plan.md) | WN0–WN8 authority for standalone V4, management, safe configuration and adapter control; October 11 iroh host probe passes 16 scenarios over existing signed commands. Device integration and physical gates remain separate. |
 | [Magnetic pocket-node plan](2026-09-07_magnetic_pocket_node_plan.md) | PN0–PN8. Autonomous NFC-only and optional-Bluetooth nodes, LC0/AT0 attachment, durable custody, M4/iPhone probe, receiver-only charging, RF mechanics, and conditional phone-charging bridge. |
 | [Hardware-family plan](2026-09-07_radio_hand_hardware_family_plan.md) | HW0–HW8 platform/product qualification; October 10 source assessment separates host composition, full iroh, LAN-direct noq and bounded radio-device profiles. All HW gates remain open. |
 | [On-device UI plan](2026-07-28_on_device_ui_implementation_plan.md) | U0–U5, all closed. |

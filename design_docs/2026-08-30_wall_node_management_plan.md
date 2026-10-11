@@ -396,8 +396,12 @@ can actually own; it does not embed an operating system inside the V4.
 
 ## Proposed iroh management carrier (2026-10-10)
 
-**Status:** proposed experiment; every existing WN gate retains its stated
-status. The [hardware-family assessment](2026-09-07_radio_hand_hardware_family_plan.md#embedded-transport-profiles-2026-10-10)
+**Status (2026-10-11):** host probe implemented and locally measured: 16
+scenarios pass in [the isolated harness](../testing/iroh-control/README.md),
+with [a source-fingerprinted receipt](../testing/iroh-control/results/host-20261011.json).
+Device integration remains open; every existing WN gate retains its stated
+status. The
+[hardware-family assessment](2026-09-07_radio_hand_hardware_family_plan.md#embedded-transport-profiles-2026-10-10)
 owns the full-iroh/bare-noq/device-profile comparison.
 
 `crates/postilion/src/control/verified/client.rs::ControlExchange` already
@@ -419,6 +423,13 @@ session without an additional board proof.
    model. Carry signed Status, ProvisionalApply, Commit, and Revert; exercise
    wrong keys/targets, replay, lost response, reconnect, expiry, and restart.
    A retry has a fresh outer counter and the same semantic transaction.
+   The isolated host harness uses one bounded bidirectional QUIC stream per
+   exchange, exact signed command bytes and the existing WN0 response codec,
+   direct loopback addresses with relay/lookup disabled, and a fresh server
+   process over fsynced A/B journal files. Its configuration applier and quiet
+   owner are explicit simulations. A board-owned deadline loop must continue
+   while a client disconnects or leaves a stream unfinished. No production
+   carrier dependency, ALPN standard, or board support is established by it.
 2. **Device integration:** select one full-iroh or LAN-direct-noq profile,
    implement the real control listener and board runtime boundary, then run
    the same exchanges through a physical target with preserved settings and
@@ -432,6 +443,31 @@ coexistence with RF, and power behavior. Disconnect cannot cancel an armed
 rollback or transfer radio ownership to Signalman. A host pass is not a
 physical or unattended-operation receipt. Secret-bearing operations wait for
 the existing confidential-carrier and sealed-storage requirements.
+
+**Host findings:** the unchanged public Postilion client performs Status,
+ProvisionalApply, Commit and Revert through real iroh endpoints. The fsynced
+A/B journal preserves committed state and outer counters in fresh processes;
+boot rolls back an armed candidate. A one-second provisional lifetime expires
+while a client stream remains unfinished, before the three-second I/O timeout.
+The quiet owner and configuration applier are simulations, and process kills
+occur between completed journal operations rather than during flash writes.
+
+The strict oversized-input case exposed a harness lifetime error: queuing a
+stream reset and immediately dropping the connection made the peer observe a
+generic connection close. The corrected path retains the connection until
+peer closure or the existing deadline. Oversize and deliberate lost-response
+cases now require their specific reset codes, rather than accepting any
+transport failure as evidence.
+
+High-level mutation helpers mint a new transaction at every call. The probe
+retains a semantic `Request` and uses `postilion::control::sign_request` with a
+fresh counter to recover a lost provisional response without a second apply.
+Expose a prepared-request/retry seam if this becomes a production carrier;
+keep its transaction/counter custody with the controller. Conflicting reuse
+while armed is `TransactionConflict`; old mutation reuse after cached-result
+replacement is `TransactionExpired`. The initial probe expected a conflict
+after completion; source inspection corrected that expectation without changing
+the durable engine. No second control or replication engine is needed here.
 
 ## Phases and gates
 
@@ -921,6 +957,12 @@ successful announce, or two-party exchange does not satisfy either half.
 
 ## Findings
 
+- **2026-10-11:** `testing/iroh-control/src/carrier.rs` implements the host
+  `ControlExchange` experiment; `board.rs` uses the actual durable runtime and
+  codecs with simulated physical adapters. All 16 process/transport scenarios
+  pass. Network reads do not own rollback scheduling, and retry preserves the
+  existing semantic request. The standalone graph locks iroh/noq 1.3.0 and
+  Tokio 1.53.2; production dependencies and physical gate status are unchanged.
 - **2026-10-10:** the carrier-neutral Postilion client and radio-free Seneschal
   grammar provide the insertion point for an iroh management probe. No iroh
   board listener or combined WiFi/LoRa firmware was implemented in this pass.
@@ -1478,3 +1520,7 @@ successful announce, or two-party exchange does not satisfy either half.
   on three pre-existing `large_enum_variant` sites in `commissioning.rs` and
   `portable_first_write.rs` and one `needless_range_loop` in
   `position_disclosure.rs`, none touched here. WN1 remains Partial.
+- **2026-10-11:** implemented and ran the isolated iroh host-control probe;
+  retained source/lock fingerprints and dependency graph. The campaign,
+  integration test, Clippy with denied warnings, formatting, and whitespace
+  checks passed. Device/RF/power/commissioning work remains open.

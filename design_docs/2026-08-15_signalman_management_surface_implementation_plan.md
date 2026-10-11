@@ -139,6 +139,12 @@ can take different subsets without requiring the desktop renderer or a second
 replication engine. These proposed probes do not close S2's headed judgement
 or any other S/WN/HW gate.
 
+**2026-10-11:** the management host probe now
+[passes 16 process/transport scenarios](../testing/iroh-control/results/host-20261011.json)
+through unchanged Postilion and durable board control. Its retained-request
+retry finding is recorded in the owning wall-node plan. This is a carrier
+experiment; no Signalman application adoption or headed judgement is implied.
+
 ## Source model
 
 ### Retinue facts

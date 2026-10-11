@@ -4,7 +4,7 @@
 products are ruled below. The embedded transport assessment now distinguishes
 full iroh, LAN-direct QUIC, and the existing radio runtime; management and
 canonical-operation probes are scoped in their owning plans. HW0 through HW8
-remain open. No new board or runtime qualification was performed.
+remain open. No board or MCU runtime qualification was performed.
 
 ## Purpose
 
@@ -230,6 +230,13 @@ and [native canonical-operation probe](2026-08-25_compact_signed_feed_and_local_
 They can begin with host controls independently of HW1/HW2; a physical result
 earns only the capability actually measured and does not close an appliance or
 hardware-family gate by inference.
+
+**2026-10-11 continuation:** the management host control now has an
+[executed receipt](../testing/iroh-control/results/host-20261011.json), with
+fresh server processes, durable signed-command state, semantic retry and
+autonomous rollback. Its physical adapters are simulations. The full device
+profile, bare-noq interop, RF coexistence and power budget remain open; the
+owning wall-node plan records the implementation and client retry seam.
 
 ## Product opportunities, in priority order
 
@@ -572,6 +579,9 @@ it.
 
 ## Findings
 
+- **2026-10-11:** the isolated iroh management host experiment passes 16
+  scenarios using unchanged control owners. This establishes carrier
+  composition and host-file persistence, not MCU execution or hardware support.
 - **2026-10-10, source embedding assessment:** the protocol, management, and
   board-service feature boundaries above were inspected at the named revisions.
   Upstream iroh demonstrates small IP endpoints, not combined Retinue radio
@@ -640,3 +650,5 @@ it.
 - **2026-10-10:** refreshed the embedding/reuse assessment and linked the two
   proposed probes to their existing owners. Documentation-only; no dependency
   repin, firmware change, board installation, or gate closure.
+- **2026-10-11:** linked the executed management host receipt and retained the
+  distinction from physical/device evidence. All HW gates remain open.
