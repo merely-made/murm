@@ -10,7 +10,8 @@ tx_packets equals the frames stock's TCP interface took in, its rx_bytes and rx_
 the frames and IFAC-sealed bytes stock handed its TCP interface to send, and its
 ifac_violations is 0; and Retinue's ifac_violations on the second link equals the frames the
 wrong-key node sent. Stock's `txb` counts HDLC flags and escapes (`TCPInterface.py` 320-327),
-so the rx side is compared with a tap of the bytes stock sealed, before framing.
+so the rx side is compared with a tap of the bytes stock sealed, before framing, and stock's
+own `txb` is pinned as those bytes plus each frame's two flags and escapes.
 
 Build: cargo build -p retinue --example interface_stats_peer
 Run:   python -u interop_interface_stats.py   (CARGO_TARGET_DIR as for the build)
@@ -82,7 +83,7 @@ def node_main(config_dir: str) -> None:
     import RNS
     from RNS.Interfaces.TCPInterface import TCPClientInterface
 
-    taps = {"frames_in": 0, "frames_out": 0, "sealed_out": 0}
+    taps = {"frames_in": 0, "frames_out": 0, "sealed_out": 0, "framing_out": 0}
     incoming, outgoing = TCPClientInterface.process_incoming, TCPClientInterface.process_outgoing
 
     def tap_in(self, data):  # counted under process_incoming's own conditions
@@ -94,6 +95,7 @@ def node_main(config_dir: str) -> None:
         if self.online and not self.detached:
             taps["frames_out"] += 1
             taps["sealed_out"] += len(data)
+            taps["framing_out"] += 2 + data.count(0x7E) + data.count(0x7D)  # HDLC flags, escapes
         return outgoing(self, data)
 
     TCPClientInterface.process_incoming, TCPClientInterface.process_outgoing = tap_in, tap_out
@@ -168,6 +170,9 @@ def main() -> int:
                   f"{ours['tx_packets']} vs {stock['frames_in']}")
     ok &= verdict("Retinue rx_bytes equals stock sealed bytes out",
                   ours["rx_bytes"] == stock["sealed_out"] > 0, f"{ours['rx_bytes']} vs {stock['sealed_out']}")
+    ok &= verdict("stock txb equals Retinue rx_bytes plus HDLC framing",
+                  stock["txb"] == ours["rx_bytes"] + stock["framing_out"],
+                  f"{stock['txb']} vs {ours['rx_bytes']} + {stock['framing_out']}")
     ok &= verdict("Retinue rx_packets equals stock frames out", ours["rx_packets"] == stock["frames_out"] > 0,
                   f"{ours['rx_packets']} vs {stock['frames_out']}")
     ok &= verdict("no IFAC violations on the honest link", ours["ifac_violations"] == 0 == stock["ifac_violations"])

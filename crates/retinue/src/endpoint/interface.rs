@@ -147,8 +147,9 @@ impl InterfaceSink {
 }
 
 /// Count one received carrier frame, strip its access code and decode it, as every carrier's
-/// ingress does. `frame_limit` includes the access code. A frame that fails is counted as an
-/// IFAC or protocol violation (`Transport.py` 1272-1322, 1790-1791).
+/// ingress does. `frame_limit` includes the access code. A frame that fails is counted as RNS
+/// classifies it (`Transport.py` 1764-1794): too short for a header, oversized or undecodable
+/// is a protocol violation; a missing, wrong or forged access code is an IFAC violation.
 pub(super) fn open_frame(
     frame: &[u8],
     ifac: Option<&Ifac>,
@@ -156,13 +157,18 @@ pub(super) fn open_frame(
     stats: &InterfaceStats,
 ) -> crate::Result<Packet> {
     stats.note_rx(frame.len());
+    if frame.len() <= 2 {
+        stats.note_protocol_violation();
+        return Err(crate::Error::Truncated);
+    }
     let overhead = ifac.map_or(0, Ifac::size);
     let opened;
     let logical = match ifac {
         Some(ifac) => {
-            opened = ifac
-                .open(frame)
-                .inspect_err(|_| stats.note_ifac_violation())?;
+            opened = ifac.open(frame).inspect_err(|err| match err {
+                crate::Error::Oversize => stats.note_protocol_violation(),
+                _ => stats.note_ifac_violation(),
+            })?;
             &opened[..]
         }
         None => frame,
