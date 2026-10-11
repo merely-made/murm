@@ -9,6 +9,10 @@ side; the local process campaign executes both implementations. Broader RFC
 TC3 now has an exploratory retained-repair scheduler and four design experiments
 using actual coding/authentication, described in the
 [prototype profile](2026-10-11_retained_repair_simulation_profile.md).
+TC4's bounded host prototype now passes one recovered signed V2 mesh job record
+to Mere's existing admission owner, preserving original bytes and identity.
+It observes insertion, duplicate arrival and three invalid-inner-record refusals;
+live carriers and wider restart/qualification work remain open.
 Publication uses direct commits and pushes to `main`; validation runs
 locally. GitHub Actions and PRs are not part of this project's requested flow.
 
@@ -131,7 +135,7 @@ eventual delivery without conditions.
 | TC1 | Independent RFC 6330 codec qualification | Selected OpenRQ `Al=1, N=1` campaign is implemented; exact symbol and bidirectional decode cases cover K-prime transitions, uneven two-block partition, padding and repair-only recovery. Pinned tooling and fixtures make those cases reproducible. Broader alignment, sub-block, ESI and resource coverage remains open before wider claims. |
 | TC2 | Portable corpus/adapters and existing carriers | External-process capability/byte/event contract; register existing stock-RNS oracle gates and a real QUIC independent-peer campaign. Optional features remain explicit. Result schemas and requirement traceability work across at least two implementation lineages; vector imports retain licenses. |
 | TC3 | Retained-repair prototype, implemented | Authored schedule and signed manifest/symbol arrays; actual codec; one-/multi-radio collection, loss/reorder/duplicates, sleep/drift/guards, late join, repair rotation, expiry and partial-state resume. Four selected experiments expose catch-up, floor cost and overload behavior. The profile and inputs may change; stable-contract evaluation is later work. |
-| TC4 | Signed-object receive composition | Recovered original bytes/IDs enter the existing operation processor. Tampered headers/bodies, unauthorized objects and expired transfers cause the declared refusal; refusal causes zero store mutation. Two-carrier duplicates admit once. Fresh-process restart preserves progress and ownership semantics. |
+| TC4 | Signed-object receive prototype, implemented; wider evaluation open | The selected host example passes actual recovered original bytes/IDs to the existing mesh admission owner, observing insertion, duplicate arrival, wrong-mesh/body/signature refusals and in-process store reopen. Later evaluation covers expired transfers, actual two-carrier duplicates and fresh-process recovery after the contracts stabilize. |
 | TC5 | Device resource profile | Selected codec/profile compiles for the actual target; measured peak heap/stack, decode time, retained storage and interrupt/radio coexistence fit named limits. no_std availability alone does not close this gate. |
 | TC6 | Physical multi-radio qualification | Named boards, firmware hashes, radios, antennas, channels and instruments; actual payload goodput, range, adjacent-channel isolation, retune/clock cost, collision behavior, power and source/repair airtime. Regulatory band/duty/power conditions are explicit. 1–2 Mbps remains a target until this campaign measures it at the intended range. |
 | TC7 | Optional full protocol adapters | Select real peers/use cases first. Each FLUTE/ALC, NORM, BPv7/BPSec, SCHC/LoRaWAN, CoAP/OSCORE or MLS branch gets its dependency closure, selected options, independent peer and its own conformance matrix. Their spec counts are not a mandate to implement them all. |
@@ -244,6 +248,25 @@ uses isolated branches from those fetched refs.
   matched pending-delivery resume, without a retained receipt. These observations
   guide the prototype and do not close conformance, admission, MCU or RF gates.
   The report fingerprints the compiled source/config and names its dirty base
-  revision honestly. The next bounded prototype passes one recovered original
-  signed object through the existing operation processor; broader qualification
-  waits for a stable shape.
+  revision honestly. The owner-local continuation below now passes one recovered
+  original signed object through the existing operation processor; broader
+  qualification waits for a stable shape.
+- **2026-10-11, signed-object receive prototype:** added bounded external
+  originals to the isolated simulator and return the actual decoder bytes after
+  manifest length/digest verification. Retinue leaves the application record
+  opaque. `mere/crates/mesh/mesh/examples/retained_receive/README.md` and
+  `mere/crates/mesh/mesh/examples/retained_receive/receive-exploration-20261011.json`
+  own the selected experiment and its source/executable identity. A current
+  1,015-byte CBOR operation record (eight source symbols) reconstructs at slot 2
+  for four radios and slot 16 for one radio joining at slot 6. The same original
+  header/body and operation ID enter `MeshStore::accept_outcome` with the
+  receiver's independently chosen mesh: the first arrival inserts one posted
+  job, the second is a duplicate. Correctly delivered wrong-mesh, altered-body
+  and altered-signature records are refused without changing the store or board.
+  In-process redb close/reopen preserves the accepted bytes and effect. Six
+  small suite tests and strict scoped Clippy passed; the existing external
+  smoke also covers saved recovered bytes after decoder-state expiry. This is
+  real host admission with modeled collection, not live carrier, worker/blob,
+  fresh-process restart, MCU or RF qualification. Next compose a bounded real
+  carrier handoff with this existing owner; expand evaluation once that shape
+  stabilizes.

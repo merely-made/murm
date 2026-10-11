@@ -187,7 +187,7 @@ impl Receiver {
                 generation,
                 manifest_hash,
                 packet,
-            }) => self.symbol(slot, bytes, generation, manifest_hash, &packet),
+            }) => self.symbol(slot, bytes, generation, manifest_hash, &packet, scenario),
         }
     }
 
@@ -247,6 +247,7 @@ impl Receiver {
         generation: u64,
         hash: [u8; 32],
         packet_bytes: &[u8],
+        scenario: &Scenario,
     ) -> Result<u8, String> {
         let Some(state) = self.active.get_mut(&generation) else {
             if self
@@ -322,6 +323,13 @@ impl Receiver {
             }
             report.completion_slot = Some(slot);
             report.reconstructed_blake3 = Some(hex::encode(state.manifest.digest));
+            if scenario
+                .generations
+                .iter()
+                .any(|g| g.id == generation && g.original_hex.is_some())
+            {
+                report.recovered_object_hex = Some(hex::encode(object));
+            }
             state.completed = true;
             state.decoder = None;
             return Ok(13);
@@ -374,6 +382,46 @@ impl Receiver {
                 && saved.report.decoder_allocations <= saved.report.decode_work,
             "checkpoint receiver work/accounting bounds",
         )?;
+        // Completed generations can outlive collected packet state after expiry.
+        // Validate their returned bytes too, before rebuilding any active decoder.
+        for (report, spec) in saved.report.generations.iter().zip(&scenario.generations) {
+            require(
+                report.id == spec.id && report.object_octets == spec.object_octets,
+                "checkpoint generation report identity/length",
+            )?;
+            if let Some(recovered) = &report.recovered_object_hex {
+                let original = spec
+                    .original_hex
+                    .as_ref()
+                    .ok_or("checkpoint returned bytes for authored generation")?;
+                let completion = report
+                    .completion_slot
+                    .ok_or("checkpoint returned bytes without successful completion")?;
+                require(
+                    recovered.len() == spec.object_octets as usize * 2
+                        && report.manifest_seen
+                        && completion >= spec.publish_slot
+                        && completion < spec.expires_slot
+                        && completion < next_slot,
+                    "checkpoint recovered-object length/completion context",
+                )?;
+                let recovered = hex::decode(recovered)
+                    .map_err(|_| "checkpoint returned bytes contain invalid hex")?;
+                let original = hex::decode(original)
+                    .map_err(|_| "checkpoint external original contains invalid hex")?;
+                require(
+                    recovered == original
+                        && report.reconstructed_blake3.as_deref()
+                            == Some(blake3::hash(&recovered).to_hex().as_str()),
+                    "checkpoint returned bytes differ from original or completion digest",
+                )?;
+            } else {
+                require(
+                    spec.original_hex.is_none() || report.completion_slot.is_none(),
+                    "checkpoint completed external generation omits recovered bytes",
+                )?;
+            }
+        }
         let mut manifests = Vec::new();
         let mut generations = BTreeSet::new();
         let mut packets = 0usize;
@@ -458,6 +506,7 @@ impl Receiver {
             };
             let mut completion = None;
             let mut digest = None;
+            let mut recovered = None;
             for collected in &state.packets {
                 let bytes = hex::decode(&collected.wire_hex).map_err(|e| e.to_string())?;
                 let AuthenticatedFrame::Symbol { packet, .. } =
@@ -482,6 +531,13 @@ impl Receiver {
                     )?;
                     completion = Some(collected.slot);
                     digest = Some(hex::encode(manifest.digest));
+                    if scenario
+                        .generations
+                        .iter()
+                        .any(|g| g.id == manifest.generation && g.original_hex.is_some())
+                    {
+                        recovered = Some(hex::encode(object));
+                    }
                 }
             }
             let report = saved
@@ -493,7 +549,8 @@ impl Receiver {
             require(
                 report.unique_symbols as usize == state.packets.len()
                     && report.completion_slot == completion
-                    && report.reconstructed_blake3 == digest,
+                    && report.reconstructed_blake3 == digest
+                    && report.recovered_object_hex == recovered,
                 "checkpoint replay differs from recorded terminal state",
             )?;
             let completed = completion.is_some();

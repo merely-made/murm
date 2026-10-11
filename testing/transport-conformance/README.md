@@ -48,6 +48,13 @@ The [scenario guide](scenarios/README.md) explains the knobs and bounded JSON
 records the authored schedule and exact narrow CBOR arrays; its field schema is
 [retained-repair-v1.cddl](scenarios/retained-repair-v1.cddl).
 
+The bounded peer can also carry externally supplied original bytes using
+`generation.original_hex`, and return exact digest-checked decoder output in
+`recovered_object_hex`. The
+[scenario guide](scenarios/README.md) records the input/output bounds. The
+Mere-owned `retained_receive` example passes those opaque bytes through its
+existing operation-record decoder and production MeshStore admission path.
+
 The selected [2026-10-11 exploration report](results/retained-repair-exploration-20261011.json)
 is a historical design observation with compiled source/config fingerprints.
 Use small local checks and experiments while changing this shape; postpone

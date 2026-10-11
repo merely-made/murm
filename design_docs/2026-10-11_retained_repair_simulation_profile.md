@@ -36,7 +36,51 @@ validation remains a separate qualification slice.
 
 All successful reconstruction metrics mean decoded original bytes whose hash
 matches the manifest. They do not mean domain authorization or store admission.
-The existing operation processor remains the eventual admission owner.
+The existing operation processor remains the admission owner; the host example
+below now exercises that boundary.
+
+## Opaque original-byte handoff
+
+An optional `generation.original_hex` lets the owning application supply actual
+original bytes instead of the deterministic synthetic fixture. The decoded hex
+must match `object_octets` and remains bounded to 64 KiB including its wrapper.
+After actual codec reconstruction, length and signed-manifest digest checks,
+the receiver report exposes those exact bytes as `recovered_object_hex`.
+Both fields are omitted for the existing synthetic experiments. Potential
+returned external bytes across all receivers are capped at 256 KiB raw;
+the JSON process request/response still has its 4 MiB ceiling. Peer responses
+also identify their compiled implementation and dependency/source fingerprints.
+
+Retinue leaves these bytes opaque. The Mere-owned `retained_receive` example
+uses an existing CBOR-encoded Stickleback `DropRecord::Operation`, carrying
+the original signed p2panda header and inline body. Mere freshly decodes the
+recovered record/header and sends the operation to
+`MeshStore::accept_outcome(expected_mesh, operation)`, which invokes the current
+mesh policy and Stickleback operation processor before storage mutation.
+The receiver supplies its expected mesh independently of the carried object.
+It does not use the operation's own addressed mesh as an admission decision.
+
+The p2panda operation ID hashes signed header bytes. The retained-object digest
+hashes the whole encoded record; manifest hashes and generation IDs identify
+other parts of delivery. Preserve each identity for its own purpose. Compare
+exact record, header and body bytes when observing preservation, because typed
+operation equality compares only operation IDs. A valid outer envelope can
+carry an invalid inner operation, so header authentication, payload commitments
+and domain policy remain checks performed at their existing owners.
+
+The selected Mere experiment records a 1,015-byte V2 mesh job operation record
+with eight source symbols. Four modeled radios recover it at slot 2; one radio
+joining at slot 6 recovers it at slot 16. The two arrivals preserve exact record,
+header and body bytes and the operation ID. The existing owner inserts one
+operation/job and reports the later arrival as a duplicate. Three separately
+delivered records with a wrong mesh, changed body or changed signature are
+refused without changing that durable effect. Closing and reopening the redb
+store in process preserves the bytes and posted job. The source-bound report
+and reproduction guide live once at
+`mere/crates/mesh/mesh/examples/retained_receive/receive-exploration-20261011.json`
+and `mere/crates/mesh/mesh/examples/retained_receive/README.md`. This does not
+transfer job blobs or execute a worker, and it uses modeled lanes rather than
+a live carrier.
 
 ## Time, capacity and retention
 
@@ -138,9 +182,10 @@ checked-in inputs, not an invariant every future scheduler must preserve:
 
 The early shape is a shared retained-object sender with priority and repair
 policy, explicit receiver opportunities, and authenticated generation envelopes.
-The next useful prototype is a small owner-local receive adapter that passes
-one recovered signed object to the existing operation processor. That will
-expose the delivery/admission seam before expanding carriers or qualification.
+The owner-local receive example now demonstrates one recovered signed object
+entering the existing operation processor. The next useful slice connects a
+bounded real carrier to that opaque-byte handoff and independently chosen
+admission scope, before wider qualification.
 
 Run and record the campaign locally. GitHub Actions is disabled in Mere and
 Retinue by owner request; this work uses direct commits and pushes to `main`,
