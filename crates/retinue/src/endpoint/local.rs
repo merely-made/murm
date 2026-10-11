@@ -6,8 +6,8 @@ use alloc::vec::Vec;
 
 use std::collections::HashSet;
 use std::io;
-use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::{Arc, Mutex};
+use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
+use std::sync::{Arc, RwLock};
 use std::time::Duration;
 
 use tokio::net::TcpStream;
@@ -78,12 +78,26 @@ impl Default for SharedInstance {
 /// Shared-instance state: which interfaces lead to one.
 #[derive(Debug, Default)]
 pub(super) struct LocalState {
-    ifaces: Mutex<HashSet<InterfaceId>>,
+    /// `ifaces.len()`, so ingress on an endpoint without one takes no lock.
+    count: AtomicUsize,
+    ifaces: RwLock<HashSet<InterfaceId>>,
 }
 
 impl LocalState {
     fn contains(&self, id: InterfaceId) -> bool {
-        self.ifaces.lock().unwrap().contains(&id)
+        self.count.load(Ordering::Acquire) > 0 && self.ifaces.read().unwrap().contains(&id)
+    }
+
+    fn insert(&self, id: InterfaceId) {
+        let mut ifaces = self.ifaces.write().unwrap();
+        ifaces.insert(id);
+        self.count.store(ifaces.len(), Ordering::Release);
+    }
+
+    fn remove(&self, id: InterfaceId) {
+        let mut ifaces = self.ifaces.write().unwrap();
+        ifaces.remove(&id);
+        self.count.store(ifaces.len(), Ordering::Release);
     }
 }
 
@@ -181,9 +195,9 @@ async fn connect(instance: &SharedInstance) -> io::Result<LocalStream> {
     let attempt = async {
         #[cfg(any(target_os = "linux", target_os = "android"))]
         match instance.kind {
-            SharedInstanceKind::Unix => return connect_abstract(&instance.instance_name),
+            SharedInstanceKind::Unix => return connect_abstract(&instance.instance_name).await,
             SharedInstanceKind::Auto => {
-                if let Ok(stream) = connect_abstract(&instance.instance_name) {
+                if let Ok(stream) = connect_abstract(&instance.instance_name).await {
                     return Ok(stream);
                 }
             }
@@ -202,9 +216,10 @@ async fn connect(instance: &SharedInstance) -> io::Result<LocalStream> {
         .map_err(|_| io::Error::from(io::ErrorKind::TimedOut))?
 }
 
-/// Connect to the abstract socket `\0rns/<name>` (`LocalInterface.py` 68, 135-137).
+/// Connect to the abstract socket `\0rns/<name>` (`LocalInterface.py` 68, 135-137). std's
+/// connect blocks while the listener's backlog is full, so it runs off the runtime.
 #[cfg(any(target_os = "linux", target_os = "android"))]
-fn connect_abstract(name: &str) -> io::Result<LocalStream> {
+async fn connect_abstract(name: &str) -> io::Result<LocalStream> {
     #[cfg(target_os = "android")]
     use std::os::android::net::SocketAddrExt;
     #[cfg(target_os = "linux")]
@@ -212,7 +227,9 @@ fn connect_abstract(name: &str) -> io::Result<LocalStream> {
     use std::os::unix::net::{SocketAddr, UnixStream};
 
     let addr = SocketAddr::from_abstract_name(alloc::format!("rns/{name}"))?;
-    let stream = UnixStream::connect_addr(&addr)?;
+    let stream = tokio::task::spawn_blocking(move || UnixStream::connect_addr(&addr))
+        .await
+        .map_err(io::Error::other)??;
     stream.set_nonblocking(true)?;
     tokio::net::UnixStream::from_std(stream).map(LocalStream::Unix)
 }
@@ -274,7 +291,7 @@ impl Endpoint {
             return Err(endpoint_closed());
         }
         let (id, online, mut outbound) = (attached.id, attached.online, attached.outbound);
-        self.shared.local.ifaces.lock().unwrap().insert(id);
+        self.shared.local.insert(id);
         // A local interface is never ingress-limited (`LocalInterface.py` 130).
         let exempt = AnnounceIngressPolicy {
             enabled: false,
@@ -305,9 +322,10 @@ impl Endpoint {
                     });
                 }
             }
-            shared.local.ifaces.lock().unwrap().remove(&id);
+            shared.local.remove(id);
         });
         if !started {
+            self.shared.local.remove(id);
             self.shared.forget_interface(id);
             return Err(endpoint_closed());
         }
@@ -335,7 +353,7 @@ mod tests {
         let ep = Endpoint::new(PrivateIdentity::from_secret_bytes(&[3; 64]));
         let plain = ep.attach_interface().id();
         let local = ep.attach_interface().id();
-        ep.shared.local.ifaces.lock().unwrap().insert(local);
+        ep.shared.local.insert(local);
         let ingress = |iface, hops| {
             ep.shared
                 .local_ingress(iface, relayed(PacketType::Data, hops))
@@ -352,7 +370,7 @@ mod tests {
     async fn routes_through_the_instance_are_addressed_as_a_stock_client_does() {
         let ep = Endpoint::new(PrivateIdentity::from_secret_bytes(&[4; 64]));
         let local = ep.attach_interface().id();
-        ep.shared.local.ifaces.lock().unwrap().insert(local);
+        ep.shared.local.insert(local);
         let beyond = ep
             .shared
             .local_ingress(local, relayed(PacketType::Announce, 1));

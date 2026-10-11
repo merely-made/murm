@@ -8,7 +8,9 @@ Topology, all on loopback TCP with free ports (the user's rnsd is untouched):
 Passes on stock state only:
   (a) hop transparency: retinue's hops to P2's destination D equal P3's RNS.Transport.hops_to;
       to T's destination, retinue's wire hops plus one equal P2's and P3's hops_to (retinue
-      keeps wire hops, one fewer than RNS's; Transport.py 1936-1939).
+      keeps wire hops, one fewer than RNS's; Transport.py 1936-1939). D's 0 also follows from
+      saturation, so retinue's route to D must name no transport node and its route to T
+      must name P1's.
   (b) a link from retinue to D goes ACTIVE in P2, and P2 proves a packet on it.
   (c) after P1 is killed and restarted, P2 regains has_path(retinue's destination) within
       30 s with no announce from retinue: its path response 10 s after reconnecting
@@ -191,9 +193,12 @@ def main() -> int:
     p2.call("announce")
     t.call("announce")
 
+    def route_via(dest):
+        m = ask(retinue, f"route {dest}", rf"ROUTE {dest} (\d+|none)(?: (\d+) (\S+))?")
+        return (None, None) if not m or m.group(1) == "none" else (int(m.group(2)), m.group(3))
+
     def route(dest):
-        m = ask(retinue, f"route {dest}", rf"ROUTE {dest} (\d+|none)(?: (\d+))?")
-        return None if not m or m.group(1) == "none" else int(m.group(2))
+        return route_via(dest)[0]
 
     wait_until(lambda: route(d) is not None and route(td) is not None, 20, 0.5)
     wait_until(lambda: p3.call("has_path", dest=d) and p2.call("has_path", dest=td), 20, 0.5)
@@ -203,6 +208,11 @@ def main() -> int:
                   f"retinue {r_d}, P3 {s_d}")
     ok &= verdict("(a) hops to the third party match P2's and P3's hops_to", r_t is not None
                   and r_t + 1 == s_t2 == s_t3, f"retinue wire {r_t}, P2 {s_t2}, P3 {s_t3}")
+    # Saturation makes D read 0 either way, so check the hop-0 versus one-past distinction on
+    # retinue's own route: D is reached directly, T through P1 (Transport.py 1416-1437).
+    via_d, via_t = route_via(d)[1], route_via(td)[1]
+    ok &= verdict("(a) D's route names no transport node, T's names P1", via_d == "-"
+                  and via_t == p1.transport_id, f"D via {via_d}, T via {via_t}, P1 {p1.transport_id}")
 
     linked = ask(retinue, f"link {d}", r"(LINKED|LINK_FAILED) ?(.*)", 20)
     active = wait_until(lambda: any(p2.call("links")), 10, 0.3)
