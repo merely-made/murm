@@ -115,6 +115,25 @@ consumer is required before extraction into a package. Graphshell/Turnstone is
 that candidate. When it arrives, extract the module and delete the app-local
 implementation in the same gate.
 
+### Reuse and embedded execution (2026-10-10)
+
+Signalman's next transport work composes existing capabilities: Postilion's
+station/control clients, Seneschal's durable management, Linkboy's package
+execution, Mere's custody/admission/storage, and shared presentation. The
+[hardware-family assessment](2026-09-07_radio_hand_hardware_family_plan.md#embedded-transport-profiles-2026-10-10)
+distinguishes host-library composition from MCU execution. The
+[iroh management probe](2026-08-30_wall_node_management_plan.md#proposed-iroh-management-carrier-2026-10-10)
+and [canonical-operation probe](2026-08-25_compact_signed_feed_and_local_control_plan.md#mc0-separate-forcing-consumer-decision)
+retain their WN and compact-carriage owners.
+
+Signalman's distinctive integration remains observed device reconciliation,
+operator choices, truthful delivery/availability, and explicit gateway
+provenance. Radio leases, rollback, and device authority remain with their
+existing owners. A headless controller, powered IP node, or constrained device
+can take different subsets without requiring the desktop renderer or a second
+replication engine. These proposed probes do not close S2's headed judgement
+or any other S/WN/HW gate.
+
 ## Source model
 
 ### Retinue facts
@@ -620,6 +639,8 @@ Stop when any of these occurs:
   receipt, and passed
   `cargo test --manifest-path apps/signalman-desktop/Cargo.toml --locked --offline -j 1`
   with 50 tests.
+- **2026-10-10:** recorded the reuse/embedding split and linked the transport
+  probes to their owning plans. No application or firmware change.
 
 ## Deliberate deferrals
 
