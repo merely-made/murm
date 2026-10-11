@@ -392,6 +392,7 @@ their filenames says so — see the `result` column.
 | [Signalman founding](2026-08-06_signalman_founding.md) | Historical founding note; execution authority moved to the Cambium scope. |
 | [Cambium desktop scope](2026-08-09_signalman_cambium_desktop_scope.md) | Desktop G0–G5 authority. G0–G4 complete, G5 partial. |
 | [G2 receipt](2026-08-09_signalman_desktop_g2_receipt.md) | Evidence, not a queue. **Its accessibility count is wrong** — see Known divergences. |
+| [Stack and custody refresh](2026-10-11_signalman_stack_refresh_plan.md) | Current locked renderer cohort; Djinn station authority, absent/Locked receipts and failing local-seed control. |
 | [Management surface direction](2026-08-15_signalman_management_surface_direction.md) | Ruling on the device-data mere. |
 | [Management surface plan](2026-08-15_signalman_management_surface_implementation_plan.md) | S0–S9 authority; also records Signalman's headless mixed-realization consumer receipt without changing S2's headed gate. |
 | [Survey and placement plan](2026-09-06_signalman_survey_and_placement_plan.md) | SP0–SP5. GPX/capture imports, directional evidence, candidate scenarios, terrain estimates, constrained placement and measured comparison. |

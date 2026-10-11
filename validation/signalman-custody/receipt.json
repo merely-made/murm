@@ -1,0 +1,182 @@
+{
+  "completed": true,
+  "toolchain": "1.98.1",
+  "keeper_sha256": "5bb95a9f23ae534faae898e34452bb033f3e47305b0d2ef907523888aa5ad88d",
+  "source_clean_sha256": "3c91ec131247e63a3232363aca8eba005011c478d0b4987ead57a542fabb250e",
+  "source_control_sha256": "46e3f451fdefa277341ee5de7a7c06fe0bfb8baddbc18560a5a1bc4bf874a3af",
+  "source_restored_sha256": "3c91ec131247e63a3232363aca8eba005011c478d0b4987ead57a542fabb250e",
+  "runtime_removed": true,
+  "commands": [
+    {
+      "label": "build-green",
+      "command": [
+        "cargo",
+        "+1.98.1",
+        "test",
+        "--locked",
+        "--offline",
+        "--manifest-path",
+        "apps/signalman-desktop/Cargo.toml",
+        "--target-dir",
+        "C:\\t\\cargo-targets\\retinue",
+        "-j4",
+        "--lib",
+        "--no-run",
+        "--message-format=json"
+      ],
+      "exit": 0,
+      "expected": 0,
+      "seconds": 32.62,
+      "log": "build-green.log",
+      "sha256": "0a6080ff678a98dbe6aeaf9673ae0fbfd6d929e310d1a1a24adb4a62036f5d8b",
+      "executable_sha256": "a73a25cf963a3df6b8d87a7bb3285cfa2f587d6f9e00844d7f907cd378f82ab5"
+    },
+    {
+      "label": "green-absent",
+      "command": [
+        "C:\\t\\cargo-targets\\retinue\\debug\\deps\\signalman_desktop-15a9983dce13c9c6.exe",
+        "desktop_station_pending_leaves_local_state_untouched",
+        "--ignored",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "exit": 0,
+      "expected": 0,
+      "seconds": 0.03,
+      "log": "green-absent.log",
+      "sha256": "d424aa3778bc619024d5c824b1f7be6589799b79435f515c0ff4f14214b74e46",
+      "executable_sha256": "a73a25cf963a3df6b8d87a7bb3285cfa2f587d6f9e00844d7f907cd378f82ab5"
+    },
+    {
+      "label": "green-locked",
+      "command": [
+        "C:\\t\\cargo-targets\\retinue\\debug\\deps\\signalman_desktop-15a9983dce13c9c6.exe",
+        "desktop_station_pending_leaves_local_state_untouched",
+        "--ignored",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "exit": 0,
+      "expected": 0,
+      "seconds": 0.03,
+      "log": "green-locked.log",
+      "sha256": "d424aa3778bc619024d5c824b1f7be6589799b79435f515c0ff4f14214b74e46",
+      "executable_sha256": "a73a25cf963a3df6b8d87a7bb3285cfa2f587d6f9e00844d7f907cd378f82ab5",
+      "keeper_state_unchanged": true
+    },
+    {
+      "label": "build-negative",
+      "command": [
+        "cargo",
+        "+1.98.1",
+        "test",
+        "--locked",
+        "--offline",
+        "--manifest-path",
+        "apps/signalman-desktop/Cargo.toml",
+        "--target-dir",
+        "C:\\t\\cargo-targets\\retinue",
+        "-j4",
+        "--lib",
+        "--no-run",
+        "--message-format=json"
+      ],
+      "exit": 0,
+      "expected": 0,
+      "seconds": 11.98,
+      "log": "build-negative.log",
+      "sha256": "8cfdf76814a5a74546f0d8151bca0fa91f9258703606645998783a8e0259c778",
+      "executable_sha256": "7a5cc63c2824fed485cd4a807cda047b6ae85f52f29945ab171e6bc59f26b311"
+    },
+    {
+      "label": "negative-absent",
+      "command": [
+        "C:\\t\\cargo-targets\\retinue\\debug\\deps\\signalman_desktop-15a9983dce13c9c6.exe",
+        "desktop_station_pending_leaves_local_state_untouched",
+        "--ignored",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "exit": 101,
+      "expected": 101,
+      "seconds": 0.78,
+      "log": "negative-absent.log",
+      "sha256": "3e17546b16f575b188c36285a6003f1eed71686873c675fffb5e0cf80bb2f4fe",
+      "executable_sha256": "7a5cc63c2824fed485cd4a807cda047b6ae85f52f29945ab171e6bc59f26b311"
+    },
+    {
+      "label": "negative-locked",
+      "command": [
+        "C:\\t\\cargo-targets\\retinue\\debug\\deps\\signalman_desktop-15a9983dce13c9c6.exe",
+        "desktop_station_pending_leaves_local_state_untouched",
+        "--ignored",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "exit": 101,
+      "expected": 101,
+      "seconds": 0.03,
+      "log": "negative-locked.log",
+      "sha256": "6acf0e8f9f82539f9efa34b9e3717525d83c46dcde495d4c2b773fb232e46af3",
+      "executable_sha256": "7a5cc63c2824fed485cd4a807cda047b6ae85f52f29945ab171e6bc59f26b311",
+      "keeper_state_unchanged": true
+    },
+    {
+      "label": "build-restored",
+      "command": [
+        "cargo",
+        "+1.98.1",
+        "test",
+        "--locked",
+        "--offline",
+        "--manifest-path",
+        "apps/signalman-desktop/Cargo.toml",
+        "--target-dir",
+        "C:\\t\\cargo-targets\\retinue",
+        "-j4",
+        "--lib",
+        "--no-run",
+        "--message-format=json"
+      ],
+      "exit": 0,
+      "expected": 0,
+      "seconds": 12.7,
+      "log": "build-restored.log",
+      "sha256": "760ee3417b754b977393a1f64b9269afc53ebec31f4425931deb2c0150106f17",
+      "executable_sha256": "53e23bbb351d00dcfae7a80c0d9acea785623ad28f32c0337fa273653e182800"
+    },
+    {
+      "label": "restored-absent",
+      "command": [
+        "C:\\t\\cargo-targets\\retinue\\debug\\deps\\signalman_desktop-15a9983dce13c9c6.exe",
+        "desktop_station_pending_leaves_local_state_untouched",
+        "--ignored",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "exit": 0,
+      "expected": 0,
+      "seconds": 0.81,
+      "log": "restored-absent.log",
+      "sha256": "d424aa3778bc619024d5c824b1f7be6589799b79435f515c0ff4f14214b74e46",
+      "executable_sha256": "53e23bbb351d00dcfae7a80c0d9acea785623ad28f32c0337fa273653e182800"
+    },
+    {
+      "label": "restored-locked",
+      "command": [
+        "C:\\t\\cargo-targets\\retinue\\debug\\deps\\signalman_desktop-15a9983dce13c9c6.exe",
+        "desktop_station_pending_leaves_local_state_untouched",
+        "--ignored",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "exit": 0,
+      "expected": 0,
+      "seconds": 0.02,
+      "log": "restored-locked.log",
+      "sha256": "d424aa3778bc619024d5c824b1f7be6589799b79435f515c0ff4f14214b74e46",
+      "executable_sha256": "53e23bbb351d00dcfae7a80c0d9acea785623ad28f32c0337fa273653e182800",
+      "keeper_state_unchanged": true
+    }
+  ]
+}

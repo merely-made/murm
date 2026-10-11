@@ -1,0 +1,462 @@
+{
+  "date": "2026-10-11",
+  "source_base": "6a0ae9d06894d6510084882ae5452e659f5a67a9",
+  "toolchain": "1.98.1",
+  "qualification": "Windows software; no new headed or physical radio receipt",
+  "commands": [
+    {
+      "command": "cargo +1.98.1 check --locked --offline --manifest-path apps/signalman-desktop/Cargo.toml --target-dir C:/t/cargo-targets/retinue -j4 --all-targets",
+      "exit": 0,
+      "log_archive_entry": "signalman-refresh-final-check.log"
+    },
+    {
+      "command": "cargo +1.98.1 check --locked --offline -p signalman --all-features --all-targets --target-dir C:/t/cargo-targets/retinue -j4",
+      "exit": 0,
+      "log_archive_entry": "signalman-refresh-final-core-check.log"
+    },
+    {
+      "command": "cargo +1.98.1 test --locked --offline --manifest-path apps/signalman-desktop/Cargo.toml --target-dir C:/t/cargo-targets/retinue -j4",
+      "exit": 0,
+      "log_archive_entry": "signalman-refresh-tests.log"
+    },
+    {
+      "command": "cargo +1.98.1 test --offline -p signalman --all-features --target-dir C:/t/cargo-targets/retinue -j4",
+      "exit": 0,
+      "log_archive_entry": "signalman-refresh-core-tests.log"
+    }
+  ],
+  "test_environment": {
+    "desktop": "CARGO_PROFILE_TEST_DEBUG=0",
+    "physical_station_activation": "absent"
+  },
+  "tests": {
+    "desktop_harness_passed": 71,
+    "desktop_executed_software": 70,
+    "desktop_inactive_physical_bench": 1,
+    "desktop_ignored_custody_test": 1,
+    "core_passed": 62
+  },
+  "custody": {
+    "completed": true,
+    "toolchain": "1.98.1",
+    "keeper_sha256": "5bb95a9f23ae534faae898e34452bb033f3e47305b0d2ef907523888aa5ad88d",
+    "source_clean_sha256": "3c91ec131247e63a3232363aca8eba005011c478d0b4987ead57a542fabb250e",
+    "source_control_sha256": "46e3f451fdefa277341ee5de7a7c06fe0bfb8baddbc18560a5a1bc4bf874a3af",
+    "source_restored_sha256": "3c91ec131247e63a3232363aca8eba005011c478d0b4987ead57a542fabb250e",
+    "runtime_removed": true,
+    "commands": [
+      {
+        "label": "build-green",
+        "command": [
+          "cargo",
+          "+1.98.1",
+          "test",
+          "--locked",
+          "--offline",
+          "--manifest-path",
+          "apps/signalman-desktop/Cargo.toml",
+          "--target-dir",
+          "C:\\t\\cargo-targets\\retinue",
+          "-j4",
+          "--lib",
+          "--no-run",
+          "--message-format=json"
+        ],
+        "exit": 0,
+        "expected": 0,
+        "seconds": 32.62,
+        "log": "build-green.log",
+        "sha256": "0a6080ff678a98dbe6aeaf9673ae0fbfd6d929e310d1a1a24adb4a62036f5d8b",
+        "executable_sha256": "a73a25cf963a3df6b8d87a7bb3285cfa2f587d6f9e00844d7f907cd378f82ab5"
+      },
+      {
+        "label": "green-absent",
+        "command": [
+          "C:\\t\\cargo-targets\\retinue\\debug\\deps\\signalman_desktop-15a9983dce13c9c6.exe",
+          "desktop_station_pending_leaves_local_state_untouched",
+          "--ignored",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 0,
+        "expected": 0,
+        "seconds": 0.03,
+        "log": "green-absent.log",
+        "sha256": "d424aa3778bc619024d5c824b1f7be6589799b79435f515c0ff4f14214b74e46",
+        "executable_sha256": "a73a25cf963a3df6b8d87a7bb3285cfa2f587d6f9e00844d7f907cd378f82ab5"
+      },
+      {
+        "label": "green-locked",
+        "command": [
+          "C:\\t\\cargo-targets\\retinue\\debug\\deps\\signalman_desktop-15a9983dce13c9c6.exe",
+          "desktop_station_pending_leaves_local_state_untouched",
+          "--ignored",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 0,
+        "expected": 0,
+        "seconds": 0.03,
+        "log": "green-locked.log",
+        "sha256": "d424aa3778bc619024d5c824b1f7be6589799b79435f515c0ff4f14214b74e46",
+        "executable_sha256": "a73a25cf963a3df6b8d87a7bb3285cfa2f587d6f9e00844d7f907cd378f82ab5",
+        "keeper_state_unchanged": true
+      },
+      {
+        "label": "build-negative",
+        "command": [
+          "cargo",
+          "+1.98.1",
+          "test",
+          "--locked",
+          "--offline",
+          "--manifest-path",
+          "apps/signalman-desktop/Cargo.toml",
+          "--target-dir",
+          "C:\\t\\cargo-targets\\retinue",
+          "-j4",
+          "--lib",
+          "--no-run",
+          "--message-format=json"
+        ],
+        "exit": 0,
+        "expected": 0,
+        "seconds": 11.98,
+        "log": "build-negative.log",
+        "sha256": "8cfdf76814a5a74546f0d8151bca0fa91f9258703606645998783a8e0259c778",
+        "executable_sha256": "7a5cc63c2824fed485cd4a807cda047b6ae85f52f29945ab171e6bc59f26b311"
+      },
+      {
+        "label": "negative-absent",
+        "command": [
+          "C:\\t\\cargo-targets\\retinue\\debug\\deps\\signalman_desktop-15a9983dce13c9c6.exe",
+          "desktop_station_pending_leaves_local_state_untouched",
+          "--ignored",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 101,
+        "expected": 101,
+        "seconds": 0.78,
+        "log": "negative-absent.log",
+        "sha256": "3e17546b16f575b188c36285a6003f1eed71686873c675fffb5e0cf80bb2f4fe",
+        "executable_sha256": "7a5cc63c2824fed485cd4a807cda047b6ae85f52f29945ab171e6bc59f26b311"
+      },
+      {
+        "label": "negative-locked",
+        "command": [
+          "C:\\t\\cargo-targets\\retinue\\debug\\deps\\signalman_desktop-15a9983dce13c9c6.exe",
+          "desktop_station_pending_leaves_local_state_untouched",
+          "--ignored",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 101,
+        "expected": 101,
+        "seconds": 0.03,
+        "log": "negative-locked.log",
+        "sha256": "6acf0e8f9f82539f9efa34b9e3717525d83c46dcde495d4c2b773fb232e46af3",
+        "executable_sha256": "7a5cc63c2824fed485cd4a807cda047b6ae85f52f29945ab171e6bc59f26b311",
+        "keeper_state_unchanged": true
+      },
+      {
+        "label": "build-restored",
+        "command": [
+          "cargo",
+          "+1.98.1",
+          "test",
+          "--locked",
+          "--offline",
+          "--manifest-path",
+          "apps/signalman-desktop/Cargo.toml",
+          "--target-dir",
+          "C:\\t\\cargo-targets\\retinue",
+          "-j4",
+          "--lib",
+          "--no-run",
+          "--message-format=json"
+        ],
+        "exit": 0,
+        "expected": 0,
+        "seconds": 12.7,
+        "log": "build-restored.log",
+        "sha256": "760ee3417b754b977393a1f64b9269afc53ebec31f4425931deb2c0150106f17",
+        "executable_sha256": "53e23bbb351d00dcfae7a80c0d9acea785623ad28f32c0337fa273653e182800"
+      },
+      {
+        "label": "restored-absent",
+        "command": [
+          "C:\\t\\cargo-targets\\retinue\\debug\\deps\\signalman_desktop-15a9983dce13c9c6.exe",
+          "desktop_station_pending_leaves_local_state_untouched",
+          "--ignored",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 0,
+        "expected": 0,
+        "seconds": 0.81,
+        "log": "restored-absent.log",
+        "sha256": "d424aa3778bc619024d5c824b1f7be6589799b79435f515c0ff4f14214b74e46",
+        "executable_sha256": "53e23bbb351d00dcfae7a80c0d9acea785623ad28f32c0337fa273653e182800"
+      },
+      {
+        "label": "restored-locked",
+        "command": [
+          "C:\\t\\cargo-targets\\retinue\\debug\\deps\\signalman_desktop-15a9983dce13c9c6.exe",
+          "desktop_station_pending_leaves_local_state_untouched",
+          "--ignored",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 0,
+        "expected": 0,
+        "seconds": 0.02,
+        "log": "restored-locked.log",
+        "sha256": "d424aa3778bc619024d5c824b1f7be6589799b79435f515c0ff4f14214b74e46",
+        "executable_sha256": "53e23bbb351d00dcfae7a80c0d9acea785623ad28f32c0337fa273653e182800",
+        "keeper_state_unchanged": true
+      }
+    ]
+  },
+  "metadata": {
+    "package_count": 1049,
+    "shared_identities": {
+      "retinue": [
+        {
+          "version": "0.3.0",
+          "source": null,
+          "manifest": "C:\\Users\\mark_\\Code\\repos\\retinue\\crates\\retinue\\Cargo.toml"
+        }
+      ],
+      "postilion": [
+        {
+          "version": "0.3.0",
+          "source": null,
+          "manifest": "C:\\Users\\mark_\\Code\\repos\\retinue\\crates\\postilion\\Cargo.toml"
+        }
+      ],
+      "outrider": [
+        {
+          "version": "0.3.0",
+          "source": null,
+          "manifest": "C:\\Users\\mark_\\Code\\repos\\retinue\\crates\\outrider\\Cargo.toml"
+        }
+      ],
+      "radio-hand": [
+        {
+          "version": "0.0.1",
+          "source": null,
+          "manifest": "C:\\Users\\mark_\\Code\\repos\\retinue\\crates\\radio-hand\\Cargo.toml"
+        }
+      ],
+      "selvage": [
+        {
+          "version": "0.1.0",
+          "source": null,
+          "manifest": "C:\\Users\\mark_\\Code\\repos\\retinue\\crates\\selvage\\Cargo.toml"
+        }
+      ],
+      "seneschal": [
+        {
+          "version": "0.2.0",
+          "source": null,
+          "manifest": "C:\\Users\\mark_\\Code\\repos\\retinue\\crates\\seneschal\\Cargo.toml"
+        }
+      ],
+      "tulle": [
+        {
+          "version": "0.2.0",
+          "source": null,
+          "manifest": "C:\\Users\\mark_\\Code\\repos\\retinue\\crates\\tulle\\Cargo.toml"
+        }
+      ],
+      "personae": [
+        {
+          "version": "0.3.0",
+          "source": "git+https://github.com/merely-made/dramatis.git?rev=0234e7eea6f2ddf2330a71b9425da01b06ae0391#0234e7eea6f2ddf2330a71b9425da01b06ae0391",
+          "manifest": "C:\\Users\\mark_\\.cargo\\git\\checkouts\\dramatis-c1632f2f3bdc2597\\0234e7e\\crates\\personae\\Cargo.toml"
+        }
+      ],
+      "gaz": [
+        {
+          "version": "0.0.2",
+          "source": "git+https://github.com/merely-made/dramatis.git?rev=0234e7eea6f2ddf2330a71b9425da01b06ae0391#0234e7eea6f2ddf2330a71b9425da01b06ae0391",
+          "manifest": "C:\\Users\\mark_\\.cargo\\git\\checkouts\\dramatis-c1632f2f3bdc2597\\0234e7e\\crates\\gaz\\Cargo.toml"
+        }
+      ],
+      "insigne": [
+        {
+          "version": "0.0.2",
+          "source": "git+https://github.com/merely-made/dramatis.git?rev=0234e7eea6f2ddf2330a71b9425da01b06ae0391#0234e7eea6f2ddf2330a71b9425da01b06ae0391",
+          "manifest": "C:\\Users\\mark_\\.cargo\\git\\checkouts\\dramatis-c1632f2f3bdc2597\\0234e7e\\crates\\insigne\\Cargo.toml"
+        }
+      ],
+      "notochord": [
+        {
+          "version": "0.1.1",
+          "source": "git+https://github.com/merely-made/dramatis.git?rev=0234e7eea6f2ddf2330a71b9425da01b06ae0391#0234e7eea6f2ddf2330a71b9425da01b06ae0391",
+          "manifest": "C:\\Users\\mark_\\.cargo\\git\\checkouts\\dramatis-c1632f2f3bdc2597\\0234e7e\\crates\\notochord\\Cargo.toml"
+        }
+      ],
+      "dramatis": [
+        {
+          "version": "0.0.3",
+          "source": "git+https://github.com/merely-made/dramatis.git?rev=0234e7eea6f2ddf2330a71b9425da01b06ae0391#0234e7eea6f2ddf2330a71b9425da01b06ae0391",
+          "manifest": "C:\\Users\\mark_\\.cargo\\git\\checkouts\\dramatis-c1632f2f3bdc2597\\0234e7e\\crates\\dramatis\\Cargo.toml"
+        }
+      ],
+      "muniment": [
+        {
+          "version": "0.1.2",
+          "source": "git+https://github.com/merely-made/mere.git?rev=43cd7f24afea6b2d3b54939f2093c098da50713b#43cd7f24afea6b2d3b54939f2093c098da50713b",
+          "manifest": "C:\\Users\\mark_\\.cargo\\git\\checkouts\\mere-9d8e871c24d9ba76\\43cd7f2\\crates\\eidetic\\muniment\\Cargo.toml"
+        }
+      ],
+      "chartulary": [
+        {
+          "version": "0.2.2",
+          "source": "git+https://github.com/merely-made/mere.git?rev=43cd7f24afea6b2d3b54939f2093c098da50713b#43cd7f24afea6b2d3b54939f2093c098da50713b",
+          "manifest": "C:\\Users\\mark_\\.cargo\\git\\checkouts\\mere-9d8e871c24d9ba76\\43cd7f2\\crates\\eidetic\\chartulary\\Cargo.toml"
+        }
+      ],
+      "layout-dom-api": [
+        {
+          "version": "0.1.1",
+          "source": "git+https://github.com/merely-made/genet.git?rev=cec760f4ae6ce336823bc2be250d9ab4e35a8a47#cec760f4ae6ce336823bc2be250d9ab4e35a8a47",
+          "manifest": "C:\\Users\\mark_\\.cargo\\git\\checkouts\\genet-0bbbe1b4c8511eb3\\cec760f\\components\\shared\\layout-dom\\Cargo.toml"
+        }
+      ],
+      "netrender": [
+        {
+          "version": "0.1.2",
+          "source": "git+https://github.com/merely-made/netrender.git?rev=46606610cd387e2e6956d8a3ebbcf442eab210d9#46606610cd387e2e6956d8a3ebbcf442eab210d9",
+          "manifest": "C:\\Users\\mark_\\.cargo\\git\\checkouts\\netrender-a79f0762881dec01\\4660661\\netrender\\Cargo.toml"
+        }
+      ],
+      "netrender-vello": [
+        {
+          "version": "0.11.0",
+          "source": "git+https://github.com/mark-ik/vello?rev=5862bba26c8a9f56f6a5fdc8ea6966b360a5d63a#5862bba26c8a9f56f6a5fdc8ea6966b360a5d63a",
+          "manifest": "C:\\Users\\mark_\\.cargo\\git\\checkouts\\vello-79c0d0e9216b3668\\5862bba\\research\\vello_research\\Cargo.toml"
+        }
+      ],
+      "vello_encoding": [
+        {
+          "version": "0.11.0",
+          "source": "git+https://github.com/mark-ik/vello?rev=5862bba26c8a9f56f6a5fdc8ea6966b360a5d63a#5862bba26c8a9f56f6a5fdc8ea6966b360a5d63a",
+          "manifest": "C:\\Users\\mark_\\.cargo\\git\\checkouts\\vello-79c0d0e9216b3668\\5862bba\\research\\vello_encoding\\Cargo.toml"
+        }
+      ],
+      "vello_shaders": [
+        {
+          "version": "0.11.0",
+          "source": "git+https://github.com/mark-ik/vello?rev=5862bba26c8a9f56f6a5fdc8ea6966b360a5d63a#5862bba26c8a9f56f6a5fdc8ea6966b360a5d63a",
+          "manifest": "C:\\Users\\mark_\\.cargo\\git\\checkouts\\vello-79c0d0e9216b3668\\5862bba\\research\\vello_shaders\\Cargo.toml"
+        }
+      ],
+      "wgpu": [
+        {
+          "version": "30.0.1",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "manifest": "C:\\Users\\mark_\\.cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\wgpu-30.0.1\\Cargo.toml"
+        }
+      ],
+      "wgpu-core": [
+        {
+          "version": "30.0.1",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "manifest": "C:\\Users\\mark_\\.cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\wgpu-core-30.0.1\\Cargo.toml"
+        }
+      ],
+      "wgpu-hal": [
+        {
+          "version": "30.0.1",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "manifest": "C:\\Users\\mark_\\.cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\wgpu-hal-30.0.1\\Cargo.toml"
+        }
+      ],
+      "wgpu-types": [
+        {
+          "version": "30.0.1",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "manifest": "C:\\Users\\mark_\\.cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\wgpu-types-30.0.1\\Cargo.toml"
+        }
+      ],
+      "naga": [
+        {
+          "version": "30.0.1",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "manifest": "C:\\Users\\mark_\\.cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\naga-30.0.1\\Cargo.toml"
+        }
+      ]
+    },
+    "castellan_package_present": false
+  },
+  "tested_source_hashes": {
+    "Cargo.toml": {
+      "raw_sha256": "1be09a1062c30e0d94775e3e8469702680de15bbe71230592a09940ccffbd224",
+      "lf_sha256": "9f67e56d4b0289468c10b205192859939bd0c2e6d2f464b05044efb6bab9f266"
+    },
+    "Cargo.lock": {
+      "raw_sha256": "ed61ac2d1c1ad345952fbfcf71c307e2a0d8823d88c4b27bdd3b577d7945de48",
+      "lf_sha256": "ed61ac2d1c1ad345952fbfcf71c307e2a0d8823d88c4b27bdd3b577d7945de48"
+    },
+    "apps/signalman/Cargo.toml": {
+      "raw_sha256": "47d77bab251b7ff609d3461f600b6353b9b2bbdd1ea119d0b6d95bae82cb99a6",
+      "lf_sha256": "8b54e13cf4b7b750c49dde7b7c0f6cf2e6c3478ff9273c1ad2501c80bfaca2a3"
+    },
+    "apps/signalman-desktop/Cargo.toml": {
+      "raw_sha256": "8460ec94bcc1ae0f72c49e42b7f5a408b040362f6726239b48dab5a5dfb53483",
+      "lf_sha256": "e1fd9080d70d8d847c6cb3fa48751104a60dfbf454fd5db8131a6723527727c5"
+    },
+    "apps/signalman-desktop/Cargo.lock": {
+      "raw_sha256": "4a7b6e8fa61bb6ee3b6f765acc7909689d42e3287e005e87cc5f18bd47019f44",
+      "lf_sha256": "4a7b6e8fa61bb6ee3b6f765acc7909689d42e3287e005e87cc5f18bd47019f44"
+    },
+    "apps/signalman-desktop/src/station.rs": {
+      "raw_sha256": "3c91ec131247e63a3232363aca8eba005011c478d0b4987ead57a542fabb250e",
+      "lf_sha256": "2966260390c3691359e2467e5d15f0d6649286c7e02723d9f564f34d4eabda5f"
+    },
+    "validation/signalman_custody_receipts.py": {
+      "raw_sha256": "863a57ae1dbf5c03fa2330ec9ddaccfed30f7c48b10020db6d74090e65f1edc5",
+      "lf_sha256": "863a57ae1dbf5c03fa2330ec9ddaccfed30f7c48b10020db6d74090e65f1edc5"
+    }
+  },
+  "archive": "signalman-refresh-logs.zip",
+  "archive_sha256": "fd24e532257ef7c1e5cbec5716fc6c7ad3daab92e673486da371ce841e4a0236",
+  "archive_entry_sha256": {
+    "signalman-custody/build-green.log": "0a6080ff678a98dbe6aeaf9673ae0fbfd6d929e310d1a1a24adb4a62036f5d8b",
+    "signalman-custody/build-negative.log": "8cfdf76814a5a74546f0d8151bca0fa91f9258703606645998783a8e0259c778",
+    "signalman-custody/build-restored.log": "760ee3417b754b977393a1f64b9269afc53ebec31f4425931deb2c0150106f17",
+    "signalman-custody/green-absent.log": "d424aa3778bc619024d5c824b1f7be6589799b79435f515c0ff4f14214b74e46",
+    "signalman-custody/green-keeper.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "signalman-custody/green-locked.log": "d424aa3778bc619024d5c824b1f7be6589799b79435f515c0ff4f14214b74e46",
+    "signalman-custody/negative-absent.log": "3e17546b16f575b188c36285a6003f1eed71686873c675fffb5e0cf80bb2f4fe",
+    "signalman-custody/negative-keeper.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "signalman-custody/negative-locked.log": "6acf0e8f9f82539f9efa34b9e3717525d83c46dcde495d4c2b773fb232e46af3",
+    "signalman-custody/receipt.json": "e51a038ef856727f66ab59c1593ea66ca0065748746ab4c4ada64b0ca97ddee1",
+    "signalman-custody/restored-absent.log": "d424aa3778bc619024d5c824b1f7be6589799b79435f515c0ff4f14214b74e46",
+    "signalman-custody/restored-keeper.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "signalman-custody/restored-locked.log": "d424aa3778bc619024d5c824b1f7be6589799b79435f515c0ff4f14214b74e46",
+    "signalman-refresh-check-locked.log": "0f8df50e3fb1fa7f359d3fd9bd992128d15df1d697e326c91bbc3a577deff741",
+    "signalman-refresh-check-offline.log": "f7f98707a6508192a90fcfd77cd88bb9d787a97491106498419b12754a5712ac",
+    "signalman-refresh-check.log": "0326cc21f0dd563d31bc96d691fa3c1bca20f21a28dbaa2de4b8cc95d1f12fee",
+    "signalman-refresh-core-tests.log": "0a81422967de0c013191a9db06aba8285059665a4f88a4ca43b5878e4715714a",
+    "signalman-refresh-final-check.log": "7e32d8a4ff27db516bbc30aa820600084f6dc298691e3df3e3405dfbcf0e6212",
+    "signalman-refresh-final-core-check.log": "f0811a8dc0f66b4acf35c275f3d79c8df09e9e42545b43d3c6882b9896f2284a",
+    "signalman-refresh-identities.json": "adf2025cd7c39c8db6edc361c8135b5799d6a348ebe0f093efbb7eb4887fc90f",
+    "signalman-refresh-metadata.json": "eaaf1a89597b3bd37e277765c92a994006916d18033ac291bc69ecac5432db34",
+    "signalman-refresh-metadata.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "signalman-refresh-resolve.log": "91d1c6bef6edce8e10dc78c3509d1c518ab14ae7fbbede0a875ef199581f4f44",
+    "signalman-refresh-tests.log": "f84c434a5c14a1c4e712865780134ab8415b5ad14dfd87fa16dcff4497b9faf7",
+    "signalman-refresh-wgpu-update.log": "e28d691437de408f62b5050da7eb8132ca1fc4e231f0b46fd49f152e0c7ecb5d",
+    "tested-source/Cargo.lock": "ed61ac2d1c1ad345952fbfcf71c307e2a0d8823d88c4b27bdd3b577d7945de48",
+    "tested-source/Cargo.toml": "1be09a1062c30e0d94775e3e8469702680de15bbe71230592a09940ccffbd224",
+    "tested-source/apps/signalman-desktop/Cargo.lock": "4a7b6e8fa61bb6ee3b6f765acc7909689d42e3287e005e87cc5f18bd47019f44",
+    "tested-source/apps/signalman-desktop/Cargo.toml": "8460ec94bcc1ae0f72c49e42b7f5a408b040362f6726239b48dab5a5dfb53483",
+    "tested-source/apps/signalman-desktop/src/station.rs": "3c91ec131247e63a3232363aca8eba005011c478d0b4987ead57a542fabb250e",
+    "tested-source/apps/signalman/Cargo.toml": "47d77bab251b7ff609d3461f600b6353b9b2bbdd1ea119d0b6d95bae82cb99a6",
+    "tested-source/validation/signalman_custody_receipts.py": "863a57ae1dbf5c03fa2330ec9ddaccfed30f7c48b10020db6d74090e65f1edc5"
+  },
+  "cleanup": "Primary reusable Mere and Retinue caches retained; no isolated Cargo home/worktree created. Synthetic runtime removed after owned hosts stopped. Exact raw log, metadata and tested-source bytes preserved in verified archive; redundant generated raw copies consolidated."
+}
