@@ -54,7 +54,7 @@ DATAGRAM_ROOT_GATES = (("auto-feth", "interop_auto_feth.py", []),)
 LOCAL_GATES = ()
 
 # V2: path requests by interface mode and recursive discovery (A4), on loopback TCP.
-DISCOVERY_GATES = ()
+DISCOVERY_GATES = (("path-discovery", "interop_path_discovery.py", []),)
 
 # V3: inbound priority lanes (B4) and per-interface statistics (C2), on loopback TCP.
 INGRESS_GATES = ()
