@@ -1,0 +1,176 @@
+{
+  "bounded_process_preflight": {
+    "java_rejections": 9,
+    "requests": [
+      {
+        "id": "zero-T",
+        "java_exit_code": 1,
+        "java_reason": "bounded T",
+        "rust_exit_code": 2,
+        "rust_reason": "T, Z, N and Al must be positive"
+      },
+      {
+        "id": "Al4-outside-Java-profile",
+        "java_exit_code": 1,
+        "java_reason": "shared profile requires N=1, Al=1",
+        "rust_exit_code": null,
+        "rust_reason": null
+      },
+      {
+        "id": "K-over-cap",
+        "java_exit_code": 1,
+        "java_reason": "bounded block K",
+        "rust_exit_code": 2,
+        "rust_reason": "profile source-block work budget exceeded"
+      },
+      {
+        "id": "SBN-outside-object",
+        "java_exit_code": 1,
+        "java_reason": "SBN outside object",
+        "rust_exit_code": 2,
+        "rust_reason": "SBN outside configured source blocks"
+      },
+      {
+        "id": "ESI-over-cap",
+        "java_exit_code": 1,
+        "java_reason": "bounded ESI",
+        "rust_exit_code": 2,
+        "rust_reason": "profile ESI budget exceeded"
+      },
+      {
+        "id": "short-symbol",
+        "java_exit_code": 1,
+        "java_reason": "profile requires one full symbol per packet",
+        "rust_exit_code": 2,
+        "rust_reason": "profile packet must contain one full symbol"
+      },
+      {
+        "id": "trailing-bytes",
+        "java_exit_code": 1,
+        "java_reason": "trailing request bytes",
+        "rust_exit_code": 2,
+        "rust_reason": "trailing interop request bytes"
+      },
+      {
+        "id": "packet-count-over-cap",
+        "java_exit_code": 1,
+        "java_reason": "too many delivered packets",
+        "rust_exit_code": 2,
+        "rust_reason": "interop packet count budget exceeded"
+      },
+      {
+        "id": "request-over-512KiB",
+        "java_exit_code": 1,
+        "java_reason": "request exceeds 512 KiB",
+        "rust_exit_code": 2,
+        "rust_reason": "interop request budget exceeded"
+      }
+    ],
+    "rust_shared_profile_rejections": 8,
+    "scope": "Process envelope and bounded profile rejections; not exhaustive malformed RFC6330 tests"
+  },
+  "corpus_regeneration": "pass",
+  "corpus_sha256": "bcbd26455082340095174c0dbd127dd62ba6c7f7a907071ae09e8831997d8922",
+  "coverage": {
+    "full_rfc6330_conformance": false,
+    "performance_benchmark": false,
+    "radio_hardware_qualification": false
+  },
+  "generator": {
+    "captured_decoder_direction": "OpenRQ decoded actual Rust raptorq 2.0.1 packets",
+    "compiled_classes_tree_sha256": "e73a5b6f75fbffcb8caa15f74807cdc8ae08830ad234934b8de965a2c17632d3",
+    "generator_sha256": "f554f6235397a9443c89c7c2bf5e31e71521c1e5d92849cda7a1c256ec3fb8fa",
+    "implementation": "OpenRQ",
+    "java_peer_sha256": "849b21947edcd932df230f1e5569a2a3f90d7d852338edfeae22eedc12db0427",
+    "license_path": "interop/OpenRQ-LICENSE.txt",
+    "license_sha256": "bb28c48e3e078166e91cfc2b6db7ffebb8a0973b9e23b3df060561292d8d69ec",
+    "normalization": "OpenRQ omits final-source padding; wrapper restores zero bytes to T. OTI and payload IDs are passed exactly; repair symbols are unchanged.",
+    "repository": "https://github.com/openrq-team/OpenRQ",
+    "revision": "45f4437ba96d7e69a6ee05a2e51cf79cda90448e",
+    "rust_encoder_package": "raptorq 2.0.1; locked Cargo.lock",
+    "source_archive_sha256": "018fbf8f77bdce497596c52cd57bdd2c7b4389cb2b1393f08ed21f68e3883e56",
+    "source_archive_url": "https://codeload.github.com/openrq-team/OpenRQ/tar.gz/45f4437ba96d7e69a6ee05a2e51cf79cda90448e",
+    "source_main_tree_sha256": "2b023582001c97ab3515333c930d6eb0e4626ce51c08a591d84409e43d762270",
+    "source_resources_tree_sha256": "c9760ff6cd8992da4f5a0e51af1367d79efcd915f24f4a42d55def86452acf28",
+    "toolchain": {
+      "archive_sha256": "59422c2292ae4e76b87e00d8808dbe49cffa39af731e08bb0292ddb0af4e0261",
+      "archive_url": "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.8%2B9/OpenJDK21U-jdk_aarch64_mac_hotspot_21.0.8_9.tar.gz",
+      "checksum_url": "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.8%2B9/OpenJDK21U-jdk_aarch64_mac_hotspot_21.0.8_9.tar.gz.sha256.txt",
+      "java_version": "openjdk version \"21.0.8\" 2025-07-15 LTS\nOpenJDK Runtime Environment Temurin-21.0.8+9 (build 21.0.8+9-LTS)\nOpenJDK 64-Bit Server VM Temurin-21.0.8+9 (build 21.0.8+9-LTS, mixed mode, sharing)",
+      "javac_options": [
+        "--release",
+        "8",
+        "-g:none"
+      ],
+      "license": "GPL-2.0 WITH Classpath-exception-2.0",
+      "platform": "macOS aarch64",
+      "release": "jdk-21.0.8+9",
+      "vendor": "Eclipse Temurin"
+    },
+    "unused_source_archive_member_omitted": "src/opt (absolute symlink; unused by main build)",
+    "upstream_license": "Apache-2.0",
+    "upstream_license_url": "https://github.com/openrq-team/OpenRQ/blob/45f4437ba96d7e69a6ee05a2e51cf79cda90448e/LICENSE"
+  },
+  "independent_interoperability": {
+    "bidirectional_decode_scenarios": 48,
+    "cases": [
+      {
+        "exact_symbol_comparisons": 28,
+        "id": "f1280-t128-z1-n1-al1",
+        "openrq_to_rust_decode_scenarios": 4,
+        "rust_to_openrq_decode_scenarios": 4
+      },
+      {
+        "exact_symbol_comparisons": 30,
+        "id": "f1281-t128-z1-n1-al1",
+        "openrq_to_rust_decode_scenarios": 4,
+        "rust_to_openrq_decode_scenarios": 4
+      },
+      {
+        "exact_symbol_comparisons": 32,
+        "id": "f1536-t128-z1-n1-al1",
+        "openrq_to_rust_decode_scenarios": 4,
+        "rust_to_openrq_decode_scenarios": 4
+      },
+      {
+        "exact_symbol_comparisons": 34,
+        "id": "f1537-t128-z1-n1-al1",
+        "openrq_to_rust_decode_scenarios": 4,
+        "rust_to_openrq_decode_scenarios": 4
+      },
+      {
+        "exact_symbol_comparisons": 58,
+        "id": "f2561-t128-z2-n1-al1",
+        "openrq_to_rust_decode_scenarios": 4,
+        "rust_to_openrq_decode_scenarios": 4
+      },
+      {
+        "exact_symbol_comparisons": 82,
+        "id": "f4097-t128-z2-n1-al1",
+        "openrq_to_rust_decode_scenarios": 4,
+        "rust_to_openrq_decode_scenarios": 4
+      }
+    ],
+    "exact_symbol_comparisons": 264,
+    "status": "pass"
+  },
+  "profile": {
+    "Al": 1,
+    "ESI_max": 4095,
+    "F_max": 65536,
+    "K_per_block_max": 256,
+    "N": 1,
+    "T_max": 256,
+    "Z_max": 16,
+    "case_symbol_size": 128,
+    "name": "openrq-shared-al1-single-symbol",
+    "packet_representation": "4-byte RFC6330 payload ID and one complete T-byte symbol"
+  },
+  "recorded_at_utc": "2026-10-11T15:59:40.611623+00:00",
+  "rust_peer_binary_sha256": "0d47efa45868231fe3cc6cd3850111ec068b6375efea594c06cf781e15cb4909",
+  "rust_peer_build_mode": "rebuilt_current_suite_locked_offline",
+  "rust_peer_cargo_lock_sha256": "ad7772b85feec6806bcb3fcfd56c5379fc880a5a189eece1d33e9ea3b8c35bd7",
+  "rust_peer_cargo_manifest_sha256": "f2307bf5c7ceeb47f6a2600a9873ae2eee2d3dd44a9ab712c134d9475f676ab5",
+  "rust_peer_source_tree_sha256": "ede5845f992a6da75fdb7598dfc574b89601ca4596efdf42d24e1a3bfbd54acb",
+  "schema": "transport-conformance.raptorq-live-interop/v1"
+}

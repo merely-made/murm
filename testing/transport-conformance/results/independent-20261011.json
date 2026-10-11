@@ -1,0 +1,565 @@
+{
+  "schema": "transport-conformance.receipt/v1",
+  "profile": "host-independent-v1",
+  "description": "Official primitive vectors, RFC6330 metadata preflight, bounded composition, and selected independent OpenRQ interoperability",
+  "implementation": {
+    "corpus_manifest_sha256": "ff95dc345ea741cde01770b4d313df5efe8522c768b04371e30042d1c1c9d20d",
+    "dependency_versions": {
+      "blake3": "1.8.7",
+      "ed25519-dalek": "3.0.0",
+      "raptorq": "2.0.1"
+    },
+    "repository_revision": "7aa87f2e9fdd973e4729e610d7130189dc22c0a0",
+    "repository_worktree_dirty": true,
+    "runner": "transport-conformance 0.1.0",
+    "suite_source_blake3": "a89884acff9e2d8e44c9d328fe6e6ee1948636ef9747452404eb82b75b9b8e36",
+    "target_arch": "aarch64",
+    "target_os": "macos"
+  },
+  "coverage": {
+    "bounded_packet_profile": "one full symbol per packet; N=1; Al=4; F in 1..=65536; T<=256; ESI<=4095; Z<=16; source symbols per block<=256",
+    "full_raptorq_codec_conformance": false,
+    "independent_profile": "selected OpenRQ and raptorq vectors; N=1; Al=1; T=128; one full symbol per packet; retained Java output and Rust replay",
+    "independent_raptorq_encoder_interoperability": true,
+    "live_java_execution_in_this_run": false,
+    "performance_benchmark": false,
+    "production_stack_integration": false,
+    "radio_hardware_qualification": false
+  },
+  "summary": {
+    "fail": 0,
+    "pass": 8,
+    "unsupported": 1
+  },
+  "cases": [
+    {
+      "id": "blake3.official.all-modes",
+      "specification": "https://github.com/BLAKE3-team/BLAKE3-specs/blob/master/blake3.pdf",
+      "section": "BLAKE3 official test_vectors/test_vectors.json",
+      "evidence_class": "known-answer",
+      "provenance": "official pinned upstream vectors; artifact hashes and license in vectors/manifest.json",
+      "implementation": "blake3 1.8.7",
+      "status": "pass",
+      "observations": {
+        "mode_comparisons": 105,
+        "modes": [
+          "hash",
+          "keyed_hash",
+          "derive_key"
+        ],
+        "official_input_lengths": 35,
+        "upstream_revision": "f55849f89cd85083c1c9daa2c5de20766f309c00"
+      }
+    },
+    {
+      "id": "ed25519.rfc8032.test-1",
+      "specification": "https://www.rfc-editor.org/rfc/rfc8032.html",
+      "section": "7.1 TEST 1",
+      "evidence_class": "known-answer",
+      "provenance": "RFC8032 published Ed25519 empty-message seed/public-key/signature vector",
+      "implementation": "ed25519-dalek 3.0.0",
+      "status": "pass",
+      "observations": {
+        "comparisons": [
+          "derived public key",
+          "deterministic signature",
+          "strict verification"
+        ],
+        "published_vectors": 1
+      }
+    },
+    {
+      "id": "ed25519.rfc8032.tamper",
+      "specification": "https://www.rfc-editor.org/rfc/rfc8032.html",
+      "section": "5.1.7; authored mutations of 7.1 TEST 1",
+      "evidence_class": "negative-vector",
+      "provenance": "suite-authored one-byte message and one-bit signature corruption of published TEST 1",
+      "implementation": "ed25519-dalek 3.0.0 verify_strict",
+      "status": "pass",
+      "observations": {
+        "authored_negative_cases": 2,
+        "mutations": [
+          "message changed from empty to 00",
+          "signature bit 0 flipped"
+        ]
+      }
+    },
+    {
+      "id": "raptorq.rfc6330.payload-id",
+      "specification": "https://www.rfc-editor.org/rfc/rfc6330.html",
+      "section": "3.1, 3.2",
+      "evidence_class": "wire-preflight",
+      "provenance": "suite-authored boundary octets derived from normative field widths and network byte order",
+      "implementation": "suite preflight and raptorq 2.0.1 PayloadId",
+      "status": "pass",
+      "observations": {
+        "integer_overflow_rejected": true,
+        "maximum_esi": 16777215,
+        "positive_boundaries": 3,
+        "rejected_lengths": [
+          0,
+          1,
+          3,
+          5,
+          8
+        ]
+      }
+    },
+    {
+      "id": "raptorq.rfc6330.oti",
+      "specification": "https://www.rfc-editor.org/rfc/rfc6330.html",
+      "section": "3.1, 3.3, 4.2, 4.4.1.2; Verified Technical erratum 5548",
+      "evidence_class": "wire-preflight",
+      "provenance": "suite-authored field/length/parameter cases; https://www.rfc-editor.org/errata/eid5548",
+      "implementation": "suite preflight and raptorq 2.0.1 ObjectTransmissionInformation",
+      "status": "pass",
+      "observations": {
+        "corrected_max_transfer_length": 942574504275,
+        "invalid_parameter_cases": 8,
+        "oti_octets": 12,
+        "positive_fields": true,
+        "rejected_lengths": [
+          0,
+          8,
+          11,
+          13,
+          20
+        ],
+        "rfc_allows_zero_transfer_length": true,
+        "verified_erratum": 5548
+      }
+    },
+    {
+      "id": "raptorq.bounded.packet-preflight",
+      "specification": "https://www.rfc-editor.org/rfc/rfc6330.html",
+      "section": "3.2, 4.4.2; suite bounded profile",
+      "evidence_class": "composition",
+      "provenance": "suite-authored exact-one-symbol packet, SBN, ESI, object and <=256 source-symbol/block work bounds; not complete RFC packet reception",
+      "implementation": "suite bounded adapter",
+      "status": "pass",
+      "observations": {
+        "complete_rfc_packet_receiver": false,
+        "esi_and_object_budgets_checked": true,
+        "exact_symbol_octets": 128,
+        "oversized_source_block_rejected_before_decoder": true,
+        "sbn_checked_before_decoder": true,
+        "source_symbols_per_block_budget": 256,
+        "truncated_and_multi_symbol_profile_packets_rejected": true
+      }
+    },
+    {
+      "id": "raptorq.bounded.loss-reorder-duplicate",
+      "specification": "https://www.rfc-editor.org/rfc/rfc6330.html",
+      "section": "4.4.3, 5; bounded same-library scenario",
+      "evidence_class": "composition",
+      "provenance": "suite-generated data encoded and decoded by the same raptorq library; no independent encoder oracle",
+      "implementation": "raptorq 2.0.1",
+      "status": "pass",
+      "observations": {
+        "encoder_and_decoder": "same raptorq 2.0.1 library",
+        "independent_interoperability": false,
+        "scenarios": [
+          {
+            "deliveries_including_duplicates": 74,
+            "distinct_delivered_packets": 37,
+            "incomplete_is_not_malformed": true,
+            "object_octets": 1024,
+            "offered_packets": 56,
+            "reconstructed_blake3": "acf3f6f7a5ad1018b4686d0e43f04992ee41db8451dde51773f574e9d74faa69",
+            "source_blocks": 2
+          },
+          {
+            "deliveries_including_duplicates": 108,
+            "distinct_delivered_packets": 54,
+            "incomplete_is_not_malformed": true,
+            "object_octets": 4097,
+            "offered_packets": 81,
+            "reconstructed_blake3": "901af07efdfe22d3a4b2e5302dbb5373deb6970b5e72c71bf4967bfa2a71618a",
+            "source_blocks": 2
+          },
+          {
+            "deliveries_including_duplicates": 148,
+            "distinct_delivered_packets": 74,
+            "incomplete_is_not_malformed": true,
+            "object_octets": 8191,
+            "offered_packets": 112,
+            "reconstructed_blake3": "03cb022cc0a4f786dfff9eaaf9b58ccac55079fe1d4f0f0ff60f752a6b5e3f88",
+            "source_blocks": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "raptorq.independent-encoder-interoperability",
+      "specification": "https://www.rfc-editor.org/rfc/rfc6330.html",
+      "section": "4.4.1, 4.4.2, 5, 5.8; selected N=1, Al=1 profile",
+      "evidence_class": "interoperability",
+      "provenance": "suite-authored objects; exact independent OpenRQ output at 45f4437ba96d7e69a6ee05a2e51cf79cda90448e; retained Java decoding of actual Rust packets; vectors/openrq-interop.json and reproducible interop/ campaign",
+      "implementation": "raptorq 2.0.1 Rust versus pinned OpenRQ Java; offline replay does not execute Java",
+      "status": "pass",
+      "observations": {
+        "cases": [
+          {
+            "exact_symbols": 28,
+            "id": "f1280-t128-z1-n1-al1",
+            "object_octets": 1280,
+            "oti_hex": "000000050000008001000101",
+            "partial_final_source_symbol": false,
+            "scenarios": [
+              {
+                "deliveries": 10,
+                "id": "all-source",
+                "java_decoded_rust": "retained independent peer output; external campaign reruns Java",
+                "packet_sha256": "39d4ecd4dbe79ef71a5db1bd07b2b5a6e77bd772ee8187ab32246aca66a4a84d",
+                "rust_decoded_java": true
+              },
+              {
+                "deliveries": 22,
+                "id": "mixed-loss",
+                "java_decoded_rust": "retained independent peer output; external campaign reruns Java",
+                "packet_sha256": "b74031ece3501c218e53d29a661a52aa40ab65a8e849606fbf5c11d8d236e53c",
+                "rust_decoded_java": true
+              },
+              {
+                "deliveries": 18,
+                "id": "repair-only",
+                "java_decoded_rust": "retained independent peer output; external campaign reruns Java",
+                "packet_sha256": "a15a3744877953f0149be1401a221e9f3a3c16e98bb774a45651d3f37bf266ac",
+                "rust_decoded_java": true
+              },
+              {
+                "deliveries": 24,
+                "id": "repair-reversed-duplicates",
+                "java_decoded_rust": "retained independent peer output; external campaign reruns Java",
+                "packet_sha256": "2835bfdfcbc0f06dc3673aa9a6f899c95407ef9488e6524182fd099c5df0647c",
+                "rust_decoded_java": true
+              }
+            ],
+            "source_symbols_per_block": [
+              10
+            ],
+            "upstream_systematic_index_annotations": [
+              {
+                "k": 10,
+                "k_prime": 10,
+                "sbn": 0
+              }
+            ]
+          },
+          {
+            "exact_symbols": 30,
+            "id": "f1281-t128-z1-n1-al1",
+            "object_octets": 1281,
+            "oti_hex": "000000050100008001000101",
+            "partial_final_source_symbol": true,
+            "scenarios": [
+              {
+                "deliveries": 11,
+                "id": "all-source",
+                "java_decoded_rust": "retained independent peer output; external campaign reruns Java",
+                "packet_sha256": "d03e1fd1d52221ea1bf286438fc82ffee870e0d671ec100fa9f1995b0dd3330e",
+                "rust_decoded_java": true
+              },
+              {
+                "deliveries": 23,
+                "id": "mixed-loss",
+                "java_decoded_rust": "retained independent peer output; external campaign reruns Java",
+                "packet_sha256": "304a042e855540887144f9579d93ae77c33d6a4649f220b2937ae7c1c03a8b13",
+                "rust_decoded_java": true
+              },
+              {
+                "deliveries": 19,
+                "id": "repair-only",
+                "java_decoded_rust": "retained independent peer output; external campaign reruns Java",
+                "packet_sha256": "5afd882c5a1fc984e1462edea4ce51f5983d1486c54e9f727655f8ff1fb5660d",
+                "rust_decoded_java": true
+              },
+              {
+                "deliveries": 26,
+                "id": "repair-reversed-duplicates",
+                "java_decoded_rust": "retained independent peer output; external campaign reruns Java",
+                "packet_sha256": "c9aedac6ff6219501f425b0352710ff4fb3f72e37236f70453698bfa39bfe35e",
+                "rust_decoded_java": true
+              }
+            ],
+            "source_symbols_per_block": [
+              11
+            ],
+            "upstream_systematic_index_annotations": [
+              {
+                "k": 11,
+                "k_prime": 12,
+                "sbn": 0
+              }
+            ]
+          },
+          {
+            "exact_symbols": 32,
+            "id": "f1536-t128-z1-n1-al1",
+            "object_octets": 1536,
+            "oti_hex": "000000060000008001000101",
+            "partial_final_source_symbol": false,
+            "scenarios": [
+              {
+                "deliveries": 12,
+                "id": "all-source",
+                "java_decoded_rust": "retained independent peer output; external campaign reruns Java",
+                "packet_sha256": "5320d4ea726660ed216c6ea3dee4870851ec176a84fec871f66e44809c063520",
+                "rust_decoded_java": true
+              },
+              {
+                "deliveries": 24,
+                "id": "mixed-loss",
+                "java_decoded_rust": "retained independent peer output; external campaign reruns Java",
+                "packet_sha256": "9002d86a2c6bd1d6d4035a8c2ade7884dc67ecf8e056e1ea1fec237488240f98",
+                "rust_decoded_java": true
+              },
+              {
+                "deliveries": 20,
+                "id": "repair-only",
+                "java_decoded_rust": "retained independent peer output; external campaign reruns Java",
+                "packet_sha256": "babddf7cb5039b04d6d60916803662bcf6de52565c4093c74914d5d42ae75e5d",
+                "rust_decoded_java": true
+              },
+              {
+                "deliveries": 27,
+                "id": "repair-reversed-duplicates",
+                "java_decoded_rust": "retained independent peer output; external campaign reruns Java",
+                "packet_sha256": "cc50347028b28a3b999e9363ef71d386704d3734685a47cc2fb76ed31814f443",
+                "rust_decoded_java": true
+              }
+            ],
+            "source_symbols_per_block": [
+              12
+            ],
+            "upstream_systematic_index_annotations": [
+              {
+                "k": 12,
+                "k_prime": 12,
+                "sbn": 0
+              }
+            ]
+          },
+          {
+            "exact_symbols": 34,
+            "id": "f1537-t128-z1-n1-al1",
+            "object_octets": 1537,
+            "oti_hex": "000000060100008001000101",
+            "partial_final_source_symbol": true,
+            "scenarios": [
+              {
+                "deliveries": 13,
+                "id": "all-source",
+                "java_decoded_rust": "retained independent peer output; external campaign reruns Java",
+                "packet_sha256": "0f7552bc5696ff9f4ed2b5dbf25b9f28ca83f790d56454d7500025b0720e5aeb",
+                "rust_decoded_java": true
+              },
+              {
+                "deliveries": 26,
+                "id": "mixed-loss",
+                "java_decoded_rust": "retained independent peer output; external campaign reruns Java",
+                "packet_sha256": "2cdc242c7395959b784e4047b5c0a324e54155bd641257f2ea7bb3db2c01c6b8",
+                "rust_decoded_java": true
+              },
+              {
+                "deliveries": 21,
+                "id": "repair-only",
+                "java_decoded_rust": "retained independent peer output; external campaign reruns Java",
+                "packet_sha256": "f01649ebc1320bafea1d6ebd1454d5711679d975d3f687711926dc9386003b2d",
+                "rust_decoded_java": true
+              },
+              {
+                "deliveries": 28,
+                "id": "repair-reversed-duplicates",
+                "java_decoded_rust": "retained independent peer output; external campaign reruns Java",
+                "packet_sha256": "3a61089cc78a76f89c1e0694819ce2b2584f28a6945487e4ab01cca651fe14e2",
+                "rust_decoded_java": true
+              }
+            ],
+            "source_symbols_per_block": [
+              13
+            ],
+            "upstream_systematic_index_annotations": [
+              {
+                "k": 13,
+                "k_prime": 18,
+                "sbn": 0
+              }
+            ]
+          },
+          {
+            "exact_symbols": 58,
+            "id": "f2561-t128-z2-n1-al1",
+            "object_octets": 2561,
+            "oti_hex": "0000000a0100008002000101",
+            "partial_final_source_symbol": true,
+            "scenarios": [
+              {
+                "deliveries": 21,
+                "id": "all-source",
+                "java_decoded_rust": "retained independent peer output; external campaign reruns Java",
+                "packet_sha256": "9332fec50cf86909d8306ecd2bb5faa522c7d9781ecda28c5c6ae75eaa750ba7",
+                "rust_decoded_java": true
+              },
+              {
+                "deliveries": 45,
+                "id": "mixed-loss",
+                "java_decoded_rust": "retained independent peer output; external campaign reruns Java",
+                "packet_sha256": "80289ab93f2e8a9a7922547fb60ea6e2a5b250b3adc01ead326a2bccb5af79d8",
+                "rust_decoded_java": true
+              },
+              {
+                "deliveries": 37,
+                "id": "repair-only",
+                "java_decoded_rust": "retained independent peer output; external campaign reruns Java",
+                "packet_sha256": "9a3140cc804b032ef73b14de7e289212871edb57e5213533a8081a2fd2bd9b40",
+                "rust_decoded_java": true
+              },
+              {
+                "deliveries": 50,
+                "id": "repair-reversed-duplicates",
+                "java_decoded_rust": "retained independent peer output; external campaign reruns Java",
+                "packet_sha256": "4b38b7aa8b7c97677f22299a9c07ca1b9efa8a134485e748e18b47bc97c13163",
+                "rust_decoded_java": true
+              }
+            ],
+            "source_symbols_per_block": [
+              11,
+              10
+            ],
+            "upstream_systematic_index_annotations": [
+              {
+                "k": 11,
+                "k_prime": 12,
+                "sbn": 0
+              },
+              {
+                "k": 10,
+                "k_prime": 10,
+                "sbn": 1
+              }
+            ]
+          },
+          {
+            "exact_symbols": 82,
+            "id": "f4097-t128-z2-n1-al1",
+            "object_octets": 4097,
+            "oti_hex": "000000100100008002000101",
+            "partial_final_source_symbol": true,
+            "scenarios": [
+              {
+                "deliveries": 33,
+                "id": "all-source",
+                "java_decoded_rust": "retained independent peer output; external campaign reruns Java",
+                "packet_sha256": "9bd7bce0de219b4afe1ae8382a99b64c1aeae00bae9d3f593b326f2260481054",
+                "rust_decoded_java": true
+              },
+              {
+                "deliveries": 61,
+                "id": "mixed-loss",
+                "java_decoded_rust": "retained independent peer output; external campaign reruns Java",
+                "packet_sha256": "0757610a1794e2241ef6b3facb05aaf5fe11a47e28faf1d9cae7b89b504897b0",
+                "rust_decoded_java": true
+              },
+              {
+                "deliveries": 49,
+                "id": "repair-only",
+                "java_decoded_rust": "retained independent peer output; external campaign reruns Java",
+                "packet_sha256": "073e7a176f9aa47ee71008f043def9d5ee9c9fc467c7636d76830f3014ade68d",
+                "rust_decoded_java": true
+              },
+              {
+                "deliveries": 66,
+                "id": "repair-reversed-duplicates",
+                "java_decoded_rust": "retained independent peer output; external campaign reruns Java",
+                "packet_sha256": "cad594255622cfb9b691b05f40cb463035ae7453f18231d30e73429213591d5b",
+                "rust_decoded_java": true
+              }
+            ],
+            "source_symbols_per_block": [
+              17,
+              16
+            ],
+            "upstream_systematic_index_annotations": [
+              {
+                "k": 17,
+                "k_prime": 18,
+                "sbn": 0
+              },
+              {
+                "k": 16,
+                "k_prime": 18,
+                "sbn": 1
+              }
+            ]
+          }
+        ],
+        "complete_rfc6330_codec_conformance": false,
+        "exact_encoded_symbols": 264,
+        "generator": {
+          "captured_decoder_direction": "OpenRQ decoded actual Rust raptorq 2.0.1 packets",
+          "compiled_classes_tree_sha256": "e73a5b6f75fbffcb8caa15f74807cdc8ae08830ad234934b8de965a2c17632d3",
+          "generator_sha256": "f554f6235397a9443c89c7c2bf5e31e71521c1e5d92849cda7a1c256ec3fb8fa",
+          "implementation": "OpenRQ",
+          "java_peer_sha256": "849b21947edcd932df230f1e5569a2a3f90d7d852338edfeae22eedc12db0427",
+          "license_path": "interop/OpenRQ-LICENSE.txt",
+          "license_sha256": "bb28c48e3e078166e91cfc2b6db7ffebb8a0973b9e23b3df060561292d8d69ec",
+          "normalization": "OpenRQ omits final-source padding; wrapper restores zero bytes to T. OTI and payload IDs are passed exactly; repair symbols are unchanged.",
+          "repository": "https://github.com/openrq-team/OpenRQ",
+          "revision": "45f4437ba96d7e69a6ee05a2e51cf79cda90448e",
+          "rust_encoder_package": "raptorq 2.0.1; locked Cargo.lock",
+          "source_archive_sha256": "018fbf8f77bdce497596c52cd57bdd2c7b4389cb2b1393f08ed21f68e3883e56",
+          "source_archive_url": "https://codeload.github.com/openrq-team/OpenRQ/tar.gz/45f4437ba96d7e69a6ee05a2e51cf79cda90448e",
+          "source_main_tree_sha256": "2b023582001c97ab3515333c930d6eb0e4626ce51c08a591d84409e43d762270",
+          "source_resources_tree_sha256": "c9760ff6cd8992da4f5a0e51af1367d79efcd915f24f4a42d55def86452acf28",
+          "toolchain": {
+            "archive_sha256": "59422c2292ae4e76b87e00d8808dbe49cffa39af731e08bb0292ddb0af4e0261",
+            "archive_url": "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.8%2B9/OpenJDK21U-jdk_aarch64_mac_hotspot_21.0.8_9.tar.gz",
+            "checksum_url": "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.8%2B9/OpenJDK21U-jdk_aarch64_mac_hotspot_21.0.8_9.tar.gz.sha256.txt",
+            "java_version": "openjdk version \"21.0.8\" 2025-07-15 LTS\nOpenJDK Runtime Environment Temurin-21.0.8+9 (build 21.0.8+9-LTS)\nOpenJDK 64-Bit Server VM Temurin-21.0.8+9 (build 21.0.8+9-LTS, mixed mode, sharing)",
+            "javac_options": [
+              "--release",
+              "8",
+              "-g:none"
+            ],
+            "license": "GPL-2.0 WITH Classpath-exception-2.0",
+            "platform": "macOS aarch64",
+            "release": "jdk-21.0.8+9",
+            "vendor": "Eclipse Temurin"
+          },
+          "unused_source_archive_member_omitted": "src/opt (absolute symlink; unused by main build)",
+          "upstream_license": "Apache-2.0",
+          "upstream_license_url": "https://github.com/openrq-team/OpenRQ/blob/45f4437ba96d7e69a6ee05a2e51cf79cda90448e/LICENSE"
+        },
+        "independent_encoder": "OpenRQ Java",
+        "retained_java_decode_rust_scenarios_verified": 24,
+        "rust_decode_java_scenarios_this_run": 24,
+        "rust_encoder_decoder": "raptorq 2.0.1",
+        "shared_profile": {
+          "Al": 1,
+          "ESI_max": 4095,
+          "F_max": 65536,
+          "K_per_block_max": 256,
+          "N": 1,
+          "T_max": 256,
+          "Z_max": 16,
+          "case_symbol_size": 128,
+          "name": "openrq-shared-al1-single-symbol",
+          "packet_representation": "4-byte RFC6330 payload ID and one complete T-byte symbol"
+        }
+      }
+    },
+    {
+      "id": "raptorq.full-codec-conformance",
+      "specification": "https://www.rfc-editor.org/rfc/rfc6330.html",
+      "section": "complete RFC6330 encoding/decoding and packet reception space",
+      "evidence_class": "conformance",
+      "provenance": "unsupported beyond named profiles; selected independent vectors do not establish complete conformance",
+      "implementation": "not qualified",
+      "status": "unsupported",
+      "observations": {
+        "reason": "Selected independent N=1, Al=1 vectors do not cover the complete RFC6330 parameter and reception space: multiple sub-blocks, multi-symbol packets, shortened final-source packets, all systematic-index transitions and resource/security behavior remain unqualified."
+      }
+    }
+  ]
+}

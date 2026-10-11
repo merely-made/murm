@@ -30,6 +30,14 @@ validation_asset_globs = [
     # first addition after this glob was written did.
     "fuzz/seeds/*/*",
     "testing/*.py",
+    "testing/transport-conformance/Cargo.toml",
+    "testing/transport-conformance/Cargo.lock",
+    "testing/transport-conformance/metadata.toml",
+    "testing/transport-conformance/src/*.rs",
+    "testing/transport-conformance/vectors/*",
+    "testing/transport-conformance/interop/*.py",
+    "testing/transport-conformance/interop/*.java",
+    "testing/transport-conformance/interop/OpenRQ-LICENSE.txt",
     "crates/retinue/oracle/*.py",
     "crates/outrider/oracle/*.py",
     "crates/sennet/capture/*.py",
@@ -93,6 +101,24 @@ command = ["cargo", "test"]
 id = "protocol-capacity"
 tier = "local"
 command = ["cargo", "run", "-p", "protocol-capacity-probe", "--features", "host"]
+
+# Portable offline corpus tests. Imported vector provenance and the independent
+# peer's generated fixture are verified by this isolated workspace, which does
+# not build the production protocol/firmware workspaces.
+[[suite]]
+id = "transport-conformance"
+tier = "pr"
+command = ["cargo", "test", "--manifest-path", "testing/transport-conformance/Cargo.toml", "--locked"]
+asset_globs = ["testing/transport-conformance/Cargo.toml", "testing/transport-conformance/Cargo.lock", "testing/transport-conformance/metadata.toml", "testing/transport-conformance/src/*.rs", "testing/transport-conformance/vectors/*"]
+
+# Live independent peer replay requires a populated pinned-tool cache or an
+# explicitly selected local JDK. Bootstrap and capture are explicit operations;
+# unavailable tooling is an infrastructure error, never conformance success.
+[[suite]]
+id = "transport-conformance-openrq"
+tier = "local"
+command = ["python3", "testing/transport-conformance/interop/openrq_interop.py", "--build-rust-peer", "--tools-dir", "validation/results/openrq-tools"]
+asset_globs = ["testing/transport-conformance/interop/*.py", "testing/transport-conformance/interop/*.java", "testing/transport-conformance/interop/OpenRQ-LICENSE.txt"]
 
 [[suite]]
 id = "retinue-sans-io"
