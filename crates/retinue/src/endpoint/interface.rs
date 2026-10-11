@@ -27,7 +27,7 @@ pub struct Interface {
     pub(super) inbound: InboundTx,
     pub(super) frame_limit: Arc<AtomicUsize>,
     pub(super) ifac: Option<Ifac>,
-    /// Inbound packets dropped because the router's queue was full. Shared with every
+    /// Inbound packets dropped because their router lane was full. Shared with every
     /// [`InterfaceSink`] split off this interface.
     pub(super) dropped: Arc<AtomicU64>,
     pub(super) stats: Arc<InterfaceStats>,
@@ -112,7 +112,7 @@ impl InterfaceSink {
     /// Deliver a received packet into the router.
     ///
     /// Returns whether the endpoint is **still there**, not whether the packet was queued: a
-    /// burst must not look like a dead endpoint to the caller. A full router queue drops the
+    /// burst must not look like a dead endpoint to the caller. A full router lane drops the
     /// packet, since Reticulum's upper layers retransmit, and counts it in [`Self::dropped`].
     pub fn deliver(&self, pkt: Packet) -> bool {
         match self.inbound.try_send(self.id, pkt) {

@@ -1,6 +1,6 @@
 //! A saturated router must not detach a working interface.
 //!
-//! The endpoint's router queue is bounded at 1,024 packets. `try_send` into it fails both
+//! The endpoint's inbound lanes are bounded (path requests at 128). `try_send` into one fails both
 //! when it is momentarily full and when the endpoint has been dropped, and for a while
 //! `InterfaceSink::deliver` collapsed those into a single `false`. Every caller reads
 //! `false` as "the endpoint is gone" and stops serving the interface, so a burst arriving
@@ -25,7 +25,7 @@ async fn a_full_router_queue_drops_packets_without_detaching_the_interface() {
     let endpoint = Endpoint::new(PrivateIdentity::from_secret_bytes(&[0x11; 64]));
     let sink = endpoint.attach_interface().sink();
 
-    // Far more than the 1,024-packet bound, delivered without yielding, so the router has no
+    // Far more than the path-request lane holds, delivered without yielding, so the router has no
     // chance to drain and the queue is certainly full well before the end.
     let burst = 4096;
     for seq in 0..burst {
@@ -40,7 +40,7 @@ async fn a_full_router_queue_drops_packets_without_detaching_the_interface() {
     // invisible from the wire and looks exactly like a peer that never transmitted.
     assert!(
         sink.dropped() > 0,
-        "a 4096-packet burst into a 1024-deep queue must have dropped something",
+        "a 4096-packet burst into a 128-deep lane must have dropped something",
     );
 
     // And the interface still works: once the router drains, delivery resumes on the same
