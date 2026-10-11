@@ -1,4 +1,4 @@
-//! Single packets, receipts, and the packet filter.
+//! Single packets, receipts, the packet filter, the inbound lanes and interface counters.
 
 use super::*;
 
@@ -222,4 +222,130 @@ async fn a_later_identify_does_not_replace_the_first() {
             .unwrap();
         assert_eq!(session.identified_peer, peer, "{direction:?}");
     }
+}
+
+fn path_request_packet(seq: u8) -> Packet {
+    crate::path::path_request(AddressHash::from_bytes([seq; 16]), &[seq; 16])
+}
+
+fn data_packet(seq: u8) -> Packet {
+    single_packet(AddressHash::from_bytes([0x44; 16]), vec![seq])
+}
+
+/// The router drains data, then announces, then path requests (`Transport.py` 70-80).
+#[tokio::test]
+async fn inbound_lanes_drain_in_priority_order() {
+    let (tx, mut rx) = super::super::inbound_queue::channel();
+    let (announce, _) = peer_announce(0x51, "lanes");
+    tx.try_send(1, path_request_packet(1)).unwrap();
+    tx.try_send(1, announce).unwrap();
+    tx.try_send(1, data_packet(1)).unwrap();
+    assert_eq!(rx.heights(), [1, 1, 1, 0]);
+    let mut order = Vec::new();
+    for _ in 0..3 {
+        let inbound = rx.recv().await.unwrap();
+        order.push((inbound.packet.packet_type, inbound.packet.destination_type));
+    }
+    assert_eq!(
+        order,
+        [
+            (PacketType::Data, DestinationType::Single),
+            (PacketType::Announce, DestinationType::Single),
+            (PacketType::Data, DestinationType::Plain),
+        ]
+    );
+}
+
+/// A full lane drops its own class only, counted per lane, and a path request from an
+/// interface in a path-request burst takes the ingress-limited lane.
+#[tokio::test]
+async fn a_full_lane_drops_only_its_own_class() {
+    let ep = Endpoint::new(PrivateIdentity::from_secret_bytes(&[0x52; 64]));
+    let wire = ep.attach_interface();
+    let queue = &ep.shared.inbound_queue;
+    let (announce, _) = peer_announce(0x53, "flood");
+    for _ in 0..128 {
+        queue.try_send(wire.id(), announce.clone()).unwrap();
+    }
+    assert_eq!(
+        queue.try_send(wire.id(), announce),
+        Err(super::super::inbound_queue::TrySendError::Full)
+    );
+    assert!(queue.try_send(wire.id(), data_packet(1)).is_ok());
+    assert!(queue.try_send(wire.id(), path_request_packet(1)).is_ok());
+    wire.stats.path_request_burst.store(true, Ordering::Relaxed);
+    for seq in 0..9 {
+        let _ = queue.try_send(wire.id(), path_request_packet(seq));
+    }
+    let counters = ep.routing_counters();
+    assert_eq!(counters.inbound_announces_dropped, 1);
+    assert_eq!(counters.inbound_ingress_limited_dropped, 1);
+    assert_eq!(counters.inbound_data_dropped, 0);
+    assert_eq!(counters.inbound_path_requests_dropped, 0);
+    let stats = ep.interface_counters(wire.id()).unwrap();
+    assert_eq!(stats.announces_rx, 129);
+    assert_eq!(stats.path_requests_rx, 10);
+}
+
+/// A stream reader waits for room in the data lane, but never in another.
+#[tokio::test]
+async fn only_the_data_lane_backpressures_a_sender() {
+    let (tx, mut rx) = super::super::inbound_queue::channel();
+    for seq in 0..1024 {
+        tx.try_send(1, data_packet(seq as u8)).unwrap();
+    }
+    let (announce, _) = peer_announce(0x54, "backpressure");
+    for _ in 0..129 {
+        assert!(
+            tx.send(1, announce.clone()).await,
+            "a full announce lane drops"
+        );
+    }
+    assert_eq!(rx.heights(), [1024, 128, 0, 0]);
+    let waiting = tokio::spawn({
+        let tx = tx.clone();
+        async move { tx.send(1, data_packet(0xFF)).await }
+    });
+    tokio::time::sleep(Duration::from_millis(20)).await;
+    assert!(!waiting.is_finished(), "a full data lane waits");
+    assert!(rx.recv().await.is_some());
+    assert!(waiting.await.unwrap());
+    drop(rx);
+    assert!(
+        !tx.send(1, data_packet(0)).await,
+        "a stopped router is reported"
+    );
+}
+
+/// The interface counters see frames both ways, classified, with the carrier's state.
+#[tokio::test]
+async fn interface_counters_classify_traffic() {
+    let ep = Endpoint::new(PrivateIdentity::from_secret_bytes(&[0x55; 64]));
+    let wire = ep.attach_interface();
+    let id = wire.id();
+    let (out, sink) = wire.split();
+    let (announce, _) = peer_announce(0x56, "counters");
+    let frame = announce.encode();
+    assert!(sink.deliver_frame(&frame).unwrap());
+    let request = path_request_packet(7);
+    out.encode(&request).unwrap();
+    let mut flagged = data_packet(1).encode();
+    flagged[0] |= 0x80;
+    assert!(sink.deliver_frame(&flagged).unwrap());
+    tokio::time::sleep(Duration::from_millis(50)).await;
+
+    let c = ep.interface_counters(id).unwrap();
+    assert_eq!(
+        (c.rx_packets, c.rx_bytes),
+        (2, (frame.len() + flagged.len()) as u64)
+    );
+    assert_eq!(
+        (c.announces_rx, c.announce_rx_bytes),
+        (1, frame.len() as u64)
+    );
+    assert_eq!((c.tx_packets, c.path_requests_tx), (1, 1));
+    assert_eq!(c.path_request_tx_bytes, request.encoded_len() as u64);
+    assert_eq!(c.ifac_violations, 1, "a flagged frame on a plain interface");
+    assert!(c.online && c.mode == InterfaceMode::Full && !c.burst_active);
+    assert!(alloc::format!("{c}").contains("\"ifac_violations\":1,"));
 }

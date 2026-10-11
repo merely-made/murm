@@ -168,6 +168,7 @@ impl Endpoint {
             discovery: Discovery::default(),
         });
 
+        shared.inbound_queue.bind(&shared);
         let router = Arc::clone(&shared);
         track(&shared, async move {
             while let Some(inbound) = inbound_rx.recv().await {
@@ -178,6 +179,8 @@ impl Endpoint {
                         .routing_stats
                         .ifac_flag_rejected
                         .fetch_add(1, Ordering::Relaxed);
+                    // RNS counts it against the interface too (`Transport.py` 1784).
+                    router.with_iface(inbound.iface, |iface| iface.stats.note_ifac_violation());
                     continue;
                 }
                 dispatch(
