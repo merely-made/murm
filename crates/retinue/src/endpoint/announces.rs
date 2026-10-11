@@ -13,8 +13,9 @@ use crate::announce_admission::{
     AnnounceIngressCounters, AnnounceIngressPolicy, DestinationVerdict, InterfaceVerdict,
 };
 use crate::announce_freshness::{
-    AnnounceFreshness, AnnounceFreshnessCandidate, AnnounceFreshnessConfig,
-    AnnounceFreshnessConfigError, AnnounceFreshnessDecision, AnnounceFreshnessReject,
+    AnnounceFreshness, AnnounceFreshnessAccept, AnnounceFreshnessCandidate,
+    AnnounceFreshnessConfig, AnnounceFreshnessConfigError, AnnounceFreshnessDecision,
+    AnnounceFreshnessReject,
 };
 use crate::packet::Packet;
 
@@ -289,7 +290,8 @@ impl Endpoint {
 
 /// Interface admission for a verified announce (`Transport.py` 1807-1825): one for an
 /// unknown destination waits while its interface bursts, unless we asked for its path in the
-/// last [`PATH_REQUEST_GATE`], so a path response is never stuck behind a flood.
+/// last [`PATH_REQUEST_GATE`] or search for it on someone's behalf, so a path response is
+/// never stuck behind a flood.
 pub(super) fn admit_verified_announce(
     shared: &Arc<Shared>,
     iface: InterfaceId,
@@ -298,7 +300,8 @@ pub(super) fn admit_verified_announce(
 ) {
     let destination = announce.destination;
     let known = shared.path_table.lock().unwrap().contains_key(&destination)
-        || shared.path_requested_within(destination, PATH_REQUEST_GATE);
+        || shared.path_requested_within(destination, PATH_REQUEST_GATE)
+        || shared.discovery.awaits(destination);
     let ingress = shared.iface_policy(iface).ingress;
     let now = shared.announce_admission_now_ms();
     let (verdict, evicted) = shared
@@ -428,17 +431,19 @@ pub(super) fn process_verified_announce(
     // Freshness belongs to the route. Without a live one this is a first sighting, as after
     // an RNS path cull, which is what lets a cached path response restore an expired route.
     let route_live = shared.has_live_route(announce.destination);
+    // A same-emission copy on a higher-gravity interface is a full path update in RNS
+    // (`Transport.py` 2229-2251 into 2335-2395), relayed as a new path would be; it is not a
+    // new announcement, so it is not published again.
     let accepted = match freshness.table.evaluate(candidate, route_live) {
-        AnnounceFreshnessDecision::Accept(accepted) => accepted,
+        AnnounceFreshnessDecision::Accept(accepted) => Some(accepted),
         AnnounceFreshnessDecision::Reject(_)
             if shared.gravity_repoints(&freshness.table, candidate, iface, pkt.hops) =>
         {
-            shared.learn_path(announce.destination, iface, pkt.hops, pkt.transport);
             shared
                 .routing_stats
                 .gravity_repoints
                 .fetch_add(1, Ordering::Relaxed);
-            return;
+            None
         }
         AnnounceFreshnessDecision::Reject(AnnounceFreshnessReject::Replay) => {
             shared
@@ -455,7 +460,86 @@ pub(super) fn process_verified_announce(
             return;
         }
     };
+    let destination = announce.destination;
+    if let Some(accepted) = accepted {
+        publish_accepted(
+            shared,
+            &mut freshness,
+            iface,
+            &pkt,
+            announce,
+            candidate,
+            accepted,
+        );
+    } else {
+        // A header-type-2 announce's transport node belongs to this destination's route, not
+        // to the interface: one radio reaches different destinations through different nodes.
+        shared.learn_path(destination, iface, pkt.hops, pkt.transport);
+    }
+    super::discovery::announce_learned(shared, &pkt);
 
+    // A path response answers one requester: RNS learns from it but never rebroadcasts it or
+    // rate-counts it, so one path request cannot flood the mesh.
+    if pkt.context == crate::path::CTX_PATH_RESPONSE {
+        return;
+    }
+
+    // RNS rate-counts every path-updating announce arriving on an interface with a rate rule,
+    // relayed or not (`Transport.py` 2299-2333). An interface's own rule applies always; the
+    // endpoint's only to a transport, as RNS sets `default_ar_*` (`Reticulum.py` 968-971).
+    let policy = shared.routing.lock().unwrap().clone();
+    let now = shared.announce_admission_now_ms();
+    let rate_override = shared.iface_policy(iface).announce_rate;
+    let mut admission = shared.announce_admission.lock().unwrap();
+    let rate = rate_override.or_else(|| {
+        policy
+            .forward_announces
+            .then(|| admission.policy().destination_rate())
+            .flatten()
+    });
+    let blocked = rate.is_some_and(|rate| {
+        admission.observe_destination(destination, rate, now) == DestinationVerdict::BlockRelay
+    });
+    drop(admission);
+
+    // Relay as a transport node: hops+1, stamped with our identity so downstream peers
+    // address replies through us, from the rebroadcast table.
+    let repointed = accepted.is_none();
+    if !policy.relays_announce_from(iface) || !(repointed || shared.announce_is_new(pkt.hash())) {
+        return;
+    }
+    if blocked {
+        shared
+            .routing_stats
+            .relay_rate_limited_announces
+            .fetch_add(1, Ordering::Relaxed);
+        return;
+    }
+    if pkt.hops.saturating_add(1) >= policy.max_hops {
+        shared
+            .routing_stats
+            .hop_limit_dropped
+            .fetch_add(1, Ordering::Relaxed);
+        return;
+    }
+    let mut fwd = pkt;
+    fwd.hops += 1;
+    fwd.header_type = crate::packet::HeaderType::Type2;
+    fwd.transport = Some(shared.identity.public().hash());
+    shared.schedule_rebroadcast(iface, fwd, candidate.blob.timebase());
+}
+
+/// Admit an accepted announce's identity to the address book, record its freshness, learn
+/// its route and publish it.
+fn publish_accepted(
+    shared: &Shared,
+    freshness: &mut AnnounceFreshnessState,
+    iface: InterfaceId,
+    pkt: &Packet,
+    announce: Announce,
+    candidate: AnnounceFreshnessCandidate,
+    accepted: AnnounceFreshnessAccept,
+) {
     // A full book evicts the least recently heard peer with no live path or link. A refusal
     // only keeps the identity out of the book (no `PeerAnnounce`): the path is still learned
     // and the announce still relayed, as RNS relays from its path table.
@@ -497,8 +581,6 @@ pub(super) fn process_verified_announce(
             .fetch_add(1, Ordering::Relaxed);
     }
     let destination = announce.destination;
-    // A header-type-2 announce's transport node belongs to this destination's route, not to
-    // the interface: one radio reaches different destinations through different nodes.
     shared.learn_path(destination, iface, pkt.hops, pkt.transport);
     if admitted {
         let sequence = shared.announce_sequence.fetch_add(1, Ordering::Relaxed) + 1;
@@ -512,53 +594,4 @@ pub(super) fn process_verified_announce(
             sequence,
         });
     }
-
-    // A path response answers one requester: RNS learns from it but never rebroadcasts it or
-    // rate-counts it, so one path request cannot flood the mesh.
-    if pkt.context == crate::path::CTX_PATH_RESPONSE {
-        return;
-    }
-
-    // RNS rate-counts every path-updating announce arriving on an interface with a rate rule,
-    // relayed or not (`Transport.py` 2299-2333). An interface's own rule applies always; the
-    // endpoint's only to a transport, as RNS sets `default_ar_*` (`Reticulum.py` 968-971).
-    let policy = shared.routing.lock().unwrap().clone();
-    let now = shared.announce_admission_now_ms();
-    let rate_override = shared.iface_policy(iface).announce_rate;
-    let mut admission = shared.announce_admission.lock().unwrap();
-    let rate = rate_override.or_else(|| {
-        policy
-            .forward_announces
-            .then(|| admission.policy().destination_rate())
-            .flatten()
-    });
-    let blocked = rate.is_some_and(|rate| {
-        admission.observe_destination(destination, rate, now) == DestinationVerdict::BlockRelay
-    });
-    drop(admission);
-
-    // Relay as a transport node: hops+1, stamped with our identity so downstream peers
-    // address replies through us, from the rebroadcast table.
-    if !policy.relays_announce_from(iface) || !shared.announce_is_new(pkt.hash()) {
-        return;
-    }
-    if blocked {
-        shared
-            .routing_stats
-            .relay_rate_limited_announces
-            .fetch_add(1, Ordering::Relaxed);
-        return;
-    }
-    if pkt.hops.saturating_add(1) >= policy.max_hops {
-        shared
-            .routing_stats
-            .hop_limit_dropped
-            .fetch_add(1, Ordering::Relaxed);
-        return;
-    }
-    let mut fwd = pkt;
-    fwd.hops += 1;
-    fwd.header_type = crate::packet::HeaderType::Type2;
-    fwd.transport = Some(shared.identity.public().hash());
-    shared.schedule_rebroadcast(iface, fwd, candidate.blob.timebase());
 }
