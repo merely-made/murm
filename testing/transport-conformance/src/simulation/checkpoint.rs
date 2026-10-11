@@ -186,6 +186,8 @@ pub fn run_peer(request: &[u8]) -> Result<Vec<u8>, String> {
             report: Box::new(resume(&checkpoint)?),
         },
     };
+    let mut response = serde_json::to_value(response).map_err(|e| e.to_string())?;
+    response["implementation"] = crate::implementation_identity();
     let bytes = serde_json::to_vec(&response).map_err(|e| e.to_string())?;
     require(
         bytes.len() <= MAX_PEER_BYTES,

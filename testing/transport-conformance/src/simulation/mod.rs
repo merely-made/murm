@@ -21,7 +21,8 @@ use scheduler::Scheduler;
 use serde::{Deserialize, Serialize};
 use types::{DemandSample, MAX_FRAME_BYTES};
 pub use types::{
-    GenerationSpec, Impairments, MAX_PEER_BYTES, ReceiverSpec, RunReport, Scenario, SlotRange,
+    GenerationSpec, Impairments, MAX_PEER_BYTES, MAX_RETURNED_OBJECT_OCTETS, ReceiverSpec,
+    RunReport, Scenario, SlotRange,
 };
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -308,4 +309,58 @@ pub(crate) fn validate_pending(
         hex::decode(&delivery.wire_hex).map_err(|e| e.to_string())?;
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn external_original_is_returned_byte_exact_after_decode_and_resume() {
+        // Opaque binary bytes deliberately have no application serialization meaning.
+        let original: Vec<u8> = (0..301).map(|i| (i * 73 % 256) as u8).collect();
+        let hexadecimal = hex::encode(&original);
+        let mut scenario: super::Scenario = serde_json::from_value(serde_json::json!({
+            "schema": "transport-conformance.simulation/v1", "id": "external-original-smoke",
+            "namespace": 900, "slots": 24, "channels": 4, "manifest_interval": 4,
+            "repair_floor": 1, "generations": [{"id": 1, "publish_slot": 0,
+            "expires_slot": 24, "object_octets": original.len(), "original_hex": hexadecimal}],
+            "receivers": [{"id": "owner", "radios": 4}],
+            "impairments": {"erase_every": 3, "duplicate_every": 5, "reorder_delay_slots": 2}
+        }))
+        .unwrap();
+        let run = super::simulate(&scenario).unwrap();
+        assert_eq!(
+            run.receivers[0].generations[0]
+                .recovered_object_hex
+                .as_deref(),
+            Some(hexadecimal.as_str())
+        );
+        let checkpoint = super::checkpoint_at(&scenario, 2).unwrap();
+        let resumed = super::resume(&checkpoint).unwrap();
+        assert_eq!(
+            resumed.receivers[0].generations[0]
+                .recovered_object_hex
+                .as_deref(),
+            Some(hexadecimal.as_str())
+        );
+        assert_eq!(
+            run.semantic_terminal_blake3,
+            resumed.semantic_terminal_blake3
+        );
+        assert_eq!(run.trace_blake3, resumed.trace_blake3);
+        scenario.generations[0].expires_slot = 12;
+        let mut expired = super::Engine::new(scenario.clone()).unwrap();
+        expired.run_until(14).unwrap();
+        let saved = expired.receivers[0].save();
+        assert!(saved.active.is_empty());
+        assert!(super::receiver::Receiver::validate_saved(saved.clone(), &scenario, 14).is_ok());
+        let mut malformed = saved;
+        malformed.report.generations[0].recovered_object_hex = Some("zz".repeat(original.len()));
+        assert!(super::receiver::Receiver::validate_saved(malformed, &scenario, 14).is_err());
+        scenario.generations[0]
+            .original_hex
+            .as_mut()
+            .unwrap()
+            .push_str("00");
+        assert!(scenario.validate().is_err());
+    }
 }

@@ -81,14 +81,22 @@ pub(crate) fn namespace(number: u64) -> [u8; 32] {
     *hasher.finalize().as_bytes()
 }
 
-pub(crate) fn original(spec: &GenerationSpec, namespace: &[u8; 32]) -> Vec<u8> {
+pub(crate) fn original(spec: &GenerationSpec, namespace: &[u8; 32]) -> Result<Vec<u8>, String> {
+    if let Some(hexadecimal) = &spec.original_hex {
+        crate::require(
+            spec.object_octets <= 65_536 && hexadecimal.len() == spec.object_octets as usize * 2,
+            "external original length budget",
+        )?;
+        return hex::decode(hexadecimal)
+            .map_err(|_| "external original contains invalid hex".into());
+    }
     let mut bytes = vec![0; spec.object_octets as usize];
     let mut hasher = blake3::Hasher::new();
     hasher.update(b"retinue.retained-repair-simulation.object.v1");
     hasher.update(namespace);
     hasher.update(&spec.id.to_be_bytes());
     hasher.finalize_xof().fill(&mut bytes);
-    bytes
+    Ok(bytes)
 }
 
 fn head(out: &mut Vec<u8>, major: u8, number: u64) {

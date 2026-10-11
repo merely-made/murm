@@ -14,6 +14,7 @@ pub(crate) const MAX_ACTIVE: usize = 8;
 pub(crate) const MAX_DECODE_WORK: u64 = 4096;
 pub(crate) const MAX_PACKETS: usize = 4096;
 pub(crate) const MAX_GENERATED: u64 = 16_384;
+pub const MAX_RETURNED_OBJECT_OCTETS: u64 = 256 * 1024;
 
 fn default_symbol_size() -> u16 {
     128
@@ -57,6 +58,9 @@ pub struct GenerationSpec {
     pub publish_slot: u32,
     pub expires_slot: u32,
     pub object_octets: u32,
+    /// Opaque original application bytes. Absence selects the authored recipe.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub original_hex: Option<String>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -148,7 +152,24 @@ impl Scenario {
                 "generation lifetime budget",
             )?;
             self.oti(generation)?.bounded()?;
+            if let Some(original) = &generation.original_hex {
+                require(
+                    original.len() == generation.object_octets as usize * 2,
+                    "external original hex length differs from object_octets",
+                )?;
+                hex::decode(original).map_err(|_| "external original contains invalid hex")?;
+            }
         }
+        let external_octets: u64 = self
+            .generations
+            .iter()
+            .filter(|g| g.original_hex.is_some())
+            .map(|g| u64::from(g.object_octets))
+            .sum();
+        require(
+            external_octets * self.receivers.len() as u64 <= MAX_RETURNED_OBJECT_OCTETS,
+            "external recovered-object output budget exceeded",
+        )?;
         for slot in 0..self.slots {
             let active: Vec<_> = self
                 .generations
@@ -259,6 +280,9 @@ pub struct GenerationRxReport {
     pub manifest_seen: bool,
     pub completion_slot: Option<u32>,
     pub reconstructed_blake3: Option<String>,
+    /// Exact recovered bytes for an external original; this grants no admission.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub recovered_object_hex: Option<String>,
     pub expired: bool,
     pub incomplete_expired: bool,
 }

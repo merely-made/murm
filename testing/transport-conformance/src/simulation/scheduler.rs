@@ -74,7 +74,7 @@ impl Scheduler {
     pub fn new(scenario: &Scenario) -> Result<Self, String> {
         // Check signed frame costs for every declared generation before any encoder.
         for spec in &scenario.generations {
-            let object = wire::original(spec, &wire::namespace(scenario.namespace));
+            let object = wire::original(spec, &wire::namespace(scenario.namespace))?;
             let (manifest, bytes) = wire::manifest(spec, scenario, &object)?;
             let packet = vec![0; 4 + usize::from(scenario.symbol_size)];
             let symbol = wire::symbol(
@@ -120,7 +120,7 @@ impl Scheduler {
             .iter()
             .filter(|g| g.publish_slot == slot)
         {
-            let original = wire::original(spec, &wire::namespace(scenario.namespace));
+            let original = wire::original(spec, &wire::namespace(scenario.namespace))?;
             let (manifest, manifest_wire) = wire::manifest(spec, scenario, &original)?;
             let block_k = block_counts(manifest.oti);
             let total = block_k.iter().sum();

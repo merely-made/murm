@@ -43,6 +43,21 @@ cargo run --locked --offline -- --simulation-peer <<'JSON'
 JSON
 ```
 
+For an application-owned object, add `original_hex` to its generation and set
+`object_octets` to the decoded byte length. Hex must be valid and match that
+length, with a 64 KiB limit including the application wrapper. On successful
+length/digest-checked reconstruction, the generation under each receiver has
+`recovered_object_hex`, containing the exact decoder output. Synthetic fixtures
+omit both fields. Across receivers, possible returned originals are capped at
+256 KiB raw; request and response JSON are each capped at 4 MiB. Retinue does
+not parse, modify, re-sign or admit those application bytes.
+
+The response's `implementation` field identifies the actual compiled peer
+source/config/dependency fingerprint and its base repository revision/dirty
+state. A downstream probe can additionally hash the peer executable it ran.
+The Mere-owned `retained_receive` example demonstrates the receive handoff
+through existing operation-record decoding and production mesh admission.
+
 `op="checkpoint"` takes the same `scenario` and `after_slot`. Its returned
 checkpoint can be passed unchanged in an `op="resume"` request. The snapshot
 contains scheduler cursors, retained originals, receiver collection and pending
