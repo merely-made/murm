@@ -1,7 +1,7 @@
 //! Answering and budgeting path requests.
 
 use super::*;
-use crate::endpoint::paths::PATH_REQUEST_GATE;
+use crate::endpoint::paths::{PATH_REQUEST_GATE, PATH_TABLE_CAPACITY};
 use crate::endpoint::{
     IfacePolicy, InterfaceSelector, ListenPolicy, PathRequestPolicy, RoutingPolicy,
 };
@@ -258,6 +258,7 @@ async fn a_transport_answers_from_its_announce_cache() {
     assert_eq!((answer.header_type, answer.hops), (HeaderType::Type2, 3));
     assert_eq!(answer.transport, Some(ep.identity().hash()));
     assert_eq!(answer.payload, packet.payload);
+    assert_eq!(answer.propagation, crate::packet::Propagation::Transport);
     assert!(next(&mut source, Duration::from_secs(5)).await.is_none());
     assert_eq!(ep.routing_counters().path_requests_answered, 1);
 
@@ -265,6 +266,39 @@ async fn a_transport_answers_from_its_announce_cache() {
     ep.set_routing_policy(RoutingPolicy::none());
     route(&ep.shared, asker.id(), request(announce.destination, 2));
     assert!(next(&mut asker, Duration::from_secs(5)).await.is_none());
+}
+
+/// Requesters on two interfaces inside one grace are both answered: the later answer holds
+/// the earlier one back rather than replacing it (`Transport.py` 811-819, 3511-3516).
+#[tokio::test(start_paused = true)]
+async fn concurrent_requesters_are_each_answered() {
+    let ep = quiet_transport(0x7E, vec![]);
+    let source = ep.attach_interface();
+    let mut first = ep.attach_interface();
+    let mut second = ep.attach_interface();
+    let (packet, announce) = peer_announce(0x7F, "popular");
+    route(&ep.shared, source.id(), relayed(&packet, 0xA1, 2));
+    route(&ep.shared, first.id(), request(announce.destination, 1));
+    route(&ep.shared, second.id(), request(announce.destination, 2));
+    for iface in [&mut second, &mut first] {
+        let answer = next(iface, Duration::from_secs(5)).await.expect("answered");
+        assert_eq!(answer.context, crate::path::CTX_PATH_RESPONSE);
+    }
+    assert_eq!(ep.routing_counters().path_requests_answered, 2);
+}
+
+/// A route with no cached announce still counts as known: no search goes out (3462-3466).
+#[tokio::test(start_paused = true)]
+async fn a_known_route_is_never_searched_for() {
+    let ep = quiet_transport(0x6E, vec![]);
+    let gateway = ep.attach_interface();
+    let mut out = ep.attach_interface();
+    assert!(ep.set_interface_mode(gateway.id(), InterfaceMode::Gateway));
+    let target = AddressHash::from_bytes([0x6F; 16]);
+    ep.shared.learn_path(target, out.id(), 1, None);
+    route(&ep.shared, gateway.id(), request(target, 1));
+    assert!(next(&mut out, Duration::from_secs(1)).await.is_none());
+    assert_eq!(ep.routing_counters().path_requests_searched, 0);
 }
 
 /// No answer leads back where the request came from: a route learned on the same roaming
@@ -474,4 +508,25 @@ async fn the_announce_cache_follows_the_route() {
     );
     ep.shared.forget_path(announce.destination);
     assert!(ep.shared.discovery.announces.lock().unwrap().is_empty());
+
+    // Evicted from a full table, a route drops its announce at once.
+    for seed in 0x60..0x60 + PATH_TABLE_CAPACITY as u8 + 1 {
+        route(&ep.shared, iface.id(), peer_announce(seed, "filler").0);
+    }
+    let routed: std::collections::HashSet<_> = ep
+        .shared
+        .path_table
+        .lock()
+        .unwrap()
+        .keys()
+        .copied()
+        .collect();
+    let cache = ep.shared.discovery.announces.lock().unwrap();
+    assert_eq!(
+        cache
+            .keys()
+            .copied()
+            .collect::<std::collections::HashSet<_>>(),
+        routed
+    );
 }

@@ -1,5 +1,6 @@
 //! The path table, path requests, and path responses.
 
+use alloc::vec::Vec;
 use std::collections::HashSet;
 use std::sync::atomic::Ordering;
 use std::time::{Duration, Instant};
@@ -197,12 +198,19 @@ impl Shared {
         now: Instant,
     ) {
         let mode = self.interface_mode(iface);
+        let mut evicted = Vec::new();
         let learned = self.write_diagnostic(|| {
             let mut t = self.path_table.lock().unwrap();
             let route_ttl = self.route_ttl();
             if t.len() >= PATH_TABLE_CAPACITY && !t.contains_key(&dest) {
                 // The dead first: a table full of expired routes must never evict a live one.
-                t.retain(|_, e| e.live_at(now, route_ttl));
+                t.retain(|dest, e| {
+                    let live = e.live_at(now, route_ttl);
+                    if !live {
+                        evicted.push(*dest);
+                    }
+                    live
+                });
                 // Every route is live, so the quietest peer loses.
                 if t.len() >= PATH_TABLE_CAPACITY
                     && let Some(stalest) = t
@@ -211,6 +219,7 @@ impl Shared {
                         .map(|(dest, _)| *dest)
                 {
                     t.remove(&stalest);
+                    evicted.push(stalest);
                     self.routing_stats
                         .paths_evicted
                         .fetch_add(1, Ordering::Relaxed);
@@ -227,6 +236,9 @@ impl Shared {
             t.insert(dest, next);
             (next, changed)
         });
+        evicted
+            .into_iter()
+            .for_each(|gone| self.discovery.forget(gone));
         self.tunnel_path_learned(dest, &learned);
     }
 

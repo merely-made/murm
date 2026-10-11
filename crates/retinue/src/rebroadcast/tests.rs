@@ -136,6 +136,28 @@ fn a_path_response_goes_once_and_restores_the_relay_it_displaced() {
 }
 
 #[test]
+fn concurrent_path_responses_each_reach_their_interface() {
+    let answer = |iface| Rebroadcast {
+        answer: Some(iface),
+        ..rebroadcast(1, 2, 0)
+    };
+    let mut table = Rebroadcasts::new(4);
+    assert!(table.schedule(rebroadcast(1, 1, 0), 0, 900));
+    assert!(table.answer(answer(7), 0, 400));
+    assert!(table.answer(answer(8), 100, 400));
+    assert!(table.answer(answer(8), 200, 400), "a repeat supersedes");
+    assert!(
+        table.schedule(rebroadcast(1, 1, 1), 300, 900),
+        "held behind"
+    );
+    let sent: Vec<_> = core::iter::from_fn(|| table.pop_due(5_000))
+        .map(|rebroadcast| rebroadcast.answer)
+        .collect();
+    assert_eq!(sent[..3], [Some(8), Some(7), None]);
+    assert_eq!(table.len(), 1, "the relay keeps its retry");
+}
+
+#[test]
 fn a_recursive_path_request_spends_the_announce_budget() {
     let rate = CapRate::from_bitrate(1_200, 2);
     let mut cap = AnnounceCap::new(4);

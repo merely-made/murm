@@ -18,6 +18,8 @@ side's own state and compared with the same case run against the stock control:
   roaming  T dials B directly on a ROAMING interface and B asks for its own destination: the
            path was learned on that same roaming interface, so no path response reaches B
            (3468-3471). On a FULL interface (the check that the tap sees answers) one does.
+           A TCP link is point to point, so B is the only peer on that interface; the rule
+           keys on the interface the path came by, not on who asks.
 
 Build: cargo build -p retinue --example discovery_node
 Run:   python -u interop_path_discovery.py   (CARGO_TARGET_DIR as for the build)
@@ -121,10 +123,13 @@ def discovery(stock: bool, a_mode: str) -> dict:
         result["hops"] = int(hops.group(1)) if hops else None
         link = a.ask(f"link {dest}", rf"LINK {dest} (\w+)", 25)
         result["link"] = link.group(1) if link else None
+        result["a2_before"] = a2.has(dest)
         asked = time.monotonic()
         a2.send(f"request {dest}")
         cached = wait_until(lambda: a2.has(dest), CACHE_WINDOW + 3, 0.1)
         result["cache_s"] = round(time.monotonic() - asked, 2) if cached else None
+        hops = a2.ask(f"hops {dest}", rf"HOPS {dest} (\d+)")
+        result["a2_hops"] = int(hops.group(1)) if hops else None
         if not stock:
             counters = t.ask("counters", r"COUNTERS (\d+) (\d+) \d+ \d+")
             result["answered_searched"] = tuple(map(int, counters.groups())) if counters else None
@@ -225,10 +230,14 @@ def main() -> int:
                   f"retinue {r['hops']}, stock {s['hops']}")
     ok &= verdict("gateway: A's link to B goes ACTIVE through T", r["link"] == s["link"] == "ACTIVE",
                   f"retinue {r['link']}, stock {s['link']}")
+    ok &= verdict("cache: A2 has no path before it asks", not r["a2_before"] and not s["a2_before"], "")
     ok &= verdict("cache: A2 has the path within 2 s",
                   r["cache_s"] is not None and r["cache_s"] <= CACHE_WINDOW
                   and s["cache_s"] is not None and s["cache_s"] <= CACHE_WINDOW,
                   f"retinue {r['cache_s']} s, stock {s['cache_s']} s")
+    ok &= verdict("cache: A2's hops_to matches the control",
+                  r["a2_hops"] is not None and r["a2_hops"] == s["a2_hops"],
+                  f"retinue {r['a2_hops']}, stock {s['a2_hops']}")
     ok &= verdict("retinue searched once and answered once from its cache",
                   r.get("answered_searched") == (1, 1), f"{r.get('answered_searched')}")
     ok &= verdict("full: A does not learn B, as the control",

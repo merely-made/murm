@@ -12,14 +12,14 @@ mod rates;
 
 use alloc::vec::Vec;
 
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use std::sync::atomic::Ordering;
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
 use crate::hash::AddressHash;
 use crate::iface_mode::{InterfaceMode, discovers_paths};
-use crate::packet::{HeaderType, Packet};
+use crate::packet::{HeaderType, Packet, Propagation};
 use crate::path::{PathRequest, path_request_via};
 
 use super::iface_policy::PathRequestPolicy;
@@ -161,6 +161,7 @@ fn search_timeout(shared: &Shared, ifaces: &[Seen]) -> Duration {
 /// addressed through us (`Transport.py` 2438-2453, 3486-3519).
 fn path_response_copy(shared: &Shared, mut announce: Packet, hops: u8) -> Packet {
     announce.header_type = HeaderType::Type2;
+    announce.propagation = Propagation::Transport;
     announce.transport = Some(shared.identity.public().hash());
     announce.hops = hops;
     announce.context = crate::path::CTX_PATH_RESPONSE;
@@ -224,8 +225,18 @@ pub(super) fn handle_path_request(
     let answered = if let Some(response) = shared.path_response(target) {
         shared.send_on_class(iface, response, TrafficClass::Control);
         true
-    } else if transport && let Some((route, announce)) = cached_route(shared, target) {
-        answer_from_cache(shared, iface, &request, route, announce);
+    } else if transport && let Some(route) = shared.live_route(target) {
+        // Any route counts as answered, even one with no cached announce (3462-3466).
+        let cached = shared
+            .discovery
+            .announces
+            .lock()
+            .unwrap()
+            .get(&target)
+            .cloned();
+        if let Some(announce) = cached {
+            answer_from_cache(shared, iface, &request, route, announce);
+        }
         true
     } else {
         if transport {
@@ -249,19 +260,6 @@ pub(super) fn handle_path_request(
             .inflight
             .remove(&target);
     }
-}
-
-/// The live route to `target` and the announce that taught it.
-fn cached_route(shared: &Shared, target: AddressHash) -> Option<(PathEntry, Packet)> {
-    let route = shared.live_route(target)?;
-    let announce = shared
-        .discovery
-        .announces
-        .lock()
-        .unwrap()
-        .get(&target)
-        .cloned()?;
-    Some((route, announce))
 }
 
 /// Queue a path response from the cache, unless the route leads back where the request came
@@ -415,11 +413,13 @@ impl Discovery {
     /// Whether a search waits for `destination`, which exempts its announce from ingress holds
     /// (`Transport.py` 1815-1821).
     pub(super) fn awaits(&self, destination: AddressHash) -> bool {
+        let now = Instant::now();
         self.state
             .lock()
             .unwrap()
             .waiting
-            .contains_key(&destination)
+            .get(&destination)
+            .is_some_and(|waiting| now < waiting.expires)
     }
 
     /// Drop the cached announce of a route that is gone.
@@ -429,7 +429,9 @@ impl Discovery {
 }
 
 /// A route to `announce`'s destination was learned from it: cache it, and pass it at once to
-/// every interface waiting for it, as a path response (`Transport.py` 2430-2455, 2479-2481).
+/// every interface still waiting for it, as a path response (`Transport.py` 2430-2455,
+/// 2479-2481). Routes evicted from the table drop their entry as they go; one removed some
+/// other way is swept here once the cache outgrows the table.
 pub(super) fn announce_learned(shared: &Shared, announce: &Packet) {
     let destination = announce.destination;
     let over = {
@@ -438,16 +440,17 @@ pub(super) fn announce_learned(shared: &Shared, announce: &Packet) {
         cache.len() > PATH_TABLE_CAPACITY
     };
     if over {
-        let routed: HashSet<AddressHash> =
-            shared.path_table.lock().unwrap().keys().copied().collect();
+        let routed = shared.path_table.lock().unwrap();
         let mut cache = shared.discovery.announces.lock().unwrap();
-        cache.retain(|destination, _| routed.contains(destination));
+        cache.retain(|destination, _| routed.contains_key(destination));
     }
+    let now = Instant::now();
     let waiting = {
         let mut state = shared.discovery.state.lock().unwrap();
         state.inflight.remove(&destination);
         state.waiting.remove(&destination)
     };
+    let waiting = waiting.filter(|waiting| now < waiting.expires);
     for iface in waiting.map(|w| w.requesters).unwrap_or_default() {
         let hops = announce.hops.saturating_add(1);
         let response = path_response_copy(shared, announce.clone(), hops);

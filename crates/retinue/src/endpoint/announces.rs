@@ -525,6 +525,7 @@ pub(super) fn process_verified_announce(
     let mut fwd = pkt;
     fwd.hops += 1;
     fwd.header_type = crate::packet::HeaderType::Type2;
+    fwd.propagation = crate::packet::Propagation::Transport;
     fwd.transport = Some(shared.identity.public().hash());
     shared.schedule_rebroadcast(iface, fwd, candidate.blob.timebase());
 }

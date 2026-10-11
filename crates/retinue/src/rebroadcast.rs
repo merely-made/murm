@@ -48,8 +48,9 @@ struct Entry {
 #[derive(Debug)]
 pub(crate) struct Rebroadcasts {
     entries: Vec<Entry>,
-    /// Relays set aside while a path response for their destination waits, put back once it
-    /// is done (`Transport.py` 811-819, 3511-3516). At most one per destination.
+    /// Entries set aside behind a path response for their destination, put back newest first
+    /// once it is done (`Transport.py` 811-819, 3511-3516): earlier answers to other
+    /// interfaces, then at most one relay. Bounded by `capacity`.
     held: Vec<Entry>,
     capacity: usize,
 }
@@ -63,13 +64,15 @@ impl Rebroadcasts {
         }
     }
 
-    /// Schedule a first transmission `delay` after `now`, replacing any entry for the same
+    /// Schedule a first transmission `delay` after `now`, replacing any relay for the same
     /// destination as RNS does. At capacity an entry already sent once makes room; with none,
     /// the announce is refused rather than displacing one still waiting for its first send.
     ///
     /// A replacement keeps the old entry's send count: the newer announce takes over the
     /// remaining transmission, so re-announcing one destination cannot pin a slot as unsent
-    /// and starve the table (RNS resets its retries; its table is unbounded).
+    /// and starve the table (RNS resets its retries; its table is unbounded). Behind a pending
+    /// path response the relay is held instead, so the requester is still answered (RNS lets
+    /// the relay overwrite it).
     pub(crate) fn schedule(&mut self, rebroadcast: Rebroadcast, now: u64, delay: u64) -> bool {
         let mut entry = Entry {
             rebroadcast,
@@ -78,24 +81,32 @@ impl Rebroadcasts {
             heard: 0,
         };
         let destination = entry.rebroadcast.destination;
-        self.held
-            .retain(|held| held.rebroadcast.destination != destination);
-        if let Some(existing) = self.find(destination) {
-            let old = &self.entries[existing];
-            entry.sent = if old.rebroadcast.answer.is_some() {
-                0
-            } else {
-                old.sent
-            };
+        let Some(existing) = self.find(destination) else {
+            return self.insert(entry);
+        };
+        if self.entries[existing].rebroadcast.answer.is_none() {
+            entry.sent = self.entries[existing].sent;
             self.entries[existing] = entry;
             return true;
         }
-        self.insert(entry)
+        match self.held.iter().position(|held| {
+            held.rebroadcast.destination == destination && held.rebroadcast.answer.is_none()
+        }) {
+            Some(relay) => {
+                entry.sent = self.held[relay].sent;
+                self.held[relay] = entry;
+            }
+            None if self.held.len() >= self.capacity => return false,
+            // Below any held answers, so it is restored last.
+            None => self.held.insert(0, entry),
+        }
+        true
     }
 
-    /// Queue a path response `delay` after `now`, in place of any relay pending for its
-    /// destination, which is held and restored once the response is done. It starts as RNS's
-    /// does, at `PATHFINDER_R` retries: it is sent once, and hearing it relayed ends it.
+    /// Queue a path response `delay` after `now`, in place of the entry pending for its
+    /// destination, which is held and restored once the response is done; an earlier answer
+    /// to the same interface is superseded. It starts as RNS's does, at `PATHFINDER_R`
+    /// retries: it is sent once, and hearing it relayed ends it.
     #[cfg_attr(
         not(feature = "tokio"),
         allow(dead_code, reason = "used by the endpoint")
@@ -110,8 +121,12 @@ impl Rebroadcasts {
         let Some(existing) = self.find(entry.rebroadcast.destination) else {
             return self.insert(entry);
         };
+        let superseded = self.entries[existing].rebroadcast.answer == entry.rebroadcast.answer;
+        if !superseded && self.held.len() >= self.capacity {
+            return false;
+        }
         let old = core::mem::replace(&mut self.entries[existing], entry);
-        if old.rebroadcast.answer.is_none() {
+        if !superseded {
             self.held.push(old);
         }
         true
@@ -146,9 +161,9 @@ impl Rebroadcasts {
         if let Some(held) = self
             .held
             .iter()
-            .position(|held| held.rebroadcast.destination == destination)
+            .rposition(|held| held.rebroadcast.destination == destination)
         {
-            let held = self.held.swap_remove(held);
+            let held = self.held.remove(held);
             self.entries.push(held);
         }
         entry
