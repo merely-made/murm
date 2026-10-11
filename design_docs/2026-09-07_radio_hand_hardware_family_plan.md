@@ -1,8 +1,10 @@
 # Radio-hand hardware family and autonomous power implementation plan
 
-**Status (2026-09-07):** planned. The family boundary and preferred next
-products are ruled below. HW0 through HW8 are open. This document makes no
-board-support, unattended-runtime, energy-budget, outdoor, or protocol claim.
+**Status (2026-10-10):** planned. The family boundary and preferred next
+products are ruled below. The embedded transport assessment now distinguishes
+full iroh, LAN-direct QUIC, and the existing radio runtime; management and
+canonical-operation probes are scoped in their owning plans. HW0 through HW8
+remain open. No new board or runtime qualification was performed.
 
 ## Purpose
 
@@ -178,6 +180,56 @@ Five different things must stay different:
 An Ethernet or cellular interface does not become a radio personality. A
 Modbus register does not become a Reticulum destination by being forwarded.
 The gateway owns the semantic and identity transition and records provenance.
+
+### Embedded transport profiles (2026-10-10)
+
+Embedding a capability in another host application and executing it on a
+microcontroller are separate claims. Source inspection at Retinue
+`937eba845ca306042a6e743d1da1dee98752c364` and Mere
+`4f70d5362f9c365b28caa5a8496755fab27a0eca` gives this baseline:
+
+| Capability | Current boundary | Device implication |
+| --- | --- | --- |
+| Retinue | Allocation-free identity/hash/command floor; `no_std + alloc` protocol core; optional Tokio shell in `crates/retinue/Cargo.toml`. | Select a verifier, bounded endpoint, or routing profile and measure the complete image. |
+| Sennet and Tucket | Default `no_std + alloc` cores with bounded retained state; hardware examples are optional. | The board supplies allocation, time, persistence, and radio execution. |
+| Seneschal, Selvage, radio-face | Radio-free or presentation/profile `no_std` leaves; Seneschal's management grammar and journal are allocation-free. | Reuse these contracts across carriers and board-specific firmware. |
+| radio-hand | Portable board decisions plus an Embassy/concrete `lora-phy` live path. | A new IP runtime still needs board ownership, quiet-window, clock, and recovery integration. |
+| Outrider | Portable LXMF codec/stamps/ticket subset; full host delivery and propagation use `std`. | Select the portable subset explicitly. |
+| Postilion and Signalman | Host libraries using `std`/Tokio; desktop presentation roots a separate workspace. | Headless host composition is available; bare-metal execution is a separate port. |
+| Mere/Stickleback | Host replication, admission, and storage; pinned p2panda core uses `std`. | A bounded device operation/contract is the first candidate, rather than the full host runtime. |
+
+The [iroh ESP32 article](https://www.iroh.computer/blog/noq-on-an-esp32-c6)
+reports a 1.69 MiB bare-noq echo image, reducible to 1.46 MiB, versus 3.73 MiB
+for its full-iroh comparison. Bare noq interoperates through raw-Ed25519-key
+mutual TLS but omits relay, address lookup, and hole punching. These figures
+belong to the upstream example, not a Retinue image. The demonstrated runtime
+is `std`/ESP-IDF/Tokio; Embassy/`no_std` work is experimental.
+
+[Iroh's compatibility documentation](https://docs.iroh.computer/compatibility)
+also separates flash capacity from RAM: its PSRAM configurations support relay
+and address lookup, while demonstrated no-PSRAM ESP32 configurations are
+LAN-direct. Choose among three profiles before changing firmware:
+
+1. **IP-capable powered controller/node:** full iroh where the complete
+   application has measured RAM, flash, and network-lifecycle headroom.
+2. **Constrained local IP component:** bare noq with a commissioned reachable
+   address and a nearby full-iroh controller when outside reachability is needed.
+3. **Radio microcontroller:** retain the bounded radio runtime, with an
+   external IP gateway where appropriate. The upstream ESP32 proof does not
+   qualify the T114 or this repository's Embassy firmware.
+
+Iroh is an IP management/backhaul candidate. Sennet and Tucket continue to own
+stock-mesh interoperability, and the executive continues to own physical radio
+leases. Reuse existing connection, sync, control, custody, rendering, and
+flashing mechanisms. New integration work must establish coexistence, bounded
+memory, restart/rollback, observed delivery, and explicit gateway provenance.
+
+The first experiments live in the
+[wall-node management probe](2026-08-30_wall_node_management_plan.md#proposed-iroh-management-carrier-2026-10-10)
+and [native canonical-operation probe](2026-08-25_compact_signed_feed_and_local_control_plan.md#mc0-separate-forcing-consumer-decision).
+They can begin with host controls independently of HW1/HW2; a physical result
+earns only the capability actually measured and does not close an appliance or
+hardware-family gate by inference.
 
 ## Product opportunities, in priority order
 
@@ -520,6 +572,10 @@ it.
 
 ## Findings
 
+- **2026-10-10, source embedding assessment:** the protocol, management, and
+  board-service feature boundaries above were inspected at the named revisions.
+  Upstream iroh demonstrates small IP endpoints, not combined Retinue radio
+  firmware. Flash size alone does not establish RAM, runtime, or power fit.
 - **2026-09-07, live radio seam:** `crates/radio-hand/src/executive.rs` and
   `service.rs` depend directly on `lora_phy::LoRa<RK, DLY>`. `ChipDiagnostics`
   exposes the same concrete type. A new radio family cannot be called resident
@@ -581,3 +637,6 @@ it.
   outdoor powered edge and solar field relay as the next new consumers, kept
   raw mains and concentrators outside the first embedded board, and defined
   HW0-HW8. All implementation and physical gates remain open.
+- **2026-10-10:** refreshed the embedding/reuse assessment and linked the two
+  proposed probes to their existing owners. Documentation-only; no dependency
+  repin, firmware change, board installation, or gate closure.

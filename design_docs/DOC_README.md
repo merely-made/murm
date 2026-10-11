@@ -285,7 +285,7 @@ provisioning and physical acceptance. Total decoder peak allocation remains unme
 | [RNS 1.5.4 signed-artifact receipt](../testing/receipts/rns-1.5.4-signed-artifact/README.md) | Historical first 1.5.4 slice: six CLI captures match retained 1.5.2 bytes. Rust replay covers both versions. Broader qualification followed in the repin receipt; provenance uncertainty remains. |
 | [Historical re-pin receipt, RNS 1.5.0 / LXMF 1.1.1](2026-08-23_rns_150_lxmf_111_repin_receipt.md) | Superseded pin receipt. Records the earlier flake finding and one Outrider defect fixed. |
 | [Permissive radio protocol compatibility survey](2026-08-25_permissive_radio_protocol_compatibility_survey.md) | Revision-pinned Reticulum, MeshChat, MeshCore and adjacent LoRa survey; separates donors, executable peers, radio adapters, bearers and semantic bridges. Opens no gates. |
-| [Compact signed feed and local control plan](2026-08-25_compact_signed_feed_and_local_control_plan.md) | Active cross-repository plan: exact allocation-free tinySSB core first; Mere foreign-source probe, ULCP extraction, Noise attach and radio personality behind explicit gates. |
+| [Compact signed feed and local control plan](2026-08-25_compact_signed_feed_and_local_control_plan.md) | Exact allocation-free tinySSB core; foreign-source, local-control and radio gates. October 10 refresh scopes canonical device operations across LoRa/IP using the current host sync primitives; embedded execution remains unproven. |
 | [Peer matrix receipt](2026-08-11_prns_peer_matrix_receipt.md) | H8 three-corner interop at RNS 1.4.2. |
 | [Peer matrix at RNS 1.5.0](2026-08-23_prns_peer_matrix_rns150_receipt.md) | Historical H8 re-receipt. Seven runs, 35/35. Establishes that capture byte counts are not constants. Current H8 evidence is in the RNS 1.5.2 re-pin receipt. |
 | [Live-gate flake lane](2026-08-23_live_gate_flake_lane.md) | FLK1–FLK5. Per-gate rates, mechanisms, and what a suite run may prove. |
@@ -309,9 +309,9 @@ provisioning and physical acceptance. Total decoder peak allocation remains unme
 | Document | What it is |
 | --- | --- |
 | [Retinue Small plan](2026-07-31_retinue_small_plan.md) | Native-node authority. N0–N6; unplug leg and current figures open. |
-| [Wall-node management plan](2026-08-30_wall_node_management_plan.md) | WN0–WN8. Active authority for the standalone V4, management carriers, safe configuration, board capability classes, and later resident adapter control. |
+| [Wall-node management plan](2026-08-30_wall_node_management_plan.md) | WN0–WN8 authority for standalone V4, management, safe configuration and adapter control; October 10 proposes an iroh carrier over existing signed commands, with separate host/device evidence. |
 | [Magnetic pocket-node plan](2026-09-07_magnetic_pocket_node_plan.md) | PN0–PN8. Autonomous NFC-only and optional-Bluetooth nodes, LC0/AT0 attachment, durable custody, M4/iPhone probe, receiver-only charging, RF mechanics, and conditional phone-charging bridge. |
-| [Hardware-family plan](2026-09-07_radio_hand_hardware_family_plan.md) | HW0–HW8. `radio-hand` platform admission, powered-edge and solar nodes, energy-aware work, multi-radio ownership, adjacent bearer/protocol admission, and exact-SKU qualification. |
+| [Hardware-family plan](2026-09-07_radio_hand_hardware_family_plan.md) | HW0–HW8 platform/product qualification; October 10 source assessment separates host composition, full iroh, LAN-direct noq and bounded radio-device profiles. All HW gates remain open. |
 | [On-device UI plan](2026-07-28_on_device_ui_implementation_plan.md) | U0–U5, all closed. |
 | [radio-mirror plan](2026-10-01_radio_mirror_plan.md) | M1: radio-face in the browser (mer3ly S8). Landed on `main` in `fa4f925` (2026-10-02); forks F1–F8 ruled by site Rulings 31–38. wasm-bindgen `=0.2.129` under site Ruling 126 (2026-10-07, branch `radio-consumers`), superseding Ruling 35's `=0.2.127`. |
 | [On-device UI direction](2026-07-25_on_device_ui.md) | PANEL×LEDGER face, accepted direction. |
@@ -580,6 +580,12 @@ interval with RF or thermal derating is reported explicitly rather than folded
 into ordinary availability.
 
 ### Hardware support is a measured capability set
+
+Host-library composition and MCU execution are separate evidence. Select a
+bounded device role and reuse existing transport, replication, control, and
+custody contracts; measure its complete RAM/flash/runtime/power profile.
+Transport authentication does not replace board-local authority, and gateway
+forwarding preserves the original signed object's identity and authorship.
 
 A board name, chip data sheet, compile target, or populated connector does not
 establish `radio-hand` support. The manifest exposes only the clock, durable

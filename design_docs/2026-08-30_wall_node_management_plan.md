@@ -394,6 +394,45 @@ can actually own; it does not embed an operating system inside the V4.
 | Linkboy | catalog trust, package verification, immutable update plans, activation policy and receipts | management carrier preference or radio scheduling |
 | Prns | optional platform provider/donor and independent peer at a pinned revision | Retinue board authority or unreceipted compatibility claims |
 
+## Proposed iroh management carrier (2026-10-10)
+
+**Status:** proposed experiment; every existing WN gate retains its stated
+status. The [hardware-family assessment](2026-09-07_radio_hand_hardware_family_plan.md#embedded-transport-profiles-2026-10-10)
+owns the full-iroh/bare-noq/device-profile comparison.
+
+`crates/postilion/src/control/verified/client.rs::ControlExchange` already
+exchanges signed outer command bytes for one WN0 response. Add an iroh carrier
+at that seam and feed the same verified command into Seneschal's durable
+runtime. Preserve controller grants, outer counters, semantic retries,
+generation checks, provisional rollback, and board quiet-window requirements.
+An authenticated endpoint key supplies a carrier fact; authorization still
+comes from the board-local grant. Commission and bind device endpoint keys
+without placing a Persona root on the board.
+
+Keep the management service distinct from WN3's stock-compatible Reticulum
+WiFi interface. Introducing iroh management does not change the RNS wire or
+require iroh on existing RNS peers. A gateway-terminated connection authenticates
+the gateway; its response must not be presented as a board-authenticated
+session without an additional board proof.
+
+1. **Host control:** use real iroh endpoints with an isolated durable board
+   model. Carry signed Status, ProvisionalApply, Commit, and Revert; exercise
+   wrong keys/targets, replay, lost response, reconnect, expiry, and restart.
+   A retry has a fresh outer counter and the same semantic transaction.
+2. **Device integration:** select one full-iroh or LAN-direct-noq profile,
+   implement the real control listener and board runtime boundary, then run
+   the same exchanges through a physical target with preserved settings and
+   a local recovery path. Record reset, link-loss, and power-cut outcomes.
+
+**Done when:** the host transcript identifies the exact dependency graph and
+separates carrier authentication from command authority; a device receipt
+identifies the image, keys by public identity, application flash/partition
+budget, static RAM, heap/stack peaks, connection and flow-control bounds,
+coexistence with RF, and power behavior. Disconnect cannot cancel an armed
+rollback or transfer radio ownership to Signalman. A host pass is not a
+physical or unattended-operation receipt. Secret-bearing operations wait for
+the existing confidential-carrier and sealed-storage requirements.
+
 ## Phases and gates
 
 Each WN gate is one feature phase with its own validation boundary.
@@ -882,6 +921,9 @@ successful announce, or two-party exchange does not satisfy either half.
 
 ## Findings
 
+- **2026-10-10:** the carrier-neutral Postilion client and radio-free Seneschal
+  grammar provide the insertion point for an iroh management probe. No iroh
+  board listener or combined WiFi/LoRa firmware was implemented in this pass.
 - **2026-08-30:** `crates/retinue/src/command.rs` already owns the
   transport-independent signed authority envelope: node or fleet target,
   controller key id, monotonic replay counter, opcode, bounded payload, and
