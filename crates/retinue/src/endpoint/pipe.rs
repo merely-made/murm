@@ -23,13 +23,16 @@ use super::runtime::{Endpoint, endpoint_closed, track};
 pub const PIPE_HW_MTU: usize = 1064;
 /// RNS's bitrate guess for a pipe (`PipeInterface.py` 56).
 const PIPE_BITRATE_GUESS: u64 = 1_000_000;
+/// Floor on `respawn_delay`, so a child that dies at once cannot spin the loop.
+const MIN_RESPAWN_DELAY: Duration = Duration::from_millis(100);
 
 /// A PipeInterface: RNS's `command` and `respawn_delay`.
 #[derive(Clone, Debug)]
 pub struct PipeConfig {
     /// The program and its arguments, already split; RNS splits `command` with `shlex`.
     pub argv: Vec<OsString>,
-    /// Wait before respawning a child that exited (`PipeInterface.py` 59, 175-190).
+    /// Wait before respawning a child that exited (`PipeInterface.py` 59, 175-190); at
+    /// least 100 ms.
     pub respawn_delay: Duration,
     /// Access code. A stock pipe without `ifac_size` uses 8 bytes (`DEFAULT_IFAC_SIZE`,
     /// `PipeInterface.py` 57), which is [`Ifac::for_serial`].
@@ -100,7 +103,7 @@ impl Endpoint {
                         return;
                     }
                 }
-                tokio::time::sleep(config.respawn_delay).await;
+                tokio::time::sleep(config.respawn_delay.max(MIN_RESPAWN_DELAY)).await;
                 if shared.with_iface(id, |_| ()).is_none() {
                     return;
                 }

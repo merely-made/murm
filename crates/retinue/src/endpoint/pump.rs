@@ -65,7 +65,8 @@ impl Deframer {
 /// KISS data frames off a stream (`TCPInterface.py` 361-388): the command's port nibble is
 /// masked and only DATA is kept. Unlike stock, a frame over `limit` or with a bad escape is
 /// dropped whole rather than truncated or passed through, as is one closed mid-escape, and
-/// every FEND starts a clean frame, so no escape state leaks into the next one.
+/// every FEND starts a clean frame, so no escape state leaks into the next one. A FEND that
+/// closes one frame also opens the next, where stock needs a FEND pair.
 struct KissData {
     buf: Vec<u8>,
     limit: usize,

@@ -58,6 +58,9 @@ pub struct ListenPolicy {
 }
 
 /// Backbone's fast-flap blocking (`BackboneInterface.py` 48-53, 126-161, 807-835).
+///
+/// Each listener keeps its own table; stock's is one per process, so an address blocked
+/// on one listener here can still reach another.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct FlapPolicy {
     /// A connection that ends sooner than this after its accept is a flap.

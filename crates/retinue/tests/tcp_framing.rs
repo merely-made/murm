@@ -188,8 +188,17 @@ mod carriers {
         let any = ListenAddr::Socket("[::]:0".parse().unwrap());
         let port = ep.listen_on(any, policy).await.unwrap().local_addr().port();
         let v4 = SocketAddr::from(([127, 0, 0, 1], port));
+        // `[::]` takes IPv4 only on a dual-stack host (bindv6only off).
+        let Ok(first) = TcpStream::connect(v4).await else {
+            eprintln!("skipped: [::] does not accept IPv4 here");
+            return;
+        };
+        let mut first = Some(first);
         for _ in 0..6 {
-            let stream = TcpStream::connect(v4).await.unwrap();
+            let stream = match first.take() {
+                Some(stream) => stream,
+                None => TcpStream::connect(v4).await.unwrap(),
+            };
             let id = timeout(WAIT, ids.recv()).await.unwrap().unwrap();
             drop(stream);
             let gone = async {
