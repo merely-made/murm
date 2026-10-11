@@ -69,7 +69,7 @@ Historical H8 closure records observed runs, not approval for new Prns use.
 | Gate | Status | Where |
 | --- | --- | --- |
 | AIR0, AIR1, AIR2 | Closed | [Work lanes](2026-08-09_retinue_work_lanes.md), [AIR0/AIR1](2026-08-12_air0_air1_software_receipt.md), [AIR2](2026-08-12_air2_announce_ingress_receipt.md) |
-| TC0–TC7 | TC0 implemented; TC1 selected OpenRQ profile qualified locally (8 pass / 0 fail / 1 unsupported full-codec case). Broader TC1 coverage and TC2–TC7 open. | [Transport conformance plan](2026-10-11_transport_conformance_plan.md) — standards corpus, independent codec peers, retained repairs, signed-object admission and separate device/RF qualification. |
+| TC0–TC7 | TC0 implemented; TC1 selected OpenRQ profile qualified locally. TC3 exploratory scheduler implemented with four design experiments; broad qualification deferred until stable contracts. | [Transport conformance plan](2026-10-11_transport_conformance_plan.md) and [retained-repair prototype](2026-10-11_retained_repair_simulation_profile.md) — standards corpus, retained delivery and later admission/device/RF evaluation. |
 | AIR3 | Closed, software and on-air | [software](2026-08-12_air3_bounded_transport_software_receipt.md), [T114 on-air](2026-08-13_air3_t114_on_air_receipt.md) |
 | AIR4, AIR5 | Open | [Work lanes](2026-08-09_retinue_work_lanes.md) |
 | FT1 | Open — needs modelled-versus-measured on-air airtime | [Mesh scaling](2026-08-09_mesh_scaling_and_asymmetric_routing.md) |

@@ -5,9 +5,19 @@ selected independent OpenRQ campaign for `Al=1, N=1`: six objects, 264 exact
 source/repair symbol comparisons and 24 live cross-decoding scenarios in each
 direction. The offline suite verifies the imported corpus and replays the Rust
 side; the local process campaign executes both implementations. Broader RFC
-6330 coverage, production FEC delivery, scheduling and radio measurements remain
-open. Publication uses direct commits and pushes to `main`; validation runs
+6330 coverage, production FEC delivery and radio measurements remain open.
+TC3 now has an exploratory retained-repair scheduler and four design experiments
+using actual coding/authentication, described in the
+[prototype profile](2026-10-11_retained_repair_simulation_profile.md).
+Publication uses direct commits and pushes to `main`; validation runs
 locally. GitHub Actions and PRs are not part of this project's requested flow.
+
+**Execution posture:** prototype the composed stack toward a useful final shape
+before expanding qualification. Code and canonical documents carry the work.
+Use small checks and experiments to answer current design questions; the gates
+below describe later evaluation, not a requirement to certify each interim
+state. Broad conformance, regression automation and physical campaigns belong
+after the behavior and contracts have stabilized.
 
 Mark authorized orchestration and prefers implementing published standards when
 they cover the needed behavior. This plan turns the Reticulum/Dash composition
@@ -120,7 +130,7 @@ eventual delivery without conditions.
 | TC0 | Catalog and suite seed | Canonical catalog and prior-art provenance validated; isolated executable emits per-case requirement/evidence/status/revision records. Official crypto vectors and reviewed RFC 6330 wire/boundary cases run. Missing independent peers are explicit unsupported results. This is a foundation, not whole-RFC qualification. |
 | TC1 | Independent RFC 6330 codec qualification | Selected OpenRQ `Al=1, N=1` campaign is implemented; exact symbol and bidirectional decode cases cover K-prime transitions, uneven two-block partition, padding and repair-only recovery. Pinned tooling and fixtures make those cases reproducible. Broader alignment, sub-block, ESI and resource coverage remains open before wider claims. |
 | TC2 | Portable corpus/adapters and existing carriers | External-process capability/byte/event contract; register existing stock-RNS oracle gates and a real QUIC independent-peer campaign. Optional features remain explicit. Result schemas and requirement traceability work across at least two implementation lineages; vector imports retain licenses. |
-| TC3 | Deterministic retained-repair model | Declared multi-channel schedule and manifest schema; one-/multi-radio receivers; erasure/burst loss, reorder/duplicates, sleep, clock/tuning gaps, late join, capacity overload, repair fairness, expiry and checkpoint/restart. Repeatable traces prove the stated finite-workload guarantees and demonstrate permanent-overload limits. |
+| TC3 | Retained-repair prototype, implemented | Authored schedule and signed manifest/symbol arrays; actual codec; one-/multi-radio collection, loss/reorder/duplicates, sleep/drift/guards, late join, repair rotation, expiry and partial-state resume. Four selected experiments expose catch-up, floor cost and overload behavior. The profile and inputs may change; stable-contract evaluation is later work. |
 | TC4 | Signed-object receive composition | Recovered original bytes/IDs enter the existing operation processor. Tampered headers/bodies, unauthorized objects and expired transfers cause the declared refusal; refusal causes zero store mutation. Two-carrier duplicates admit once. Fresh-process restart preserves progress and ownership semantics. |
 | TC5 | Device resource profile | Selected codec/profile compiles for the actual target; measured peak heap/stack, decode time, retained storage and interrupt/radio coexistence fit named limits. no_std availability alone does not close this gate. |
 | TC6 | Physical multi-radio qualification | Named boards, firmware hashes, radios, antennas, channels and instruments; actual payload goodput, range, adjacent-channel isolation, retune/clock cost, collision behavior, power and source/repair airtime. Regulatory band/duty/power conditions are explicit. 1–2 Mbps remains a target until this campaign measures it at the intended range. |
@@ -218,5 +228,22 @@ uses isolated branches from those fetched refs.
 - **2026-10-11, owner workflow correction:** removed the newly added transport
   workflow, disabled GitHub Actions in Mere and Retinue, closed the temporary
   draft PRs and published directly to `main`. Existing CI observations remain
-  historical evidence. Subsequent qualification uses local commands and
-  recorded receipts.
+  historical evidence. Subsequent work uses local checks and experiments,
+  with code and canonical docs as the execution frontier.
+- **2026-10-11, retained-repair prototype:** implemented an isolated slot model
+  using actual `raptorq`, Ed25519 and a narrow authored deterministic CBOR
+  profile. It retains originals, reserves a configurable repair floor and
+  rotates live generations through persisted queues. Full-radio receivers stay
+  assigned to channels; partial receivers use preconfigured manifest cadence
+  and clock assumptions. Authentication precedes decoder work. All manifest,
+  source, repair and signature bytes count in the model. The
+  [four-experiment report](../testing/transport-conformance/results/retained-repair-exploration-20261011.json)
+  records finite catch-up, the zero/one-floor capacity tradeoff, cumulative
+  unmet demand under overload, and in-process partial-state resume. Five small
+  local tests and strict Clippy passed; a separate manual fresh-process smoke
+  matched pending-delivery resume, without a retained receipt. These observations
+  guide the prototype and do not close conformance, admission, MCU or RF gates.
+  The report fingerprints the compiled source/config and names its dirty base
+  revision honestly. The next bounded prototype passes one recovered original
+  signed object through the existing operation processor; broader qualification
+  waits for a stable shape.

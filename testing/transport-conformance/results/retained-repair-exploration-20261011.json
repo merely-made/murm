@@ -1,0 +1,6871 @@
+{
+  "assumptions": [
+    "A slot is an authored scheduling opportunity, with no physical duration or RF modulation assigned.",
+    "The transmitter can offer one frame on each ideal independent channel simultaneously; receiver radio count alone does not increase transmitted capacity.",
+    "Each independently tuned radio collects at most one channel frame per modeled slot; four radios can cover four channels.",
+    "Receivers already know the channel plan, manifest cadence and common slot clock; partial receivers prefer the anchor channel on predicted manifest slots.",
+    "T=128, N=1, Al=4; full single-symbol RFC6330 packets are wrapped in authored authenticated frames.",
+    "Manifest repeats, signatures and framing consume the recorded slot and wire-byte budget.",
+    "The repair floor reserves channel opportunities for round-robin retained generations; zero is an exploratory counterfactual.",
+    "Catch-up depends on retention, receive opportunities, offered work and actual decoder success; it is not guaranteed by fountain coding alone."
+  ],
+  "experiments": [
+    {
+      "compare_to": null,
+      "id": "finite-burst",
+      "observations": {
+        "completion_comparison": [
+          {
+            "four_finished_earlier": true,
+            "four_radio_completion_slot": 9,
+            "generation": 1,
+            "one_radio_completion_slot": 64
+          },
+          {
+            "four_finished_earlier": true,
+            "four_radio_completion_slot": 33,
+            "generation": 2,
+            "one_radio_completion_slot": 53
+          }
+        ],
+        "four_radio_unmet_object_octets": 0,
+        "interpretation": "Catch-up is conditional on this finite production tail, retention window and modeled receive opportunities. Completion uses actual RaptorQ reconstruction.",
+        "one_radio_unmet_object_octets": 0
+      },
+      "question": "After production stops, can one radio catch up while four radios complete earlier?",
+      "restart_observation": {
+        "after_slot": 25,
+        "fresh_process": "Available through --simulation-peer; not exercised by this frontier campaign.",
+        "kind": "in_process_saved_state_design_observation",
+        "pending_frames": 0,
+        "reconstruction_decode_work": 57,
+        "snapshot_blake3": "0b8f90ec25ae92e7d45fe39aa4c2840419ef469fc0c60eea02a3a96b3e50642f",
+        "snapshot_octets": 102015,
+        "terminal_hash_equal": true,
+        "trace_hash_equal": true
+      },
+      "run": {
+        "authority_public_key_hex": "2152f8d19b791d24453242e15f2eab6cb7cffa7b6a5ed30097960e069881db12",
+        "checkpoint_replay_decode_work": 0,
+        "demand_by_slot": [
+          {
+            "produced_object_octets": 4097,
+            "receiver_unmet_object_octets": [
+              4097,
+              4097
+            ],
+            "slot": 0
+          },
+          {
+            "produced_object_octets": 4097,
+            "receiver_unmet_object_octets": [
+              4097,
+              4097
+            ],
+            "slot": 1
+          },
+          {
+            "produced_object_octets": 4097,
+            "receiver_unmet_object_octets": [
+              4097,
+              4097
+            ],
+            "slot": 2
+          },
+          {
+            "produced_object_octets": 4097,
+            "receiver_unmet_object_octets": [
+              4097,
+              4097
+            ],
+            "slot": 3
+          },
+          {
+            "produced_object_octets": 4097,
+            "receiver_unmet_object_octets": [
+              4097,
+              4097
+            ],
+            "slot": 4
+          },
+          {
+            "produced_object_octets": 4097,
+            "receiver_unmet_object_octets": [
+              4097,
+              4097
+            ],
+            "slot": 5
+          },
+          {
+            "produced_object_octets": 4097,
+            "receiver_unmet_object_octets": [
+              4097,
+              4097
+            ],
+            "slot": 6
+          },
+          {
+            "produced_object_octets": 4097,
+            "receiver_unmet_object_octets": [
+              4097,
+              4097
+            ],
+            "slot": 7
+          },
+          {
+            "produced_object_octets": 4097,
+            "receiver_unmet_object_octets": [
+              4097,
+              4097
+            ],
+            "slot": 8
+          },
+          {
+            "produced_object_octets": 4097,
+            "receiver_unmet_object_octets": [
+              4097,
+              0
+            ],
+            "slot": 9
+          },
+          {
+            "produced_object_octets": 4097,
+            "receiver_unmet_object_octets": [
+              4097,
+              0
+            ],
+            "slot": 10
+          },
+          {
+            "produced_object_octets": 4097,
+            "receiver_unmet_object_octets": [
+              4097,
+              0
+            ],
+            "slot": 11
+          },
+          {
+            "produced_object_octets": 4097,
+            "receiver_unmet_object_octets": [
+              4097,
+              0
+            ],
+            "slot": 12
+          },
+          {
+            "produced_object_octets": 4097,
+            "receiver_unmet_object_octets": [
+              4097,
+              0
+            ],
+            "slot": 13
+          },
+          {
+            "produced_object_octets": 4097,
+            "receiver_unmet_object_octets": [
+              4097,
+              0
+            ],
+            "slot": 14
+          },
+          {
+            "produced_object_octets": 4097,
+            "receiver_unmet_object_octets": [
+              4097,
+              0
+            ],
+            "slot": 15
+          },
+          {
+            "produced_object_octets": 4097,
+            "receiver_unmet_object_octets": [
+              4097,
+              0
+            ],
+            "slot": 16
+          },
+          {
+            "produced_object_octets": 4097,
+            "receiver_unmet_object_octets": [
+              4097,
+              0
+            ],
+            "slot": 17
+          },
+          {
+            "produced_object_octets": 4097,
+            "receiver_unmet_object_octets": [
+              4097,
+              0
+            ],
+            "slot": 18
+          },
+          {
+            "produced_object_octets": 4097,
+            "receiver_unmet_object_octets": [
+              4097,
+              0
+            ],
+            "slot": 19
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              5378,
+              1281
+            ],
+            "slot": 20
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              5378,
+              1281
+            ],
+            "slot": 21
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              5378,
+              1281
+            ],
+            "slot": 22
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              5378,
+              1281
+            ],
+            "slot": 23
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              5378,
+              1281
+            ],
+            "slot": 24
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              5378,
+              1281
+            ],
+            "slot": 25
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              5378,
+              1281
+            ],
+            "slot": 26
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              5378,
+              1281
+            ],
+            "slot": 27
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              5378,
+              1281
+            ],
+            "slot": 28
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              5378,
+              1281
+            ],
+            "slot": 29
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              5378,
+              1281
+            ],
+            "slot": 30
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              5378,
+              1281
+            ],
+            "slot": 31
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              5378,
+              1281
+            ],
+            "slot": 32
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              5378,
+              0
+            ],
+            "slot": 33
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              5378,
+              0
+            ],
+            "slot": 34
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              5378,
+              0
+            ],
+            "slot": 35
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              5378,
+              0
+            ],
+            "slot": 36
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              5378,
+              0
+            ],
+            "slot": 37
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              5378,
+              0
+            ],
+            "slot": 38
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              5378,
+              0
+            ],
+            "slot": 39
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              5378,
+              0
+            ],
+            "slot": 40
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              5378,
+              0
+            ],
+            "slot": 41
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              5378,
+              0
+            ],
+            "slot": 42
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              5378,
+              0
+            ],
+            "slot": 43
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              5378,
+              0
+            ],
+            "slot": 44
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              5378,
+              0
+            ],
+            "slot": 45
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              5378,
+              0
+            ],
+            "slot": 46
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              5378,
+              0
+            ],
+            "slot": 47
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              5378,
+              0
+            ],
+            "slot": 48
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              5378,
+              0
+            ],
+            "slot": 49
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              5378,
+              0
+            ],
+            "slot": 50
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              5378,
+              0
+            ],
+            "slot": 51
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              5378,
+              0
+            ],
+            "slot": 52
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              4097,
+              0
+            ],
+            "slot": 53
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              4097,
+              0
+            ],
+            "slot": 54
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              4097,
+              0
+            ],
+            "slot": 55
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              4097,
+              0
+            ],
+            "slot": 56
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              4097,
+              0
+            ],
+            "slot": 57
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              4097,
+              0
+            ],
+            "slot": 58
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              4097,
+              0
+            ],
+            "slot": 59
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              4097,
+              0
+            ],
+            "slot": 60
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              4097,
+              0
+            ],
+            "slot": 61
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              4097,
+              0
+            ],
+            "slot": 62
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              4097,
+              0
+            ],
+            "slot": 63
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 64
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 65
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 66
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 67
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 68
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 69
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 70
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 71
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 72
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 73
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 74
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 75
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 76
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 77
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 78
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 79
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 80
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 81
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 82
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 83
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 84
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 85
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 86
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 87
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 88
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 89
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 90
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 91
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 92
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 93
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 94
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 95
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 96
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 97
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 98
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 99
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 100
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 101
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 102
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 103
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 104
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 105
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 106
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 107
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 108
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 109
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 110
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 111
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 112
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 113
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 114
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 115
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 116
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 117
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 118
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 119
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 120
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 121
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 122
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 123
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 124
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 125
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 126
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 127
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 128
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 129
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 130
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 131
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 132
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 133
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 134
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 135
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 136
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 137
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 138
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 139
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 140
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 141
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 142
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 143
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 144
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 145
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 146
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 147
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 148
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 149
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 150
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 151
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 152
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 153
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 154
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 155
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 156
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 157
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 158
+          },
+          {
+            "produced_object_octets": 5378,
+            "receiver_unmet_object_octets": [
+              0,
+              0
+            ],
+            "slot": 159
+          }
+        ],
+        "id": "finite-burst",
+        "namespace_blake3": "a6a382f9e875a00854ad6864ea5a6165e9605c11b8fd9c20aa4a9969613a8423",
+        "pending_delivery_frames": 0,
+        "physical_throughput_claim": false,
+        "receivers": [
+          {
+            "accepted_manifests": 23,
+            "accepted_symbols": 47,
+            "budget_rejections": 0,
+            "channel_misses": 480,
+            "completed_generation_symbols": 86,
+            "completed_object_octets": 5378,
+            "decode_work": 47,
+            "decoder_allocations": 2,
+            "drift_misses": 0,
+            "duplicate_symbols": 0,
+            "erased_frames": 0,
+            "expired_frames": 0,
+            "generations": [
+              {
+                "completion_slot": 64,
+                "expired": false,
+                "id": 1,
+                "incomplete_expired": false,
+                "manifest_seen": true,
+                "object_octets": 4097,
+                "reconstructed_blake3": "1db300f9c264c1e6bf62cae7e8667b00eb61a1e5db0fd2d580d2cde81262f38c",
+                "required_source_symbols": 33,
+                "unique_symbols": 36
+              },
+              {
+                "completion_slot": 53,
+                "expired": false,
+                "id": 2,
+                "incomplete_expired": false,
+                "manifest_seen": true,
+                "object_octets": 1281,
+                "reconstructed_blake3": "6eeae3a926064a9822e7ca0f33d75f4a156f1f9fba15218bbc73f3347280ae0c",
+                "required_source_symbols": 11,
+                "unique_symbols": 11
+              }
+            ],
+            "id": "one",
+            "invalid_signatures": 0,
+            "late_or_sleep_misses": 0,
+            "malformed_frames": 0,
+            "offered_frames": 640,
+            "produced_object_octets": 5378,
+            "radios": 1,
+            "reconstructed_digest_mismatches": 0,
+            "retune_misses": 0,
+            "symbol_opportunity_upper_bound": 160,
+            "tuned_frames": 160,
+            "unknown_generation_symbols": 4,
+            "unmet_object_octets": 0,
+            "wire_octets": 41355
+          },
+          {
+            "accepted_manifests": 23,
+            "accepted_symbols": 49,
+            "budget_rejections": 0,
+            "channel_misses": 0,
+            "completed_generation_symbols": 547,
+            "completed_object_octets": 5378,
+            "decode_work": 49,
+            "decoder_allocations": 2,
+            "drift_misses": 0,
+            "duplicate_symbols": 0,
+            "erased_frames": 0,
+            "expired_frames": 0,
+            "generations": [
+              {
+                "completion_slot": 9,
+                "expired": false,
+                "id": 1,
+                "incomplete_expired": false,
+                "manifest_seen": true,
+                "object_octets": 4097,
+                "reconstructed_blake3": "1db300f9c264c1e6bf62cae7e8667b00eb61a1e5db0fd2d580d2cde81262f38c",
+                "required_source_symbols": 33,
+                "unique_symbols": 38
+              },
+              {
+                "completion_slot": 33,
+                "expired": false,
+                "id": 2,
+                "incomplete_expired": false,
+                "manifest_seen": true,
+                "object_octets": 1281,
+                "reconstructed_blake3": "6eeae3a926064a9822e7ca0f33d75f4a156f1f9fba15218bbc73f3347280ae0c",
+                "required_source_symbols": 11,
+                "unique_symbols": 11
+              }
+            ],
+            "id": "four",
+            "invalid_signatures": 0,
+            "late_or_sleep_misses": 0,
+            "malformed_frames": 0,
+            "offered_frames": 640,
+            "produced_object_octets": 5378,
+            "radios": 4,
+            "reconstructed_digest_mismatches": 0,
+            "retune_misses": 0,
+            "symbol_opportunity_upper_bound": 640,
+            "tuned_frames": 640,
+            "unknown_generation_symbols": 21,
+            "unmet_object_octets": 0,
+            "wire_octets": 173355
+          }
+        ],
+        "resumed_from_slot": null,
+        "schema": "transport-conformance.simulation-report/v1",
+        "semantic_terminal_blake3": "c678b0651ebe094a7c23bf34b85b4d1e7ff668c19697934ab4717ff5336885f1",
+        "slots_executed": 160,
+        "trace_blake3": "5979473646c7ffc91d4698f0de5af1165f043dfb3871eb8d4df90083f9fae139",
+        "transmitter": {
+          "channel_wire_octets": [
+            41355,
+            44000,
+            44000,
+            44000
+          ],
+          "fresh_frames": 44,
+          "generations": [
+            {
+              "esi_exhausted": false,
+              "expired": false,
+              "fresh_backlog": 0,
+              "fresh_sent": 33,
+              "id": 1,
+              "object_octets": 4097,
+              "repairs_sent": 309,
+              "total_source_symbols": 33
+            },
+            {
+              "esi_exhausted": false,
+              "expired": false,
+              "fresh_backlog": 0,
+              "fresh_sent": 11,
+              "id": 2,
+              "object_octets": 1281,
+              "repairs_sent": 264,
+              "total_source_symbols": 11
+            }
+          ],
+          "manifest_frames": 23,
+          "repair_frames": 573,
+          "wire_octets": 173355
+        }
+      },
+      "scenario": {
+        "channels": 4,
+        "generations": [
+          {
+            "expires_slot": 160,
+            "id": 1,
+            "object_octets": 4097,
+            "publish_slot": 0
+          },
+          {
+            "expires_slot": 160,
+            "id": 2,
+            "object_octets": 1281,
+            "publish_slot": 20
+          }
+        ],
+        "id": "finite-burst",
+        "impairments": {
+          "bursts": [],
+          "duplicate_every": 0,
+          "erase_every": 0,
+          "loss_per_million": 0,
+          "loss_seed": 0,
+          "malformed_every": 0,
+          "reorder_delay_slots": 0,
+          "tamper_every": 0
+        },
+        "manifest_interval": 7,
+        "namespace": 101,
+        "receivers": [
+          {
+            "drift_every_slots": 0,
+            "drift_slots": 0,
+            "dwell_slots": 1,
+            "id": "one",
+            "join_slot": 0,
+            "phase": 0,
+            "radios": 1,
+            "retune_guard_slots": 0,
+            "sleep": []
+          },
+          {
+            "drift_every_slots": 0,
+            "drift_slots": 0,
+            "dwell_slots": 1,
+            "id": "four",
+            "join_slot": 0,
+            "phase": 0,
+            "radios": 4,
+            "retune_guard_slots": 0,
+            "sleep": []
+          }
+        ],
+        "repair_floor": 1,
+        "schema": "transport-conformance.simulation/v1",
+        "slot_octet_budget": 512,
+        "slots": 160,
+        "source_blocks": 2,
+        "symbol_size": 128
+      }
+    },
+    {
+      "compare_to": null,
+      "id": "fresh-priority-no-floor",
+      "observations": {
+        "baseline_old_generation": null,
+        "fresh_frames": 345,
+        "interpretation": "These paired inputs change only the reserved repair floor. The late receiver misses the original burst while four large new objects keep fresh demand available. Observe both old progress and the fresh capacity consumed by repairs.",
+        "old_collection_improved": null,
+        "repair_frames": 19,
+        "retained_old_generation": {
+          "completion_slot": null,
+          "generation": 1,
+          "incomplete_expired": false,
+          "reconstructed_blake3": null,
+          "required_source_symbols": 11,
+          "unique_symbols": 0
+        }
+      },
+      "question": "Does sustained fresh priority starve an older generation for a receiver that joined after its original burst?",
+      "restart_observation": null,
+      "run": {
+        "authority_public_key_hex": "2152f8d19b791d24453242e15f2eab6cb7cffa7b6a5ed30097960e069881db12",
+        "checkpoint_replay_decode_work": 0,
+        "demand_by_slot": [
+          {
+            "produced_object_octets": 1281,
+            "receiver_unmet_object_octets": [
+              1281
+            ],
+            "slot": 0
+          },
+          {
+            "produced_object_octets": 1281,
+            "receiver_unmet_object_octets": [
+              1281
+            ],
+            "slot": 1
+          },
+          {
+            "produced_object_octets": 1281,
+            "receiver_unmet_object_octets": [
+              1281
+            ],
+            "slot": 2
+          },
+          {
+            "produced_object_octets": 1281,
+            "receiver_unmet_object_octets": [
+              1281
+            ],
+            "slot": 3
+          },
+          {
+            "produced_object_octets": 1281,
+            "receiver_unmet_object_octets": [
+              1281
+            ],
+            "slot": 4
+          },
+          {
+            "produced_object_octets": 1281,
+            "receiver_unmet_object_octets": [
+              1281
+            ],
+            "slot": 5
+          },
+          {
+            "produced_object_octets": 1281,
+            "receiver_unmet_object_octets": [
+              1281
+            ],
+            "slot": 6
+          },
+          {
+            "produced_object_octets": 1281,
+            "receiver_unmet_object_octets": [
+              1281
+            ],
+            "slot": 7
+          },
+          {
+            "produced_object_octets": 34049,
+            "receiver_unmet_object_octets": [
+              34049
+            ],
+            "slot": 8
+          },
+          {
+            "produced_object_octets": 34049,
+            "receiver_unmet_object_octets": [
+              34049
+            ],
+            "slot": 9
+          },
+          {
+            "produced_object_octets": 34049,
+            "receiver_unmet_object_octets": [
+              34049
+            ],
+            "slot": 10
+          },
+          {
+            "produced_object_octets": 34049,
+            "receiver_unmet_object_octets": [
+              34049
+            ],
+            "slot": 11
+          },
+          {
+            "produced_object_octets": 34049,
+            "receiver_unmet_object_octets": [
+              34049
+            ],
+            "slot": 12
+          },
+          {
+            "produced_object_octets": 34049,
+            "receiver_unmet_object_octets": [
+              34049
+            ],
+            "slot": 13
+          },
+          {
+            "produced_object_octets": 34049,
+            "receiver_unmet_object_octets": [
+              34049
+            ],
+            "slot": 14
+          },
+          {
+            "produced_object_octets": 34049,
+            "receiver_unmet_object_octets": [
+              34049
+            ],
+            "slot": 15
+          },
+          {
+            "produced_object_octets": 66817,
+            "receiver_unmet_object_octets": [
+              66817
+            ],
+            "slot": 16
+          },
+          {
+            "produced_object_octets": 66817,
+            "receiver_unmet_object_octets": [
+              66817
+            ],
+            "slot": 17
+          },
+          {
+            "produced_object_octets": 66817,
+            "receiver_unmet_object_octets": [
+              66817
+            ],
+            "slot": 18
+          },
+          {
+            "produced_object_octets": 66817,
+            "receiver_unmet_object_octets": [
+              66817
+            ],
+            "slot": 19
+          },
+          {
+            "produced_object_octets": 66817,
+            "receiver_unmet_object_octets": [
+              66817
+            ],
+            "slot": 20
+          },
+          {
+            "produced_object_octets": 66817,
+            "receiver_unmet_object_octets": [
+              66817
+            ],
+            "slot": 21
+          },
+          {
+            "produced_object_octets": 66817,
+            "receiver_unmet_object_octets": [
+              66817
+            ],
+            "slot": 22
+          },
+          {
+            "produced_object_octets": 66817,
+            "receiver_unmet_object_octets": [
+              66817
+            ],
+            "slot": 23
+          },
+          {
+            "produced_object_octets": 99585,
+            "receiver_unmet_object_octets": [
+              99585
+            ],
+            "slot": 24
+          },
+          {
+            "produced_object_octets": 99585,
+            "receiver_unmet_object_octets": [
+              99585
+            ],
+            "slot": 25
+          },
+          {
+            "produced_object_octets": 99585,
+            "receiver_unmet_object_octets": [
+              99585
+            ],
+            "slot": 26
+          },
+          {
+            "produced_object_octets": 99585,
+            "receiver_unmet_object_octets": [
+              99585
+            ],
+            "slot": 27
+          },
+          {
+            "produced_object_octets": 99585,
+            "receiver_unmet_object_octets": [
+              99585
+            ],
+            "slot": 28
+          },
+          {
+            "produced_object_octets": 99585,
+            "receiver_unmet_object_octets": [
+              99585
+            ],
+            "slot": 29
+          },
+          {
+            "produced_object_octets": 99585,
+            "receiver_unmet_object_octets": [
+              99585
+            ],
+            "slot": 30
+          },
+          {
+            "produced_object_octets": 99585,
+            "receiver_unmet_object_octets": [
+              99585
+            ],
+            "slot": 31
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 32
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 33
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 34
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 35
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 36
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 37
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 38
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 39
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 40
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 41
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 42
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 43
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 44
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 45
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 46
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 47
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 48
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 49
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 50
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 51
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 52
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 53
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 54
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 55
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 56
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 57
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 58
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 59
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 60
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 61
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 62
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 63
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 64
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 65
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 66
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 67
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 68
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 69
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 70
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 71
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 72
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 73
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 74
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 75
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 76
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 77
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 78
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 79
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 80
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 81
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 82
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 83
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 84
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 85
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 86
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 87
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 88
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 89
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 90
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 91
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 92
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 93
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 94
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 95
+          }
+        ],
+        "id": "fresh-priority-no-floor",
+        "namespace_blake3": "d345c8e800c2ff8ae68ff90452dbedffa35e1ac255a32a6c0fe19d4e88d5d51b",
+        "pending_delivery_frames": 0,
+        "physical_throughput_claim": false,
+        "receivers": [
+          {
+            "accepted_manifests": 18,
+            "accepted_symbols": 307,
+            "budget_rejections": 0,
+            "channel_misses": 0,
+            "completed_generation_symbols": 0,
+            "completed_object_octets": 0,
+            "decode_work": 307,
+            "decoder_allocations": 2,
+            "drift_misses": 0,
+            "duplicate_symbols": 0,
+            "erased_frames": 0,
+            "expired_frames": 0,
+            "generations": [
+              {
+                "completion_slot": null,
+                "expired": false,
+                "id": 1,
+                "incomplete_expired": false,
+                "manifest_seen": true,
+                "object_octets": 1281,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 11,
+                "unique_symbols": 0
+              },
+              {
+                "completion_slot": null,
+                "expired": false,
+                "id": 2,
+                "incomplete_expired": false,
+                "manifest_seen": true,
+                "object_octets": 32768,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 256,
+                "unique_symbols": 229
+              },
+              {
+                "completion_slot": null,
+                "expired": false,
+                "id": 3,
+                "incomplete_expired": false,
+                "manifest_seen": true,
+                "object_octets": 32768,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 256,
+                "unique_symbols": 78
+              },
+              {
+                "completion_slot": null,
+                "expired": false,
+                "id": 4,
+                "incomplete_expired": false,
+                "manifest_seen": true,
+                "object_octets": 32768,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 256,
+                "unique_symbols": 0
+              },
+              {
+                "completion_slot": null,
+                "expired": false,
+                "id": 5,
+                "incomplete_expired": false,
+                "manifest_seen": true,
+                "object_octets": 32768,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 256,
+                "unique_symbols": 0
+              }
+            ],
+            "id": "late",
+            "invalid_signatures": 0,
+            "late_or_sleep_misses": 32,
+            "malformed_frames": 0,
+            "offered_frames": 384,
+            "produced_object_octets": 132353,
+            "radios": 4,
+            "reconstructed_digest_mismatches": 0,
+            "retune_misses": 0,
+            "symbol_opportunity_upper_bound": 352,
+            "tuned_frames": 352,
+            "unknown_generation_symbols": 27,
+            "unmet_object_octets": 132353,
+            "wire_octets": 94735
+          }
+        ],
+        "resumed_from_slot": null,
+        "schema": "transport-conformance.simulation-report/v1",
+        "semantic_terminal_blake3": "a6d1a301266d570773805a64eccfa116dd35fb5795108abf66f02b239e8a77a7",
+        "slots_executed": 96,
+        "trace_blake3": "e6265045db91862a5ea3e5f1bbcd2da6e9f9942e6f4fcbe1009856c992427897",
+        "transmitter": {
+          "channel_wire_octets": [
+            24105,
+            26400,
+            26400,
+            26400
+          ],
+          "fresh_frames": 345,
+          "generations": [
+            {
+              "esi_exhausted": false,
+              "expired": false,
+              "fresh_backlog": 0,
+              "fresh_sent": 11,
+              "id": 1,
+              "object_octets": 1281,
+              "repairs_sent": 19,
+              "total_source_symbols": 11
+            },
+            {
+              "esi_exhausted": false,
+              "expired": false,
+              "fresh_backlog": 0,
+              "fresh_sent": 256,
+              "id": 2,
+              "object_octets": 32768,
+              "repairs_sent": 0,
+              "total_source_symbols": 256
+            },
+            {
+              "esi_exhausted": false,
+              "expired": false,
+              "fresh_backlog": 178,
+              "fresh_sent": 78,
+              "id": 3,
+              "object_octets": 32768,
+              "repairs_sent": 0,
+              "total_source_symbols": 256
+            },
+            {
+              "esi_exhausted": false,
+              "expired": false,
+              "fresh_backlog": 256,
+              "fresh_sent": 0,
+              "id": 4,
+              "object_octets": 32768,
+              "repairs_sent": 0,
+              "total_source_symbols": 256
+            },
+            {
+              "esi_exhausted": false,
+              "expired": false,
+              "fresh_backlog": 256,
+              "fresh_sent": 0,
+              "id": 5,
+              "object_octets": 32768,
+              "repairs_sent": 0,
+              "total_source_symbols": 256
+            }
+          ],
+          "manifest_frames": 20,
+          "repair_frames": 19,
+          "wire_octets": 103305
+        }
+      },
+      "scenario": {
+        "channels": 4,
+        "generations": [
+          {
+            "expires_slot": 160,
+            "id": 1,
+            "object_octets": 1281,
+            "publish_slot": 0
+          },
+          {
+            "expires_slot": 160,
+            "id": 2,
+            "object_octets": 32768,
+            "publish_slot": 8
+          },
+          {
+            "expires_slot": 160,
+            "id": 3,
+            "object_octets": 32768,
+            "publish_slot": 16
+          },
+          {
+            "expires_slot": 160,
+            "id": 4,
+            "object_octets": 32768,
+            "publish_slot": 24
+          },
+          {
+            "expires_slot": 160,
+            "id": 5,
+            "object_octets": 32768,
+            "publish_slot": 32
+          }
+        ],
+        "id": "fresh-priority-no-floor",
+        "impairments": {
+          "bursts": [],
+          "duplicate_every": 0,
+          "erase_every": 0,
+          "loss_per_million": 0,
+          "loss_seed": 0,
+          "malformed_every": 0,
+          "reorder_delay_slots": 0,
+          "tamper_every": 0
+        },
+        "manifest_interval": 5,
+        "namespace": 102,
+        "receivers": [
+          {
+            "drift_every_slots": 0,
+            "drift_slots": 0,
+            "dwell_slots": 1,
+            "id": "late",
+            "join_slot": 8,
+            "phase": 0,
+            "radios": 4,
+            "retune_guard_slots": 0,
+            "sleep": []
+          }
+        ],
+        "repair_floor": 0,
+        "schema": "transport-conformance.simulation/v1",
+        "slot_octet_budget": 512,
+        "slots": 96,
+        "source_blocks": 1,
+        "symbol_size": 128
+      }
+    },
+    {
+      "compare_to": "fresh-priority-no-floor",
+      "id": "fresh-priority-repair-floor",
+      "observations": {
+        "baseline_old_generation": {
+          "completion_slot": null,
+          "generation": 1,
+          "incomplete_expired": false,
+          "reconstructed_blake3": null,
+          "required_source_symbols": 11,
+          "unique_symbols": 0
+        },
+        "fresh_frames": 257,
+        "interpretation": "These paired inputs change only the reserved repair floor. The late receiver misses the original burst while four large new objects keep fresh demand available. Observe both old progress and the fresh capacity consumed by repairs.",
+        "old_collection_improved": true,
+        "repair_frames": 107,
+        "retained_old_generation": {
+          "completion_slot": 43,
+          "generation": 1,
+          "incomplete_expired": false,
+          "reconstructed_blake3": "2eae7d0a7fdaaacff26ec8a2a51e8aba0e7a1e8274eda0feab4a1d8047681834",
+          "required_source_symbols": 11,
+          "unique_symbols": 11
+        }
+      },
+      "question": "What old-generation progress and fresh-capacity cost does one reserved repair lane produce?",
+      "restart_observation": null,
+      "run": {
+        "authority_public_key_hex": "2152f8d19b791d24453242e15f2eab6cb7cffa7b6a5ed30097960e069881db12",
+        "checkpoint_replay_decode_work": 0,
+        "demand_by_slot": [
+          {
+            "produced_object_octets": 1281,
+            "receiver_unmet_object_octets": [
+              1281
+            ],
+            "slot": 0
+          },
+          {
+            "produced_object_octets": 1281,
+            "receiver_unmet_object_octets": [
+              1281
+            ],
+            "slot": 1
+          },
+          {
+            "produced_object_octets": 1281,
+            "receiver_unmet_object_octets": [
+              1281
+            ],
+            "slot": 2
+          },
+          {
+            "produced_object_octets": 1281,
+            "receiver_unmet_object_octets": [
+              1281
+            ],
+            "slot": 3
+          },
+          {
+            "produced_object_octets": 1281,
+            "receiver_unmet_object_octets": [
+              1281
+            ],
+            "slot": 4
+          },
+          {
+            "produced_object_octets": 1281,
+            "receiver_unmet_object_octets": [
+              1281
+            ],
+            "slot": 5
+          },
+          {
+            "produced_object_octets": 1281,
+            "receiver_unmet_object_octets": [
+              1281
+            ],
+            "slot": 6
+          },
+          {
+            "produced_object_octets": 1281,
+            "receiver_unmet_object_octets": [
+              1281
+            ],
+            "slot": 7
+          },
+          {
+            "produced_object_octets": 34049,
+            "receiver_unmet_object_octets": [
+              34049
+            ],
+            "slot": 8
+          },
+          {
+            "produced_object_octets": 34049,
+            "receiver_unmet_object_octets": [
+              34049
+            ],
+            "slot": 9
+          },
+          {
+            "produced_object_octets": 34049,
+            "receiver_unmet_object_octets": [
+              34049
+            ],
+            "slot": 10
+          },
+          {
+            "produced_object_octets": 34049,
+            "receiver_unmet_object_octets": [
+              34049
+            ],
+            "slot": 11
+          },
+          {
+            "produced_object_octets": 34049,
+            "receiver_unmet_object_octets": [
+              34049
+            ],
+            "slot": 12
+          },
+          {
+            "produced_object_octets": 34049,
+            "receiver_unmet_object_octets": [
+              34049
+            ],
+            "slot": 13
+          },
+          {
+            "produced_object_octets": 34049,
+            "receiver_unmet_object_octets": [
+              34049
+            ],
+            "slot": 14
+          },
+          {
+            "produced_object_octets": 34049,
+            "receiver_unmet_object_octets": [
+              34049
+            ],
+            "slot": 15
+          },
+          {
+            "produced_object_octets": 66817,
+            "receiver_unmet_object_octets": [
+              66817
+            ],
+            "slot": 16
+          },
+          {
+            "produced_object_octets": 66817,
+            "receiver_unmet_object_octets": [
+              66817
+            ],
+            "slot": 17
+          },
+          {
+            "produced_object_octets": 66817,
+            "receiver_unmet_object_octets": [
+              66817
+            ],
+            "slot": 18
+          },
+          {
+            "produced_object_octets": 66817,
+            "receiver_unmet_object_octets": [
+              66817
+            ],
+            "slot": 19
+          },
+          {
+            "produced_object_octets": 66817,
+            "receiver_unmet_object_octets": [
+              66817
+            ],
+            "slot": 20
+          },
+          {
+            "produced_object_octets": 66817,
+            "receiver_unmet_object_octets": [
+              66817
+            ],
+            "slot": 21
+          },
+          {
+            "produced_object_octets": 66817,
+            "receiver_unmet_object_octets": [
+              66817
+            ],
+            "slot": 22
+          },
+          {
+            "produced_object_octets": 66817,
+            "receiver_unmet_object_octets": [
+              66817
+            ],
+            "slot": 23
+          },
+          {
+            "produced_object_octets": 99585,
+            "receiver_unmet_object_octets": [
+              99585
+            ],
+            "slot": 24
+          },
+          {
+            "produced_object_octets": 99585,
+            "receiver_unmet_object_octets": [
+              99585
+            ],
+            "slot": 25
+          },
+          {
+            "produced_object_octets": 99585,
+            "receiver_unmet_object_octets": [
+              99585
+            ],
+            "slot": 26
+          },
+          {
+            "produced_object_octets": 99585,
+            "receiver_unmet_object_octets": [
+              99585
+            ],
+            "slot": 27
+          },
+          {
+            "produced_object_octets": 99585,
+            "receiver_unmet_object_octets": [
+              99585
+            ],
+            "slot": 28
+          },
+          {
+            "produced_object_octets": 99585,
+            "receiver_unmet_object_octets": [
+              99585
+            ],
+            "slot": 29
+          },
+          {
+            "produced_object_octets": 99585,
+            "receiver_unmet_object_octets": [
+              99585
+            ],
+            "slot": 30
+          },
+          {
+            "produced_object_octets": 99585,
+            "receiver_unmet_object_octets": [
+              99585
+            ],
+            "slot": 31
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 32
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 33
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 34
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 35
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 36
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 37
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 38
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 39
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 40
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 41
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              132353
+            ],
+            "slot": 42
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              131072
+            ],
+            "slot": 43
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              131072
+            ],
+            "slot": 44
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              131072
+            ],
+            "slot": 45
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              131072
+            ],
+            "slot": 46
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              131072
+            ],
+            "slot": 47
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              131072
+            ],
+            "slot": 48
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              131072
+            ],
+            "slot": 49
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              131072
+            ],
+            "slot": 50
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              131072
+            ],
+            "slot": 51
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              131072
+            ],
+            "slot": 52
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              131072
+            ],
+            "slot": 53
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              131072
+            ],
+            "slot": 54
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              131072
+            ],
+            "slot": 55
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              131072
+            ],
+            "slot": 56
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              131072
+            ],
+            "slot": 57
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              131072
+            ],
+            "slot": 58
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              131072
+            ],
+            "slot": 59
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              131072
+            ],
+            "slot": 60
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              131072
+            ],
+            "slot": 61
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              131072
+            ],
+            "slot": 62
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              131072
+            ],
+            "slot": 63
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              131072
+            ],
+            "slot": 64
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              131072
+            ],
+            "slot": 65
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              131072
+            ],
+            "slot": 66
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              131072
+            ],
+            "slot": 67
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              131072
+            ],
+            "slot": 68
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              131072
+            ],
+            "slot": 69
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              131072
+            ],
+            "slot": 70
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              131072
+            ],
+            "slot": 71
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              131072
+            ],
+            "slot": 72
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              131072
+            ],
+            "slot": 73
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              131072
+            ],
+            "slot": 74
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              131072
+            ],
+            "slot": 75
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              131072
+            ],
+            "slot": 76
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              131072
+            ],
+            "slot": 77
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              131072
+            ],
+            "slot": 78
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              131072
+            ],
+            "slot": 79
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              131072
+            ],
+            "slot": 80
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              131072
+            ],
+            "slot": 81
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              131072
+            ],
+            "slot": 82
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              131072
+            ],
+            "slot": 83
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              131072
+            ],
+            "slot": 84
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              131072
+            ],
+            "slot": 85
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              131072
+            ],
+            "slot": 86
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              131072
+            ],
+            "slot": 87
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              131072
+            ],
+            "slot": 88
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              131072
+            ],
+            "slot": 89
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              131072
+            ],
+            "slot": 90
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              131072
+            ],
+            "slot": 91
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              131072
+            ],
+            "slot": 92
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              131072
+            ],
+            "slot": 93
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              131072
+            ],
+            "slot": 94
+          },
+          {
+            "produced_object_octets": 132353,
+            "receiver_unmet_object_octets": [
+              131072
+            ],
+            "slot": 95
+          }
+        ],
+        "id": "fresh-priority-repair-floor",
+        "namespace_blake3": "d345c8e800c2ff8ae68ff90452dbedffa35e1ac255a32a6c0fe19d4e88d5d51b",
+        "pending_delivery_frames": 0,
+        "physical_throughput_claim": false,
+        "receivers": [
+          {
+            "accepted_manifests": 18,
+            "accepted_symbols": 289,
+            "budget_rejections": 0,
+            "channel_misses": 0,
+            "completed_generation_symbols": 10,
+            "completed_object_octets": 1281,
+            "decode_work": 289,
+            "decoder_allocations": 5,
+            "drift_misses": 0,
+            "duplicate_symbols": 0,
+            "erased_frames": 0,
+            "expired_frames": 0,
+            "generations": [
+              {
+                "completion_slot": 43,
+                "expired": false,
+                "id": 1,
+                "incomplete_expired": false,
+                "manifest_seen": true,
+                "object_octets": 1281,
+                "reconstructed_blake3": "2eae7d0a7fdaaacff26ec8a2a51e8aba0e7a1e8274eda0feab4a1d8047681834",
+                "required_source_symbols": 11,
+                "unique_symbols": 11
+              },
+              {
+                "completion_slot": null,
+                "expired": false,
+                "id": 2,
+                "incomplete_expired": false,
+                "manifest_seen": true,
+                "object_octets": 32768,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 256,
+                "unique_symbols": 245
+              },
+              {
+                "completion_slot": null,
+                "expired": false,
+                "id": 3,
+                "incomplete_expired": false,
+                "manifest_seen": true,
+                "object_octets": 32768,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 256,
+                "unique_symbols": 13
+              },
+              {
+                "completion_slot": null,
+                "expired": false,
+                "id": 4,
+                "incomplete_expired": false,
+                "manifest_seen": true,
+                "object_octets": 32768,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 256,
+                "unique_symbols": 12
+              },
+              {
+                "completion_slot": null,
+                "expired": false,
+                "id": 5,
+                "incomplete_expired": false,
+                "manifest_seen": true,
+                "object_octets": 32768,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 256,
+                "unique_symbols": 8
+              }
+            ],
+            "id": "late",
+            "invalid_signatures": 0,
+            "late_or_sleep_misses": 32,
+            "malformed_frames": 0,
+            "offered_frames": 384,
+            "produced_object_octets": 132353,
+            "radios": 4,
+            "reconstructed_digest_mismatches": 0,
+            "retune_misses": 0,
+            "symbol_opportunity_upper_bound": 352,
+            "tuned_frames": 352,
+            "unknown_generation_symbols": 35,
+            "unmet_object_octets": 131072,
+            "wire_octets": 94735
+          }
+        ],
+        "resumed_from_slot": null,
+        "schema": "transport-conformance.simulation-report/v1",
+        "semantic_terminal_blake3": "00a1c075eee10e109cbbfb0db642e2cb941d4bdf447fa264315d59d4f9e705d2",
+        "slots_executed": 96,
+        "trace_blake3": "389d3718793a1440ee182376682be5e308ac627d90308c4ecec7bf89338ac66a",
+        "transmitter": {
+          "channel_wire_octets": [
+            24105,
+            26400,
+            26400,
+            26400
+          ],
+          "fresh_frames": 257,
+          "generations": [
+            {
+              "esi_exhausted": false,
+              "expired": false,
+              "fresh_backlog": 0,
+              "fresh_sent": 11,
+              "id": 1,
+              "object_octets": 1281,
+              "repairs_sent": 41,
+              "total_source_symbols": 11
+            },
+            {
+              "esi_exhausted": false,
+              "expired": false,
+              "fresh_backlog": 10,
+              "fresh_sent": 246,
+              "id": 2,
+              "object_octets": 32768,
+              "repairs_sent": 22,
+              "total_source_symbols": 256
+            },
+            {
+              "esi_exhausted": false,
+              "expired": false,
+              "fresh_backlog": 256,
+              "fresh_sent": 0,
+              "id": 3,
+              "object_octets": 32768,
+              "repairs_sent": 17,
+              "total_source_symbols": 256
+            },
+            {
+              "esi_exhausted": false,
+              "expired": false,
+              "fresh_backlog": 256,
+              "fresh_sent": 0,
+              "id": 4,
+              "object_octets": 32768,
+              "repairs_sent": 15,
+              "total_source_symbols": 256
+            },
+            {
+              "esi_exhausted": false,
+              "expired": false,
+              "fresh_backlog": 256,
+              "fresh_sent": 0,
+              "id": 5,
+              "object_octets": 32768,
+              "repairs_sent": 12,
+              "total_source_symbols": 256
+            }
+          ],
+          "manifest_frames": 20,
+          "repair_frames": 107,
+          "wire_octets": 103305
+        }
+      },
+      "scenario": {
+        "channels": 4,
+        "generations": [
+          {
+            "expires_slot": 160,
+            "id": 1,
+            "object_octets": 1281,
+            "publish_slot": 0
+          },
+          {
+            "expires_slot": 160,
+            "id": 2,
+            "object_octets": 32768,
+            "publish_slot": 8
+          },
+          {
+            "expires_slot": 160,
+            "id": 3,
+            "object_octets": 32768,
+            "publish_slot": 16
+          },
+          {
+            "expires_slot": 160,
+            "id": 4,
+            "object_octets": 32768,
+            "publish_slot": 24
+          },
+          {
+            "expires_slot": 160,
+            "id": 5,
+            "object_octets": 32768,
+            "publish_slot": 32
+          }
+        ],
+        "id": "fresh-priority-repair-floor",
+        "impairments": {
+          "bursts": [],
+          "duplicate_every": 0,
+          "erase_every": 0,
+          "loss_per_million": 0,
+          "loss_seed": 0,
+          "malformed_every": 0,
+          "reorder_delay_slots": 0,
+          "tamper_every": 0
+        },
+        "manifest_interval": 5,
+        "namespace": 102,
+        "receivers": [
+          {
+            "drift_every_slots": 0,
+            "drift_slots": 0,
+            "dwell_slots": 1,
+            "id": "late",
+            "join_slot": 8,
+            "phase": 0,
+            "radios": 4,
+            "retune_guard_slots": 0,
+            "sleep": []
+          }
+        ],
+        "repair_floor": 1,
+        "schema": "transport-conformance.simulation/v1",
+        "slot_octet_budget": 512,
+        "slots": 96,
+        "source_blocks": 1,
+        "symbol_size": 128
+      }
+    },
+    {
+      "compare_to": null,
+      "id": "sustained-overload",
+      "observations": {
+        "completed_object_octets": 0,
+        "cumulative_produced_object_octets": 131072,
+        "cumulative_unmet_object_octets": 131072,
+        "expired_unmet_object_octets": 106496,
+        "interpretation": "Steady offered demand spans this finite modeled horizon. Expiring retained state does not clear cumulative undelivered work. Extending the same offered rate above receive capacity cannot provide eventual delivery of every object.",
+        "offered_exceeds_even_opportunity_upper_bound": true,
+        "offered_source_symbols": 1024,
+        "offered_symbols_per_slot": {
+          "denominator": 256,
+          "numerator": 1024
+        },
+        "one_radio_symbol_opportunity_upper_bound": 256,
+        "sender_fresh_backlog_symbols": 308
+      },
+      "question": "When offered source demand stays above one-radio capacity, how do cumulative undelivered work, retention and expiry behave?",
+      "restart_observation": null,
+      "run": {
+        "authority_public_key_hex": "2152f8d19b791d24453242e15f2eab6cb7cffa7b6a5ed30097960e069881db12",
+        "checkpoint_replay_decode_work": 0,
+        "demand_by_slot": [
+          {
+            "produced_object_octets": 4096,
+            "receiver_unmet_object_octets": [
+              4096,
+              4096
+            ],
+            "slot": 0
+          },
+          {
+            "produced_object_octets": 4096,
+            "receiver_unmet_object_octets": [
+              4096,
+              4096
+            ],
+            "slot": 1
+          },
+          {
+            "produced_object_octets": 4096,
+            "receiver_unmet_object_octets": [
+              4096,
+              4096
+            ],
+            "slot": 2
+          },
+          {
+            "produced_object_octets": 4096,
+            "receiver_unmet_object_octets": [
+              4096,
+              4096
+            ],
+            "slot": 3
+          },
+          {
+            "produced_object_octets": 4096,
+            "receiver_unmet_object_octets": [
+              4096,
+              4096
+            ],
+            "slot": 4
+          },
+          {
+            "produced_object_octets": 4096,
+            "receiver_unmet_object_octets": [
+              4096,
+              4096
+            ],
+            "slot": 5
+          },
+          {
+            "produced_object_octets": 4096,
+            "receiver_unmet_object_octets": [
+              4096,
+              4096
+            ],
+            "slot": 6
+          },
+          {
+            "produced_object_octets": 4096,
+            "receiver_unmet_object_octets": [
+              4096,
+              4096
+            ],
+            "slot": 7
+          },
+          {
+            "produced_object_octets": 8192,
+            "receiver_unmet_object_octets": [
+              8192,
+              4096
+            ],
+            "slot": 8
+          },
+          {
+            "produced_object_octets": 8192,
+            "receiver_unmet_object_octets": [
+              8192,
+              4096
+            ],
+            "slot": 9
+          },
+          {
+            "produced_object_octets": 8192,
+            "receiver_unmet_object_octets": [
+              8192,
+              4096
+            ],
+            "slot": 10
+          },
+          {
+            "produced_object_octets": 8192,
+            "receiver_unmet_object_octets": [
+              8192,
+              4096
+            ],
+            "slot": 11
+          },
+          {
+            "produced_object_octets": 8192,
+            "receiver_unmet_object_octets": [
+              8192,
+              4096
+            ],
+            "slot": 12
+          },
+          {
+            "produced_object_octets": 8192,
+            "receiver_unmet_object_octets": [
+              8192,
+              4096
+            ],
+            "slot": 13
+          },
+          {
+            "produced_object_octets": 8192,
+            "receiver_unmet_object_octets": [
+              8192,
+              4096
+            ],
+            "slot": 14
+          },
+          {
+            "produced_object_octets": 8192,
+            "receiver_unmet_object_octets": [
+              8192,
+              4096
+            ],
+            "slot": 15
+          },
+          {
+            "produced_object_octets": 12288,
+            "receiver_unmet_object_octets": [
+              12288,
+              8192
+            ],
+            "slot": 16
+          },
+          {
+            "produced_object_octets": 12288,
+            "receiver_unmet_object_octets": [
+              12288,
+              8192
+            ],
+            "slot": 17
+          },
+          {
+            "produced_object_octets": 12288,
+            "receiver_unmet_object_octets": [
+              12288,
+              8192
+            ],
+            "slot": 18
+          },
+          {
+            "produced_object_octets": 12288,
+            "receiver_unmet_object_octets": [
+              12288,
+              8192
+            ],
+            "slot": 19
+          },
+          {
+            "produced_object_octets": 12288,
+            "receiver_unmet_object_octets": [
+              12288,
+              8192
+            ],
+            "slot": 20
+          },
+          {
+            "produced_object_octets": 12288,
+            "receiver_unmet_object_octets": [
+              12288,
+              8192
+            ],
+            "slot": 21
+          },
+          {
+            "produced_object_octets": 12288,
+            "receiver_unmet_object_octets": [
+              12288,
+              8192
+            ],
+            "slot": 22
+          },
+          {
+            "produced_object_octets": 12288,
+            "receiver_unmet_object_octets": [
+              12288,
+              8192
+            ],
+            "slot": 23
+          },
+          {
+            "produced_object_octets": 16384,
+            "receiver_unmet_object_octets": [
+              16384,
+              12288
+            ],
+            "slot": 24
+          },
+          {
+            "produced_object_octets": 16384,
+            "receiver_unmet_object_octets": [
+              16384,
+              12288
+            ],
+            "slot": 25
+          },
+          {
+            "produced_object_octets": 16384,
+            "receiver_unmet_object_octets": [
+              16384,
+              12288
+            ],
+            "slot": 26
+          },
+          {
+            "produced_object_octets": 16384,
+            "receiver_unmet_object_octets": [
+              16384,
+              12288
+            ],
+            "slot": 27
+          },
+          {
+            "produced_object_octets": 16384,
+            "receiver_unmet_object_octets": [
+              16384,
+              12288
+            ],
+            "slot": 28
+          },
+          {
+            "produced_object_octets": 16384,
+            "receiver_unmet_object_octets": [
+              16384,
+              12288
+            ],
+            "slot": 29
+          },
+          {
+            "produced_object_octets": 16384,
+            "receiver_unmet_object_octets": [
+              16384,
+              12288
+            ],
+            "slot": 30
+          },
+          {
+            "produced_object_octets": 16384,
+            "receiver_unmet_object_octets": [
+              16384,
+              12288
+            ],
+            "slot": 31
+          },
+          {
+            "produced_object_octets": 20480,
+            "receiver_unmet_object_octets": [
+              20480,
+              16384
+            ],
+            "slot": 32
+          },
+          {
+            "produced_object_octets": 20480,
+            "receiver_unmet_object_octets": [
+              20480,
+              16384
+            ],
+            "slot": 33
+          },
+          {
+            "produced_object_octets": 20480,
+            "receiver_unmet_object_octets": [
+              20480,
+              16384
+            ],
+            "slot": 34
+          },
+          {
+            "produced_object_octets": 20480,
+            "receiver_unmet_object_octets": [
+              20480,
+              16384
+            ],
+            "slot": 35
+          },
+          {
+            "produced_object_octets": 20480,
+            "receiver_unmet_object_octets": [
+              20480,
+              16384
+            ],
+            "slot": 36
+          },
+          {
+            "produced_object_octets": 20480,
+            "receiver_unmet_object_octets": [
+              20480,
+              16384
+            ],
+            "slot": 37
+          },
+          {
+            "produced_object_octets": 20480,
+            "receiver_unmet_object_octets": [
+              20480,
+              16384
+            ],
+            "slot": 38
+          },
+          {
+            "produced_object_octets": 20480,
+            "receiver_unmet_object_octets": [
+              20480,
+              16384
+            ],
+            "slot": 39
+          },
+          {
+            "produced_object_octets": 24576,
+            "receiver_unmet_object_octets": [
+              24576,
+              20480
+            ],
+            "slot": 40
+          },
+          {
+            "produced_object_octets": 24576,
+            "receiver_unmet_object_octets": [
+              24576,
+              20480
+            ],
+            "slot": 41
+          },
+          {
+            "produced_object_octets": 24576,
+            "receiver_unmet_object_octets": [
+              24576,
+              20480
+            ],
+            "slot": 42
+          },
+          {
+            "produced_object_octets": 24576,
+            "receiver_unmet_object_octets": [
+              24576,
+              20480
+            ],
+            "slot": 43
+          },
+          {
+            "produced_object_octets": 24576,
+            "receiver_unmet_object_octets": [
+              24576,
+              20480
+            ],
+            "slot": 44
+          },
+          {
+            "produced_object_octets": 24576,
+            "receiver_unmet_object_octets": [
+              24576,
+              20480
+            ],
+            "slot": 45
+          },
+          {
+            "produced_object_octets": 24576,
+            "receiver_unmet_object_octets": [
+              24576,
+              20480
+            ],
+            "slot": 46
+          },
+          {
+            "produced_object_octets": 24576,
+            "receiver_unmet_object_octets": [
+              24576,
+              20480
+            ],
+            "slot": 47
+          },
+          {
+            "produced_object_octets": 28672,
+            "receiver_unmet_object_octets": [
+              28672,
+              24576
+            ],
+            "slot": 48
+          },
+          {
+            "produced_object_octets": 28672,
+            "receiver_unmet_object_octets": [
+              28672,
+              20480
+            ],
+            "slot": 49
+          },
+          {
+            "produced_object_octets": 28672,
+            "receiver_unmet_object_octets": [
+              28672,
+              20480
+            ],
+            "slot": 50
+          },
+          {
+            "produced_object_octets": 28672,
+            "receiver_unmet_object_octets": [
+              28672,
+              20480
+            ],
+            "slot": 51
+          },
+          {
+            "produced_object_octets": 28672,
+            "receiver_unmet_object_octets": [
+              28672,
+              20480
+            ],
+            "slot": 52
+          },
+          {
+            "produced_object_octets": 28672,
+            "receiver_unmet_object_octets": [
+              28672,
+              20480
+            ],
+            "slot": 53
+          },
+          {
+            "produced_object_octets": 28672,
+            "receiver_unmet_object_octets": [
+              28672,
+              20480
+            ],
+            "slot": 54
+          },
+          {
+            "produced_object_octets": 28672,
+            "receiver_unmet_object_octets": [
+              28672,
+              20480
+            ],
+            "slot": 55
+          },
+          {
+            "produced_object_octets": 32768,
+            "receiver_unmet_object_octets": [
+              32768,
+              24576
+            ],
+            "slot": 56
+          },
+          {
+            "produced_object_octets": 32768,
+            "receiver_unmet_object_octets": [
+              32768,
+              24576
+            ],
+            "slot": 57
+          },
+          {
+            "produced_object_octets": 32768,
+            "receiver_unmet_object_octets": [
+              32768,
+              24576
+            ],
+            "slot": 58
+          },
+          {
+            "produced_object_octets": 32768,
+            "receiver_unmet_object_octets": [
+              32768,
+              24576
+            ],
+            "slot": 59
+          },
+          {
+            "produced_object_octets": 32768,
+            "receiver_unmet_object_octets": [
+              32768,
+              24576
+            ],
+            "slot": 60
+          },
+          {
+            "produced_object_octets": 32768,
+            "receiver_unmet_object_octets": [
+              32768,
+              24576
+            ],
+            "slot": 61
+          },
+          {
+            "produced_object_octets": 32768,
+            "receiver_unmet_object_octets": [
+              32768,
+              24576
+            ],
+            "slot": 62
+          },
+          {
+            "produced_object_octets": 32768,
+            "receiver_unmet_object_octets": [
+              32768,
+              24576
+            ],
+            "slot": 63
+          },
+          {
+            "produced_object_octets": 36864,
+            "receiver_unmet_object_octets": [
+              36864,
+              28672
+            ],
+            "slot": 64
+          },
+          {
+            "produced_object_octets": 36864,
+            "receiver_unmet_object_octets": [
+              36864,
+              28672
+            ],
+            "slot": 65
+          },
+          {
+            "produced_object_octets": 36864,
+            "receiver_unmet_object_octets": [
+              36864,
+              28672
+            ],
+            "slot": 66
+          },
+          {
+            "produced_object_octets": 36864,
+            "receiver_unmet_object_octets": [
+              36864,
+              28672
+            ],
+            "slot": 67
+          },
+          {
+            "produced_object_octets": 36864,
+            "receiver_unmet_object_octets": [
+              36864,
+              28672
+            ],
+            "slot": 68
+          },
+          {
+            "produced_object_octets": 36864,
+            "receiver_unmet_object_octets": [
+              36864,
+              28672
+            ],
+            "slot": 69
+          },
+          {
+            "produced_object_octets": 36864,
+            "receiver_unmet_object_octets": [
+              36864,
+              28672
+            ],
+            "slot": 70
+          },
+          {
+            "produced_object_octets": 36864,
+            "receiver_unmet_object_octets": [
+              36864,
+              28672
+            ],
+            "slot": 71
+          },
+          {
+            "produced_object_octets": 40960,
+            "receiver_unmet_object_octets": [
+              40960,
+              32768
+            ],
+            "slot": 72
+          },
+          {
+            "produced_object_octets": 40960,
+            "receiver_unmet_object_octets": [
+              40960,
+              32768
+            ],
+            "slot": 73
+          },
+          {
+            "produced_object_octets": 40960,
+            "receiver_unmet_object_octets": [
+              40960,
+              32768
+            ],
+            "slot": 74
+          },
+          {
+            "produced_object_octets": 40960,
+            "receiver_unmet_object_octets": [
+              40960,
+              32768
+            ],
+            "slot": 75
+          },
+          {
+            "produced_object_octets": 40960,
+            "receiver_unmet_object_octets": [
+              40960,
+              32768
+            ],
+            "slot": 76
+          },
+          {
+            "produced_object_octets": 40960,
+            "receiver_unmet_object_octets": [
+              40960,
+              32768
+            ],
+            "slot": 77
+          },
+          {
+            "produced_object_octets": 40960,
+            "receiver_unmet_object_octets": [
+              40960,
+              32768
+            ],
+            "slot": 78
+          },
+          {
+            "produced_object_octets": 40960,
+            "receiver_unmet_object_octets": [
+              40960,
+              32768
+            ],
+            "slot": 79
+          },
+          {
+            "produced_object_octets": 45056,
+            "receiver_unmet_object_octets": [
+              45056,
+              36864
+            ],
+            "slot": 80
+          },
+          {
+            "produced_object_octets": 45056,
+            "receiver_unmet_object_octets": [
+              45056,
+              36864
+            ],
+            "slot": 81
+          },
+          {
+            "produced_object_octets": 45056,
+            "receiver_unmet_object_octets": [
+              45056,
+              36864
+            ],
+            "slot": 82
+          },
+          {
+            "produced_object_octets": 45056,
+            "receiver_unmet_object_octets": [
+              45056,
+              36864
+            ],
+            "slot": 83
+          },
+          {
+            "produced_object_octets": 45056,
+            "receiver_unmet_object_octets": [
+              45056,
+              36864
+            ],
+            "slot": 84
+          },
+          {
+            "produced_object_octets": 45056,
+            "receiver_unmet_object_octets": [
+              45056,
+              36864
+            ],
+            "slot": 85
+          },
+          {
+            "produced_object_octets": 45056,
+            "receiver_unmet_object_octets": [
+              45056,
+              36864
+            ],
+            "slot": 86
+          },
+          {
+            "produced_object_octets": 45056,
+            "receiver_unmet_object_octets": [
+              45056,
+              32768
+            ],
+            "slot": 87
+          },
+          {
+            "produced_object_octets": 49152,
+            "receiver_unmet_object_octets": [
+              49152,
+              36864
+            ],
+            "slot": 88
+          },
+          {
+            "produced_object_octets": 49152,
+            "receiver_unmet_object_octets": [
+              49152,
+              36864
+            ],
+            "slot": 89
+          },
+          {
+            "produced_object_octets": 49152,
+            "receiver_unmet_object_octets": [
+              49152,
+              32768
+            ],
+            "slot": 90
+          },
+          {
+            "produced_object_octets": 49152,
+            "receiver_unmet_object_octets": [
+              49152,
+              32768
+            ],
+            "slot": 91
+          },
+          {
+            "produced_object_octets": 49152,
+            "receiver_unmet_object_octets": [
+              49152,
+              32768
+            ],
+            "slot": 92
+          },
+          {
+            "produced_object_octets": 49152,
+            "receiver_unmet_object_octets": [
+              49152,
+              32768
+            ],
+            "slot": 93
+          },
+          {
+            "produced_object_octets": 49152,
+            "receiver_unmet_object_octets": [
+              49152,
+              32768
+            ],
+            "slot": 94
+          },
+          {
+            "produced_object_octets": 49152,
+            "receiver_unmet_object_octets": [
+              49152,
+              32768
+            ],
+            "slot": 95
+          },
+          {
+            "produced_object_octets": 53248,
+            "receiver_unmet_object_octets": [
+              53248,
+              36864
+            ],
+            "slot": 96
+          },
+          {
+            "produced_object_octets": 53248,
+            "receiver_unmet_object_octets": [
+              53248,
+              36864
+            ],
+            "slot": 97
+          },
+          {
+            "produced_object_octets": 53248,
+            "receiver_unmet_object_octets": [
+              53248,
+              36864
+            ],
+            "slot": 98
+          },
+          {
+            "produced_object_octets": 53248,
+            "receiver_unmet_object_octets": [
+              53248,
+              36864
+            ],
+            "slot": 99
+          },
+          {
+            "produced_object_octets": 53248,
+            "receiver_unmet_object_octets": [
+              53248,
+              36864
+            ],
+            "slot": 100
+          },
+          {
+            "produced_object_octets": 53248,
+            "receiver_unmet_object_octets": [
+              53248,
+              36864
+            ],
+            "slot": 101
+          },
+          {
+            "produced_object_octets": 53248,
+            "receiver_unmet_object_octets": [
+              53248,
+              32768
+            ],
+            "slot": 102
+          },
+          {
+            "produced_object_octets": 53248,
+            "receiver_unmet_object_octets": [
+              53248,
+              32768
+            ],
+            "slot": 103
+          },
+          {
+            "produced_object_octets": 57344,
+            "receiver_unmet_object_octets": [
+              57344,
+              36864
+            ],
+            "slot": 104
+          },
+          {
+            "produced_object_octets": 57344,
+            "receiver_unmet_object_octets": [
+              57344,
+              36864
+            ],
+            "slot": 105
+          },
+          {
+            "produced_object_octets": 57344,
+            "receiver_unmet_object_octets": [
+              57344,
+              36864
+            ],
+            "slot": 106
+          },
+          {
+            "produced_object_octets": 57344,
+            "receiver_unmet_object_octets": [
+              57344,
+              36864
+            ],
+            "slot": 107
+          },
+          {
+            "produced_object_octets": 57344,
+            "receiver_unmet_object_octets": [
+              57344,
+              36864
+            ],
+            "slot": 108
+          },
+          {
+            "produced_object_octets": 57344,
+            "receiver_unmet_object_octets": [
+              57344,
+              36864
+            ],
+            "slot": 109
+          },
+          {
+            "produced_object_octets": 57344,
+            "receiver_unmet_object_octets": [
+              57344,
+              36864
+            ],
+            "slot": 110
+          },
+          {
+            "produced_object_octets": 57344,
+            "receiver_unmet_object_octets": [
+              57344,
+              36864
+            ],
+            "slot": 111
+          },
+          {
+            "produced_object_octets": 61440,
+            "receiver_unmet_object_octets": [
+              61440,
+              40960
+            ],
+            "slot": 112
+          },
+          {
+            "produced_object_octets": 61440,
+            "receiver_unmet_object_octets": [
+              61440,
+              36864
+            ],
+            "slot": 113
+          },
+          {
+            "produced_object_octets": 61440,
+            "receiver_unmet_object_octets": [
+              61440,
+              36864
+            ],
+            "slot": 114
+          },
+          {
+            "produced_object_octets": 61440,
+            "receiver_unmet_object_octets": [
+              61440,
+              36864
+            ],
+            "slot": 115
+          },
+          {
+            "produced_object_octets": 61440,
+            "receiver_unmet_object_octets": [
+              61440,
+              36864
+            ],
+            "slot": 116
+          },
+          {
+            "produced_object_octets": 61440,
+            "receiver_unmet_object_octets": [
+              61440,
+              36864
+            ],
+            "slot": 117
+          },
+          {
+            "produced_object_octets": 61440,
+            "receiver_unmet_object_octets": [
+              61440,
+              36864
+            ],
+            "slot": 118
+          },
+          {
+            "produced_object_octets": 61440,
+            "receiver_unmet_object_octets": [
+              61440,
+              36864
+            ],
+            "slot": 119
+          },
+          {
+            "produced_object_octets": 65536,
+            "receiver_unmet_object_octets": [
+              65536,
+              40960
+            ],
+            "slot": 120
+          },
+          {
+            "produced_object_octets": 65536,
+            "receiver_unmet_object_octets": [
+              65536,
+              40960
+            ],
+            "slot": 121
+          },
+          {
+            "produced_object_octets": 65536,
+            "receiver_unmet_object_octets": [
+              65536,
+              40960
+            ],
+            "slot": 122
+          },
+          {
+            "produced_object_octets": 65536,
+            "receiver_unmet_object_octets": [
+              65536,
+              40960
+            ],
+            "slot": 123
+          },
+          {
+            "produced_object_octets": 65536,
+            "receiver_unmet_object_octets": [
+              65536,
+              36864
+            ],
+            "slot": 124
+          },
+          {
+            "produced_object_octets": 65536,
+            "receiver_unmet_object_octets": [
+              65536,
+              36864
+            ],
+            "slot": 125
+          },
+          {
+            "produced_object_octets": 65536,
+            "receiver_unmet_object_octets": [
+              65536,
+              36864
+            ],
+            "slot": 126
+          },
+          {
+            "produced_object_octets": 65536,
+            "receiver_unmet_object_octets": [
+              65536,
+              36864
+            ],
+            "slot": 127
+          },
+          {
+            "produced_object_octets": 69632,
+            "receiver_unmet_object_octets": [
+              69632,
+              40960
+            ],
+            "slot": 128
+          },
+          {
+            "produced_object_octets": 69632,
+            "receiver_unmet_object_octets": [
+              69632,
+              40960
+            ],
+            "slot": 129
+          },
+          {
+            "produced_object_octets": 69632,
+            "receiver_unmet_object_octets": [
+              69632,
+              40960
+            ],
+            "slot": 130
+          },
+          {
+            "produced_object_octets": 69632,
+            "receiver_unmet_object_octets": [
+              69632,
+              40960
+            ],
+            "slot": 131
+          },
+          {
+            "produced_object_octets": 69632,
+            "receiver_unmet_object_octets": [
+              69632,
+              40960
+            ],
+            "slot": 132
+          },
+          {
+            "produced_object_octets": 69632,
+            "receiver_unmet_object_octets": [
+              69632,
+              40960
+            ],
+            "slot": 133
+          },
+          {
+            "produced_object_octets": 69632,
+            "receiver_unmet_object_octets": [
+              69632,
+              40960
+            ],
+            "slot": 134
+          },
+          {
+            "produced_object_octets": 69632,
+            "receiver_unmet_object_octets": [
+              69632,
+              36864
+            ],
+            "slot": 135
+          },
+          {
+            "produced_object_octets": 73728,
+            "receiver_unmet_object_octets": [
+              73728,
+              40960
+            ],
+            "slot": 136
+          },
+          {
+            "produced_object_octets": 73728,
+            "receiver_unmet_object_octets": [
+              73728,
+              40960
+            ],
+            "slot": 137
+          },
+          {
+            "produced_object_octets": 73728,
+            "receiver_unmet_object_octets": [
+              73728,
+              40960
+            ],
+            "slot": 138
+          },
+          {
+            "produced_object_octets": 73728,
+            "receiver_unmet_object_octets": [
+              73728,
+              40960
+            ],
+            "slot": 139
+          },
+          {
+            "produced_object_octets": 73728,
+            "receiver_unmet_object_octets": [
+              73728,
+              40960
+            ],
+            "slot": 140
+          },
+          {
+            "produced_object_octets": 73728,
+            "receiver_unmet_object_octets": [
+              73728,
+              40960
+            ],
+            "slot": 141
+          },
+          {
+            "produced_object_octets": 73728,
+            "receiver_unmet_object_octets": [
+              73728,
+              40960
+            ],
+            "slot": 142
+          },
+          {
+            "produced_object_octets": 73728,
+            "receiver_unmet_object_octets": [
+              73728,
+              40960
+            ],
+            "slot": 143
+          },
+          {
+            "produced_object_octets": 77824,
+            "receiver_unmet_object_octets": [
+              77824,
+              45056
+            ],
+            "slot": 144
+          },
+          {
+            "produced_object_octets": 77824,
+            "receiver_unmet_object_octets": [
+              77824,
+              45056
+            ],
+            "slot": 145
+          },
+          {
+            "produced_object_octets": 77824,
+            "receiver_unmet_object_octets": [
+              77824,
+              45056
+            ],
+            "slot": 146
+          },
+          {
+            "produced_object_octets": 77824,
+            "receiver_unmet_object_octets": [
+              77824,
+              45056
+            ],
+            "slot": 147
+          },
+          {
+            "produced_object_octets": 77824,
+            "receiver_unmet_object_octets": [
+              77824,
+              45056
+            ],
+            "slot": 148
+          },
+          {
+            "produced_object_octets": 77824,
+            "receiver_unmet_object_octets": [
+              77824,
+              45056
+            ],
+            "slot": 149
+          },
+          {
+            "produced_object_octets": 77824,
+            "receiver_unmet_object_octets": [
+              77824,
+              45056
+            ],
+            "slot": 150
+          },
+          {
+            "produced_object_octets": 77824,
+            "receiver_unmet_object_octets": [
+              77824,
+              45056
+            ],
+            "slot": 151
+          },
+          {
+            "produced_object_octets": 81920,
+            "receiver_unmet_object_octets": [
+              81920,
+              49152
+            ],
+            "slot": 152
+          },
+          {
+            "produced_object_octets": 81920,
+            "receiver_unmet_object_octets": [
+              81920,
+              49152
+            ],
+            "slot": 153
+          },
+          {
+            "produced_object_octets": 81920,
+            "receiver_unmet_object_octets": [
+              81920,
+              49152
+            ],
+            "slot": 154
+          },
+          {
+            "produced_object_octets": 81920,
+            "receiver_unmet_object_octets": [
+              81920,
+              49152
+            ],
+            "slot": 155
+          },
+          {
+            "produced_object_octets": 81920,
+            "receiver_unmet_object_octets": [
+              81920,
+              49152
+            ],
+            "slot": 156
+          },
+          {
+            "produced_object_octets": 81920,
+            "receiver_unmet_object_octets": [
+              81920,
+              49152
+            ],
+            "slot": 157
+          },
+          {
+            "produced_object_octets": 81920,
+            "receiver_unmet_object_octets": [
+              81920,
+              49152
+            ],
+            "slot": 158
+          },
+          {
+            "produced_object_octets": 81920,
+            "receiver_unmet_object_octets": [
+              81920,
+              49152
+            ],
+            "slot": 159
+          },
+          {
+            "produced_object_octets": 86016,
+            "receiver_unmet_object_octets": [
+              86016,
+              53248
+            ],
+            "slot": 160
+          },
+          {
+            "produced_object_octets": 86016,
+            "receiver_unmet_object_octets": [
+              86016,
+              53248
+            ],
+            "slot": 161
+          },
+          {
+            "produced_object_octets": 86016,
+            "receiver_unmet_object_octets": [
+              86016,
+              53248
+            ],
+            "slot": 162
+          },
+          {
+            "produced_object_octets": 86016,
+            "receiver_unmet_object_octets": [
+              86016,
+              53248
+            ],
+            "slot": 163
+          },
+          {
+            "produced_object_octets": 86016,
+            "receiver_unmet_object_octets": [
+              86016,
+              53248
+            ],
+            "slot": 164
+          },
+          {
+            "produced_object_octets": 86016,
+            "receiver_unmet_object_octets": [
+              86016,
+              53248
+            ],
+            "slot": 165
+          },
+          {
+            "produced_object_octets": 86016,
+            "receiver_unmet_object_octets": [
+              86016,
+              53248
+            ],
+            "slot": 166
+          },
+          {
+            "produced_object_octets": 86016,
+            "receiver_unmet_object_octets": [
+              86016,
+              53248
+            ],
+            "slot": 167
+          },
+          {
+            "produced_object_octets": 90112,
+            "receiver_unmet_object_octets": [
+              90112,
+              57344
+            ],
+            "slot": 168
+          },
+          {
+            "produced_object_octets": 90112,
+            "receiver_unmet_object_octets": [
+              90112,
+              57344
+            ],
+            "slot": 169
+          },
+          {
+            "produced_object_octets": 90112,
+            "receiver_unmet_object_octets": [
+              90112,
+              57344
+            ],
+            "slot": 170
+          },
+          {
+            "produced_object_octets": 90112,
+            "receiver_unmet_object_octets": [
+              90112,
+              57344
+            ],
+            "slot": 171
+          },
+          {
+            "produced_object_octets": 90112,
+            "receiver_unmet_object_octets": [
+              90112,
+              57344
+            ],
+            "slot": 172
+          },
+          {
+            "produced_object_octets": 90112,
+            "receiver_unmet_object_octets": [
+              90112,
+              57344
+            ],
+            "slot": 173
+          },
+          {
+            "produced_object_octets": 90112,
+            "receiver_unmet_object_octets": [
+              90112,
+              57344
+            ],
+            "slot": 174
+          },
+          {
+            "produced_object_octets": 90112,
+            "receiver_unmet_object_octets": [
+              90112,
+              57344
+            ],
+            "slot": 175
+          },
+          {
+            "produced_object_octets": 94208,
+            "receiver_unmet_object_octets": [
+              94208,
+              61440
+            ],
+            "slot": 176
+          },
+          {
+            "produced_object_octets": 94208,
+            "receiver_unmet_object_octets": [
+              94208,
+              61440
+            ],
+            "slot": 177
+          },
+          {
+            "produced_object_octets": 94208,
+            "receiver_unmet_object_octets": [
+              94208,
+              61440
+            ],
+            "slot": 178
+          },
+          {
+            "produced_object_octets": 94208,
+            "receiver_unmet_object_octets": [
+              94208,
+              61440
+            ],
+            "slot": 179
+          },
+          {
+            "produced_object_octets": 94208,
+            "receiver_unmet_object_octets": [
+              94208,
+              61440
+            ],
+            "slot": 180
+          },
+          {
+            "produced_object_octets": 94208,
+            "receiver_unmet_object_octets": [
+              94208,
+              61440
+            ],
+            "slot": 181
+          },
+          {
+            "produced_object_octets": 94208,
+            "receiver_unmet_object_octets": [
+              94208,
+              61440
+            ],
+            "slot": 182
+          },
+          {
+            "produced_object_octets": 94208,
+            "receiver_unmet_object_octets": [
+              94208,
+              61440
+            ],
+            "slot": 183
+          },
+          {
+            "produced_object_octets": 98304,
+            "receiver_unmet_object_octets": [
+              98304,
+              65536
+            ],
+            "slot": 184
+          },
+          {
+            "produced_object_octets": 98304,
+            "receiver_unmet_object_octets": [
+              98304,
+              65536
+            ],
+            "slot": 185
+          },
+          {
+            "produced_object_octets": 98304,
+            "receiver_unmet_object_octets": [
+              98304,
+              65536
+            ],
+            "slot": 186
+          },
+          {
+            "produced_object_octets": 98304,
+            "receiver_unmet_object_octets": [
+              98304,
+              65536
+            ],
+            "slot": 187
+          },
+          {
+            "produced_object_octets": 98304,
+            "receiver_unmet_object_octets": [
+              98304,
+              65536
+            ],
+            "slot": 188
+          },
+          {
+            "produced_object_octets": 98304,
+            "receiver_unmet_object_octets": [
+              98304,
+              65536
+            ],
+            "slot": 189
+          },
+          {
+            "produced_object_octets": 98304,
+            "receiver_unmet_object_octets": [
+              98304,
+              65536
+            ],
+            "slot": 190
+          },
+          {
+            "produced_object_octets": 98304,
+            "receiver_unmet_object_octets": [
+              98304,
+              65536
+            ],
+            "slot": 191
+          },
+          {
+            "produced_object_octets": 102400,
+            "receiver_unmet_object_octets": [
+              102400,
+              69632
+            ],
+            "slot": 192
+          },
+          {
+            "produced_object_octets": 102400,
+            "receiver_unmet_object_octets": [
+              102400,
+              69632
+            ],
+            "slot": 193
+          },
+          {
+            "produced_object_octets": 102400,
+            "receiver_unmet_object_octets": [
+              102400,
+              69632
+            ],
+            "slot": 194
+          },
+          {
+            "produced_object_octets": 102400,
+            "receiver_unmet_object_octets": [
+              102400,
+              69632
+            ],
+            "slot": 195
+          },
+          {
+            "produced_object_octets": 102400,
+            "receiver_unmet_object_octets": [
+              102400,
+              69632
+            ],
+            "slot": 196
+          },
+          {
+            "produced_object_octets": 102400,
+            "receiver_unmet_object_octets": [
+              102400,
+              69632
+            ],
+            "slot": 197
+          },
+          {
+            "produced_object_octets": 102400,
+            "receiver_unmet_object_octets": [
+              102400,
+              69632
+            ],
+            "slot": 198
+          },
+          {
+            "produced_object_octets": 102400,
+            "receiver_unmet_object_octets": [
+              102400,
+              69632
+            ],
+            "slot": 199
+          },
+          {
+            "produced_object_octets": 106496,
+            "receiver_unmet_object_octets": [
+              106496,
+              73728
+            ],
+            "slot": 200
+          },
+          {
+            "produced_object_octets": 106496,
+            "receiver_unmet_object_octets": [
+              106496,
+              73728
+            ],
+            "slot": 201
+          },
+          {
+            "produced_object_octets": 106496,
+            "receiver_unmet_object_octets": [
+              106496,
+              73728
+            ],
+            "slot": 202
+          },
+          {
+            "produced_object_octets": 106496,
+            "receiver_unmet_object_octets": [
+              106496,
+              73728
+            ],
+            "slot": 203
+          },
+          {
+            "produced_object_octets": 106496,
+            "receiver_unmet_object_octets": [
+              106496,
+              73728
+            ],
+            "slot": 204
+          },
+          {
+            "produced_object_octets": 106496,
+            "receiver_unmet_object_octets": [
+              106496,
+              73728
+            ],
+            "slot": 205
+          },
+          {
+            "produced_object_octets": 106496,
+            "receiver_unmet_object_octets": [
+              106496,
+              73728
+            ],
+            "slot": 206
+          },
+          {
+            "produced_object_octets": 106496,
+            "receiver_unmet_object_octets": [
+              106496,
+              73728
+            ],
+            "slot": 207
+          },
+          {
+            "produced_object_octets": 110592,
+            "receiver_unmet_object_octets": [
+              110592,
+              77824
+            ],
+            "slot": 208
+          },
+          {
+            "produced_object_octets": 110592,
+            "receiver_unmet_object_octets": [
+              110592,
+              77824
+            ],
+            "slot": 209
+          },
+          {
+            "produced_object_octets": 110592,
+            "receiver_unmet_object_octets": [
+              110592,
+              77824
+            ],
+            "slot": 210
+          },
+          {
+            "produced_object_octets": 110592,
+            "receiver_unmet_object_octets": [
+              110592,
+              77824
+            ],
+            "slot": 211
+          },
+          {
+            "produced_object_octets": 110592,
+            "receiver_unmet_object_octets": [
+              110592,
+              77824
+            ],
+            "slot": 212
+          },
+          {
+            "produced_object_octets": 110592,
+            "receiver_unmet_object_octets": [
+              110592,
+              77824
+            ],
+            "slot": 213
+          },
+          {
+            "produced_object_octets": 110592,
+            "receiver_unmet_object_octets": [
+              110592,
+              77824
+            ],
+            "slot": 214
+          },
+          {
+            "produced_object_octets": 110592,
+            "receiver_unmet_object_octets": [
+              110592,
+              77824
+            ],
+            "slot": 215
+          },
+          {
+            "produced_object_octets": 114688,
+            "receiver_unmet_object_octets": [
+              114688,
+              81920
+            ],
+            "slot": 216
+          },
+          {
+            "produced_object_octets": 114688,
+            "receiver_unmet_object_octets": [
+              114688,
+              81920
+            ],
+            "slot": 217
+          },
+          {
+            "produced_object_octets": 114688,
+            "receiver_unmet_object_octets": [
+              114688,
+              81920
+            ],
+            "slot": 218
+          },
+          {
+            "produced_object_octets": 114688,
+            "receiver_unmet_object_octets": [
+              114688,
+              81920
+            ],
+            "slot": 219
+          },
+          {
+            "produced_object_octets": 114688,
+            "receiver_unmet_object_octets": [
+              114688,
+              81920
+            ],
+            "slot": 220
+          },
+          {
+            "produced_object_octets": 114688,
+            "receiver_unmet_object_octets": [
+              114688,
+              81920
+            ],
+            "slot": 221
+          },
+          {
+            "produced_object_octets": 114688,
+            "receiver_unmet_object_octets": [
+              114688,
+              81920
+            ],
+            "slot": 222
+          },
+          {
+            "produced_object_octets": 114688,
+            "receiver_unmet_object_octets": [
+              114688,
+              81920
+            ],
+            "slot": 223
+          },
+          {
+            "produced_object_octets": 118784,
+            "receiver_unmet_object_octets": [
+              118784,
+              86016
+            ],
+            "slot": 224
+          },
+          {
+            "produced_object_octets": 118784,
+            "receiver_unmet_object_octets": [
+              118784,
+              86016
+            ],
+            "slot": 225
+          },
+          {
+            "produced_object_octets": 118784,
+            "receiver_unmet_object_octets": [
+              118784,
+              86016
+            ],
+            "slot": 226
+          },
+          {
+            "produced_object_octets": 118784,
+            "receiver_unmet_object_octets": [
+              118784,
+              86016
+            ],
+            "slot": 227
+          },
+          {
+            "produced_object_octets": 118784,
+            "receiver_unmet_object_octets": [
+              118784,
+              86016
+            ],
+            "slot": 228
+          },
+          {
+            "produced_object_octets": 118784,
+            "receiver_unmet_object_octets": [
+              118784,
+              86016
+            ],
+            "slot": 229
+          },
+          {
+            "produced_object_octets": 118784,
+            "receiver_unmet_object_octets": [
+              118784,
+              86016
+            ],
+            "slot": 230
+          },
+          {
+            "produced_object_octets": 118784,
+            "receiver_unmet_object_octets": [
+              118784,
+              86016
+            ],
+            "slot": 231
+          },
+          {
+            "produced_object_octets": 122880,
+            "receiver_unmet_object_octets": [
+              122880,
+              90112
+            ],
+            "slot": 232
+          },
+          {
+            "produced_object_octets": 122880,
+            "receiver_unmet_object_octets": [
+              122880,
+              90112
+            ],
+            "slot": 233
+          },
+          {
+            "produced_object_octets": 122880,
+            "receiver_unmet_object_octets": [
+              122880,
+              90112
+            ],
+            "slot": 234
+          },
+          {
+            "produced_object_octets": 122880,
+            "receiver_unmet_object_octets": [
+              122880,
+              90112
+            ],
+            "slot": 235
+          },
+          {
+            "produced_object_octets": 122880,
+            "receiver_unmet_object_octets": [
+              122880,
+              90112
+            ],
+            "slot": 236
+          },
+          {
+            "produced_object_octets": 122880,
+            "receiver_unmet_object_octets": [
+              122880,
+              90112
+            ],
+            "slot": 237
+          },
+          {
+            "produced_object_octets": 122880,
+            "receiver_unmet_object_octets": [
+              122880,
+              90112
+            ],
+            "slot": 238
+          },
+          {
+            "produced_object_octets": 122880,
+            "receiver_unmet_object_octets": [
+              122880,
+              90112
+            ],
+            "slot": 239
+          },
+          {
+            "produced_object_octets": 126976,
+            "receiver_unmet_object_octets": [
+              126976,
+              94208
+            ],
+            "slot": 240
+          },
+          {
+            "produced_object_octets": 126976,
+            "receiver_unmet_object_octets": [
+              126976,
+              94208
+            ],
+            "slot": 241
+          },
+          {
+            "produced_object_octets": 126976,
+            "receiver_unmet_object_octets": [
+              126976,
+              94208
+            ],
+            "slot": 242
+          },
+          {
+            "produced_object_octets": 126976,
+            "receiver_unmet_object_octets": [
+              126976,
+              94208
+            ],
+            "slot": 243
+          },
+          {
+            "produced_object_octets": 126976,
+            "receiver_unmet_object_octets": [
+              126976,
+              94208
+            ],
+            "slot": 244
+          },
+          {
+            "produced_object_octets": 126976,
+            "receiver_unmet_object_octets": [
+              126976,
+              94208
+            ],
+            "slot": 245
+          },
+          {
+            "produced_object_octets": 126976,
+            "receiver_unmet_object_octets": [
+              126976,
+              94208
+            ],
+            "slot": 246
+          },
+          {
+            "produced_object_octets": 126976,
+            "receiver_unmet_object_octets": [
+              126976,
+              94208
+            ],
+            "slot": 247
+          },
+          {
+            "produced_object_octets": 131072,
+            "receiver_unmet_object_octets": [
+              131072,
+              98304
+            ],
+            "slot": 248
+          },
+          {
+            "produced_object_octets": 131072,
+            "receiver_unmet_object_octets": [
+              131072,
+              98304
+            ],
+            "slot": 249
+          },
+          {
+            "produced_object_octets": 131072,
+            "receiver_unmet_object_octets": [
+              131072,
+              98304
+            ],
+            "slot": 250
+          },
+          {
+            "produced_object_octets": 131072,
+            "receiver_unmet_object_octets": [
+              131072,
+              98304
+            ],
+            "slot": 251
+          },
+          {
+            "produced_object_octets": 131072,
+            "receiver_unmet_object_octets": [
+              131072,
+              98304
+            ],
+            "slot": 252
+          },
+          {
+            "produced_object_octets": 131072,
+            "receiver_unmet_object_octets": [
+              131072,
+              98304
+            ],
+            "slot": 253
+          },
+          {
+            "produced_object_octets": 131072,
+            "receiver_unmet_object_octets": [
+              131072,
+              98304
+            ],
+            "slot": 254
+          },
+          {
+            "produced_object_octets": 131072,
+            "receiver_unmet_object_octets": [
+              131072,
+              98304
+            ],
+            "slot": 255
+          }
+        ],
+        "id": "sustained-overload",
+        "namespace_blake3": "6d1fdf7c3789905ff133e37e9036f9f10a1bd8b3a8bd947ffd25b2a58d14e4c8",
+        "pending_delivery_frames": 0,
+        "physical_throughput_claim": false,
+        "receivers": [
+          {
+            "accepted_manifests": 52,
+            "accepted_symbols": 161,
+            "budget_rejections": 0,
+            "channel_misses": 768,
+            "completed_generation_symbols": 0,
+            "completed_object_octets": 0,
+            "decode_work": 161,
+            "decoder_allocations": 27,
+            "drift_misses": 0,
+            "duplicate_symbols": 0,
+            "erased_frames": 0,
+            "expired_frames": 0,
+            "generations": [
+              {
+                "completion_slot": null,
+                "expired": true,
+                "id": 1,
+                "incomplete_expired": true,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 10
+              },
+              {
+                "completion_slot": null,
+                "expired": true,
+                "id": 2,
+                "incomplete_expired": true,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 6
+              },
+              {
+                "completion_slot": null,
+                "expired": true,
+                "id": 3,
+                "incomplete_expired": true,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 4
+              },
+              {
+                "completion_slot": null,
+                "expired": true,
+                "id": 4,
+                "incomplete_expired": true,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 4
+              },
+              {
+                "completion_slot": null,
+                "expired": true,
+                "id": 5,
+                "incomplete_expired": true,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 2
+              },
+              {
+                "completion_slot": null,
+                "expired": true,
+                "id": 6,
+                "incomplete_expired": true,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 6
+              },
+              {
+                "completion_slot": null,
+                "expired": true,
+                "id": 7,
+                "incomplete_expired": true,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 8
+              },
+              {
+                "completion_slot": null,
+                "expired": true,
+                "id": 8,
+                "incomplete_expired": true,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 6
+              },
+              {
+                "completion_slot": null,
+                "expired": true,
+                "id": 9,
+                "incomplete_expired": true,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 9
+              },
+              {
+                "completion_slot": null,
+                "expired": true,
+                "id": 10,
+                "incomplete_expired": true,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 7
+              },
+              {
+                "completion_slot": null,
+                "expired": true,
+                "id": 11,
+                "incomplete_expired": true,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 8
+              },
+              {
+                "completion_slot": null,
+                "expired": true,
+                "id": 12,
+                "incomplete_expired": true,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 7
+              },
+              {
+                "completion_slot": null,
+                "expired": true,
+                "id": 13,
+                "incomplete_expired": true,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 6
+              },
+              {
+                "completion_slot": null,
+                "expired": true,
+                "id": 14,
+                "incomplete_expired": true,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 5
+              },
+              {
+                "completion_slot": null,
+                "expired": true,
+                "id": 15,
+                "incomplete_expired": true,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 6
+              },
+              {
+                "completion_slot": null,
+                "expired": true,
+                "id": 16,
+                "incomplete_expired": true,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 6
+              },
+              {
+                "completion_slot": null,
+                "expired": true,
+                "id": 17,
+                "incomplete_expired": true,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 5
+              },
+              {
+                "completion_slot": null,
+                "expired": true,
+                "id": 18,
+                "incomplete_expired": true,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 6
+              },
+              {
+                "completion_slot": null,
+                "expired": true,
+                "id": 19,
+                "incomplete_expired": true,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 5
+              },
+              {
+                "completion_slot": null,
+                "expired": true,
+                "id": 20,
+                "incomplete_expired": true,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 6
+              },
+              {
+                "completion_slot": null,
+                "expired": true,
+                "id": 21,
+                "incomplete_expired": true,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 6
+              },
+              {
+                "completion_slot": null,
+                "expired": true,
+                "id": 22,
+                "incomplete_expired": true,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 5
+              },
+              {
+                "completion_slot": null,
+                "expired": true,
+                "id": 23,
+                "incomplete_expired": true,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 6
+              },
+              {
+                "completion_slot": null,
+                "expired": true,
+                "id": 24,
+                "incomplete_expired": true,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 5
+              },
+              {
+                "completion_slot": null,
+                "expired": true,
+                "id": 25,
+                "incomplete_expired": true,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 6
+              },
+              {
+                "completion_slot": null,
+                "expired": true,
+                "id": 26,
+                "incomplete_expired": true,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 6
+              },
+              {
+                "completion_slot": null,
+                "expired": false,
+                "id": 27,
+                "incomplete_expired": false,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 5
+              },
+              {
+                "completion_slot": null,
+                "expired": false,
+                "id": 28,
+                "incomplete_expired": false,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 0
+              },
+              {
+                "completion_slot": null,
+                "expired": false,
+                "id": 29,
+                "incomplete_expired": false,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 0
+              },
+              {
+                "completion_slot": null,
+                "expired": false,
+                "id": 30,
+                "incomplete_expired": false,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 0
+              },
+              {
+                "completion_slot": null,
+                "expired": false,
+                "id": 31,
+                "incomplete_expired": false,
+                "manifest_seen": false,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 0
+              },
+              {
+                "completion_slot": null,
+                "expired": false,
+                "id": 32,
+                "incomplete_expired": false,
+                "manifest_seen": false,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 0
+              }
+            ],
+            "id": "one",
+            "invalid_signatures": 0,
+            "late_or_sleep_misses": 0,
+            "malformed_frames": 0,
+            "offered_frames": 1024,
+            "produced_object_octets": 131072,
+            "radios": 1,
+            "reconstructed_digest_mismatches": 0,
+            "retune_misses": 0,
+            "symbol_opportunity_upper_bound": 256,
+            "tuned_frames": 256,
+            "unknown_generation_symbols": 43,
+            "unmet_object_octets": 131072,
+            "wire_octets": 64503
+          },
+          {
+            "accepted_manifests": 52,
+            "accepted_symbols": 745,
+            "budget_rejections": 0,
+            "channel_misses": 0,
+            "completed_generation_symbols": 38,
+            "completed_object_octets": 32768,
+            "decode_work": 745,
+            "decoder_allocations": 29,
+            "drift_misses": 0,
+            "duplicate_symbols": 0,
+            "erased_frames": 0,
+            "expired_frames": 0,
+            "generations": [
+              {
+                "completion_slot": 8,
+                "expired": true,
+                "id": 1,
+                "incomplete_expired": false,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": "77b46c315fecd65e7e92e07301ef71a36395238bba0d5795a38069d048348df9",
+                "required_source_symbols": 32,
+                "unique_symbols": 32
+              },
+              {
+                "completion_slot": 49,
+                "expired": true,
+                "id": 2,
+                "incomplete_expired": false,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": "09cd014c2492783ca64eea2c809dbe2f3d9047bb56764720608205a7c661b1f3",
+                "required_source_symbols": 32,
+                "unique_symbols": 32
+              },
+              {
+                "completion_slot": null,
+                "expired": true,
+                "id": 3,
+                "incomplete_expired": true,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 18
+              },
+              {
+                "completion_slot": null,
+                "expired": true,
+                "id": 4,
+                "incomplete_expired": true,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 22
+              },
+              {
+                "completion_slot": null,
+                "expired": true,
+                "id": 5,
+                "incomplete_expired": true,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 10
+              },
+              {
+                "completion_slot": null,
+                "expired": true,
+                "id": 6,
+                "incomplete_expired": true,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 29
+              },
+              {
+                "completion_slot": 87,
+                "expired": true,
+                "id": 7,
+                "incomplete_expired": false,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": "3f0efe9218169ba9b848dec16862e7e9881fad329cbc57c1dea4c72814b346df",
+                "required_source_symbols": 32,
+                "unique_symbols": 32
+              },
+              {
+                "completion_slot": 90,
+                "expired": true,
+                "id": 8,
+                "incomplete_expired": false,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": "c431209df79f68ab4ce5b96583dd8cebf77448deb766e940551b5046f5daf34b",
+                "required_source_symbols": 32,
+                "unique_symbols": 32
+              },
+              {
+                "completion_slot": 102,
+                "expired": true,
+                "id": 9,
+                "incomplete_expired": false,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": "1ff63d818ff7e70956217113df07eb0a34803cb42a0cf2e007630a7463932bbb",
+                "required_source_symbols": 32,
+                "unique_symbols": 32
+              },
+              {
+                "completion_slot": 113,
+                "expired": true,
+                "id": 10,
+                "incomplete_expired": false,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": "c04cbd669956b47ef6afdfc84714866a7e3be51c81035be69ba08fa0c1af0477",
+                "required_source_symbols": 32,
+                "unique_symbols": 32
+              },
+              {
+                "completion_slot": 124,
+                "expired": true,
+                "id": 11,
+                "incomplete_expired": false,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": "3a27a366eae82bf691764cdaecd0eebe961581d4e100cda8c5238377872ee4f3",
+                "required_source_symbols": 32,
+                "unique_symbols": 32
+              },
+              {
+                "completion_slot": 135,
+                "expired": true,
+                "id": 12,
+                "incomplete_expired": false,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": "1e95c23770832e5c02edaefc9077f150bfa74cf5a68812e98334b3fb887fee3c",
+                "required_source_symbols": 32,
+                "unique_symbols": 32
+              },
+              {
+                "completion_slot": null,
+                "expired": true,
+                "id": 13,
+                "incomplete_expired": true,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 28
+              },
+              {
+                "completion_slot": null,
+                "expired": true,
+                "id": 14,
+                "incomplete_expired": true,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 28
+              },
+              {
+                "completion_slot": null,
+                "expired": true,
+                "id": 15,
+                "incomplete_expired": true,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 27
+              },
+              {
+                "completion_slot": null,
+                "expired": true,
+                "id": 16,
+                "incomplete_expired": true,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 26
+              },
+              {
+                "completion_slot": null,
+                "expired": true,
+                "id": 17,
+                "incomplete_expired": true,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 26
+              },
+              {
+                "completion_slot": null,
+                "expired": true,
+                "id": 18,
+                "incomplete_expired": true,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 27
+              },
+              {
+                "completion_slot": null,
+                "expired": true,
+                "id": 19,
+                "incomplete_expired": true,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 27
+              },
+              {
+                "completion_slot": null,
+                "expired": true,
+                "id": 20,
+                "incomplete_expired": true,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 28
+              },
+              {
+                "completion_slot": null,
+                "expired": true,
+                "id": 21,
+                "incomplete_expired": true,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 27
+              },
+              {
+                "completion_slot": null,
+                "expired": true,
+                "id": 22,
+                "incomplete_expired": true,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 27
+              },
+              {
+                "completion_slot": null,
+                "expired": true,
+                "id": 23,
+                "incomplete_expired": true,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 27
+              },
+              {
+                "completion_slot": null,
+                "expired": true,
+                "id": 24,
+                "incomplete_expired": true,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 26
+              },
+              {
+                "completion_slot": null,
+                "expired": true,
+                "id": 25,
+                "incomplete_expired": true,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 26
+              },
+              {
+                "completion_slot": null,
+                "expired": true,
+                "id": 26,
+                "incomplete_expired": true,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 26
+              },
+              {
+                "completion_slot": null,
+                "expired": false,
+                "id": 27,
+                "incomplete_expired": false,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 27
+              },
+              {
+                "completion_slot": null,
+                "expired": false,
+                "id": 28,
+                "incomplete_expired": false,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 4
+              },
+              {
+                "completion_slot": null,
+                "expired": false,
+                "id": 29,
+                "incomplete_expired": false,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 3
+              },
+              {
+                "completion_slot": null,
+                "expired": false,
+                "id": 30,
+                "incomplete_expired": false,
+                "manifest_seen": true,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 0
+              },
+              {
+                "completion_slot": null,
+                "expired": false,
+                "id": 31,
+                "incomplete_expired": false,
+                "manifest_seen": false,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 0
+              },
+              {
+                "completion_slot": null,
+                "expired": false,
+                "id": 32,
+                "incomplete_expired": false,
+                "manifest_seen": false,
+                "object_octets": 4096,
+                "reconstructed_blake3": null,
+                "required_source_symbols": 32,
+                "unique_symbols": 0
+              }
+            ],
+            "id": "four",
+            "invalid_signatures": 0,
+            "late_or_sleep_misses": 0,
+            "malformed_frames": 0,
+            "offered_frames": 1024,
+            "produced_object_octets": 131072,
+            "radios": 4,
+            "reconstructed_digest_mismatches": 0,
+            "retune_misses": 0,
+            "symbol_opportunity_upper_bound": 1024,
+            "tuned_frames": 1024,
+            "unknown_generation_symbols": 189,
+            "unmet_object_octets": 98304,
+            "wire_octets": 275816
+          }
+        ],
+        "resumed_from_slot": null,
+        "schema": "transport-conformance.simulation-report/v1",
+        "semantic_terminal_blake3": "c3e24cd8ba430c627462456dab1be3366b355f9016c91bf03a0803802416c012",
+        "slots_executed": 256,
+        "trace_blake3": "e7ffd4b67d888f18817b253f9cd24dde405963ccc2fa63df4b1242777ee10e4e",
+        "transmitter": {
+          "channel_wire_octets": [
+            64517,
+            70435,
+            70432,
+            70432
+          ],
+          "fresh_frames": 716,
+          "generations": [
+            {
+              "esi_exhausted": false,
+              "expired": true,
+              "fresh_backlog": 0,
+              "fresh_sent": 32,
+              "id": 1,
+              "object_octets": 4096,
+              "repairs_sent": 20,
+              "total_source_symbols": 32
+            },
+            {
+              "esi_exhausted": false,
+              "expired": true,
+              "fresh_backlog": 0,
+              "fresh_sent": 32,
+              "id": 2,
+              "object_octets": 4096,
+              "repairs_sent": 14,
+              "total_source_symbols": 32
+            },
+            {
+              "esi_exhausted": false,
+              "expired": true,
+              "fresh_backlog": 0,
+              "fresh_sent": 32,
+              "id": 3,
+              "object_octets": 4096,
+              "repairs_sent": 10,
+              "total_source_symbols": 32
+            },
+            {
+              "esi_exhausted": false,
+              "expired": true,
+              "fresh_backlog": 0,
+              "fresh_sent": 32,
+              "id": 4,
+              "object_octets": 4096,
+              "repairs_sent": 9,
+              "total_source_symbols": 32
+            },
+            {
+              "esi_exhausted": false,
+              "expired": true,
+              "fresh_backlog": 0,
+              "fresh_sent": 32,
+              "id": 5,
+              "object_octets": 4096,
+              "repairs_sent": 8,
+              "total_source_symbols": 32
+            },
+            {
+              "esi_exhausted": false,
+              "expired": true,
+              "fresh_backlog": 0,
+              "fresh_sent": 32,
+              "id": 6,
+              "object_octets": 4096,
+              "repairs_sent": 8,
+              "total_source_symbols": 32
+            },
+            {
+              "esi_exhausted": false,
+              "expired": true,
+              "fresh_backlog": 0,
+              "fresh_sent": 32,
+              "id": 7,
+              "object_octets": 4096,
+              "repairs_sent": 8,
+              "total_source_symbols": 32
+            },
+            {
+              "esi_exhausted": false,
+              "expired": true,
+              "fresh_backlog": 0,
+              "fresh_sent": 32,
+              "id": 8,
+              "object_octets": 4096,
+              "repairs_sent": 8,
+              "total_source_symbols": 32
+            },
+            {
+              "esi_exhausted": false,
+              "expired": true,
+              "fresh_backlog": 0,
+              "fresh_sent": 32,
+              "id": 9,
+              "object_octets": 4096,
+              "repairs_sent": 8,
+              "total_source_symbols": 32
+            },
+            {
+              "esi_exhausted": false,
+              "expired": true,
+              "fresh_backlog": 0,
+              "fresh_sent": 32,
+              "id": 10,
+              "object_octets": 4096,
+              "repairs_sent": 8,
+              "total_source_symbols": 32
+            },
+            {
+              "esi_exhausted": false,
+              "expired": true,
+              "fresh_backlog": 0,
+              "fresh_sent": 32,
+              "id": 11,
+              "object_octets": 4096,
+              "repairs_sent": 8,
+              "total_source_symbols": 32
+            },
+            {
+              "esi_exhausted": false,
+              "expired": true,
+              "fresh_backlog": 4,
+              "fresh_sent": 28,
+              "id": 12,
+              "object_octets": 4096,
+              "repairs_sent": 8,
+              "total_source_symbols": 32
+            },
+            {
+              "esi_exhausted": false,
+              "expired": true,
+              "fresh_backlog": 9,
+              "fresh_sent": 23,
+              "id": 13,
+              "object_octets": 4096,
+              "repairs_sent": 8,
+              "total_source_symbols": 32
+            },
+            {
+              "esi_exhausted": false,
+              "expired": true,
+              "fresh_backlog": 10,
+              "fresh_sent": 22,
+              "id": 14,
+              "object_octets": 4096,
+              "repairs_sent": 8,
+              "total_source_symbols": 32
+            },
+            {
+              "esi_exhausted": false,
+              "expired": true,
+              "fresh_backlog": 9,
+              "fresh_sent": 23,
+              "id": 15,
+              "object_octets": 4096,
+              "repairs_sent": 8,
+              "total_source_symbols": 32
+            },
+            {
+              "esi_exhausted": false,
+              "expired": true,
+              "fresh_backlog": 10,
+              "fresh_sent": 22,
+              "id": 16,
+              "object_octets": 4096,
+              "repairs_sent": 8,
+              "total_source_symbols": 32
+            },
+            {
+              "esi_exhausted": false,
+              "expired": true,
+              "fresh_backlog": 10,
+              "fresh_sent": 22,
+              "id": 17,
+              "object_octets": 4096,
+              "repairs_sent": 8,
+              "total_source_symbols": 32
+            },
+            {
+              "esi_exhausted": false,
+              "expired": true,
+              "fresh_backlog": 9,
+              "fresh_sent": 23,
+              "id": 18,
+              "object_octets": 4096,
+              "repairs_sent": 8,
+              "total_source_symbols": 32
+            },
+            {
+              "esi_exhausted": false,
+              "expired": true,
+              "fresh_backlog": 10,
+              "fresh_sent": 22,
+              "id": 19,
+              "object_octets": 4096,
+              "repairs_sent": 8,
+              "total_source_symbols": 32
+            },
+            {
+              "esi_exhausted": false,
+              "expired": true,
+              "fresh_backlog": 9,
+              "fresh_sent": 23,
+              "id": 20,
+              "object_octets": 4096,
+              "repairs_sent": 8,
+              "total_source_symbols": 32
+            },
+            {
+              "esi_exhausted": false,
+              "expired": true,
+              "fresh_backlog": 10,
+              "fresh_sent": 22,
+              "id": 21,
+              "object_octets": 4096,
+              "repairs_sent": 8,
+              "total_source_symbols": 32
+            },
+            {
+              "esi_exhausted": false,
+              "expired": true,
+              "fresh_backlog": 10,
+              "fresh_sent": 22,
+              "id": 22,
+              "object_octets": 4096,
+              "repairs_sent": 8,
+              "total_source_symbols": 32
+            },
+            {
+              "esi_exhausted": false,
+              "expired": true,
+              "fresh_backlog": 9,
+              "fresh_sent": 23,
+              "id": 23,
+              "object_octets": 4096,
+              "repairs_sent": 8,
+              "total_source_symbols": 32
+            },
+            {
+              "esi_exhausted": false,
+              "expired": true,
+              "fresh_backlog": 10,
+              "fresh_sent": 22,
+              "id": 24,
+              "object_octets": 4096,
+              "repairs_sent": 8,
+              "total_source_symbols": 32
+            },
+            {
+              "esi_exhausted": false,
+              "expired": true,
+              "fresh_backlog": 9,
+              "fresh_sent": 23,
+              "id": 25,
+              "object_octets": 4096,
+              "repairs_sent": 8,
+              "total_source_symbols": 32
+            },
+            {
+              "esi_exhausted": false,
+              "expired": true,
+              "fresh_backlog": 10,
+              "fresh_sent": 22,
+              "id": 26,
+              "object_octets": 4096,
+              "repairs_sent": 8,
+              "total_source_symbols": 32
+            },
+            {
+              "esi_exhausted": false,
+              "expired": false,
+              "fresh_backlog": 10,
+              "fresh_sent": 22,
+              "id": 27,
+              "object_octets": 4096,
+              "repairs_sent": 8,
+              "total_source_symbols": 32
+            },
+            {
+              "esi_exhausted": false,
+              "expired": false,
+              "fresh_backlog": 32,
+              "fresh_sent": 0,
+              "id": 28,
+              "object_octets": 4096,
+              "repairs_sent": 7,
+              "total_source_symbols": 32
+            },
+            {
+              "esi_exhausted": false,
+              "expired": false,
+              "fresh_backlog": 32,
+              "fresh_sent": 0,
+              "id": 29,
+              "object_octets": 4096,
+              "repairs_sent": 5,
+              "total_source_symbols": 32
+            },
+            {
+              "esi_exhausted": false,
+              "expired": false,
+              "fresh_backlog": 32,
+              "fresh_sent": 0,
+              "id": 30,
+              "object_octets": 4096,
+              "repairs_sent": 4,
+              "total_source_symbols": 32
+            },
+            {
+              "esi_exhausted": false,
+              "expired": false,
+              "fresh_backlog": 32,
+              "fresh_sent": 0,
+              "id": 31,
+              "object_octets": 4096,
+              "repairs_sent": 2,
+              "total_source_symbols": 32
+            },
+            {
+              "esi_exhausted": false,
+              "expired": false,
+              "fresh_backlog": 32,
+              "fresh_sent": 0,
+              "id": 32,
+              "object_octets": 4096,
+              "repairs_sent": 1,
+              "total_source_symbols": 32
+            }
+          ],
+          "manifest_frames": 52,
+          "repair_frames": 256,
+          "wire_octets": 275816
+        }
+      },
+      "scenario": {
+        "channels": 4,
+        "generations": [
+          {
+            "expires_slot": 48,
+            "id": 1,
+            "object_octets": 4096,
+            "publish_slot": 0
+          },
+          {
+            "expires_slot": 56,
+            "id": 2,
+            "object_octets": 4096,
+            "publish_slot": 8
+          },
+          {
+            "expires_slot": 64,
+            "id": 3,
+            "object_octets": 4096,
+            "publish_slot": 16
+          },
+          {
+            "expires_slot": 72,
+            "id": 4,
+            "object_octets": 4096,
+            "publish_slot": 24
+          },
+          {
+            "expires_slot": 80,
+            "id": 5,
+            "object_octets": 4096,
+            "publish_slot": 32
+          },
+          {
+            "expires_slot": 88,
+            "id": 6,
+            "object_octets": 4096,
+            "publish_slot": 40
+          },
+          {
+            "expires_slot": 96,
+            "id": 7,
+            "object_octets": 4096,
+            "publish_slot": 48
+          },
+          {
+            "expires_slot": 104,
+            "id": 8,
+            "object_octets": 4096,
+            "publish_slot": 56
+          },
+          {
+            "expires_slot": 112,
+            "id": 9,
+            "object_octets": 4096,
+            "publish_slot": 64
+          },
+          {
+            "expires_slot": 120,
+            "id": 10,
+            "object_octets": 4096,
+            "publish_slot": 72
+          },
+          {
+            "expires_slot": 128,
+            "id": 11,
+            "object_octets": 4096,
+            "publish_slot": 80
+          },
+          {
+            "expires_slot": 136,
+            "id": 12,
+            "object_octets": 4096,
+            "publish_slot": 88
+          },
+          {
+            "expires_slot": 144,
+            "id": 13,
+            "object_octets": 4096,
+            "publish_slot": 96
+          },
+          {
+            "expires_slot": 152,
+            "id": 14,
+            "object_octets": 4096,
+            "publish_slot": 104
+          },
+          {
+            "expires_slot": 160,
+            "id": 15,
+            "object_octets": 4096,
+            "publish_slot": 112
+          },
+          {
+            "expires_slot": 168,
+            "id": 16,
+            "object_octets": 4096,
+            "publish_slot": 120
+          },
+          {
+            "expires_slot": 176,
+            "id": 17,
+            "object_octets": 4096,
+            "publish_slot": 128
+          },
+          {
+            "expires_slot": 184,
+            "id": 18,
+            "object_octets": 4096,
+            "publish_slot": 136
+          },
+          {
+            "expires_slot": 192,
+            "id": 19,
+            "object_octets": 4096,
+            "publish_slot": 144
+          },
+          {
+            "expires_slot": 200,
+            "id": 20,
+            "object_octets": 4096,
+            "publish_slot": 152
+          },
+          {
+            "expires_slot": 208,
+            "id": 21,
+            "object_octets": 4096,
+            "publish_slot": 160
+          },
+          {
+            "expires_slot": 216,
+            "id": 22,
+            "object_octets": 4096,
+            "publish_slot": 168
+          },
+          {
+            "expires_slot": 224,
+            "id": 23,
+            "object_octets": 4096,
+            "publish_slot": 176
+          },
+          {
+            "expires_slot": 232,
+            "id": 24,
+            "object_octets": 4096,
+            "publish_slot": 184
+          },
+          {
+            "expires_slot": 240,
+            "id": 25,
+            "object_octets": 4096,
+            "publish_slot": 192
+          },
+          {
+            "expires_slot": 248,
+            "id": 26,
+            "object_octets": 4096,
+            "publish_slot": 200
+          },
+          {
+            "expires_slot": 256,
+            "id": 27,
+            "object_octets": 4096,
+            "publish_slot": 208
+          },
+          {
+            "expires_slot": 264,
+            "id": 28,
+            "object_octets": 4096,
+            "publish_slot": 216
+          },
+          {
+            "expires_slot": 272,
+            "id": 29,
+            "object_octets": 4096,
+            "publish_slot": 224
+          },
+          {
+            "expires_slot": 280,
+            "id": 30,
+            "object_octets": 4096,
+            "publish_slot": 232
+          },
+          {
+            "expires_slot": 288,
+            "id": 31,
+            "object_octets": 4096,
+            "publish_slot": 240
+          },
+          {
+            "expires_slot": 296,
+            "id": 32,
+            "object_octets": 4096,
+            "publish_slot": 248
+          }
+        ],
+        "id": "sustained-overload",
+        "impairments": {
+          "bursts": [],
+          "duplicate_every": 0,
+          "erase_every": 0,
+          "loss_per_million": 0,
+          "loss_seed": 0,
+          "malformed_every": 0,
+          "reorder_delay_slots": 0,
+          "tamper_every": 0
+        },
+        "manifest_interval": 5,
+        "namespace": 103,
+        "receivers": [
+          {
+            "drift_every_slots": 0,
+            "drift_slots": 0,
+            "dwell_slots": 1,
+            "id": "one",
+            "join_slot": 0,
+            "phase": 0,
+            "radios": 1,
+            "retune_guard_slots": 0,
+            "sleep": []
+          },
+          {
+            "drift_every_slots": 0,
+            "drift_slots": 0,
+            "dwell_slots": 1,
+            "id": "four",
+            "join_slot": 0,
+            "phase": 0,
+            "radios": 4,
+            "retune_guard_slots": 0,
+            "sleep": []
+          }
+        ],
+        "repair_floor": 1,
+        "schema": "transport-conformance.simulation/v1",
+        "slot_octet_budget": 512,
+        "slots": 256,
+        "source_blocks": 1,
+        "symbol_size": 128
+      }
+    }
+  ],
+  "id": "retained-repair-frontier-v1",
+  "implementation": {
+    "corpus_manifest_sha256": "ff95dc345ea741cde01770b4d313df5efe8522c768b04371e30042d1c1c9d20d",
+    "dependency_versions": {
+      "blake3": "1.8.7",
+      "ed25519-dalek": "3.0.0",
+      "raptorq": "2.0.1"
+    },
+    "repository_revision": "72ce2990d406e88d27ab1274f953410f94ba99cb",
+    "repository_worktree_dirty": true,
+    "runner": "transport-conformance 0.1.0",
+    "suite_source_blake3": "c7a512bba767a08ce04641c3974fd54c6c56b0d2331a2703aabd1d722cda4ee2",
+    "target_arch": "aarch64",
+    "target_os": "macos"
+  },
+  "kind": "prototype_design_exploration",
+  "limits": {
+    "active_generations": 8,
+    "channels": 8,
+    "checkpoint_peer_octets": 4194304,
+    "esi": 4095,
+    "frame_octets": 512,
+    "generated_symbols": 16384,
+    "generations": 32,
+    "object_octets": 65536,
+    "receiver_decode_work": 4096,
+    "receiver_packet_budget": 4096,
+    "receivers": 8,
+    "reorder_delay_slots": 16,
+    "retained_original_octets": 524288,
+    "slots": 4096,
+    "source_symbols_per_block": 256,
+    "symbol_octets": 256
+  },
+  "scenario_asset_blake3": "481adab1060cf77ffd916da467b8f05d4f2d81254533a2fe60b8c43cf8603c59",
+  "schema": "transport-conformance.simulation-exploration/v1",
+  "scope": {
+    "actual_raptorq_codec": true,
+    "fresh_process_resume_exercised": false,
+    "modeled_slots_and_bytes": true,
+    "physical_mbps": false,
+    "qualification_matrix": false,
+    "standards_conformance": false
+  }
+}

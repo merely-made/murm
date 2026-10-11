@@ -11,6 +11,7 @@ Run from this directory:
 cargo test --locked
 cargo run --locked -- --list
 cargo run --locked -- --output receipt.json
+cargo run --locked -- --simulate --output exploration.json
 ```
 
 The output path must be new; the runner refuses to overwrite receipts. Without
@@ -26,6 +27,33 @@ case IDs, specification sections, provenance, evidence classes and observations.
 The revision is the base repository commit, not a claim that uncommitted suite
 code belongs to it; the suite source hash identifies those exact compiled inputs.
 All imported corpus artifacts are hash-checked before running.
+
+## Retained repair prototype
+
+`--simulate` runs four editable design experiments from
+[scenarios/retained-repair-v1.toml](scenarios/retained-repair-v1.toml): finite
+production with one/four radios, fresh priority with zero/one reserved repair
+lane, and sustained overload with expiry. It invokes actual bounded RaptorQ
+encoding and decoding, signs manifests/symbols with a public Ed25519 fixture
+key, and records authenticated wire bytes, collection opportunities, successful
+reconstruction, cumulative unmet demand and saved-state observations.
+
+This mode emits `transport-conformance.simulation-exploration/v1`. It describes
+the current prototype and makes no conformance, production-admission or
+physical-throughput claim. Channels are ideal parallel transmitter lanes;
+receivers already know the channel plan, manifest cadence and slot clock.
+The [scenario guide](scenarios/README.md) explains the knobs and bounded JSON
+`--simulation-peer` run/checkpoint/resume interface. The
+[prototype profile](../../design_docs/2026-10-11_retained_repair_simulation_profile.md)
+records the authored schedule and exact narrow CBOR arrays; its field schema is
+[retained-repair-v1.cddl](scenarios/retained-repair-v1.cddl).
+
+The selected [2026-10-11 exploration report](results/retained-repair-exploration-20261011.json)
+is a historical design observation with compiled source/config fingerprints.
+Use small local checks and experiments while changing this shape; postpone
+broad qualification and regression machinery until behavior stabilizes.
+Publish through direct commits and pushes to `main`. GitHub Actions remains
+disabled in Mere/Retinue by owner request; this work creates no workflows or PRs.
 
 ## Exercised scope
 
@@ -98,9 +126,9 @@ does not influence parsed parameters; serialization emits zero.
 Parameter preflight is not symbol authentication. These tests do not establish
 protection against malicious, correctly sized repair symbols, a production
 memory bound, embedded execution, radio throughput, channel isolation or power
-use. They introduce no fresh/repair scheduling implementation, FLUTE/ALC/NORM
-transport, Stickleback admission adapter or store mutation. Those are separate
-profile and interoperability slices in the owning plans.
+use. The separate `--simulate` mode explores fresh/repair scheduling. Neither
+mode implements FLUTE/ALC/NORM transport, a Stickleback admission adapter or
+store mutation. Those remain separate composition choices in the owning plans.
 
 **Complete RFC6330 codec conformance remains unsupported.** Multiple sub-blocks,
 multi-symbol packet reception, shortened final-source packets, all systematic
