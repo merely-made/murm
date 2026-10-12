@@ -54,6 +54,90 @@ is useful for application objects and corpus identity but does not replace
 SHA-256/HKDF-SHA256 inside a Reticulum compatibility claim. Additional COSE
 manifests must not silently re-sign or re-encode the original operation.
 
+## Parallel composition lanes — 2026-10-11
+
+**Status:** scoped proposals from published Retinue `3c786625` and Mere
+`04a48c2d`; implementation of these next slices has not started. Assign one
+write owner per lane and keep common manifests and canonical documentation with
+the integrating owner. These are prototype deliverables, not new qualification
+matrices.
+
+| Lane | Write owner and first deliverable | Useful completion flow |
+| --- | --- | --- |
+| A. Resident signed-record ingress | Mere Distillery resident and Murm transport accept queue. Mount an opt-in service on the existing resident endpoint and mesh store. | An admitted session submits one externally signed job record; the existing board/Chronicle shows one job. A repeat returns duplicate; a refusal or stalled stream leaves state intact and releases capacity. |
+| B. Prepared control retries | Retinue Postilion verified client and the existing iroh-control probe. Prepare one immutable semantic mutation and execute it with a fresh caller-owned counter on each attempt. | Lose a provisional response after durable apply, reconnect and retry through the public client; obtain the same transaction/result with no second apply, then commit normally. |
+| C. Incremental retained repair | New Retinue retained-repair library and streaming host example. Accept publication after startup and separate frame preparation from sink acceptance. | Publish B while a late consumer still needs A; interleave fresh symbols and retained repair. A full sink defers the same symbol without advancing its cursor or declaring it sent. |
+| D. Advisory inventory reconciliation | Mere-owned IO-free inventory policy beside Stickleback's object-stream leaf. Detailed adaptation stays in the standards brief's MemoryLAN subsection. | An authorized peer reconnects after missing objects; bounded inventory differences suggest candidates, the retained owner supplies exact bytes, and the existing mesh owner decides admission. |
+
+**A — owner and resource boundaries.** Use `ResidentAuthority` and
+`InstalledAuthority::bind_resident`, with the existing
+`MeshStore::accept_outcome(owner_expected_mesh, operation)`. Preserve the
+original author separately from the submitting session principal. The proposed
+service starts with Notochord admission and an action check, so it needs a new
+ALPN rather than changing the existing object-first example protocol. Wrap the
+complete admission handshake, including refusal shutdown, in a host deadline:
+the pinned handshake deadline field alone does not enforce I/O expiry.
+Initially allow four queued sessions, two active submissions, 16 KiB objects
+and 2 KiB result replies. Bound first-stream waits and the per-ALPN transport
+queue as well as application tasks; a worker cap after an unbounded queue is
+insufficient. Transport capacity, session authority and domain admission are
+separate gates. One lane owner holds
+`mere/crates/murm/transport/src/p2panda_transport.rs`,
+`mere/ports/distillery/src/{installed,resident,record_ingress}.rs` and the
+resident composition in `mere/ports/djinn/src/resident_distillery.rs`.
+
+**B — semantic identity and counter custody.** Extend
+`crates/postilion/src/control/verified/client.rs` through a small prepared-value
+module and replace the manual raw-request retry in
+`testing/iroh-control/src/campaign.rs`. Retain transaction, sequence, expected
+generation, operation and arguments; bind the value to its controller and
+target, redact secret-bearing arguments, and sign anew for each supplied outer
+counter. Existing convenience methods can prepare and execute once. The
+controller application still owns counter persistence; in-memory prepared
+values do not establish controller-restart recovery. Preserve Seneschal's
+conflict, expiry, commit and rollback decisions. The optional production iroh
+adapter follows this slice; the existing probe already supplies real transport.
+Its owning plan is
+[wall-node management](2026-08-30_wall_node_management_plan.md#proposed-iroh-management-carrier-2026-10-10).
+
+**C — explicit backpressure before radio adaptation.** A proposed
+`crates/retained-repair` core exposes publish, prepare, accept/defer settlement
+and expiry. Begin with one outstanding prepared frame, four retained objects,
+1–16 KiB per original and 64 KiB of retained original bytes, with explicit sink
+count/byte caps and a positive repair floor. These byte limits do not bound all
+codec working memory. Deferral preserves generation/SBN/ESI and exact bytes;
+expiry invalidates outstanding preparation explicitly. A dynamic receiver
+creates bounded state from verified manifests rather than a predeclared
+scenario. Keep the historical simulator and corpus intact. Physical airtime,
+activation and transmission results remain with radio-hand or Tulle. The
+current `T=128` signed host frame is calculated as 275 bytes for generation one,
+exceeding Selvage's 255-byte radio payload cap; a smaller-symbol or fragmentation
+profile is separate work. Queue acceptance is not physical transmission.
+
+**D — advisory summaries and shared integration seams.** The canonical policy
+assessment remains once at
+`mere/design_docs/2026-08-24_standards_survey_brief.md` §10, **MemoryLAN: adapt
+inventory policy and keep a baseline**. The leaf consumes owner-provided record
+digest, length and expiry; it does not own payload retention, storage, admission
+or airtime. Compare bounded exact inventory with versioned Cuckoo summaries and
+bounded exact fallback; stable hashing, saturation and stale/false-positive
+behavior are explicit. Exact fallback must be paged/count its control bytes
+within the same round budget. Inventory access requires namespace authority;
+record-submission permission alone does not imply inventory-read permission.
+Both inventory and retained-repair leaves can develop independently, but live
+integration waits for owner-provided availability/retrieval and A's admitted
+service contract. Do not duplicate A's accept-queue work or silently add
+inventory messages to its protocol. Canonical operation ID and whole-record
+digest remain distinct.
+
+The first shared demonstration joins C's publication/recovery and D's candidate
+selection to A's existing admission owner. B develops alongside that data path
+with its existing durable board owner. Add a second real Reticulum carrier only
+after the ingress contract is usable; the current Reticulum accepted peer is
+honestly absent and needs the existing session-proof boundary. Device builds,
+physical multi-radio goodput and the eventual broad standards corpus follow
+the useful host shape. No 1–2 Mbps claim follows from these lanes.
+
 ## Profiles and test contract
 
 Separate three kinds of specification: published protocol requirements, selected
