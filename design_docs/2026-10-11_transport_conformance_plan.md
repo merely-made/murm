@@ -56,18 +56,19 @@ manifests must not silently re-sign or re-encode the original operation.
 
 ## Parallel composition lanes — 2026-10-11
 
-**Status:** scoped proposals from published Retinue `3c786625` and Mere
-`04a48c2d`; implementation of these next slices has not started. Assign one
-write owner per lane and keep common manifests and canonical documentation with
-the integrating owner. These are prototype deliverables, not new qualification
-matrices.
+**Status, updated 2026-10-12:** A–C remain scoped proposals from published
+Retinue `3c786625` and Mere `04a48c2d`. D's IO-free inventory policy and finite
+comparison harness are published in Mere `58bfd81b5`; admitted live composition
+remains pending. Assign one write owner per lane and keep common manifests and
+canonical documentation with the integrating owner. These are prototype
+deliverables, not new qualification matrices.
 
 | Lane | Write owner and first deliverable | Useful completion flow |
 | --- | --- | --- |
 | A. Resident signed-record ingress | Mere Distillery resident and Murm transport accept queue. Mount an opt-in service on the existing resident endpoint and mesh store. | An admitted session submits one externally signed job record; the existing board/Chronicle shows one job. A repeat returns duplicate; a refusal or stalled stream leaves state intact and releases capacity. |
 | B. Prepared control retries | Retinue Postilion verified client and the existing iroh-control probe. Prepare one immutable semantic mutation and execute it with a fresh caller-owned counter on each attempt. | Lose a provisional response after durable apply, reconnect and retry through the public client; obtain the same transaction/result with no second apply, then commit normally. |
 | C. Incremental retained repair | New Retinue retained-repair library and streaming host example. Accept publication after startup and separate frame preparation from sink acceptance. | Publish B while a late consumer still needs A; interleave fresh symbols and retained repair. A full sink defers the same symbol without advancing its cursor or declaring it sent. |
-| D. Advisory inventory reconciliation | Mere-owned IO-free inventory policy beside Stickleback's object-stream leaf. Detailed adaptation stays in the standards brief's MemoryLAN subsection. | An authorized peer reconnects after missing objects; bounded inventory differences suggest candidates, the retained owner supplies exact bytes, and the existing mesh owner decides admission. |
+| D. Advisory inventory reconciliation | IO-free policy and finite comparison harness published in Mere `58bfd81b5`. Detailed findings stay in the standards brief's MemoryLAN subsection and the inventory example receipt. | The finite policy comparison is complete. Next, admitted live reconnection uses bounded inventory candidates, retained-owner retrieval and the existing mesh admission owner. |
 
 **A — owner and resource boundaries.** Use `ResidentAuthority` and
 `InstalledAuthority::bind_resident`, with the existing
@@ -117,11 +118,25 @@ profile is separate work. Queue acceptance is not physical transmission.
 **D — advisory summaries and shared integration seams.** The canonical policy
 assessment remains once at
 `mere/design_docs/2026-08-24_standards_survey_brief.md` §10, **MemoryLAN: adapt
-inventory policy and keep a baseline**. The leaf consumes owner-provided record
+inventory policy and keep a baseline**. **First slice published, 2026-10-12:**
+`mere/crates/stickleback/src/inventory/` provides the policy; its finite
+experiment and evidence are owned by
+`mere/crates/stickleback/examples/inventory_compare/README.md` and
+`results/20261012/{comparison,summary,metadata,validation}.json` beneath that
+example. The selected source/lock and comparison hashes match published commit
+`58bfd81b5`. Reference this receipt rather than duplicating its experiment
+ledger. Use exact inventory first for C's initial four-object/64 KiB retained
+set; Cuckoo remains selectable when a workload and budget justify it. The
+comparison includes scheduling choices and is not a pure filter comparison.
+It exercises synthetic digest-verified reception, without live service,
+signed-operation admission, RaptorQ, MCU or RF qualification.
+
+The leaf consumes owner-provided record
 digest, length and expiry; it does not own payload retention, storage, admission
-or airtime. Compare bounded exact inventory with versioned Cuckoo summaries and
-bounded exact fallback; stable hashing, saturation and stale/false-positive
-behavior are explicit. Exact fallback must be paged/count its control bytes
+or airtime. The published profile supplies immutable exact snapshots,
+version-one stable BLAKE3 Cuckoo summaries, paged exact fallback, explicit
+saturation fallback, aged/capped peer views and bounded offers. Exact fallback
+must be paged/count its control bytes
 within the same round budget. Inventory access requires namespace authority;
 record-submission permission alone does not imply inventory-read permission.
 Both inventory and retained-repair leaves can develop independently, but live
@@ -131,9 +146,9 @@ inventory messages to its protocol. Canonical operation ID and whole-record
 digest remain distinct.
 
 **Lane D coordination, 2026-10-12:** the resident ingress service and its public
-admission API remain proposed; the published implementation provides generic
-`ObjectStreamLimits`, `read_object` and `write_object` plus the finite QUIC
-example. D can implement its IO-free leaf and comparison independently. Its
+admission API remain proposed. Generic `ObjectStreamLimits`, `read_object` and
+`write_object`, the finite QUIC example, and D's IO-free leaf/comparison are
+published; admitted live composition is still pending. D's
 eight authorized peer slots and one outstanding candidate decision per peer
 are policy metadata, not eight active transport permits. Live dispatch shares
 A's two active submissions and four queued sessions; deferred capacity does
