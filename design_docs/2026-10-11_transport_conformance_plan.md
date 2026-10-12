@@ -130,6 +130,20 @@ service contract. Do not duplicate A's accept-queue work or silently add
 inventory messages to its protocol. Canonical operation ID and whole-record
 digest remain distinct.
 
+**Lane D coordination, 2026-10-12:** the resident ingress service and its public
+admission API remain proposed; the published implementation provides generic
+`ObjectStreamLimits`, `read_object` and `write_object` plus the finite QUIC
+example. D can implement its IO-free leaf and comparison independently. Its
+eight authorized peer slots and one outstanding candidate decision per peer
+are policy metadata, not eight active transport permits. Live dispatch shares
+A's two active submissions and four queued sessions; deferred capacity does
+not justify another ingress queue. A's 16 KiB object and 2 KiB result ceilings
+remain the proposed integration profile. D owns its declared 1 KiB control
+message ceiling; round accounting includes encoded messages, object/reply
+framing, exact-inventory pages and refused attempts. Service admission injects
+namespace/action authority and complete-call deadlines. The example's private
+attempt, campaign and byte-budget constants are not a public service contract.
+
 The first shared demonstration joins C's publication/recovery and D's candidate
 selection to A's existing admission owner. B develops alongside that data path
 with its existing durable board owner. Add a second real Reticulum carrier only
