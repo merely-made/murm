@@ -59,31 +59,42 @@ additional authority.
 
 ## 2. Build and dependency map
 
-Use one stack-wide compiler policy: current stable Rust 1.99.0, with 1.99 as
-the declared minimum for owned crates and coordinated upgrades thereafter.
-The owner explicitly rejected treating the existing Rust 1.88 manifest/CI
-setting as a requirement. P2panda's Rust 1.96 floor is below the selected
-baseline and does not justify a separate compiler lane. The canonical policy
-is in `mere/design_docs/2026-08-12_family_composition_thesis_brief.md`, section
+Keep two separate stack-wide decisions: the working toolchain and the minimum
+supported Rust version (MSRV). Pin the working toolchain to current stable Rust
+1.99.0 for this rollout. The common owned-package MSRV is **not yet selected**;
+it may remain below the working toolchain and advances independently when
+language use, dependencies or an explicit support decision require it. The
+owner rejected both preserving Rust 1.88 by assumption and making Rust 1.99 the
+minimum by assumption. The canonical policy is in
+`mere/design_docs/2026-08-12_family_composition_thesis_brief.md`, section
 "Shared Rust toolchain and minimum version (2026-10-13)".
 
+The locked Mere graph declares Rust 1.91 for Iroh and 1.96 for the refreshed
+p2panda supplier. Its selected Murm/transport normal and build dependency
+closures have no declared floor above 1.96, making 1.96 a Murm candidate.
+The wider resolved graph includes Knot at 1.97 and WESL at 1.97.1. Those are
+inputs to the stack-wide decision, not proof of any tested minimum: scope the
+actual supported feature/target configurations, inspect undeclared floors and
+run the selected compiler before adopting a common MSRV. A 1.96 stack floor
+would require qualifying or adjusting any supported path that needs more.
+
 The two-workspace layout below remains a proposal for dependency, feature and
-target isolation. Both roots use the same Rust baseline. Keep a separate
-native workspace only where graph qualification demonstrates its value; a
-unified workspace is acceptable if radio/firmware dependency cones and profiles
-remain correct. The independent desktop workspace follows the same compiler
-policy as well.
+target isolation. Both roots follow the same working-toolchain policy and the
+separately selected common MSRV. Keep a separate native workspace only where
+graph qualification demonstrates its value; a unified workspace is acceptable
+if radio/firmware dependency cones and profiles remain correct. The independent
+desktop workspace follows the same policies as well.
 
 Proposed layout (illustrative; these destination directories do not yet exist):
 
 ```text
 Murm repository, based on existing Retinue history
-  Cargo.toml                  radio workspace / unified stack Rust baseline
+  Cargo.toml                  radio workspace / shared toolchain and separate MSRV
   crates/                     existing radio/protocol/control package paths
   apps/                       existing host apps and separate desktop workspace
   firmware/                   existing targets and packaging
   native/
-    Cargo.toml                proposed native workspace / same Rust baseline
+    Cargo.toml                proposed native workspace / same two compiler policies
     crates/murm/              package murm; library murm
     crates/transport/         package mere-transport; library transport
     crates/webrtc-carrier/    package mere-webrtc-carrier; library webrtc_carrier
@@ -91,8 +102,8 @@ Murm repository, based on existing Retinue history
 ```
 
 If the separate native workspace is retained, the root excludes it. Native
-defaults must not activate native transports in embedded builds. All owned
-package minimums move together; retaining old MSRVs is not a move criterion.
+defaults must not activate native transports in embedded builds. Owned packages
+converge on the separately selected shared MSRV; neither their existing floors nor the latest working toolchain chooses that value by itself.
 The WebRTC core still gets its default Wasm check; the native workspace name
 does not turn its portable core into a native-only API. Retinue's release
 profile is flash-size-oriented; select native profiles explicitly instead of
@@ -244,13 +255,16 @@ actual import gate.
 
 ### MOVE1: unify Rust and establish the receiving build roots
 
-Inventory and align toolchain pins, owned `rust-version` fields, CI compiler
-jobs and independent workspace/probe/firmware roots across the active stack.
-Pin the coordinated current stable release exactly (1.99.0 for this pass),
-declare minimum 1.99, and qualify native, browser and embedded builds on that
-baseline. An actually required target compiler fork/nightly must be recorded
-as a target realization, with its compiler capabilities checked against the
-common floor; it does not create an assumed older radio MSRV policy.
+Inventory toolchain pins, owned `rust-version` fields, CI compiler jobs and
+independent workspace/probe/firmware roots across the active stack. Pin the
+working toolchain to the coordinated current stable release (1.99.0 for this
+pass). Independently choose and qualify a common MSRV from source requirements
+and the supported dependency/feature/target graphs, then align owned minimums.
+Use a current-toolchain CI lane for development checks and a separate selected
+MSRV lane for supported builds/tests. Upgrade the working pin without raising
+the MSRV automatically. An actually required target compiler fork/nightly must
+be recorded as a target realization, with its capabilities checked against the
+support policy; it does not create an assumed older radio MSRV policy.
 
 Use Cargo's supported `build.build-dir` for intermediate artifacts and retain
 `build.target-dir` for delivered outputs. Inventory environment overrides,
@@ -264,8 +278,9 @@ shared p2panda patch set in each consuming build root because dependency
 workspaces' patches do not propagate to consumers. Preserve radio dependency
 defaults, desktop isolation and firmware target ownership.
 
-**Done when:** active owned toolchain pins, minimums and CI lanes follow the
-same qualified release; each target's actual compiler is recorded; build-dir
+**Done when:** active owned toolchain pins follow the qualified working
+release, owned minimums follow the separately selected and tested common MSRV,
+and CI checks both; each target's actual compiler is recorded; build-dir
 and delivered-artifact paths work in native/browser/embedded and packaging
 recipes; receiving workspace graphs resolve only intended suppliers. No
 placeholder crate or application dependency stands in for a real leaf
@@ -349,9 +364,9 @@ partitioned transport needs explicit configuration and its own receipt.
 
 - The foundational Retinue tree already contains the requested protocol,
   radio, UI and management leaves. Its root manifest and CI currently declare
-  a Rust 1.88 lane, while the owner now requires one current compiler/minimum
-  policy across the stack. The old values are migration inputs, not an owner
-  commitment to preserve them. Genet-backed desktop and retained-repair
+  a Rust 1.88 lane, while the owner now requires a shared current working
+  toolchain and a separately chosen shared MSRV across the stack. The old values
+  are migration inputs, not an owner commitment to preserve them. Genet-backed desktop and retained-repair
   prototype workspaces remain excluded for dependency/target reasons.
 - Locked Mere metadata identifies seven relevant supplier packages and 33
   consumer edges. Stickleback has no normal transport/Gemot dependency;
@@ -375,10 +390,13 @@ partitioned transport needs explicit configuration and its own receipt.
 ### 2026-10-13 compiler-policy correction
 
 The owner clarified that Rust 1.88 was not a requested compatibility promise.
-He wants the newest Rust, including build-directory support, and a unified
-minimum across the stack. The initial planning inference was wrong and is
-withdrawn. Rust 1.99.0 is current stable at verification; build-dir support
-stabilized in Cargo 1.91. The plan now uses current stable for both exact
-toolchain pins and owned minimums, with coordinated upgrades. Repository
-manifests and CI still require the MOVE1 rollout; this document does not claim
-that the stack has already been upgraded.
+He wants the newest working Rust, including build-directory support, and a
+unified minimum across the stack. The initial Rust 1.88 preservation inference
+is withdrawn. The subsequent interpretation that the newest toolchain must
+also be the MSRV is withdrawn too. Rust 1.99.0 is the selected working release;
+build-dir support stabilized in Cargo 1.91. The shared MSRV remains a separate,
+unselected decision. Locked dependency declarations make 1.96 a Murm candidate
+and identify wider-stack requirements at 1.97/1.97.1 for qualification or
+supplier adjustment. No MSRV compiler runs were performed in this correction.
+Repository manifests and CI still require the MOVE1 rollout; this document
+does not claim that the stack has already been upgraded.
