@@ -490,3 +490,41 @@ and receipts were saved, to release disk space. Original history remains in
 the actual receiving repository. The imported source is ready for immutable
 Git publication and the first Mere consumer cutover; crate-registry publication
 and repository rename remain later phases.
+
+### 2026-10-13 immutable supplier publication and primary cutover
+
+Receiving commit `b49df894635b` is published on the continuing Retinue main,
+with source ancestry and the native workspace. Mere's working cutover now
+names that exact Git source for all three implementations and removes their
+old source trees. The root's Retinue/Outrider/Postilion/radio-hand pins move to
+the same family source, and Mere's source patches preserve one local shared
+leaf identity for imported suppliers. Commons test edges and the active Burn
+Remote fixture are rewired; the fixture carries its own p2panda/shared-leaf
+patches. The Mesh inventory harness resolves and hashes the transport supplier
+through Cargo metadata, rather than assume its former sibling path.
+
+The primary cutover is under compiler/metadata qualification and is not yet
+published. Frozen receipt manifests retain their recorded historical sources.
+Other applications' old immutable Mere pins remain valid snapshots; adopting
+this newer Mere source is a separate coordinated consumer update, not a
+rewrite of already published history. Repository rename and Netfetcher wire
+extraction remain later phases.
+
+### 2026-10-13 primary consumer qualification
+
+The Mere cutover now passes locked workspace resolution, the port/Graphshell
+browser dependency boundary gate, Gemot's 95 non-network tests, Stickleback's
+99 tests and all 25 Comms tests with the actual Murm adapter enabled. Signalman
+and Commons all-target compiler checks pass against the new family source.
+The active Burn Remote fixture's locked metadata resolves one selected
+transport/shared-leaf/Personae/p2panda source each. Its GPU/remote receipt was
+not rerun. The old Retinue 0.2 package remains a pre-existing, separate-version
+consumer in the wider Mere graph; it is not a second Retinue 0.3 source.
+
+The published supplier, fetched by Cargo from GitHub, retains the original
+Mere source commit as an ancestor. Receiving packed objects measure 228.05 MiB;
+this records the actual receiving repository, not an incremental network-size
+claim. Current primary checkouts were fast-forwarded only while clean. The
+remaining owner checkouts and already published older immutable consumer pins
+were preserved. The exact compiler/supplier/log scope is saved locally in
+`Code/targets/murm-first-move-20261013.json`.
