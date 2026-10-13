@@ -3,6 +3,7 @@
 # excluded from the Mere workspace and this receipt spans the live Retinue
 # checkout.
 [package]
+rust-version = "1.97.1"
 name = "murm-direct-phy"
 version = "0.0.1"
 edition = "2024"
