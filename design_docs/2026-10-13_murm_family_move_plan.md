@@ -528,3 +528,19 @@ claim. Current primary checkouts were fast-forwarded only while clean. The
 remaining owner checkouts and already published older immutable consumer pins
 were preserved. The exact compiler/supplier/log scope is saved locally in
 `Code/targets/murm-first-move-20261013.json`.
+
+### 2026-10-13 first move published
+
+Mere's primary cutover is published at `4749f98a0`; active source-reference
+repairs follow at `0b9b7a9b2`. The three former source trees are gone from
+current Mere and are supplied only by the immutable receiving Git source.
+The defaults changes are published across all 21 active Rust repositories plus
+the shared CI repository. Clean primary checkouts are synchronized; unrelated
+worktrees, frozen receipts and older published source pins remain preserved.
+
+This closes the first implementation move and the primary Mere consumer
+cutover. Full application adoption, crate-registry releases, the canonical
+Retinue-to-Murm repository rename, and Netfetcher wire extraction remain open
+phases. The hosted native runtime workflow is dispatched but was still queued
+at the final check; local twelve live-network exclusions and physical/headed
+acceptance are not closed by software compilation or metadata policy checks.
