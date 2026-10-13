@@ -13,6 +13,7 @@ enum Mode {
     InteropPeer,
     Simulation,
     SimulationPeer,
+    RetainedPeer,
 }
 
 fn main() {
@@ -28,7 +29,8 @@ fn execute() -> Result<(), Box<dyn std::error::Error>> {
     let mut mode = Mode::Cases;
     while let Some(argument) = args.next() {
         match argument.as_str() {
-            "--interop-peer" | "--list" | "--simulate" | "--simulation-peer" => {
+            "--interop-peer" | "--list" | "--simulate" | "--simulation-peer"
+            | "--retained-peer" => {
                 if mode != Mode::Cases {
                     return Err("select only one runner mode".into());
                 }
@@ -36,18 +38,26 @@ fn execute() -> Result<(), Box<dyn std::error::Error>> {
                     "--interop-peer" => Mode::InteropPeer,
                     "--list" => Mode::List,
                     "--simulate" => Mode::Simulation,
+                    "--retained-peer" => Mode::RetainedPeer,
                     _ => Mode::SimulationPeer,
                 };
             }
             "--output" => output = Some(args.next().ok_or("--output requires a path")?),
             "--help" | "-h" => {
                 println!(
-                    "transport-conformance [--list | --interop-peer | --simulate | --simulation-peer] [--output NEW_RECEIPT_PATH]\nPrints a JSON receipt; exits 1 for failed cases, 2 for runner errors. Unsupported cases are explicit. The interop peer exchanges bounded RQI1/RQO1 bytes; the simulation peer resumes bounded JSON checkpoints."
+                    "transport-conformance [--list | --interop-peer | --simulate | --simulation-peer | --retained-peer] [--output NEW_RECEIPT_PATH]\nPrints a JSON receipt; exits 1 for failed cases, 2 for runner errors. Unsupported cases are explicit. The interop peer exchanges bounded RQI1/RQO1 bytes; the simulation peer resumes bounded JSON checkpoints; the retained peer runs a finite persistent NDJSON producer/collector session."
                 );
                 return Ok(());
             }
             _ => return Err(format!("unknown argument: {argument}").into()),
         }
+    }
+    if mode == Mode::RetainedPeer {
+        if output.is_some() {
+            return Err("process peers write only to stdout; --output is unavailable".into());
+        }
+        transport_conformance::retained_peer::run_stdio()?;
+        return Ok(());
     }
     if mode == Mode::InteropPeer || mode == Mode::SimulationPeer {
         if output.is_some() {

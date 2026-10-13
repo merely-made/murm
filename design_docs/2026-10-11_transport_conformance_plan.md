@@ -1,6 +1,6 @@
 # Transport standards and retained repair conformance
 
-**Status, 2026-10-11:** TC0's isolated host suite is implemented. TC1 now has a
+**Status, updated 2026-10-12:** TC0's isolated host suite is implemented. TC1 now has a
 selected independent OpenRQ campaign for `Al=1, N=1`: six objects, 264 exact
 source/repair symbol comparisons and 24 live cross-decoding scenarios in each
 direction. The offline suite verifies the imported corpus and replays the Rust
@@ -13,6 +13,11 @@ TC4's bounded host prototype now passes one recovered signed V2 mesh job record
 to Mere's existing admission owner, preserving original bytes and identity.
 It observes insertion, duplicate arrival and three invalid-inner-record refusals;
 the continuation now carries these recovered bytes over real local QUIC.
+Lane C now supplies an incremental retained-object host core and persistent
+bounded JSON peer. Publication after startup, deferred-frame settlement,
+manifest-created collector state and actual decoder-output recovery are
+implemented. The selected dynamic process observation and API live in the
+[host suite guide](../testing/transport-conformance/README.md#incremental-retained-peer).
 Additional carriers and wider restart/qualification work remain open.
 Publication uses direct commits and pushes to `main`; validation runs
 locally. GitHub Actions and PRs are not part of this project's requested flow.
@@ -56,10 +61,11 @@ manifests must not silently re-sign or re-encode the original operation.
 
 ## Parallel composition lanes — 2026-10-11
 
-**Status, updated 2026-10-12:** A–C remain scoped proposals from published
-Retinue `3c786625` and Mere `04a48c2d`. D's IO-free inventory policy and finite
-comparison harness are published in Mere `58bfd81b5`; admitted live composition
-remains pending. Assign one write owner per lane and keep common manifests and
+**Status, updated 2026-10-12:** C's host core and persistent peer are implemented;
+A's resident ingress and B's prepared control retries remain pending here.
+D's IO-free inventory policy and finite comparison harness are published in
+Mere `58bfd81b5`; the Mere owner is composing exact inventory, retained retrieval
+and admitted live ingress separately. Assign one write owner per lane and keep common manifests and
 canonical documentation with the integrating owner. These are prototype
 deliverables, not new qualification matrices.
 
@@ -67,7 +73,7 @@ deliverables, not new qualification matrices.
 | --- | --- | --- |
 | A. Resident signed-record ingress | Mere Distillery resident and Murm transport accept queue. Mount an opt-in service on the existing resident endpoint and mesh store. | An admitted session submits one externally signed job record; the existing board/Chronicle shows one job. A repeat returns duplicate; a refusal or stalled stream leaves state intact and releases capacity. |
 | B. Prepared control retries | Retinue Postilion verified client and the existing iroh-control probe. Prepare one immutable semantic mutation and execute it with a fresh caller-owned counter on each attempt. | Lose a provisional response after durable apply, reconnect and retry through the public client; obtain the same transaction/result with no second apply, then commit normally. |
-| C. Incremental retained repair | New Retinue retained-repair library and streaming host example. Accept publication after startup and separate frame preparation from sink acceptance. | Publish B while a late consumer still needs A; interleave fresh symbols and retained repair. A full sink defers the same symbol without advancing its cursor or declaring it sent. |
+| C. Incremental retained repair | Implemented isolated Retinue retained-repair library, streaming host example and persistent `--retained-peer` adapter. | The selected host process publishes B while late A is incomplete; B receives fresh symbols on three channels and A later decodes from channel-zero repair only. Deferral retains exact bytes/token and does not advance queued accounting. |
 | D. Advisory inventory reconciliation | IO-free policy and finite comparison harness published in Mere `58bfd81b5`. Detailed findings stay in the standards brief's MemoryLAN subsection and the inventory example receipt. | The finite policy comparison is complete. Next, admitted live reconnection uses bounded inventory candidates, retained-owner retrieval and the existing mesh admission owner. |
 
 **A — owner and resource boundaries.** Use `ResidentAuthority` and
@@ -101,19 +107,28 @@ adapter follows this slice; the existing probe already supplies real transport.
 Its owning plan is
 [wall-node management](2026-08-30_wall_node_management_plan.md#proposed-iroh-management-carrier-2026-10-10).
 
-**C — explicit backpressure before radio adaptation.** A proposed
-`crates/retained-repair` core exposes publish, prepare, accept/defer settlement
-and expiry. Begin with one outstanding prepared frame, four retained objects,
-1–16 KiB per original and 64 KiB of retained original bytes, with explicit sink
-count/byte caps and a positive repair floor. These byte limits do not bound all
-codec working memory. Deferral preserves generation/SBN/ESI and exact bytes;
-expiry invalidates outstanding preparation explicitly. A dynamic receiver
-creates bounded state from verified manifests rather than a predeclared
-scenario. Keep the historical simulator and corpus intact. Physical airtime,
+**C — explicit backpressure before radio adaptation.** The implemented isolated
+[`crates/retained-repair` host core](../crates/retained-repair/README.md) exposes
+publish, prepare, accept/defer settlement and explicit clock advancement/expiry.
+It retains one outstanding prepared frame and four originals of 1–16,384 bytes,
+with a 64 KiB original-payload ceiling. These limits do not describe total codec
+heap. Deferral preserves generation/ESI, token and exact bytes; acceptance
+advances queued accounting once. Expiry reports any invalidated preparation.
+The dynamic collector learns state from verified manifests, caps unique symbols
+and epoch decode calls, and returns length/digest-checked actual decoder output.
+The owner supplies the namespace and signing authority; the JSON peer accepts
+only explicitly public fixture authority material. Caller-driven logical slots
+and a finite epoch remain distinct from the peer's wall-clock I/O deadlines.
+The persistent peer bounds lines, lifetime bytes, commands, active work and
+output; its finite `recover` helper delivers repairs and reports prior decoder
+state. Original application bytes stay opaque. The historical simulator and
+corpus are intact. Physical airtime,
 activation and transmission results remain with radio-hand or Tulle. The
 current `T=128` signed host frame is calculated as 275 bytes for generation one,
 exceeding Selvage's 255-byte radio payload cap; a smaller-symbol or fragmentation
-profile is separate work. Queue acceptance is not physical transmission.
+profile is separate work. Queue acceptance is not physical transmission or
+application admission. Exact inventory selects the retained generation through
+owner-provided metadata/retrieval; C adds no domain store or admission authority.
 
 **D — advisory summaries and shared integration seams.** The canonical policy
 assessment remains once at

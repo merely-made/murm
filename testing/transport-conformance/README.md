@@ -1,7 +1,7 @@
 # Transport conformance suite
 
-An unpublished, isolated Cargo workspace. It links no production Retinue or Mere
-crate and changes no production protocol or radio behavior. Merely-owned code is
+An unpublished, isolated Cargo workspace. It links the isolated retained-repair
+host core and changes no production protocol or radio behavior. Merely-owned code is
 MPL-2.0; imported BLAKE3 and RFC artifacts retain their separately recorded
 licenses and attribution in `vectors/manifest.json`.
 
@@ -61,6 +61,78 @@ Use small local checks and experiments while changing this shape; postpone
 broad qualification and regression machinery until behavior stabilizes.
 Publish through direct commits and pushes to `main`. GitHub Actions remains
 disabled in Mere/Retinue by owner request; this work creates no workflows or PRs.
+
+## Incremental retained peer
+
+The isolated [`retained-repair` core](../../crates/retained-repair/README.md)
+supports publication after startup, four retained originals, explicit expiry,
+prepared-frame acceptance/deferral and a manifest-driven collector. Build the
+persistent JSON adapter from this directory:
+
+```sh
+cargo build --locked --offline
+target/debug/transport-conformance --retained-peer
+```
+
+Unlike `--simulation-peer`, this mode processes newline-terminated JSON without
+waiting for EOF. It first emits `{schema:"retinue.retained-peer/v1",kind:"hello",
+implementation,limits,scope,time}`. Each request is
+`{schema:"retinue.retained-peer/v1",request_id:u32,now_slot:u32,command:{op,...}}`.
+IDs strictly increase. `now_slot` is a monotonic logical slot, not seconds;
+commands advance expiry before operating. A reply has `kind:"response"`,
+`request_id`, `requested_now_slot`, actual `now_slot`, `status:"ok"|"refused"`,
+`result` or `refusal:{code,detail,retry_at_slot?}`, implementation, producer/
+collector stats and pending token. Refused commands may still advance expiry;
+malformed/schema-rejected requests do not. After `recover`, use returned
+`now_slot`, because that finite helper advances logical time internally.
+
+| Command | Inputs and successful result |
+| --- | --- |
+| `init` | `public_fixture:true`, 32-byte `namespace_hex`, 32-byte public throwaway `authority_seed_hex`, `channels:1..4`, `manifest_interval:1..4096`, `repair_floor:0..channels`. One initialization per process; no secret credentials. |
+| `publish` | `generation:u64`, `original_bytes_hex` of 1–16,384 bytes, `expires_at:u32`. Returns `outcome:"inserted"|"already_retained"` and metadata. Same-generation bytes/expiry changes conflict; new generations increase strictly. Full retention refuses before encoder construction, naming next expiry. |
+| `snapshot` | Returns `inventory`, `retained_original_octets`, `collector_inventory`, `pending`. |
+| `lookup_metadata` | `generation`; returns `metadata:{generation,digest_hex,object_octets,publish_at,expires_at}`. Digest hashes the whole opaque original, not its inner operation ID. |
+| `prepare` | `channel`, optional `requested_generation`; returns `prepared:null` or `{token:u64,channel,lane,generation,esi,frame_bytes_hex,frame_octets,frame_blake3}`. Only one pending preparation; deferral retains it exactly. |
+| `settle` | `token:u64`, `decision:"accept"|"defer"`; returns `settlement:"accepted"|"deferred"`. Acceptance names local sink custody and advances counters once. |
+| `receive` | `frame_bytes_hex` of at most 512 bytes; returns manifest/symbol/duplicate/completed outcome. Completion returns `recovered`. |
+| `recovered` | `generation`; returns `{metadata,original_bytes_hex,actual_decoder_output:true,application_admission:false}` from completed retained decoder state. |
+| `recover` | `generation`; finite host loopback helper, refusing outstanding preparation. Returns `recovered` in the same shape, start/end slots and frame counts. It drops fresh frames and delivers signed manifests/repairs. Prior collector state/stats and input provenance are reported; earlier inputs can have included fresh symbols. This is owner-selected local recovery, not network dispatch. |
+
+`expiry` exposes producer/collector object metadata and any invalidated token.
+Its `during_command` array also preserves internal recovery expiry transitions
+on success or refusal. Generation/slot exhaustion is explicit; a new epoch
+requires a distinct namespace and new owner state. No restart persistence is
+supplied. Original signed application bytes remain opaque; existing Mere
+decoding/policy/storage owns admission.
+
+Lines including newline are capped at 64 KiB before JSON parsing. Each direction
+is capped at 4 MiB including hello/replies, with at most 4096 requests. Input,
+actor and output queues each have one slot. The process has a 60-second lifetime,
+five-second idle deadline and ten-second actor/output deadlines; timeout exits
+without waiting for blocked standard threads. A parent must discard this
+volatile process after closure/uncertainty. The core caps 512 unique symbols per
+object and 4096 decode calls per epoch; `recover` caps 1024 frame settlements.
+The 64 KiB original cap does not measure total codec heap or MCU suitability.
+
+Run one small dynamic process experiment, writing a new output path:
+
+```sh
+python3 retained_live.py --peer target/debug/transport-conformance \
+  --output /tmp/retained-live.json
+```
+
+The selected [2026-10-12 report](results/retained-live-20261012/exploration.json)
+records publication of B while A is incomplete, fast fresh reception of B,
+late channel-zero repair-only reconstruction of A, exact deferral, stale-token
+refusal, pre-codec signature refusal, full retention and expiry. It retains the
+process transcript and executing binary/compiled-source identity. These are
+host delivery opportunities; the report starts no sockets, radios or store.
+One collector holds separate A/B decoder states. The driver explicitly selects
+A on channel zero and B on channels one through three, and discards every fresh
+A packet to force repair-only reconstruction. This demonstrates coexistence
+and late recovery rather than automatic scheduling fairness or independent
+receiver processes.
+The Mere owner composes exact inventory and admitted real ingress separately.
 
 ## Exercised scope
 

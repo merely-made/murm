@@ -18,6 +18,7 @@ mod independent;
 pub mod interop;
 mod preflight;
 mod primitives;
+pub mod retained_peer;
 pub mod simulation;
 pub use preflight::{Oti, checked_packet, checked_payload_id, parse_payload_id};
 pub(crate) use preflight::{checked_packet_for_alignment, small_oti};
@@ -196,6 +197,54 @@ fn implementation_identity() -> Value {
         ),
         ("src/lib.rs", include_bytes!("lib.rs").as_slice()),
         ("src/main.rs", include_bytes!("main.rs").as_slice()),
+        (
+            "src/retained_peer/mod.rs",
+            include_bytes!("retained_peer/mod.rs").as_slice(),
+        ),
+        (
+            "src/retained_peer/actor.rs",
+            include_bytes!("retained_peer/actor.rs").as_slice(),
+        ),
+        (
+            "src/retained_peer/format.rs",
+            include_bytes!("retained_peer/format.rs").as_slice(),
+        ),
+        (
+            "src/retained_peer/protocol.rs",
+            include_bytes!("retained_peer/protocol.rs").as_slice(),
+        ),
+        (
+            "src/retained_peer/provenance.rs",
+            include_bytes!("retained_peer/provenance.rs").as_slice(),
+        ),
+        (
+            "src/retained_peer/stdio.rs",
+            include_bytes!("retained_peer/stdio.rs").as_slice(),
+        ),
+        (
+            "crates/retained-repair/Cargo.toml",
+            include_bytes!("../../../crates/retained-repair/Cargo.toml").as_slice(),
+        ),
+        (
+            "crates/retained-repair/src/lib.rs",
+            include_bytes!("../../../crates/retained-repair/src/lib.rs").as_slice(),
+        ),
+        (
+            "crates/retained-repair/src/profile.rs",
+            include_bytes!("../../../crates/retained-repair/src/profile.rs").as_slice(),
+        ),
+        (
+            "crates/retained-repair/src/wire.rs",
+            include_bytes!("../../../crates/retained-repair/src/wire.rs").as_slice(),
+        ),
+        (
+            "crates/retained-repair/src/producer.rs",
+            include_bytes!("../../../crates/retained-repair/src/producer.rs").as_slice(),
+        ),
+        (
+            "crates/retained-repair/src/collector.rs",
+            include_bytes!("../../../crates/retained-repair/src/collector.rs").as_slice(),
+        ),
         ("src/interop.rs", include_bytes!("interop.rs").as_slice()),
         (
             "src/independent.rs",
