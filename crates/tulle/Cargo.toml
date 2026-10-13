@@ -2,7 +2,8 @@
 name = "tulle"
 version = "0.2.0"
 edition = "2024"
-rust-version.workspace = true
+
+rust-version = "1.97.1"
 description = "Shared radio interface layer for LoRa mesh stacks: serial modem control, direct PHY, and medium access."
 license-file = "LICENSE"
 repository = "https://github.com/merely-made/retinue"

@@ -2,7 +2,8 @@
 name = "outrider"
 version = "0.3.0"
 edition = "2024"
-rust-version.workspace = true
+
+rust-version = "1.97.1"
 description = "LXMF boundary crate in the retinue family: message codec, delivery, propagation, and voice clips over Reticulum."
 license-file = "LICENSE"
 repository = "https://github.com/merely-made/retinue"

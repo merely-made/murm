@@ -2,7 +2,8 @@
 name = "tucket"
 version = "0.0.2"
 edition = "2024"
-rust-version.workspace = true
+
+rust-version = "1.97.1"
 description = "MeshCore interop for the retinue radio family: node management, routing, and text interop over LoRa mesh."
 license = "MPL-2.0"
 repository = "https://github.com/merely-made/retinue"

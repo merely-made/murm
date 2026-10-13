@@ -42,7 +42,7 @@ def main():
     records = []
     env = os.environ.copy()
     env["CARGO_PROFILE_TEST_DEBUG"] = "0"
-    base = ["cargo", "+1.98.1", "test", "--locked", "--offline",
+    base = ["cargo", "+1.99.0", "test", "--locked", "--offline",
             "--manifest-path", "apps/signalman-desktop/Cargo.toml",
             "--target-dir", str(target), "-j4", "--lib"]
 
@@ -156,7 +156,7 @@ def main():
         if runtime.resolve().parent != target.resolve() or not (runtime / ".signalman-generated").is_file():
             raise RuntimeError("synthetic runtime cleanup boundary changed")
         shutil.rmtree(runtime)
-        manifest = {"completed": completed, "toolchain": "1.98.1",
+        manifest = {"completed": completed, "toolchain": "1.99.0",
                     "keeper_sha256": digest(keeper),
                     "source_clean_sha256": hashlib.sha256(clean).hexdigest(),
                     "source_control_sha256": control_sha,

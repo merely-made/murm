@@ -2,7 +2,8 @@
 name = "tinyssb-core"
 version = "0.1.0"
 edition = "2024"
-rust-version.workspace = true
+
+rust-version = "1.97.1"
 license = "MIT"
 description = "Allocation-free verifier for the pinned tinySSB v0 signed-feed wire format"
 publish = false

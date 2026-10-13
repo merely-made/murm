@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@1.99.0
         with:
           components: clippy, rustfmt
 
@@ -53,20 +53,13 @@ jobs:
         env:
           RUSTDOCFLAGS: -D warnings
 
-  # The published crates declare rust-version = "1.88", which is a promise to
-  # anyone depending on them. Cargo records that number but never checks the code
-  # actually builds on it, so an undefended MSRV drifts silently and downstream
-  # gets a compile error instead of a clean "requires a newer rustc". This job is
-  # the defence.
-  #
-  # It names the published host crates instead of running at the workspace root: the
-  # firmware is a workspace member that reaches rustc 1.93 through `fixed`, so a
-  # root-level run would fail on a crate the MSRV deliberately does not cover.
+  # The shared 1.97.1 support floor is checked independently of current Rust.
+  # Name host packages explicitly; firmware has its own cross-target lane.
   msrv:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@1.88.0
+      - uses: dtolnay/rust-toolchain@1.97.1
       - name: Build and test on the declared MSRV
         run: cargo test -p retinue -p tulle -p selvage -p seneschal -p sennet -p tucket -p outrider -p postilion -p signalman -p linkboy
 
@@ -79,7 +72,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@1.99.0
         with:
           targets: thumbv7em-none-eabihf
       - name: Build (t114 phy)
@@ -103,7 +96,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@1.99.0
         with:
           targets: wasm32-unknown-unknown
           components: clippy
