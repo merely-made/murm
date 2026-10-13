@@ -427,8 +427,10 @@ repository something specific and recent.
 
 The [Murm move plan](2026-10-13_murm_family_move_plan.md) promotes the family,
 not a mandatory aggregate dependency. Preserve published crate names and
-original history, radio toolchain/target boundaries and protocol-specific
-semantics. Host persistence, identity roots, governance and browser policy keep
+original history, radio dependency/target boundaries and protocol-specific
+semantics. The owner requires one current Rust toolchain and minimum across
+the stack (1.99 for the current planned rollout); existing lower MSRV settings
+are not a requirement to preserve. Host persistence, identity roots, governance and browser policy keep
 their named owners when an implementation changes repository.
 
 ### Murmuration coordinates our implementations

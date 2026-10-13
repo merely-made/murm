@@ -59,30 +59,40 @@ additional authority.
 
 ## 2. Build and dependency map
 
-Use two Cargo build lanes in the same repository. The existing root workspace
-continues to hold the published radio crates' Rust 1.88 contract and current
-firmware/default-member rules. The imported p2panda-backed implementations use
-a separate native workspace compatible with the supplier's Rust 1.96 floor.
-The desktop workspace remains independent.
+Use one stack-wide compiler policy: current stable Rust 1.99.0, with 1.99 as
+the declared minimum for owned crates and coordinated upgrades thereafter.
+The owner explicitly rejected treating the existing Rust 1.88 manifest/CI
+setting as a requirement. P2panda's Rust 1.96 floor is below the selected
+baseline and does not justify a separate compiler lane. The canonical policy
+is in `mere/design_docs/2026-08-12_family_composition_thesis_brief.md`, section
+"Shared Rust toolchain and minimum version (2026-10-13)".
+
+The two-workspace layout below remains a proposal for dependency, feature and
+target isolation. Both roots use the same Rust baseline. Keep a separate
+native workspace only where graph qualification demonstrates its value; a
+unified workspace is acceptable if radio/firmware dependency cones and profiles
+remain correct. The independent desktop workspace follows the same compiler
+policy as well.
 
 Proposed layout (illustrative; these destination directories do not yet exist):
 
 ```text
 Murm repository, based on existing Retinue history
-  Cargo.toml                  existing radio workspace / Rust 1.88 promise
+  Cargo.toml                  radio workspace / unified stack Rust baseline
   crates/                     existing radio/protocol/control package paths
   apps/                       existing host apps and separate desktop workspace
   firmware/                   existing targets and packaging
   native/
-    Cargo.toml                new native workspace / qualified toolchain
+    Cargo.toml                proposed native workspace / same Rust baseline
     crates/murm/              package murm; library murm
     crates/transport/         package mere-transport; library transport
     crates/webrtc-carrier/    package mere-webrtc-carrier; library webrtc_carrier
   design_docs/                this canonical migration plan and existing evidence
 ```
 
-The root excludes the native workspace. A native member's defaults must not
-raise a radio crate's MSRV or activate native transports in embedded builds.
+If the separate native workspace is retained, the root excludes it. Native
+defaults must not activate native transports in embedded builds. All owned
+package minimums move together; retaining old MSRVs is not a move criterion.
 The WebRTC core still gets its default Wasm check; the native workspace name
 does not turn its portable core into a native-only API. Retinue's release
 profile is flash-size-oriented; select native profiles explicitly instead of
@@ -232,18 +242,35 @@ been inventoried; the original-ID import rehearsal passes; source authority
 and toolchain boundaries are resolved. Planning evidence does not close the
 actual import gate.
 
-### MOVE1: establish the receiving native workspace
+### MOVE1: unify Rust and establish the receiving build roots
 
-Add the separate native workspace and explicit root exclusion. Record toolchain
-and profiles; carry the immutable shared p2panda patch set in the native build
-root because dependency workspaces' patches do not propagate to consumers.
-Keep root radio defaults, desktop separation and firmware target ownership.
+Inventory and align toolchain pins, owned `rust-version` fields, CI compiler
+jobs and independent workspace/probe/firmware roots across the active stack.
+Pin the coordinated current stable release exactly (1.99.0 for this pass),
+declare minimum 1.99, and qualify native, browser and embedded builds on that
+baseline. An actually required target compiler fork/nightly must be recorded
+as a target realization, with its compiler capabilities checked against the
+common floor; it does not create an assumed older radio MSRV policy.
 
-**Done when:** root library/MSRV and firmware build recipes still select their
-original members/toolchains; the native workspace resolves only intended
-suppliers; no placeholder crate or application dependency stands in for a real
-leaf supplier. Check package graphs in both build roots, not just workspace
-member names.
+Use Cargo's supported `build.build-dir` for intermediate artifacts and retain
+`build.target-dir` for delivered outputs. Inventory environment overrides,
+cache keys, release scripts and executable-path discovery; tests must obtain
+executable locations from Cargo output rather than assume an intermediate
+`target/debug/deps` layout. Keep worktree/platform/configuration isolation.
+
+Qualify the proposed native workspace and root exclusion, or select one
+workspace if its graph remains bounded. Record profiles; carry the immutable
+shared p2panda patch set in each consuming build root because dependency
+workspaces' patches do not propagate to consumers. Preserve radio dependency
+defaults, desktop isolation and firmware target ownership.
+
+**Done when:** active owned toolchain pins, minimums and CI lanes follow the
+same qualified release; each target's actual compiler is recorded; build-dir
+and delivered-artifact paths work in native/browser/embedded and packaging
+recipes; receiving workspace graphs resolve only intended suppliers. No
+placeholder crate or application dependency stands in for a real leaf
+supplier. Check package graphs in every independent build root. Old compiler
+receipts do not establish qualification of the new baseline.
 
 ### MOVE2: import and qualify the three Mere implementations
 
@@ -321,9 +348,11 @@ partitioned transport needs explicit configuration and its own receipt.
 ### 2026-10-13 planning pass
 
 - The foundational Retinue tree already contains the requested protocol,
-  radio, UI and management leaves. Its root manifest protects a Rust 1.88
-  published-host lane and excludes the Genet-backed desktop and retained-repair
-  prototype workspaces.
+  radio, UI and management leaves. Its root manifest and CI currently declare
+  a Rust 1.88 lane, while the owner now requires one current compiler/minimum
+  policy across the stack. The old values are migration inputs, not an owner
+  commitment to preserve them. Genet-backed desktop and retained-repair
+  prototype workspaces remain excluded for dependency/target reasons.
 - Locked Mere metadata identifies seven relevant supplier packages and 33
   consumer edges. Stickleback has no normal transport/Gemot dependency;
   `mere-transport` consumes Stickleback for its address book. WebRTC consumes
@@ -342,3 +371,14 @@ partitioned transport needs explicit configuration and its own receipt.
 - This pass created the map and plan only. MOVE1-MOVE5 are unexecuted. Registry,
   history and direct-dependency inspection do not replace the receiving build,
   publication, consumer or physical receipts.
+
+### 2026-10-13 compiler-policy correction
+
+The owner clarified that Rust 1.88 was not a requested compatibility promise.
+He wants the newest Rust, including build-directory support, and a unified
+minimum across the stack. The initial planning inference was wrong and is
+withdrawn. Rust 1.99.0 is current stable at verification; build-dir support
+stabilized in Cargo 1.91. The plan now uses current stable for both exact
+toolchain pins and owned minimums, with coordinated upgrades. Repository
+manifests and CI still require the MOVE1 rollout; this document does not claim
+that the stack has already been upgraded.
