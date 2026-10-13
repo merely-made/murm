@@ -135,7 +135,12 @@ A on channel zero and B on channels one through three, and discards every fresh
 A packet to force repair-only reconstruction. This demonstrates coexistence
 and late recovery rather than automatic scheduling fairness or independent
 receiver processes.
-The Mere owner composes exact inventory and admitted real ingress separately.
+The Mere-owned exact-inventory/admitted-ingress composition is published in
+`26eb8038`, with acceptance `abdf6d51`. Its
+[guide and receipt](https://github.com/merely-made/mere/blob/abdf6d51556dd175f57440199a8335e37bb19f1a/crates/mesh/mesh/examples/inventory_ingress/README.md)
+own that evidence: actual decoder bytes cross QUIC into the existing resident
+mesh admission owner, with separate inventory/submission authority and shared
+service capacity. Retinue's peer continues to own only opaque host transfer state.
 
 ## Exercised scope
 

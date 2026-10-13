@@ -1,7 +1,9 @@
 # Retained repair simulation prototype
 
 **Status, updated 2026-10-12:** the historical finite host model is implemented;
-an incremental host core and persistent peer now provide the later lane C.
+an incremental host core and persistent peer provide lane C. Mere's admitted
+exact-inventory/QUIC composition is published in `26eb8038`, with final
+acceptance `abdf6d51`.
 This document records their boundary and the historical simulation choices so
 they can change with the prototype. It is not an RF wire protocol or a qualification gate. The owning sequence and later
 admission/device gates are in the
@@ -65,6 +67,17 @@ The selected process experiment lives once at
 These volatile host components add no radio, persistence or application
 admission owner. The following `generation.original_hex` and checkpoint API
 continue to describe the historical scenario mode.
+
+The later A/C/D composition and its evidence live once in the
+[Mere-owned ingress guide](https://github.com/merely-made/mere/blob/abdf6d51556dd175f57440199a8335e37bb19f1a/crates/mesh/mesh/examples/inventory_ingress/README.md).
+An admitted exact snapshot selects missing retained generations; actual host
+RaptorQ output then crosses real QUIC into fresh signed decoding and the existing
+mesh owner. The resident mounts on its existing endpoint/store, with inventory
+and submission sharing two active calls/four pending reservations. The receipt
+includes unchanged signed bytes and separate-process durable reopen. Coded
+frames remain host loopback before QUIC; MCU/RF/worker/native-UI qualification
+stays separate. The receipt preserves the intermittent full-transport gossip
+failure rather than claiming consistently green whole-transport tests.
 
 An optional `generation.original_hex` lets the owning application supply actual
 original bytes instead of the deterministic synthetic fixture. The decoded hex
@@ -232,11 +245,11 @@ checked-in inputs, not an invariant every future scheduler must preserve:
 
 The early shape is a shared retained-object sender with priority and repair
 policy, explicit receiver opportunities, and authenticated generation envelopes.
-The owner-local receive example now demonstrates one recovered signed object
-crossing a bounded real local QUIC handoff and entering the existing operation
-processor. The next useful slice exposes that bounded ingress in an owning host
-with explicit service/session admission, before other carriers or wider
-qualification.
+The historical owner-local receive example demonstrates one recovered signed
+object crossing bounded real local QUIC into the existing operation processor.
+The later published A/C/D slice mounts bounded admitted ingress in the owning
+resident and selects missing retained originals through exact inventory.
+Other carriers, physical scheduling and wider qualification remain separate.
 
 Run and record the campaign locally. GitHub Actions is disabled in Mere and
 Retinue by owner request; this work uses direct commits and pushes to `main`,
