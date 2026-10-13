@@ -1,5 +1,12 @@
 # Retinue Documentation Index
 
+Murm family direction (2026-10-13): the owner authorized using this repository
+as the foundation for Murm while preserving crate names and history. The
+[Murm family move plan](2026-10-13_murm_family_move_plan.md) maps radio/native
+workspaces, keeps Stickleback in Mere and Fetch policy in Genet, and sequences
+the implementation, consumer and repository cutovers. This is a planned move;
+the repository identity and implementations have not changed.
+
 > Canonical index per [`DOC_POLICY.md`](DOC_POLICY.md) §6. **If any other index
 > in this repository disagrees with this file, this file wins.** Founded
 > 2026-08-24 against 93 markdown documents and 19 JSON receipts, none of which
@@ -33,6 +40,7 @@ gate without its family is ambiguous and has already produced wrong readings.
 
 | Namespace | Family | Meaning |
 | --- | --- | --- |
+| `MOVE0`–`MOVE5` **(Murm family move)** | [Murm family move plan](2026-10-13_murm_family_move_plan.md) | Source/history qualification, native workspace, imports, consumers, repository cutover and later HTTP/WebSocket wire extraction. |
 | `G0`–`G4` **(ARDC)** | [ARDC lane](2026-07-31_ardc_application_lane.md) | Grant application gates. All unstarted; lane dormant by decision 2026-08-26. |
 | `G0`–`G5` **(Signalman desktop)** | [Cambium scope](2026-08-09_signalman_cambium_desktop_scope.md) | Desktop GUI adoption gates. G0–G4 complete, G5 partial. |
 | `S0`–`S9` **(Signalman management)** | [Management surface plan](2026-08-15_signalman_management_surface_implementation_plan.md) | Real gates. |
@@ -414,6 +422,14 @@ their filenames says so — see the `result` column.
 
 These are not general good practice. Each is here because its absence cost this
 repository something specific and recent.
+
+### Family placement preserves implementation contracts
+
+The [Murm move plan](2026-10-13_murm_family_move_plan.md) promotes the family,
+not a mandatory aggregate dependency. Preserve published crate names and
+original history, radio toolchain/target boundaries and protocol-specific
+semantics. Host persistence, identity roots, governance and browser policy keep
+their named owners when an implementation changes repository.
 
 ### Murmuration coordinates our implementations
 
