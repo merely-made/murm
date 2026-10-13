@@ -61,8 +61,8 @@ additional authority.
 
 Keep two separate stack-wide decisions: the working toolchain and the minimum
 supported Rust version (MSRV). Pin the working toolchain to current stable Rust
-1.99.0 for this rollout. The common owned-package MSRV is **not yet selected**;
-it may remain below the working toolchain and advances independently when
+1.99.0 for this rollout. The selected common owned-package MSRV is **1.97.1**;
+it remains below the working toolchain and advances independently when
 language use, dependencies or an explicit support decision require it. The
 owner rejected both preserving Rust 1.88 by assumption and making Rust 1.99 the
 minimum by assumption. The canonical policy is in
@@ -70,13 +70,19 @@ minimum by assumption. The canonical policy is in
 "Shared Rust toolchain and minimum version (2026-10-13)".
 
 The locked Mere graph declares Rust 1.91 for Iroh and 1.96 for the refreshed
-p2panda supplier. Its selected Murm/transport normal and build dependency
-closures have no declared floor above 1.96, making 1.96 a Murm candidate.
-The wider resolved graph includes Knot at 1.97 and WESL at 1.97.1. Those are
-inputs to the stack-wide decision, not proof of any tested minimum: scope the
-actual supported feature/target configurations, inspect undeclared floors and
-run the selected compiler before adopting a common MSRV. A 1.96 stack floor
-would require qualifying or adjusting any supported path that needs more.
+p2panda supplier. Its highest declared floor is 1.97.1, from WESL/WGSL; Knot
+declares 1.97. Fetched owner manifests across eleven active repositories and
+2,491 cached registry manifests from 71 tracked lockfiles contain no declared
+minimum above 1.97.1. Higher working-toolchain pins, including 1.98.1, are
+separate settings and do not by themselves establish a higher MSRV.
+
+This selects a rollout floor, not a tested compatibility receipt. Inspect
+undeclared requirements and qualify supported feature/target configurations on
+1.97.1 in MOVE1. The registry inventory has 277 uncached package versions and
+does not exhaustively resolve independent Git suppliers outside Mere. Any
+actual requirement above 1.97.1 must be resolved or brought back into the shared
+MSRV decision before claiming stack-wide support. Inventory evidence is saved
+in `Code/targets/murm-shared-msrv-selection-20261013.json`.
 
 The two-workspace layout below remains a proposal for dependency, feature and
 target isolation. Both roots follow the same working-toolchain policy and the
@@ -103,7 +109,8 @@ Murm repository, based on existing Retinue history
 
 If the separate native workspace is retained, the root excludes it. Native
 defaults must not activate native transports in embedded builds. Owned packages
-converge on the separately selected shared MSRV; neither their existing floors nor the latest working toolchain chooses that value by itself.
+converge on the selected shared MSRV of 1.97.1; a newer working toolchain
+does not change that value automatically.
 The WebRTC core still gets its default Wasm check; the native workspace name
 does not turn its portable core into a native-only API. Retinue's release
 profile is flash-size-oriented; select native profiles explicitly instead of
@@ -258,8 +265,9 @@ actual import gate.
 Inventory toolchain pins, owned `rust-version` fields, CI compiler jobs and
 independent workspace/probe/firmware roots across the active stack. Pin the
 working toolchain to the coordinated current stable release (1.99.0 for this
-pass). Independently choose and qualify a common MSRV from source requirements
-and the supported dependency/feature/target graphs, then align owned minimums.
+pass). Independently qualify the selected common MSRV, 1.97.1, against source
+requirements and supported dependency/feature/target graphs, then align owned
+minimums to `rust-version = "1.97.1"`.
 Use a current-toolchain CI lane for development checks and a separate selected
 MSRV lane for supported builds/tests. Upgrade the working pin without raising
 the MSRV automatically. An actually required target compiler fork/nightly must
@@ -365,8 +373,8 @@ partitioned transport needs explicit configuration and its own receipt.
 - The foundational Retinue tree already contains the requested protocol,
   radio, UI and management leaves. Its root manifest and CI currently declare
   a Rust 1.88 lane, while the owner now requires a shared current working
-  toolchain and a separately chosen shared MSRV across the stack. The old values
-  are migration inputs, not an owner commitment to preserve them. Genet-backed desktop and retained-repair
+  toolchain and the separately selected shared MSRV of 1.97.1 across the stack.
+  The old values are migration inputs, not an owner commitment to preserve them. Genet-backed desktop and retained-repair
   prototype workspaces remain excluded for dependency/target reasons.
 - Locked Mere metadata identifies seven relevant supplier packages and 33
   consumer edges. Stickleback has no normal transport/Gemot dependency;
@@ -394,9 +402,20 @@ He wants the newest working Rust, including build-directory support, and a
 unified minimum across the stack. The initial Rust 1.88 preservation inference
 is withdrawn. The subsequent interpretation that the newest toolchain must
 also be the MSRV is withdrawn too. Rust 1.99.0 is the selected working release;
-build-dir support stabilized in Cargo 1.91. The shared MSRV remains a separate,
-unselected decision. Locked dependency declarations make 1.96 a Murm candidate
-and identify wider-stack requirements at 1.97/1.97.1 for qualification or
+build-dir support stabilized in Cargo 1.91. At this correction stage, the shared MSRV was a separate,
+unselected decision; the subsequent selection is recorded below. Locked
+dependency declarations made 1.96 a Murm candidate and identified wider-stack requirements at 1.97/1.97.1 for qualification or
 supplier adjustment. No MSRV compiler runs were performed in this correction.
 Repository manifests and CI still require the MOVE1 rollout; this document
 does not claim that the stack has already been upgraded.
+
+### 2026-10-13 shared MSRV selection
+
+The owner accepted 1.97.1 if no requirement pins a higher minimum. Fetched
+owner-manifest and locked-dependency declaration inventories found no higher
+floor in their inspected scope. Select Rust 1.97.1 as the shared owned-package
+MSRV and retain Rust 1.99.0 as the working toolchain. MOVE1 must qualify the
+actual supported configurations on both compilers before claiming the rollout
+complete; declarations, uncached suppliers and existing development pins do
+not substitute for those compiler runs. The stack-wide manifest/CI rollout
+remains unexecuted.

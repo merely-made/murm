@@ -429,8 +429,9 @@ The [Murm move plan](2026-10-13_murm_family_move_plan.md) promotes the family,
 not a mandatory aggregate dependency. Preserve published crate names and
 original history, radio dependency/target boundaries and protocol-specific
 semantics. The owner requires a shared current Rust toolchain (1.99.0 for the planned
-rollout) and a separately selected shared MSRV across the stack. The MSRV
-remains undecided; it does not automatically follow the working toolchain.
+rollout) and a separately selected shared MSRV of 1.97.1 across the stack.
+The MSRV does not automatically follow the working toolchain; compiler
+qualification and manifest/CI rollout remain pending.
 Host persistence, identity roots, governance and browser policy keep their
 named owners when an implementation changes repository.
 
