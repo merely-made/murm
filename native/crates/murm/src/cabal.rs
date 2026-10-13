@@ -372,7 +372,7 @@ impl CabalHandle {
     ///
     /// Verifies the signature, computes the post id, and stores it.
     /// Returns the computed post id on success; rejects with
-    /// [`MurmError::Protocol`] if the signature is invalid.
+    /// an admission error if the signature is invalid.
     pub async fn ingest_post(&self, post: Post) -> Result<PostId, MurmError> {
         self.engine
             .ingest_post(self.cabal_id.as_bytes(), post)

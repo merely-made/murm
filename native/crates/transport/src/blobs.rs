@@ -7,7 +7,7 @@
 //! Content-addressed blob store, backed by `iroh-blobs`.
 //!
 //! Phase 2C v0 per
-//! [`mere/design_docs/mere_docs/implementation_strategy/2026-05-05_protocol_architecture_plan.md`](../../../../../../design_docs/mere_docs/implementation_strategy/2026-05-05_protocol_architecture_plan.md)
+//! `mere/design_docs/mere_docs/implementation_strategy/2026-05-05_protocol_architecture_plan.md` (`mere/design_docs/mere_docs/implementation_strategy/2026-05-05_protocol_architecture_plan.md`)
 //! §2.1 — `iroh-blobs` is a sibling iroh primitive that lives in
 //! `transport`. Consumers (murm Cable attachments, gemot codicil
 //! payloads, eidetic large artifacts) put bytes and get a stable BLAKE3
@@ -23,7 +23,7 @@
 //! - **Network transfer**: [`BlobStore::fetch_from`] downloads a blob
 //!   from a peer via [`P2pandaTransport`](crate::P2pandaTransport). The peer
 //!   must have been constructed with
-//!   [`P2pandaTransport::bind_with_blobs`](crate::P2pandaTransport::bind_with_blobs)
+//!   the transport builder's `blobs` method
 //!   so its router serves the iroh-blobs protocol.
 //!
 //! ## Choosing a backing
@@ -735,7 +735,7 @@ impl BlobStore {
     /// Fetch a blob from a remote peer over iroh.
     ///
     /// The peer must have been constructed via
-    /// [`P2pandaTransport::bind_with_blobs`](crate::P2pandaTransport::bind_with_blobs)
+    /// the transport builder's `blobs` method
     /// so its p2panda-net endpoint serves the iroh-blobs protocol against a
     /// store that holds the blob.
     ///

@@ -10,7 +10,7 @@
 //! [`mere`](https://crates.io/crates/mere) browser.
 //!
 //! See the workspace's active
-//! [Murm peer-runtime plan](../../../design_docs/mere_docs/implementation_strategy/2026-07-12_murm_peer_runtime_and_moot_domain_plan.md)
+//! Murm peer-runtime plan (`mere/design_docs/mere_docs/implementation_strategy/2026-07-12_murm_peer_runtime_and_moot_domain_plan.md`)
 //! for the architectural specification.
 //!
 //! ## What Murm owns
@@ -44,7 +44,7 @@
 //! Pre-1.0. Phase 2B: the Cable-shaped Murm dialect is in place, and a cabal has a
 //! real **send** ([`CabalHandle::send_text`] and siblings), **history**
 //! ([`CabalHandle::history`]), and live **subscribe** ([`CabalHandle::subscribe`])
-//! API. With a [`P2pandaTransport`], [`SyncedCabal`] adds the two sync lanes
+//! API. With a [`transport::P2pandaTransport`], [`SyncedCabal`] adds the two sync lanes
 //! (live gossip + LogSync catch-up) on top of the same surface.
 
 #![doc(html_root_url = "https://docs.rs/murm/0.0.1")]
@@ -124,7 +124,7 @@ use std::sync::Arc;
 /// ## Status
 ///
 /// Phase 2B. [`open_cabal`](Murm::open_cabal) returns a working
-/// [`CabalHandle`] (send / history / subscribe); over a [`P2pandaTransport`],
+/// [`CabalHandle`] (send / history / subscribe); over a [`transport::P2pandaTransport`],
 /// [`subscribe_cabal`](Murm::subscribe_cabal) returns a [`SyncedCabal`] that
 /// also runs the gossip + LogSync lanes. Shared activity lifecycle belongs to
 /// the concrete application consuming the conversation and admission seams.

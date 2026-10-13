@@ -445,7 +445,7 @@ fn hold(seed: &[u8; 32]) -> HeldSeed {
     held
 }
 
-/// Builder for [`P2pandaTransport`]. Use [`P2pandaTransport::builder`].
+/// Builder for [`P2pandaTransport`]. Use the appropriate scoped-identity constructor on [`P2pandaTransport`].
 pub struct P2pandaTransportBuilder<'a> {
     signing_seed: HeldSeed,
     alpns: Vec<Alpn>,
