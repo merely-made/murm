@@ -428,10 +428,11 @@ repository something specific and recent.
 The [Murm move plan](2026-10-13_murm_family_move_plan.md) promotes the family,
 not a mandatory aggregate dependency. Preserve published crate names and
 original history, radio dependency/target boundaries and protocol-specific
-semantics. The owner requires one current Rust toolchain and minimum across
-the stack (1.99 for the current planned rollout); existing lower MSRV settings
-are not a requirement to preserve. Host persistence, identity roots, governance and browser policy keep
-their named owners when an implementation changes repository.
+semantics. The owner requires a shared current Rust toolchain (1.99.0 for the planned
+rollout) and a separately selected shared MSRV across the stack. The MSRV
+remains undecided; it does not automatically follow the working toolchain.
+Host persistence, identity roots, governance and browser policy keep their
+named owners when an implementation changes repository.
 
 ### Murmuration coordinates our implementations
 
