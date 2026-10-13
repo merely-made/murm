@@ -2,7 +2,8 @@
 name = "radio-hand"
 version = "0.0.1"
 edition = "2024"
-rust-version.workspace = true
+
+rust-version = "1.97.1"
 license-file = "LICENSE"
 publish = false
 

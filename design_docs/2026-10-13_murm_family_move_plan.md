@@ -1,7 +1,7 @@
 # Murm family and repository move
 
 **Date:** 2026-10-13
-**Status:** Plan. The owner authorized the Murm family direction and a move based
+**Status:** In progress (2026-10-13). The owner authorized the Murm family direction and a move based
 on the Retinue repository, preserving crate names and history. This document
 selects boundaries and sequences qualification; no repository has been renamed
 and no implementation has moved.
@@ -419,3 +419,22 @@ actual supported configurations on both compilers before claiming the rollout
 complete; declarations, uncached suppliers and existing development pins do
 not substitute for those compiler runs. The stack-wide manifest/CI rollout
 remains unexecuted.
+
+### 2026-10-13 defaults rollout and import execution
+
+The owner authorized applying the selected defaults/MSRV and beginning the
+implementation moves. Isolated current-source checkouts cover all 21 active
+Rust repositories in the organization, including Dramatis and the repositories
+absent from the earlier local-only inventory. Owned active package manifests
+now declare Rust 1.97.1, stable working pins use 1.99.0, and intermediate build
+artifacts use `{workspace-root}/target/build`. Existing compiler jobs are
+aligned by role; separate declaration-policy lanes run on both versions.
+Vendor/patch supplier manifests and frozen receipt manifests are preserved.
+
+All 42 root metadata checks pass on their named compilers. These validate
+package declarations and workspace loading, not every platform's compiled
+support. The shared CI repository's wgpu MSRV default also moves to 1.97.1.
+Native/radio compiler runs and source imports are in progress. The import
+inventory adds Castellan's MPL allocator-tracker test helper, currently included
+by relative path from the transport seed-residue binary; it must become a
+package-local test fixture with source attribution, not a lost test.

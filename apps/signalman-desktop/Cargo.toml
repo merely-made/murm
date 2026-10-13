@@ -11,7 +11,8 @@ edition = "2024"
 # Its own floor, not the workspace's. Retinue's `rust-version` is a promise
 # about six published crates and their MSRV job; this package is private and
 # rides genet, whose stack wants a newer toolchain than that promise allows.
-rust-version = "1.96"
+
+rust-version = "1.97.1"
 license = "MPL-2.0"
 repository = "https://github.com/merely-made/retinue"
 description = "Signalman's desktop face for the owner firmware flow, on the shared Cambium desktop host."
@@ -150,3 +151,6 @@ radio-hand = { path = "../../crates/radio-hand" }
 selvage = { path = "../../crates/selvage" }
 seneschal = { path = "../../crates/seneschal" }
 tulle = { path = "../../crates/tulle" }
+
+[workspace.package]
+rust-version = "1.97.1"

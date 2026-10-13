@@ -1,4 +1,5 @@
 [package]
+rust-version = "1.97.1"
 name = "retinue-fuzz"
 version = "0.0.0"
 publish = false
@@ -36,3 +37,6 @@ path = "fuzz_targets/retinue_command_accept.rs"
 test = false
 doc = false
 bench = false
+
+[workspace.package]
+rust-version = "1.97.1"
