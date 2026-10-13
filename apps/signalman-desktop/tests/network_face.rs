@@ -279,6 +279,15 @@ fn selection_drag_and_named_viewport_controls_use_the_shipping_handlers() {
 
 #[test]
 fn a_dragged_node_tracks_the_pointer_instead_of_a_stale_actor_snapshot() {
+    drag_returns_to_physics(cambium::PointerPhase::Up);
+}
+
+#[test]
+fn a_cancelled_drag_releases_the_pin_and_accepts_the_next_actor_snapshot() {
+    drag_returns_to_physics(cambium::PointerPhase::Cancel);
+}
+
+fn drag_returns_to_physics(end_phase: cambium::PointerPhase) {
     let mut harness = harness();
     let dragged = ManagementNodeId::from_source_key("destination:peer");
     let key = harness
@@ -320,10 +329,14 @@ fn a_dragged_node_tracks_the_pointer_instead_of_a_stale_actor_snapshot() {
     assert!(adopted);
     assert_eq!(layout_position(harness.state(), key), echoed);
 
-    // Releasing hands the node back to physics.
+    // Releasing or cancelling hands the node back to physics.
     harness.update(|state| {
-        state.drag_network_node(&dragged, cambium::PointerPhase::Up, (0.75, 0.75));
+        state.drag_network_node(&dragged, end_phase, (0.75, 0.75));
     });
+    assert!(matches!(
+        harness.state().pending_network,
+        Some(signalman_desktop::state::NetworkRequest::Unpin(node)) if node == key
+    ));
     let settled = signalman_desktop::network::NetworkLayout {
         epoch: harness.state().network_epoch,
         snapshot: seiche::LayoutSnapshot {

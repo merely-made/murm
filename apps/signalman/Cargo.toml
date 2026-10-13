@@ -40,7 +40,7 @@ comms = ["dep:comms"]
 
 [dependencies]
 # The shared presentation vocabulary follows the desktop's Mere cohort.
-comms = { package = "mere-comms", git = "https://github.com/merely-made/mere.git", rev = "43cd7f24afea6b2d3b54939f2093c098da50713b", optional = true }
+comms = { package = "mere-comms", git = "https://www.github.com/merely-made/mere.git", rev = "0b9b7a9b218579f1f36cc1ab05a51b2a13128f1d", optional = true }
 hex = "0.4"
 linkboy = { version = "0.1.0", path = "../linkboy" }
 outrider = { version = "0.3.0", path = "../../crates/outrider", features = ["voice"] }

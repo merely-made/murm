@@ -180,7 +180,7 @@ impl DesktopState {
                 self.echo_drag_position(key, position);
                 NetworkRequest::Pin(key, position)
             }
-            cambium::PointerPhase::Up => {
+            cambium::PointerPhase::Up | cambium::PointerPhase::Cancel => {
                 self.network_drag = None;
                 NetworkRequest::Unpin(key)
             }

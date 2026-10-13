@@ -4,8 +4,8 @@ Murm family direction (2026-10-13): the owner authorized using this repository
 as the foundation for Murm while preserving crate names and history. The
 [Murm family move plan](2026-10-13_murm_family_move_plan.md) maps radio/native
 workspaces, keeps Stickleback in Mere and Fetch policy in Genet, and sequences
-the implementation, consumer and repository cutovers. This is a planned move;
-the repository identity and implementations have not changed.
+the implementation, consumer and repository cutovers. The first native import and Mere consumer cutover are published. Remaining
+application adoption is in progress; the repository rename awaits green checks.
 
 > Canonical index per [`DOC_POLICY.md`](DOC_POLICY.md) §6. **If any other index
 > in this repository disagrees with this file, this file wins.** Founded
