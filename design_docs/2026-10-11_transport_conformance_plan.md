@@ -18,6 +18,10 @@ bounded JSON peer. Publication after startup, deferred-frame settlement,
 manifest-created collector state and actual decoder-output recovery are
 implemented. The selected dynamic process observation and API live in the
 [host suite guide](../testing/transport-conformance/README.md#incremental-retained-peer).
+The A/C/D host composition is published: Mere's admitted exact inventory selects
+retained generations, actual RaptorQ output crosses real QUIC, and fresh signed
+record decoding reaches the existing mesh owner on the resident endpoint/store.
+Its source and acceptance evidence are linked in the lane status below.
 Additional carriers and wider restart/qualification work remain open.
 Publication uses direct commits and pushes to `main`; validation runs
 locally. GitHub Actions and PRs are not part of this project's requested flow.
@@ -61,37 +65,41 @@ manifests must not silently re-sign or re-encode the original operation.
 
 ## Parallel composition lanes — 2026-10-11
 
-**Status, updated 2026-10-12:** C's host core and persistent peer are implemented;
-A's resident ingress and B's prepared control retries remain pending here.
-D's IO-free inventory policy and finite comparison harness are published in
-Mere `58bfd81b5`; the Mere owner is composing exact inventory, retained retrieval
-and admitted live ingress separately. Assign one write owner per lane and keep common manifests and
+**Status, updated 2026-10-12:** C's host core and persistent peer are published
+in Retinue `73616a78`, with the selected process receipt in `2ee6f0c`.
+A's resident ingress and D's exact-inventory composition are published in Mere
+`26eb8038`, with final acceptance in `abdf6d51`. The
+[Mere-owned guide and receipt](https://github.com/merely-made/mere/blob/abdf6d51556dd175f57440199a8335e37bb19f1a/crates/mesh/mesh/examples/inventory_ingress/README.md)
+hold that evidence once. B's prepared control retries remain pending.
+Assign one write owner per lane and keep common manifests and
 canonical documentation with the integrating owner. These are prototype
 deliverables, not new qualification matrices.
 
 | Lane | Write owner and first deliverable | Useful completion flow |
 | --- | --- | --- |
-| A. Resident signed-record ingress | Mere Distillery resident and Murm transport accept queue. Mount an opt-in service on the existing resident endpoint and mesh store. | An admitted session submits one externally signed job record; the existing board/Chronicle shows one job. A repeat returns duplicate; a refusal or stalled stream leaves state intact and releases capacity. |
+| A. Resident signed-record ingress | Published Mere mesh ingress service, opt-in Distillery resident mounting, and bounded Murm ALPN queue. | Admitted unchanged signed records enter the existing mesh store/board. Duplicate/refused/stalled calls release shared capacity; the resident test mounts on the existing endpoint/store and checks shutdown/availability expiry. |
 | B. Prepared control retries | Retinue Postilion verified client and the existing iroh-control probe. Prepare one immutable semantic mutation and execute it with a fresh caller-owned counter on each attempt. | Lose a provisional response after durable apply, reconnect and retry through the public client; obtain the same transaction/result with no second apply, then commit normally. |
 | C. Incremental retained repair | Implemented isolated Retinue retained-repair library, streaming host example and persistent `--retained-peer` adapter. | The selected host process publishes B while late A is incomplete; B receives fresh symbols on three channels and A later decodes from channel-zero repair only. Deferral retains exact bytes/token and does not advance queued accounting. |
-| D. Advisory inventory reconciliation | IO-free policy and finite comparison harness published in Mere `58bfd81b5`. Detailed findings stay in the standards brief's MemoryLAN subsection and the inventory example receipt. | The finite policy comparison is complete. Next, admitted live reconnection uses bounded inventory candidates, retained-owner retrieval and the existing mesh admission owner. |
+| D. Advisory inventory reconciliation | IO-free policy/finite comparison published in Mere `58bfd81b5`; admitted exact-inventory composition published in `26eb8038` with acceptance `abdf6d51`. | The admitted receiver snapshot selects three missing retained generations after the first insertion; actual reconstruction and QUIC submission reconcile the four originals through the existing owner. |
 
-**A — owner and resource boundaries.** Use `ResidentAuthority` and
-`InstalledAuthority::bind_resident`, with the existing
-`MeshStore::accept_outcome(owner_expected_mesh, operation)`. Preserve the
-original author separately from the submitting session principal. The proposed
-service starts with Notochord admission and an action check, so it needs a new
-ALPN rather than changing the existing object-first example protocol. Wrap the
-complete admission handshake, including refusal shutdown, in a host deadline:
-the pinned handshake deadline field alone does not enforce I/O expiry.
-Initially allow four queued sessions, two active submissions, 16 KiB objects
-and 2 KiB result replies. Bound first-stream waits and the per-ALPN transport
-queue as well as application tasks; a worker cap after an unbounded queue is
-insufficient. Transport capacity, session authority and domain admission are
-separate gates. One lane owner holds
-`mere/crates/murm/transport/src/p2panda_transport.rs`,
-`mere/ports/distillery/src/{installed,resident,record_ingress}.rs` and the
-resident composition in `mere/ports/djinn/src/resident_distillery.rs`.
+**A — owner and resource boundaries.** The published
+`ResidentAuthority::enable_record_ingress(config)` mounts `RecordIngress` on the
+resident's existing endpoint and mesh store. Notochord admits distinct
+`inventory` and `submit` actions on `mere/mesh-retained-admitted/v1`; transport
+subject remains separate from the original signed author. Fresh strict record
+decoding reaches the existing
+`MeshStore::accept_outcome(owner_expected_mesh, operation)`.
+Four pending/queued reservations are held before first-stream waiting and
+released on dequeue. Two active calls cover admission through result FIN.
+One arrival-to-finish deadline includes queue wait and refusal shutdown; actual
+per-call I/O is capped at 24 KiB read/8 KiB written. Objects, result replies and
+inventory payloads have respective 16 KiB, 2 KiB and 1 KiB ceilings. Shutdown
+closes the route and cancels/joins active service work before closing resident
+resources. The Mere owner holds `crates/mesh/mesh/src/ingress/`, Murm's
+`p2panda_transport/bounded_accept.rs` and Distillery's `resident.rs`.
+The guide/receipt above owns the acceptance detail, including separate-process
+durable reopen. Its validation retains an intermittent existing whole-transport
+gossip failure and successful isolated retry; that suite is not consistently green.
 
 **B — semantic identity and counter custody.** Extend
 `crates/postilion/src/control/verified/client.rs` through a small prepared-value
@@ -154,31 +162,30 @@ saturation fallback, aged/capped peer views and bounded offers. Exact fallback
 must be paged/count its control bytes
 within the same round budget. Inventory access requires namespace authority;
 record-submission permission alone does not imply inventory-read permission.
-Both inventory and retained-repair leaves can develop independently, but live
-integration waits for owner-provided availability/retrieval and A's admitted
-service contract. Do not duplicate A's accept-queue work or silently add
-inventory messages to its protocol. Canonical operation ID and whole-record
-digest remain distinct.
+The published live composition supplies owner-provided availability/retrieval
+through C's persistent peer and A's separately authorized inventory action.
+Inventory and submission use the same bounded ingress service. Canonical
+operation ID and whole-record digest remain distinct.
 
-**Lane D coordination, 2026-10-12:** the resident ingress service and its public
-admission API remain proposed. Generic `ObjectStreamLimits`, `read_object` and
-`write_object`, the finite QUIC example, and D's IO-free leaf/comparison are
-published; admitted live composition is still pending. D's
-eight authorized peer slots and one outstanding candidate decision per peer
-are policy metadata, not eight active transport permits. Live dispatch shares
-A's two active submissions and four queued sessions; deferred capacity does
-not justify another ingress queue. A's 16 KiB object and 2 KiB result ceilings
-remain the proposed integration profile. D owns its declared 1 KiB control
-message ceiling; round accounting includes encoded messages, object/reply
-framing, exact-inventory pages and refused attempts. Service admission injects
-namespace/action authority and complete-call deadlines. The example's private
-attempt, campaign and byte-budget constants are not a public service contract.
+**Lane D coordination, 2026-10-12:** the resident service and public admitted
+client API are published in Mere `26eb8038`; final source-bound composition
+acceptance is in `abdf6d51`. D's peer-view capacity is policy metadata;
+it does not allocate active transport permits. Live dispatch shares
+A's two active calls and four pending/queued sessions. A's 16 KiB object,
+2 KiB result and D's 1 KiB control ceilings are the implemented profile.
+Framing, handshake, refusals and partial/timed-out traffic count toward the
+same call I/O budgets. Service admission injects namespace/action authority and
+complete-call deadlines. The receiver's four-object availability cache may
+FIFO-evict an older original; C's producer refuses full retention without
+eviction. Cache expiry/eviction leaves durable mesh operations intact. Sender
+logical slots and receiver owner milliseconds are independent; exact summaries
+exchange digest membership rather than comparing their expiry timestamps.
 
-The first shared demonstration joins C's publication/recovery and D's candidate
-selection to A's existing admission owner. B develops alongside that data path
-with its existing durable board owner. Add a second real Reticulum carrier only
-after the ingress contract is usable; the current Reticulum accepted peer is
-honestly absent and needs the existing session-proof boundary. Device builds,
+The published shared demonstration joins C's publication/recovery and D's
+candidate selection to A's existing admission owner. B remains a separate
+prepared-retry implementation slice with its existing durable board owner.
+A second real Reticulum carrier still requires the existing session-proof
+boundary to be wired to an accepted peer. Device builds,
 physical multi-radio goodput and the eventual broad standards corpus follow
 the useful host shape. No 1–2 Mbps claim follows from these lanes.
 
@@ -263,8 +270,8 @@ eventual delivery without conditions.
 | TC0 | Catalog and suite seed | Canonical catalog and prior-art provenance validated; isolated executable emits per-case requirement/evidence/status/revision records. Official crypto vectors and reviewed RFC 6330 wire/boundary cases run. Missing independent peers are explicit unsupported results. This is a foundation, not whole-RFC qualification. |
 | TC1 | Independent RFC 6330 codec qualification | Selected OpenRQ `Al=1, N=1` campaign is implemented; exact symbol and bidirectional decode cases cover K-prime transitions, uneven two-block partition, padding and repair-only recovery. Pinned tooling and fixtures make those cases reproducible. Broader alignment, sub-block, ESI and resource coverage remains open before wider claims. |
 | TC2 | Portable corpus/adapters and existing carriers | External-process capability/byte/event contract; register existing stock-RNS oracle gates and a real QUIC independent-peer campaign. Optional features remain explicit. Result schemas and requirement traceability work across at least two implementation lineages; vector imports retain licenses. |
-| TC3 | Retained-repair prototype, implemented | Authored schedule and signed manifest/symbol arrays; actual codec; one-/multi-radio collection, loss/reorder/duplicates, sleep/drift/guards, late join, repair rotation, expiry and partial-state resume. Four selected experiments expose catch-up, floor cost and overload behavior. The profile and inputs may change; stable-contract evaluation is later work. |
-| TC4 | Signed-object receive and local QUIC prototypes, implemented; wider evaluation open | The selected host example passes actual recovered original bytes/IDs through bounded real QUIC to the existing mesh admission owner, observing insertion, duplicate arrival, wrong-mesh/body/signature refusals, pre-owner framing refusals and in-process store reopen. Later evaluation covers expired transfers, actual two-carrier duplicates and fresh-process recovery after the contracts stabilize. |
+| TC3 | Retained-repair host prototypes, implemented | Historical authored scheduler/codec experiments plus C's incremental publication, transactional frame settlement, verified-manifest collector, bounded persistent peer and exact decoder-byte return. The profile and inputs may change; stable-contract evaluation is later work. |
+| TC4 | Signed-object receive, resident ingress and admitted exact-inventory/QUIC composition, implemented; wider evaluation open | The published Mere-owned receipt joins actual reconstruction and unchanged signed bytes to separately admitted inventory/submission on the resident endpoint/store. It records duplicate/refusal/capacity behavior and separate-process durable reopen. Later evaluation covers additional real carriers and wider service/restart/resource behavior after contracts stabilize; native UI, workers and RF remain separate. |
 | TC5 | Device resource profile | Selected codec/profile compiles for the actual target; measured peak heap/stack, decode time, retained storage and interrupt/radio coexistence fit named limits. no_std availability alone does not close this gate. |
 | TC6 | Physical multi-radio qualification | Named boards, firmware hashes, radios, antennas, channels and instruments; actual payload goodput, range, adjacent-channel isolation, retune/clock cost, collision behavior, power and source/repair airtime. Regulatory band/duty/power conditions are explicit. 1–2 Mbps remains a target until this campaign measures it at the intended range. |
 | TC7 | Optional full protocol adapters | Select real peers/use cases first. Each FLUTE/ALC, NORM, BPv7/BPSec, SCHC/LoRaWAN, CoAP/OSCORE or MLS branch gets its dependency closure, selected options, independent peer and its own conformance matrix. Their spec counts are not a mandate to implement them all. |
