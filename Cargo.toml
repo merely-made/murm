@@ -42,6 +42,7 @@ members = [
 # -D warnings, and upstream code is patched only where a defect forces it (156d3bb).
 # Membership made every new rustc lint in vendored code a CI failure (Rust 1.99, 2026-10-03).
 exclude = [
+    "native",
     "apps/signalman-desktop",
     # Bounded retained-repair host prototype has its own pinned codec graph.
     "crates/retained-repair",

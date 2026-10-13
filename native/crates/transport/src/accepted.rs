@@ -7,7 +7,7 @@
 //! Honest acceptance context for inbound sessions.
 //!
 //! V4 of the 2026-07-24 low-power radio and managed-network plan
-//! ([`mere/design_docs/mere_docs/implementation_strategy/2026-07-24_low_power_managed_network_plan.md`](../../../../../design_docs/mere_docs/implementation_strategy/2026-07-24_low_power_managed_network_plan.md)).
+//! (`mere/design_docs/mere_docs/implementation_strategy/2026-07-24_low_power_managed_network_plan.md` (`mere/design_docs/mere_docs/implementation_strategy/2026-07-24_low_power_managed_network_plan.md`)).
 //!
 //! [`crate::Transport::accept`] used to return a naked stream, which left a
 //! policy layer above with nothing to decide on: it could not tell which

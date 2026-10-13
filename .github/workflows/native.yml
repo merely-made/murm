@@ -1,0 +1,39 @@
+name: Murm native carriers
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      matrix:
+        toolchain: ["1.97.1", "1.99.0"]
+    defaults:
+      run:
+        working-directory: native
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          targets: wasm32-unknown-unknown
+          components: rustfmt
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: native -> target
+      - name: Check retained formatting policy
+        run: cargo fmt --all --check
+      - name: Compile native adapters and test binaries
+        run: cargo check --locked --workspace --all-targets --all-features
+      - name: Exercise conversation ownership, persistence and live gossip
+        run: cargo test --locked -p murm --lib
+      - name: Exercise authenticated session admission
+        run: cargo test --locked -p murm --features session-lane --test session_lane
+      - name: Exercise portable WebRTC core
+        run: cargo test --locked -p mere-webrtc-carrier --lib
+      - name: Check browser WebRTC adapter and tests
+        run: cargo check --locked -p mere-webrtc-carrier --all-targets --features browser --target wasm32-unknown-unknown

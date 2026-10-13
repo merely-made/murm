@@ -17,10 +17,10 @@ implementation here — no Rust WebRTC stack ships in Wasm). See
 [Features](#features) below.
 
 This crate carries C0 of the
-[browser WebRTC carrier plan](../../../design_docs/mere_docs/implementation_strategy/2026-08-25_browser_webrtc_carrier_plan.md)
+browser WebRTC carrier plan (`mere/design_docs/mere_docs/implementation_strategy/2026-08-25_browser_webrtc_carrier_plan.md`)
 — the shared core — plus the two C1 runtime adapters built on it; the
 feasibility work behind it is the
-[browser-to-native WebRTC probe](../../../design_docs/mere_docs/research/2026-08-25_browser_native_webrtc_carrier_probe.md).
+browser-to-native WebRTC probe (`mere/design_docs/mere_docs/research/2026-08-25_browser_native_webrtc_carrier_probe.md`).
 
 ## The core computes; it does not generate
 
@@ -250,7 +250,7 @@ Pre-1.0 (`STAGE = "pre-alpha"`). C0 (the core and its vectors) and C1 (the
 `native` and `browser` runtime adapters) are here. Invitation redemption and
 Notochord admission (C2), forced-relay reconnect (C3), and the real browser
 Graphshell consumer (C4) are implemented above this crate and recorded in the
-[carrier plan](../../../design_docs/mere_docs/implementation_strategy/2026-08-25_browser_webrtc_carrier_plan.md).
+carrier plan (`mere/design_docs/mere_docs/implementation_strategy/2026-08-25_browser_webrtc_carrier_plan.md`).
 Public rendezvous (C5) remains next. Those Graphshell receipts do not qualify a
 browser Murm conversation consumer.
 

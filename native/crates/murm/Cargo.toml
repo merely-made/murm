@@ -24,7 +24,7 @@ session-lane = ["dep:notochord", "transport/notochord"]
 [dependencies]
 # Path + version: path for local workspace builds; version for `cargo publish`.
 identity.workspace = true
-muniment = { path = "../../eidetic/muniment", features = ["redb"] }
+muniment = { workspace = true, features = ["redb"] }
 stickleback = { workspace = true }
 transport.workspace = true
 notochord = { workspace = true, features = ["tokio"], optional = true }

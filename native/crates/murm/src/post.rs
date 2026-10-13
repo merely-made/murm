@@ -53,7 +53,7 @@ impl PostId {
 /// ## Validation
 ///
 /// - Non-empty
-/// - At most [`MAX_CHANNEL_NAME_BYTES`] bytes (UTF-8 length, not
+/// - At most `MAX_CHANNEL_NAME_BYTES` bytes (UTF-8 length, not
 ///   codepoint count)
 /// - No ASCII control characters (`< 0x20` or `0x7F`) — these are
 ///   typically problematic in chat-style names and the Cable spec doesn't
@@ -154,7 +154,7 @@ impl InfoEntry {
 
 /// A signed Cable post.
 ///
-/// On the wire a post is a p2panda-core operation (see [`crate::post_wire`]):
+/// On the wire a post is a p2panda-core operation (see the internal `post_wire` codec):
 /// content-addressed via its `PostId` (the operation's **signed-header hash** =
 /// `Header::hash()`, which transitively binds the body via `payload_hash`),
 /// belonging to a cabal (`cabal_id`), positioned in its author's per-cabal log

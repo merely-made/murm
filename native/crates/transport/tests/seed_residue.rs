@@ -31,7 +31,7 @@
 //!
 //! No libtest harness: the allocator is process-wide.
 
-#[path = "../../../../ports/castellan/tests/residue/mod.rs"]
+#[path = "residue/mod.rs"]
 mod residue;
 
 use std::collections::BTreeSet;

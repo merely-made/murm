@@ -1,4 +1,21 @@
-# Retinue: managed cadre of mesh protocols
+# Murm: communication and device implementations
+
+Murm brings the radio family together with the native peer carriers and
+conversation service imported from Mere. Retinue remains the Reticulum crate;
+all existing crate names and source histories are preserved. The repository
+still uses its Retinue URL during this first move. See the
+[family move plan](design_docs/2026-10-13_murm_family_move_plan.md) for the
+receiving-build and consumer-cutover status.
+
+The radio workspace stays at the root. The separate `native/` workspace contains
+`murm`, `mere-transport`, and `mere-webrtc-carrier`. Both use Rust 1.99.0 for
+development and declare a shared MSRV of 1.97.1. Build the native libraries with
+`cargo test --manifest-path native/Cargo.toml --lib`; cross-target and live
+network qualification remain explicit lanes. Stickleback stays in Mere, and
+Netfetcher's browser policy stays in Genet.
+
+## Radio family
+
 
 Embedded Rust implementations of three mesh protocols, a shared
 radio interface layer, operator apps, and firmware that runs on my limited 
@@ -27,6 +44,9 @@ Each crate has its own README with more detail, and here's a generated overview.
 
 | Crate | What it is | crates.io |
 | --- | --- | --- |
+| `murm` | Peer conversation service in `native/crates/murm`; immutable Git source, package identity preserved. | Git |
+| `mere-transport` | Native peer carriers in `native/crates/transport`. | Git |
+| `mere-webrtc-carrier` | Portable WebRTC core with optional browser/native adapters. | Git |
 | `retinue` | Reticulum protocol: identity, announces, links, requests, Resources, routing. `no_std + alloc` core with a tokio shell. | published |
 | `outrider` | LXMF: message codec, direct and opportunistic delivery, propagation client and server. | published |
 | `postilion` | Shared radio-host library: a Station wraps one identity, one board, an announce cadence and a peer table. | published |

@@ -438,3 +438,55 @@ Native/radio compiler runs and source imports are in progress. The import
 inventory adds Castellan's MPL allocator-tracker test helper, currently included
 by relative path from the transport seed-residue binary; it must become a
 package-local test fixture with source attribution, not a lost test.
+
+### 2026-10-13 history-preserving native import
+
+The receiving repository now retains Mere source commit `fabfd10ef7f8` as an
+ancestor through import merge `46d368c6d`. The disposable rehearsal verified
+72 original crate blobs unchanged at import, source ancestry and original
+commit availability in a fresh clone. Cross-path blame attributes the imported
+source to its original Mere commits and authors. `native/source-import.json`
+records the immutable source, tree map, local test helper and formatting policy.
+
+The independent native workspace supplies the three original package names and
+versions, materializes their Mere MPL licenses, and pins Stickleback, Muniment,
+proofs and Luggage core to immutable Mere sources. Personae/Insigne/Notochord
+share the existing immutable Dramatis source; the p2panda patch set is identical
+to the reviewed refresh. Metadata shows one source per shared supplier. The
+optional Reticulum carrier uses this repository's current Retinue crate and
+compiles in the all-features native check. Luggage native updater code is not
+enabled by the WebRTC core.
+
+On Rust 1.99.0, 66 conversation, four in-process admission and 44 WebRTC core
+tests pass. All native features/test binaries and the browser adapter/test
+binaries compile. Radio library tests pass 913 cases on each selected compiler.
+The same imported-native compiler lanes on 1.97.1 are in progress. Local runs
+exclude the three live gossip/LogSync and two authenticated p2panda cases because
+this sandbox denies Iroh's OS network monitor; the receiving hosted CI lane
+runs them without those exclusions. No physical radio or headed browser run is
+claimed. Consumer source cutover follows the receiving compiler checks.
+
+### 2026-10-13 receiving compiler qualification
+
+Both Rust 1.97.1 and 1.99.0 pass the imported workspace's 66 conversation,
+four in-process session-admission and 44 WebRTC core tests (114 per compiler).
+Both also compile all native features/test binaries and the browser adapter's
+Wasm test targets. Native formatting retains Mere's canonical policy and
+passes. The T114 firmware checks on 1.97.1; the 1.99.0 check is in progress.
+The eight radio library suites pass 913 tests per compiler. This qualifies the
+receiving software scopes; five imported live-network cases and physical/
+headed acceptance retain their separate receipts. No installed board data is
+changed.
+
+The imported Git supplier will be published before the primary Mere consumer
+cutover. Preserve frozen historical receipt manifests at their recorded source
+commits; they are not active path overrides to rewrite into the new topology.
+
+The T114 cross-target checks now pass on both 1.97.1 and 1.99.0. Native rustdoc
+passes with warnings denied after correcting stale/private API references;
+these are documentation-only repairs. The disposable rehearsal repositories
+and completed MSRV/radio/embedded build caches were removed after their logs
+and receipts were saved, to release disk space. Original history remains in
+the actual receiving repository. The imported source is ready for immutable
+Git publication and the first Mere consumer cutover; crate-registry publication
+and repository rename remain later phases.

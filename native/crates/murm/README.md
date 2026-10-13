@@ -112,7 +112,7 @@ offline drops do not establish that group lifecycle. Coop lifecycle belongs to c
 existing admission, transport and Stickleback seams; the historical
 `host_coop` / `join_coop` suggestion is not a commitment to put application
 collaboration state in Murm. See the Gemot continuation in
-[`suite composition`](../../../design_docs/2026-08-22_turnstone_suite_composition_and_capability_census.md#gemot-murmurs-moots-and-coop-2026-09-13).
+`suite composition` (`mere/design_docs/2026-08-22_turnstone_suite_composition_and_capability_census.md#gemot-murmurs-moots-and-coop-2026-09-13`).
 Native drops have
 epoch-aware protection today; authorization, epoch distribution, and persisted
 key history still belong to personae or a p2panda group-state adapter.
