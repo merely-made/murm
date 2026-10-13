@@ -1,8 +1,9 @@
 # Retained repair simulation prototype
 
-**Status:** exploratory host model, implemented on 2026-10-11. This
-document records the current simulation choices so they can be changed with
-the prototype. It is not an RF wire protocol or a qualification gate. The owning sequence and later
+**Status, updated 2026-10-12:** the historical finite host model is implemented;
+an incremental host core and persistent peer now provide the later lane C.
+This document records their boundary and the historical simulation choices so
+they can change with the prototype. It is not an RF wire protocol or a qualification gate. The owning sequence and later
 admission/device gates are in the
 [transport conformance plan](2026-10-11_transport_conformance_plan.md).
 
@@ -40,6 +41,30 @@ The existing operation processor remains the admission owner; the host example
 below now exercises that boundary.
 
 ## Opaque original-byte handoff
+
+The later [`retained-repair` host library](../crates/retained-repair/README.md)
+accepts publication after startup and retains at most four exact opaque
+originals of 1–16,384 bytes, with a 64 KiB original-payload ceiling. It splits
+frame preparation from sink acceptance, preserves deferred bytes/ESI/token,
+and reports expiry invalidation. Its dynamic collector learns from signed
+manifests, authenticates before decoder construction, and returns actual
+length/digest-checked decoder bytes. It uses explicit caller authority and
+namespace, and the authored T=128/Z=1/N=1/Al=4 profile. Codec workspaces and
+returned bytes need additional heap; the payload cap is not a heap measurement.
+
+The [persistent `--retained-peer` API](../testing/transport-conformance/README.md#incremental-retained-peer)
+exposes that core for the Mere owner's exact-inventory/ingress composition.
+Its NDJSON commands are separately bounded by line size, command count,
+lifetime bytes and wall-clock deadlines. Logical clock advancement/expiry is
+caller-owned and ends at slot 8192. A prepared-frame token acknowledges local
+sink custody. The bounded `recover` helper accepts/drop source frames and
+delivers repair frames through the real collector, with prior decoder state
+reported; it does not substitute producer originals for decoder output.
+The selected process experiment lives once at
+[`retained-live-20261012/exploration.json`](../testing/transport-conformance/results/retained-live-20261012/exploration.json).
+These volatile host components add no radio, persistence or application
+admission owner. The following `generation.original_hex` and checkpoint API
+continue to describe the historical scenario mode.
 
 An optional `generation.original_hex` lets the owning application supply actual
 original bytes instead of the deterministic synthetic fixture. The decoded hex

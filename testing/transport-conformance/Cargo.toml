@@ -13,6 +13,7 @@ blake3 = "=1.8.7"
 ed25519-dalek = "=3.0.0"
 hex = "0.4"
 raptorq = "=2.0.1"
+retained-repair = { path = "../../crates/retained-repair" }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 sha2 = "0.11"
