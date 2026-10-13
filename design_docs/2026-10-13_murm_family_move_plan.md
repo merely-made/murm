@@ -544,3 +544,62 @@ Retinue-to-Murm repository rename, and Netfetcher wire extraction remain open
 phases. The hosted native runtime workflow is dispatched but was still queued
 at the final check; local twelve live-network exclusions and physical/headed
 acceptance are not closed by software compilation or metadata policy checks.
+
+### 2026-10-13 — remaining app adoption underway
+
+MOVE3 now covers the active independent roots in Knot (including optional
+NomadNet), Woodshed/Hocket/Redshank, Turnstone, Cleromancy, Isocosm and its
+products, the public site graph, and Signalman desktop. The active Mere
+`murm-direct-phy` probe still named removed source directories and now takes
+the immutable imported crates. Historical receipt manifests remain frozen.
+Outer roots restate the owner patches so imported carriers, Personae,
+Muniment and p2panda do not split their types. Resolution, compilation and
+software tests are recorded separately; physical and headed claims retain
+their original source-bound receipts.
+
+The hosted native workflow is queued because the repository Actions API
+reports `enabled: false`; permission to enable it was requested. MOVE4 remains
+gated on checks. Live repository inventory finds no Pages site and no
+published releases. Existing crate names and directory paths remain intact.
+
+### 2026-10-13 — local validation gate selected
+
+The owner chose to keep Actions disabled and use available local checks for
+the repository cutover. The Actions permissions endpoint remains disabled;
+the hosted workflow has no jobs and GitHub refuses cancellation of its
+dormant run. No CI success is claimed. Live UDP/gossip/session tests that the
+sandbox cannot execute remain an explicit qualification gap rather than a
+repository-rename gate under this direction.
+
+Outer-root optional-feature metadata resolves one imported carrier, Personae,
+Muniment and p2panda family wherever those packages are selected. App
+compilation exposed Cambium pointer cancellation in Signalman, Knot and
+Woodshed, and the standalone V7 probe needed Dramatis
+`identity::delegation::Issue` in scope. Cancellation releases interaction
+state without committing an abandoned placement or firing a game action.
+Software checks and focused cancellation tests continue before MOVE4.
+
+### 2026-10-13 — named application software gates pass
+
+The named MOVE3 consumers pass local Rust 1.99.0 compilation: Signalman
+desktop, Knot (including its optional Retinue/NomadNet targets), Woodshed,
+Hocket, Redshank, Turnstone, Cleromancy, the public site graph, and Mere
+Djinn/Moot/Distillery/Graphshell plus native fetch with `iroh-blobs`. The active
+V7 probe compiles from immutable suppliers without sibling overrides. The
+public site passes 83 cases, Signalman/comms 34, the desktop network face seven
+including cancellation, and Knot
+`stale_hidden_invalid_or_click_only_gestures_cannot_author_placements` passes
+with cancelled-preview and late-release assertions. These are software
+receipts; physical and headed acceptance is unchanged.
+
+An additional Isocosm audit resolves the imported supplier under all features,
+but current gameplay compiler gates fail with ten errors. A clean archive of
+`2260b026bf1bbac9039ff8ddb0d001cc2b520ab5` reproduces the exact same errors,
+and `shared/isocosm/src` has no diff. The active wing plan still defers those
+gates under ruling826. Its pin changes remain an uncommitted review candidate
+in `isocosm-murm-rust-defaults`, with a baseline-comparison receipt and patch
+under `Code/targets/`; scope clarification was requested before treating the
+gameplay work as a MOVE4 gate. No gameplay repair or success is claimed.
+
+Native MSRV qualification is being refreshed in a separate local gate receipt;
+Actions remains disabled by owner direction.

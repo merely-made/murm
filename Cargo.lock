@@ -1807,7 +1807,7 @@ dependencies = [
 [[package]]
 name = "mere-comms"
 version = "0.0.1"
-source = "git+https://github.com/merely-made/mere.git?rev=43cd7f24afea6b2d3b54939f2093c098da50713b#43cd7f24afea6b2d3b54939f2093c098da50713b"
+source = "git+https://www.github.com/merely-made/mere.git?rev=0b9b7a9b218579f1f36cc1ab05a51b2a13128f1d#0b9b7a9b218579f1f36cc1ab05a51b2a13128f1d"
 dependencies = [
  "async-trait",
  "serde",
@@ -3219,3 +3219,53 @@ name = "zmij"
 version = "1.0.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "29666d0abbfad1e3dc4dcf6144730dd3a3ab225bbbdac83319345b1b44ccfc1b"
+
+[[patch.unused]]
+name = "mere-p2panda-net"
+version = "0.7.5"
+source = "git+https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bcb9f2a9d798b1c25b2ec2f47c0416bd65"
+
+[[patch.unused]]
+name = "mere-proofs"
+version = "0.1.0"
+source = "git+https://www.github.com/merely-made/mere.git?rev=0b9b7a9b218579f1f36cc1ab05a51b2a13128f1d#0b9b7a9b218579f1f36cc1ab05a51b2a13128f1d"
+
+[[patch.unused]]
+name = "muniment"
+version = "0.1.2"
+source = "git+https://www.github.com/merely-made/mere.git?rev=0b9b7a9b218579f1f36cc1ab05a51b2a13128f1d#0b9b7a9b218579f1f36cc1ab05a51b2a13128f1d"
+
+[[patch.unused]]
+name = "p2panda-auth"
+version = "0.7.1"
+source = "git+https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bcb9f2a9d798b1c25b2ec2f47c0416bd65"
+
+[[patch.unused]]
+name = "p2panda-core"
+version = "0.7.1"
+source = "git+https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bcb9f2a9d798b1c25b2ec2f47c0416bd65"
+
+[[patch.unused]]
+name = "p2panda-discovery"
+version = "0.7.1"
+source = "git+https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bcb9f2a9d798b1c25b2ec2f47c0416bd65"
+
+[[patch.unused]]
+name = "p2panda-encryption"
+version = "0.7.1"
+source = "git+https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bcb9f2a9d798b1c25b2ec2f47c0416bd65"
+
+[[patch.unused]]
+name = "p2panda-store"
+version = "0.7.1"
+source = "git+https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bcb9f2a9d798b1c25b2ec2f47c0416bd65"
+
+[[patch.unused]]
+name = "p2panda-stream"
+version = "0.7.1"
+source = "git+https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bcb9f2a9d798b1c25b2ec2f47c0416bd65"
+
+[[patch.unused]]
+name = "p2panda-sync"
+version = "0.7.1"
+source = "git+https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bcb9f2a9d798b1c25b2ec2f47c0416bd65"
