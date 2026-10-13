@@ -1,0 +1,103 @@
+{
+  "build": {
+    "artifact_fresh": true,
+    "cargo_manifest_path": "/Users/markik/Code/testing/iroh-control-20261011/retinue/testing/transport-conformance/Cargo.toml",
+    "command": "cargo build --locked --offline --message-format=json",
+    "executable_sha256": "d90a08a421c0fb8a313f1587a0a59d508a76aa63b87242bd579fd996ce2963e4",
+    "selected_executable": "/Users/markik/Code/testing/iroh-control-20261011/retinue/testing/transport-conformance/target/debug/transport-conformance",
+    "status": "pass"
+  },
+  "exploration_sha256": "2206a3ef7f0e4d369523d2c8332a95275e6cc58d8828688deb83ce3a2ad1acb0",
+  "focused_checks": [
+    {
+      "command": "cargo test --manifest-path crates/retained-repair/Cargo.toml --locked --offline",
+      "owner": "core lane",
+      "result": "5 focused tests passed"
+    },
+    {
+      "command": "cargo clippy --manifest-path crates/retained-repair/Cargo.toml --locked --offline --all-targets -- -D warnings",
+      "owner": "core lane",
+      "result": "pass"
+    },
+    {
+      "command": "cargo test --manifest-path testing/transport-conformance/Cargo.toml --locked --offline retained_peer",
+      "owner": "peer lane",
+      "result": "4 focused tests passed"
+    },
+    {
+      "command": "cargo clippy --manifest-path testing/transport-conformance/Cargo.toml --locked --offline --all-targets -- -D warnings",
+      "owner": "peer lane",
+      "result": "pass"
+    },
+    {
+      "owner": "both lanes",
+      "result": "scoped formatting passed"
+    },
+    {
+      "command": "python3 retained_live.py --peer target/debug/transport-conformance --output results/retained-live-20261012/exploration.json",
+      "owner": "integrator",
+      "result": "pass; 207 commands, normal exit, actual decoder output equals supplied originals"
+    },
+    {
+      "owner": "integrator",
+      "result": "idle with stdin open: idle_timeout, exit 2, 5.209 seconds; overlong line: line_too_large before JSON, exit 2"
+    },
+    {
+      "owner": "read-only review lane",
+      "result": "no remaining material source defect; process transcript consistent; one collector, explicit generation selection and forced repair-only A scope recorded"
+    }
+  ],
+  "schema": "retinue.retained-live-validation/v1",
+  "scope": {
+    "application_admission": false,
+    "conformance_campaign": false,
+    "new_msrv_qualification": false,
+    "radio_or_mcu_qualification": false,
+    "restart_persistence": false
+  },
+  "source_revision": "73616a78b45837765b638b5f16bff0e8c6a7126a",
+  "source_sha256": {
+    "crates/retained-repair/Cargo.lock": "c9325f26c000bea15003450f29c55cbc01ccc0c09b10599c21983a3881c6eeba",
+    "crates/retained-repair/Cargo.toml": "a32878efbab0a6fcd7b43ddbfa1b18ebf613ebba68313b272b4cb029cbce533f",
+    "crates/retained-repair/examples/streaming.rs": "32c1f445cf5a95b7f39c2f2535d2ff2c9e99c4526ac7574615ced67687391fe0",
+    "crates/retained-repair/src/collector.rs": "4010f2b1b8e1847439a7766c43abe118681047c23c20eb246af01489a3ec8744",
+    "crates/retained-repair/src/lib.rs": "b5ae0f4257d62b434a0c082dada42dd5d4d6aa690247be13395cdb569b74f1a5",
+    "crates/retained-repair/src/producer.rs": "1ea56b7c7f67e35a290ca460d265c0c3ab258934e321c3f1d4186aa09b635c01",
+    "crates/retained-repair/src/profile.rs": "33229df46f124fbf647ac24b53234a240796ab2e93511932827caad7e3135905",
+    "crates/retained-repair/src/tests.rs": "8d4d51dc877e46d47aeffa30e77eacc474c2e402e544ec362570a8b62b887494",
+    "crates/retained-repair/src/wire.rs": "0bc12c56f28269327ec4dc30d1c762d64d78d1f71bbcb49062281eaa3059c6e9",
+    "testing/transport-conformance/Cargo.lock": "24d95f061632dabcdecf9dfe47480c18a8579ca6289cabce1f82ff22db568c9d",
+    "testing/transport-conformance/Cargo.toml": "66afbb110da8017c6142a0f8b5184d7a5a6e27cb6376716c90a6d2ed300b91d5",
+    "testing/transport-conformance/interop/OpenRQ-LICENSE.txt": "bb28c48e3e078166e91cfc2b6db7ffebb8a0973b9e23b3df060561292d8d69ec",
+    "testing/transport-conformance/metadata.toml": "2c0a138213074272dc74eb3d182185bf1ed5f1f4ebdede318e3d8367130e1ac8",
+    "testing/transport-conformance/retained_live.py": "cfa90b572dc6e094588920931ebc2591ae1375597dcb6796ba69f9aef1b03a3f",
+    "testing/transport-conformance/scenarios/retained-repair-v1.cddl": "3cd04cf30e09ba7e05aa9fe845fbd346fd08f4bc60be7c742578cc7b985a7383",
+    "testing/transport-conformance/scenarios/retained-repair-v1.toml": "045aeda26565599adbf5a6c04d13327b1f2c8fbbe8ff268eb15e21ad57005723",
+    "testing/transport-conformance/src/independent.rs": "e7421254b1da2754b2932e765c24ea41c914f93a315f8c5db43336ca5ae3e1dc",
+    "testing/transport-conformance/src/interop.rs": "b96d5a49d6d39610d359abb4775bc5f519ab2a0072d8fb19a916b960e4e4b3a0",
+    "testing/transport-conformance/src/lib.rs": "804041f20a7d1b11bbee121896db21770213ac67049d56e31aa46cd5198fa570",
+    "testing/transport-conformance/src/main.rs": "43628338d10c6d6bcd7bc9093e99d2052505e3d61bfbe61321372c647e7be567",
+    "testing/transport-conformance/src/preflight.rs": "6312269baec61f22ffff427a52fdbc75f3384db2e0334b9849e4e54b71e6f2cc",
+    "testing/transport-conformance/src/primitives.rs": "a721835fcff979f5bf02e3497d8efb2c8df4bf8b20bfa695cf2e53ed0edf0b01",
+    "testing/transport-conformance/src/retained_peer/actor.rs": "60cf9b916383881e46c7b3070c55cd963de644fa3732b655646ab79fd2e92ba9",
+    "testing/transport-conformance/src/retained_peer/format.rs": "10a51dd7526555f466b47bdde43543ef1e9186a4f34373910dd71950fa162089",
+    "testing/transport-conformance/src/retained_peer/mod.rs": "13437b95c9a98d88062d7f9f2b7688b7329c271e8e63c8daba3d83de8d54a193",
+    "testing/transport-conformance/src/retained_peer/protocol.rs": "bb0ad2f7c0244c6f1b8ba74020070cb138de35fd0352cc8e31a7b9cc143e70a0",
+    "testing/transport-conformance/src/retained_peer/provenance.rs": "db12f332f7b508852786b911529af4c9833248badde186c3f6a38205cc6f9dd0",
+    "testing/transport-conformance/src/retained_peer/stdio.rs": "79b99ae820ff571271b4dfc4cdb22589890b01145d6f13eb03fab7b89de30d35",
+    "testing/transport-conformance/src/retained_peer/tests.rs": "699bb9ff7a868bb418068b43079195d37a6b00570738f821d2f761faa88eb3db",
+    "testing/transport-conformance/src/simulation/campaign.rs": "79c15f74ac6b1a3e5aaf87687569fcbb0d2633e42602a34990f4d9fca9d92231",
+    "testing/transport-conformance/src/simulation/checkpoint.rs": "5d13a24b3c987ff20ce946b18ef2fc2828c47f9b2488a366ad0f0b9942569ca1",
+    "testing/transport-conformance/src/simulation/mod.rs": "2b7a19e6d2a7fed261dfb5d4b771031a106031822e7f19cba82f49a0bafd59af",
+    "testing/transport-conformance/src/simulation/receiver.rs": "acd7221254f367673548814fa9024215b1607f56677b26afb166b83d8f48c313",
+    "testing/transport-conformance/src/simulation/scheduler.rs": "8b7dbc90784143a1b8db3256cd9266647c2d235d54b8598769288b7302e5ee14",
+    "testing/transport-conformance/src/simulation/types.rs": "1e3ec4791986043329e63090a6e17b550feabf1f76cd490b080f0ba9effd042b",
+    "testing/transport-conformance/src/simulation/wire.rs": "5605588ed41a62bfee10fc1b86ad2dd4a85004978c4db931fd3899b3265b03b4",
+    "testing/transport-conformance/vectors/BLAKE3-LICENSE-APACHE-2.0.txt": "00fcc7a934ddbc9ece2a7cc063ac788e284b703b1d705ccbba72d462aa97921e",
+    "testing/transport-conformance/vectors/RFC-CODE-COMPONENTS-LICENSE.txt": "a23c17602a5f50638abb0d85416e64189aa552e7976ac7d428eb7ed70eff44ec",
+    "testing/transport-conformance/vectors/blake3-test-vectors.json": "dcb91ea8accc77e6d6e632af7cdc1a99a9f3ae78cf648da595c7d064db32f624",
+    "testing/transport-conformance/vectors/manifest.json": "ff95dc345ea741cde01770b4d313df5efe8522c768b04371e30042d1c1c9d20d",
+    "testing/transport-conformance/vectors/openrq-interop.json": "bcbd26455082340095174c0dbd127dd62ba6c7f7a907071ae09e8831997d8922",
+    "testing/transport-conformance/vectors/rfc8032-test1.json": "276fad335c173a28569c88966c6f4ed961f20a9fb3e785d3fe990d0a3160c833"
+  }
+}

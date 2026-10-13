@@ -125,7 +125,10 @@ The selected [2026-10-12 report](results/retained-live-20261012/exploration.json
 records publication of B while A is incomplete, fast fresh reception of B,
 late channel-zero repair-only reconstruction of A, exact deferral, stale-token
 refusal, pre-codec signature refusal, full retention and expiry. It retains the
-process transcript and executing binary/compiled-source identity. These are
+process transcript and executing binary/compiled-source identity. The
+[validation record](results/retained-live-20261012/validation.json) binds the
+selected Cargo artifact and 42 source/validation inputs to commit `73616a78`.
+These are
 host delivery opportunities; the report starts no sockets, radios or store.
 One collector holds separate A/B decoder states. The driver explicitly selects
 A on channel zero and B on channels one through three, and discards every fresh
