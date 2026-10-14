@@ -10,15 +10,15 @@ license = "MPL-2.0"
 notices = "See apps/linkboy/NOTICES.md; Retinue workspace notices and the repository MPL-2.0 license apply."
 
 source_revision = "AIR3 bounded transport and non-starving native-node USB attach v51"
-source_url = "https://github.com/merely-made/retinue/tree/main/firmware/t114-phy"
-origin_url = "https://github.com/merely-made/retinue"
+source_url = "https://github.com/merely-made/murm/tree/main/firmware/t114-phy"
+origin_url = "https://github.com/merely-made/murm"
 
 [[helpers]]
 route = "uf2-mass-storage"
 program = "linkboy UF2 volume writer"
 version = "0.1.0"
 license = "MPL-2.0"
-source_url = "https://github.com/merely-made/retinue/tree/main/apps/linkboy"
+source_url = "https://github.com/merely-made/murm/tree/main/apps/linkboy"
 notice = "This application-only route is built into Linkboy. It verifies every UF2 block, the nRF52840 family id, target addresses, and the whole-file digest before writing the owner-selected stock bootloader volume."
 
 [payload]

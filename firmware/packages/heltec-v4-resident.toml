@@ -9,8 +9,8 @@ state_impact = "preserved"
 license = "MPL-2.0"
 notices = "See apps/linkboy/NOTICES.md; Retinue workspace notices and the repository MPL-2.0 license apply."
 source_revision = "711816a8124bd58cd8cc314ec4de5009be7df166"
-source_url = "https://github.com/merely-made/retinue/tree/main/firmware/heltec-v4-phy"
-origin_url = "https://github.com/merely-made/retinue"
+source_url = "https://github.com/merely-made/murm/tree/main/firmware/heltec-v4-phy"
+origin_url = "https://github.com/merely-made/murm"
 
 [[helpers]]
 route = "esp-rom"

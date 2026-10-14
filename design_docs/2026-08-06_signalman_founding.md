@@ -13,7 +13,7 @@ rather than owning radios) now has its names and its topology:
 
 - **retinue stays the workspace.** The redshank-as-umbrella alternative (a new
   workspace with retinue as a member) was considered and declined on cost:
-  mere and sibylla pin `merely-made/retinue` as git dependencies, the family's
+  mere and sibylla pin `merely-made/murm` as git dependencies, the family's
   recorded posture is one workspace, and `retinue` is the protocol brand doing
   the most public work in the family.
 - **signalman** (`apps/signalman`) — the radio-management application. Chosen
