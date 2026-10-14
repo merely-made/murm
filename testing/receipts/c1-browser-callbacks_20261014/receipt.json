@@ -1,0 +1,31 @@
+{
+  "schema": "murm.browser-callback-qualification/v1",
+  "source_base": "b49df894635bac95823284efee6c445885eaf62a",
+  "source_sha256": "156974ec25012210535ad8aafc03208de93bf4d309e8eb67ddd99707829b5ca2",
+  "wasm_sha256": "e6078bf82cd85d0f19d6a6df6f57941b5c2e3e121842e3fe24f72979b6dadeb9",
+  "runner_sha256": "c134932534107763adc55be43cc682aade190ba1a312717ebc526c51c49180c2",
+  "runner_version": "0.2.129 official release",
+  "runner_method": "NO_HEADLESS=1 WASM_BINDGEN_USE_BROWSER=1 WASM_BINDGEN_TEST_ADDRESS=127.0.0.1:19699; actualheadedChrome155 via nativeCUA",
+  "passed": 20,
+  "failed": 0,
+  "ignored": 0,
+  "seconds_from_browser_display": 0.11,
+  "new_regressions": [
+    "dropping_connecting_initiator_detaches_all_browser_handlers",
+    "explicit_close_keeps_handlers_and_reports_terminal_once"
+  ],
+  "whole_page_capture": {
+    "file": "whole-browser-page.png",
+    "sha256": "9c7ea373a585f607159771c99ea459aeab67a46e186808ec13c4af912b963ca1",
+    "bytes": 419672,
+    "mechanism": "Chrome visibleDevTools Capture screenshot command; defaultDesktop1400x900,DPR2; originaldownload preserved"
+  },
+  "console_notes": [
+    "Officialrunner emits deprecated initialization parameters warning",
+    "Favicon404 resourceconsoleerror; noadditionaluncaughtcallbackerror seen inactualConsole22messages"
+  ],
+  "web_reference": "https://wasm-bindgen.github.io/wasm-bindgen/wasm-bindgen-test/browsers.html",
+  "source_reference": "https://raw.githubusercontent.com/wasm-bindgen/wasm-bindgen/0.2.129/crates/cli/src/wasm_bindgen_test_runner.rs",
+  "final_immutable_acceptance": false,
+  "publication": false
+}
