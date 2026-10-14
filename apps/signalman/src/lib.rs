@@ -21,6 +21,8 @@ use postilion::{Event, Peer, Sent};
 
 #[cfg(feature = "comms")]
 pub mod comms_adapter;
+#[cfg(feature = "comms")]
+pub mod radio_comms;
 pub mod firmware;
 pub mod management;
 pub mod message;

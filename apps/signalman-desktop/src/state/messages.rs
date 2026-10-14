@@ -29,6 +29,10 @@ impl DesktopState {
     }
 
     pub fn queue_message_at(&mut self, observed_unix_ms: u64) {
+        if self.message_protocol != signalman::comms_adapter::comms::ProtocolKind::Lxmf {
+            self.queue_radio_message();
+            return;
+        }
         let Some(sender) = self.message_local else {
             self.message_notice =
                 Some("Connect a station identity before queueing a message.".into());
@@ -77,17 +81,83 @@ impl DesktopState {
         &self,
     ) -> Result<signalman::comms_adapter::comms::Comms, signalman::comms_adapter::comms::AdapterError>
     {
-        let local = self.message_local.ok_or_else(|| {
-            signalman::comms_adapter::comms::AdapterError::Unsupported(
-                "a station identity is required".into(),
-            )
-        })?;
-        Ok(crate::comms::model(
-            local,
-            self.message_store.clone(),
-            self.station_sender.clone(),
-            None,
-        ))
+        let mut model = match self.message_local {
+            Some(local) => crate::comms::model(
+                local,
+                self.message_store.clone(),
+                self.station_sender.clone(),
+                None,
+            ),
+            None => signalman::comms_adapter::comms::Comms::new(),
+        };
+        if let Some(owner) = &self.radio_comms {
+            owner.add_to(&mut model);
+        }
+        if model.identities().is_empty() {
+            return Err(signalman::comms_adapter::comms::AdapterError::Unsupported(
+                "a station identity or commissioned radio journal is required".into(),
+            ));
+        }
+        Ok(model)
+    }
+
+    pub fn set_radio_comms(&mut self, owner: signalman::radio_comms::RadioComms) {
+        self.radio_comms = Some(owner);
+    }
+    pub fn select_message_protocol(
+        &mut self,
+        protocol: signalman::comms_adapter::comms::ProtocolKind,
+    ) {
+        use signalman::comms_adapter::comms::ProtocolKind;
+        if !matches!(
+            protocol,
+            ProtocolKind::Lxmf | ProtocolKind::Meshtastic | ProtocolKind::MeshCore
+        ) || (protocol != ProtocolKind::Lxmf && self.radio_comms.is_none())
+        {
+            self.message_notice =
+                Some("Load a commissioned radio journal before selecting its protocol.".into());
+            return;
+        }
+        self.message_protocol = protocol;
+        self.message_notice = None;
+    }
+    fn queue_radio_message(&mut self) {
+        use signalman::comms_adapter::comms::{Draft, ProtocolKind};
+        let result = (|| {
+            let owner = self
+                .radio_comms
+                .as_ref()
+                .ok_or_else(|| "a commissioned radio journal is required".to_owned())?;
+            let scope = owner.scope().map_err(|e| e.to_string())?;
+            let peer = self.message_recipient.text().trim().trim_start_matches('!');
+            let target = match self.message_protocol {
+                ProtocolKind::Meshtastic if peer.len() == 8 => scope.meshtastic(
+                    u32::from_str_radix(peer, 16)
+                        .map_err(|_| "use an exact 8-digit Meshtastic node number".to_owned())?,
+                ),
+                ProtocolKind::MeshCore if peer.len() == 64 => scope.meshcore(
+                    hex::decode(peer)
+                        .map_err(|_| "use an exact 64-digit MeshCore public key".to_owned())?
+                        .try_into()
+                        .map_err(|_| "invalid MeshCore public key".to_owned())?,
+                ),
+                _ => return Err(
+                    "use an exact 8-digit Meshtastic node number or 64-digit MeshCore public key"
+                        .to_owned(),
+                ),
+            };
+            let mut draft = Draft::reply_to(target);
+            draft.body = self.message_draft.text().to_owned();
+            pollster::block_on(self.comms().map_err(|e| e.to_string())?.send(&draft))
+                .map_err(|e| e.to_string())
+        })();
+        match result {
+            Ok(_) => {
+                self.message_draft = cambium::TextInput::default();
+                self.message_notice = Some("Text persisted. The authorized resident owner carries queued intents when this protocol is active.".into());
+            }
+            Err(error) => self.message_notice = Some(format!("Message was not queued: {error}")),
+        }
     }
 
     pub fn apply_message_event(&mut self, event: MessageEvent) -> bool {

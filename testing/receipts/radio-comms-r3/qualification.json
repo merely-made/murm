@@ -1,0 +1,94 @@
+{
+  "recorded_at": "2026-10-14T06:55:13.780841+00:00",
+  "receiving_base": "8ec235254b78ac1be7469aaee49770d47877bf23",
+  "mere_supplier": "2f92d45dd2fc30c173367f203ad49ed913f29fff",
+  "genet_cohort": "5618326d287e7f7ef0c1cc3545587d64cedb22a7",
+  "profiles": [
+    "Sennet resident Meshtastic channel text",
+    "Tucket resident MeshCore private plain text"
+  ],
+  "checks": [
+    {
+      "scope": "portable Comms",
+      "compiler": "1.99.0",
+      "passed": 20,
+      "log_sha256": "44fb58a24022b3bbf5595442ef783953c2b47bf86de676205591c1edc7b97aab"
+    },
+    {
+      "scope": "portable Comms",
+      "compiler": "1.97.1",
+      "passed": 20,
+      "log_sha256": "ab9ea408d60fe3a4bc3d52238a3228ec880e1a87efba8d7dbbe082c2fb88e07a"
+    },
+    {
+      "scope": "Signalman and real resident protocols",
+      "compiler": "1.99.0",
+      "passed": 43,
+      "log_sha256": "e2ec5c89f00856b6c624448cfe3c63bc74149b074d97b797cbe3393c4aa59050"
+    },
+    {
+      "scope": "Signalman and real resident protocols",
+      "compiler": "1.97.1",
+      "passed": 43,
+      "log_sha256": "5476e5ba243626bc52d9b36c294bd188e583560688fd4bbfa29978e5f55cb609"
+    },
+    {
+      "scope": "Messages-face and durable host",
+      "compiler": "1.99.0",
+      "passed": 29,
+      "log_sha256": "8e26403282112d229a2213583c5550e11f2dabcebcfa5fd7e7a733414339d250"
+    },
+    {
+      "scope": "comms-wasm",
+      "compiler": "1.99.0",
+      "result": "passed",
+      "log_sha256": "5bd7673cd2eaabcf82bc85bbbb5c39a571e7b4adc56081381cfe905ca1cb337a"
+    },
+    {
+      "scope": "clippy",
+      "compiler": "1.99.0",
+      "result": "passed",
+      "log_sha256": "733cb50302a41028e98ae5e11227f88b51723b84be6d72d8d81f9e7fef630299"
+    },
+    {
+      "scope": "desktop-check",
+      "compiler": "1.99.0",
+      "result": "passed",
+      "log_sha256": "881ba3be2c91d1aab6b432c1270c22cfa550ca8718c8e845d245a67dda8259f4"
+    },
+    {
+      "scope": "desktop-clippy",
+      "compiler": "1.99.0",
+      "result": "passed",
+      "log_sha256": "c8988780617a9fbde5bb94ad0f811cf34a94a0791ed30f5791d38290f40fa2be"
+    }
+  ],
+  "passing_test_executions": 155,
+  "existing_ignored_desktop_custody_cases": 1,
+  "inputs": {
+    "Cargo.lock": "7982fa516e2bc3ee583c9dce489993188a758d9a59bff6c3117138655316e838",
+    "Cargo.toml": "6d1202b0c8aa61acc56f7b6d3c7970f6adc4de4893fdbaff3ae21bd3cdbfb8f8",
+    "apps/signalman-desktop/Cargo.lock": "8e633300a1be30cafeb46ee5fadf31080930fea033223336ab12643a5e63dffb",
+    "apps/signalman-desktop/Cargo.toml": "25d0a1d6862230de3609c20f2b926130079e5253e0ccb039a35793073babfee7",
+    "apps/signalman-desktop/src/comms/tests.rs": "d8cd65f2ed97b8cd12293adceb0edb59a85fd8c504b7c828e8d8cb37ade8c652",
+    "apps/signalman-desktop/src/main.rs": "8b20d49b43db233dd7f5648398969e2426c5385f1f7f9a4c04932b6cfc215e3d",
+    "apps/signalman-desktop/src/state.rs": "be74d5b7bbbda490e8eb98d52915c3a1673548e21312eff0c0337e17c0c63b6c",
+    "apps/signalman-desktop/src/state/messages.rs": "c0a2335dab9ed56cd5f81ca60ecea210ce0cef2fb45302d413c28076f752926a",
+    "apps/signalman-desktop/src/views/messages.rs": "89eb12949b501ed066784d08f8666096b09a989a581e150aed0c1391ac482ad5",
+    "apps/signalman/Cargo.toml": "b32a6488eb46b98632995c20c8f6446a4d55fe003132f414317ef18af31e5e79",
+    "apps/signalman/src/lib.rs": "1c358d7108eb476674f6c79558493d80ae9034702b6b99e76a1d9b8e180812f4",
+    "apps/signalman/src/radio_comms.rs": "d6a9dc098a83e05fc2fc8f92a80e9d999245523a36c972bf259f7f844cf14135",
+    "apps/signalman/src/radio_comms/journal.rs": "973b768edc446c032ff241017d01caeb70504911535b69c7176f3089a00503b0",
+    "apps/signalman/src/radio_comms/resident.rs": "aa34bb67eaba08c4cd711151204f67ad3bc552ff6e5c470fdb715a4a35525490",
+    "apps/signalman/src/radio_comms/tests.rs": "8d3bcbb5a4a59a7c8fb6fad9f33b73b53c2f960c34038c1649c82f89883d4705",
+    "crates/sennet/src/instance/state.rs": "c55bbb8a4a847b37dd815c883b1b1346afdd5737f1864edab98f4e2277201b04"
+  },
+  "limits": [
+    "No RF, physical board, stock companion serial or headed/pixel execution",
+    "One caller-selected realm and resident runtime per radio journal; one adapter per protocol in the Comms model",
+    "Meshtastic sender/header is unauthenticated; MeshCore private text has a 16-bit pairwise MAC; matched 32-bit ACKs are unencrypted and do not authenticate origin or prove reading",
+    "Packet-ID reservations and device activation remain with their existing owners",
+    "File reopen checks completed replacement; no power-loss qualification",
+    "Actions remained disabled"
+  ]
+}

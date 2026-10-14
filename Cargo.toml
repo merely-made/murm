@@ -43,6 +43,7 @@ members = [
 # Membership made every new rustc lint in vendored code a CI failure (Rust 1.99, 2026-10-03).
 exclude = [
     "native",
+    "wire",
     "apps/signalman-desktop",
     # Bounded retained-repair host prototype has its own pinned codec graph.
     "crates/retained-repair",
@@ -99,7 +100,7 @@ p2panda-encryption = { git = "https://github.com/mark-ik/p2panda.git", tag = "me
 p2panda-store = { git = "https://github.com/mark-ik/p2panda.git", tag = "mere-p2panda-net-0.7.5-upstream-20261013" }
 p2panda-stream = { git = "https://github.com/mark-ik/p2panda.git", tag = "mere-p2panda-net-0.7.5-upstream-20261013" }
 p2panda-sync = { git = "https://github.com/mark-ik/p2panda.git", tag = "mere-p2panda-net-0.7.5-upstream-20261013" }
-muniment = { git = "https://www.github.com/merely-made/mere.git", rev = "e84cfbd95b1660046d646580a8707af020a06e4b" }
-mere-proofs = { git = "https://www.github.com/merely-made/mere.git", rev = "e84cfbd95b1660046d646580a8707af020a06e4b" }
+muniment = { git = "https://www.github.com/merely-made/mere.git", rev = "2f92d45dd2fc30c173367f203ad49ed913f29fff" }
+mere-proofs = { git = "https://www.github.com/merely-made/mere.git", rev = "2f92d45dd2fc30c173367f203ad49ed913f29fff" }
 
 [patch."https://github.com/merely-made/mere.git"]

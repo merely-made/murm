@@ -259,3 +259,50 @@ fn reopened_history_supplies_offline_authoring_but_never_selects_between_station
         .unwrap();
     assert_eq!(state.message_store.known_local_peer(), None);
 }
+
+#[test]
+fn messages_face_registers_both_radio_protocols_and_queues_in_the_owner_journal() {
+    use signalman::radio_comms::{FileJournal, RadioComms, RadioScope};
+    let dir = tempfile::tempdir().unwrap();
+    let scope = RadioScope {
+        realm: "test-household".into(),
+        meshtastic_node: 7,
+        meshtastic_channel: 8,
+        meshcore_key: [3; 32],
+    };
+    let owner = RadioComms::open(
+        scope.clone(),
+        FileJournal::new(dir.path().join("radio.json")),
+    )
+    .unwrap();
+    let mut state = crate::state::DesktopState::new(&crate::default_catalog_path());
+    state.select_message_protocol(comms::ProtocolKind::Meshtastic);
+    assert_eq!(state.message_protocol, comms::ProtocolKind::Lxmf);
+    state.set_radio_comms(owner.clone());
+    state.select_message_protocol(comms::ProtocolKind::Meshtastic);
+    state.message_recipient = comms_text_input("!00000008");
+    state.message_draft = comms_text_input("Meshtastic from the Messages face");
+    state.queue_message();
+    state.select_message_protocol(comms::ProtocolKind::MeshCore);
+    state.message_recipient = comms_text_input(&hex::encode([4; 32]));
+    state.message_draft = comms_text_input("MeshCore from the Messages face");
+    state.queue_message();
+    assert_eq!(owner.records().unwrap().len(), 2);
+    assert_eq!(state.message_store.len(), 0);
+    let model = state.comms().unwrap();
+    assert_eq!(model.identities().len(), 2);
+    let inbox = pollster::block_on(model.inbox());
+    assert!(inbox.failures.is_empty());
+    assert_eq!(inbox.conversations.len(), 2);
+    assert_eq!(
+        pollster::block_on(model.messages(&scope.meshtastic(8))).unwrap()[0]
+            .body
+            .text(),
+        "Meshtastic from the Messages face"
+    );
+    drop(model);
+    drop(state);
+    drop(owner);
+    let reopened = RadioComms::reopen(FileJournal::new(dir.path().join("radio.json"))).unwrap();
+    assert_eq!(reopened.records().unwrap().len(), 2);
+}

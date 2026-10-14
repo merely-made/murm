@@ -497,6 +497,16 @@ fn main() {
                     ));
                 }
             }
+            if let Some(path) = std::env::var_os("SIGNALMAN_RADIO_JOURNAL") {
+                match signalman::radio_comms::RadioComms::reopen(
+                    signalman::radio_comms::FileJournal::new(path),
+                ) {
+                    Ok(owner) => state.set_radio_comms(owner),
+                    Err(error) => {
+                        state.message_notice = Some(format!("Radio journal did not open: {error}"))
+                    }
+                }
+            }
             if !offline_appearance_receipt {
                 match audio::inventory() {
                     Ok(inventory) => state.adopt_audio_inventory(inventory),

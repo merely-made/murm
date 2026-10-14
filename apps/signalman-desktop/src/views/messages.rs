@@ -7,7 +7,7 @@ use crate::state::{DesktopState, VOICE_DURATION_OPTIONS, VOICE_ENCODING_OPTIONS,
 
 use super::{Child, heading};
 
-pub(super) fn messages_page(state: &DesktopState) -> Child {
+fn lxmf_page(state: &DesktopState) -> Child {
     let book = state.message_store.book();
     let rows = book
         .iter()
@@ -385,4 +385,113 @@ fn short_address(bytes: [u8; 16]) -> String {
 
 fn message_id_hex(id: MessageId) -> String {
     id.0.iter().map(|byte| format!("{byte:02x}")).collect()
+}
+
+pub(super) fn messages_page(state: &DesktopState) -> Child {
+    use signalman::comms_adapter::comms::ProtocolKind;
+    let choices = [
+        ("LXMF", ProtocolKind::Lxmf),
+        ("Meshtastic", ProtocolKind::Meshtastic),
+        ("MeshCore", ProtocolKind::MeshCore),
+    ]
+    .into_iter()
+    .map(|(label, protocol)| {
+        Box::new(
+            button(label, move |s: &mut DesktopState, _| {
+                s.select_message_protocol(protocol)
+            })
+            .attr(
+                "aria-pressed",
+                if state.message_protocol == protocol {
+                    "true"
+                } else {
+                    "false"
+                },
+            )
+            .attr("data-message-protocol", label),
+        ) as Child
+    })
+    .collect::<Vec<_>>();
+    let page = if state.message_protocol == ProtocolKind::Lxmf {
+        lxmf_page(state)
+    } else {
+        radio_page(state)
+    };
+    Box::new(el(
+        "div",
+        (
+            el("nav", choices).attr("aria-label", "Message protocol"),
+            page,
+        ),
+    ))
+}
+fn radio_page(state: &DesktopState) -> Child {
+    use signalman::comms_adapter::comms::{Direction, ProtocolKind};
+    let protocol = state.message_protocol;
+    let label = if protocol == ProtocolKind::Meshtastic {
+        "Meshtastic"
+    } else {
+        "MeshCore"
+    };
+    let rows = state
+        .radio_comms
+        .as_ref()
+        .map(|owner| owner.records())
+        .transpose()
+        .map(|records| {
+            records
+                .unwrap_or_default()
+                .into_iter()
+                .filter(|r| r.conversation.protocol == protocol)
+                .rev()
+                .map(|record| {
+                    let direction = if record.message.direction == Direction::Incoming {
+                        "From"
+                    } else {
+                        "To"
+                    };
+                    let address = if record.message.direction == Direction::Incoming {
+                        record.message.author.address.clone()
+                    } else {
+                        record
+                            .conversation
+                            .key
+                            .rsplit('/')
+                            .next()
+                            .unwrap_or_default()
+                            .to_owned()
+                    };
+                    Box::new(
+                        el(
+                            "div",
+                            text(format!(
+                                "{direction} {address}: {}. {}",
+                                record.message.body.text(),
+                                record.delivery.label()
+                            )),
+                        )
+                        .attr("class", "message-row")
+                        .attr("data-message-id", record.message.id.0),
+                    ) as Child
+                })
+                .collect::<Vec<_>>()
+        })
+        .unwrap_or_else(|error| vec![Box::new(el("div", text(error.to_string()))) as Child]);
+    let diagnostics = state
+        .radio_comms
+        .as_ref()
+        .map(|owner| owner.diagnostics())
+        .transpose()
+        .map(|lines| lines.unwrap_or_default().join(" "))
+        .unwrap_or_else(|e| e.to_string());
+    Box::new(el("main", (
+        heading(label, "Text history belongs to the commissioned radio realm."),
+        el("div", text(diagnostics)).attr("data-comms-diagnostics", label),
+        el("label", (el("div", text(if protocol == ProtocolKind::Meshtastic {"Recipient node number (8 hex digits; ffffffff broadcasts)"} else {"Recipient public key (64 hex digits)"})),
+            el("div", cambium::lens(|input: &mut cambium::TextInput| cambium::text_field(input), |s: &mut DesktopState| &mut s.message_recipient)).attr("data-text-field", "message-recipient"))),
+        el("label", (el("div", text("Text message")), el("div", cambium::lens(|input: &mut cambium::TextInput| cambium::text_field(input), |s: &mut DesktopState| &mut s.message_draft)).attr("data-text-field", "message-draft"))),
+        button("Queue text", |s: &mut DesktopState, _| s.queue_message()),
+        el("div", text(state.message_notice.clone().unwrap_or_else(|| "Queued intents wait for the authorized resident owner. Radio activation is separate.".into()))).attr("role", "status"),
+        el("div", rows).attr("role", "list"),
+    )).attr("class", "messages-page").attr("role", "main").attr("aria-label", format!("{label} Messages")))
 }

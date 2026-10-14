@@ -1,7 +1,7 @@
 # Murm family and repository move
 
 **Date:** 2026-10-13
-**Status:** In progress (2026-10-13). The native implementation import and named
+**Status:** In progress (2026-10-14). The native implementation import and named
 MOVE3 consumer adoption are published. MOVE4 renamed the continuing Retinue
 repository to Murm with the same repository identity and refs; canonical URL
 validation passed and the canonical URLs are published on main. Crate names and history remain
@@ -785,3 +785,62 @@ No hardware, headed, fresh custody-daemon or GPU acceptance is claimed by this
 pass. Isocosm's gameplay repair remains separate, as the owner confirmed;
 MOVE5 Netfetcher wire extraction and Sennet/Tucket/SSB application adapters
 remain their subsequent phases.
+
+
+### 2026-10-14 — R3 Meshtastic and MeshCore software application path
+
+`apps/signalman/src/radio_comms` now projects Sennet channel text and Tucket
+private text through the real Comms router. A separate public radio journal
+keeps their native identities and facts instead of coercing them into LXMF's
+16-byte destination/profile. The host-selected realm binds a Meshtastic source
+number/channel configuration and a full MeshCore public key. Exact conversation
+addresses include that realm and local owner; the 8-bit channel hash and
+MeshCore one-byte wire hash never become cross-device application identity.
+
+`RadioComms` commits intents before handing them to the existing
+`radio-hand::instances::Runtime`. Its exclusive borrowed `ResidentSession`
+uses the runtime's confirmed personality, retained packet-ID lease, learned
+contacts, physical work tokens, retry operations and receive reports. It cannot
+commission a device, activate a personality or allocate durable packet-ID
+reservations. Hosts still own device authority, physical execution and clock
+inputs. Dropping the session reports unresolved obligations as uncertain; it
+does not cancel already issued physical work. Reopen never automatically
+replays a dispatched operation against a new runtime whose operation IDs could
+start again at one.
+
+The public journal stores text, native packet/ACK/completion facts and bounded
+operator notices, with no channel keys or identity seeds. `FileJournal` takes
+an exclusive OS file lock and atomically replaces a bounded snapshot. Software
+reopen tests cover completed file replacement; power-loss qualification is not
+claimed. Storage owners can supply their own atomic `RadioJournal` backend.
+Queue bounds, invalid scopes/subjects/lengths/NUL, full-key collisions, stale
+physical completions and failed durable writes remain explicit refusals.
+
+The Messages face selects LXMF, Meshtastic or MeshCore and reads/queues through
+the owning journals. A host injects a commissioned `RadioComms` handle, or the
+standalone app reopens an existing public journal through
+`SIGNALMAN_RADIO_JOURNAL`. That setting creates no identity and activates no
+radio. The attended LXMF station actor keeps its existing path; resident radio
+carriage requires the authorized host to attach its existing runtime. Stock
+Meshtastic/MeshCore companion serial APIs are distinct from this resident path
+and are not implied by these adapters.
+
+Meshtastic text has no authenticated sender/integrity receipt. MeshCore private
+text carries its actual 16-bit pairwise MAC qualification; its matched 32-bit
+ACK is unencrypted and does not authenticate an origin or establish a read
+receipt. `ReceivedByRadio` avoids implying a direct route; the separate
+`ProtocolAcknowledged` projection preserves that weaker protocol fact. The
+native records retain the exact supporting values. Identical MeshCore
+sender/timestamp/plain-text tuples are wire-indistinguishable: retries dedup
+under that tuple, preserve observed attempt numbers, and originating the same
+tuple twice is refused.
+
+Software qualification includes two real resident runtimes, channel cipher and
+native packet identities, verified MeshCore adverts/private text, a withheld
+ACK followed by a genuine retry and delayed-ACK completion, durable reopen and
+duplicate receive, actual Messages-face queueing and combined Comms routing.
+Compiler, MSRV, Wasm and desktop gates are recorded in
+`testing/receipts/radio-comms-r3/qualification.json`. Physical RF, stock companion
+serial interoperability and headed/pixel acceptance retain their own lanes.
+MOVE5 wire extraction is now being qualified against the actual Genet and Mere
+host boundaries; browser policy remains in Genet.

@@ -107,6 +107,11 @@ impl SennetInstance {
     pub fn directory(&self) -> &NodeDirectory {
         &self.directory
     }
+    /// Public source number and channel discriminator for host projections.
+    /// The hash alone does not identify a channel key or authenticate a sender.
+    pub fn address(&self) -> (u32, u8) {
+        (self.packet_ids.source(), self.channel.hash)
+    }
     pub fn seen_len(&self) -> usize {
         self.flood.seen_len()
     }
