@@ -118,7 +118,7 @@ fn mounted_modes_and_authored_css_preserve_domain_state_and_reopen_exact_choice(
     for mode in [Mode::Light, Mode::Dark, Mode::HcLight, Mode::HcDark] {
         click(
             &mut host,
-            Selector::role("button").with_attr("data-appearance-mode", &mode.as_key()),
+            Selector::role("button").with_attr("data-appearance-mode", mode.as_key()),
         );
         assert_eq!(
             host.state()

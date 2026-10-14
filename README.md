@@ -190,4 +190,10 @@ keeps protocol-specific addresses and observed delivery facts; a host supplies
 its commissioned public journal and authorized runtime. The standalone face
 can reopen an existing journal with `SIGNALMAN_RADIO_JOURNAL`. See R3 in
 `design_docs/2026-10-13_murm_family_move_plan.md` for the software qualification
-and the separate physical, companion-serial and headed acceptance gates.
+and the separate physical and headed acceptance gates. R4 adds stock
+Meshtastic Stream API and MeshCore USB companion connections: select the
+protocol in Messages, enter its serial port, realm and public journal path,
+then Connect. The device supplies its public identity and owns radio keys and
+execution. Queue acceptance and protocol acknowledgements remain distinct;
+MeshCore contact prefixes must resolve to a unique full key. See the same
+plan's R4 section for startup settings and the software-only qualification.

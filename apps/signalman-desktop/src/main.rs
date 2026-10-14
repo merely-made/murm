@@ -171,6 +171,12 @@ fn main() {
     let audio = Rc::new(RefCell::new(None::<AudioWorker>));
     let wake_audio = audio.clone();
     let dispatch_audio = audio.clone();
+    let companions = Rc::new(RefCell::new(Vec::<
+        signalman_desktop::companion::CompanionWorker,
+    >::new()));
+    let wake_companions = companions.clone();
+    let dispatch_companions = companions.clone();
+    let init_companions = companions.clone();
     let station = Rc::new(RefCell::new(None::<StationWorker>));
     let wake_station = station.clone();
     let init_station = station.clone();
@@ -225,6 +231,11 @@ fn main() {
                 .as_ref()
                 .map(AudioWorker::drain)
                 .unwrap_or_default();
+            let companion_events: Vec<_> = wake_companions
+                .borrow()
+                .iter()
+                .flat_map(|worker| worker.drain())
+                .collect();
             let station_events = wake_station
                 .borrow()
                 .as_ref()
@@ -246,6 +257,7 @@ fn main() {
                 && layout.is_none()
                 && audio_events.is_empty()
                 && station_events.is_empty()
+                && companion_events.is_empty()
                 && collector_events.is_empty()
                 && fixture_events.is_empty()
             {
@@ -262,6 +274,7 @@ fn main() {
                 for event in audio_events {
                     state.apply_audio_event(event);
                 }
+                for event in companion_events { state.apply_companion_event(event); }
                 for event in station_events {
                     state.apply_station_event(event);
                 }
@@ -372,6 +385,7 @@ fn main() {
             let mut network_request = None;
             let mut audio_request = None;
             let mut observation_request = None;
+            let mut companion_request = None;
             ctx.runner.update(|state| {
                 if let Some(request) = state.take_request() {
                     flow::perform(state, request, &mut worker, wake.clone());
@@ -379,8 +393,21 @@ fn main() {
                 network_request = state.take_network_request();
                 audio_request = state.take_audio_request();
                 observation_request = state.take_observation_request();
+                companion_request = state.take_companion_request();
             });
             drop(worker);
+            if let Some(settings) = companion_request {
+                let mut companions = dispatch_companions.borrow_mut();
+                companions.retain(|worker| worker.protocol != settings.protocol.kind());
+                let actor =
+                    signalman_desktop::companion::CompanionWorker::spawn(settings, wake.clone());
+                let stop = actor.stop_handle();
+                let protocol = actor.protocol;
+                ctx.runner.update(|state| {
+                    state.companion_stops.push((protocol, stop));
+                });
+                companions.push(actor);
+            }
             if let Some(request) = network_request {
                 perform_network_request(&mut dispatch_network.borrow_mut(), request, wake.clone());
             }
@@ -504,6 +531,33 @@ fn main() {
                     Ok(owner) => state.set_radio_comms(owner),
                     Err(error) => {
                         state.message_notice = Some(format!("Radio journal did not open: {error}"))
+                    }
+                }
+            }
+            if !offline_appearance_receipt {
+                match signalman_desktop::companion::settings_from_env() {
+                    Ok(settings) => {
+                        state.companion_settings = settings.clone();
+                        for setting in settings {
+                            let protocol = setting.protocol.kind();
+                            state.companion_notices.push((
+                                protocol,
+                                format!(
+                                    "Connecting stock companion on {}…",
+                                    setting.port.display()
+                                ),
+                            ));
+                            let actor = signalman_desktop::companion::CompanionWorker::spawn(
+                                setting,
+                                wake.callback(),
+                            );
+                            state.companion_stops.push((protocol, actor.stop_handle()));
+                            init_companions.borrow_mut().push(actor);
+                        }
+                    }
+                    Err(error) => {
+                        state.message_notice =
+                            Some(format!("Stock companion configuration refused: {error}"))
                     }
                 }
             }

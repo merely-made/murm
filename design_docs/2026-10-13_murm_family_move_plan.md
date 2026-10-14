@@ -11,7 +11,9 @@ Registry releases and further physical/live-network qualification retain their
 own gates. MOVE5's reusable wire engine and receiving Genet/Mere source
 adoptions are published; Signalman's final supplier cohort is qualified.
 Post-cutover R1 implements Signalman's LXMF software path and initial R2
-recorded-delivery diagnostics; broader integration retains its gates below.
+recorded-delivery diagnostics; R3 supplies resident radio Comms and R4 adds
+stock Meshtastic/MeshCore companion actors and attended desktop controls.
+Physical/live qualification retains its gates below.
 
 **Canonical home:** this repository owns the migration. Mere and Genet should
 cite this plan rather than keep another migration specification. The canonical
@@ -905,3 +907,101 @@ does not pull unused Netfetcher/HTTP wire engines; those are qualified in the
 Genet/Mere host cones. The frozen first receipts remain unchanged; the final
 supplier/input record is `testing/receipts/wire-engines/receiving-cohort.json`.
 MOVE5 source extraction and receiving adoption are complete.
+
+### R4 — stock companion connections (2026-10-14, software qualified)
+
+Signalman owns stock companion client protocols separately from Sennet/Tucket
+resident PHY execution. Device handshakes supply public identities; independent
+companion scopes register only their own Comms adapter and preserve version-1
+resident journals. The firmware retains keys and radio state. Host configuration
+selects a port, realm and Meshtastic channel; no firmware/channel/key mutation
+is part of connection. Commands follow durable intent/dispatched markers.
+
+Done conditions: bounded serial actors for Meshtastic Stream API and MeshCore
+USB companion API, real desktop activation and shared Comms history, matched
+queue/ACK facts, collision refusal for MeshCore six-byte contact prefixes,
+interrupt/reopen uncertainty without automatic replay, simulated byte-peer
+coverage on the toolchain and MSRV, and coherent publication. Physical radios
+and headed visuals remain separately qualified. New client code lives in
+Signalman; Sennet's independent provenance boundary is unchanged.
+
+#### R4 implementation findings and use (2026-10-14)
+
+- `apps/signalman/src/radio_comms/companion.rs` owns the stock client actor.
+  Meshtastic uses the framed ToRadio/FromRadio API, a fresh configuration nonce,
+  the device's node number and an enabled configured channel. MeshCore uses
+  App Start, Device Query and bounded full-contact enumeration. It requests
+  plain contact text, synchronizes queued messages and matches SEND_CONFIRMED.
+  The host never imports a private device key, sets a radio/channel configuration,
+  flashes firmware or requests an advertisement during this connection path.
+- `RadioComms` retains version-1 resident scope JSON and adds a separately
+  tagged, protocol-specific companion scope. The journal cannot silently move
+  to another public device identity/channel/realm or attach a companion journal
+  to a resident runtime. The firmware owns RF encryption, routing and retry
+  execution; host request correlations do not mint resident packet-ID leases.
+- Meshtastic queue acceptance and MeshCore MSG_SENT earn HandedToRadio only.
+  Matched remote Meshtastic routing success and MeshCore SEND_CONFIRMED earn
+  ProtocolAcknowledged, with native correlations retained. Meshtastic local
+  implicit relay successes and unrelated routing requests do not earn a
+  recipient acknowledgement. Device-reported PKI flags are preserved without
+  claiming verification of PKI acknowledgement proofs. A missing ACK preserves
+  observed device acceptance; interrupted commands require explicit resend.
+- MeshCore firmware exposes six-byte contact prefixes on this API. Dispatch
+  resolves the requested full public key against a freshly read contact list
+  and refuses absent or ambiguous prefixes before sending text. Unknown inbound
+  prefixes produce diagnostics; Signalman never invents a full sender identity.
+  This phase carries direct contact text, not MeshCore channel/data chat.
+- Serial framing and command writes are bounded. Partial input survives receive
+  timeouts, confirmations within active correlation windows are matched even
+  before the send reply, pending sends cap at 16,
+  and journal write failures stop further carriage. Stock queue synchronization
+  is a destructive device read: a host write failure after receiving a message
+  cannot guarantee recovery of the firmware's already consumed queue item.
+  This implementation makes no exactly-once or power-loss claim.
+- `apps/signalman-desktop/src/companion.rs` owns worker threads, coalesced progress
+  wakes and bounded terminal events. Unix TIOCEXCL prevents subsequent ordinary
+  opens while the stock session owns a port; Windows uses the serial handle's
+  ownership. Serial/USB ownership and modem-line behavior still need physical
+  platform qualification. Reconnecting explicitly retires the previous handle
+  and reacquires the same identity-bound journal; uncertain commands are not
+  replayed. Stop and application shutdown release the actor and byte link.
+
+In Messages, select Meshtastic or MeshCore. Enter the stock serial port, a stable
+realm name for its configured radio/channel environment, and a public journal
+path; choose Meshtastic channel index 0..7 (default 0). Connect reads identity
+from the device. Queue text addresses an exact 8-digit Meshtastic node number
+(`ffffffff` broadcasts) or a full 64-digit MeshCore contact public key. Disconnect
+leaves history and offline intents durable; Connect explicitly reconnects using
+the same settings. A changed channel/key environment requires a new realm name.
+Only one connection per protocol is admitted, with distinct ports and journals.
+Do not reuse the Retinue station or an active observation collector's port.
+
+Attended startup also accepts `SIGNALMAN_MESHTASTIC_PORT`,
+`SIGNALMAN_MESHTASTIC_REALM`, `SIGNALMAN_MESHTASTIC_JOURNAL` and optional
+`SIGNALMAN_MESHTASTIC_CHANNEL` (0..7, default 0). MeshCore uses
+`SIGNALMAN_MESHCORE_PORT`, `SIGNALMAN_MESHCORE_REALM` and
+`SIGNALMAN_MESHCORE_JOURNAL`. Port selection is explicit; this phase does not
+provide BLE pairing or automatic radio discovery/activation.
+
+Source inputs are recorded explicitly: the public Meshtastic client API and
+protobuf field contract at `meshtastic/protobufs` commit
+`28f4f5f5c31c0323bfb86d890a1acaff15d1c4c6` (mesh.proto SHA-256
+`36a29e703a679a3b2841bf84e2e3220ca53f40611400be58a3a79abc3fe1cb59`),
+and MeshCore companion documentation/firmware semantics at the existing 1.17.1
+pin `d92964352441e53b93e8667b802e04f6e072b39e`. No upstream client/source/schema
+files or generated bindings were copied into the shipping tree. This new
+Signalman host client consulted these inputs; Sennet's existing independent RF
+implementation, fixtures and provenance files are untouched. The new host
+client is not represented as part of Sennet's prior clean-room record.
+
+#### R4 progress (2026-10-14)
+
+The software done conditions are green: 58 Signalman library tests on each of
+Rust 1.99.0 and 1.97.1, 33 desktop library tests on 1.99.0 (one existing custody
+bench test intentionally ignored), and 10 mounted companion/voice/accessibility
+tests on 1.99.0. Strict Clippy passes for both owning packages with all targets;
+the desktop all-target compilation also passes on 1.97.1. The selected metadata
+has one Comms, Personae, LayoutDom and radio family, with immutable Git manifests.
+Qualification will be frozen in `testing/receipts/stock-companions`; physical
+serial/RF interoperability, BLE, headed pixels and power-loss behavior remain
+separate gates. GitHub Actions remains disabled at the owner's request.

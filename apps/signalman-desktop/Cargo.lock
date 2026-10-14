@@ -8736,6 +8736,7 @@ name = "signalman"
 version = "0.1.0"
 dependencies = [
  "async-trait",
+ "getrandom 0.3.4",
  "hex",
  "linkboy",
  "mere-comms",
@@ -8784,10 +8785,12 @@ dependencies = [
  "postilion",
  "radio-hand",
  "retinue",
+ "rustix 1.1.4",
  "sceno",
  "scenomise",
  "seiche",
  "serde_json",
+ "serial2-tokio",
  "signalman",
  "sprigging",
  "tabard",

@@ -27,7 +27,11 @@ impl RadioComms {
         if inner.attached {
             return Err(backend("resident journal already attached"));
         }
-        let scope = &inner.book.scope;
+        let Scope::Resident(scope) = &inner.book.scope else {
+            return Err(backend(
+                "stock companion journals cannot attach to a resident runtime",
+            ));
+        };
         if runtime.sennet().address() != (scope.meshtastic_node, scope.meshtastic_channel)
             || runtime.tucket().node().identity().pub_key != scope.meshcore_key
         {
