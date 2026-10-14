@@ -1,0 +1,127 @@
+{
+  "schema": 1,
+  "date": "2026-10-14",
+  "source_commit": "b982319b6f203dffc81225a7232784c980c94ef8",
+  "base_commit": "3a98a3a8abc2afac56964af6943c6d91cbbda733",
+  "platform": "x86_64-apple-darwin",
+  "qualification": "software_only",
+  "passed_test_executions": 159,
+  "checks": [
+    {
+      "name": "signalman_library_1_99",
+      "compiler": "1.99.0",
+      "command": "cargo +1.99.0 test -p signalman --features comms --lib --locked --offline",
+      "result": "passed",
+      "log_sha256": "0c06e4c9e3b3afd3a52a69fcb74be9ca6d90cd866c65f268967668092b49eedc",
+      "passed": 58,
+      "ignored": 0
+    },
+    {
+      "name": "signalman_library_msrv",
+      "compiler": "1.97.1",
+      "command": "cargo +1.97.1 test -p signalman --features comms --lib --locked --offline",
+      "result": "passed",
+      "log_sha256": "c1328004b33ad26453a2eb46a4cfaf904228460556c91f88431d9769a3f45146",
+      "passed": 58,
+      "ignored": 0
+    },
+    {
+      "name": "desktop_library",
+      "compiler": "1.99.0",
+      "command": "cargo +1.99.0 test --manifest-path apps/signalman-desktop/Cargo.toml --lib --locked --offline",
+      "result": "passed",
+      "log_sha256": "cd5be5706c605f75bab0af03ab03ea47aa5d8823be798f8728759571a803df15",
+      "passed": 33,
+      "ignored": 1
+    },
+    {
+      "name": "mounted_companion_voice_accessibility",
+      "compiler": "1.99.0",
+      "command": "cargo +1.99.0 test --manifest-path apps/signalman-desktop/Cargo.toml --test companion_face --test voice_desktop --test accessibility --locked --offline",
+      "result": "passed",
+      "log_sha256": "b52d196c7e7ac5879064bf0ace107c40186a8bf053c2216be207cc34d5970b79",
+      "passed": 10,
+      "ignored": 0
+    },
+    {
+      "name": "signalman_strict_clippy",
+      "compiler": "1.99.0",
+      "command": "cargo +1.99.0 clippy -p signalman --features comms --all-targets --locked --offline -- -D warnings",
+      "result": "passed",
+      "log_sha256": "00a39db8691074a0da6869a4bafa96853fe85a426b6d55218254fb79818bdb02"
+    },
+    {
+      "name": "desktop_strict_clippy",
+      "compiler": "1.99.0",
+      "command": "cargo +1.99.0 clippy --manifest-path apps/signalman-desktop/Cargo.toml --all-targets --locked --offline -- -D warnings",
+      "result": "passed",
+      "log_sha256": "3d105395f53943a9b897e37accf0264de128c70dc935e66ce07a5ece0852d971"
+    },
+    {
+      "name": "desktop_all_targets_msrv",
+      "compiler": "1.97.1",
+      "command": "cargo +1.97.1 check --manifest-path apps/signalman-desktop/Cargo.toml --all-targets --locked --offline",
+      "result": "passed",
+      "log_sha256": "3d105395f53943a9b897e37accf0264de128c70dc935e66ce07a5ece0852d971"
+    }
+  ],
+  "source_sha256": {
+    "Cargo.lock": "411d664f12e8231dd61d81ed01978be7c9ea40db212425da18025df86768845c",
+    "apps/signalman-desktop/Cargo.lock": "5f717ceb27c92d48e22cbd5f0d87cc42fce4f303dceda1d784affff5997da138",
+    "apps/signalman-desktop/Cargo.toml": "d3ad66b02e668d54300b72726fc78ab126983da9cd1317ef384eef7ada596925",
+    "apps/signalman-desktop/src/comms/tests.rs": "ee3f492ed1c4e1649ef3b9dca024573e05fbe824d0dcf0e217264ce3a6b85345",
+    "apps/signalman-desktop/src/companion.rs": "f7876060c35bc2f7df78e35e82746617d137eefa488066d9adf79e9f5d8956a2",
+    "apps/signalman-desktop/src/lib.rs": "83a0dd70c99c8e6a8ca0dcba706cd37cafaeaeab68e534426fa70276f9eedd81",
+    "apps/signalman-desktop/src/main.rs": "2e45fd0af26faca8a35b20c392665ab147807e8453aa96bd6b02e54fa28e7ddf",
+    "apps/signalman-desktop/src/state.rs": "20019356529487042bf339f05d6804b1f02bcba2a053867666bf36295aaebd00",
+    "apps/signalman-desktop/src/state/messages.rs": "f7837fe21a1c4626dc9d504c7eb4dd8f31ee62b0d5e50eb47e3d29bd0da5c576",
+    "apps/signalman-desktop/src/station/messages.rs": "4d303a90734254f2822d4e337168f53d3dbeb23eb20bb998125db6ab40479260",
+    "apps/signalman-desktop/src/views/messages.rs": "01fa830d957af452b0b11d346bb02cc6632a850c9367115f0d9aba9e2e10ec59",
+    "apps/signalman-desktop/tests/companion_face.rs": "bc7a20d592a4b4799c015b66eeecfcce6062ae7e5a8a6f1f2bf1800a6421f4d6",
+    "apps/signalman-desktop/tests/tabard_appearance.rs": "419280102c12b88ddd6b66d500a367e0cec190bdf1b304a04f6955d1a73304b0",
+    "apps/signalman/Cargo.toml": "c5fe3dfffd3cfa38123cd794488d2323742b2a704474b1e4c7c3a545a4170609",
+    "apps/signalman/src/radio_comms.rs": "8a9d729c376b3ab0a36975a10900cc3cebb7b9cd5bf61719edd8dfde48a1674b",
+    "apps/signalman/src/radio_comms/companion.rs": "6b52972d44cf71297092ed9027519e9ac439a39aabf15684bc7123fede64dfb8",
+    "apps/signalman/src/radio_comms/companion/frame.rs": "7fb27c33dac7999769eae53ebc0264f5c1fce9ab21b9499f268746dba77bce49",
+    "apps/signalman/src/radio_comms/companion/meshtastic.rs": "d16532a7485899b8b9fb4d2b77bbc31b130c2c0ff9a4a3fe95629632ec65975f",
+    "apps/signalman/src/radio_comms/companion/tests.rs": "30685dc87fd183f8effd18c011089bf4474bb37e05609800192afc062cf2cf4e",
+    "apps/signalman/src/radio_comms/resident.rs": "56244971c293ec3677fba073bfbd83aaa2dba179f4271793f351ae0f41600051"
+  },
+  "selected_cohort": {
+    "signalman": "path+file:///Users/markik/Code/worktrees/retinue-murm-family-plan/apps/signalman#0.1.0",
+    "mere-comms": "git+https://www.github.com/merely-made/mere.git?rev=864757da78214bdd810e17355df5b2309721d651#mere-comms@0.0.1",
+    "postilion": "path+file:///Users/markik/Code/worktrees/retinue-murm-family-plan/crates/postilion#0.3.0",
+    "radio-hand": "path+file:///Users/markik/Code/worktrees/retinue-murm-family-plan/crates/radio-hand#0.0.1",
+    "personae": "git+https://github.com/merely-made/dramatis.git?rev=0234e7eea6f2ddf2330a71b9425da01b06ae0391#personae@0.3.0",
+    "layout-dom-api": "git+https://github.com/merely-made/genet.git?rev=b6bfbeb556a6a17eddf8d5ad8254d3fcac95b084#layout-dom-api@0.1.1"
+  },
+  "metadata_sha256": "7816e679315c00174255323c258114929256d40fef71a8f0ccce0090c52fd7e5",
+  "actions_enabled": false,
+  "protected_trees_unchanged": [
+    "firmware",
+    "native",
+    "wire",
+    "crates/sennet",
+    "crates/tucket",
+    "distribution",
+    "testing/receipts/radio-comms",
+    "testing/receipts/radio-comms-r3",
+    "testing/receipts/wire-engines"
+  ],
+  "upstream_inputs": {
+    "meshtastic_client_api": "https://meshtastic.org/docs/development/device/client-api/",
+    "meshtastic_protobuf_commit": "28f4f5f5c31c0323bfb86d890a1acaff15d1c4c6",
+    "mesh_proto_sha256": "36a29e703a679a3b2841bf84e2e3220ca53f40611400be58a3a79abc3fe1cb59",
+    "meshcore_companion_commit": "d92964352441e53b93e8667b802e04f6e072b39e"
+  },
+  "limitations": [
+    "No physical serial/USB or RF interoperability run",
+    "No BLE connection path",
+    "No native headed/pixel qualification",
+    "No power-loss or exactly-once guarantee",
+    "MeshCore contact plain text only; channel/data messages diagnostic-only",
+    "Protocol ACK facts are not authenticated or read receipts",
+    "Meshtastic PKI proofs are not verified by Signalman",
+    "SDK/native ownership compiled on macOS; other OS execution not qualified"
+  ]
+}

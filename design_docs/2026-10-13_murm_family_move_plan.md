@@ -1002,6 +1002,7 @@ bench test intentionally ignored), and 10 mounted companion/voice/accessibility
 tests on 1.99.0. Strict Clippy passes for both owning packages with all targets;
 the desktop all-target compilation also passes on 1.97.1. The selected metadata
 has one Comms, Personae, LayoutDom and radio family, with immutable Git manifests.
-Qualification will be frozen in `testing/receipts/stock-companions`; physical
+Qualification at `b982319b6f203dffc81225a7232784c980c94ef8` is frozen in
+`testing/receipts/stock-companions`; physical
 serial/RF interoperability, BLE, headed pixels and power-loss behavior remain
 separate gates. GitHub Actions remains disabled at the owner's request.
