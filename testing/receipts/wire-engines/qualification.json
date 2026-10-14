@@ -1,0 +1,128 @@
+{
+  "recorded_at": "2026-10-14T06:57:24.479389+00:00",
+  "destination_base": "5caa7cf688927937e357605b4c184b5f17ad70f1",
+  "unfiltered_genet_source": "1ec5d08d16e78f936e9ab366af9f36b7d6abc044",
+  "history_rehearsal": {
+    "path": "/Users/markik/Code/targets/murm-wire-history-rehearsal-kygt2fx9",
+    "base": "8ec235254b78ac1be7469aaee49770d47877bf23",
+    "source": "1ec5d08d16e78f936e9ab366af9f36b7d6abc044",
+    "index_matches_destination": true,
+    "merge_commit": "e23e5ae976a5c280919ecee919e5038d6e721025",
+    "parents": [
+      "8ec235254b78ac1be7469aaee49770d47877bf23",
+      "1ec5d08d16e78f936e9ab366af9f36b7d6abc044"
+    ],
+    "changed": [
+      "wire/Cargo.lock",
+      "wire/Cargo.toml",
+      "wire/crates/wire/Cargo.toml",
+      "wire/crates/wire/README.md",
+      "wire/crates/wire/src/h3_client.rs",
+      "wire/crates/wire/src/hyper.rs",
+      "wire/crates/wire/src/lib.rs",
+      "wire/crates/wire/src/tests.rs",
+      "wire/crates/wire/src/websocket.rs"
+    ]
+  },
+  "inputs": {
+    "wire/Cargo.lock": "86ee9350eea517c2a8b2ce519f4ce0d22ea9ae963b7fd2a9bb33872576beb995",
+    "wire/Cargo.toml": "9e28094b0fab3a03df6eee8481bb5a1d72d8454eaee8744ca1ab0732f6a02880",
+    "wire/crates/wire/Cargo.toml": "b0322589e0dd0e7e5a924523e15145489875955d8d5d1704ebc448044147222f",
+    "wire/crates/wire/README.md": "6780019457c5ba732d36ca3208604080393c79a01983f94efea64353ef02e403",
+    "wire/crates/wire/src/h3_client.rs": "726a4f7d68474fad5664bdb709a6eafe488563390b1807bf5384472b8a919a8a",
+    "wire/crates/wire/src/hyper.rs": "ebcb9a3d94dff3a5fa775cf785392e6ec3e7fc95d9cae2e4f41ba27ec5d35828",
+    "wire/crates/wire/src/lib.rs": "123223870643e84a157aa11749645a28a13c3bcceca00923e01b2a6b9d53afeb",
+    "wire/crates/wire/src/tests.rs": "4a70b939e125a18ddcea765d6805e9f0f83e3dfd7b3ae7d2c0111bd09def9185",
+    "wire/crates/wire/src/websocket.rs": "d554deb71d3ad10eedfa8f3d9356af71cad7fffecc1b90e52ac927f334b0fd23"
+  },
+  "source_files": {
+    "components/netfetcher/src/transport.rs": "bebb5fd9a1304df8326023e15f0a2c6005e160e47a1b5e470f6359330185be15",
+    "components/netfetcher/src/transport/hyper.rs": "1f61cefe31584df00538c0ee0d3c6eca047cd16efeee5ed824fb3fea6c68c737",
+    "components/netfetcher/src/h3_client.rs": "f6ff864ea8bcd2da4ff3a9345920e467d83c6d0a34cae1f77a186cff799b7e9a",
+    "components/netfetcher/src/websocket.rs": "0be3e749a316725655933c6cd1c53d8af83891d2b1c3cc955ad20eaf431a4b4b",
+    "components/netfetcher/Cargo.toml": "f8da9449f02b023213c3cc568df76be2eb50d32b3e2624e8078334895327c3c5"
+  },
+  "checks": [
+    {
+      "scope": "HTTP/1-2-3 and raw WebSocket",
+      "compiler": "1.99.0",
+      "passed": 5,
+      "log_sha256": "c46bb5dcae505a58604315d1228dde4cbe3716b61003486aefd278e344552362"
+    },
+    {
+      "scope": "HTTP/1-2-3 and raw WebSocket",
+      "compiler": "1.97.1",
+      "passed": 5,
+      "log_sha256": "cf74e3b4c8f1578779a5d3d6eb5e7f1d427f5265d1ffcd96f314f64573d27d6a"
+    },
+    {
+      "scope": "Genet Fetch/WebSocket policy",
+      "compiler": "1.99.0",
+      "passed": 83,
+      "log_sha256": "d33c01f8cecf80ca59082d1a8f2ce056652ce48d0108b523bd0cc4a81c990975"
+    },
+    {
+      "scope": "Genet Fetch/WebSocket policy",
+      "compiler": "1.97.1",
+      "passed": 83,
+      "log_sha256": "5a97ffa11e1b06033c4af757ba4b9208e8977e238dd9176c7f64c714067e5a7d"
+    },
+    {
+      "scope": "Genet WPT JS Fetch host",
+      "compiler": "1.99.0",
+      "passed": 1,
+      "log_sha256": "95c5c7003d04f101cd7a3d784e19cbdda535e62e0fc989e157c3affa06fa1a16"
+    },
+    {
+      "scope": "Mere Fetch/crawler host",
+      "compiler": "1.99.0",
+      "passed": 16,
+      "log_sha256": "63a73b0b7c3ba43479acb44ee138d5ebf50dd211acad3c7d94ea288ce58a4154"
+    },
+    {
+      "scope": "clippy",
+      "compiler": "1.99.0",
+      "result": "passed",
+      "log_sha256": "6287aac0725ea74e5f8f87680831b17aa3338c6d7f1580c3a7a67a7750c8151e"
+    },
+    {
+      "scope": "bare-wasm",
+      "compiler": "1.99.0",
+      "result": "passed",
+      "log_sha256": "c3b165aea3e39feaacbfdc386f93e14086e6febc6651341b08514eebff5608d0"
+    },
+    {
+      "scope": "netfetcher-disabled",
+      "compiler": "1.99.0",
+      "result": "passed",
+      "log_sha256": "80ab05dd8c12baee96cf2140782665e585f614a97a6aa8a8fd595f81994d5143"
+    },
+    {
+      "scope": "netfetcher-websocket-only",
+      "compiler": "1.99.0",
+      "result": "passed",
+      "log_sha256": "531cfdd7ab1b7478b67878cde0f9da4effad52f111f4b7d772678b6c8ddb631c"
+    }
+  ],
+  "passing_test_executions": 193,
+  "netfetcher_identity": {
+    "name": "netfetcher",
+    "version": "0.1.1",
+    "default_features": [
+      "hyper-transport",
+      "h3",
+      "websocket"
+    ]
+  },
+  "feature_disabled_cone": "no Murm engine, hyper, rustls, quinn or tungstenite in normal Netfetcher dependencies",
+  "wpt_cpu_cone": "no compositor/WebGL device fixture; webgl-tests now explicit",
+  "qualification_phase": "pre-publication host adapters use task-local source paths; final immutable Git qualification is recorded in the receiving repositories",
+  "limits": [
+    "Default pool remains process-wide; explicitly supplied HttpTransport pools and trust are independent in the HTTP/2 receipt",
+    "HTTP/3 retains buffered responses; response-header deadlines do not bound caller body reads",
+    "WPT JS Fetch integration and focused library gates are not the full upstream WPT corpus",
+    "The WebGL/compositor macOS compilation failure belongs to its existing lane; no repair or GPU/presentation acceptance",
+    "Registry release and remote-internet interoperability remain separate",
+    "Actions remained disabled"
+  ]
+}
