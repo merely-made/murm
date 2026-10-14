@@ -156,39 +156,12 @@ impl Station {
             }
         }));
 
-        tasks.push(tokio::spawn({
-            let endpoint = Arc::clone(&endpoint);
-            let held = Arc::clone(&held);
-            async move {
-                loop {
-                    let Ok(accepted) = endpoint.accept_resource().await else {
-                        return;
-                    };
-                    let events = match receive_direct_with_stamp_cost_and_resource_config(
-                        &endpoint,
-                        accepted,
-                        &held.delivered,
-                        DEFAULT_MAX_MESSAGE_BYTES,
-                        None,
-                        resource_config,
-                    )
-                    .await
-                    {
-                        Ok(received) if received.verification == Verification::SourceUnknown => {
-                            held.hold(&endpoint, received, now_secs())
-                        }
-                        Ok(received) => vec![Event::authenticated_message(received)],
-                        Err(error) => vec![Event::Dropped(error.to_string())],
-                    };
-                    if events
-                        .into_iter()
-                        .any(|event| events_tx.send(event).is_err())
-                    {
-                        return;
-                    }
-                }
-            }
-        }));
+        tasks.push(tokio::spawn(serve_deliveries(
+            Arc::clone(&endpoint),
+            Arc::clone(&held),
+            events_tx,
+            resource_config,
+        )));
 
         Ok(Self {
             endpoint,
@@ -346,6 +319,54 @@ impl Drop for Station {
     }
 }
 
+/// Receive every inbound delivery link, each in its own task.
+///
+/// A link that stalls (its first packet lost, say) holds only itself until its resource
+/// timeout; serving links one at a time let it hold every later delivery too, so a sender's
+/// retries timed out queued behind it. Receivers live in a `JoinSet`, so aborting this task
+/// aborts them.
+async fn serve_deliveries(
+    endpoint: Arc<Endpoint>,
+    held: Arc<Held>,
+    events_tx: mpsc::UnboundedSender<Event>,
+    resource_config: ResourceTransferConfig,
+) {
+    let mut receiving = tokio::task::JoinSet::new();
+    loop {
+        let accepted = tokio::select! {
+            accepted = endpoint.accept_resource() => accepted,
+            Some(_) = receiving.join_next(), if !receiving.is_empty() => continue,
+        };
+        let Ok(accepted) = accepted else {
+            return;
+        };
+        let endpoint = Arc::clone(&endpoint);
+        let held = Arc::clone(&held);
+        let events_tx = events_tx.clone();
+        receiving.spawn(async move {
+            let events = match receive_direct_with_stamp_cost_and_resource_config(
+                &endpoint,
+                accepted,
+                &held.delivered,
+                DEFAULT_MAX_MESSAGE_BYTES,
+                None,
+                resource_config,
+            )
+            .await
+            {
+                Ok(received) if received.verification == Verification::SourceUnknown => {
+                    held.hold(&endpoint, received, now_secs())
+                }
+                Ok(received) => vec![Event::authenticated_message(received)],
+                Err(error) => vec![Event::Dropped(error.to_string())],
+            };
+            for event in events {
+                let _ = events_tx.send(event);
+            }
+        });
+    }
+}
+
 pub(crate) fn radio_resource_config(
     params: &tulle::lora::LoRaParams,
     timeout: Duration,
@@ -362,4 +383,92 @@ fn now_secs() -> f64 {
         .duration_since(UNIX_EPOCH)
         .map(|d| d.as_secs_f64())
         .unwrap_or_default()
+}
+
+#[cfg(test)]
+mod tests {
+    use std::time::Duration;
+
+    use outrider::{
+        DeliveryAnnounce, LxmfPayload, announce_delivery, register_delivery, send_direct,
+    };
+    use retinue::endpoint::{Endpoint, ResourceTransferConfig};
+    use retinue::identity::PrivateIdentity;
+
+    use super::*;
+
+    fn connect(a: &Endpoint, b: &Endpoint) {
+        let (mut a_out, a_sink) = a.attach_interface().split();
+        let (mut b_out, b_sink) = b.attach_interface().split();
+        tokio::spawn(async move {
+            while let Some(packet) = a_out.recv().await {
+                if !b_sink.deliver(packet) {
+                    break;
+                }
+            }
+        });
+        tokio::spawn(async move {
+            while let Some(packet) = b_out.recv().await {
+                if !a_sink.deliver(packet) {
+                    break;
+                }
+            }
+        });
+    }
+
+    /// MeshChatX on o-pc, 2026-10-14: a delivery link whose first packet was lost stalled
+    /// the serial accept loop for its whole resource timeout, and each retry link queued
+    /// behind it until the sender gave up.
+    #[tokio::test]
+    async fn a_silent_link_does_not_hold_later_deliveries() {
+        let sender_identity = PrivateIdentity::from_secret_bytes(&[0x51; 64]);
+        let sender = Arc::new(Endpoint::new(sender_identity.clone()));
+        let receiver = Arc::new(Endpoint::new(PrivateIdentity::from_secret_bytes(
+            &[0x61; 64],
+        )));
+        connect(&sender, &receiver);
+        let sender_announce = DeliveryAnnounce::named(b"Sender".to_vec());
+        let receiver_announce = DeliveryAnnounce::named(b"Receiver".to_vec());
+        register_delivery(&sender, &sender_announce).unwrap();
+        register_delivery(&receiver, &receiver_announce).unwrap();
+        announce_delivery(&receiver, &receiver_announce).unwrap();
+        let peer = tokio::time::timeout(Duration::from_secs(2), sender.next_announcement())
+            .await
+            .unwrap()
+            .unwrap();
+        announce_delivery(&sender, &sender_announce).unwrap();
+        tokio::time::timeout(Duration::from_secs(2), receiver.next_announcement())
+            .await
+            .unwrap()
+            .unwrap();
+
+        let (events_tx, mut events) = mpsc::unbounded_channel();
+        let config = ResourceTransferConfig {
+            timeout: Duration::from_secs(30),
+            ..ResourceTransferConfig::default()
+        };
+        let serving = tokio::spawn(serve_deliveries(
+            Arc::clone(&receiver),
+            Arc::new(Held::default()),
+            events_tx,
+            config,
+        ));
+
+        // Established, then silent: the receiver waits on it for the full timeout.
+        let _silent = sender
+            .open_resource(peer.destination, peer.identity)
+            .await
+            .unwrap();
+        let payload = LxmfPayload::text(1_760_000_000.0, b"", b"after the stall".to_vec());
+        send_direct(&sender, &sender_identity, &peer, &payload)
+            .await
+            .unwrap();
+
+        let event = tokio::time::timeout(Duration::from_secs(5), events.recv())
+            .await
+            .expect("a later delivery must not wait out the silent link")
+            .unwrap();
+        assert!(matches!(event, Event::Message { .. }), "{event:?}");
+        serving.abort();
+    }
 }
