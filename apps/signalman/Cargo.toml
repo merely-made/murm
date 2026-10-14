@@ -44,7 +44,7 @@ tucket = { path = "../../crates/tucket", optional = true }
 tempfile = { version = "3", optional = true }
 async-trait = { version = "0.1", optional = true }
 # The shared presentation vocabulary follows the desktop's Mere cohort.
-comms = { package = "mere-comms", git = "https://www.github.com/merely-made/mere.git", rev = "2f92d45dd2fc30c173367f203ad49ed913f29fff", optional = true }
+comms = { package = "mere-comms", git = "https://www.github.com/merely-made/mere.git", rev = "864757da78214bdd810e17355df5b2309721d651", optional = true }
 hex = "0.4"
 linkboy = { version = "0.1.0", path = "../linkboy" }
 outrider = { version = "0.3.0", path = "../../crates/outrider", features = ["voice"] }

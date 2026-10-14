@@ -8,11 +8,17 @@ repository is [merely-made/murm](https://github.com/merely-made/murm). See the
 receiving-build and consumer-cutover status.
 
 The radio workspace stays at the root. The separate `native/` workspace contains
-`murm`, `mere-transport`, and `mere-webrtc-carrier`. Both use Rust 1.99.0 for
-development and declare a shared MSRV of 1.97.1. Build the native libraries with
-`cargo test --manifest-path native/Cargo.toml --lib`; cross-target and live
-network qualification remain explicit lanes. Stickleback stays in Mere, and
-Netfetcher's browser policy stays in Genet.
+`murm`, `mere-transport`, and `mere-webrtc-carrier`. The independent `wire/`
+workspace provides `murm-wire`, the reusable one-hop HTTP/1-2-3 and raw
+WebSocket engines. All use Rust 1.99.0 for development and declare a shared
+MSRV of 1.97.1. Build the native libraries with
+`cargo test --manifest-path native/Cargo.toml --lib` and the wire engine with
+`cargo test --manifest-path wire/Cargo.toml`.
+
+Original Genet source ancestry is preserved for the wire import. Netfetcher's
+browser policy and public crate identity stay in Genet, while hosts select
+trust, pooling and limits. Stickleback stays in Mere. Cross-target and live
+network qualification retain their own lanes; see MOVE5 in the family plan.
 
 Signalman's desktop Messages face now routes its versioned text-over-LXMF
 profile through the shared Comms adapter and the same durable application

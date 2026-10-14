@@ -7,8 +7,9 @@ repository to Murm with the same repository identity and refs; canonical URL
 validation passed and the canonical URLs are published on main. Crate names and history remain
 intact. Supplemental Isocosm source adoption is also published; its gameplay
 compiler gates retain the reproduced upstream failure described below.
-Registry releases, further physical/live-network qualification and
-MOVE5 wire extraction retain their own gates.
+Registry releases and further physical/live-network qualification retain their
+own gates. MOVE5's reusable wire engine and receiving Genet/Mere source
+adoptions are published; Signalman's final supplier cohort is qualified.
 Post-cutover R1 implements Signalman's LXMF software path and initial R2
 recorded-delivery diagnostics; broader integration retains its gates below.
 
@@ -90,31 +91,33 @@ actual requirement above 1.97.1 must be resolved or brought back into the shared
 MSRV decision before claiming stack-wide support. Inventory evidence is saved
 in `Code/targets/murm-shared-msrv-selection-20261013.json`.
 
-The two-workspace layout below remains a proposal for dependency, feature and
-target isolation. Both roots follow the same working-toolchain policy and the
-separately selected common MSRV. Keep a separate native workspace only where
-graph qualification demonstrates its value; a unified workspace is acceptable
-if radio/firmware dependency cones and profiles remain correct. The independent
-desktop workspace follows the same policies as well.
+The qualified layout keeps the radio/firmware workspace at the root, native
+peer carriers in `native/`, and the reusable HTTP/WebSocket engine in `wire/`.
+Each has an independent dependency cone. Signalman's desktop host remains a
+separate app workspace. All roots follow the working toolchain 1.99.0 and the
+separately qualified common MSRV 1.97.1.
 
-Proposed layout (illustrative; these destination directories do not yet exist):
+Current implementation layout:
 
 ```text
-Murm repository, based on existing Retinue history
-  Cargo.toml                  radio workspace / shared toolchain and separate MSRV
+Murm repository, continuing Retinue history
+  Cargo.toml                  radio workspace
   crates/                     existing radio/protocol/control package paths
   apps/                       existing host apps and separate desktop workspace
   firmware/                   existing targets and packaging
   native/
-    Cargo.toml                proposed native workspace / same two compiler policies
+    Cargo.toml                independent native workspace
     crates/murm/              package murm; library murm
     crates/transport/         package mere-transport; library transport
     crates/webrtc-carrier/    package mere-webrtc-carrier; library webrtc_carrier
-  design_docs/                this canonical migration plan and existing evidence
+  wire/
+    Cargo.toml                independent wire workspace, no Genet back-edge
+    crates/wire/              package murm-wire; protocol HTTP/WebSocket engines
+  design_docs/                canonical migration plan and existing evidence
 ```
 
-If the separate native workspace is retained, the root excludes it. Native
-defaults must not activate native transports in embedded builds. Owned packages
+The radio root excludes native, wire and the independent desktop workspace.
+Their defaults cannot activate native networking in an embedded build. Owned packages
 converge on the selected shared MSRV of 1.97.1; a newer working toolchain
 does not change that value automatically.
 The WebRTC core still gets its default Wasm check; the native workspace name
@@ -844,3 +847,61 @@ Compiler, MSRV, Wasm and desktop gates are recorded in
 serial interoperability and headed/pixel acceptance retain their own lanes.
 MOVE5 wire extraction is now being qualified against the actual Genet and Mere
 host boundaries; browser policy remains in Genet.
+
+
+### 2026-10-14 — MOVE5 wire engine and receiving source adoption
+
+The independent `wire` workspace publishes `murm-wire` 0.1.0 at
+`80d9959000fcd913634fd223538dfdbbec1f5e4f`. The original unfiltered Genet
+source `1ec5d08d16e78f936e9ab366af9f36b7d6abc044` is a parent/ancestor of
+that import. The rehearsed `ours` merge retained the radio/native tree and
+staged only the selected engine and receipts; no unrelated Genet component
+appears at Murm's implementation tip. GitHub's comparison confirms the original
+source as the merge base. The source-bound pre-publication engine/host receipt
+is `testing/receipts/wire-engines/qualification.json`.
+
+Genet's published adoption is
+`b6bfbeb556a6a17eddf8d5ad8254d3fcac95b084`. Netfetcher remains package
+`netfetcher` 0.1.1, with the same default features and public Fetch/WebSocket
+entry points. Its adapter translates policy-owned request/response values to
+protocol-level HTTP values, and the raw WebSocket connector receives the
+already assembled handshake. CORS, redirect/cookie/cache/tainting/referrer/CSP,
+integrity/decoding, WebSocket policy and response-cookie processing stay in
+Genet. The duplicate HTTP/3 and default HTTP connection implementations are
+removed from its shipping tree. The engine has no Genet/Netfetcher dependency.
+
+Mere's published adoption is
+`864757da78214bdd810e17355df5b2309721d651`. It adopts one Genet cohort and
+removes the duplicate crawler exchange implementation. Its explicit crawler
+engine retains Mozilla roots, a separate pool and canceled-request retries
+disabled. Tests preserve one-hop admission, redirects, byte budgets, partial
+failures, ranged reads and scoped session cookies. It introduces no new
+per-persona pool partitioning and changes no session-store authority.
+
+The immutable Git receiving checks pass 83 Genet policy cases on each compiler,
+the JS Fetch integration, four actual production WPT net-worker cases, and
+16 Mere Fetch/crawler cases on each compiler, with selected-source metadata
+showing one wire engine, coherent Genet types and no foreign worktree Git
+manifest. Genet's optional WebGL fixture now requires `webgl-tests`, preserving
+the existing `image-decode` default and keeping the CPU network gate free of
+its compositor dependency. The original broad WPT command reached three
+existing macOS compositor compiler errors; no renderer repair, GPU/presentation
+or full upstream WPT-corpus acceptance comes from this move.
+
+The default Netfetcher process pool remains compatible. Explicit
+`HttpTransport` instances select their own TLS roots, pool and retry behavior;
+the HTTP/2 fixture proves separate connections and rejection outside supplied
+trust. Explicit HTTP/3 trust and raw WebSocket TLS connectors remain distinct
+from browser policy and Iroh endpoints. HTTP/3 retains its buffered-response
+contract; a response-header deadline does not bound caller body reading.
+Registry publishing, broader network/physical acceptance and stock companion
+serial backends remain separate work.
+
+Signalman's final coherent receiving cohort uses Mere `864757da7` and Genet
+`b6bfbeb556a`. Its 43 library cases pass on each compiler; the desktop's 29
+library cases and all-target compilation pass. Metadata selects one
+Comms/DOM/Personae identity with no foreign worktree Git manifest. The desktop
+does not pull unused Netfetcher/HTTP wire engines; those are qualified in the
+Genet/Mere host cones. The frozen first receipts remain unchanged; the final
+supplier/input record is `testing/receipts/wire-engines/receiving-cohort.json`.
+MOVE5 source extraction and receiving adoption are complete.

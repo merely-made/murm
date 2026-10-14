@@ -1807,7 +1807,7 @@ dependencies = [
 [[package]]
 name = "mere-comms"
 version = "0.0.1"
-source = "git+https://www.github.com/merely-made/mere.git?rev=2f92d45dd2fc30c173367f203ad49ed913f29fff#2f92d45dd2fc30c173367f203ad49ed913f29fff"
+source = "git+https://www.github.com/merely-made/mere.git?rev=864757da78214bdd810e17355df5b2309721d651#864757da78214bdd810e17355df5b2309721d651"
 dependencies = [
  "async-trait",
  "serde",
@@ -3232,12 +3232,12 @@ source = "git+https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-
 [[patch.unused]]
 name = "mere-proofs"
 version = "0.1.0"
-source = "git+https://www.github.com/merely-made/mere.git?rev=2f92d45dd2fc30c173367f203ad49ed913f29fff#2f92d45dd2fc30c173367f203ad49ed913f29fff"
+source = "git+https://www.github.com/merely-made/mere.git?rev=864757da78214bdd810e17355df5b2309721d651#864757da78214bdd810e17355df5b2309721d651"
 
 [[patch.unused]]
 name = "muniment"
 version = "0.1.2"
-source = "git+https://www.github.com/merely-made/mere.git?rev=2f92d45dd2fc30c173367f203ad49ed913f29fff#2f92d45dd2fc30c173367f203ad49ed913f29fff"
+source = "git+https://www.github.com/merely-made/mere.git?rev=864757da78214bdd810e17355df5b2309721d651#864757da78214bdd810e17355df5b2309721d651"
 
 [[patch.unused]]
 name = "p2panda-auth"
