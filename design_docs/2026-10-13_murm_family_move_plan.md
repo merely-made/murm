@@ -643,7 +643,10 @@ public links use Murm. Stable graph ID `retinue` and package/schema IDs keep
 existing references valid while the displayed repository name is Murm.
 
 The additional Isocosm pin/adapter audit remains an uncommitted candidate,
-not a green gameplay build: current main reproduces its ten simulator errors
-with or without these changes. It remains separate from the named MOVE3
-cutover. MOVE5 Netfetcher wire extraction, crate-registry publication and
+not a green gameplay build: the candidate and untouched baseline at
+`2260b026bf1bbac9039ff8ddb0d001cc2b520ab5` reproduce the same ten simulator
+errors. Isocosm upstream advanced to `55f48769d7ccac51bf70160f785da616e5259690`
+during final reconciliation; that gameplay revision was not compiled here,
+and the candidate needs reconciliation before publication. It remains separate
+from the named MOVE3 cutover. MOVE5 Netfetcher wire extraction, crate-registry publication and
 further network/physical/headed qualification remain open in this plan.
