@@ -1144,3 +1144,71 @@ Keep crate names/history and Actions disabled. Establish fresh Windows
 source/tool/binary/firmware facts and a finite native run before claiming UI
 acceptance. At an access, peer or resource blocker, preserve the result and stop
 rather than polling or expanding preparation while waiting.
+
+#### R5 o-pc first session (2026-10-14)
+
+**Windows builds.** At `fe5b085a2a9` on o-pc (Rust 1.99.0, debug info off),
+`cargo build -p signalman --example stock_companion_pair --features comms`
+finished in 1m37s and the separate `apps/signalman-desktop` build in 4m01s,
+both exit 0. Strict Clippy on Windows has not run.
+
+**Device facts.** No board attached to o-pc runs stock or RNode firmware:
+
+| Port | USB | Firmware evidence |
+| --- | --- | --- |
+| COM6 | 303A:1001, MAC …FB:28 | ESP app descriptor `tulle-heltec-v4-phy` 0.0.1, built 2026-09-30 21:12:39 (read-only esptool flash read; board reset and answered again) |
+| COM7 | 303A:1001, MAC …FA:64 | Same descriptor and build |
+| COM10 | 1915:521F | Boot banner `tulle/t114 phy online; version=0.0.1 … build=711816a… image=t114-native`, slot B seq 93, node `599997c8` |
+
+The production companion actors timed out on the identity handshake under both
+protocols on both V4s (four of four `probe` runs, receipts `failed`, no
+mutation). Every board answers RNode detect, MeshCore device query and
+unknown frames with Tulle's `82 03 00 00` refusal. The T114 package exposes
+`modem`/`node`/`rnode` channels and the V4 package `modem`/`rnode`, chosen at
+Linkboy install time. The T114 currently runs as a modem, so stock RNS reports
+`Could not detect device for RNodeInterface[Retinue T114]`.
+
+**MeshChatX 4.8.1 on o-pc.** Started once and stopped. Besides the RNode detect
+failure, it loops `division by zero` in the T114 announce queue several times
+a second; that loop is the likely source of an 8.0 GB `meshchatx.log.1`, which
+the owner asked to remove (moved to the Recycle Bin). Its frozen backend also
+logs `unrecognized arguments: --multiprocessing-fork` for child processes. Its
+database-loss guard is stuck: the Aug 23 baseline says 5 messages, the live
+`lxmf_messages` has 0 after test messages were deleted, so every start writes
+`backup-SUSPICIOUS-*.zip` (four retained, about 20 MB each), and by its own
+changelog a suspicious run skips the baseline update, so the warning never
+clears. Rebaselining was refused by the session's permission classifier and
+was not done.
+
+**Static LXMF interop.** `apps/signalman/src/message/observe.rs` accepts only
+`signalman.message.v1`/`signalman.voice.v1` titles and returns
+`WrongWireTitle` for anything else; text sends carry a JSON `WireEnvelope` as
+content. Plain MeshChatX chat therefore cannot be received, and Signalman text
+would appear in MeshChatX as a titled JSON blob. Not yet confirmed on air.
+
+**Rulings (owner, 2026-10-14).**
+
+1. *Stock radios.* Put: COM6/COM7 run Tulle PHY, no stock companion attached;
+   stop, reflash both to Meshtastic, reflash both to MeshCore, or skip. Owner:
+   "flash them at will, whatever firmware. although presumably you're
+   considering flashing them with... sennet? tucket? too? integration work
+   looms, i wager, for those two, and the point is to see if meshtastic and
+   meshcore can be integrated into murm. so you may proceed, but remember the
+   point of the stack."
+2. *Bench layout.* Put, after noting that Sennet/Tucket are host-side over the
+   existing Tulle PHY and Sennet lacks directed text/ACK: stock↔stock then
+   stack legs; stock↔Sennet/Tucket peer; or hybrid per protocol. Owner chose
+   **stock↔stock, then stack legs**: back up and flash both V4s stock, run the
+   `fe5b085` companion lane with `stock_companion_pair peer`, Meshtastic then
+   MeshCore, then restore Tulle.
+3. *Order.* Owner chose **MeshChatX RF check first, then flash.**
+4. *MeshChatX peer.* q-pc also runs MeshChatX with the same identity as o-pc.
+   Owner chose **o-pc local MeshChatX, q-pc paused** for the check.
+
+*Reading, not ruled:* ruling 3 cannot proceed as put, because no o-pc board is
+in RNode mode. Moving any board to the `rnode` channel is a Linkboy reinstall,
+and the T114 was outside ruling 1. Stock artifacts for ruling 2 are already
+local under ignored `validation/results/sennet-tucket-radios/artifacts`
+(Meshtastic 2.7.26.54e0d8d, MeshCore 1.17.1 companion, pinned espflash 4.5.0).
+The retained backups predate the current Tulle build, so a fresh full backup
+comes first.
