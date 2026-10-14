@@ -4,7 +4,7 @@
 //! Tucket: MeshCore interop for the retinue radio family.
 //!
 //! Node management and text interop with MeshCore mesh networks, as a sibling
-//! of [retinue](https://github.com/merely-made/retinue) on the shared tulle radio
+//! of [retinue](https://github.com/merely-made/murm) on the shared tulle radio
 //! layer.
 //!
 //! A tucket is a trumpet flourish announcing a single arrival.

@@ -36,7 +36,7 @@
 //! path segment is the Reticulum app name, the rest are its aspects. The expanded name
 //! is `mere.cable.v1`, so the destination hash is the one RNS derives.
 //!
-//! [`retinue`]: https://github.com/merely-made/retinue
+//! [`retinue`]: https://github.com/merely-made/murm
 
 mod announce;
 mod keys;

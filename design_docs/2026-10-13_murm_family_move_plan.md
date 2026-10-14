@@ -1,15 +1,17 @@
 # Murm family and repository move
 
 **Date:** 2026-10-13
-**Status:** In progress (2026-10-13). The owner authorized the Murm family direction and a move based
-on the Retinue repository, preserving crate names and history. This document
-selects boundaries and sequences qualification; no repository has been renamed
-and no implementation has moved.
+**Status:** In progress (2026-10-13). The native implementation import and named
+MOVE3 consumer adoption are published. MOVE4 renamed the continuing Retinue
+repository to Murm with the same repository identity and refs; canonical URL
+validation passed and publication is being completed. Crate names and history remain
+intact. Registry releases, further physical/live-network qualification and
+MOVE5 wire extraction retain their own gates.
 
 **Canonical home:** this repository owns the migration. Mere and Genet should
-cite this plan rather than keep another migration specification. Until the
-repository rename actually happens, the cross-repository coordinate is
-`retinue/design_docs/2026-10-13_murm_family_move_plan.md`.
+cite this plan rather than keep another migration specification. The canonical
+cross-repository coordinate is
+`murm/design_docs/2026-10-13_murm_family_move_plan.md`.
 
 **Related:** [documentation policy](DOC_POLICY.md),
 [murmuration direction](2026-08-09_channel_murmuration.md#current-direction-coordinated-runtime-personalities),
@@ -603,3 +605,45 @@ gameplay work as a MOVE4 gate. No gameplay repair or success is claimed.
 
 Native MSRV qualification is being refreshed in a separate local gate receipt;
 Actions remains disabled by owner direction.
+
+### 2026-10-13 — canonical repository cutover verified
+
+MOVE3 is complete for the named production consumers. MOVE4 renamed the
+existing GitHub repository to `merely-made/murm`, retaining repository ID
+`1291698578` / `R_kgDOTP3Bkg`, `main`, and byte-identical advertised refs at
+the rename. There were no published releases and no Pages site. The old
+repository URL resolves to the same ID and the complete Mere source ancestry
+still reaches `fabfd10ef7f8a34058907f9a9c2b1e1a311be82f`. No repository was
+created at the old name. Crate names, versions, directories, package IDs and
+firmware payloads are unchanged. Actions remained disabled throughout.
+
+Current supplier/remotes/repository metadata, firmware/catalog locators, org
+profile and active family references now use Murm. Old-source Cargo patch
+keys remain where immutable published suppliers still name Retinue; their
+targets are canonical Murm or the receiving workspace. This closes Mere
+onto one Retinue 0.3 source, including its older Knot/NomadNet consumer.
+Twenty-three independent all-feature graphs and the Mere root plus Burn
+Remote fixture resolve the canonical supplier without sibling source
+overrides or duplicated transport/Personae/Muniment/p2panda families.
+
+Fourteen named local compilation/test scopes passed again after the URL
+change. Site 83, Signalman 34 and desktop-network seven tests pass; Knot
+cancellation passed one focused test before the URL-only change. Native
+receiving gates passed on both Rust 1.97.1 and 1.99.0: 66 conversation tests,
+four admission tests, 44 portable WebRTC tests, native all-target/all-feature
+compilation and browser WebRTC target compilation. Three live gossip and two
+live admission cases were filtered because local network execution is
+unavailable; no fresh network, physical-radio or headed acceptance is claimed.
+
+The public site's immutable version 3 firmware feed remains SHA256
+`01076ad8a6f705c296ef7bee746d40899a8e3085c399511f62e549ea265492f5`.
+Its public navigation is canonicalized after custody verification. Generated
+route/face trace bytes and their original provenance also remain intact;
+public links use Murm. Stable graph ID `retinue` and package/schema IDs keep
+existing references valid while the displayed repository name is Murm.
+
+The additional Isocosm pin/adapter audit remains an uncommitted candidate,
+not a green gameplay build: current main reproduces its ten simulator errors
+with or without these changes. It remains separate from the named MOVE3
+cutover. MOVE5 Netfetcher wire extraction, crate-registry publication and
+further network/physical/headed qualification remain open in this plan.

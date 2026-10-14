@@ -5,7 +5,7 @@ edition = "2024"
 
 rust-version = "1.97.1"
 license = "MPL-2.0"
-repository = "https://github.com/merely-made/retinue"
+repository = "https://github.com/merely-made/murm"
 description = "The radio-management application of the retinue family: the signal box for a household's radios."
 keywords = ["radio", "mesh", "reticulum", "lora"]
 categories = ["network-programming"]

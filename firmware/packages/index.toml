@@ -8,10 +8,10 @@ release_sequence = 2
 manifest = "heltec-v4-current.toml"
 firmware_publisher = "Merely Made"
 state = "proven-recipe"
-instructions_url = "https://github.com/merely-made/retinue/blob/main/firmware/packages/README.md"
-recovery_url = "https://github.com/merely-made/retinue/blob/main/firmware/packages/heltec-v4-current-recovery.md"
-installer_receipts = ["https://github.com/merely-made/retinue/blob/main/testing/receipts/firmware-refresh/README.md"]
-recovery_receipts = ["https://github.com/merely-made/retinue/blob/main/testing/receipts/firmware-refresh/README.md"]
+instructions_url = "https://github.com/merely-made/murm/blob/main/firmware/packages/README.md"
+recovery_url = "https://github.com/merely-made/murm/blob/main/firmware/packages/heltec-v4-current-recovery.md"
+installer_receipts = ["https://github.com/merely-made/murm/blob/main/testing/receipts/firmware-refresh/README.md"]
+recovery_receipts = ["https://github.com/merely-made/murm/blob/main/testing/receipts/firmware-refresh/README.md"]
 receipt_hosts = ["windows-x86_64"]
 
 [[packages]]
@@ -20,8 +20,8 @@ release_sequence = 1
 manifest = "heltec-v4-resident.toml"
 firmware_publisher = "Merely Made"
 state = "partial"
-instructions_url = "https://github.com/merely-made/retinue/blob/main/firmware/packages/README.md"
-recovery_url = "https://github.com/merely-made/retinue/blob/main/firmware/packages/heltec-v4-current-recovery.md"
+instructions_url = "https://github.com/merely-made/murm/blob/main/firmware/packages/README.md"
+recovery_url = "https://github.com/merely-made/murm/blob/main/firmware/packages/heltec-v4-current-recovery.md"
 installer_receipts = []
 recovery_receipts = []
 
@@ -31,8 +31,8 @@ release_sequence = 52
 manifest = "t114-current.toml"
 firmware_publisher = "Merely Made"
 state = "partial"
-instructions_url = "https://github.com/merely-made/retinue/blob/main/firmware/packages/README.md"
-recovery_url = "https://github.com/merely-made/retinue/blob/main/firmware/packages/t114-current-recovery.md"
+instructions_url = "https://github.com/merely-made/murm/blob/main/firmware/packages/README.md"
+recovery_url = "https://github.com/merely-made/murm/blob/main/firmware/packages/t114-current-recovery.md"
 installer_receipts = []
 recovery_receipts = []
 
@@ -42,7 +42,7 @@ release_sequence = 2007026
 manifest = "meshtastic-t114-2.7.26.54e0d8d.toml"
 firmware_publisher = "Meshtastic"
 state = "partial"
-instructions_url = "https://github.com/merely-made/retinue/blob/main/firmware/packages/README.md"
-recovery_url = "https://github.com/merely-made/retinue/blob/main/firmware/packages/t114-v51-recovery.md"
+instructions_url = "https://github.com/merely-made/murm/blob/main/firmware/packages/README.md"
+recovery_url = "https://github.com/merely-made/murm/blob/main/firmware/packages/t114-v51-recovery.md"
 installer_receipts = []
 recovery_receipts = []

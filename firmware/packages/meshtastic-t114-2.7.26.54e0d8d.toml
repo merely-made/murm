@@ -17,7 +17,7 @@ route = "uf2-mass-storage"
 program = "linkboy UF2 volume writer"
 version = "0.0.1"
 license = "MPL-2.0"
-source_url = "https://github.com/merely-made/retinue/tree/main/apps/linkboy"
+source_url = "https://github.com/merely-made/murm/tree/main/apps/linkboy"
 notice = "This route is built into Linkboy. It writes the already hash-verified UF2 file to an explicitly selected, readable UF2 bootloader volume and never shells out to an unpinned flasher."
 
 [payload]

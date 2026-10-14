@@ -2,8 +2,8 @@
 
 Murm brings the radio family together with the native peer carriers and
 conversation service imported from Mere. Retinue remains the Reticulum crate;
-all existing crate names and source histories are preserved. The repository
-still uses its Retinue URL during this first move. See the
+all existing crate names and source histories are preserved. The canonical
+repository is [merely-made/murm](https://github.com/merely-made/murm). See the
 [family move plan](design_docs/2026-10-13_murm_family_move_plan.md) for the
 receiving-build and consumer-cutover status.
 
