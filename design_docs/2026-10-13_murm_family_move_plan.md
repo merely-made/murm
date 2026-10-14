@@ -4,7 +4,7 @@
 **Status:** In progress (2026-10-13). The native implementation import and named
 MOVE3 consumer adoption are published. MOVE4 renamed the continuing Retinue
 repository to Murm with the same repository identity and refs; canonical URL
-validation passed and publication is being completed. Crate names and history remain
+validation passed and the canonical URLs are published on main. Crate names and history remain
 intact. Registry releases, further physical/live-network qualification and
 MOVE5 wire extraction retain their own gates.
 
