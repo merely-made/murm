@@ -66,3 +66,7 @@ required-features = ["serial-async"]
 [[example]]
 name = "direct_phy_sleep_proof"
 required-features = ["serial-async"]
+
+[[example]]
+name = "rf_sniff"
+required-features = ["serial-async"]
