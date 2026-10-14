@@ -1212,3 +1212,55 @@ local under ignored `validation/results/sennet-tucket-radios/artifacts`
 (Meshtastic 2.7.26.54e0d8d, MeshCore 1.17.1 companion, pinned espflash 4.5.0).
 The retained backups predate the current Tulle build, so a fresh full backup
 comes first.
+
+#### R5 MeshChatX RF check (2026-10-14)
+
+**Ruling 5 (owner).** Put: make COM6 the RNode (MeshChatX's RNS repointed to
+COM6, Signalman's station on COM7) or reinstall the T114 as the RNode. Owner
+chose COM6, adding "either, both, i don't mind", then "listen, the firmware is
+fungible to me" and "like, these are meant for experimentation, go ahead and
+use 'em as you need." *Reading, not ruled:* the bench boards need no backup
+ceremony before experimental use.
+
+**Setup.** No reinstall was needed: the V4 image takes a text `channel rnode`
+line, persists it and reboots into its RNode loop. Text probes are honored only
+at a command boundary, so a lone `0x00` delimiter has to come first; without it
+`status` is parsed as Selvage commands and answered with `83 01`
+(CONFIG_MALFORMED) and `82 03` (TX_UNKNOWN_COMMAND), so nothing was
+transmitted. After the switch, COM6 answers RNode detect with `c0 08 46 c0`.
+`~/.reticulum/config` (backup `config.bak-20261014`) disables the COM10 T114
+entry and adds `Retinue V4 COM6` on the trunk profile (906.875 MHz, BW 250 kHz,
+SF8, CR 4/5, 7 dBm). MeshChatX is 4.9.1, not 4.8.1. With COM6 it reports the
+interface "configured and powered up", and the division-by-zero loop is gone.
+The config also keeps LAN AutoInterface and seven public TCP/backbone
+interfaces with transport on, so the bench announces were relayed publicly.
+q-pc's same-identity MeshChatX was paused by the owner.
+
+**Desktop Signalman is blocked on custody.** With `SIGNALMAN_STATION_PORT=COM7`
+and a fresh bench data root, the Network face reports "station identity is
+pending: djinn is not reachable: the resident host closed the stream
+mid-conversation", although `graphshell-device-host` is running. The radio was
+never opened. The `signalman.message.v1` desktop path is therefore untested on
+air.
+
+**Terminal Signalman over RF.** The terminal `signalman` (same Postilion
+station; plain LXMF with title = station name) ran on COM7 under a throwaway
+bench identity, LXMF `b3ce96b773aa8d2217971bf099019755`. MeshChatX's
+address is `23f9f4029bffab61be661a5c138a0e31`.
+
+| Direction | Result |
+| --- | --- |
+| Signalman → MeshChatX | Held until MeshChatX announced, handed to the radio as a Resource, shown intact in MeshChatX (`signalman-mcx-1 hello from Signalman on COM7`, Direct, SNR 13) |
+| MeshChatX → Signalman | **Failed.** MeshChatX sent `signalman-mcx-2 …` as a link Resource, stalled at 50% (1.7 then 0.8 B/s, 1 hop), and ended "FAILED, WAITING FOR ANNOUNCE". The station logged four `[dropped] Retinue delivery failed: resource link closed` between 16:58:06 and 16:58:44 |
+
+The error comes from `crates/retinue/src/endpoint/resource_session.rs` /
+`resource_inbound.rs` when the link closes mid-transfer. The open hypothesis is
+that Retinue's inbound Resource receiver doesn't request, or doesn't accept,
+the remaining parts from Python RNS. Diagnosing it needs RNS debug logs on both
+ends. Station output and the config diff are under ignored
+`validation/results/meshchatx-interop-20261014/`.
+
+**MeshChatX data-loss guard.** Its toast reads "Database content anomaly: was
+5 messages / 4816448 bytes, now 0 / 1270176. Restore from backup if needed."
+That confirms the stale baseline described above. Rebaselining remains
+undone.
