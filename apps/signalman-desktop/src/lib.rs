@@ -25,6 +25,7 @@ pub mod audio;
 pub mod availability;
 pub mod collector;
 mod comms;
+pub mod companion;
 pub mod device_mere;
 pub mod flow;
 pub mod messages;
@@ -119,6 +120,26 @@ pub fn focused_revision_field(
             node,
             get: Box::new(|s: &DesktopState| &s.t114_loader_record),
             get_mut: Box::new(|s: &mut DesktopState| &mut s.t114_loader_record),
+        }),
+        Some("companion-port") => Some(cambium_genet_winit_host::FocusedTextSlot {
+            node,
+            get: Box::new(|s: &DesktopState| &s.companion_port),
+            get_mut: Box::new(|s: &mut DesktopState| &mut s.companion_port),
+        }),
+        Some("companion-realm") => Some(cambium_genet_winit_host::FocusedTextSlot {
+            node,
+            get: Box::new(|s: &DesktopState| &s.companion_realm),
+            get_mut: Box::new(|s: &mut DesktopState| &mut s.companion_realm),
+        }),
+        Some("companion-journal") => Some(cambium_genet_winit_host::FocusedTextSlot {
+            node,
+            get: Box::new(|s: &DesktopState| &s.companion_journal),
+            get_mut: Box::new(|s: &mut DesktopState| &mut s.companion_journal),
+        }),
+        Some("companion-channel") => Some(cambium_genet_winit_host::FocusedTextSlot {
+            node,
+            get: Box::new(|s: &DesktopState| &s.companion_channel),
+            get_mut: Box::new(|s: &mut DesktopState| &mut s.companion_channel),
         }),
         Some("message-recipient") => Some(cambium_genet_winit_host::FocusedTextSlot {
             node,

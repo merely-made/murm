@@ -32,6 +32,7 @@ path = "src/main.rs"
 
 [dependencies]
 hex = "0.4"
+serial2-tokio = "0.1.24"
 # The presentation vocabulary. NOT linkboy: package trust, plans, execution,
 # and recovery decisions stay behind Signalman, and this application renders
 # plan facts rather than reconstituting them.
@@ -224,3 +225,6 @@ seneschal = { path = "../../crates/seneschal" }
 tulle = { path = "../../crates/tulle" }
 mere-transport = { git = "https://github.com/merely-made/murm.git", rev = "b49df894635bac95823284efee6c445885eaf62a" }
 mere-webrtc-carrier = { git = "https://github.com/merely-made/murm.git", rev = "b49df894635bac95823284efee6c445885eaf62a" }
+
+[target.'cfg(unix)'.dependencies]
+rustix = { version = "1", features = ["termios"] }

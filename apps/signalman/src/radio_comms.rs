@@ -1,10 +1,11 @@
-//! Comms presentation over the existing resident Sennet and Tucket owners.
+//! Comms presentation and public journals for resident and stock radio owners.
 //!
-//! This journal contains public text and observed wire facts, never channel keys
-//! or identity seeds. Hosts supply an already authorized resident runtime and a
-//! stable realm identifier. This API cannot activate a radio, mint a lease, or
-//! restore packet-ID reservations. Stock companion serial protocols are separate
-//! from this resident-runtime path.
+//! Journals contain text and observed wire facts, never channel keys or private
+//! identity seeds. A resident host supplies its authorized runtime and durable
+//! packet-ID reservations. Stock companion hosts supply an exclusive byte link;
+//! firmware owns keys and RF execution. Both paths use a host-owned realm name.
+//! The companion client cannot attach its journal to a resident PHY runtime.
+pub mod companion;
 mod journal;
 mod resident;
 #[cfg(test)]
@@ -29,6 +30,7 @@ const MAX_RECORDS: usize = 2048;
 /// A caller-owned realm binds channel configuration and public device identities.
 /// The 8-bit Meshtastic channel hash alone is not a realm identifier.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct RadioScope {
     pub realm: String,
     pub meshtastic_node: u32,
@@ -36,14 +38,6 @@ pub struct RadioScope {
     pub meshcore_key: [u8; 32],
 }
 impl RadioScope {
-    fn valid(&self) -> bool {
-        !self.realm.is_empty()
-            && self.realm.len() <= 128
-            && self
-                .realm
-                .bytes()
-                .all(|b| b.is_ascii_alphanumeric() || b == b'-' || b == b'_')
-    }
     fn local(&self, protocol: ProtocolKind) -> String {
         match protocol {
             ProtocolKind::Meshtastic => format!("{:08x}", self.meshtastic_node),
@@ -103,6 +97,113 @@ impl RadioScope {
     }
 }
 
+/// Public identity returned by one stock companion. No synthetic identity is
+/// created for the other protocol. Realm names remain host-owned configuration.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(tag = "companion", deny_unknown_fields)]
+pub enum CompanionScope {
+    Meshtastic {
+        realm: String,
+        node: u32,
+        channel: u8,
+    },
+    MeshCore {
+        realm: String,
+        key: [u8; 32],
+    },
+}
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(untagged)]
+enum Scope {
+    Resident(RadioScope),
+    Companion(CompanionScope),
+}
+impl Scope {
+    fn protocols(&self) -> Vec<ProtocolKind> {
+        match self {
+            Self::Resident(_) => vec![ProtocolKind::Meshtastic, ProtocolKind::MeshCore],
+            Self::Companion(CompanionScope::Meshtastic { .. }) => vec![ProtocolKind::Meshtastic],
+            Self::Companion(CompanionScope::MeshCore { .. }) => vec![ProtocolKind::MeshCore],
+        }
+    }
+    fn realm(&self) -> &str {
+        match self {
+            Self::Resident(s) => &s.realm,
+            Self::Companion(
+                CompanionScope::Meshtastic { realm, .. } | CompanionScope::MeshCore { realm, .. },
+            ) => realm,
+        }
+    }
+    fn valid(&self) -> bool {
+        let realm = self.realm();
+        !realm.is_empty()
+            && realm.len() <= 128
+            && realm
+                .bytes()
+                .all(|b| b.is_ascii_alphanumeric() || b == b'-' || b == b'_')
+    }
+    fn local(&self, protocol: ProtocolKind) -> String {
+        match self {
+            Self::Resident(s) => s.local(protocol),
+            Self::Companion(CompanionScope::Meshtastic { node, .. }) => format!("{node:08x}"),
+            Self::Companion(CompanionScope::MeshCore { key, .. }) => hex::encode(key),
+        }
+    }
+    fn conversation(
+        &self,
+        protocol: ProtocolKind,
+        peer: &str,
+    ) -> Result<ConversationId, AdapterError> {
+        if !self.protocols().contains(&protocol) {
+            return Err(AdapterError::NotFound);
+        }
+        let channel = match self {
+            Self::Resident(s) => s.meshtastic_channel,
+            Self::Companion(CompanionScope::Meshtastic { channel, .. }) => *channel,
+            _ => 0,
+        };
+        let local = self.local(protocol);
+        let key = if protocol == ProtocolKind::Meshtastic {
+            format!("{}/{local}/{channel:02x}/{peer}", self.realm())
+        } else {
+            format!("{}/{local}/{peer}", self.realm())
+        };
+        let id = ConversationId::new(protocol, key);
+        self.peer(&id)?;
+        Ok(id)
+    }
+    fn peer(&self, id: &ConversationId) -> Result<String, AdapterError> {
+        if !self.protocols().contains(&id.protocol) {
+            return Err(AdapterError::NotFound);
+        }
+        let local = self.local(id.protocol);
+        let channel = match self {
+            Self::Resident(s) => s.meshtastic_channel,
+            Self::Companion(CompanionScope::Meshtastic { channel, .. }) => *channel,
+            _ => 0,
+        };
+        let prefix = if id.protocol == ProtocolKind::Meshtastic {
+            format!("{}/{local}/{channel:02x}/", self.realm())
+        } else {
+            format!("{}/{local}/", self.realm())
+        };
+        let peer = id.key.strip_prefix(&prefix).ok_or(AdapterError::NotFound)?;
+        let length = if id.protocol == ProtocolKind::Meshtastic {
+            8
+        } else {
+            64
+        };
+        if peer.len() != length
+            || !peer
+                .bytes()
+                .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
+        {
+            return Err(AdapterError::NotFound);
+        }
+        Ok(peer.to_owned())
+    }
+}
+
 /// Native protocol facts remain available alongside the portable projection.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum RadioFact {
@@ -131,6 +232,24 @@ pub enum RadioFact {
         sequence: u64,
         transmitted: bool,
     },
+    CompanionPacket {
+        source: u32,
+        destination: u32,
+        packet_id: u32,
+        channel_index: u8,
+        pki_reported: bool,
+    },
+    CompanionRequest {
+        packet_id: u32,
+    },
+    CompanionAccepted {
+        correlation: u32,
+    },
+    CompanionReceived {
+        protocol: ProtocolKind,
+        source: String,
+        timestamp: u32,
+    },
     Refusal {
         detail: String,
     },
@@ -145,7 +264,7 @@ pub struct RadioRecord {
 #[derive(Clone, Serialize, Deserialize)]
 struct Book {
     version: u8,
-    scope: RadioScope,
+    scope: Scope,
     next_id: u64,
     records: Vec<RadioRecord>,
     #[serde(default)]
@@ -172,7 +291,7 @@ impl RadioComms {
         mut journal: impl RadioJournal + 'static,
     ) -> Result<Self, AdapterError> {
         let bytes = journal.load().map_err(backend)?;
-        Self::open_loaded(scope, journal, bytes)
+        Self::open_loaded(Scope::Resident(scope), journal, bytes)
     }
     /// Reopen a pre-existing public journal; this never creates a local identity.
     pub fn reopen(mut journal: impl RadioJournal + 'static) -> Result<Self, AdapterError> {
@@ -184,7 +303,7 @@ impl RadioComms {
         Self::open_loaded(book.scope, journal, Some(bytes))
     }
     fn open_loaded(
-        scope: RadioScope,
+        scope: Scope,
         mut journal: impl RadioJournal + 'static,
         bytes: Option<Vec<u8>>,
     ) -> Result<Self, AdapterError> {
@@ -230,8 +349,7 @@ impl RadioComms {
                 )
             {
                 record.delivery = DeliveryStatus::Failed {
-                    detail: "resident outcome unknown after reopen; explicit resend required"
-                        .into(),
+                    detail: "radio outcome unknown after reopen; explicit resend required".into(),
                 };
             }
         }
@@ -273,7 +391,30 @@ impl RadioComms {
         Ok(result)
     }
     pub fn scope(&self) -> Result<RadioScope, AdapterError> {
-        Ok(self.lock()?.book.scope.clone())
+        match &self.lock()?.book.scope {
+            Scope::Resident(scope) => Ok(scope.clone()),
+            _ => Err(backend("this is a stock companion scope")),
+        }
+    }
+    pub fn open_companion(
+        scope: CompanionScope,
+        mut journal: impl RadioJournal + 'static,
+    ) -> Result<Self, AdapterError> {
+        let bytes = journal.load().map_err(backend)?;
+        Self::open_loaded(Scope::Companion(scope), journal, bytes)
+    }
+    pub fn supports(&self, protocol: ProtocolKind) -> bool {
+        self.inner
+            .lock()
+            .map(|inner| inner.book.scope.protocols().contains(&protocol))
+            .unwrap_or(false)
+    }
+    pub fn conversation(
+        &self,
+        protocol: ProtocolKind,
+        peer: &str,
+    ) -> Result<ConversationId, AdapterError> {
+        self.lock()?.book.scope.conversation(protocol, peer)
     }
     pub fn records(&self) -> Result<Vec<RadioRecord>, AdapterError> {
         Ok(self.lock()?.book.records.clone())
@@ -281,6 +422,9 @@ impl RadioComms {
     pub fn diagnostics(&self) -> Result<Vec<String>, AdapterError> {
         let inner = self.lock()?;
         let mut lines = vec!["Meshtastic channel senders are unauthenticated; MeshCore private text uses a 16-bit pairwise MAC; ACKs are unencrypted 32-bit matches.".into()];
+        if matches!(inner.book.scope, Scope::Companion(_)) {
+            lines.push("Stock companion observations are device-reported. Signalman does not verify PKI proofs or treat protocol ACKs as authenticated/read receipts.".into());
+        }
         if let Some(fault) = &inner.fault {
             lines.push(fault.clone());
         }
@@ -291,12 +435,17 @@ impl RadioComms {
         }));
         Ok(lines)
     }
-    pub fn add_to(&self, model: &mut comms::Comms) {
-        for protocol in [ProtocolKind::Meshtastic, ProtocolKind::MeshCore] {
+    pub fn add_protocol_to(&self, model: &mut comms::Comms, protocol: ProtocolKind) {
+        if self.supports(protocol) {
             model.add_adapter(Box::new(RadioAdapter {
                 owner: self.clone(),
                 protocol,
             }));
+        }
+    }
+    pub fn add_to(&self, model: &mut comms::Comms) {
+        for protocol in [ProtocolKind::Meshtastic, ProtocolKind::MeshCore] {
+            self.add_protocol_to(model, protocol);
         }
     }
     pub fn model(&self) -> comms::Comms {
@@ -386,7 +535,7 @@ impl ProtocolAdapter for RadioAdapter {
         Identity::new(self.protocol, scope.local(self.protocol))
     }
     async fn conversations(&self) -> Result<Vec<Conversation>, AdapterError> {
-        let scope = self.owner.scope()?;
+        let scope = self.owner.lock()?.book.scope.clone();
         let mut rows: BTreeMap<String, Conversation> = BTreeMap::new();
         for record in self
             .owner
@@ -412,7 +561,7 @@ impl ProtocolAdapter for RadioAdapter {
         if id.protocol != self.protocol {
             return Err(AdapterError::NotFound);
         }
-        self.owner.scope()?.peer(id)?;
+        self.owner.lock()?.book.scope.peer(id)?;
         Ok(self
             .owner
             .records()?
@@ -426,12 +575,16 @@ impl ProtocolAdapter for RadioAdapter {
         if target.protocol != self.protocol {
             return Err(AdapterError::NotFound);
         }
-        self.owner.scope()?.peer(target)?;
+        self.owner.lock()?.book.scope.peer(target)?;
         let author = self.identity();
         let limit = if self.protocol == ProtocolKind::Meshtastic {
             sennet::application::MAX_APPLICATION_PAYLOAD
         } else {
-            tucket::node::MAX_TEXT_BYTES
+            if matches!(self.owner.lock()?.book.scope, Scope::Companion(_)) {
+                133
+            } else {
+                tucket::node::MAX_TEXT_BYTES
+            }
         };
         if draft.subject.is_some()
             || draft.body.trim().is_empty()
@@ -482,7 +635,7 @@ impl ProtocolAdapter for RadioAdapter {
         if conversation.protocol != self.protocol {
             return Err(AdapterError::NotFound);
         }
-        self.owner.scope()?.peer(conversation)?;
+        self.owner.lock()?.book.scope.peer(conversation)?;
         self.owner
             .records()?
             .into_iter()

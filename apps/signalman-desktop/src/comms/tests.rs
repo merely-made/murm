@@ -277,7 +277,7 @@ fn messages_face_registers_both_radio_protocols_and_queues_in_the_owner_journal(
     .unwrap();
     let mut state = crate::state::DesktopState::new(&crate::default_catalog_path());
     state.select_message_protocol(comms::ProtocolKind::Meshtastic);
-    assert_eq!(state.message_protocol, comms::ProtocolKind::Lxmf);
+    assert_eq!(state.message_protocol, comms::ProtocolKind::Meshtastic);
     state.set_radio_comms(owner.clone());
     state.select_message_protocol(comms::ProtocolKind::Meshtastic);
     state.message_recipient = comms_text_input("!00000008");
@@ -305,4 +305,141 @@ fn messages_face_registers_both_radio_protocols_and_queues_in_the_owner_journal(
     drop(owner);
     let reopened = RadioComms::reopen(FileJournal::new(dir.path().join("radio.json"))).unwrap();
     assert_eq!(reopened.records().unwrap().len(), 2);
+}
+
+#[test]
+fn companion_identity_events_use_one_adapter_per_protocol_and_disconnect_preserves_history() {
+    use signalman::radio_comms::{CompanionScope, FileJournal, RadioComms};
+    let dir = tempfile::tempdir().unwrap();
+    let mt = RadioComms::open_companion(
+        CompanionScope::Meshtastic {
+            realm: "stock".into(),
+            node: 1,
+            channel: 0,
+        },
+        FileJournal::new(dir.path().join("mt.json")),
+    )
+    .unwrap();
+    let mc = RadioComms::open_companion(
+        CompanionScope::MeshCore {
+            realm: "stock".into(),
+            key: [7; 32],
+        },
+        FileJournal::new(dir.path().join("mc.json")),
+    )
+    .unwrap();
+    let mut state = crate::state::DesktopState::new(&crate::default_catalog_path());
+    let stop = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
+    state.apply_companion_event(crate::companion::CompanionEvent::Connected {
+        protocol: comms::ProtocolKind::Meshtastic,
+        owner: mt.clone(),
+        stop: stop.clone(),
+        port: "sim-mt".into(),
+    });
+    state.apply_companion_event(crate::companion::CompanionEvent::Connected {
+        protocol: comms::ProtocolKind::MeshCore,
+        owner: mc.clone(),
+        stop: std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false)),
+        port: "sim-mc".into(),
+    });
+    assert_eq!(state.comms().unwrap().identities().len(), 2);
+    state.select_message_protocol(comms::ProtocolKind::Meshtastic);
+    state.message_recipient = comms_text_input("!00000002");
+    state.message_draft = comms_text_input("from stock page");
+    state.queue_message();
+    assert_eq!(mt.records().unwrap().len(), 1);
+    assert!(mc.records().unwrap().is_empty());
+    state.disconnect_companion();
+    assert!(stop.load(std::sync::atomic::Ordering::Relaxed));
+    state.apply_companion_event(crate::companion::CompanionEvent::Stopped {
+        protocol: comms::ProtocolKind::Meshtastic,
+        detail: "disconnected".into(),
+    });
+    assert_eq!(
+        state
+            .radio_owner(comms::ProtocolKind::Meshtastic)
+            .unwrap()
+            .records()
+            .unwrap()
+            .len(),
+        1
+    );
+}
+#[test]
+fn companion_connection_controls_validate_before_dispatch_and_allow_explicit_reconnect() {
+    let dir = tempfile::tempdir().unwrap();
+    let mut state = crate::state::DesktopState::new(&crate::default_catalog_path());
+    state.select_message_protocol(comms::ProtocolKind::Meshtastic);
+    state.request_companion_connection();
+    assert!(state.take_companion_request().is_none());
+    state.companion_port = comms_text_input("/dev/cu.stock");
+    state.companion_realm = comms_text_input("household");
+    state.companion_journal = comms_text_input(dir.path().join("radio.json").to_str().unwrap());
+    state.request_companion_connection();
+    let first = state.take_companion_request().unwrap();
+    assert_eq!(first.realm, "household");
+    state.request_companion_connection();
+    assert!(state.take_companion_request().is_none());
+    state.apply_companion_event(crate::companion::CompanionEvent::Stopped {
+        protocol: comms::ProtocolKind::Meshtastic,
+        detail: "simulated disconnect".into(),
+    });
+    state.request_companion_connection();
+    assert!(state.take_companion_request().is_some());
+    state.select_message_protocol(comms::ProtocolKind::MeshCore);
+    state.request_companion_connection();
+    assert!(state.take_companion_request().is_none()); // same serial port/journal already claimed
+}
+#[test]
+fn companion_settings_refuse_port_aliases_and_separate_scope_paths() {
+    use crate::companion::{CompanionSettings, validate_settings};
+    use signalman::radio_comms::companion::CompanionProtocol;
+    let mt = CompanionSettings {
+        protocol: CompanionProtocol::Meshtastic { channel: 0 },
+        port: "/dev/cu.radio".into(),
+        realm: "house".into(),
+        journal: "/tmp/mt-test.json".into(),
+    };
+    let mut mc = CompanionSettings {
+        protocol: CompanionProtocol::MeshCore,
+        port: "/dev/tty.radio".into(),
+        realm: "house".into(),
+        journal: "/tmp/mc-test.json".into(),
+    };
+    assert!(validate_settings(&[mt.clone(), mc.clone()], None).is_err());
+    mc.port = "/dev/cu.other".into();
+    assert!(validate_settings(&[mt.clone(), mc.clone()], None).is_ok());
+    assert!(
+        validate_settings(
+            std::slice::from_ref(&mt),
+            Some(std::path::Path::new("/dev/tty.radio"))
+        )
+        .is_err()
+    );
+    mc.journal = mt.journal.clone();
+    assert!(validate_settings(&[mt, mc], None).is_err());
+}
+#[test]
+fn invalid_companion_configuration_is_rejected_before_opening_serial_io() {
+    let worker = crate::companion::CompanionWorker::spawn(
+        crate::companion::CompanionSettings {
+            protocol: signalman::radio_comms::companion::CompanionProtocol::MeshCore,
+            port: "/dev/nonexistent-stock-companion".into(),
+            realm: "invalid realm".into(),
+            journal: "/tmp/not-created-stock-companion.json".into(),
+        },
+        std::sync::Arc::new(|| {}),
+    );
+    let deadline = std::time::Instant::now() + std::time::Duration::from_secs(2);
+    loop {
+        if let Some(event) = worker.drain().into_iter().next() {
+            let crate::companion::CompanionEvent::Stopped { detail, .. } = event else {
+                panic!("invalid configuration cannot connect")
+            };
+            assert!(detail.contains("Realm must contain"));
+            break;
+        }
+        assert!(std::time::Instant::now() < deadline);
+        std::thread::sleep(std::time::Duration::from_millis(5));
+    }
 }

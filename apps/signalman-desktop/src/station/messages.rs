@@ -128,9 +128,9 @@ mod tests {
     fn handoff_is_bounded_deduplicated_and_waits_for_persisted_acknowledgement() {
         let (sender, mut receiver) = channel();
         for n in 0..16 {
-            assert_eq!(sender.submit(message(n)).unwrap(), true);
+            assert!(sender.submit(message(n)).unwrap());
         }
-        assert_eq!(sender.submit(message(0)).unwrap(), false);
+        assert!(!sender.submit(message(0)).unwrap());
         assert!(sender.submit(message(17)).is_err());
         let first = receiver.try_recv().unwrap();
         assert!(
@@ -138,7 +138,7 @@ mod tests {
             "dequeue alone is not a durable observation"
         );
         sender.acknowledge(first.id());
-        assert_eq!(sender.submit(message(17)).unwrap(), true);
+        assert!(sender.submit(message(17)).unwrap());
         drop(receiver);
         sender.acknowledge(message(1).id());
         assert!(sender.submit(message(18)).is_err());

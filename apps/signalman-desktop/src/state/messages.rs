@@ -90,8 +90,22 @@ impl DesktopState {
             ),
             None => signalman::comms_adapter::comms::Comms::new(),
         };
-        if let Some(owner) = &self.radio_comms {
+        for owner in &self.companion_comms {
             owner.add_to(&mut model);
+        }
+        if let Some(owner) = &self.radio_comms {
+            for protocol in [
+                signalman::comms_adapter::comms::ProtocolKind::Meshtastic,
+                signalman::comms_adapter::comms::ProtocolKind::MeshCore,
+            ] {
+                if !self
+                    .companion_comms
+                    .iter()
+                    .any(|companion| companion.supports(protocol))
+                {
+                    owner.add_protocol_to(&mut model, protocol);
+                }
+            }
         }
         if model.identities().is_empty() {
             return Err(signalman::comms_adapter::comms::AdapterError::Unsupported(
@@ -104,6 +118,121 @@ impl DesktopState {
     pub fn set_radio_comms(&mut self, owner: signalman::radio_comms::RadioComms) {
         self.radio_comms = Some(owner);
     }
+    pub fn radio_owner(
+        &self,
+        protocol: signalman::comms_adapter::comms::ProtocolKind,
+    ) -> Option<&signalman::radio_comms::RadioComms> {
+        self.companion_comms
+            .iter()
+            .find(|owner| owner.supports(protocol))
+            .or_else(|| {
+                self.radio_comms
+                    .as_ref()
+                    .filter(|owner| owner.supports(protocol))
+            })
+    }
+    pub fn apply_companion_event(&mut self, event: crate::companion::CompanionEvent) {
+        use crate::companion::CompanionEvent;
+        match event {
+            CompanionEvent::Connected {
+                protocol,
+                owner,
+                stop,
+                port,
+            } => {
+                self.companion_comms.retain(|o| !o.supports(protocol));
+                self.companion_comms.push(owner);
+                self.companion_stops.retain(|(p, _)| *p != protocol);
+                self.companion_stops.push((protocol, stop));
+                self.companion_notices.retain(|(p, _)| *p != protocol);
+                self.companion_notices.push((
+                    protocol,
+                    format!("Connected on {port}. Device firmware owns keys and radio execution."),
+                ));
+            }
+            CompanionEvent::Stopped { protocol, detail } => {
+                self.companion_settings
+                    .retain(|s| s.protocol.kind() != protocol);
+                self.companion_stops.retain(|(p, _)| *p != protocol);
+                self.companion_notices.retain(|(p, _)| *p != protocol);
+                self.companion_notices.push((protocol, detail));
+            }
+            CompanionEvent::Progress => (),
+        }
+    }
+    pub fn request_companion_connection(&mut self) {
+        use signalman::comms_adapter::comms::ProtocolKind;
+        use signalman::radio_comms::companion::CompanionProtocol;
+        let result = (|| {
+            if self.observation_collecting {
+                return Err(
+                    "Stop the serial observation collector before connecting a companion"
+                        .to_owned(),
+                );
+            }
+            if self
+                .companion_settings
+                .iter()
+                .any(|s| s.protocol.kind() == self.message_protocol)
+            {
+                return Err(
+                    "This protocol already has a connecting or connected companion".to_owned(),
+                );
+            }
+            let protocol = match self.message_protocol {
+                ProtocolKind::Meshtastic => CompanionProtocol::Meshtastic {
+                    channel: self
+                        .companion_channel
+                        .text()
+                        .trim()
+                        .parse::<u8>()
+                        .map_err(|_| "Use a Meshtastic channel index from 0 to 7")?,
+                },
+                ProtocolKind::MeshCore => CompanionProtocol::MeshCore,
+                _ => {
+                    return Err(
+                        "Select Meshtastic or MeshCore to connect its stock companion".into(),
+                    );
+                }
+            };
+            let settings = crate::companion::CompanionSettings {
+                protocol,
+                port: self.companion_port.text().trim().into(),
+                realm: self.companion_realm.text().trim().into(),
+                journal: self.companion_journal.text().trim().into(),
+            };
+            let mut active = self.companion_settings.clone();
+            active.push(settings.clone());
+            let station = std::env::var_os("SIGNALMAN_STATION_PORT").map(std::path::PathBuf::from);
+            crate::companion::validate_settings(&active, station.as_deref())?;
+            Ok(settings)
+        })();
+        match result {
+            Ok(settings) => {
+                // Retire the previous inactive handle so the replacement can
+                // acquire the same journal's exclusive file lock on reconnect.
+                self.companion_comms
+                    .retain(|owner| !owner.supports(self.message_protocol));
+                self.companion_settings.push(settings.clone());
+                self.pending_companion = Some(settings);
+                self.message_notice =
+                    Some("Connecting stock companion; waiting for its public identity.".into());
+            }
+            Err(error) => {
+                self.message_notice = Some(format!("Companion connection refused: {error}"))
+            }
+        }
+    }
+    pub fn take_companion_request(&mut self) -> Option<crate::companion::CompanionSettings> {
+        self.pending_companion.take()
+    }
+    pub fn disconnect_companion(&mut self) {
+        for (protocol, stop) in &self.companion_stops {
+            if *protocol == self.message_protocol {
+                stop.store(true, std::sync::atomic::Ordering::Relaxed);
+            }
+        }
+    }
     pub fn select_message_protocol(
         &mut self,
         protocol: signalman::comms_adapter::comms::ProtocolKind,
@@ -112,10 +241,8 @@ impl DesktopState {
         if !matches!(
             protocol,
             ProtocolKind::Lxmf | ProtocolKind::Meshtastic | ProtocolKind::MeshCore
-        ) || (protocol != ProtocolKind::Lxmf && self.radio_comms.is_none())
-        {
-            self.message_notice =
-                Some("Load a commissioned radio journal before selecting its protocol.".into());
+        ) {
+            self.message_notice = Some("Unsupported message protocol".into());
             return;
         }
         self.message_protocol = protocol;
@@ -125,27 +252,20 @@ impl DesktopState {
         use signalman::comms_adapter::comms::{Draft, ProtocolKind};
         let result = (|| {
             let owner = self
-                .radio_comms
-                .as_ref()
+                .radio_owner(self.message_protocol)
                 .ok_or_else(|| "a commissioned radio journal is required".to_owned())?;
-            let scope = owner.scope().map_err(|e| e.to_string())?;
             let peer = self.message_recipient.text().trim().trim_start_matches('!');
-            let target = match self.message_protocol {
-                ProtocolKind::Meshtastic if peer.len() == 8 => scope.meshtastic(
-                    u32::from_str_radix(peer, 16)
-                        .map_err(|_| "use an exact 8-digit Meshtastic node number".to_owned())?,
-                ),
-                ProtocolKind::MeshCore if peer.len() == 64 => scope.meshcore(
-                    hex::decode(peer)
-                        .map_err(|_| "use an exact 64-digit MeshCore public key".to_owned())?
-                        .try_into()
-                        .map_err(|_| "invalid MeshCore public key".to_owned())?,
-                ),
-                _ => return Err(
-                    "use an exact 8-digit Meshtastic node number or 64-digit MeshCore public key"
-                        .to_owned(),
-                ),
+            let length = if self.message_protocol == ProtocolKind::Meshtastic {
+                8
+            } else {
+                64
             };
+            if peer.len() != length {
+                return Err(format!("use an exact {length}-digit recipient address"));
+            }
+            let target = owner
+                .conversation(self.message_protocol, &peer.to_ascii_lowercase())
+                .map_err(|e| e.to_string())?;
             let mut draft = Draft::reply_to(target);
             draft.body = self.message_draft.text().to_owned();
             pollster::block_on(self.comms().map_err(|e| e.to_string())?.send(&draft))
@@ -154,7 +274,7 @@ impl DesktopState {
         match result {
             Ok(_) => {
                 self.message_draft = cambium::TextInput::default();
-                self.message_notice = Some("Text persisted. The authorized resident owner carries queued intents when this protocol is active.".into());
+                self.message_notice = Some("Text persisted. The connected companion or authorized resident owner carries queued intents.".into());
             }
             Err(error) => self.message_notice = Some(format!("Message was not queued: {error}")),
         }
