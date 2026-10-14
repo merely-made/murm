@@ -19,7 +19,7 @@
 use async_trait::async_trait;
 
 use crate::model::{
-    Conversation, ConversationId, Draft, Identity, Message, MessageId, ProtocolKind,
+    Conversation, ConversationId, DeliveryStatus, Draft, Identity, Message, MessageId, ProtocolKind,
 };
 
 /// Why an adapter operation failed.
@@ -73,4 +73,20 @@ pub trait ProtocolAdapter: Send + Sync {
     /// backend can't send (a receive-only surface), `NotFound` if the draft's
     /// target conversation is unknown.
     async fn send(&self, draft: &Draft) -> Result<MessageId, AdapterError>;
+
+    /// The latest observed delivery fact. Backends without delivery tracking
+    /// return `Unknown` for a known message; unknown messages remain `NotFound`.
+    /// Carrier acceptance must not be promoted to recipient delivery or a read receipt.
+    async fn delivery_status(
+        &self,
+        conversation: &ConversationId,
+        message: &MessageId,
+    ) -> Result<DeliveryStatus, AdapterError> {
+        self.messages(conversation)
+            .await?
+            .iter()
+            .any(|found| &found.id == message)
+            .then_some(DeliveryStatus::Unknown)
+            .ok_or(AdapterError::NotFound)
+    }
 }
