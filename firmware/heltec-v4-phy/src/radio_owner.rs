@@ -11,7 +11,7 @@ use radio_hand::control::{
     AbSlotStore, ConfigApplier, DurableConfig, FirstWriteStore, ManagementCarrier, QuietExit,
     QuietGuard, QuietWindow,
 };
-use radio_hand::executive::{Executive, Face, RadioFault, RadioState, Received};
+use radio_hand::executive::{AirDiag, Executive, Face, RadioFault, RadioState, Received};
 use radio_hand::link::HostLink;
 use radio_hand::observation::QuietCause;
 use radio_hand::observation::owner::OwnerObservations;
@@ -38,6 +38,8 @@ pub struct V4RadioOwner<RK: RadioKind, DLY: DelayNs> {
     boot_owner_available: bool,
     radio_service_started: bool,
     observations: Option<OwnerObservations>,
+    /// The executive's counters for the whole boot; each per-call executive counts into it.
+    diag: AirDiag,
 }
 
 /// The sole boot-only handoff into WN1's durable recovery path.
@@ -301,6 +303,7 @@ impl<RK: RadioKind, DLY: DelayNs> V4RadioOwner<RK, DLY> {
             boot_owner_available: true,
             radio_service_started: false,
             observations: None,
+            diag: AirDiag::default(),
         }
     }
 
@@ -348,6 +351,7 @@ impl<RK: RadioKind, DLY: DelayNs> V4RadioOwner<RK, DLY> {
         if let Some(observations) = self.observations.as_mut() {
             executive.attach_observations(observations);
         }
+        executive.attach_diag(&mut self.diag);
         executive
     }
 
@@ -535,6 +539,39 @@ impl<RK: RadioKind, DLY: DelayNs> V4RadioOwner<RK, DLY> {
         host: &mut L,
     ) -> channels::Outcome {
         self.close_boot_owner();
+        // The executive's counters for this boot, as the T114's `air` probe prints them. The
+        // uptime shows whether a host reconnect reset the board.
+        if packet == b"air\n" || packet == b"air\r\n" {
+            use core::fmt::Write as _;
+            let d = self.diag;
+            let mut reply = radio_face::Text::<320>::empty();
+            let _ = write!(
+                &mut reply,
+                "air uptime={}ms region={} armed={} armfail={} rxok={} rxerr={} rxbad={} \
+                 txok={} txerr={} noregion={} overduty={} cadclear={} cadbusy={} cadgiveup={} \
+                 cadover={} cadfault={} beats={} frames={}\r\n",
+                embassy_time::Instant::now().as_millis(),
+                self.region.name(),
+                d.rx_armed,
+                d.rx_arm_failed,
+                d.rx_ok,
+                d.rx_err,
+                d.rx_damaged,
+                d.tx_ok,
+                d.tx_err,
+                d.tx_no_region,
+                d.tx_over_duty,
+                d.cad_clear,
+                d.cad_busy,
+                d.tx_channel_busy,
+                d.cad_override,
+                d.cad_fault,
+                d.wait_beats,
+                d.wait_frames,
+            );
+            let _ = host.write_all(reply.as_str().as_bytes()).await;
+            return channels::Outcome::Served;
+        }
         channels::probe(
             packet,
             online,

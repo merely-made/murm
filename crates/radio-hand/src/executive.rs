@@ -51,7 +51,17 @@ pub struct Executive<'r, RK: RadioKind, DLY: DelayNs> {
     /// When the current duty window opened.
     duty_window_start: Option<Instant>,
     diag: AirDiag,
+    /// Where `diag` came from and goes back to, for a board that builds one executive per call.
+    diag_sink: Option<&'r mut AirDiag>,
     observations: Option<&'r mut OwnerObservations>,
+}
+
+impl<RK: RadioKind, DLY: DelayNs> Drop for Executive<'_, RK, DLY> {
+    fn drop(&mut self) {
+        if let Some(sink) = self.diag_sink.take() {
+            *sink = self.diag;
+        }
+    }
 }
 
 impl<'r, RK: RadioKind, DLY: DelayNs> Executive<'r, RK, DLY> {
@@ -74,8 +84,16 @@ impl<'r, RK: RadioKind, DLY: DelayNs> Executive<'r, RK, DLY> {
             duty_spent_ms: 0,
             duty_window_start: None,
             diag: AirDiag::default(),
+            diag_sink: None,
             observations: None,
         }
+    }
+
+    /// Count into `sink` for the life of this executive. A board that builds one executive
+    /// per call (the V4) keeps its counters this way; without it each call starts from zero.
+    pub fn attach_diag(&mut self, sink: &'r mut AirDiag) {
+        self.diag = *sink;
+        self.diag_sink = Some(sink);
     }
 
     /// The region this executive enforces.

@@ -1336,3 +1336,80 @@ the parts.
 3. *Bench terminal exits on one send failure.* `apps/signalman/src/main.rs`
    propagates a `send_text` error out of `main`.
 4. *Desktop Signalman custody.* Still blocked: Djinn closes the stream.
+
+#### R5 lost-frame diagnosis: COM7 damages received frames (2026-10-14)
+
+**Owner request.** "Chase the lost back-to-back frames: add RNode drop counters
+that survive a reconnect (or sniff the channel with the T114), find why the
+second frame of a pair is lost and what produces error code 04, then fix and
+recheck both directions."
+
+**Instruments.**
+
+- *Channel witness.* `tulle/examples/rf_sniff.rs` is a receive-only Tulle
+  direct-PHY listener on Postilion's trunk profile (906.875 MHz, SF8, CR 4/5,
+  sync 0x12, 16-symbol preamble). It prints each frame's time, RSSI/SNR and RNS
+  header. On COM10 (T114) it heard the COM7 station's opening announce within
+  the run, which serves as the positive control.
+- *Station-side PHY trace.* A temporary trace in Tulle's direct-PHY pump
+  (`TULLE_PHY_TRACE`) logged host-visible RX, TX requests with
+  airtime-budget admission, and TX results. It was reverted and is not
+  committed.
+- *Counters that survive a reconnect.* On the V4, `owner.executive()` built a
+  fresh `Executive` per operation, and `Executive::new` reset `AirDiag`, so
+  every V4 radio counter restarted at zero on each call. That is why the
+  `rnode` probe read all zeros earlier. `Executive::attach_diag` (radio-hand)
+  now seeds the counters from a long-lived sink and writes them back on drop.
+  `V4RadioOwner` keeps one `AirDiag` per boot, and a new V4 `air` probe prints
+  it with uptime in the T114 probe's field order. Reopening COM7 from fresh
+  processes left uptime continuous (43 s → 47 s), so a host reconnect does not
+  reset the board. The image was built with the installed `esp` toolchain,
+  rustc 1.95.0-nightly. That needed `--ignore-rust-version`, because the
+  family MSRV rose to 1.97.1 in `403d99e8b1e` after the Sept 30 image was
+  built. COM7 runs this image; its SHA-256 is under ignored
+  `validation/results/meshchatx-interop-20261014/`. COM6 still runs the
+  Sept 30 image.
+
+**The "second frame" is on the air.** In run 6, MeshChatX's link request
+(186.879 s), the station's proof (187.085), MeshChatX's RTT (187.306), its
+211-byte data frame (187.635) and its LINKCLOSE (190.717) were all heard by
+the witness. COM6/MeshChatX transmitted everything. Two earlier link requests
+were on the air and got no proof. The loss is at COM7's receiver, not in
+MeshChatX, COM6's RNode loop or the airtime budget. The station's budget is
+`AirtimeBudget::new(60_000, 60_000)`, so every traced transmit had
+`may_transmit=true`.
+
+**COM7 damages strong frames on a clean channel.** Station and witness clocks
+align to the millisecond: 371.594 s in run 7, 16.556 s in run 8.
+
+- Run 7: COM7 received 14 of 23 COM6 frames the witness heard. One miss
+  collided with COM7's own transmit; the others arrived while COM7 was idle.
+- Run 8: 12 of 14. COM7's `air` counters read `rxok=12 rxbad=2`, so both
+  misses were detected and failed CRC/header checks.
+
+No other transmission was within ±2 s of either run-8 miss, and COM7 sent
+nothing within ±8 s. COM7 reports these frames at about −55 dBm, SNR 10. The
+T114 decodes every one at −69. COM7 at a configured 17 dBm also arrives at the
+T114 weaker (−74) than COM6 at 7 dBm (−69).
+
+**Error code 04 is not explained.** radio-hand's RNode channel only emits
+ERROR 0x02 or 0x06 (`rnode::tx_error`), and the V4 RNode loop writes no other
+ERROR frame. RNS's two `hardware error (code 04)` events on COM6 therefore come
+from bytes RNS parsed as `CMD_ERROR 0x04`, origin unknown. COM6 has no
+persistent counters yet.
+
+**Excluded by reading code, not by test.** RX light-sleep or duty-cycling is
+absent from the USB image. RX is continuous with boosted gain. The station
+stack issues no excursions or reconfigurations. `prepare_rx` is set only by
+TX, LBT refusal, profile change, CAD or RX fault. The vendored lora-phy clears
+exactly the IRQ flags it read, and the loop re-checks DIO1 level.
+`listen_first` defaults off.
+
+*Reading, not ruled:* the V4 firmware drives no RF front-end pins
+(`GenericSx126xInterfaceVariant::new(reset, dio1, busy, None, None)`). The
+2026-07-19 Heltec plan required explicit V4 RF-switch and external-PA handling
+"from the board schematic … with conservative defaults". An undriven front end
+fits both the damaged receptions and the weak transmit. It is a hypothesis
+until a front-end change, derived from Heltec's V4.2 schematic, measurably
+changes `rxbad` and the witness's RSSI. The prns harvest notes on V4 FEM
+variants are not a source: Prns was withdrawn as a reference on 2026-09-26.
