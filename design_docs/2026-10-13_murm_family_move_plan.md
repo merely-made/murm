@@ -1060,3 +1060,87 @@ Do not run both protocols against those ports without verifying their actual
 firmware and roles. Each direction has a 180-second receive/ACK limit. The
 physical and headed phases remain open pending the requested owner input and
 native validation handoff; no end-to-end success is inferred from compilation.
+
+#### R5 owner assignment and launch preparation (2026-10-14)
+
+The owner confirms o-pc hosts the radios and explicitly authorizes the renderer/
+Tabard handoff. Both chats report no currently owned native/GPU/headed process;
+Tabard queues Signalman next, requiring a concrete source/binary/fixture and
+bounded supervision/receipt/closure plan before a finite launch grant. Murm
+primary stays at `3234d0fa644` while their separate exact55-second immutable
+Git cache seed is reviewed. This lane has no queued compiler/cache operation.
+
+o-pc answers LAN ping at its configured address but TCP SSH still times out
+before authentication. The local Djinn agent socket currently refuses agent
+queries; the owner is checking access and Windows OpenSSH state. No keys or
+remote policy are changed by these probes.
+
+The native `SIGNALMAN_COMPANION_SCENARIO` lane is being prepared against real
+Connect/Queue/Disconnect controls, normal text-input dispatch and actual journal
+facts. Its explicit `SIGNALMAN_COMPANION_TAG`, `SIGNALMAN_COMPANION_PROTOCOL`
+and `SIGNALMAN_COMPANION_PEER` bind one outgoing tagged text and one tagged
+return to the assigned protocol, full peer address and conversation. Acceptance
+requires a matched protocol ACK, six captures and
+reconnect history assertions; no synthetic identity, receive or delivery event
+is injected. It retains a 7200-presented-frame bound and Mesquite's native
+acquisition/capture refusal. Its source and compiler checks are pending separate
+CPU admission. No native launch occurs before assigned devices, a frozen fixture
+and the coordinator's finite scheduling window.
+
+The first CPU supervisor review verified source bindings but refused admission
+pending stronger process ownership, absolute deadline, tool/config bindings and
+durable receipt closure. The revised candidate will also build the current peer
+example explicitly; Clippy alone does not produce a runnable peer. The shared
+cache remains held until its independent post-fetch verification closes. No
+compiler or radio operation has been launched for this native scenario.
+
+The owner also requests booting MeshChatX on o-pc. Its existing installed profile
+will be inspected first. MeshChatX is an RNS/LXMF peer, not a Meshtastic/MeshCore
+companion peer. Signalman's existing `message/observe.rs` rejects standard LXMF
+titles outside its versioned text/voice profiles; generic chat interoperability
+therefore remains an explicit additional test/fix rather than being inferred
+from prior Signalman-to-Signalman receipts.
+
+#### R5 o-pc primer (2026-10-14)
+
+The owner is moving actual-radio and UI testing to o-pc and authorized publishing
+these candidate changes so that host can pull them. This is the current resumption
+point; it supersedes the earlier access/cache/compiler-pending snapshots above.
+
+Signalman now has an opt-in native companion scenario over real controls and
+journal facts, plus `stock_companion_pair peer` to return one tagged UI message
+from an independent compatible radio. The scenario binds the selected protocol,
+full peer address and conversation. It requires a protocol ACK, tagged return,
+disconnect and six captures. The peer helper has a 180-second bound. No concrete
+device-bound scenario fixture has been run or qualified yet.
+
+This code passed a Rust 1.99.0 Mac desktop all-target check and both executable
+builds in 49.3 seconds. Cargo returned zero, but both builds retained a private
+Mac `rust-objcopy` warning about missing `@rpath/libLLVM.dylib`. Strict Clippy for
+this candidate, Windows compilation, physical exchanges and UI captures remain
+pending. The Mac compiler window closed and its owned processes were released;
+no Mac toolchain repair or radio operation ran. Toolchain 1.99.0 and the separate
+MSRV 1.97.1 remain unchanged.
+
+On o-pc, identify current firmware and public identities on COM6 and COM7 before
+using either stock protocol. Both were observed as ESP32 USB devices; their
+historical Meshtastic/MeshCore roles are not fresh firmware proof. COM10 is an
+nRF USB device assigned to the T114 RNode in the existing Reticulum profile.
+Each stock protocol needs a compatible peer; one Meshtastic board and one
+MeshCore board do not make a pair. Preserve current board/profile custody and
+the separate Isocosm lane, then test the production actors followed by actual
+Signalman Connect/send/receive/status/history/Disconnect/reconnect controls.
+
+Use the already installed MeshChatX 4.8.1 as the additional RNS/LXMF peer. Its
+existing o-pc installation is under
+`C:\Users\mark_\AppData\Local\Programs\Reticulum MeshChatX`, with app storage
+at `C:\Users\mark_\.reticulum-meshchatx` and RNS config at
+`C:\Users\mark_\.reticulum`. Only backend `--help` ran here; the application was
+not installed, started or modified. MeshChatX does not supply a stock
+Meshtastic/MeshCore peer. Signalman's current LXMF observe path accepts its
+versioned text/voice titles, so plain MeshChatX chat interop is a separate check.
+
+Keep crate names/history and Actions disabled. Establish fresh Windows
+source/tool/binary/firmware facts and a finite native run before claiming UI
+acceptance. At an access, peer or resource blocker, preserve the result and stop
+rather than polling or expanding preparation while waiting.

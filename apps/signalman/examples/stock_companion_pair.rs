@@ -1,6 +1,7 @@
 //! Finite stock-radio Comms bench. No flashing, key import or radio configuration.
 //! Probe: stock_companion_pair probe <meshtastic|meshcore> <port> <realm> <new-output-dir> [channel]
 //! Pair:  stock_companion_pair pair <meshtastic|meshcore> <left-port> <right-port> <realm> <new-output-dir> [channel]
+//! Peer: stock_companion_pair peer <meshtastic|meshcore> <port> <realm> <new-output-dir> <signalman-ui-tag> <expected-sender> [channel]
 //! Pair requires two already configured stock radios with compatible profiles.
 //! MeshCore contacts must already contain each other's full public keys.
 use signalman::{
@@ -113,6 +114,60 @@ async fn exchange(
         }
     }
 }
+async fn serve_peer(
+    radio: &mut Radio,
+    protocol: CompanionProtocol,
+    tag: &str,
+    expected_sender: &str,
+) -> Result<serde_json::Value, Box<dyn Error>> {
+    let owner = radio.session.owner();
+    let started = Instant::now();
+    let mut response = None;
+    let mut observed = None;
+    loop {
+        radio.session.poll().await?;
+        let records = owner.records()?;
+        if response.is_none() {
+            let incoming: Vec<_> = records
+                .iter()
+                .filter(|r| {
+                    r.message.direction == Direction::Incoming
+                        && r.message.author.address == expected_sender
+                        && r.message.body.text() == tag
+                })
+                .collect();
+            if incoming.len() > 1 {
+                return Err("tagged UI text appeared more than once".into());
+            }
+            if let Some(received) = incoming.first() {
+                observed = Some((*received).clone());
+                let mut draft =
+                    Draft::reply_to(owner.conversation(protocol.kind(), expected_sender)?);
+                draft.body = format!("{tag}-return");
+                response = Some(owner.model().send(&draft).await?);
+                println!("UI tagged receive matched; queued return");
+            }
+        }
+        if let Some(id) = &response {
+            let sent = records.iter().find(|r| &r.message.id == id);
+            if let Some(sent) = sent {
+                if let DeliveryStatus::Failed { detail } = &sent.delivery {
+                    return Err(format!("UI return send failed: {detail}").into());
+                }
+                if sent.delivery == DeliveryStatus::ProtocolAcknowledged {
+                    return Ok(
+                        serde_json::json!({"received":observed,"sent":sent,"elapsed_ms":started.elapsed().as_millis(),"matched_protocol_ack":true}),
+                    );
+                }
+            }
+        }
+        if started.elapsed() > Duration::from_secs(180) {
+            return Err(
+                "UI peer timed out waiting for tagged receive/return acknowledgement".into(),
+            );
+        }
+    }
+}
 fn snapshot(radio: &Radio, tag: Option<&str>) -> Result<serde_json::Value, Box<dyn Error>> {
     let owner = radio.session.owner();
     let records = owner.records()?;
@@ -158,15 +213,22 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let args: Vec<String> = std::env::args().skip(1).collect();
     let mode = args
         .first()
-        .ok_or("supply probe or pair; no default ports are opened")?;
+        .ok_or("supply probe, pair or peer; no default ports are opened")?;
+    let peer_mode = mode == "peer";
     let pair = match mode.as_str() {
         "pair" => true,
-        "probe" => false,
-        _ => return Err("mode must be probe or pair".into()),
+        "probe" | "peer" => false,
+        _ => return Err("mode must be probe, pair or peer".into()),
     };
-    let required = if pair { 6 } else { 5 };
+    let required = if peer_mode {
+        7
+    } else if pair {
+        6
+    } else {
+        5
+    };
     if args.len() < required || args.len() > required + 1 {
-        return Err("see example's probe/pair usage; explicit ports, realm and new output directory required".into());
+        return Err("see example's probe/pair/peer usage; explicit ports, realm and new output directory required".into());
     }
     let channel = args
         .get(required)
@@ -186,7 +248,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     if right_port.is_some_and(|right| left_port.eq_ignore_ascii_case(right)) {
         return Err("pair ports must differ".into());
     }
-    let realm = &args[required - 2];
+    let realm = &args[if peer_mode { 3 } else { required - 2 }];
     if realm.is_empty()
         || realm.len() > 128
         || !realm
@@ -195,13 +257,40 @@ async fn main() -> Result<(), Box<dyn Error>> {
     {
         return Err("invalid realm name".into());
     }
-    let output = Path::new(&args[required - 1]);
+    if peer_mode {
+        let length = if matches!(protocol, CompanionProtocol::Meshtastic { .. }) {
+            8
+        } else {
+            64
+        };
+        if !args[5].starts_with("signalman-ui-")
+            || args[5].len() > 100
+            || !args[5]
+                .bytes()
+                .all(|b| b.is_ascii_alphanumeric() || b == b'-')
+        {
+            return Err("invalid UI bench tag".into());
+        }
+        if args[6].len() != length
+            || !args[6]
+                .bytes()
+                .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
+        {
+            return Err("invalid expected UI sender address".into());
+        }
+    }
+    let output = Path::new(&args[if peer_mode { 4 } else { required - 1 }]);
     std::fs::create_dir(output)?; // Fresh evidence; never overwrite an earlier trial.
     let mut receipt = serde_json::json!({"schema":1,"protocol":args[1],"ports":if pair{vec![left_port.as_str(),right_port.unwrap()]}else{vec![left_port.as_str()]},"realm":realm,"channel":channel,"mode":mode,"result":"not_completed","exchanges":[],"firmware_or_configuration_mutated":false});
     let result = async {
         let left_path = output.join("left.json");
         let mut left = connect(left_port, protocol, realm, left_path.clone()).await?;
         receipt["left"] = snapshot(&left, None)?;
+        if peer_mode {
+            receipt["ui_peer"] = serve_peer(&mut left, protocol, &args[5], &args[6]).await?;
+            receipt["left"] = snapshot(&left, Some(&args[5]))?;
+            return Ok::<(),Box<dyn Error>>(());
+        }
         let Some(right_port) = right_port else {
             return Ok::<(), Box<dyn Error>>(());
         };

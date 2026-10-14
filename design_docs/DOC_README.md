@@ -1,6 +1,6 @@
 # Murm Documentation Index
 
-Radio-to-Comms integration (2026-10-14): [R1/R2 in the family plan](2026-10-13_murm_family_move_plan.md#6-post-cutover-application-integration) records Signalman's concrete LXMF adapter, shared durable journal, attended station send/receive path and recorded-delivery diagnostics. R3 adds Sennet/Meshtastic and Tucket/MeshCore journals/adapters over the resident runtime, protocol selection in the Messages face and preserved packet/MAC/ACK limits. R4 adds stock serial/USB companion actors with device-observed identities, independent protocol scopes, Connect/Disconnect controls and bounded delivery correlation. R5 now owns the finite real-radio pair runner and the pending physical/headed acceptance; current device assignment and native admission are recorded in the family plan. The [stock companion software receipt](../testing/receipts/stock-companions/README.md) freezes R4 validation; real-radio and headed acceptance remain separate.
+Radio-to-Comms integration (2026-10-14): [R1/R2 in the family plan](2026-10-13_murm_family_move_plan.md#6-post-cutover-application-integration) records Signalman's concrete LXMF adapter, shared durable journal, attended station send/receive path and recorded-delivery diagnostics. R3 adds Sennet/Meshtastic and Tucket/MeshCore journals/adapters over the resident runtime, protocol selection in the Messages face and preserved packet/MAC/ACK limits. R4 adds stock serial/USB companion actors with device-observed identities, independent protocol scopes, Connect/Disconnect controls and bounded delivery correlation. R5 owns the finite real-radio pair runner and pending physical/headed acceptance. Its [o-pc primer](2026-10-13_murm_family_move_plan.md#r5-o-pc-primer-2026-10-14) records the native/peer candidate, completed Mac compiler checks and stripping warning, radio assignment and remaining Windows/physical/UI checks. The [stock companion software receipt](../testing/receipts/stock-companions/README.md) freezes R4 validation; real-radio and headed acceptance remain separate.
 
 Reusable wire engines (2026-10-14): MOVE5 publishes the independent `wire` workspace and preserves the original Genet ancestry. Genet's Netfetcher keeps its package/defaults/public policy APIs; Mere removes its duplicate crawler exchange and supplies explicit host trust/pooling. Source-bound receipts live in `testing/receipts/wire-engines`, with final receiving checks in the Genet and Mere plans.
 
@@ -430,6 +430,14 @@ their filenames says so — see the `result` column.
 
 These are not general good practice. Each is here because its absence cost this
 repository something specific and recent.
+
+### Stop at an external blocker
+
+The owner explicitly requires stopping rather than churning when access,
+credentials, a compatible device peer or a resource handoff is unavailable.
+Report the concrete blocker and preserve completed evidence; do not keep
+polling, retrying or expanding preparation while waiting. Resume when the owner
+provides the missing condition or explicitly asks to continue.
 
 ### Family placement preserves implementation contracts
 
