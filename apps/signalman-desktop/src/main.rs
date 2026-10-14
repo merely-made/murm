@@ -192,7 +192,12 @@ fn main() {
     let wake_fixtures = fixture_rx.clone();
 
     let mut appearance_previews = signalman_desktop::appearance_host::PreviewBindings::default();
+    let mut companion_lane = signalman_desktop::companion_scenario::from_env();
     let mut appearance_lane = signalman_desktop::appearance_scenario::from_env();
+    assert!(
+        companion_lane.is_none() || appearance_lane.is_none(),
+        "companion and appearance scenarios must own separate native runs"
+    );
     let offline_appearance_receipt = appearance_lane.is_some();
     let hooks: HostHooks<DesktopState, Logic, Child> = HostHooks {
         // Installation progress is event-driven: a Signalman worker calls the
@@ -435,6 +440,9 @@ fn main() {
             disposition.expect("the runner updates close disposition")
         }),
         after_frame: Box::new(move |ctx| {
+            if let Some(lane) = companion_lane.as_mut() {
+                signalman_desktop::companion_scenario::drive(lane, ctx);
+            }
             if let Some(lane) = appearance_lane.as_mut() {
                 signalman_desktop::appearance_scenario::drive(lane, ctx);
             }

@@ -26,6 +26,7 @@ pub mod availability;
 pub mod collector;
 mod comms;
 pub mod companion;
+pub mod companion_scenario;
 pub mod device_mere;
 pub mod flow;
 pub mod messages;
