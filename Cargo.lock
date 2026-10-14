@@ -1807,7 +1807,7 @@ dependencies = [
 [[package]]
 name = "mere-comms"
 version = "0.0.1"
-source = "git+https://www.github.com/merely-made/mere.git?rev=0b9b7a9b218579f1f36cc1ab05a51b2a13128f1d#0b9b7a9b218579f1f36cc1ab05a51b2a13128f1d"
+source = "git+https://www.github.com/merely-made/mere.git?rev=e84cfbd95b1660046d646580a8707af020a06e4b#e84cfbd95b1660046d646580a8707af020a06e4b"
 dependencies = [
  "async-trait",
  "serde",
@@ -2505,6 +2505,7 @@ dependencies = [
 name = "signalman"
 version = "0.1.0"
 dependencies = [
+ "async-trait",
  "hex",
  "linkboy",
  "mere-comms",
@@ -3228,12 +3229,12 @@ source = "git+https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-
 [[patch.unused]]
 name = "mere-proofs"
 version = "0.1.0"
-source = "git+https://www.github.com/merely-made/mere.git?rev=0b9b7a9b218579f1f36cc1ab05a51b2a13128f1d#0b9b7a9b218579f1f36cc1ab05a51b2a13128f1d"
+source = "git+https://www.github.com/merely-made/mere.git?rev=e84cfbd95b1660046d646580a8707af020a06e4b#e84cfbd95b1660046d646580a8707af020a06e4b"
 
 [[patch.unused]]
 name = "muniment"
 version = "0.1.2"
-source = "git+https://www.github.com/merely-made/mere.git?rev=0b9b7a9b218579f1f36cc1ab05a51b2a13128f1d#0b9b7a9b218579f1f36cc1ab05a51b2a13128f1d"
+source = "git+https://www.github.com/merely-made/mere.git?rev=e84cfbd95b1660046d646580a8707af020a06e4b#e84cfbd95b1660046d646580a8707af020a06e4b"
 
 [[patch.unused]]
 name = "p2panda-auth"

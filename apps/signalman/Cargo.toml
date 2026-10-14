@@ -6,7 +6,7 @@ edition = "2024"
 rust-version = "1.97.1"
 license = "MPL-2.0"
 repository = "https://github.com/merely-made/murm"
-description = "The radio-management application of the retinue family: the signal box for a household's radios."
+description = "The radio-management application of the Murm family: the signal box for a household's radios."
 keywords = ["radio", "mesh", "reticulum", "lora"]
 categories = ["network-programming"]
 
@@ -34,13 +34,14 @@ name = "signalman-control-configure"
 path = "src/bin/signalman-control-configure.rs"
 
 [features]
-# Read-only presentation over the existing message journal. No renderer or
-# network adapter is enabled by the shared vocabulary.
-comms = ["dep:comms"]
+# Comms presentation and queue adapter over the application's message journal.
+# Radio execution remains in the attended station owner.
+comms = ["dep:comms", "dep:async-trait"]
 
 [dependencies]
+async-trait = { version = "0.1", optional = true }
 # The shared presentation vocabulary follows the desktop's Mere cohort.
-comms = { package = "mere-comms", git = "https://www.github.com/merely-made/mere.git", rev = "0b9b7a9b218579f1f36cc1ab05a51b2a13128f1d", optional = true }
+comms = { package = "mere-comms", git = "https://www.github.com/merely-made/mere.git", rev = "e84cfbd95b1660046d646580a8707af020a06e4b", optional = true }
 hex = "0.4"
 linkboy = { version = "0.1.0", path = "../linkboy" }
 outrider = { version = "0.3.0", path = "../../crates/outrider", features = ["voice"] }

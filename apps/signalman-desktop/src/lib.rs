@@ -24,6 +24,7 @@ pub mod appearance_view;
 pub mod audio;
 pub mod availability;
 pub mod collector;
+mod comms;
 pub mod device_mere;
 pub mod flow;
 pub mod messages;

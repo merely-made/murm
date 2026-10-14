@@ -33,6 +33,17 @@ use postilion::management::ManagementSnapshot;
 
 use crate::network::LayoutWake;
 
+mod messages;
+pub use messages::StationSender;
+
+#[cfg(test)]
+pub(crate) fn test_channel() -> (
+    StationSender,
+    tokio::sync::mpsc::Receiver<signalman::message::Message>,
+) {
+    messages::channel()
+}
+
 /// How often the actor captures a snapshot while the station is live.
 const POLL: Duration = Duration::from_secs(2);
 /// Each Djinn-issued host grant covers this window.
@@ -90,19 +101,33 @@ pub enum StationEvent {
         name: String,
         port: String,
         expires_at_ms: u64,
+        local: signalman::message::MessagePeer,
     },
     /// One owned management capture and its wall-clock capture time.
     Snapshot {
         snapshot: Box<ManagementSnapshot>,
         captured_unix_ms: u64,
     },
+    Message {
+        event: signalman::message::MessageEvent,
+        complete: bool,
+    },
+    Peer {
+        destination: signalman::message::MessagePeer,
+    },
+    Notice {
+        message: String,
+    },
     /// The actor stopped and will not produce further snapshots.
-    Failed { message: String },
+    Failed {
+        message: String,
+    },
 }
 
 /// One live station owned by one ordinary worker thread.
 pub struct StationWorker {
     events: Receiver<StationEvent>,
+    sender: StationSender,
     stop: Arc<AtomicBool>,
     join: Option<JoinHandle<()>>,
 }
@@ -110,17 +135,23 @@ pub struct StationWorker {
 impl StationWorker {
     pub fn spawn(settings: StationSettings, wake: LayoutWake) -> Self {
         let (events_tx, events) = mpsc::channel();
+        let (sender, commands) = messages::channel();
         let stop = Arc::new(AtomicBool::new(false));
         let actor_stop = Arc::clone(&stop);
         let join = thread::Builder::new()
             .name("signalman-station".to_owned())
-            .spawn(move || run_station(settings, events_tx, wake, actor_stop))
+            .spawn(move || run_station(settings, events_tx, wake, actor_stop, commands))
             .expect("spawn Signalman station actor");
         Self {
             events,
+            sender,
             stop,
             join: Some(join),
         }
+    }
+
+    pub fn sender(&self) -> StationSender {
+        self.sender.clone()
     }
 
     /// Take every event observed since the last drain, oldest first.
@@ -143,6 +174,7 @@ fn run_station(
     events: Sender<StationEvent>,
     wake: LayoutWake,
     stop: Arc<AtomicBool>,
+    mut commands: tokio::sync::mpsc::Receiver<signalman::message::Message>,
 ) {
     let fail = |message: String| {
         let _ = events.send(StationEvent::Failed { message });
@@ -158,47 +190,75 @@ fn run_station(
         }
     };
     runtime.block_on(async {
-        let station = match open_station(&settings).await {
+        let opened = tokio::select! {
+            opened = open_station(&settings) => opened,
+            _ = messages::stopped(&stop) => return,
+        };
+        let station = match opened {
             Ok(station) => station,
             Err(message) => return fail(message),
         };
+        let initial = match station.station.management_snapshot().await {
+            Ok(snapshot) => snapshot,
+            Err(error) => return fail(format!("station identity capture failed: {error}")),
+        };
+        let local = signalman::message::MessagePeer::new(*initial.station.delivery_destination.as_bytes(), Some(*initial.station.identity.ed25519_bytes()));
         let _ = events.send(StationEvent::Connected {
             name: settings.name.clone(),
             port: settings.port.clone(),
             expires_at_ms: station.station.lease().expires_at_ms(),
+            local,
         });
         wake();
 
         let mut last_generation = None;
-        while !stop.load(Ordering::Relaxed) {
-            if let Err(error) = station.renew_if_needed() {
-                return fail(format!("station grant renewal failed: {error}"));
-            }
-            match station.station.management_snapshot().await {
-                Ok(snapshot) => {
-                    let generation = snapshot.generation;
-                    if last_generation != Some(generation) {
-                        last_generation = Some(generation);
-                        let captured_unix_ms = match unix_time_ms() {
-                            Ok(now_ms) => now_ms,
-                            Err(error) => {
-                                return fail(format!("station clock failed: {error}"));
-                            }
-                        };
-                        let _ = events.send(StationEvent::Snapshot {
-                            snapshot: Box::new(snapshot),
-                            captured_unix_ms,
-                        });
-                        wake();
+        let mut poll = tokio::time::interval(POLL);
+        poll.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Skip);
+        loop {
+            tokio::select! {
+                _ = messages::stopped(&stop) => break,
+                command = commands.recv() => match command {
+                    Some(message) => {
+                        if let Err(error) = station.renew_if_needed() {
+                            fail(format!("station grant renewal failed: {error}")); break;
+                        }
+                        messages::send(&station.station, message, local, &events, &wake, &stop).await;
+                    },
+                    None => break,
+                },
+                _ = poll.tick() => {
+                    if let Err(error) = station.renew_if_needed() {
+                        fail(format!("station grant renewal failed: {error}")); break;
                     }
-                }
-                // A renewal landed mid-operation; the station remains live.
-                Err(SitedStationError::OperationInterrupted) => {}
-                Err(error) => {
-                    return fail(format!("station snapshot failed: {error}"));
-                }
+                    match station.station.management_snapshot().await {
+                        Ok(snapshot) => {
+                            if last_generation != Some(snapshot.generation) {
+                                last_generation = Some(snapshot.generation);
+                                let captured_unix_ms = match unix_time_ms() {
+                                    Ok(now) => now, Err(error) => { fail(format!("station clock failed: {error}")); break; }
+                                };
+                                let _ = events.send(StationEvent::Snapshot { snapshot: Box::new(snapshot), captured_unix_ms }); wake();
+                            }
+                        },
+                        Err(SitedStationError::OperationInterrupted) => {},
+                        Err(error) => { fail(format!("station snapshot failed: {error}")); break; }
+                    }
+                },
+                received = station.station.next_event() => match received {
+                    Ok(event) => {
+                        let observed = match unix_time_ms() { Ok(now) => now, Err(error) => { fail(format!("station clock failed: {error}")); break; } };
+                        let update = match signalman::message::observe_station_event(&event, local, observed) {
+                            Ok(signalman::message::MessageObservation::Incoming(event)) => StationEvent::Message { event, complete: false },
+                            Ok(signalman::message::MessageObservation::PeerAppeared { destination, .. }) => StationEvent::Peer { destination },
+                            Ok(signalman::message::MessageObservation::Dropped(message)) => StationEvent::Notice { message: format!("Radio receive refused: {message}") },
+                            Err(error) => StationEvent::Notice { message: format!("Radio message profile refused: {error}") },
+                        };
+                        let _ = events.send(update); wake();
+                    },
+                    Err(SitedStationError::OperationInterrupted) => {},
+                    Err(error) => { fail(format!("station receive failed: {error}")); break; }
+                },
             }
-            tokio::time::sleep(POLL).await;
         }
         station.station.stop().await;
     });

@@ -1,6 +1,6 @@
 //! Text messages and saved contacts.
 
-use signalman::message::{MessageEvent, MessageId, MessagePeer, QueuedReason, TextMessage};
+use signalman::message::{MessageEvent, MessageId, MessagePeer, QueuedReason};
 
 use crate::messages::MessageStore;
 
@@ -9,6 +9,9 @@ use super::{DesktopState, parse_address};
 impl DesktopState {
     pub fn replace_message_store(&mut self, store: MessageStore) {
         self.next_message_nonce = u64::try_from(store.log_len()).unwrap_or(u64::MAX);
+        if self.message_local.is_none() {
+            self.message_local = store.known_local_peer();
+        }
         self.message_store = store;
         self.message_notice = None;
     }
@@ -40,35 +43,107 @@ impl DesktopState {
             self.message_notice = Some("Write a message before queueing it.".into());
             return;
         }
-        let mut nonce = [0_u8; 32];
-        nonce[..8].copy_from_slice(&self.next_message_nonce.to_be_bytes());
-        nonce[8..16].copy_from_slice(&observed_unix_ms.to_be_bytes());
-        let message = TextMessage::compose(
+        let model = crate::comms::model(
             sender,
-            MessagePeer::new(destination, None),
-            observed_unix_ms,
-            nonce,
-            text,
+            self.message_store.clone(),
+            self.station_sender.clone(),
+            Some(observed_unix_ms),
         );
-        let id = message.id;
-        match self.message_store.append(MessageEvent::OutgoingQueued {
-            message: message.into(),
-            reason: QueuedReason::Offline,
-            observed_unix_ms,
-        }) {
-            Ok(_) => {
-                self.next_message_nonce = self.next_message_nonce.saturating_add(1);
+        let conversation =
+            signalman::comms_adapter::LxmfAdapter::<crate::comms::Mailbox>::conversation_id(
+                sender,
+                MessagePeer::new(destination, None),
+            );
+        let mut draft = signalman::comms_adapter::comms::Draft::reply_to(conversation);
+        draft.body = text.to_owned();
+        match pollster::block_on(model.send(&draft)) {
+            Ok(id) => {
+                let bytes = hex::decode(id.0).expect("Signalman adapter returns a hex message id");
+                self.selected_message = Some(MessageId(
+                    bytes.try_into().expect("Signalman message id is 32 bytes"),
+                ));
+                self.next_message_nonce =
+                    u64::try_from(self.message_store.log_len()).unwrap_or(u64::MAX);
                 self.message_draft = cambium::TextInput::default();
-                self.selected_message = Some(id);
-                self.message_notice = Some("Message persisted offline and queued.".into());
+                self.message_notice =
+                    Some("Message persisted and queued for LXMF carriage.".into());
             }
             Err(error) => self.message_notice = Some(format!("Message was not queued: {error}")),
         }
     }
 
-    pub fn apply_message_event(&mut self, event: MessageEvent) {
+    /// A Comms view over the same journal and attended station handoff.
+    pub fn comms(
+        &self,
+    ) -> Result<signalman::comms_adapter::comms::Comms, signalman::comms_adapter::comms::AdapterError>
+    {
+        let local = self.message_local.ok_or_else(|| {
+            signalman::comms_adapter::comms::AdapterError::Unsupported(
+                "a station identity is required".into(),
+            )
+        })?;
+        Ok(crate::comms::model(
+            local,
+            self.message_store.clone(),
+            self.station_sender.clone(),
+            None,
+        ))
+    }
+
+    pub fn apply_message_event(&mut self, event: MessageEvent) -> bool {
         if let Err(error) = self.message_store.append(event) {
             self.message_notice = Some(format!("Message event was not persisted: {error}"));
+            return false;
+        }
+        true
+    }
+
+    pub fn comms_diagnostics(
+        &self,
+    ) -> Result<
+        signalman::comms_adapter::LxmfDiagnostics,
+        signalman::comms_adapter::comms::AdapterError,
+    > {
+        let local = self.message_local.ok_or_else(|| {
+            signalman::comms_adapter::comms::AdapterError::Unsupported(
+                "Connect a station identity to inspect its LXMF queue.".into(),
+            )
+        })?;
+        signalman::comms_adapter::LxmfAdapter::new(
+            local,
+            crate::comms::Mailbox {
+                store: self.message_store.clone(),
+                station: self.station_sender.clone(),
+                now_ms: None,
+            },
+        )
+        .diagnostics()
+    }
+
+    /// Resume durable intents after station progress. Waiting-for-peer work
+    /// retries only after a matching peer observation (or a fresh connection).
+    pub fn dispatch_queued_messages(&mut self, peer: Option<MessagePeer>) {
+        let (Some(sender), Some(local)) = (&self.station_sender, self.message_local) else {
+            return;
+        };
+        for record in self.message_store.book().iter() {
+            if record.message.sender() != local {
+                continue;
+            }
+            let eligible = match record.status {
+                signalman::message::MessageStatus::Queued(
+                    QueuedReason::Offline | QueuedReason::ReadyForCarriage,
+                ) => true,
+                signalman::message::MessageStatus::Queued(QueuedReason::WaitingForPeer) => peer
+                    .is_some_and(|peer| {
+                        peer == local || peer.destination == record.message.recipient().destination
+                    }),
+                _ => false,
+            };
+            if eligible && let Err(error) = sender.submit(record.message.clone()) {
+                self.message_notice = Some(error);
+                break;
+            }
         }
     }
 
@@ -84,8 +159,8 @@ impl DesktopState {
         };
         let Some(peer) = self
             .message_store
-            .records()
-            .find(|record| record.message.id() == id)
+            .book()
+            .get(id)
             .map(|record| record.message.sender())
         else {
             self.message_notice = Some("The selected message is no longer present.".into());

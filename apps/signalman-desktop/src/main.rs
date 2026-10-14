@@ -265,6 +265,7 @@ fn main() {
                 for event in station_events {
                     state.apply_station_event(event);
                 }
+                state.dispatch_queued_messages(None);
                 for event in collector_events {
                     match event {
                         CollectorEvent::Finished { source, bundle, captured_unix_ms } => {
@@ -484,7 +485,9 @@ fn main() {
                     "Connecting station \u{201c}{}\u{201d} on {}\u{2026}",
                     settings.name, settings.port
                 ));
-                *init_station.borrow_mut() = Some(StationWorker::spawn(settings, wake.callback()));
+                let worker = StationWorker::spawn(settings, wake.callback());
+                state.station_sender = Some(worker.sender());
+                *init_station.borrow_mut() = Some(worker);
             }
             match MessageStore::open(default_message_store_path(), "signalman-local") {
                 Ok(store) => state.replace_message_store(store),

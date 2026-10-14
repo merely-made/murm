@@ -86,6 +86,9 @@ fn live_station_shows_a_real_announce_and_route() {
                         snapshot.announce_history.len()
                     );
                 }
+                StationEvent::Message { event, .. } => println!("message: {event:?}"),
+                StationEvent::Peer { destination } => println!("peer: {destination:?}"),
+                StationEvent::Notice { message } => println!("station notice: {message}"),
             }
             state.apply_station_event(event);
         }

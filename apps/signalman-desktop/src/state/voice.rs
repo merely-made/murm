@@ -116,9 +116,9 @@ impl DesktopState {
         };
         let Some(voice) = self
             .message_store
-            .records()
-            .find(|record| record.message.id() == id)
-            .and_then(|record| record.message.voice())
+            .book()
+            .get(id)
+            .and_then(|record| record.message.voice().cloned())
         else {
             self.message_notice = Some("The selected message is not a voice drop.".into());
             return;

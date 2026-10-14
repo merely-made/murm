@@ -175,10 +175,7 @@ pub fn editor(state: &DesktopState) -> Child {
                 button(
                     "Apply to Signalman",
                     |state: &mut DesktopState, _: PointerClick| {
-                        state.appearance.notice = match state.appearance.apply_workshop() {
-                            Ok(()) => None,
-                            Err(error) => Some(error),
-                        };
+                        state.appearance.notice = state.appearance.apply_workshop().err();
                     },
                 )
                 .attr("data-action", "apply-to-signalman"),

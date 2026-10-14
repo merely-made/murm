@@ -14,6 +14,16 @@ development and declare a shared MSRV of 1.97.1. Build the native libraries with
 network qualification remain explicit lanes. Stickleback stays in Mere, and
 Netfetcher's browser policy stays in Genet.
 
+Signalman's desktop Messages face now routes its versioned text-over-LXMF
+profile through the shared Comms adapter and the same durable application
+journal. With `SIGNALMAN_STATION_PORT` and the existing Djinn custody service,
+its attended station actor carries queued intents and persists authenticated
+receive events. An unambiguous public identity from saved history supports
+offline drafts; transmission still requires the station's current grant.
+The face reports recorded queue, handoff, receive and failure facts. This is
+software-qualified integration; wider LXMF bodies, other protocol adapters,
+real-radio and headed acceptance retain their own gates.
+
 ## Radio family
 
 
