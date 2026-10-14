@@ -56,7 +56,10 @@ impl DesktopState {
                 name,
                 port,
                 expires_at_ms: _,
+                local,
             } => {
+                self.set_message_local(local);
+                self.dispatch_queued_messages(Some(local));
                 self.station_notice =
                     Some(format!("Station \u{201c}{name}\u{201d} is live on {port}."));
             }
@@ -72,8 +75,22 @@ impl DesktopState {
                 self.apply_management_material(&material);
             }
             crate::station::StationEvent::Failed { message } => {
+                self.station_sender = None;
                 self.station_notice = Some(message);
             }
+            crate::station::StationEvent::Message { event, complete } => {
+                let id = event.message_id();
+                if self.apply_message_event(event)
+                    && complete
+                    && let Some(sender) = &self.station_sender
+                {
+                    sender.acknowledge(id);
+                }
+            }
+            crate::station::StationEvent::Peer { destination } => {
+                self.dispatch_queued_messages(Some(destination))
+            }
+            crate::station::StationEvent::Notice { message } => self.station_notice = Some(message),
         }
     }
 

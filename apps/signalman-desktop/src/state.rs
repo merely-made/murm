@@ -219,6 +219,7 @@ pub struct DesktopState {
     pending_observation: Option<ObservationRequest>,
 
     pub message_store: MessageStore,
+    pub station_sender: Option<crate::station::StationSender>,
     pub message_local: Option<MessagePeer>,
     pub message_recipient: cambium::TextInput,
     pub message_draft: cambium::TextInput,
@@ -317,6 +318,7 @@ impl DesktopState {
             observation_notice: None,
             pending_observation: None,
             message_store: MessageStore::memory("signalman-local"),
+            station_sender: None,
             message_local: None,
             message_recipient: cambium::TextInput::default(),
             message_draft: cambium::TextInput::default(),

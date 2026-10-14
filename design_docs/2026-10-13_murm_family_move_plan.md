@@ -9,6 +9,8 @@ intact. Supplemental Isocosm source adoption is also published; its gameplay
 compiler gates retain the reproduced upstream failure described below.
 Registry releases, further physical/live-network qualification and
 MOVE5 wire extraction retain their own gates.
+Post-cutover R1 implements Signalman's LXMF software path and initial R2
+recorded-delivery diagnostics; broader integration retains its gates below.
 
 **Canonical home:** this repository owns the migration. Mere and Genet should
 cite this plan rather than keep another migration specification. The canonical
@@ -686,3 +688,100 @@ and compiler results are in
 `Code/targets/murm-isocosm-migration-qualification-20261013.json`, with the
 untouched-upstream comparison in
 `Code/targets/murm-isocosm-upstream-baseline-check-20261013.json`.
+
+## 6. Post-cutover application integration
+
+**Status, 2026-10-13:** in progress, authorized after the family status review.
+
+### R1: one complete radio-to-Comms path
+
+Start with Signalman's existing authenticated LXMF text profile: Postilion
+already carries the payload, Signalman owns replayable message facts, and the
+desktop owns their durable journal. Add a concrete Comms adapter over that
+owner, not a second conversation store. Keep native station operations behind
+Mere's existing Djinn-authorized lease. Preserve exact destination addressing,
+local identity scope, incoming authenticated sender facts, message identity,
+queued/handed-to-radio/failure distinctions and history after reopen. Subjects,
+unsupported bodies and malformed addresses refuse before queue mutation.
+
+The desktop currently persists outgoing drafts but its live station actor
+only polls management snapshots; connect outgoing journal intents and incoming
+station events through that actor. Bound queueing and shutdown, retain receive
+refusals as operator diagnostics, and never imply carrier handoff is recipient
+delivery. The initial profile is Signalman's versioned text over LXMF; broader
+stock-LXMF bodies and voice presentation retain their own capability gates.
+
+**Done when:** the real Comms routing surface composes/reads the existing owner
+journal, the attended actor carries queued messages and persists authenticated
+receive facts, and software receipts prove addressing, durable reopen,
+duplicate receive, failure/queue semantics and wrong-owner refusal. Native
+compilation and the portable Comms Wasm cone pass. Real-radio and headed UI
+acceptance require the existing validation lane; no new physical claim comes
+from an in-process carrier test.
+
+### R2: operator-facing diagnostics
+
+Build on existing Postilion management captures and conformance inventories.
+Expose peer/route availability, admission and signature failures, queue state,
+sync progress and radio restoration/coverage gaps with their actual source and
+age. Keep unsupported observations explicit. Diagnostics observe the owning
+service and do not silently change configuration or cross-protocol identities.
+
+**Done when:** one operator path explains a failed or queued exchange from the
+existing facts, with deterministic software examples and preserved failure
+detail. Physical measurements and standards interoperability name their own
+profiles and receipts.
+
+### R3: further backends and wire extraction
+
+Use R1's application boundary for Sennet/Meshtastic and Tucket/MeshCore, with
+their distinct addressing, authentication and delivery semantics. tinySSB feed
+verification does not by itself supply SSB messaging. MOVE5 remains the later
+Netfetcher HTTP/WebSocket wire extraction; browser policy stays in Genet.
+
+### 2026-10-13 — R1 software path and initial R2 operator diagnostics
+
+Mere `e84cfbd95b1660046d646580a8707af020a06e4b` publishes the portable LXMF
+protocol identity and per-message observed-delivery query. Signalman's concrete
+`LxmfAdapter` reads the immutable book published by the existing journal owner
+and queues through that owner. The desktop and Comms share one synchronized
+journal; persistence still precedes publication. Book snapshots avoid copying
+voice data on each render. An unambiguous retained public authoring identity
+supports offline drafts after reopen; it creates no wallet, secret or grant.
+
+The attended actor now captures its actual station identity, sends persisted
+intents through the existing `SitedStation::send_payload` lease gate and drains
+authenticated Postilion events through Signalman's existing profile verifier.
+Wrong-station intents refuse before carriage. Sixteen reservations bound
+handoff; duplicate submission is suppressed, and only a persisted attempt
+outcome releases its reservation. Unknown-peer work retries after a matching
+peer observation or a fresh connection. Actor shutdown interrupts waiting
+carriage and preserves uncertainty in the failure detail. Receive/profile
+refusals remain operator notices, never fabricated incoming messages.
+
+The Messages face queues through the real Comms router and reports recorded
+LXMF offline/ready/waiting, handoff, receive, fetch and failure facts. Its
+station reservation count is separate from journal state. Public diagnostic
+snapshots preserve failure detail and their last local observation time; they
+do not infer radio health, routes or recipient reads. Broader R2 peer/path/sync
+and standards-profile composition remains open. Comms currently selects one
+adapter per protocol; this adapter is scoped to the attended station and does
+not promise automatic multi-station multiplexing.
+
+A software receipt authors via Comms, sends the actual signed LXMF object over
+Retinue's in-process packet carrier, authenticates through Outrider/Postilion,
+replays the receiver event, and reopens the Redb journal with the same message
+ID and no duplicate or automatic contact insertion. This is one Signalman text
+profile, not all stock LXMF application bodies or voice presentation. Native
+application, headless face/network and MSRV checks retain their exact scopes
+in [the radio-to-Comms receipt](../testing/receipts/radio-comms/README.md)
+and `Code/targets/murm-radio-comms-qualification-20261013.json`. Bare Comms
+Wasm compilation remains free of the radio/engine dependency cone. Three
+existing appearance style lints were simplified without changing behavior so
+the desktop library passes strict Clippy on the working compiler.
+
+R1's implemented software path is ready for the existing radio/headed lane.
+No hardware, headed, fresh custody-daemon or GPU acceptance is claimed by this
+pass. Isocosm's gameplay repair remains separate, as the owner confirmed;
+MOVE5 Netfetcher wire extraction and Sennet/Tucket/SSB application adapters
+remain their subsequent phases.

@@ -8,9 +8,9 @@ use crate::state::{DesktopState, VOICE_DURATION_OPTIONS, VOICE_ENCODING_OPTIONS,
 use super::{Child, heading};
 
 pub(super) fn messages_page(state: &DesktopState) -> Child {
-    let rows = state
-        .message_store
-        .records()
+    let book = state.message_store.book();
+    let rows = book
+        .iter()
         .rev()
         .map(|record| {
             let id = record.message.id();
@@ -21,7 +21,6 @@ pub(super) fn messages_page(state: &DesktopState) -> Child {
             let name = state
                 .message_store
                 .contact_name(peer)
-                .map(str::to_owned)
                 .unwrap_or_else(|| short_address(peer.destination));
             let direction = match record.direction {
                 MessageDirection::Incoming => "From",
@@ -65,12 +64,7 @@ pub(super) fn messages_page(state: &DesktopState) -> Child {
 
     let contact_controls: Child = state
         .selected_message
-        .and_then(|id| {
-            state
-                .message_store
-                .records()
-                .find(|record| record.message.id() == id)
-        })
+        .and_then(|id| book.get(id))
         .filter(|record| record.direction == MessageDirection::Incoming)
         .map(|record| record.message.sender())
         .filter(|peer| peer.identity.is_some() && state.message_store.contact_name(*peer).is_none())
@@ -309,6 +303,15 @@ pub(super) fn messages_page(state: &DesktopState) -> Child {
                     "Messages",
                     "Conversation history is replayed from the local journal.",
                 ),
+                el("div", text(state.comms_diagnostics().map(|report| {
+                    let summary = report.summary();
+                    match state.station_sender.as_ref().and_then(|sender| sender.pending_count().ok()) {
+                        Some(pending) => format!("{summary} {pending} awaiting station or journal outcome."),
+                        None => summary,
+                    }
+                }).unwrap_or_else(|error| error.to_string())))
+                    .attr("class", "message-notice")
+                    .attr("data-comms-diagnostics", "lxmf"),
                 el(
                     "div",
                     (

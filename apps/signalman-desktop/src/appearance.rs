@@ -123,12 +123,11 @@ impl AppearanceState {
         let mut modes = MODES.to_vec();
         if let Some(theme) = self.workshop.registry().theme_def(self.active_id()) {
             for (key, rules) in &theme.mode_sheets {
-                if !rules.is_empty() {
-                    if let Some(mode @ Mode::Custom(_)) = Mode::from_key(key) {
-                        if !modes.contains(&mode) {
-                            modes.push(mode);
-                        }
-                    }
+                if !rules.is_empty()
+                    && let Some(mode @ Mode::Custom(_)) = Mode::from_key(key)
+                    && !modes.contains(&mode)
+                {
+                    modes.push(mode);
                 }
             }
         }

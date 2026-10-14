@@ -11,14 +11,157 @@ const CONTACTS_SLOT: &str = "signalman/messages/v1/contacts";
 
 type DynBackend = Box<dyn Backend + Send + Sync>;
 
+/// Shared handle to the one durable application journal. Comms and the face
+/// serialize mutations through this owner rather than retaining separate books.
+#[derive(Clone)]
 pub struct MessageStore {
-    slots: JsonSlots<DynBackend>,
-    log: Journal<MessageEvent>,
-    book: MessageBook,
-    contacts: ContactBook,
+    inner: std::sync::Arc<std::sync::Mutex<JournalStore>>,
 }
 
 impl MessageStore {
+    pub fn memory(scope: impl Into<String>) -> Self {
+        Self {
+            inner: std::sync::Arc::new(std::sync::Mutex::new(JournalStore::memory(scope))),
+        }
+    }
+    pub fn open(
+        path: impl AsRef<Path>,
+        scope: impl Into<String>,
+    ) -> Result<Self, MessageStoreError> {
+        Ok(Self {
+            inner: std::sync::Arc::new(std::sync::Mutex::new(JournalStore::open(path, scope)?)),
+        })
+    }
+    pub fn append(&self, event: MessageEvent) -> Result<ApplyOutcome, MessageStoreError> {
+        self.inner
+            .lock()
+            .map_err(|_| MessageStoreError::Unavailable)?
+            .append(event)
+    }
+    pub fn records(&self) -> std::vec::IntoIter<MessageRecord> {
+        self.snapshot()
+            .expect("message journal owner poisoned")
+            .into_iter()
+    }
+    pub(crate) fn snapshot(&self) -> Result<Vec<MessageRecord>, MessageStoreError> {
+        Ok(self
+            .inner
+            .lock()
+            .map_err(|_| MessageStoreError::Unavailable)?
+            .records()
+            .cloned()
+            .collect())
+    }
+    /// A stable, cheap read of the current owner materialization. No journal
+    /// or mutable authority is exposed, and concurrent writes publish a new book.
+    pub fn book(&self) -> std::sync::Arc<MessageBook> {
+        self.try_book().expect("message journal owner poisoned")
+    }
+    pub(crate) fn try_book(&self) -> Result<std::sync::Arc<MessageBook>, MessageStoreError> {
+        Ok(self
+            .inner
+            .lock()
+            .map_err(|_| MessageStoreError::Unavailable)?
+            .book
+            .clone())
+    }
+    /// Recover one unambiguous public authoring identity from the owner's
+    /// history. This enables offline drafts; it grants no station authority.
+    pub fn known_local_peer(&self) -> Option<MessagePeer> {
+        let mut known = None;
+        for record in self.book().iter() {
+            let peer = match record.direction {
+                signalman::message::MessageDirection::Outgoing => record.message.sender(),
+                signalman::message::MessageDirection::Incoming => record.message.recipient(),
+            };
+            if peer.identity.is_none() {
+                continue;
+            }
+            if known.is_some_and(|existing| existing != peer) {
+                return None;
+            }
+            known = Some(peer);
+        }
+        known
+    }
+    pub fn len(&self) -> usize {
+        self.inner
+            .lock()
+            .expect("message journal owner poisoned")
+            .len()
+    }
+    pub fn is_empty(&self) -> bool {
+        self.inner
+            .lock()
+            .expect("message journal owner poisoned")
+            .is_empty()
+    }
+    pub fn log_len(&self) -> usize {
+        self.inner
+            .lock()
+            .expect("message journal owner poisoned")
+            .log_len()
+    }
+    pub fn contacts(&self) -> ContactBook {
+        self.inner
+            .lock()
+            .expect("message journal owner poisoned")
+            .contacts()
+            .clone()
+    }
+    pub fn contact_name(&self, peer: MessagePeer) -> Option<String> {
+        self.inner
+            .lock()
+            .expect("message journal owner poisoned")
+            .contact_name(peer)
+            .map(str::to_owned)
+    }
+    pub fn save_contact(
+        &self,
+        peer: MessagePeer,
+        petname: impl Into<String>,
+        now_ms: u64,
+    ) -> Result<(), MessageStoreError> {
+        self.inner
+            .lock()
+            .map_err(|_| MessageStoreError::Unavailable)?
+            .save_contact(peer, petname, now_ms)
+    }
+    pub(crate) fn queue_text_at(
+        &self,
+        local: MessagePeer,
+        peer: MessagePeer,
+        text: &str,
+        now_ms: u64,
+    ) -> Result<signalman::message::MessageId, MessageStoreError> {
+        let mut store = self
+            .inner
+            .lock()
+            .map_err(|_| MessageStoreError::Unavailable)?;
+        let mut nonce = [0; 32];
+        let sequence =
+            u64::try_from(store.log.len()).map_err(|_| MessageStoreError::SequenceExhausted)?;
+        nonce[..8].copy_from_slice(&sequence.to_be_bytes());
+        nonce[8..16].copy_from_slice(&now_ms.to_be_bytes());
+        let message = signalman::message::TextMessage::compose(local, peer, now_ms, nonce, text);
+        let id = message.id;
+        store.append(MessageEvent::OutgoingQueued {
+            message: message.into(),
+            reason: signalman::message::QueuedReason::Offline,
+            observed_unix_ms: now_ms,
+        })?;
+        Ok(id)
+    }
+}
+
+struct JournalStore {
+    slots: JsonSlots<DynBackend>,
+    log: Journal<MessageEvent>,
+    book: std::sync::Arc<MessageBook>,
+    contacts: ContactBook,
+}
+
+impl JournalStore {
     pub fn memory(scope: impl Into<String>) -> Self {
         Self::from_backend(Box::new(MemoryBackend::new()), scope)
             .expect("a fresh memory message store loads")
@@ -53,7 +196,7 @@ impl MessageStore {
             Ok::<_, StoreError>((log, contacts))
         })?;
         contacts.verify_scope(&expected)?;
-        let book = MessageBook::replay(log.entries())?;
+        let book = std::sync::Arc::new(MessageBook::replay(log.entries())?);
         Ok(Self {
             slots,
             log,
@@ -66,7 +209,7 @@ impl MessageStore {
     /// state. A failed store write leaves both in-memory objects unchanged.
     pub fn append(&mut self, event: MessageEvent) -> Result<ApplyOutcome, MessageStoreError> {
         let mut candidate_book = self.book.clone();
-        let outcome = candidate_book.apply(&event)?;
+        let outcome = std::sync::Arc::make_mut(&mut candidate_book).apply(&event)?;
         if outcome == ApplyOutcome::Duplicate {
             return Ok(outcome);
         }
@@ -149,6 +292,10 @@ fn hex_bytes(bytes: &[u8]) -> String {
 
 #[derive(Debug, thiserror::Error)]
 pub enum MessageStoreError {
+    #[error("the message journal owner is unavailable")]
+    Unavailable,
+    #[error("the message journal sequence is exhausted")]
+    SequenceExhausted,
     #[error(transparent)]
     Store(#[from] StoreError),
     #[error(transparent)]
@@ -172,7 +319,7 @@ mod tests {
         let local = MessagePeer::new([1; 16], Some([1; 32]));
         let unknown = MessagePeer::new([2; 16], Some([2; 32]));
         let message = TextMessage::compose(unknown, local, 10, [3; 32], "hello");
-        let mut store = MessageStore::memory("local");
+        let store = MessageStore::memory("local");
         store
             .append(MessageEvent::IncomingReceived {
                 message: message.into(),
@@ -186,7 +333,7 @@ mod tests {
         assert_eq!(store.contact_name(unknown), None);
 
         store.save_contact(unknown, "Alice", 12).unwrap();
-        assert_eq!(store.contact_name(unknown), Some("Alice"));
+        assert_eq!(store.contact_name(unknown), Some("Alice".into()));
     }
 
     #[test]
@@ -203,7 +350,7 @@ mod tests {
             reason: QueuedReason::Offline,
             observed_unix_ms: 11,
         };
-        let mut store = MessageStore::memory("local");
+        let store = MessageStore::memory("local");
         assert_eq!(store.append(event.clone()).unwrap(), ApplyOutcome::Applied);
         assert_eq!(store.append(event).unwrap(), ApplyOutcome::Duplicate);
         assert_eq!(store.log_len(), 1);
@@ -222,7 +369,7 @@ mod tests {
         );
         let id = message.id;
         {
-            let mut first = MessageStore::open(&path, "local").unwrap();
+            let first = MessageStore::open(&path, "local").unwrap();
             first
                 .append(MessageEvent::OutgoingQueued {
                     message: message.into(),
@@ -254,7 +401,7 @@ mod tests {
         .unwrap();
         let id = message.id;
         {
-            let mut first = MessageStore::open(&path, "local").unwrap();
+            let first = MessageStore::open(&path, "local").unwrap();
             first
                 .append(MessageEvent::OutgoingQueued {
                     message: message.into(),

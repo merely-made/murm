@@ -1,6 +1,6 @@
 #![forbid(unsafe_code)]
 
-//! Signalman: the radio-management application of the retinue family.
+//! Signalman: the radio-management application of the Murm family.
 //!
 //! The signalman sits in the box, sets the routes, works the block sections, and hands out
 //! the single-line token — the object exactly one train may hold to enter a single-track
@@ -19,6 +19,8 @@ use std::time::Duration;
 
 use postilion::{Event, Peer, Sent};
 
+#[cfg(feature = "comms")]
+pub mod comms_adapter;
 pub mod firmware;
 pub mod management;
 pub mod message;
