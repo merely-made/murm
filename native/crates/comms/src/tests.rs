@@ -96,6 +96,8 @@ fn delivery_status_labels_cover_each_delivery_fact() {
             "fetched from propagation node",
         ),
         (DeliveryStatus::ReceivedDirect, "received directly"),
+        (DeliveryStatus::ReceivedByRadio, "received by radio"),
+        (DeliveryStatus::ProtocolAcknowledged, "protocol acknowledgment observed"),
         (DeliveryStatus::Cancelled, "cancelled"),
         (
             DeliveryStatus::Failed {
