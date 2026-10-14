@@ -1,0 +1,55 @@
+{
+  "recorded_at": "2026-10-14T07:42:14.733347+00:00",
+  "selected_desktop_identities": {
+    "mere-comms": "git+https://www.github.com/merely-made/mere.git?rev=864757da78214bdd810e17355df5b2309721d651#864757da78214bdd810e17355df5b2309721d651",
+    "layout-dom-api": "git+https://github.com/merely-made/genet.git?rev=b6bfbeb556a6a17eddf8d5ad8254d3fcac95b084#b6bfbeb556a6a17eddf8d5ad8254d3fcac95b084",
+    "genet-scripted-dom": "git+https://github.com/merely-made/genet.git?rev=b6bfbeb556a6a17eddf8d5ad8254d3fcac95b084#b6bfbeb556a6a17eddf8d5ad8254d3fcac95b084",
+    "personae": "git+https://github.com/merely-made/dramatis.git?rev=0234e7eea6f2ddf2330a71b9425da01b06ae0391#0234e7eea6f2ddf2330a71b9425da01b06ae0391"
+  },
+  "wire_host_suppliers": {
+    "genet": "b6bfbeb556a6a17eddf8d5ad8254d3fcac95b084",
+    "mere": "864757da78214bdd810e17355df5b2309721d651",
+    "wire": "80d9959000fcd913634fd223538dfdbbec1f5e4f"
+  },
+  "desktop_http_wire_cone": "not selected; Signalman does not pull unused Netfetcher/wire engines",
+  "checks": [
+    {
+      "scope": "signalman",
+      "compiler": "1.99.0",
+      "passed": 43,
+      "log_sha256": "4e14df5dcabd1dc4ba75cd63c93237d2eac436f0cd8afa5cba28549cf45e187b"
+    },
+    {
+      "scope": "signalman-msrv",
+      "compiler": "1.97.1",
+      "passed": 43,
+      "log_sha256": "f9130471c45e39d729eabf1b12c065df1afd8ffb0630d80748c9475873de30b6"
+    },
+    {
+      "scope": "desktop",
+      "compiler": "1.99.0",
+      "passed": 29,
+      "log_sha256": "b6b965d10dcbaa33b3b7c40b92c8f3586f2ecdae7cafe687a5d6ee8af3e1bb96"
+    },
+    {
+      "scope": "desktop all targets",
+      "compiler": "1.99.0",
+      "result": "passed",
+      "log_sha256": "d46e9885f46873f1d1b950f8a7df411b291bc182eaf4b1cfae10f918202163c0"
+    }
+  ],
+  "foreign_git_manifests": [],
+  "inputs": {
+    "Cargo.toml": "3de2537c16f4d5ced14ff77ca03c10a800804e64728d52ad0b38f5b7ba2a556a",
+    "Cargo.lock": "8b3c2bb943a3c431e72be34344afd8912ba0332051a2ca777b70196da3df9c0d",
+    "apps/signalman/Cargo.toml": "3922f4fc59fa3b4c1b86e7a28142b29cfd3b0bdf50f0d217271d62ce086349ed",
+    "apps/signalman-desktop/Cargo.toml": "45f5d7625c0fbce7840a8bc42c4048391a6865670affc468d0c9c9783a9c52ca",
+    "apps/signalman-desktop/Cargo.lock": "87a7a7309d8eb9764ffcfc8cfd29e553401fa07319d5d7c5477089c980adc402"
+  },
+  "limits": [
+    "No physical radio, stock companion serial, headed/pixel, power-loss or registry release claim",
+    "Existing isolated-daemon desktop custody case remains ignored",
+    "Default pool remains process-wide; new per-persona pool partitioning is not implemented"
+  ],
+  "actions_enabled": false
+}
