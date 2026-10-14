@@ -1,6 +1,6 @@
 # Murm Documentation Index
 
-Radio-to-Comms integration (2026-10-13): [R1/R2 in the family plan](2026-10-13_murm_family_move_plan.md#6-post-cutover-application-integration) records Signalman's concrete LXMF adapter, shared durable journal, attended station send/receive path and recorded-delivery diagnostics. Software qualification is separate from real-radio and headed acceptance.
+Radio-to-Comms integration (2026-10-14): [R1/R2 in the family plan](2026-10-13_murm_family_move_plan.md#6-post-cutover-application-integration) records Signalman's concrete LXMF adapter, shared durable journal, attended station send/receive path and recorded-delivery diagnostics. R3 adds Sennet/Meshtastic and Tucket/MeshCore journals/adapters over the resident runtime, protocol selection in the Messages face and preserved packet/MAC/ACK limits. Software qualification is separate from real-radio and headed acceptance.
 
 Murm family direction (2026-10-13): the owner authorized using this repository
 as the foundation for Murm while preserving crate names and history. The

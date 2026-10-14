@@ -218,6 +218,8 @@ pub struct DesktopState {
     pub observation_notice: Option<String>,
     pending_observation: Option<ObservationRequest>,
 
+    pub radio_comms: Option<signalman::radio_comms::RadioComms>,
+    pub message_protocol: signalman::comms_adapter::comms::ProtocolKind,
     pub message_store: MessageStore,
     pub station_sender: Option<crate::station::StationSender>,
     pub message_local: Option<MessagePeer>,
@@ -317,6 +319,8 @@ impl DesktopState {
             observation_retention_age_ms: 7 * 24 * 60 * 60 * 1000,
             observation_notice: None,
             pending_observation: None,
+            radio_comms: None,
+            message_protocol: signalman::comms_adapter::comms::ProtocolKind::Lxmf,
             message_store: MessageStore::memory("signalman-local"),
             station_sender: None,
             message_local: None,

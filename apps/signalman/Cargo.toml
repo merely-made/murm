@@ -36,12 +36,15 @@ path = "src/bin/signalman-control-configure.rs"
 [features]
 # Comms presentation and queue adapter over the application's message journal.
 # Radio execution remains in the attended station owner.
-comms = ["dep:comms", "dep:async-trait"]
+comms = ["dep:comms", "dep:async-trait", "dep:sennet", "dep:tucket", "radio-hand/instances", "dep:tempfile"]
 
 [dependencies]
+sennet = { path = "../../crates/sennet", optional = true }
+tucket = { path = "../../crates/tucket", optional = true }
+tempfile = { version = "3", optional = true }
 async-trait = { version = "0.1", optional = true }
 # The shared presentation vocabulary follows the desktop's Mere cohort.
-comms = { package = "mere-comms", git = "https://www.github.com/merely-made/mere.git", rev = "e84cfbd95b1660046d646580a8707af020a06e4b", optional = true }
+comms = { package = "mere-comms", git = "https://www.github.com/merely-made/mere.git", rev = "2f92d45dd2fc30c173367f203ad49ed913f29fff", optional = true }
 hex = "0.4"
 linkboy = { version = "0.1.0", path = "../linkboy" }
 outrider = { version = "0.3.0", path = "../../crates/outrider", features = ["voice"] }
@@ -59,4 +62,5 @@ tulle = { version = "0.2.0", path = "../../crates/tulle", features = ["serial-as
 zeroize = "1"
 
 [dev-dependencies]
+selvage = { path = "../../crates/selvage" }
 tempfile = "3"
