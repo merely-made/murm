@@ -7,7 +7,8 @@ workspaces, keeps Stickleback in Mere and Fetch policy in Genet, and sequences
 the implementation, consumer and repository cutovers. The native import and
 named application cutover are published. The existing repository is now
 `merely-made/murm` with the same identity, refs and crate names. Canonical URL
-validation passed; additional Isocosm gameplay work remains separate.
+validation passed. Supplemental Isocosm dependency adoption is published;
+its reproduced gameplay compiler failures remain in the wing after-pass.
 
 > Canonical index per [`DOC_POLICY.md`](DOC_POLICY.md) §6. **If any other index
 > in this repository disagrees with this file, this file wins.** Founded

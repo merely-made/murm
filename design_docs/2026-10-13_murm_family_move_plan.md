@@ -5,7 +5,9 @@
 MOVE3 consumer adoption are published. MOVE4 renamed the continuing Retinue
 repository to Murm with the same repository identity and refs; canonical URL
 validation passed and the canonical URLs are published on main. Crate names and history remain
-intact. Registry releases, further physical/live-network qualification and
+intact. Supplemental Isocosm source adoption is also published; its gameplay
+compiler gates retain the reproduced upstream failure described below.
+Registry releases, further physical/live-network qualification and
 MOVE5 wire extraction retain their own gates.
 
 **Canonical home:** this repository owns the migration. Mere and Genet should
@@ -650,3 +652,37 @@ during final reconciliation; that gameplay revision was not compiled here,
 and the candidate needs reconciliation before publication. It remains separate
 from the named MOVE3 cutover. MOVE5 Netfetcher wire extraction, crate-registry publication and
 further network/physical/headed qualification remain open in this plan.
+
+### 2026-10-13 — supplemental Isocosm adoption published
+
+The owner authorized migration after the known simulator baseline report.
+The candidate was preserved in a recovery branch and named stash, reconciled
+without conflict onto Isocosm `55f48769d7ccac51bf70160f785da616e5259690`, and
+published as `983c0e7b` on `merely-made/isocosm` main. This supersedes the
+uncommitted-candidate status above. VTT communications now selects canonical
+Murm `b49df894635bac95823284efee6c445885eaf62a`; the VTT, Eponym, Mesocosm,
+shared host, parry-ground probe and shared Isocosm/Isomere/Isometer roots use
+coherent Mere `0b9b7a9b`, Genet `7a8c5b8c` and Dramatis `0234e7ee` where
+those suppliers are reached. Package names, versions and source history stay
+intact. Eponym handles Cambium pointer cancellation by stopping charging.
+
+All eight roots pass locked, offline, all-feature dependency resolution.
+Selected graphs contain no old Retinue supplier URL, duplicate transport or
+identity family, sibling Git source override, or dependency declaration above
+MSRV 1.97.1. Sixty-three newly added unused patch rows were removed, with the
+selected package IDs unchanged; existing upstream patch policy is retained.
+
+Fresh VTT and shared-host all-target/all-feature compiler checks, and Eponym
+and Mesocosm all-target checks, each stop on the same ten simulator errors.
+An untouched Git archive of current upstream `55f48769` reproduces the exact
+same ten coded diagnostics. `shared/isocosm/src` and the gameplay/runtime
+sources were not repaired by this dependency move. These are open compiler
+gates, not successful application builds; gameplay acceptance remains in the
+wing after-pass. No gameplay tests, tuning or headed/GPU checks ran.
+
+The source-adoption receipt is
+`Code/targets/murm-isocosm-migration-publication-20261013.json`; fresh graph
+and compiler results are in
+`Code/targets/murm-isocosm-migration-qualification-20261013.json`, with the
+untouched-upstream comparison in
+`Code/targets/murm-isocosm-upstream-baseline-check-20261013.json`.
