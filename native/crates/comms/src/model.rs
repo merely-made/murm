@@ -20,11 +20,13 @@ pub enum ProtocolKind {
     /// Misfin (gemini-style mail). The default for a fresh new-message form.
     #[default]
     Misfin,
-    /// Murm (Cable bilateral / small-group cabals).
+    /// Murm's invited conversations (murmurs).
     Murm,
     /// Commons' retained encrypted chat, projected under Moot authority.
     /// This names the record grammar, independently of its carriage.
     CommonsChat,
+    /// LXMF correspondence, with application-owned history and delivery facts.
+    Lxmf,
 }
 
 /// A party in a conversation — you or a peer. `address` is the backend-native
