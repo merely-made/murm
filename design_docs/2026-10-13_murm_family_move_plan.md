@@ -1413,3 +1413,16 @@ fits both the damaged receptions and the weak transmit. It is a hypothesis
 until a front-end change, derived from Heltec's V4.2 schematic, measurably
 changes `rxbad` and the witness's RSSI. The prns harvest notes on V4 FEM
 variants are not a source: Prns was withdrawn as a reference on 2026-09-26.
+
+**Rulings (owner, 2026-10-14), continued.**
+
+6. *V4 front end.* Put: COM7 damages frames that are on the air (`rxbad`
+   matches every run-8 miss), the firmware drives no front-end pins, and the
+   cause is a hypothesis. Options: cheap A/B first, then FEM; derive FEM control
+   from the schematic now; or park it for the stock tests. Owner chose
+   **"Cheap A/B first, then FEM"**: re-measure `rxbad` with COM6 at 2 dBm, then
+   with the boards about 2 m apart, before any front-end design.
+7. *esp toolchain.* Put: rustc 1.95 nightly is below MSRV 1.97.1; bench images
+   built with `--ignore-rust-version`. Owner chose **"Update via espup"**:
+   install a newer esp toolchain so V4 builds meet the floor without the
+   override.
