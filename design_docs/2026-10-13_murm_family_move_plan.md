@@ -1006,3 +1006,57 @@ Qualification at `b982319b6f203dffc81225a7232784c980c94ef8` is frozen in
 `testing/receipts/stock-companions`; physical
 serial/RF interoperability, BLE, headed pixels and power-loss behavior remain
 separate gates. GitHub Actions remains disabled at the owner's request.
+
+### R5 — physical companion and headed UI acceptance (2026-10-14, in progress)
+
+The owner authorized actual-radio end-to-end validation followed by Signalman's
+UI acceptance. A finite pair runner uses the production CompanionSession and
+Comms adapters: explicit identified stock ports, independent public journals,
+bidirectional unique text, receiver/author/body match, protocol ACK, close and
+reconnect with preserved history, then a second pair of exchanges. Probe mode
+reads identity/config/contact metadata without dispatching text. It neither
+flashes nor changes radio configuration, keys or contacts. A fresh output
+directory preserves every attempted trial. This pair runner requires two
+already compatible stock peers per protocol;
+MeshCore full contacts must already be present. A separately assigned Tulle
+direct-PHY peer is an alternative bench route, retaining its own PHY/source
+receipt rather than representing one stock device as two peers.
+
+Done conditions: verified board/firmware identities and source/tool/binary ledger,
+four physical exchanges per protocol including reconnect, native UI Connect,
+Queue, receive/history/status, Disconnect and reconnect with production actors,
+nonblank visually reviewed captures, and release of serial/native resources.
+Each failure retains its receipt; software proof cannot close physical gates.
+
+Initial inventory: the local Mac lists only BLTH/Bluetooth-Incoming-Port/URT1;
+USB inventory shows no radio endpoint. o-pc's configured SSH address timed out,
+and s-pc's configured Djinn public-key identity is missing and authentication
+was refused. The current host/board assignment is pending from the owner.
+Native UI admission is also pending explicit coordination with the renderer
+and Tabard chats; no headed/native/GPU process has been launched.
+
+#### R5 preparation progress (2026-10-14)
+
+`apps/signalman/examples/stock_companion_pair.rs` is built on Rust 1.99.0,
+passes strict example Clippy and checks on MSRV 1.97.1. Three actual-binary
+entry refusals (missing mode, invalid realm, repeated pair port) fail before
+serial I/O or evidence-directory creation. Receipt projections include only
+this run's tagged text; full journals remain local. No physical radio or
+native UI process ran. Preparation evidence is local at
+`targets/murm-stock-companion-preparation-20261014.json`; earlier R4 receipts
+remain frozen at their recorded source.
+
+Compile-ready commands, from the repository root (new output directories must
+have existing parents; substitute the identified ports and configured realm):
+
+```sh
+cargo run -p signalman --features comms --example stock_companion_pair -- probe meshtastic COM6 household output/mt-probe 0
+cargo run -p signalman --features comms --example stock_companion_pair -- pair meshtastic COM6 COM7 household output/mt-pair 0
+cargo run -p signalman --features comms --example stock_companion_pair -- pair meshcore COM6 COM7 household output/mc-pair
+```
+
+These COM names are illustrative arguments, not a current device assignment.
+Do not run both protocols against those ports without verifying their actual
+firmware and roles. Each direction has a 180-second receive/ACK limit. The
+physical and headed phases remain open pending the requested owner input and
+native validation handoff; no end-to-end success is inferred from compilation.
