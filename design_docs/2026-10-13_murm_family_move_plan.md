@@ -1264,3 +1264,75 @@ ends. Station output and the config diff are under ignored
 5 messages / 4816448 bytes, now 0 / 1270176. Restore from backup if needed."
 That confirms the stale baseline described above. Rebaselining remains
 undone.
+
+#### R5 MeshChatX inbound diagnosis and fix (2026-10-14)
+
+**Owner request.** "Diagnose the Retinue inbound Resource failure first: rerun
+MeshChatX→Signalman with RNS debug logging on both ends, find why the transfer
+stalls at 50%, fix it, and confirm both directions."
+
+**Instruments.** MeshChatX's RNS ran at `loglevel = 7` (restored to 4
+afterwards). Retinue has no logging, so a temporary trace gated on
+`RETINUE_LINK_TRACE` was added to `remove_link` (`#[track_caller]`),
+`queue_link_packet`, the router's link-packet admission and
+`ResourceSession::receive`. It was reverted and is not committed. Five
+terminal-Signalman runs on COM7 against MeshChatX 4.9.1 (bundled RNS 1.5.4) on
+COM6 are kept under ignored `validation/results/meshchatx-interop-20261014/`.
+
+**What "50%" and "resource link closed" were.** Short MeshChatX texts go as a
+single link data packet. On many fresh delivery links the initiator's RTT
+packet (`ctx 0xfe`) arrived but the data packet sent right behind it did not.
+MeshChatX then got no proof, and about 3 s later its RNS sent LINKCLOSE
+(`ctx 0xfc`). Retinue reported that close as `resource link closed`. MeshChatX
+logged "closed unexpectedly", retried on a new link and eventually failed.
+
+**Root cause in Postilion: head-of-line blocking.** `Station::open`'s inbound
+task received one accepted delivery link at a time. Run 4 showed it directly:
+link `65e09dd6…` got only its RTT packet, and the station waited on it for the
+whole Resource timeout (two minutes, "payload receive timed out"). Meanwhile
+link `ffd32aa5…`'s data packet arrived and was admitted at 17:25:50 but went
+unread, so MeshChatX's retries timed out queued behind it. The backlog drained
+at 17:27:41 and printed `signalman-mcx-5` two minutes after MeshChatX had
+marked it failed. A single lost first packet was enough to sink every retry.
+
+**Fix.** `serve_deliveries` (`crates/postilion/src/station.rs`) receives each
+accepted link in its own task. The tasks live in a `JoinSet` owned by the
+accept task, so `Station`'s `Drop` still aborts them. One behavior change: the
+loop now ends when `accept_resource` fails rather than when the event receiver
+goes away. Regression test `a_silent_link_does_not_hold_later_deliveries`
+opens an established but silent link first (30 s timeout), then requires a real
+`send_direct` to arrive within 5 s. It passes in 0.09 s. Negative control: the
+same loop forced serial fails it after 6.1 s. Postilion's 32 tests and strict
+Clippy (`--all-targets -D warnings`) pass. The `signalman` binary and the
+`stock_companion_pair` example build.
+
+**RF confirmation.** With the fix, `signalman-mcx-6 after the concurrency fix`
+was delivered on MeshChatX's third link (17:33:17, about 17 s after sending).
+The two dead links were closed and dropped in about 3 s each instead of
+stalling the station, and MeshChatX shows it delivered. Earlier,
+`signalman-mcx-1` went Signalman → MeshChatX. `signalman-mcx-3` reached the
+station before the fix and was released when MeshChatX announced. Both
+directions have therefore delivered. Neither is reliable on this bench:
+`signalman-mcx-7` (Signalman → MeshChatX, fixed build) failed with "resource
+publish timed out before receiver request" because MeshChatX never requested
+the parts.
+
+**Open, not fixed.**
+
+1. *Back-to-back frame loss on COM6.* Of each pair of frames sent back to back
+   (RTT then data), usually only one reaches Retinue. Retinue's LINKCLOSE also
+   failed to reach MeshChatX once, since it kept sending keepalives on a closed
+   link. MeshChatX twice took COM6 offline on `hardware error (code 04)`, an
+   RNode queue-full code that radio-hand never emits (it maps only 0x02 and
+   0x06). The RNode loop silently drops frames refused as `TX_CHANNEL_BUSY` or
+   `TX_OVER_DUTY`. The `rnode` probe's refusal counters were all zero with
+   `radio=off` after MeshChatX disconnected, so they reset with the host
+   session. That is an instrument failure, not evidence either way.
+   *Reading, not ruled:* the next instrument is a refusal counter that survives
+   the session, or a T114 sniffer on the same channel.
+2. *Held messages are invisible.* A message from a sender the station hasn't
+   heard announce is proved, so MeshChatX shows it delivered, but it prints
+   nothing until that sender announces.
+3. *Bench terminal exits on one send failure.* `apps/signalman/src/main.rs`
+   propagates a `send_text` error out of `main`.
+4. *Desktop Signalman custody.* Still blocked: Djinn closes the stream.
