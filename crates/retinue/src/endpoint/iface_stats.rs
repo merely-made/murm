@@ -49,7 +49,7 @@ pub struct InterfaceCounters {
     pub tx_dropped: u64,
     /// Announces held while the interface bursts (`held_announces`).
     pub held_announces: u64,
-    /// The interface is holding announces for a burst (`burst_active`).
+    /// The interface is in an announce burst (`burst_active`).
     pub burst_active: bool,
     /// The interface is in a path-request burst (`pr_burst_active`).
     pub path_request_burst: bool,
@@ -222,13 +222,13 @@ impl Endpoint {
                 ..iface.stats.snapshot()
             }
         })?;
-        // Retinue's admission keeps no burst flag: an interface bursts while it holds
-        // announces, and holds what it held less what it released.
-        if shared.held_announces.lock().unwrap().holds(id) {
-            let admission = shared.announce_admission.lock().unwrap().counters(id);
-            counters.held_announces = admission.held.saturating_sub(admission.released).max(1);
-            counters.burst_active = true;
-        }
+        counters.held_announces = shared.held_announces.lock().unwrap().held(id) as u64;
+        let now = shared.announce_admission_now_ms();
+        counters.burst_active = shared
+            .announce_admission
+            .lock()
+            .unwrap()
+            .bursting(id, now);
         Some(counters)
     }
 }

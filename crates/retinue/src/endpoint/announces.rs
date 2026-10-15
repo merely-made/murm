@@ -114,8 +114,9 @@ impl HeldAnnounces {
         false
     }
 
-    pub(super) fn holds(&self, iface: InterfaceId) -> bool {
-        self.by_iface.contains_key(&iface)
+    /// How many announces `iface` holds (`len(interface.held_announces)`).
+    pub(super) fn held(&self, iface: InterfaceId) -> usize {
+        self.by_iface.get(&iface).map_or(0, Vec::len)
     }
 
     /// The fewest-hops announce `iface` holds, the oldest among equals (`Interface.py` 285).
@@ -360,7 +361,7 @@ pub(super) fn start_held_announce_release(
             }
 
             let now_ms = owner.announce_admission_now_ms();
-            if !owner.held_announces.lock().unwrap().holds(iface) {
+            if owner.held_announces.lock().unwrap().held(iface) == 0 {
                 break;
             }
             let ingress = owner.iface_policy(iface).ingress;
@@ -396,7 +397,7 @@ pub(super) fn start_held_announce_release(
 
         owner.held_release_tasks.lock().unwrap().remove(&iface);
         let next_due_ms = owner.announce_admission_now_ms();
-        if owner.held_announces.lock().unwrap().holds(iface) {
+        if owner.held_announces.lock().unwrap().held(iface) > 0 {
             start_held_announce_release(&owner, iface, next_due_ms);
         }
     }) {
