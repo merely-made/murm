@@ -65,6 +65,10 @@ impl UdpCarrier {
 /// The carrier an RNS interface section configures, in retinue's own config types.
 #[derive(Clone, Debug)]
 #[non_exhaustive]
+#[allow(
+    clippy::large_enum_variant,
+    reason = "a config value, built once per section"
+)]
 pub enum Carrier {
     /// `TCPClientInterface`, or a `BackboneInterface` with a `target_host`/`remote`. A
     /// `fixed_mtu` is the client's [`HwMtu::Fixed`].
@@ -91,13 +95,12 @@ pub enum Carrier {
         tnc: crate::iface::kiss::TncConfig,
         beacon: Option<IdBeacon>,
     },
-    /// `AX25KISSInterface`: its `callsign` and `ssid` (`None` for RNS's -1) are kept as data.
+    /// `AX25KISSInterface`, with its station's header from `callsign` and `ssid`.
     #[cfg(feature = "serial")]
     Ax25Kiss {
         port: crate::iface::serial::SerialConfig,
         tnc: crate::iface::kiss::TncConfig,
-        callsign: String,
-        ssid: Option<u8>,
+        header: crate::iface::ax25::Ax25Header,
     },
     /// `RNodeInterface`.
     #[cfg(feature = "tulle-radio")]
@@ -353,9 +356,11 @@ pub enum RnsAttached {
 }
 
 impl Endpoint {
-    /// Attach a TCP client, TCP or Backbone listener, or UDP section and apply its settings.
-    /// Other carriers are attached through their own APIs with [`RnsInterface::carrier`]'s
-    /// config, then [`Self::apply_interface_settings`]. `enabled` is the caller's to check.
+    /// Attach a TCP client, TCP or Backbone listener, UDP, Pipe, Serial, KISS or AX.25 KISS
+    /// section and apply its settings; a serial carrier runs until the endpoint closes. Auto
+    /// and RNode sections are attached through their own APIs with [`RnsInterface::carrier`]'s
+    /// config, then [`Self::apply_interface_settings`]; the `[reticulum]` shared instance with
+    /// [`Self::attach_shared_instance`]. `enabled` is the caller's to check.
     pub async fn attach_rns_interface(&self, section: &RnsInterface) -> io::Result<RnsAttached> {
         let unsupported = |why: &str| io::Error::new(io::ErrorKind::Unsupported, why.to_string());
         let id = match &section.carrier {
@@ -372,10 +377,39 @@ impl Endpoint {
                 self.apply_interface_settings(handle.id, &section.settings);
                 return Ok(RnsAttached::Udp(handle));
             }
+            #[cfg(feature = "pipe")]
+            Carrier::Pipe(cfg) => self.attach_pipe(cfg.clone()).await?,
+            #[cfg(feature = "serial")]
+            Carrier::Serial(_) | Carrier::Kiss { .. } | Carrier::Ax25Kiss { .. } => {
+                self.attach_serial_section(section)?
+            }
             #[allow(unreachable_patterns)]
             _ => return Err(unsupported("attach this carrier with its own API")),
         };
         self.apply_interface_settings(id, &section.settings);
         Ok(RnsAttached::Interface(id))
+    }
+
+    #[cfg(feature = "serial")]
+    fn attach_serial_section(&self, section: &RnsInterface) -> io::Result<InterfaceId> {
+        use crate::iface::beacon::Beacon;
+        use crate::iface::kiss::KissTnc;
+        use crate::iface::serial::{self, Framing};
+        let (port, framing) = match &section.carrier {
+            Carrier::Serial(port) => (port, Framing::Hdlc),
+            Carrier::Kiss { port, tnc, beacon } => {
+                let beacon = beacon
+                    .as_ref()
+                    .map(|b| Beacon::kiss(b.callsign.as_bytes(), b.interval));
+                (port, Framing::Kiss(KissTnc::new(*tnc, beacon)))
+            }
+            Carrier::Ax25Kiss { port, tnc, header } => (port, Framing::ax25(*header, *tnc)),
+            _ => return Err(io::ErrorKind::InvalidInput.into()),
+        };
+        let carrier = serial::attach(self, port.clone(), framing, section.settings.ifac.clone())?;
+        if !super::super::runtime::track(&self.shared, carrier.run) {
+            return Err(super::super::runtime::endpoint_closed());
+        }
+        Ok(carrier.id)
     }
 }
