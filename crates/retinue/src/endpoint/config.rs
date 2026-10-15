@@ -15,8 +15,8 @@ pub(super) const DEFAULT_RELIABLE_INITIAL_RTT_MS: u64 = 750;
 /// can lower it without changing the wire format.
 pub(super) const DEFAULT_RELIABLE_MAX_WINDOW: u32 = crate::channel::WINDOW_MAX;
 
-/// Default link MTU advertised by Reticulum; radio callers may lower it.
-pub(super) const DEFAULT_LINK_MTU: u32 = crate::packet::MTU as u32;
+/// Default link MTU ceiling: none of its own, so a link takes what its path signals.
+pub(super) const DEFAULT_LINK_MTU: u32 = crate::link::MAX_MTU;
 /// Smallest link MTU the direct-PHY Data and Resource paths exercise: room for an
 /// eight-byte IFAC on a 255-byte packet radio.
 const MIN_LINK_MTU: u32 = 247;
@@ -94,14 +94,15 @@ impl Endpoint {
         }
     }
 
-    /// Set the MTU requested and offered by subsequently established links.
+    /// Set a ceiling on the MTU requested and offered by subsequently established links.
     ///
-    /// The lower bound keeps link setup, identify, and resource control packets
-    /// representable while allowing the standard eight-byte IFAC on a 255-byte
-    /// packet radio. The default remains Reticulum's 500-byte MTU.
+    /// A link takes the smaller of this and what its interface signals: the protocol MTU,
+    /// or an autoconfigured or fixed hardware MTU (16384 on TCP). The default sets no
+    /// ceiling. The lower bound keeps link setup, identify, and resource control packets
+    /// representable while allowing the standard eight-byte IFAC on a 255-byte packet radio.
     pub fn set_link_mtu(&self, mtu: u32) {
         self.shared.link_mtu.store(
-            mtu.clamp(MIN_LINK_MTU, crate::packet::MTU as u32),
+            mtu.clamp(MIN_LINK_MTU, crate::link::MAX_MTU),
             Ordering::Relaxed,
         );
     }

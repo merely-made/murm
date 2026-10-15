@@ -444,8 +444,8 @@ async fn a_responder_clamps_the_link_to_its_receiving_interface() {
     assert_eq!(pending.prove(&proof).unwrap().mtu(), 300);
 }
 
-/// A signalled MTU of 0 means RNS's default, and a request below the smallest workable
-/// link is held to that floor.
+/// A signalled MTU of 0 means the protocol MTU (`Link.py` 194), and a request below the
+/// smallest workable link is held to that floor.
 #[tokio::test]
 async fn a_responder_floors_what_it_offers() {
     let identity = PrivateIdentity::from_secret_bytes(&[0x9C; 64]);
@@ -454,7 +454,7 @@ async fn a_responder_floors_what_it_offers() {
     endpoint.register(name.clone(), b"");
     let iface = endpoint.attach_interface();
     for (seed, signalled, offered) in [
-        (0x9D, 0, endpoint.shared.link_mtu.load(Ordering::Relaxed)),
+        (0x9D, 0, crate::packet::MTU as u32),
         (0x9E, 1, crate::node::MIN_LOGICAL_MTU),
     ] {
         let (_, mut request) = link::PendingLink::open(
@@ -480,5 +480,91 @@ async fn a_responder_floors_what_it_offers() {
         let echoed = &proof.payload[proof.payload.len() - link::TRAILER_LEN..];
         let echoed = LinkTrailer::decode(echoed.try_into().unwrap()).unwrap();
         assert_eq!(echoed.mtu, offered);
+    }
+}
+
+const TCP: crate::endpoint::HwMtu = crate::endpoint::HwMtu::Auto {
+    bitrate: 10_000_000,
+};
+
+/// A transit hop between two autoconfigured TCP interfaces keeps 16384 end to end, clamps a
+/// larger request to it, and holds a request leaving by a protocol interface to 500
+/// (`Transport.py` 2063-2088).
+#[tokio::test]
+async fn a_transit_hop_clamps_to_what_both_interfaces_signal() {
+    for (out_mtu, asked, carried) in [
+        (Some(TCP), 16_384, 16_384),
+        (Some(TCP), 1 << 20, 16_384),
+        (None, 16_384, 500),
+    ] {
+        let endpoint = Endpoint::new(PrivateIdentity::from_secret_bytes(&[0xA1; 64]));
+        let a = endpoint.attach_interface_with_hw_mtu(TCP, None).unwrap();
+        let b = match out_mtu {
+            Some(mtu) => endpoint.attach_interface_with_hw_mtu(mtu, None).unwrap(),
+            None => endpoint.attach_interface_with_frame_limit(1064).unwrap(),
+        };
+        endpoint.enable_routing();
+        let responder = PrivateIdentity::from_secret_bytes(&[0xA2; 64]);
+        let (_, announce) = freshness_announce(&responder, "transit-mtu", 0, 1, 1, 0);
+        endpoint.shared.path_table.lock().unwrap().insert(
+            announce.destination,
+            PathEntry {
+                iface: b.id(),
+                transport: None,
+                hops: 0,
+                learned: Instant::now(),
+                mode: InterfaceMode::default(),
+            },
+        );
+        let (_, mut request) = link::PendingLink::open(
+            announce.destination,
+            *responder.public(),
+            &[0xA3; 64],
+            LinkTrailer {
+                mode: LinkMode::Aes256Cbc,
+                mtu: asked,
+            },
+        );
+        request.header_type = crate::packet::HeaderType::Type2;
+        request.transport = Some(endpoint.identity().hash());
+        route(&endpoint.shared, a.id(), request);
+        let out = b.outbound.queues.pop().expect("the request is carried");
+        assert_eq!(
+            link::request_trailer(&out).unwrap().map(|t| t.mtu),
+            Some(carried)
+        );
+    }
+}
+
+/// A responder offers what its receiving interface signals: 16384 on TCP, 1196 on Auto,
+/// and at most the configured ceiling.
+#[tokio::test]
+async fn a_responder_offers_its_signalled_hardware_mtu() {
+    let identity = PrivateIdentity::from_secret_bytes(&[0xA4; 64]);
+    let endpoint = Endpoint::new(identity.clone());
+    let name = DestinationName::new("retinue", ["hw-mtu"]);
+    endpoint.register(name.clone(), b"");
+    let auto = crate::endpoint::HwMtu::Fixed(1196);
+    for (seed, hw_mtu, ceiling, offered) in [
+        (0xA5, TCP, None, 16_384),
+        (0xA6, auto, None, 1196),
+        (0xA7, TCP, Some(255), 255),
+    ] {
+        if let Some(ceiling) = ceiling {
+            endpoint.set_link_mtu(ceiling);
+        }
+        let iface = endpoint.attach_interface_with_hw_mtu(hw_mtu, None).unwrap();
+        let (pending, request) = link::PendingLink::open(
+            name.destination_hash(identity.public()),
+            *identity.public(),
+            &[seed; 64],
+            LinkTrailer {
+                mode: LinkMode::Aes256Cbc,
+                mtu: 1 << 20,
+            },
+        );
+        route(&endpoint.shared, iface.id(), request);
+        let proof = iface.outbound.queues.pop().expect("the request is proved");
+        assert_eq!(pending.prove(&proof).unwrap().mtu(), offered);
     }
 }
