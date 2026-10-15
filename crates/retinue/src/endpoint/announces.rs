@@ -146,7 +146,7 @@ impl HeldAnnounces {
 /// scheduling makes a held-release task indistinguishable from direct router ingress.
 pub(super) struct AnnounceFreshnessState {
     policy: AnnounceFreshnessPolicy,
-    table: AnnounceFreshness,
+    pub(super) table: AnnounceFreshness,
 }
 
 impl AnnounceFreshnessState {

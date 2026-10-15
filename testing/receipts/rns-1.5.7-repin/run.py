@@ -52,7 +52,10 @@ DATAGRAM_ROOT_GATES = (("auto-feth", "interop_auto_feth.py", []),)
 # Every gate takes free ephemeral ports, so lanes may run in parallel.
 
 # V1: shared instance (A6) and tunnel synthesis (B6), on loopback TCP.
-LOCAL_GATES = ()
+LOCAL_GATES = (
+    ("shared-instance", "interop_shared_instance.py", []),
+    ("tunnel", "interop_tunnel.py", []),
+)
 
 # V2: path requests by interface mode and recursive discovery (A4), on loopback TCP.
 DISCOVERY_GATES = (("path-discovery", "interop_path_discovery.py", []),)
