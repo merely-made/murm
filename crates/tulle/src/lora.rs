@@ -15,6 +15,10 @@
 //! where `CR` is 1..=4 (4/5..4/8), `IH` is 1 for an implicit header, `CRC` is 1 when on, and
 //! `DE` (low-data-rate optimization) is forced on when the symbol time exceeds 16 ms. `DE` is
 //! derived, never stored: storing it invites a transmitter/receiver mismatch.
+//!
+//! An SX126x at SF5 and SF6 counts differently (SX1261/2 datasheet 6.1.4): the preamble adds
+//! 6.25 symbols rather than 4.25, the numerator drops the `+8`, and `DE` never applies.
+//! [`PhyChip`] selects it; at SF7 and above the two chips agree.
 
 use core::time::Duration;
 use selvage::PhyProfile;
@@ -44,11 +48,19 @@ impl CodingRate {
     }
 }
 
+/// Which transceiver family's time-on-air rules apply. Differs only at SF5 and SF6.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum PhyChip {
+    #[default]
+    Sx127x,
+    Sx126x,
+}
+
 /// The modulation parameters for a LoRa transmission, enough to compute airtime and to key a
 /// duty-cycle budget by channel.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct LoRaParams {
-    /// Spreading factor, 7..=12.
+    /// Spreading factor, 5..=12.
     pub spreading_factor: u8,
     /// Bandwidth in Hz, e.g. 125_000, 250_000, 500_000.
     pub bandwidth_hz: u32,
@@ -78,16 +90,32 @@ impl LoRaParams {
         self.symbol_time() > Duration::from_micros(16_000)
     }
 
-    /// The number of payload symbols for a `payload_len`-byte PHY frame.
+    /// The number of payload symbols for a `payload_len`-byte PHY frame on an SX127x.
     pub fn payload_symbols(&self, payload_len: usize) -> u32 {
+        self.payload_symbols_on(PhyChip::Sx127x, payload_len)
+    }
+
+    /// Whether `chip` counts this modulation by its SF5/SF6 rule.
+    fn short_sf(&self, chip: PhyChip) -> bool {
+        chip == PhyChip::Sx126x && self.spreading_factor < 7
+    }
+
+    /// The number of payload symbols for a `payload_len`-byte PHY frame on `chip`.
+    pub fn payload_symbols_on(&self, chip: PhyChip, payload_len: usize) -> u32 {
         let sf = self.spreading_factor as i64;
         let pl = payload_len as i64;
         let crc = if self.crc { 1 } else { 0 };
         let ih = if self.explicit_header { 0 } else { 1 };
-        let de = if self.low_data_rate_optimize() { 1 } else { 0 };
+        let short = self.short_sf(chip);
+        let de = if !short && self.low_data_rate_optimize() {
+            1
+        } else {
+            0
+        };
 
-        let num = 8 * pl - 4 * sf + 28 + 16 * crc - 20 * ih;
-        let den = 4 * (sf - 2 * de); // > 0 for SF >= 7
+        let header_bits = if short { 20 } else { 28 };
+        let num = 8 * pl - 4 * sf + header_bits + 16 * crc - 20 * ih;
+        let den = 4 * (sf - 2 * de); // > 0 for SF >= 5
         // Ceiling division for a signed numerator over a positive denominator: round up for a
         // positive numerator; Rust's truncation-toward-zero already ceils a non-positive one.
         let ceil = if num > 0 {
@@ -99,11 +127,17 @@ impl LoRaParams {
         (8 + term) as u32
     }
 
-    /// The full time-on-air for a `payload_len`-byte PHY frame.
+    /// The full time-on-air for a `payload_len`-byte PHY frame on an SX127x.
     pub fn time_on_air(&self, payload_len: usize) -> Duration {
+        self.time_on_air_on(PhyChip::Sx127x, payload_len)
+    }
+
+    /// The full time-on-air for a `payload_len`-byte PHY frame on `chip`.
+    pub fn time_on_air_on(&self, chip: PhyChip, payload_len: usize) -> Duration {
         let t_sym = (1u64 << self.spreading_factor) as f64 / self.bandwidth_hz as f64;
-        let t_preamble = (self.preamble_syms as f64 + 4.25) * t_sym;
-        let t_payload = self.payload_symbols(payload_len) as f64 * t_sym;
+        let sync = if self.short_sf(chip) { 6.25 } else { 4.25 };
+        let t_preamble = (self.preamble_syms as f64 + sync) * t_sym;
+        let t_payload = self.payload_symbols_on(chip, payload_len) as f64 * t_sym;
         Duration::from_secs_f64(t_preamble + t_payload)
     }
 
@@ -183,6 +217,36 @@ mod tests {
                 (got - expected_ms).abs() < 0.01,
                 "SF{sf} BW{bw} PL{pl}: got {got:.3} ms, expected {expected_ms:.3} ms",
             );
+        }
+    }
+
+    /// SX1261/2 datasheet 6.1.4, SF5/SF6: `N_preamble + 6.25 + 8 + ceil(max(8*PL + 16*CRC -
+    /// 4*SF + 20*H, 0) / (4*SF)) * (CR + 4)` symbols, `H` 1 for an explicit header.
+    #[test]
+    fn sx126x_short_spreading_factors_follow_the_datasheet() {
+        let mut p = params(5, 125_000);
+        // 8 + 6.25 + 8 + ceil(176 / 20) * 5 = 67.25 symbols of 0.256 ms.
+        let ms = |p: &LoRaParams, chip, pl| p.time_on_air_on(chip, pl).as_secs_f64() * 1e3;
+        assert!((ms(&p, PhyChip::Sx126x, 20) - 17.216).abs() < 1e-6);
+        // SF6, BW500, CR 4/8, 64 bytes: 8 + 6.25 + 8 + ceil(524 / 24) * 8 = 198.25 x 0.128 ms.
+        p = LoRaParams {
+            coding_rate: CodingRate::Cr48,
+            ..params(6, 500_000)
+        };
+        assert!((ms(&p, PhyChip::Sx126x, 64) - 25.376).abs() < 1e-6);
+        // Implicit header, no CRC, one byte: the payload term clamps to zero.
+        p = LoRaParams {
+            explicit_header: false,
+            crc: false,
+            ..params(6, 125_000)
+        };
+        assert_eq!(p.payload_symbols_on(PhyChip::Sx126x, 1), 8);
+        assert!((ms(&p, PhyChip::Sx126x, 1) - 11.392).abs() < 1e-6);
+        // The default stays SX127x, and the chips agree from SF7 up.
+        assert_ne!(p.time_on_air(1), p.time_on_air_on(PhyChip::Sx126x, 1));
+        for sf in 7..=12 {
+            let p = params(sf, 125_000);
+            assert_eq!(p.time_on_air(51), p.time_on_air_on(PhyChip::Sx126x, 51));
         }
     }
 

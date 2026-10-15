@@ -3,7 +3,7 @@
 
 use core::fmt;
 
-use crate::lora::LoRaParams;
+use crate::lora::{LoRaParams, PhyChip};
 
 /// KISS command bytes (`RNodeInterface.py` 40-82).
 pub mod cmd {
@@ -22,7 +22,10 @@ pub mod cmd {
     pub const STAT_RSSI: u8 = 0x23;
     pub const STAT_SNR: u8 = 0x24;
     pub const STAT_CHTM: u8 = 0x25;
+    pub const STAT_PHYPRM: u8 = 0x26;
     pub const STAT_BAT: u8 = 0x27;
+    pub const STAT_CSMA: u8 = 0x28;
+    pub const STAT_TEMP: u8 = 0x29;
     pub const PLATFORM: u8 = 0x48;
     pub const MCU: u8 = 0x49;
     pub const FW_VERSION: u8 = 0x50;
@@ -73,6 +76,8 @@ pub struct RNodeConfig {
     pub flow_control: bool,
     /// Firmware below this is refused.
     pub min_firmware: (u8, u8),
+    /// The transceiver whose airtime rules pace frames; matters only at SF5 and SF6.
+    pub chip: PhyChip,
 }
 
 impl RNodeConfig {
@@ -83,10 +88,12 @@ impl RNodeConfig {
             lt_alock: None,
             flow_control: false,
             min_firmware: MIN_FIRMWARE,
+            chip: PhyChip::default(),
         }
     }
 
-    /// RNS's range checks (`RNodeInterface.py` 307-334); a coding rate is valid by type.
+    /// RNS's range checks (`RNodeInterface.py` 307-334): SF 5-12, BW 7.8 kHz-1.625 MHz, TX
+    /// power 0-37 dBm (0 by type), CR 5-8 (by type).
     pub fn validate(&self) -> Result<(), ConfigError> {
         let p = &self.params;
         let checks = [
