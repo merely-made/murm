@@ -55,13 +55,17 @@ pub use iface_policy::{AnnounceRate, IfacePolicy};
 pub use inbound::{Accepted, AcceptedResource, InboundLinkLimits};
 pub use interface::{Interface, InterfaceId, InterfaceSink};
 pub use link_receipt::{LinkDelivery, PayloadReceipt};
+pub use link_setup::{LinkSetupTimedOut, is_link_setup_timeout};
 pub use listen::{ListenPolicy, Listener};
 pub use queue::{
     ClassCounters, OutboundPackets, QueueCounters, QueueDepths, QueueWeights, TrafficClass,
 };
 pub use resource_inbound::{ReceivedLinkData, SessionInbound};
 pub use resource_requests::{ReceivedRawRequest, ReceivedRawResponse, ReceivedRequest};
-pub use resource_session::{PayloadMode, ReceivedPayload, ResourceSession, ResourceTransferConfig};
+pub use resource_session::{
+    PayloadMode, ReceivedPayload, ResourceNeverRequested, ResourceSession, ResourceTransferConfig,
+    is_resource_never_requested,
+};
 pub use routing::{InterfaceSelector, RoutingCounters, RoutingPolicy};
 pub use runtime::Endpoint;
 pub use single::{ProofStrategy, ReceivedSingle, SingleDelivery, SinglePacketReceipt};

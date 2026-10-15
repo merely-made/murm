@@ -2,7 +2,8 @@
 
 use retinue::endpoint::{
     AcceptedResource, Endpoint, InterfaceId, LinkDelivery, PayloadMode, PeerAnnounce,
-    ProofStrategy, ReceivedPayload, ResourceTransferConfig,
+    ProofStrategy, ReceivedPayload, ResourceTransferConfig, is_link_setup_timeout,
+    is_resource_never_requested,
 };
 use retinue::hash::AddressHash;
 use retinue::identity::{Identity, PrivateIdentity};
@@ -16,6 +17,9 @@ use crate::delivered::DeliveredCache;
 use crate::inbound::{Verification, check_stamp, unix_now, verify};
 use crate::stamp::{MESSAGE_WORKBLOCK_ROUNDS, STAMP_LEN, find_parallel, valid_streamed};
 use crate::ticket::{StampFault, StampOutcome, TICKET_LEN, is_ticket_stamp};
+
+/// Link setups a direct send tries before giving up, as LXMF tries a delivery five times.
+pub const LINK_SETUP_ATTEMPTS: u32 = 5;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct DirectReceipt {
@@ -198,9 +202,24 @@ async fn finish_send(
     let message_id = prepared.message_id;
     let signature = sender.sign(prepared.signing_bytes());
     let packed = prepared.finish(signature);
-    let receipt = endpoint
-        .deliver_payload(peer.destination, peer.identity, &packed, resource_config)
-        .await?;
+    // Retinue sends one link request per attempt, as RNS does; a setup that got no proof, or
+    // an offer the receiver never asked for, is retried here on a fresh link, as LXMF retries
+    // a delivery. Neither reached the receiver, so a retry cannot duplicate the message.
+    let mut attempt = 1;
+    let receipt = loop {
+        match endpoint
+            .deliver_payload(peer.destination, peer.identity, &packed, resource_config)
+            .await
+        {
+            Err(error)
+                if (is_link_setup_timeout(&error) || is_resource_never_requested(&error))
+                    && attempt < LINK_SETUP_ATTEMPTS =>
+            {
+                attempt += 1;
+            }
+            result => break result?,
+        }
+    };
     Ok(DirectReceipt {
         message_id,
         mode: receipt.mode,

@@ -76,9 +76,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let endpoint = Endpoint::new(PrivateIdentity::from_secret_bytes(&[0x41; 64]));
     endpoint.set_link_mtu(255);
-    // Retries must clear the round trip at SF11, exactly as node_link found: the setup
-    // retry past request+proof, the transfer retry past request+part.
-    endpoint.set_link_setup_retry(Duration::from_secs(12));
+    // Retries must clear the round trip at SF11, as node_link found: the transfer retry
+    // past request+part.
     let interface = endpoint.attach_interface();
     let driver = tokio::spawn(drive(interface, radio));
 

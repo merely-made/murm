@@ -282,14 +282,12 @@ impl Endpoint {
             Instant::now()
         };
         let setup_timeout = self.link_setup_timeout(dest);
-        // RTT runs from the first transmission: a proof after a retry cannot say which copy
-        // it answers (Karn), so keep the conservative bound.
+        // One request per attempt, as RNS sends it (`Link.py`): RNS drops a repeated request as
+        // a duplicate packet and does not answer it again, so a lost proof is recovered by the
+        // caller's next attempt on a fresh link, not by resending this one.
         let sent_at = tokio::time::Instant::now();
         send_request();
 
-        let retry = Duration::from_millis(self.shared.link_setup_retry_ms.load(Ordering::Relaxed));
-        let mut retries = tokio::time::interval_at(tokio::time::Instant::now() + retry, retry);
-        retries.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Delay);
         let deadline = tokio::time::sleep(setup_timeout);
         let closed = self.shared.closed_notify.notified();
         tokio::pin!(deadline);
@@ -299,44 +297,61 @@ impl Endpoint {
             return Err(endpoint_closed());
         }
 
-        loop {
-            tokio::select! {
-                result = &mut rx => match result {
-                    Ok((link, iface)) => {
-                        guard.armed = false; // router removed both entries on success
-                        if self.shared.is_running() {
-                            // The responder activates the link on our RTT report, so it
-                            // must precede any application packet.
-                            let rtt = sent_at.elapsed();
-                            self.shared
-                                .send_on(iface, link.rtt_packet(rtt.as_secs_f32(), &next_iv()));
-                            let rtt_ms = rtt.as_millis().min(u128::from(u64::MAX)) as u64;
-                            let liveness =
-                                Liveness::initiator(rtt_ms, self.shared.link_clock_ms());
-                            return Ok((link, iface, liveness));
-                        }
+        tokio::select! {
+            result = &mut rx => match result {
+                Ok((link, iface)) => {
+                    guard.armed = false; // router removed both entries on success
+                    if self.shared.is_running() {
+                        // The responder activates the link on our RTT report, so it
+                        // must precede any application packet.
+                        let rtt = sent_at.elapsed();
+                        self.shared
+                            .send_on(iface, link.rtt_packet(rtt.as_secs_f32(), &next_iv()));
+                        let rtt_ms = rtt.as_millis().min(u128::from(u64::MAX)) as u64;
+                        let liveness =
+                            Liveness::initiator(rtt_ms, self.shared.link_clock_ms());
+                        Ok((link, iface, liveness))
+                    } else {
                         self.shared.send_on(iface, link.close_packet(&next_iv()));
-                        return Err(endpoint_closed());
+                        Err(endpoint_closed())
                     }
-                    Err(_) => return Err(io::Error::new(
-                        io::ErrorKind::ConnectionReset,
-                        "link setup dropped",
-                    )),
-                },
-                _ = retries.tick() => {
-                    send_request();
                 }
-                _ = &mut deadline => {
-                    if !self.shared.routing.lock().unwrap().forward_packets {
-                        self.shared.forget_path(dest);
-                        self.request_path(dest);
-                    }
-                    return Err(io::Error::new(io::ErrorKind::TimedOut, "link setup timed out"));
+                Err(_) => Err(io::Error::new(
+                    io::ErrorKind::ConnectionReset,
+                    "link setup dropped",
+                )),
+            },
+            _ = &mut deadline => {
+                if !self.shared.routing.lock().unwrap().forward_packets {
+                    self.shared.forget_path(dest);
+                    self.request_path(dest);
                 }
-                _ = &mut closed => return Err(endpoint_closed()),
+                Err(io::Error::new(io::ErrorKind::TimedOut, LinkSetupTimedOut))
             }
+            _ = &mut closed => Err(endpoint_closed()),
         }
     }
+}
+
+/// The error payload of a link setup that got no proof in time. Setup sends one request per
+/// attempt, so this is the caller's signal to try again on a fresh link.
+#[derive(Debug)]
+pub struct LinkSetupTimedOut;
+
+impl core::fmt::Display for LinkSetupTimedOut {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.write_str("link setup timed out")
+    }
+}
+
+impl std::error::Error for LinkSetupTimedOut {}
+
+/// Whether `error` is a link setup that timed out, as opposed to a failure after the link
+/// was up.
+pub fn is_link_setup_timeout(error: &io::Error) -> bool {
+    error
+        .get_ref()
+        .is_some_and(|inner| inner.is::<LinkSetupTimedOut>())
 }
 
 /// Removes a link's `pending` waker and `pending_links` entry if setup does not complete (a

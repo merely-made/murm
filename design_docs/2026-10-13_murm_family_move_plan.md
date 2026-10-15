@@ -1595,3 +1595,76 @@ the owner.
 15. *Link-setup retry.* Put: fresh request with a slower retry; the RNS model
     (one request per attempt, caller retries with a fresh link); or identical
     retries then fresh. Owner chose **"RNS model: one per attempt"**.
+
+#### R5 RNS-model link setup and fresh-link retry (2026-10-14)
+
+**Change (ruling 15).** `Endpoint::establish` sends one link request per
+attempt and waits the RNS-shaped `link_setup_timeout`. The in-place identical
+retransmission is gone, along with `set_link_setup_retry`, its config field,
+the default, and its callers: Postilion's `Station::open` and the
+`node_link`, `node_data` and `node_stress` examples. Tulle's
+`pacing::link_setup_retry` helper is left in place, unused here. Two typed
+error payloads keep their old messages:
+
+- `LinkSetupTimedOut` ("link setup timed out"), with `is_link_setup_timeout`.
+- `ResourceNeverRequested` ("resource publish timed out before receiver
+  request"), with `is_resource_never_requested`. It is used only where the
+  receiver requested nothing. "Matched no parts" and proof timeouts stay
+  terminal.
+
+outrider's `finish_send` retries either on a fresh link, up to
+`LINK_SETUP_ATTEMPTS = 5` (LXMF's delivery attempts). In both cases nothing
+reached the receiver, so a retry cannot duplicate the message.
+
+RNS 1.5.6 source (`crates/retinue/oracle`) confirms the mechanisms:
+
+- `Transport.packet_filter` exempts KEEPALIVE, RESOURCE_REQ/PRF/RESOURCE,
+  CACHE_REQUEST and CHANNEL from duplicate dropping, but not link requests or
+  RESOURCE_ADV.
+- `Packet.resend()` re-packs for fresh ciphertext.
+- A link starts at `ACCEPT_NONE`, which silently ignores advertisements, and
+  goes ACTIVE only on the initiator's single LRRTT (`Link.py` 239, 523, 1031).
+
+Retinue already re-advertises with a fresh IV, so its advertisements were never
+deduplicated. An unanswered offer means the responder never activated the
+link.
+
+**Gates.** Outrider: 126 passed, including `a_lost_link_request_is_recovered_on_a_fresh_link`
+and `an_unanswered_offer_is_made_again_on_a_fresh_link`. Each fails with the
+retry removed: forcing one attempt, or dropping the never-requested case.
+Postilion: 32 passed. Retinue integration (`--features tulle-radio --test '*'`):
+178 passed. Strict Clippy is clean on outrider, retinue (lib and examples),
+postilion and signalman, and formatting passes. Retinue's own unit-test target
+does not compile on Windows: `endpoint/tests/interfaces.rs` uses socket2
+keepalive getters that do not exist here; it was last changed in `d6ebd481031`
+and predates this work. `reliable_stream::reliable_exchange_survives_loss_including_identify`
+failed at `HEAD` in a scratch worktree and with this change, then passed in the
+full run, so it is **flaky**. Its own comment wrongly says link setup is not
+lossy.
+
+**RF, run 15** (both at 0 dBm; MeshChatX at log level 4):
+
+- Signalman → MeshChatX: `mcx-21` delivered first try (7 s); `mcx-22` (39 s) and
+  `mcx-23` (26 s) delivered after fresh-link retries; `mcx-20` failed (71 s).
+- MeshChatX → Signalman: `mcx-24` (80 s) and `mcx-25` (12 s) delivered.
+
+Witness record for `mcx-20`, by attempt:
+
+1. COM7 missed the proof (on the air 250 ms after its request).
+2. MeshChatX ignored five advertisements, so it had lost the LRRTT.
+3. COM6 never answered the link request; no proof reached the air.
+
+After a setup timeout the non-transport station forgets the path and requests
+a new one. The later attempts put no link request on the air before the next
+message; that is not yet traced.
+
+An earlier run-15 failure was my procedure: the station and MeshChatX
+announced at the same instant and collided (MeshChatX's announce reached the
+witness at SNR 2.0).
+
+*Reading, not ruled:* the software amplifiers are fixed (serial accept,
+identical setup retries, unanswered offers). What remains is per-frame receive
+loss at both V4s, about 8% at COM7 in run 11 and unmeasured at COM6, which
+compounds over the 6–8 frames of an LXMF exchange. COM6's `air` counters cannot
+be read after a MeshChatX session, because RNS's port close resets the
+ESP32-S3.
