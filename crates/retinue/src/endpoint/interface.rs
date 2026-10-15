@@ -3,12 +3,12 @@
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, AtomicU64, AtomicUsize, Ordering};
 
-use tokio::sync::mpsc;
-
 use crate::ifac::Ifac;
 use crate::node::InterfaceMode;
 use crate::packet::Packet;
 
+use super::iface_stats::InterfaceStats;
+use super::inbound_queue::{InboundTx, TrySendError};
 use super::queue::{OutboundPackets, OutboundQueues, TrafficClass};
 
 /// Identifies one attached interface. A dialed TCP interface keeps its id across reconnects.
@@ -24,12 +24,13 @@ pub type InterfaceId = u32;
 pub struct Interface {
     pub(super) id: InterfaceId,
     pub(super) outbound: OutboundPackets,
-    pub(super) router_tx: mpsc::Sender<(InterfaceId, Packet)>,
+    pub(super) inbound: InboundTx,
     pub(super) frame_limit: Arc<AtomicUsize>,
     pub(super) ifac: Option<Ifac>,
     /// Inbound packets dropped because the router's queue was full. Shared with every
     /// [`InterfaceSink`] split off this interface.
     pub(super) dropped: Arc<AtomicU64>,
+    pub(super) stats: Arc<InterfaceStats>,
 }
 
 impl Interface {
@@ -70,9 +71,11 @@ impl Interface {
     pub fn sink(&self) -> InterfaceSink {
         InterfaceSink {
             id: self.id,
-            router_tx: self.router_tx.clone(),
+            inbound: self.inbound.clone(),
             ifac: self.ifac.clone(),
+            frame_limit: self.frame_limit.clone(),
             dropped: self.dropped.clone(),
+            stats: self.stats.clone(),
         }
     }
 
@@ -81,9 +84,11 @@ impl Interface {
     pub fn split(self) -> (OutboundPackets, InterfaceSink) {
         let sink = InterfaceSink {
             id: self.id,
-            router_tx: self.router_tx,
+            inbound: self.inbound,
             ifac: self.ifac,
+            frame_limit: self.frame_limit,
             dropped: self.dropped,
+            stats: self.stats,
         };
         (self.outbound, sink)
     }
@@ -94,11 +99,13 @@ impl Interface {
 #[derive(Clone)]
 pub struct InterfaceSink {
     id: InterfaceId,
-    router_tx: mpsc::Sender<(InterfaceId, Packet)>,
+    inbound: InboundTx,
     ifac: Option<Ifac>,
+    frame_limit: Arc<AtomicUsize>,
     /// Packets dropped because the router's queue was full, shared across clones so the
     /// figure describes the interface rather than one handle to it.
     dropped: Arc<AtomicU64>,
+    stats: Arc<InterfaceStats>,
 }
 
 impl InterfaceSink {
@@ -108,13 +115,13 @@ impl InterfaceSink {
     /// burst must not look like a dead endpoint to the caller. A full router queue drops the
     /// packet, since Reticulum's upper layers retransmit, and counts it in [`Self::dropped`].
     pub fn deliver(&self, pkt: Packet) -> bool {
-        match self.router_tx.try_send((self.id, pkt)) {
+        match self.inbound.try_send(self.id, pkt) {
             Ok(()) => true,
-            Err(mpsc::error::TrySendError::Full(_)) => {
+            Err(TrySendError::Full) => {
                 self.dropped.fetch_add(1, Ordering::Relaxed);
                 true
             }
-            Err(mpsc::error::TrySendError::Closed(_)) => false,
+            Err(TrySendError::Closed) => false,
         }
     }
 
@@ -133,12 +140,35 @@ impl InterfaceSink {
     /// on, and the router drops it and counts it in
     /// [`RoutingCounters::ifac_flag_rejected`](super::RoutingCounters::ifac_flag_rejected).
     pub fn deliver_frame(&self, frame: &[u8]) -> crate::Result<bool> {
-        let packet = match &self.ifac {
-            Some(ifac) => Packet::decode(&ifac.open(frame)?)?,
-            None => Packet::decode(frame)?,
-        };
+        let limit = self.frame_limit.load(Ordering::Acquire);
+        let packet = open_frame(frame, self.ifac.as_ref(), limit, &self.stats)?;
         Ok(self.deliver(packet))
     }
+}
+
+/// Count one received carrier frame, strip its access code and decode it, as every carrier's
+/// ingress does. `frame_limit` includes the access code. A frame that fails is counted as an
+/// IFAC or protocol violation (`Transport.py` 1272-1322, 1790-1791).
+pub(super) fn open_frame(
+    frame: &[u8],
+    ifac: Option<&Ifac>,
+    frame_limit: usize,
+    stats: &InterfaceStats,
+) -> crate::Result<Packet> {
+    stats.note_rx(frame.len());
+    let overhead = ifac.map_or(0, Ifac::size);
+    let opened;
+    let logical = match ifac {
+        Some(ifac) => {
+            opened = ifac
+                .open(frame)
+                .inspect_err(|_| stats.note_ifac_violation())?;
+            &opened[..]
+        }
+        None => frame,
+    };
+    Packet::decode_with_limit(logical, frame_limit.saturating_sub(overhead))
+        .inspect_err(|_| stats.note_protocol_violation())
 }
 
 /// An attached interface: the scheduler its writer task drains.
@@ -154,6 +184,8 @@ pub(super) struct Iface {
     pub(super) online: Arc<AtomicBool>,
     /// Queued packets the carrier could not encode, dropped rather than ending the carrier.
     pub(super) unsendable: AtomicU64,
+    /// Traffic counters, shared with the carrier's sink and queues.
+    pub(super) stats: Arc<InterfaceStats>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

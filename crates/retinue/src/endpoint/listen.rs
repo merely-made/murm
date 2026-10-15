@@ -1,5 +1,7 @@
 //! TCP listeners and the interfaces they spawn per connection (`TCPInterface.py` 511-688).
 
+use alloc::string::String;
+
 use std::io;
 use std::net::SocketAddr;
 use std::sync::Arc;
@@ -12,9 +14,11 @@ use crate::ifac::Ifac;
 use crate::iface::hdlc;
 use crate::node::InterfaceMode;
 
+use super::dial::TCP_BITRATE_GUESS;
 use super::iface_policy::IfacePolicy;
 use super::interface::InterfaceId;
-use super::pump::carry_tcp;
+use super::mtu::HwMtu;
+use super::pump::{Framing, carry_tcp};
 use super::runtime::{Endpoint, endpoint_closed, track};
 use super::shared::Shared;
 use super::sockopt;
@@ -23,10 +27,9 @@ use super::sockopt;
 const ACCEPT_RETRY: Duration = Duration::from_millis(100);
 
 /// What every connection a listener accepts inherits, as RNS copies a server interface's
-/// settings onto each spawned client (`TCPInterface.py` 587-650).
-///
-/// Not yet modelled: the `IN` flag, egress control and path-request rates (`ec_pr_freq`,
-/// `ic_pr_burst_*`), and `recursive_prs`.
+/// settings onto each spawned client (`TCPInterface.py` 587-650). Egress control, the
+/// path-request rates and `recursive_prs` travel in [`IfacePolicy`]; RNS copies `IN` too, but
+/// nothing in 1.5.7 reads it.
 #[derive(Clone, Debug, Default)]
 pub struct ListenPolicy {
     /// Mode of each spawned interface.
@@ -41,6 +44,54 @@ pub struct ListenPolicy {
     /// that finds the channel full or closed is dropped, so a slow consumer never stalls
     /// accepting.
     pub spawned: Option<mpsc::Sender<InterfaceId>>,
+    /// Frame accepted connections with KISS. RNS has no KISS server; this pairs with a stock
+    /// `TCPClientInterface` set to `kiss_framing = yes`.
+    pub kiss_framing: bool,
+    /// Refuse peers that reconnect too fast, as BackboneInterface does; `None` accepts all,
+    /// as TCPServerInterface does.
+    pub flap: Option<FlapPolicy>,
+}
+
+/// Backbone's fast-flap blocking (`BackboneInterface.py` 48-53, 126-161, 807-835).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct FlapPolicy {
+    /// A connection that ends sooner than this after its accept is a flap.
+    pub threshold: Duration,
+    /// Flaps tolerated from one address before it is blocked.
+    pub grace: u32,
+    /// How long an address stays blocked after its last flap.
+    pub block: Duration,
+}
+
+impl Default for FlapPolicy {
+    /// Backbone's defaults: 20 s, 5 flaps, 12 h.
+    fn default() -> Self {
+        Self {
+            threshold: Duration::from_secs(20),
+            grace: 5,
+            block: Duration::from_secs(12 * 60 * 60),
+        }
+    }
+}
+
+/// Where a listener binds: RNS's `listen_ip`/`listen_port` and `device` keys
+/// (`TCPInterface.py` 469-551; `BackboneInterface.py` 84-170).
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum ListenAddr {
+    /// A resolved address.
+    Socket(SocketAddr),
+    /// A host name or address literal, resolved on bind.
+    Host {
+        name: String,
+        port: u16,
+        prefer_ipv6: bool,
+    },
+    /// The first address of a network device, with its scope for an IPv6 link-local one.
+    Device {
+        name: String,
+        port: u16,
+        prefer_ipv6: bool,
+    },
 }
 
 /// A running listener. Dropping the handle leaves it listening; [`Self::close`] stops it.
@@ -126,6 +177,15 @@ impl Endpoint {
         Ok(Listener { local, stop })
     }
 
+    /// Listen at `addr`, giving every accepted connection `policy`. Seam: only
+    /// [`ListenAddr::Socket`] until unit V4 (C7) resolves hosts and devices.
+    pub async fn listen_on(&self, addr: ListenAddr, policy: ListenPolicy) -> io::Result<Listener> {
+        match addr {
+            ListenAddr::Socket(addr) => self.listen_tcp_with(addr, policy).await,
+            _ => Err(io::ErrorKind::Unsupported.into()),
+        }
+    }
+
     /// Attach a connected TCP stream as an interface, and return its id.
     pub fn attach_stream(&self, stream: TcpStream) -> InterfaceId {
         spawn(&self.shared, stream, &ListenPolicy::default()).0
@@ -145,7 +205,16 @@ impl Endpoint {
 /// The flag is false if the endpoint has stopped.
 fn spawn(shared: &Arc<Shared>, stream: TcpStream, policy: &ListenPolicy) -> (InterfaceId, bool) {
     let _ = sockopt::tune(&stream, policy.i2p_tunneled);
-    let attached = shared.add_interface(hdlc::MAX_FRAME, policy.ifac.clone(), policy.mode, true);
+    let hw_mtu = HwMtu::Auto {
+        bitrate: TCP_BITRATE_GUESS,
+    };
+    let attached = shared.add_interface(
+        hdlc::MAX_FRAME,
+        policy.ifac.clone(),
+        policy.mode,
+        true,
+        hw_mtu,
+    );
     let id = attached.id;
     if !attached.registered {
         return (id, false);
@@ -158,9 +227,14 @@ fn spawn(shared: &Arc<Shared>, stream: TcpStream, policy: &ListenPolicy) -> (Int
             .insert(id, policy.iface);
     }
     let (online, mut outbound) = (attached.online, attached.outbound);
+    let framing = if policy.kiss_framing {
+        Framing::Kiss
+    } else {
+        Framing::Hdlc
+    };
     let owner = Arc::clone(shared);
     let started = track(shared, async move {
-        carry_tcp(&owner, id, &online, &mut outbound, stream).await;
+        carry_tcp(&owner, id, &online, &mut outbound, stream, framing).await;
         owner.forget_interface(id);
     });
     if !started {

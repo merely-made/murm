@@ -196,7 +196,7 @@ impl Shared {
         now: Instant,
     ) {
         let mode = self.interface_mode(iface);
-        self.write_diagnostic(|| {
+        let learned = self.write_diagnostic(|| {
             let mut t = self.path_table.lock().unwrap();
             let route_ttl = self.route_ttl();
             if t.len() >= PATH_TABLE_CAPACITY && !t.contains_key(&dest) {
@@ -224,8 +224,9 @@ impl Shared {
             };
             let changed = t.get(&dest) != Some(&next);
             t.insert(dest, next);
-            ((), changed)
+            (next, changed)
         });
+        self.tunnel_path_learned(dest, &learned);
     }
 
     /// Destinations the address book must keep while it is full: those with an unexpired path
