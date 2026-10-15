@@ -82,6 +82,7 @@ fn ifac_overhead_counts_against_interface_frame_admission() {
         outbound: queues,
         frame_limit: Arc::new(AtomicUsize::new(actual - 1)),
         wire_overhead: 8,
+        hw_mtu: crate::endpoint::HwMtu::Protocol,
         mode: InterfaceMode::Full,
         online: Arc::new(AtomicBool::new(true)),
         unsendable: AtomicU64::new(0),
@@ -320,8 +321,8 @@ async fn an_announce_queued_right_after_attaching_is_sent() {
     assert_eq!(heard, [b"dialed".to_vec(), b"streamed".to_vec()]);
 }
 
-/// A TCP interface with IFAC still carries a full 500-byte packet: the access code rides on
-/// top of the protocol MTU, as on a stock stream carrier.
+/// A TCP interface with IFAC signals its autoconfigured 16384-byte MTU: the access code
+/// rides on top, as on a stock stream carrier.
 #[tokio::test]
 async fn tcp_interfaces_with_ifac_carry_the_full_mtu() {
     let ifac = Ifac::for_stream(Some("mtu"), None).unwrap();
@@ -337,10 +338,7 @@ async fn tcp_interfaces_with_ifac_carry_the_full_mtu() {
         .unwrap();
     let streamed = dialer.attach_stream_with_ifac(TcpStream::connect(addr).await.unwrap(), ifac);
     for id in [dialed, streamed] {
-        assert_eq!(
-            dialer.shared.link_mtu_on(id),
-            Some(crate::packet::MTU as u32)
-        );
+        assert_eq!(dialer.shared.link_mtu_on(id), Some(16_384));
     }
     let spawned = tokio::time::timeout(Duration::from_secs(3), async {
         loop {
@@ -352,10 +350,7 @@ async fn tcp_interfaces_with_ifac_carry_the_full_mtu() {
     })
     .await
     .unwrap();
-    assert_eq!(
-        hub.shared.link_mtu_on(spawned),
-        Some(crate::packet::MTU as u32)
-    );
+    assert_eq!(hub.shared.link_mtu_on(spawned), Some(16_384));
 }
 
 /// An unreachable hub is attached offline, then forgotten after the configured tries.
@@ -439,10 +434,10 @@ async fn an_unencodable_packet_is_counted_and_skipped() {
     let (mut out, _sink) = iface.split();
     let dest = AddressHash::from_bytes([0x66; 16]);
     // Past the frame limit, so only a direct push gets it queued.
-    assert!(
-        out.queues
-            .push(single_packet(dest, vec![0; 600]), TrafficClass::Interactive)
-    );
+    assert!(out.queues.push(
+        single_packet(dest, vec![0; crate::link::MAX_MTU as usize]),
+        TrafficClass::Interactive
+    ));
     assert!(out.queues.push(
         single_packet(dest, b"fits".to_vec()),
         TrafficClass::Interactive

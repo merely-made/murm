@@ -36,4 +36,5 @@ pub use wire::{
     CTX_RESOURCE_PRF, CTX_RESOURCE_RCL, CTX_RESOURCE_REQ, CTX_RESPONSE, KEEPALIVE_REQUEST,
     KEEPALIVE_RESPONSE, LINK_KEYS_LEN, LINK_PROOF_LEN, LINK_REQUEST_LEN, LinkMode, LinkTrailer,
     MAX_MTU, TRAILER_LEN, clamp_request_mtu, link_id, proof_is_signed_by, request_trailer,
+    strip_request_mtu,
 };

@@ -15,7 +15,7 @@ use super::sockets::{Sockets, scoped};
 use super::state::{Peer, State, apply_policy, pump};
 use super::{ANNOUNCE_INTERVAL, AutoConfig, HW_MTU, PEER_JOB_INTERVAL, keep_link_local};
 use crate::auto::{descope, peering_token, token_valid};
-use crate::endpoint::Endpoint;
+use crate::endpoint::{Endpoint, HwMtu};
 use crate::ifac::Ifac;
 use crate::iface::udp::{RX_BUF, RX_ERROR_PAUSE, frame_fits};
 
@@ -94,10 +94,7 @@ impl Carrier {
     /// unicast token. Stock waits for its next job (up to about 9 s); peering is the same.
     async fn add_peer(&mut self, addr: Ipv6Addr) {
         let Some(ep) = self.ep.upgrade() else { return };
-        let attached = match &self.cfg.ifac {
-            Some(ifac) => ep.attach_interface_with_ifac(HW_MTU + ifac.size(), ifac.clone()),
-            None => ep.attach_interface_with_frame_limit(HW_MTU),
-        };
+        let attached = ep.attach_interface_with_hw_mtu(HwMtu::Fixed(HW_MTU), self.cfg.ifac.clone());
         let Ok(interface) = attached else { return };
         let id = interface.id();
         ep.set_interface_mode(id, self.cfg.mode);

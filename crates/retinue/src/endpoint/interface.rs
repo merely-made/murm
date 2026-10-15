@@ -183,6 +183,8 @@ pub(super) struct Iface {
     pub(super) outbound: Arc<OutboundQueues>,
     pub(super) frame_limit: Arc<AtomicUsize>,
     pub(super) wire_overhead: usize,
+    /// Its hardware MTU policy, which sets the link MTU it signals.
+    pub(super) hw_mtu: super::mtu::HwMtu,
     /// Sets the lifetime of routes learned on this interface.
     pub(super) mode: InterfaceMode,
     /// Whether the carrier is up. A dialed interface outlives its connection, keeping its
