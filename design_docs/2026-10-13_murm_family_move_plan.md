@@ -1449,3 +1449,10 @@ retinue, selvage, seneschal and tulle-heltec-v4-phy require 1.97.1.
    That’s like six feet, the cables aren’t even long enough". *Reading, not
    ruled:* the separation test as put is not possible on this bench. It goes
    back to the owner with alternatives.
+10. *Separation, re-put.* Options: maximum reach on the cables, unplug and
+    move, or skip to FEM. Owner (after spreading the boards): "ok, no idea how
+    far apart that is, but that's as good as it gets. also, the board kept
+    unplugging no matter how gently i moved it, so meh". *Reading, not ruled:*
+    A/B 2 runs at maximum cable separation, distance unmeasured. Port identities
+    were re-checked by USB parent afterwards and are unchanged (COM6 …FB:28,
+    COM7 …FA:64, COM10 TULLE-T114-01).
