@@ -36,6 +36,7 @@ mod queue;
 mod rebroadcast;
 mod registration;
 mod reliable_driver;
+mod resource_errors;
 mod resource_inbound;
 mod resource_pace;
 mod resource_requests;
