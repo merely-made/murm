@@ -207,15 +207,14 @@ From the interface batch (2026-10-09), same source:
   Targets: `src/announce_admission.rs`, `src/endpoint/announces.rs`,
   `src/endpoint/iface_policy.rs`.
 - Interface gravity: the same emission with no more hops, heard on a
-  higher-gravity interface, moves the route. Unlike RNS, it queues no
-  rebroadcast. RNS `Transport.py` 2225-2251; `Interfaces/Interface.py` 75, 109;
+  higher-gravity interface, moves the route (relayed from batch 2). RNS `Transport.py` 2225-2251; `Interfaces/Interface.py` 75, 109;
   `Reticulum.py` 881-882, 1035.
   Targets: `src/endpoint/paths.rs`, `src/endpoint/announces.rs`.
 - The seven interface modes, their announce rules and path-discovery modes;
   own announces skip access points, and an Endpoint relay takes its next hop
   from the live path at release. Relays to roaming, boundary and internal
-  interfaces stay capped, where RNS leaves them uncapped; the Node core treats
-  the ingress interface as the next hop. RNS `Interfaces/Interface.py` 45-56;
+  interfaces stay capped, where RNS leaves them uncapped; the Node core's next
+  hop is settled in batch 2. RNS `Interfaces/Interface.py` 45-56;
   `Transport.py` 964-969, 1458-1521, 3426-3433, 3574-3575.
   Targets: `src/iface_mode.rs`, `src/node/`, `src/endpoint/rebroadcast.rs`,
   `src/endpoint/shared.rs`.
@@ -243,8 +242,9 @@ From the interface batch (2026-10-09), same source:
   count. RNS `Interfaces/TCPInterface.py` 83-95, 181-207.
   Target: `src/endpoint/sockopt.rs`.
 - Listeners keep accepting after accept errors, and spawned interfaces take the
-  listener's mode and interface policy; the IN flag, egress and path-request
-  rates and `recursive_prs` are not modelled. RNS
+  listener's mode and interface policy (from batch 2 also the path-request
+  rates, egress control and `recursive_prs`); the IN flag, which RNS 1.5.7
+  never reads, is not modelled. RNS
   `Interfaces/TCPInterface.py` 557-650, 675-688;
   `Interfaces/BackboneInterface.py` 658-679, 792-805.
   Target: `src/endpoint/listen.rs`.
@@ -291,6 +291,181 @@ From the interface batch (2026-10-09), same source:
   error. RNS `Interfaces/AutoInterface.py` 44-73, 103-356, 358-482, 485-520,
   526-614, 633-700; `Reticulum.py` 1114-1116.
   Target: `src/iface/auto/`.
+
+From the interface batch 2 (2026-10-14), same source:
+
+- Attaching to a stock shared instance as a local client: the abstract socket
+  `\0rns/<instance_name>` on Linux and Android (connected off the async
+  workers), falling back to TCP, and TCP elsewhere; a 1 Gbit/s autoconfigured
+  MTU, ingress control off, an 8 s redial and, 10 s after it, path responses
+  for every registered destination. Hops through the instance count none, and
+  an announce it re-emits at hops 0 (a sibling client) keeps no transport
+  node, since a stock client drops a header-type-2 packet naming the instance.
+  Loss is scoped to the lost interface: its links fail and its paths, bridges,
+  return paths, pending relays and answers, held announces and tunnels go;
+  links still awaiting a proof lapse at their deadline. The RPC port is not
+  modelled. RNS `Interfaces/LocalInterface.py` 53-202; `Reticulum.py` 350-362,
+  730-745; `Utilities/platformutils.py` 55-61; `Transport.py` 1405-1437,
+  1936-1939, 2398-2425, 3690-3709.
+  Targets: `src/endpoint/local.rs`, `src/endpoint/transit.rs`,
+  `src/endpoint/rebroadcast.rs`, `src/rebroadcast.rs`.
+- Tunnel synthesis: a 176-byte signed synthesis (the review's 170 was wrong)
+  on every connect of a non-KISS TCP client, queued after the carrier is
+  online; its interface hash names `TCPClientInterface[host:port]`, so two
+  identical clients share a tunnel. A listener validates it, counting a bad
+  one as a protocol violation (RNS counts only an exception), mirrors routes
+  per tunnel and restores them on reappearance under RNS's hops and timebase
+  test, reading the freshness row's timebase recorded when the tunnel went
+  away. Unlike RNS: tables bounded at 256 tunnels and the path-table capacity,
+  away tunnels evicted first; a route without a freshness row is never
+  restored; restores obey the path-table capacity; the else-branch over an
+  undefined packet is not ported; while a tunnel is bound, a route learned
+  elsewhere drops its mirrored copy. RNS `Interfaces/TCPInterface.py` 169-180,
+  298-299; `Interfaces/Interface.py` 181-183; `Transport.py` 157-158, 362,
+  1014-1060, 2463-2473, 2764-2860.
+  Targets: `src/endpoint/tunnel.rs`, `src/endpoint/dial.rs`,
+  `src/endpoint/announces.rs`.
+- Path requests at a transport (`RoutingPolicy::forward_announces`): answered
+  from a cache of each route's verified announce, bounded and evicted with the
+  path table, through the announce table after 0.4 s (1.9 s on a roaming
+  interface), as header type 2 with TRANSPORT propagation and hops one past
+  the route; never on the roaming interface the path came from, nor to a
+  requestor that is the next hop; any live route counts as answered. Unlike
+  RNS: concurrent answers for one destination stack rather than overwrite, a
+  relay arriving behind a pending answer waits rather than replacing it, and
+  answers obey the routing policy's egress and `outgoing`. The relay cap bypass
+  for roaming and boundary interfaces is not ported. RNS `Transport.py`
+  765-829, 1489-1521, 2456, 3418-3524.
+  Targets: `src/endpoint/discovery.rs`, `src/endpoint/rebroadcast.rs`,
+  `src/rebroadcast.rs`, `src/endpoint/paths.rs`.
+- Recursive path discovery by the requesting interface's mode (boundary
+  searches only boundary and gateway interfaces) or `recursive_prs`, on the
+  other online interfaces with the requester's tag and our transport id,
+  withheld by egress control or the announce cap; the matching announce goes
+  straight back to each requester as a path response. A transport sends the
+  three-field request. Unlike RNS: the search timeout is max(15 s, the
+  slowest known airtime round trip) and the cap gate applies only where the
+  airtime is known; batching runs only on a transport; the tables hold 1024;
+  expired searches are ignored on access and swept on the next request.
+  Local-client forwarding is not modelled. RNS `Transport.py` 1005-1120,
+  1862-1884, 2430-2455, 3279-3325, 3420-3436, 3528-3583;
+  `Interfaces/Interface.py` 55-56.
+  Targets: `src/endpoint/discovery.rs`, `src/path.rs`, `src/rebroadcast.rs`,
+  `src/endpoint/announces.rs`.
+- Path-request ingress and egress control per interface: burst detection at
+  the new-interface and established rates with hold and a cooldown of 3,
+  mirrored into the interface statistics, and egress counted preemptively
+  with two samples minimum. Unlike RNS: an interface's age runs from its first
+  path request, the burst is evaluated once per request (RNS twice), and rates
+  are whole Hz. RNS `Interfaces/Interface.py` 213-250, 315-325, 368-389;
+  `Transport.py` 1601, 1858.
+  Targets: `src/endpoint/discovery/rates.rs`, `src/endpoint/iface_policy.rs`.
+- A gravity re-point is relayed as a newly added path would be, bypassing the
+  packet-hash dedup as RNS's filter passes single announces, but is not
+  published again. The Node core takes the next-hop mode from the live route
+  at release and falls back to the ingress interface when its bounded table
+  has evicted the route (RNS would not relay). RNS `Transport.py` 1458-1469,
+  1668-1672, 2229-2251, 2297-2395.
+  Targets: `src/endpoint/announces.rs`, `src/node/rebroadcast.rs`.
+- Four inbound lanes (data 1024, announce 128, path request 128, ingress
+  limited 8), sorted at enqueue by packet type and the path-request hash, a
+  bursting interface's requests going to the ingress-limited lane; drained in
+  strict priority, only the data lane back-pressures a stream reader, each
+  full lane drops its own class and counts it. The `qlen_in_*` overrides are
+  not exposed; released held announces do not re-enter ingress; the router
+  yields cooperatively. RNS `Transport.py` 46-95, 111-114, 141-146, 307-317,
+  1796-1912; `Reticulum.py` 716-730; `Interfaces/Interface.py` 296.
+  Targets: `src/endpoint/inbound_queue.rs`, `src/endpoint/runtime.rs`.
+- Per-interface statistics: rx and tx bytes deframed with the access code
+  (stock's txb also counts framing), packets, announce and path-request counts
+  and bytes, IFAC and protocol violations, held announces, the announce and
+  path-request burst flags, online, mode and frame limit, with a JSON form.
+  Unlike RNS: announce and path-request receipts are counted when queued
+  rather than after validation and dedup; every path request encoded is
+  counted; an oversized frame with a bad access code is a protocol violation;
+  the announce queue length is not reported. RNS `Interfaces/Interface.py`
+  98-180, 303-336; `Reticulum.py` 1498-1667; `Transport.py` 1272-1322,
+  1600-1601, 1764-1794, 3320; `Interfaces/TCPInterface.py` 305-329.
+  Targets: `src/endpoint/iface_stats.rs`, `src/endpoint/interface.rs`,
+  `src/endpoint/queue.rs`, `src/announce_admission.rs`.
+- PipeInterface: a child process over HDLC at a 1064-byte MTU, 1 Mbit/s and an
+  8-byte access code, respawned under the same interface after
+  `respawn_delay`. EOF and writes to a dead child respawn it rather than
+  raising; a failed first spawn fails the attach; the delay has a 100 ms
+  floor; `shared_medium` is not modelled. RNS `Interfaces/PipeInterface.py`
+  41-207.
+  Targets: `src/endpoint/pipe.rs`, `src/endpoint/pump.rs`.
+- KISS framing on TCP clients and listeners: FEND, command 0, escaped data,
+  FEND; the port nibble masked and data frames only; no tunnel synthesis.
+  Oversize and badly escaped frames are dropped whole, escapes reset at each
+  frame, and one FEND may close a frame and open the next. RNS
+  `Interfaces/TCPInterface.py` 55-67, 104-106, 178-179, 322-388.
+  Target: `src/endpoint/pump.rs`.
+- Backbone fast-flap blocking on listeners, refusing by accept-then-close;
+  the table is per listener (stock's is per process) and bounded at 4096
+  addresses. RNS `Interfaces/BackboneInterface.py` 48-53, 126-161, 807-835,
+  1084-1109.
+  Target: `src/endpoint/listen.rs`.
+- Listen addresses by host name or device, with the family preference and an
+  IPv6 link-local scope. RNS `Interfaces/TCPInterface.py` 469-551;
+  `Interfaces/BackboneInterface.py` 84-170; `Interfaces/util/netinfo.py`
+  191-232.
+  Targets: `src/endpoint/listen.rs`, `src/iface/netinfo.rs`.
+- AX25KISSInterface framing over a KISS TNC: a 16-byte UI header to APZRNS,
+  no beacon, a 1200 bit/s guess and a 564-byte MTU. Callsigns pad with 0x40,
+  not stock's 0x20 (identical for six characters); received headers are
+  checked for control, PID and address extension, and digipeated, header-only
+  or oversize frames are dropped. RNS `Interfaces/AX25KISSInterface.py` 60-65,
+  104-142, 178-262, 268-348.
+  Targets: `src/iface/ax25.rs`, `src/iface/serial.rs`, `src/iface/kiss.rs`.
+- RNodes attach by RNS's port value, a device or `tcp://host`, and the
+  interface bitrate follows the device's echoed parameters, floored to whole
+  bits per second. RNS `Interfaces/RNodeInterface.py` 170-193, 698-704.
+  Target: `src/iface/tulle.rs`.
+- Per-interface hardware MTU: RNS's autoconfiguration table (TCP 10 Mbit/s
+  16384, Backbone 100 Mbit/s 32768, a shared instance 1 Gbit/s, a configured
+  bitrate re-optimised), a TCP client's `fixed_mtu`, and AutoInterface fixed at
+  1196; UDP, Pipe, serial and radio carriers are not signalled. Below
+  62.5 kbit/s the protocol MTU stands (RNS's `HW_MTU = None` is not ported),
+  and an autoconfigured stream has no frame bound of its own. RNS
+  `Interfaces/Interface.py` 94-95, 251-265; `Interfaces/TCPInterface.py`
+  76-78, 110-116, 465-467, 612; `Interfaces/BackboneInterface.py` 44, 844;
+  `Interfaces/AutoInterface.py` 44-45; `Reticulum.py` 1038-1039;
+  `Transport.py` 1790-1791.
+  Targets: `src/endpoint/mtu.rs`, `src/endpoint/attach.rs`,
+  `src/endpoint/dial.rs`, `src/endpoint/listen.rs`, `src/iface/auto/`.
+- Link MTU discovery: the initiator signals the smaller of its ceiling and
+  what the next hop signals, responders and transit hops clamp, and a transit
+  hop strips the signalling when the outbound interface does not signal. A
+  receiving interface that does not signal counts as 500 where RNS uses its raw
+  hardware MTU, and `set_link_mtu` is a ceiling with none by default. Resource
+  parts, Channel and Buffer frames (up to 16 KiB) and access codes scale to the
+  negotiated MTU, the IFAC mask wrapping its HKDF counter as RNS's does. RNS
+  `Link.py` 194, 300-315, 493, 512-514, 580-585; `Transport.py` 2063-2088,
+  2543-2563, 3173-3178; `Reticulum.py` 105; `Resource.py` 343-344;
+  `Buffer.py` 217, 230-256; `Cryptography/HKDF.py` 41-84.
+  Targets: `src/endpoint/mtu.rs`, `src/endpoint/link_setup.rs`,
+  `src/endpoint/transit.rs`, `src/link/wire.rs`, `src/reliable.rs`,
+  `src/channel/`, `src/resource_transfer/`, `src/resource/outgoing.rs`,
+  `src/ifac.rs`.
+- RNS `[interfaces]` config sections mapped onto retinue's settings and
+  carriers (TCP client and server, Backbone, UDP, Auto, Serial, KISS, AX.25
+  KISS, RNode including `tcp://`, Pipe) and the `[reticulum]` shared-instance
+  keys, attaching the TCP, Backbone, UDP, Pipe and serial-family ones. Unlike
+  RNS: `interface_mode = gateway` without `mode` does not raise; a configured
+  0 is honoured; out-of-range integers are ignored as RNS ignores them; the
+  announce cap is a whole percent of at least 1 and rates whole Hz; UDP
+  addresses are IPv4 literals; an unknown discovery scope, a bad coding rate
+  or airtime limit, a `fixed_mtu` below 500 and an AX.25 callsign or SSID RNS
+  refuses are typed errors; a KISS beacon needs only `id_interval`, an RNode
+  one also `id_callsign`; `bootstrap_only` is parsed but unsupported. RNS
+  `Reticulum.py` 478-500, 843-1160, 1271-1314; `Interfaces/TCPInterface.py`
+  101-116, 515-560; `Interfaces/BackboneInterface.py` 133-170, 864-872;
+  `Interfaces/UDPInterface.py` 60-87; `Interfaces/AutoInterface.py` 106-213;
+  `Interfaces/SerialInterface.py` 76-103; `Interfaces/KISSInterface.py`
+  86-119; `Interfaces/AX25KISSInterface.py` 93-140;
+  `Interfaces/RNodeInterface.py` 150-195; `Interfaces/PipeInterface.py` 67-68.
+  Target: `src/endpoint/iface_config/`.
 
 ## Prns
 
