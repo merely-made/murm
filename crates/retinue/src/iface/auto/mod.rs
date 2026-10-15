@@ -32,8 +32,7 @@ mod tests;
 #[cfg(all(test, any(target_os = "macos", target_os = "ios")))]
 mod tests_loopback;
 
-/// Stock's fixed hardware MTU (`AutoInterface.py` 44-45). It bounds received frames; sent
-/// packets keep the protocol MTU.
+/// Stock's fixed hardware MTU (`AutoInterface.py` 44-45), signalled to links as `FIXED_MTU`.
 pub const HW_MTU: usize = 1196;
 /// Stock's bitrate guess (`AutoInterface.py` 70, 326-329).
 pub const BITRATE_GUESS: u64 = 10_000_000;

@@ -96,6 +96,12 @@ impl ResourceSession {
         self.iface
     }
 
+    /// The link's negotiated MTU: the protocol 500 bytes, or more where every hop signalled
+    /// it (`Link.py` 580-585).
+    pub fn mtu(&self) -> u32 {
+        self.link.mtu()
+    }
+
     pub(super) fn retain_identified_peer(&self, identity: Identity) {
         self.shared.write_diagnostic(|| {
             let mut links = self.shared.links.lock().unwrap();

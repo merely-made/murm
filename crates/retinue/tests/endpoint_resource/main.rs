@@ -15,6 +15,7 @@ use retinue::packet::{DestinationType, Packet, PacketType};
 use retinue::request::Request;
 
 mod cancel;
+mod mtu;
 mod proofs;
 mod receipts;
 mod segments;

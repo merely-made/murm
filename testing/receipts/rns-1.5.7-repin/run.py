@@ -71,7 +71,11 @@ STREAM_GATES = ()
 RADIO_GATES = ()
 
 # V6: link MTU autoconfiguration (L1) and RNS config sections (B5), on loopback TCP.
-MTU_GATES = ()
+MTU_GATES = (
+    ("link-mtu", "interop_link_mtu.py", []),
+    ("transit-mtu", "interop_transit_mtu.py", []),
+    ("rns-config", "interop_rns_config.py", []),
+)
 
 BATCH2_LANES = {"local": LOCAL_GATES, "discovery": DISCOVERY_GATES, "ingress": INGRESS_GATES,
                 "stream": STREAM_GATES, "radio": RADIO_GATES, "mtu": MTU_GATES}
