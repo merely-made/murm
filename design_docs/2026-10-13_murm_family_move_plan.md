@@ -1592,3 +1592,6 @@ repeated request (`LINK_REQUEST_CACHE`). *Reading, not ruled:* Python RNS drops
 exact duplicate packets and does not replay the proof, so against RNS one lost
 proof guarantees a timeout. The fix is a link-layer design choice and goes to
 the owner.
+15. *Link-setup retry.* Put: fresh request with a slower retry; the RNS model
+    (one request per attempt, caller retries with a fresh link); or identical
+    retries then fresh. Owner chose **"RNS model: one per attempt"**.
