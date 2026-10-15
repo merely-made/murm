@@ -247,7 +247,14 @@ impl Endpoint {
             return Err(endpoint_closed());
         }
         let ephemeral = ephemeral_seed();
-        let link_mtu = self.shared.link_mtu.load(Ordering::Relaxed);
+        // The next hop's signalled MTU, or the protocol MTU for want of a route (`Link.py`
+        // 304-310), under the configured ceiling.
+        let link_mtu = self.shared.link_mtu.load(Ordering::Relaxed).min(
+            self.shared
+                .path_iface(dest)
+                .and_then(|iface| self.shared.link_mtu_on(iface))
+                .unwrap_or(crate::packet::MTU as u32),
+        );
         let (pending, request) = link::PendingLink::open(
             dest,
             peer,

@@ -20,6 +20,10 @@ use crate::{Error, Result};
 pub const MIN_SIZE: usize = 1;
 /// Largest supported access code: one complete Ed25519 signature.
 pub const MAX_SIZE: usize = 64;
+
+/// The largest logical packet sealed or opened: the most a link MTU can signal
+/// ([`crate::link::MAX_MTU`]). Each interface's frame limit is the real bound.
+const MAX_PACKET: usize = crate::link::MAX_MTU as usize;
 /// RNS's default code size for TCP, UDP, Auto, Backbone, I2P and Local interfaces
 /// (`Interface.py` 96, `TCPInterface.py` 77/466, `UDPInterface.py` 42, `AutoInterface.py` 50).
 pub const STREAM_SIZE: usize = 16;
@@ -169,12 +173,13 @@ impl Ifac {
         self.size
     }
 
-    /// Sign and mask one logical packet for this interface.
+    /// Sign and mask one logical packet for this interface. The interface's own frame limit
+    /// bounds it; here only the largest MTU a link can signal does.
     pub fn seal(&self, packet: &[u8]) -> Result<Vec<u8>> {
         if packet.len() < 2 {
             return Err(Error::Truncated);
         }
-        if packet.len() > crate::packet::MTU {
+        if packet.len() > MAX_PACKET {
             return Err(Error::Oversize);
         }
 
@@ -205,7 +210,7 @@ impl Ifac {
         if frame.len() < 2 + self.size {
             return Err(Error::Truncated);
         }
-        if frame.len() > crate::packet::MTU + self.size {
+        if frame.len() > MAX_PACKET + self.size {
             return Err(Error::Oversize);
         }
 
@@ -431,12 +436,9 @@ mod tests {
     #[test]
     fn oversized_logical_and_carrier_packets_are_rejected() {
         let ifac = oracle_ifac();
+        assert_eq!(ifac.seal(&vec![0_u8; MAX_PACKET + 1]), Err(Error::Oversize));
         assert_eq!(
-            ifac.seal(&vec![0_u8; crate::packet::MTU + 1]),
-            Err(Error::Oversize)
-        );
-        assert_eq!(
-            ifac.open(&vec![0_u8; crate::packet::MTU + ifac.size() + 1]),
+            ifac.open(&vec![0_u8; MAX_PACKET + ifac.size() + 1]),
             Err(Error::Oversize)
         );
     }

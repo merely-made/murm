@@ -17,8 +17,8 @@ use crate::packet::Packet;
 #[cfg(not(feature = "compression"))]
 use crate::resource::FLAG_COMPRESSED;
 use crate::resource::{
-    Advertisement, DEFAULT_MAX_DECOMPRESSED_SIZE, FLAG_RESPONSE, Incoming, SDU, WINDOW_MAX,
-    parse_hmu, split_metadata,
+    Advertisement, DEFAULT_MAX_DECOMPRESSED_SIZE, FLAG_RESPONSE, Incoming, WINDOW_MAX, parse_hmu,
+    split_metadata,
 };
 use crate::token::IV_LEN;
 
@@ -377,7 +377,7 @@ impl ResourceReceiver {
         self.inc.as_ref()?;
         let part_size = (self.link.mtu() as usize)
             .saturating_sub(crate::packet::HEADER_MIN_LEN)
-            .clamp(1, SDU);
+            .max(1);
         let wait = self.timing.part_wait(
             &self.window,
             part_size,

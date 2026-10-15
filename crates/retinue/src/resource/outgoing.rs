@@ -86,7 +86,7 @@ impl Outgoing {
         compressed: bool,
         part_size: usize,
     ) -> Self {
-        let part_size = part_size.clamp(1, SDU);
+        let part_size = part_size.max(1);
         let mut rerolls = 0;
         let (map_hashes, by_hash) = loop {
             let map_hashes: Vec<_> = token
