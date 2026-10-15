@@ -1704,3 +1704,30 @@ Sept 30 finding. Owners are "Signalman bench 1."/"SB1" and "Signalman bench
 
 Per the source policy, Meshtastic firmware source is not consulted. The cause
 is unknown and black-box only. The baseline is stopped here pending the owner.
+16. *Meshtastic PKI block.* Put: MeshCore now and Meshtastic later; a
+    broadcast-only baseline; or keep probing black-box. Owner chose **"Keep
+    probing black-box"**.
+
+**Meshtastic key exchange, black-box.** The stock CLI's documented contact path
+made direct messages work. After `--reset-nodedb` on both, each node's
+`--contact-qr !<self> --contact-verified` URL was imported on the other with
+`--add-contact`. The stock CLI's `--sendtext --dest '!f66afa64' --ack` then
+returned "Received an ACK." The earlier raw NodeInfo pushed through the API had
+put the peer's key into the database, but the PKI send path did not accept it.
+
+**Windows reconnect fix.** The first full pair hit Windows `os error 995` once,
+did not repeat it, and then failed reopening the ports with `Access is denied`
+right after dropping the sessions. *Reading, not ruled:* Windows releases a COM
+handle only once its pending overlapped read has been canceled.
+`signalman::radio_comms::companion::open_port` now opens at 115200 and retries
+only `PermissionDenied`, every 100 ms for up to 2 s. Any other error, or a port
+another program holds, still fails. serial2-tokio is now an optional `comms`
+dependency, already present in the graph through Tulle's `serial-async`. Both
+`stock_companion_pair` and the desktop companion worker use it.
+
+**Meshtastic production-actor baseline: passed.** `stock_companion_pair pair
+meshtastic COM6 COM7` ran four exchanges over two connection generations. Each
+matched the recipient text and the protocol ACK (3041, 3284, 2969 and 3258 ms),
+and `reconnect_history_preserved` was true. The receipt is under ignored
+`validation/results/stock-baseline-20261014/pair-mt-5/`. The UI lane, MeshCore
+and the Tulle restore are next.

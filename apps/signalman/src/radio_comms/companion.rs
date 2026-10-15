@@ -18,6 +18,25 @@ use tokio::{
     time::{Instant, timeout},
 };
 
+/// Open a stock companion's serial port at the companions' 115200 baud.
+///
+/// Windows releases a port's handle only once its pending overlapped read has been canceled,
+/// so a reconnect straight after a disconnect can be refused for a moment. That refusal is
+/// retried briefly; every other error, and a port another program holds, still fails.
+pub async fn open_port(path: impl AsRef<std::path::Path>) -> io::Result<serial2_tokio::SerialPort> {
+    const ATTEMPTS: u32 = 20;
+    let mut attempt = 1;
+    loop {
+        match serial2_tokio::SerialPort::open(path.as_ref(), 115_200) {
+            Err(error) if error.kind() == io::ErrorKind::PermissionDenied && attempt < ATTEMPTS => {
+                attempt += 1;
+                tokio::time::sleep(Duration::from_millis(100)).await;
+            }
+            result => return result,
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum CompanionProtocol {
     Meshtastic { channel: u8 },

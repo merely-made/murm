@@ -145,7 +145,7 @@ impl CompanionWorker {
                 let runtime = tokio::runtime::Builder::new_current_thread().enable_all().build().map_err(|e| e.to_string())?;
                 runtime.block_on(async {
                     if actor_stop.load(Ordering::Relaxed) { return Err("Companion connection cancelled".into()); }
-                    let port = serial2_tokio::SerialPort::open(&settings.port, 115_200).map_err(|e| e.to_string())?;
+                    let port = signalman::radio_comms::companion::open_port(&settings.port).await.map_err(|e| e.to_string())?;
                     #[cfg(unix)]
                     let _exclusive = ExclusivePort::claim(&settings.port).map_err(|e| e.to_string())?;
                     // Assert CDC readiness without entering the flasher/reset sequence.
