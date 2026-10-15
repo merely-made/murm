@@ -1668,3 +1668,39 @@ loss at both V4s, about 8% at COM7 in run 11 and unmeasured at COM6, which
 compounds over the 6–8 frames of an LXMF exchange. COM6's `air` counters cannot
 be read after a MeshChatX session, because RNS's port close resets the
 ESP32-S3.
+
+#### R5 stock baseline: Meshtastic setup (2026-10-14)
+
+**Owner request.** "let's move on to the stock tests to establish a baseline
+for the personalities" (with "authorized" for repointing origin to
+`merely-made/murm`, done). Ruling 2 layout: stock↔stock, Meshtastic first.
+
+**Setup.** COM6 (…FB:28) and COM7 (…FA:64) were written with the Sept 30
+three-part bench package (`validation/results/sennet-tucket-radios/meshtastic-bench.toml`,
+part hashes re-verified) using pinned espflash 4.5.0, without backups
+(firmware fungible). Both report stock Meshtastic 2.7.26.54e0d8d, HELTEC_V4,
+CLIENT; node numbers `f66afb28` (COM6) and `f66afa64` (COM7). Region came up
+UNSET. A combined owner+region set did not persist (read back 0). A region-only
+`--set lora.region US --wait-to-disconnect 5` did (read back 1), matching the
+Sept 30 finding. Owners are "Signalman bench 1."/"SB1" and "Signalman bench
+2."/"SB2". Evidence is under ignored `validation/results/stock-baseline-20261014/`.
+
+**Results so far.**
+
+- `stock_companion_pair probe meshtastic` passed on both. Signalman's
+  Meshtastic companion identity handshake works on Windows against stock.
+- RF works: a stock-CLI broadcast from COM6 was received on COM7.
+- The nodes did not exchange NodeInfo on their own: not after reboots,
+  not after re-setting owners with region US, and not after several minutes.
+  Each `--nodes` listed only itself. Sending each node's own NodeInfo to the
+  other through the stock Python API (`sendData` NODEINFO_APP,
+  `wantResponse=True`, scratch `mt_nodeinfo.py`) put the peer, with its public
+  key, into both databases.
+- Every direct message is still refused with Routing error 39, which the stock
+  CLI names `PKI_SEND_FAIL_PUBLIC_KEY`. That holds for Signalman's companion
+  text (`stock_companion_pair pair`, no `pki_encrypted` or `public_key` set)
+  and for the stock CLI's own `--sendtext --dest '!f66afa64' --ack`, including
+  after a reboot. The block is in stock behavior, not Signalman.
+
+Per the source policy, Meshtastic firmware source is not consulted. The cause
+is unknown and black-box only. The baseline is stopped here pending the owner.
