@@ -1518,3 +1518,20 @@ Antenna power is the SX1262 setting − 17 dB (π pad) + 30 dB in PA mode, or
 − 1 dB in bypass. The station's 17 dBm would be +30 dBm at the antenna in PA
 mode, and the +17 dBm reaching the module's TX input would exceed its +5 dBm
 absolute maximum. In bypass the same setting gives about −1 dBm.
+12. *FEM fix scope.* Put: RX LNA + TX bypass; also enable the PA, capped; or
+    measure CSD only first. Owner chose **"Also enable PA, capped"**.
+13. *TX power meaning.* Put: antenna power with the board mapping (callers'
+    numbers become radiated power), or chip power with the PA opt-in. Owner:
+    "antenna power is the regulated one, right? let's go with that if so".
+    Answered: yes, regulators limit what reaches the antenna (conducted power at
+    the antenna port and EIRP), not chip drive. Which US rule governs a
+    non-hopping 250 kHz LoRa signal is a separate, unsettled question.
+    **`tx_power_dbm` means dBm at the antenna**, and seneschal's
+    `Region::clamp_power` applies to that value.
+14. *PA cap.* Put: +20, +27 or +30 dBm. Owner chose **"+20 dBm board cap"**.
+
+*Reading, not ruled:* at 915 MHz, about 10 cm of free space costs about 12 dB.
+Two adjacent V4s radiating +17 dBm would put about +5 dBm into each other's
+GC1109 antenna port: under its +10 dBm absolute maximum, but well past the LNA's
+−10 dBm input P1dB. Bench A/B runs therefore use low antenna power on both
+sides, or compression would mimic the fault under test.
