@@ -1456,3 +1456,14 @@ retinue, selvage, seneschal and tulle-heltec-v4-phy require 1.97.1.
     A/B 2 runs at maximum cable separation, distance unmeasured. Port identities
     were re-checked by USB parent afterwards and are unchanged (COM6 …FB:28,
     COM7 …FA:64, COM10 TULLE-T114-01).
+
+**A/B 2 result (2026-10-14).** At maximum cable separation, COM7's counters
+over 6 minutes moved by Δrxok=20 and Δrxbad=6 (23% damaged). Damage across the
+three controlled runs: run 8 adjacent at 7 dBm, 14%; run 9 at 2 dBm, 35%;
+run 10 separated at 7 dBm, 23%. The witness shows COM6 moved away from the T114
+(−69 → −79/−80), but COM7 still heard COM6 at −56/−57, within about 2 dB of
+adjacent. So the V4-to-V4 path barely changed, and A/B 2 is weak evidence on
+coupling. Neither less power nor this separation removed the damage. Per
+ruling 6, the next step is front-end control from Heltec's V4.2 schematic.
+That schematic is a 275,027-byte PDF at the README's cited URL, not yet
+downloaded.
