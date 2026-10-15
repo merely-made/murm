@@ -53,22 +53,16 @@ pub(super) fn serial(kind: &str, keys: &Keys<'_>) -> Result<Carrier, RnsConfigEr
     }
     tnc.flow_control = keys.bool("flow_control")?.unwrap_or(false);
     if kind == "AX25KISSInterface" {
-        return Ok(Carrier::Ax25Kiss {
-            port,
-            tnc,
-            callsign: keys.str("callsign").unwrap_or("").to_string(),
-            // RNS's -1 is no SSID.
-            ssid: keys
-                .int::<i64>("ssid")?
-                .filter(|&s| s >= 0)
-                .map(|s| {
-                    u8::try_from(s)
-                        .ok()
-                        .filter(|&s| s <= 15)
-                        .ok_or_else(|| keys.bad("ssid", &s.to_string()))
-                })
-                .transpose()?,
-        });
+        // RNS refuses a callsign outside 3-6 characters and its default SSID of -1
+        // (`AX25KISSInterface.py` 103-104, 136-140).
+        let callsign = keys.str("callsign").unwrap_or("");
+        let ssid = keys.int::<i64>("ssid")?.unwrap_or(-1);
+        let ssid = u8::try_from(ssid).map_err(|_| keys.bad("ssid", &ssid.to_string()))?;
+        let header = crate::iface::ax25::Ax25Header::new(callsign, ssid).map_err(|e| match e {
+            crate::iface::ax25::Ax25Error::Callsign => keys.bad("callsign", callsign),
+            crate::iface::ax25::Ax25Error::Ssid => keys.bad("ssid", &ssid.to_string()),
+        })?;
+        return Ok(Carrier::Ax25Kiss { port, tnc, header });
     }
     // KISS beacons whenever an interval is set, an unset callsign being empty.
     let beacon = keys.int::<u64>("id_interval")?.map(|secs| IdBeacon {

@@ -138,12 +138,27 @@ fn the_stock_example_maps() {
             (115200, 150, 200)
         );
         assert!(beacon.is_none());
-        let Carrier::Ax25Kiss { callsign, ssid, .. } =
-            &config.interfaces[7].as_ref().unwrap().carrier
+        let Carrier::Ax25Kiss { header, .. } = &config.interfaces[7].as_ref().unwrap().carrier
         else {
             panic!("AX.25")
         };
-        assert_eq!((callsign.as_str(), *ssid), ("NO1CLL", Some(0)));
+        assert_eq!(
+            *header,
+            crate::iface::ax25::Ax25Header::new("NO1CLL", 0).unwrap()
+        );
+        let ax25 = |extra: &str| {
+            section(&format!(
+                "    type = AX25KISSInterface\n    port = /dev/null\n{extra}"
+            ))
+        };
+        assert!(matches!(
+            ax25("    callsign = N0CALL\n"),
+            Err(RnsConfigError::Value { key, .. }) if key == "ssid"
+        ));
+        assert!(matches!(
+            ax25("    callsign = NO\n    ssid = 1\n"),
+            Err(RnsConfigError::Value { key, .. }) if key == "callsign"
+        ));
     }
     #[cfg(feature = "tulle-radio")]
     {
@@ -154,6 +169,16 @@ fn the_stock_example_maps() {
             (config.params.frequency_hz, config.params.spreading_factor),
             (867_200_000, 8)
         );
+        let tcp = section(concat!(
+            "    type = RNodeInterface\n    port = TCP://rnode.local\n    frequency = 867200000\n",
+            "    bandwidth = 125000\n    spreadingfactor = 8\n    codingrate = 5\n",
+        ))
+        .unwrap();
+        assert!(matches!(
+            tcp.carrier,
+            Carrier::RNode { port: tulle::serial::RNodePort::Tcp { host, port }, .. }
+                if host == "rnode.local" && port == tulle::serial::RNODE_TCP_PORT
+        ));
     }
 }
 
