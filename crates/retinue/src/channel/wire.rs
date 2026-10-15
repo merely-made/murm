@@ -20,6 +20,10 @@ pub const STREAM_ID_MAX: u16 = 0x3FFF;
 /// the link MDU less the 6-byte envelope header and the 2-byte stream header (`OVERHEAD` 8).
 pub const MAX_DATA_LEN: usize = 423;
 
+/// The most stream data bytes one [`StreamFrame`] carries on a link that negotiated a larger
+/// MTU (RNS `RawChannelWriter.MAX_CHUNK_LEN`, `Buffer.py` 217, 230-256).
+pub const MAX_CHUNK_LEN: usize = 16 * 1024;
+
 /// One channel message on the wire: `[msgtype u16][sequence u16][length u16][payload]`,
 /// big-endian. This is RNS 1.3.8's `Channel.Envelope` layout exactly.
 #[derive(Clone, Debug, PartialEq, Eq)]
