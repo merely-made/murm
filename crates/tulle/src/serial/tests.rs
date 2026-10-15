@@ -44,18 +44,27 @@ async fn record_host(mut device: DuplexStream) -> Vec<Vec<u8>> {
 }
 
 async fn emulate_rnode(device: DuplexStream) -> Vec<Instant> {
-    emulate(device, false).await
+    let log = emulate(device, false).await;
+    log.into_iter()
+        .filter_map(|(at, command)| (command == cmd::DATA).then_some(at))
+        .collect()
 }
 
-async fn emulate(mut device: DuplexStream, fail_when_online: bool) -> Vec<Instant> {
+/// Telemetry a device reports once its radio is on: CHTM and TEMP.
+const CHTM: [u8; 12] = [cmd::STAT_CHTM, 0, 50, 0, 25, 1, 0, 0, 200, 60, 40, 0xFF];
+const TEMP: [u8; 2] = [cmd::STAT_TEMP, 150];
+
+/// Play an RNode; returns each host command with when it arrived.
+async fn emulate(mut device: DuplexStream, fail_when_online: bool) -> Vec<(Instant, u8)> {
     let mut deframer = kiss::Deframer::new(600);
     let mut read = [0u8; 256];
-    let mut data_times = Vec::new();
+    let mut log = Vec::new();
     while let Ok(count @ 1..) = device.read(&mut read).await {
         let mut frames = Vec::new();
         deframer.push(&read[..count], &mut frames);
         for frame in frames {
             let (&command, payload) = frame.split_first().expect("command");
+            log.push((Instant::now(), command));
             let response = match command {
                 cmd::DETECT => Some(vec![cmd::DETECT, crate::rnode::DETECT_RESP]),
                 cmd::FW_VERSION => Some(vec![cmd::FW_VERSION, 1, 86]),
@@ -68,9 +77,12 @@ async fn emulate(mut device: DuplexStream, fail_when_online: bool) -> Vec<Instan
                     // A transmit failure, which RNS treats as fatal.
                     Some(vec![cmd::ERROR, 0x02])
                 }
-                cmd::RADIO_STATE => Some(frame.clone()),
+                cmd::RADIO_STATE => {
+                    device.write_all(&kiss::encode(&frame)).await.ok();
+                    device.write_all(&kiss::encode(&CHTM)).await.ok();
+                    Some(TEMP.to_vec())
+                }
                 cmd::DATA => {
-                    data_times.push(Instant::now());
                     let mut response = vec![cmd::STAT_RSSI, 117]; // -40 dBm
                     device.write_all(&kiss::encode(&response)).await.ok();
                     response = vec![cmd::STAT_SNR, 32]; // 8 dB
@@ -86,7 +98,7 @@ async fn emulate(mut device: DuplexStream, fail_when_online: bool) -> Vec<Instan
             }
         }
     }
-    data_times
+    log
 }
 
 #[tokio::test]
@@ -176,9 +188,11 @@ async fn a_supervised_link_reopens_after_a_fatal_device_error() {
     let mut ports = vec![second, first];
     let mut pump = RNodeSerialLink::spawn(
         move || {
-            ports
-                .pop()
-                .ok_or_else(|| std::io::ErrorKind::NotFound.into())
+            std::future::ready(
+                ports
+                    .pop()
+                    .ok_or_else(|| std::io::ErrorKind::NotFound.into()),
+            )
         },
         crate::rnode::RNodeConfig::new(params()),
         AirtimeBudget::new(60_000, 1000),
@@ -203,6 +217,139 @@ async fn a_supervised_link_reopens_after_a_fatal_device_error() {
     pump.send(b"after reopen".to_vec()).await.unwrap();
     assert_eq!(pump.recv().await.unwrap().frame, b"after reopen");
     pump.shutdown().await.unwrap();
+}
+
+#[tokio::test]
+async fn an_idle_link_sends_detect_keepalives_and_publishes_telemetry() {
+    let (host, device) = tokio::io::duplex(4096);
+    let emulator = tokio::spawn(emulate(device, false));
+    let idle = Duration::from_millis(100);
+    let config = SerialPumpConfig {
+        keepalive: Some(idle),
+        ..config()
+    };
+    let mut pump =
+        RNodeSerialLink::spawn_io(host, params(), AirtimeBudget::new(60_000, 1000), config);
+    pump.wait_online().await.unwrap();
+    let mut telemetry = pump.watch_telemetry();
+    let t = telemetry
+        .wait_for(|t| t.channel.is_some() && t.temperature_c.is_some())
+        .await
+        .unwrap()
+        .clone();
+    assert_eq!(t.temperature_c, Some(30));
+    assert_eq!(t.channel.unwrap().airtime_short, 0.5);
+    assert_eq!(t.bitrate, Some(crate::rnode::bitrate(7, 5, 125_000)));
+    let online = Instant::now();
+    tokio::time::sleep(Duration::from_millis(700)).await;
+    pump.shutdown().await.unwrap();
+    let detects: Vec<_> = emulator
+        .await
+        .unwrap()
+        .into_iter()
+        .filter(|&(at, command)| command == cmd::DETECT && at > online)
+        .map(|(at, _)| at)
+        .collect();
+    assert!(detects.len() >= 4, "{} keepalives", detects.len());
+    for pair in detects.windows(2) {
+        let gap = pair[1].duration_since(pair[0]);
+        assert!(gap >= idle && gap < idle * 2, "keepalive gap {gap:?}");
+    }
+}
+
+#[tokio::test]
+async fn an_unanswered_detect_ends_the_port_for_a_reopen() {
+    let opens = std::sync::Arc::new(std::sync::atomic::AtomicUsize::new(0));
+    let counted = std::sync::Arc::clone(&opens);
+    let mut devices = Vec::new();
+    let pump = RNodeSerialLink::spawn(
+        move || {
+            counted.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+            let (host, device) = tokio::io::duplex(4096);
+            devices.push(device); // held open, never answering
+            std::future::ready(Ok(host))
+        },
+        crate::rnode::RNodeConfig::new(params()),
+        AirtimeBudget::new(60_000, 1000),
+        SerialPumpConfig {
+            detect_timeout: Some(Duration::from_millis(150)),
+            reconnect: Duration::from_millis(50),
+            ..config()
+        },
+        true,
+    );
+    let mut status = pump.watch_status();
+    let fault = status
+        .wait_for(|s| matches!(s, PumpStatus::Fault(_)))
+        .await
+        .unwrap()
+        .clone();
+    assert!(matches!(fault, PumpStatus::Fault(m) if m.contains("DETECT")));
+    tokio::time::sleep(Duration::from_millis(300)).await;
+    assert!(opens.load(std::sync::atomic::Ordering::Relaxed) >= 2);
+    pump.shutdown().await.unwrap();
+}
+
+#[cfg(feature = "rnode-tcp")]
+#[tokio::test]
+async fn a_tcp_rnode_comes_online_and_reconnects() {
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let port = listener.local_addr().unwrap().port();
+    let device = tokio::spawn(async move {
+        for _ in 0..2 {
+            let (socket, _) = listener.accept().await.unwrap();
+            let (mut read, mut write) = socket.into_split();
+            let (host, mut device) = tokio::io::duplex(4096);
+            let (mut host_read, mut host_write) = tokio::io::split(host);
+            let forward = tokio::spawn(async move {
+                let _ = tokio::join!(
+                    tokio::io::copy(&mut read, &mut host_write),
+                    tokio::io::copy(&mut host_read, &mut write),
+                );
+            });
+            // Answer the first connection briefly, then drop it.
+            let _ = tokio::time::timeout(Duration::from_millis(400), async {
+                let mut buf = [0u8; 256];
+                let mut deframer = kiss::Deframer::new(600);
+                while let Ok(n @ 1..) = device.read(&mut buf).await {
+                    let mut frames = Vec::new();
+                    deframer.push(&buf[..n], &mut frames);
+                    for frame in frames {
+                        let reply = match frame[0] {
+                            cmd::DETECT => vec![cmd::DETECT, crate::rnode::DETECT_RESP],
+                            cmd::FW_VERSION => vec![cmd::FW_VERSION, 1, 86],
+                            cmd::DATA => continue,
+                            _ => frame.clone(),
+                        };
+                        device.write_all(&kiss::encode(&reply)).await.ok();
+                    }
+                }
+            })
+            .await;
+            forward.abort();
+        }
+    });
+    let config = SerialPumpConfig {
+        open_settle: Duration::ZERO,
+        reconnect: Duration::from_millis(100),
+        ..SerialPumpConfig::tcp()
+    };
+    let rnode = crate::rnode::RNodeConfig::new(params());
+    let budget = AirtimeBudget::new(60_000, 1000);
+    let port = RNodePort::Tcp {
+        host: "127.0.0.1".into(),
+        port,
+    };
+    let mut pump = RNodeSerialLink::supervise_port(&port, rnode, budget, config).unwrap();
+    pump.wait_online().await.unwrap();
+    let mut status = pump.watch_status();
+    status
+        .wait_for(|s| matches!(s, PumpStatus::Fault(_)))
+        .await
+        .unwrap();
+    pump.wait_online().await.unwrap();
+    pump.shutdown().await.unwrap();
+    device.await.unwrap();
 }
 
 #[test]
