@@ -1467,3 +1467,26 @@ coupling. Neither less power nor this separation removed the damage. Per
 ruling 6, the next step is front-end control from Heltec's V4.2 schematic.
 That schematic is a 275,027-byte PDF at the README's cited URL, not yet
 downloaded.
+
+**V4.2 front end from Heltec's schematic (2026-10-14).** Source:
+`WiFi_LoRa_32_V4.2.pdf` from the README's cited URL, 275,027 bytes, SHA-256
+`397c5d470be4185ea84597f7fa604e940d90849bcfada22be5820031c3f5866b`. Downloaded
+with owner approval, read as data and not committed. The SX1262 reaches the
+antenna through a GC1109 front-end module (U10):
+
+| Control | Source | Board pull | Current V4 firmware |
+| --- | --- | --- | --- |
+| `Vfem`: TLV75733 LDO (U3) EN = `VFEM_Ctrl` | ESP32 GPIO7 | 5.1 MΩ to 3V3 (R41) | not driven |
+| `PA_CSD` (GC1109 pin 4) | ESP32 GPIO2 | 10 kΩ to ground (R4) | not driven, so low |
+| `PA_CPS` (GC1109 pin 5) | ESP32 GPIO46 (a boot strap) | 10 kΩ to ground (R44) | not driven, so low |
+| `PA_CTX` (GC1109 pin 6) | SX1262 DIO2 | none | lora-phy's DIO2 RF-switch setting |
+
+TX path: SX1262 RFO → 17 dB π attenuator (R33/R35/R36) → GC1109 TX_IN/TX →
+PA → ANT (IPEX E3). RX path: ANT → GC1109 RX → SX1262 RFI_P/RFI_N.
+
+*Reading, not ruled:* with `PA_CSD` held low, the module is very likely
+disabled and possibly unpowered. That fits both COM7's weak transmit (17 dBm
+less 17 dB with no PA gain) and its damaged receptions. The GC1109 truth table
+and PA gain are not on the schematic, and they must be known before any change
+drives `PA_CSD`/`PA_CPS`/`Vfem`. With the PA engaged, today's 17 dBm SX1262
+setting could radiate far more than intended.
