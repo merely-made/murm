@@ -17,10 +17,6 @@ use crate::service;
 /// How long a transmission may run before the firmware gives up on it.
 const TX_DEADLINE: Duration = Duration::from_secs(3);
 
-/// The SX1262's conducted-power ceiling in dBm. Applied on top of every regional cap: the
-/// power actually used is the minimum of request, region, and this.
-const HARDWARE_MAX_DBM: i8 = 22;
-
 /// The duty-cycle accounting window, one hour, matching how the EU limits are stated.
 const DUTY_WINDOW_MS: u64 = 3_600_000;
 
@@ -226,12 +222,23 @@ impl<'r, RK: RadioKind, DLY: DelayNs> Executive<'r, RK, DLY> {
             self.refuse_observation(RequestKind::Retune, RefusalReason::InvalidProfile, work);
             return selvage::CONFIG_OUT_OF_REGION;
         }
+        // The profile's power is antenna power: the region and the board cap bound it, and the
+        // front end turns it into a chip setting. The bypass is selected while the chip setting
+        // changes, since it takes any chip level; the PA follows only a level planned for it.
+        let front_end = self.radio.front_end;
         let mut clamped = *profile;
-        clamped.tx_power_dbm = region.clamp_power(profile.tx_power_dbm, HARDWARE_MAX_DBM);
+        let plan =
+            front_end.plan(region.clamp_power(profile.tx_power_dbm, front_end.max_antenna_dbm()));
+        clamped.tx_power_dbm = plan.antenna_dbm;
+        let mut chip = clamped;
+        chip.tx_power_dbm = plan.chip_dbm;
+        let previous_pa = front_end.plan(self.radio.profile.tx_power_dbm).pa;
         self.invalidate_observation(CONTINUITY_RETUNE);
 
-        match service::apply_profile(self.lora, &clamped).await {
+        front_end.select(false);
+        match service::apply_profile(self.lora, &chip).await {
             Ok(applied) => {
+                front_end.select(plan.pa);
                 self.radio.modulation = applied.modulation;
                 self.radio.tx = applied.tx;
                 self.radio.rx = applied.rx;
@@ -243,6 +250,7 @@ impl<'r, RK: RadioKind, DLY: DelayNs> Executive<'r, RK, DLY> {
                 service::ACCEPTED
             }
             Err(code) => {
+                front_end.select(previous_pa);
                 let reason = if code == selvage::CONFIG_RADIO_FAULT {
                     RefusalReason::RadioFault
                 } else {

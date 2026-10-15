@@ -82,6 +82,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut config = StationConfig::new(port.clone(), name.clone(), station_identity_from_env()?);
     config.bandwidth_hz = bandwidth_hz;
     config.radio = radio;
+    // Bench override: two radios a few centimetres apart need far less than the default.
+    if let Ok(dbm) = std::env::var("SIGNALMAN_TX_POWER_DBM") {
+        config.tx_power_dbm = dbm.trim().parse()?;
+    }
     let mut station = Station::open(config).await?;
 
     println!("radio: {port} online ({radio:?})");
@@ -152,10 +156,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     Command::Say(text) => match recipient.clone() {
                         None => println!("pick someone first: /peers then /to <prefix>"),
                         Some(prefix) => {
-                            let sent = station
-                                .send_text(&prefix, text, SEND_PATIENCE)
-                                .await?;
-                            println!("{}", report(&sent, &prefix));
+                            // One failed delivery is a message the operator should see, not
+                            // the end of the station.
+                            match station.send_text(&prefix, text, SEND_PATIENCE).await {
+                                Ok(sent) => println!("{}", report(&sent, &prefix)),
+                                Err(error) => println!("(not delivered: {error})"),
+                            }
                         }
                     },
                 }

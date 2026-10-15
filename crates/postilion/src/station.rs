@@ -52,7 +52,8 @@ impl Station {
     pub async fn open(config: StationConfig) -> Result<Self, Error> {
         let identity = config.identity.clone();
         let radio_config = StationRadioConfig::from(&config);
-        let profile = profile(config.bandwidth_hz);
+        let mut profile = profile(config.bandwidth_hz);
+        profile.tx_power_dbm = config.tx_power_dbm;
         let params = tulle::lora::LoRaParams::try_from(profile).map_err(|_| Error::Profile)?;
         let resource_config = radio_resource_config(&params, config.resource_timeout);
 

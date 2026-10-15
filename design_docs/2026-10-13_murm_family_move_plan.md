@@ -1535,3 +1535,60 @@ Two adjacent V4s radiating +17 dBm would put about +5 dBm into each other's
 GC1109 antenna port: under its +10 dBm absolute maximum, but well past the LNA's
 −10 dBm input P1dB. Bench A/B runs therefore use low antenna power on both
 sides, or compression would mimic the fault under test.
+
+#### R5 V4 front end enabled; outbound link-retry finding (2026-10-14)
+
+**Change.** `radio_hand::front_end::FrontEnd` describes the chain between chip
+and antenna: `Direct` (T114), or `PadAndPa` with pad, PA gain, bypass loss,
+board cap, PA-input limit and a `select_pa` hook. Per ruling 13, a profile's
+`tx_power_dbm` is antenna power. `Executive::apply_profile` clamps it to the
+region and `max_antenna_dbm()`, plans the chip setting and path, holds the
+bypass while the chip setting changes, then selects the PA. `RadioState`
+carries the chain; `radio.tx_power_dbm` stays the chip setting and
+`radio.profile.tx_power_dbm` the antenna power. The V4 (`front_end.rs`) powers
+`Vfem` (GPIO7), waits 1 ms, enables CSD (GPIO2), and drives CPS (GPIO46) from
+`select_pa`. Its chain is 17/30/1 dB, a +20 dBm cap (ruling 14) and a +5 dBm PA
+input limit. Requests up to +4 dBm use the bypass (chip = request + 18); above
+that the PA (chip = request − 13). Boot power goes through the same plan. Five
+host tests cover the bypass, the PA under the cap, the sweep never exceeding
+the cap or the PA-input rating, monotonic antenna power, and the direct chain.
+radio-hand's default suite runs 144 tests. Strict Clippy passes with
+`radio,node,replay,control-retinue,instances`. Host test binaries with `radio`
+on do not link on Windows: lora-phy's `defmt` symbols are unresolved, as
+before this change. The V4 image (SHA-256 under ignored results) was built on
+esp 1.97.0 with `--ignore-rust-version` (ruling 8) and flashed to COM6 and
+COM7. COM6 kept `channel=rnode`; COM7 kept slot B seq 5. The T114 image was not
+built: the `thumbv7em-none-eabihf` target is not installed here.
+
+**Bench power knob.** `postilion::StationConfig::tx_power_dbm` (antenna dBm,
+`DEFAULT_TX_POWER_DBM = 17`) feeds the station profile. The terminal
+`signalman` reads `SIGNALMAN_TX_POWER_DBM`, and a failed send now prints
+`(not delivered: …)` instead of ending the station (the earlier open item 3).
+MeshChatX's COM6 entry runs `txpower = 0`. Both bench sides ran at 0 dBm
+(bypass) so the adjacent boards stay well under the GC1109 RX ratings.
+
+**Results.**
+
+- *Run 11* (6 min, both at 0 dBm): COM7 `rxok=24 rxbad=2` (≈8%, against
+  14/35/23% in runs 8–10). The witness heard 12 COM6 frames in the window while
+  COM7 counted 26 receptions. *Reading, not ruled:* with the LNA engaged, COM7
+  now also hears weaker distant transmitters. Witness levels: COM7 −69 (from
+  −74/−75), COM6 −67.
+- *Run 12*: `signalman-mcx-9` (MeshChatX → Signalman) printed on the first
+  attempt with no drops, about 5 s after sending. MeshChatX nevertheless
+  marked it failed, so the station's delivery proof did not reach it.
+  Signalman → MeshChatX `mcx-10` failed with "link setup timed out".
+- *Run 13*: `mcx-11` failed ("link setup timed out"); `mcx-12` and `mcx-13`
+  delivered (handed to the radio in 7 s and 5 s, shown in MeshChatX).
+
+**Outbound amplifier.** The witness shows `mcx-11`'s link request (17.069 s),
+MeshChatX's proof on the air at 17.321 that COM7 did not take, and then the
+station retransmitting the **identical** link request every ~0.5 s: 25 copies
+in 13 s, about 27% channel airtime, none answered. `Endpoint::establish`
+(`crates/retinue/src/endpoint/link_setup.rs`) resends the same `request`
+every `link_setup_retry_ms` (Postilion sets `tulle::pacing::link_setup_retry`)
+until `link_setup_timeout`. Retinue's own responder replays a cached proof for a
+repeated request (`LINK_REQUEST_CACHE`). *Reading, not ruled:* Python RNS drops
+exact duplicate packets and does not replay the proof, so against RNS one lost
+proof guarantees a timeout. The fix is a link-layer design choice and goes to
+the owner.

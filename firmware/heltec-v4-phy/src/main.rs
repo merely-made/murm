@@ -70,6 +70,7 @@ mod control_boot;
 mod control_carrier;
 mod control_fixture;
 mod control_store;
+mod front_end;
 mod gnss;
 mod host;
 mod murmuration;
@@ -285,6 +286,8 @@ async fn main(spawner: Spawner) {
     .with_mosi(peripherals.GPIO10)
     .with_miso(peripherals.GPIO11)
     .into_async();
+    // The GC1109 is powered and enabled before the radio is configured, PA deselected.
+    front_end::power_up(peripherals.GPIO7, peripherals.GPIO2, peripherals.GPIO46);
     let cs = Output::new(peripherals.GPIO8, Level::High, OutputConfig::default());
     let spi = ExclusiveDevice::new(spi, cs, Delay).unwrap();
 
@@ -404,13 +407,19 @@ async fn main(spawner: Spawner) {
 
     // Past every path that hands the halves to `serve_status_only`, so they can become the
     // host link and the radio settings become the state `radio-hand` drives.
+    // Boot power is antenna power like every profile's; the front end plans the chip setting.
+    let boot_tx = front_end::CHAIN.plan(board::DEFAULT_TX_POWER_DBM);
+    front_end::CHAIN.select(boot_tx.pa);
+    let mut boot_profile = selvage::PhyProfile::meshtastic_long_fast(board::DEFAULT_FREQUENCY_HZ);
+    boot_profile.tx_power_dbm = boot_tx.antenna_dbm;
     let radio = RadioState {
-        profile: selvage::PhyProfile::meshtastic_long_fast(board::DEFAULT_FREQUENCY_HZ),
+        profile: boot_profile,
         modulation,
         tx: tx_params,
         rx: rx_params,
-        tx_power_dbm: i32::from(board::DEFAULT_TX_POWER_DBM),
+        tx_power_dbm: i32::from(boot_tx.chip_dbm),
         prepare_rx: true,
+        front_end: front_end::CHAIN,
     };
     let face = Face {
         publish: ui::publish,
