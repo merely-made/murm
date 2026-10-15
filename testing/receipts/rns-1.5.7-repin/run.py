@@ -48,8 +48,8 @@ DATAGRAM_LAN_GATES = (
 )
 DATAGRAM_ROOT_GATES = (("auto-feth", "interop_auto_feth.py", []),)
 
-# Interface batch 2: one tuple per unit, each edited only by its owner. (name, script, args).
-# Every gate takes free ephemeral ports, so lanes may run in parallel.
+# Interface batch 2, one lane per unit: (name, script, args). Every gate takes free
+# ephemeral ports, so lanes may run in parallel.
 
 # V1: shared instance (A6) and tunnel synthesis (B6), on loopback TCP.
 LOCAL_GATES = (
@@ -89,6 +89,7 @@ MTU_GATES = (
 
 BATCH2_LANES = {"local": LOCAL_GATES, "discovery": DISCOVERY_GATES, "ingress": INGRESS_GATES,
                 "stream": STREAM_GATES, "radio": RADIO_GATES, "mtu": MTU_GATES}
+BATCH2_COUNTS = {"local": 2, "discovery": 1, "ingress": 2, "stream": 3, "radio": 2, "mtu": 3}
 
 
 def main():
@@ -125,7 +126,7 @@ def main():
         assert len(gates) == 2
     elif args.lane in BATCH2_LANES:
         gates = [(name, ORACLE / script, extra) for name, script, extra in BATCH2_LANES[args.lane]]
-        assert gates, f"the {args.lane} lane has no gates yet"
+        assert len(gates) == BATCH2_COUNTS[args.lane]
     elif args.lane == "datagram-root":
         gates = [(name, ORACLE / script, extra) for name, script, extra in DATAGRAM_ROOT_GATES]
         assert len(gates) == 1
