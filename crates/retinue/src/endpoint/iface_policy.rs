@@ -37,6 +37,37 @@ impl Default for AnnounceRate {
     }
 }
 
+/// Path-request control on one interface (`Interface.py` 79-86, 122, 213-250). Rates are
+/// requests per second; RNS takes fractional rates, which this rounds to whole ones.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct PathRequestPolicy {
+    /// Search for unknown paths on behalf of requesters here whatever the mode
+    /// (`recursive_prs`).
+    pub recursive: bool,
+    /// Withhold recursive requests sent here above [`Self::egress_hz`] (`egress_control`).
+    pub egress_control: bool,
+    /// Outgoing path-request rate past which egress control withholds (`ec_pr_freq`).
+    pub egress_hz: u64,
+    /// Incoming path-request rate that starts a burst on a new interface
+    /// (`ic_pr_burst_freq_new`).
+    pub burst_hz_new: u64,
+    /// The same, once the interface has aged (`ic_pr_burst_freq`).
+    pub burst_hz: u64,
+}
+
+impl Default for PathRequestPolicy {
+    /// RNS's defaults (`Interface.py` 79-86).
+    fn default() -> Self {
+        Self {
+            recursive: false,
+            egress_control: false,
+            egress_hz: 5,
+            burst_hz_new: 3,
+            burst_hz: 8,
+        }
+    }
+}
+
 /// One interface's policy. The default is an RNS interface with nothing configured.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct IfacePolicy {
@@ -57,6 +88,8 @@ pub struct IfacePolicy {
     pub announces_from_internal: bool,
     /// Whether announces learned here may be relayed to INTERNAL interfaces (`Transport.py` 1484).
     pub announces_to_internal: bool,
+    /// Path-request discovery and rate control.
+    pub path_requests: PathRequestPolicy,
 }
 
 impl Default for IfacePolicy {
@@ -70,6 +103,7 @@ impl Default for IfacePolicy {
             outgoing: true,
             announces_from_internal: true,
             announces_to_internal: false,
+            path_requests: PathRequestPolicy::default(),
         }
     }
 }
@@ -143,6 +177,16 @@ impl Endpoint {
             .update_iface_policy(id, |p| p.outgoing = outgoing)
     }
 
+    /// Set an interface's path-request discovery and rate control.
+    pub fn set_interface_path_request_policy(
+        &self,
+        id: InterfaceId,
+        policy: PathRequestPolicy,
+    ) -> bool {
+        self.shared
+            .update_iface_policy(id, |p| p.path_requests = policy)
+    }
+
     /// Set the INTERNAL-mode announce flags: `from_internal` and `to_internal` as RNS's
     /// `announces_from_internal` and `announces_to_internal`.
     pub fn set_interface_mode_flags(
@@ -202,6 +246,7 @@ mod tests {
                 outgoing: false,
                 announces_from_internal: false,
                 announces_to_internal: true,
+                path_requests: PathRequestPolicy::default(),
             }
         );
 

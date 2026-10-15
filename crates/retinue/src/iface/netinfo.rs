@@ -73,6 +73,39 @@ pub fn interfaces() -> io::Result<Vec<NetIf>> {
     Ok(out)
 }
 
+/// A device's index and its first address of each family, in report order.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct DeviceAddrs {
+    pub index: u32,
+    pub v4: Option<Ipv4Addr>,
+    /// Descoped if link-local; `index` is its scope.
+    pub v6: Option<Ipv6Addr>,
+}
+
+/// What RNS reads from `ifaddresses(name)` for a listener's `device` (`TCPInterface.py`
+/// 469-487); `None` if the host has no such interface.
+pub fn first_addresses(name: &str) -> io::Result<Option<DeviceAddrs>> {
+    let Ok(index) = if_nametoindex(name) else {
+        return Ok(None);
+    };
+    let mut found = DeviceAddrs {
+        index,
+        v4: None,
+        v6: None,
+    };
+    for entry in getifaddrs().map_err(io::Error::from)? {
+        let Some(addr) = entry.address.filter(|_| entry.interface_name == name) else {
+            continue;
+        };
+        if let Some(a) = addr.as_sockaddr_in() {
+            found.v4.get_or_insert(a.ip());
+        } else if let Some(a) = addr.as_sockaddr_in6() {
+            found.v6.get_or_insert(descope(a.ip()));
+        }
+    }
+    Ok(Some(found))
+}
+
 /// The interface called `name`, if the host has one.
 pub fn find(name: &str) -> io::Result<Option<NetIf>> {
     Ok(interfaces()?.into_iter().find(|i| i.name == name))
@@ -95,6 +128,17 @@ mod tests {
         };
         assert_eq!(host.broadcast_v4(), Some(Ipv4Addr::new(10, 0, 0, 1)));
         assert_eq!(NetIf::default().broadcast_v4(), None);
+    }
+
+    #[test]
+    fn loopback_first_addresses() {
+        let lo = interfaces()
+            .unwrap()
+            .into_iter()
+            .find(|i| i.v4.iter().any(|(a, _)| a.is_loopback()));
+        let found = first_addresses(&lo.unwrap().name).unwrap().unwrap();
+        assert!(found.index > 0 && found.v4.is_some_and(|a| a.is_loopback()));
+        assert_eq!(first_addresses("no-such-if0").unwrap(), None);
     }
 
     #[test]

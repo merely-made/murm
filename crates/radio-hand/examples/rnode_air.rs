@@ -8,12 +8,14 @@
 //! ```text
 //! rnode_air --fd N [--fd N ...] --log PATH [--ready-flow MS]
 //!           [--mismatch-txp DEV[,DEV]] [--error-after DEV:COUNT] [--reset-after DEV:COUNT]
+//!           [--telemetry]
 //! ```
 //!
 //! `--fd` names a pty master the harness passed down. `--ready-flow` answers each DATA
 //! with READY after MS milliseconds. `--mismatch-txp` echoes TX power one lower on those
 //! devices. `--error-after` answers a device's COUNT-th DATA with `ERROR 0x02` (TX failed),
-//! and `--reset-after` with `RESET 0xF8`, instead of transmitting it. Airtime limits are
+//! and `--reset-after` with `RESET 0xF8`, instead of transmitting it. `--telemetry` reports
+//! the fixed [`TELEMETRY`] frames each time a radio comes on. Airtime limits are
 //! echoed at half their value, which hosts must tolerate: RNS never validates them.
 
 use std::fs::File;
@@ -29,6 +31,42 @@ const RSSI_DBM: i16 = -40;
 const SNR_DB: i16 = 8;
 /// ERROR_TXFAILED (`RNodeInterface.py` 92).
 const TX_FAILED: u8 = 0x02;
+/// Telemetry vectors, laid out as RNS reads them (`RNodeInterface.py` 966-1069). The CHTM
+/// airtime is 0x00C0 so a FEND is escaped inside a report.
+const TELEMETRY: [&[u8]; 5] = [
+    &[
+        cmd::STAT_CHTM,
+        0x00,
+        0xC0,
+        0x02,
+        0x37,
+        0x09,
+        0xC4,
+        0x03,
+        0xE8,
+        60,
+        40,
+        77,
+    ],
+    &[
+        cmd::STAT_PHYPRM,
+        0x04,
+        0x00,
+        0x03,
+        0xD1,
+        0,
+        18,
+        0,
+        19,
+        0,
+        24,
+        0,
+        60,
+    ],
+    &[cmd::STAT_CSMA, 2, 3, 8],
+    &[cmd::STAT_BAT, 1, 87],
+    &[cmd::STAT_TEMP, 150],
+];
 
 #[derive(Default)]
 struct Flags {
@@ -36,6 +74,7 @@ struct Flags {
     mismatch_txp: Vec<usize>,
     error_after: Option<(usize, u32)>,
     reset_after: Option<(usize, u32)>,
+    telemetry: bool,
 }
 
 #[derive(Default)]
@@ -107,6 +146,11 @@ impl Air {
                 let on = radio.tuned.is_some();
                 drop(radio);
                 self.reply(dev, cmd::RADIO_STATE, &[u8::from(on)]);
+                if on && self.flags.telemetry {
+                    for report in TELEMETRY {
+                        self.reply(dev, report[0], &report[1..]);
+                    }
+                }
             }
             Command::RadioState(false) => {
                 self.devices[dev].radio.lock().unwrap().tuned = None;
@@ -206,6 +250,7 @@ fn main() -> Result<(), String> {
             }
             "--error-after" => flags.error_after = Some(device_count(&value()?)?),
             "--reset-after" => flags.reset_after = Some(device_count(&value()?)?),
+            "--telemetry" => flags.telemetry = true,
             other => return Err(format!("unknown flag {other}")),
         }
     }
