@@ -404,6 +404,8 @@ async fn main(spawner: Spawner) {
         publish: ui::publish,
         publish_host: ui::publish_host,
     };
+    // Declared before `exec`, which borrows it for the rest of `main`.
+    let mut observations = None;
     // The executive owns `lora`, the flash and the RNG for the rest of `main`.
     let mut exec = Executive::new(
         &mut lora,
@@ -420,8 +422,7 @@ async fn main(spawner: Spawner) {
     } else {
         0
     };
-    let mut observations =
-        radio_hand::observation::owner::OwnerObservations::new(observation_boot).ok();
+    observations = radio_hand::observation::owner::OwnerObservations::new(observation_boot).ok();
     if let Some(observations) = observations.as_mut() {
         exec.attach_observations(observations);
     }

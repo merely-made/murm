@@ -14,6 +14,8 @@
 //! The existing authored v1 wire epoch ends at logical tick 8192. A new epoch
 //! requires a new namespace; this library never wraps a clock or generation.
 
+#![forbid(unsafe_code)]
+
 mod collector;
 mod producer;
 mod profile;
