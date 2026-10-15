@@ -75,7 +75,10 @@ STREAM_GATES = (
 
 # V5: AX.25 KISS (B13) over ptys, RNode over TCP (B10) and telemetry (B11) over loopback;
 # macOS only, as the serial lane.
-RADIO_GATES = ()
+RADIO_GATES = (
+    ("ax25-kiss", "interop_ax25_kiss.py", []),
+    ("rnode-tcp", "interop_rnode_tcp.py", []),
+)
 
 # V6: link MTU autoconfiguration (L1) and RNS config sections (B5), on loopback TCP.
 MTU_GATES = (

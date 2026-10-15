@@ -27,6 +27,27 @@ pub struct SerialPumpConfig {
     pub flow_unlock: Duration,
     /// Delay before a supervised link reopens a failed port (`RNodeInterface.py` 1175-1187).
     pub reconnect: Duration,
+    /// Send the detect probe whenever nothing was written for this long, so a dead peer
+    /// shows up as a write error (TCP: `RNodeInterface.py` 1151-1154, 1457-1458).
+    pub keepalive: Option<Duration>,
+    /// Give up on the port, for a supervisor to reopen, if the device has not answered
+    /// DETECT this long after the probe (TCP: `RNodeInterface.py` 437-441).
+    pub detect_timeout: Option<Duration>,
+}
+
+impl SerialPumpConfig {
+    /// RNS's profile for an RNode over TCP: 2 s settle, a 1.5 s partial-frame timeout, a
+    /// 5 s detect wait and a detect keepalive after 3.5 s without writes
+    /// (`RNodeInterface.py` 402-441, 1151-1154, 1452-1458).
+    pub fn tcp() -> Self {
+        Self {
+            open_settle: Duration::from_secs(2),
+            idle_reset: Duration::from_millis(1_500),
+            keepalive: Some(Duration::from_millis(3_500)),
+            detect_timeout: Some(Duration::from_secs(5)),
+            ..Self::default()
+        }
+    }
 }
 
 impl Default for SerialPumpConfig {
@@ -42,6 +63,8 @@ impl Default for SerialPumpConfig {
             idle_reset: Duration::from_millis(100),
             flow_unlock: Duration::from_secs(5),
             reconnect: Duration::from_secs(5),
+            keepalive: None,
+            detect_timeout: None,
         }
     }
 }

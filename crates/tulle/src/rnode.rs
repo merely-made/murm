@@ -13,7 +13,8 @@
 //! - TX: `DATA(0x00)` framing the raw packet, KISS-escaped.
 //! - RX: per received packet, a triplet: `STAT_RSSI(0x23)` (dBm = raw − 157),
 //!   `STAT_SNR(0x24)` (dB = raw as i8 / 4), then `DATA(0x00)` with the packet verbatim.
-//! - Unsolicited channel-stat (`0x25`) and battery (`0x27`) frames ride alongside.
+//! - Unsolicited telemetry rides alongside: channel stats, PHY parameters, battery, CSMA and
+//!   temperature (`0x25`-`0x29`), kept as [`Telemetry`].
 //!
 //! On top of the capture, RNS 1.5.7's semantics (`RNodeInterface.py` 428-500, 619-744,
 //! 1076-1209): airtime locks, echo validation, a firmware floor, READY flow control, `ERROR`
@@ -28,12 +29,14 @@ use crate::lora::LoRaParams;
 use crate::modem::{Modem, ModemError, ModemEvent};
 
 mod config;
+mod stats;
 
 use config::coding_rate_wire;
 pub use config::{
     ConfigError, DETECT_REQ, DETECT_RESP, DeviceError, FREQ_MAX, FREQ_MIN, FREQ_TOLERANCE_HZ,
     Fault, HW_MTU, MIN_FIRMWARE, Mismatch, RESET_MARKER, RNodeConfig, RSSI_OFFSET, Reported, cmd,
 };
+pub use stats::{Battery, ChannelStats, CsmaStats, PhyStats, Telemetry, bitrate, quality};
 
 /// A sans-io RNode: implements [`Modem`] on top of the captured host protocol.
 pub struct RNode {
@@ -53,6 +56,8 @@ pub struct RNode {
     /// Last device-reported error command payload, if any.
     last_error: Option<Vec<u8>>,
     fault: Option<Fault>,
+    telemetry: Telemetry,
+    telemetry_changed: bool,
 }
 
 impl RNode {
@@ -76,6 +81,8 @@ impl RNode {
             pending_snr: None,
             last_error: None,
             fault: None,
+            telemetry: Telemetry::default(),
+            telemetry_changed: false,
         }
     }
 
@@ -95,16 +102,38 @@ impl RNode {
         self.online = false;
         self.ready = true;
         self.reported = Reported::default();
-        self.queue_cmd(cmd::DETECT, &[DETECT_REQ]);
-        self.queue_cmd(cmd::FW_VERSION, &[0x00]);
-        self.queue_cmd(cmd::PLATFORM, &[0x00]);
-        self.queue_cmd(cmd::MCU, &[0x00]);
+        self.keepalive();
         self.queue_config();
     }
 
-    /// Forget everything about the last session, for a reopened port.
+    /// Queue RNS's detect probe: DETECT, FW_VERSION, PLATFORM, MCU (`RNodeInterface.py`
+    /// 490-494). Over TCP it doubles as the idle keepalive (1151-1154).
+    /// The four frames share their FENDs, byte for byte as stock writes them.
+    pub fn keepalive(&mut self) {
+        use kiss::FEND;
+        self.outbound.extend_from_slice(&[
+            FEND,
+            cmd::DETECT,
+            DETECT_REQ,
+            FEND,
+            cmd::FW_VERSION,
+            0x00,
+            FEND,
+            cmd::PLATFORM,
+            0x00,
+            FEND,
+            cmd::MCU,
+            0x00,
+            FEND,
+        ]);
+    }
+
+    /// Forget the last session for a reopened port, keeping the telemetry last reported, as
+    /// stock keeps its `r_*` values across `reconnect_port`.
     pub fn reopen(&mut self) {
+        let telemetry = std::mem::take(&mut self.telemetry);
         *self = Self::with_config(self.config);
+        self.telemetry = telemetry;
     }
 
     fn queue_config(&mut self) {
@@ -157,9 +186,15 @@ impl RNode {
         };
         let byte = payload.first().copied();
         if self.reported.record(command, payload) {
-            if command == cmd::RADIO_STATE {
-                self.on_radio_state();
+            match command {
+                cmd::RADIO_STATE => self.on_radio_state(),
+                cmd::SF | cmd::CR | cmd::BANDWIDTH => self.on_echoed_modulation(),
+                _ => {}
             }
+            return;
+        }
+        if self.telemetry.record(command, payload) {
+            self.telemetry_changed = true;
             return;
         }
         match command {
@@ -191,8 +226,22 @@ impl RNode {
                 }
                 self.last_error = Some(payload.to_vec());
             }
-            // Channel stats, battery, platform and MCU probes: informational.
+            // Platform and MCU probes: informational.
             _ => {}
+        }
+    }
+
+    /// RNS recomputes the bitrate on each modulation echo (`RNodeInterface.py` 698-704).
+    fn on_echoed_modulation(&mut self) {
+        let r = &self.reported;
+        if let (Some(sf), Some(cr @ 5..=8), Some(bw)) =
+            (r.spreading_factor, r.coding_rate, r.bandwidth_hz)
+        {
+            let bps = bitrate(sf, cr, bw);
+            if self.telemetry.bitrate != Some(bps) {
+                self.telemetry.bitrate = Some(bps);
+                self.telemetry_changed = true;
+            }
         }
     }
 
@@ -234,6 +283,16 @@ impl RNode {
     /// The settings the device has echoed since the last [`Self::start`].
     pub fn reported(&self) -> &Reported {
         &self.reported
+    }
+
+    /// The latest telemetry the device reported.
+    pub fn telemetry(&self) -> &Telemetry {
+        &self.telemetry
+    }
+
+    /// Whether telemetry changed since the last call.
+    pub fn take_telemetry_changed(&mut self) -> bool {
+        std::mem::take(&mut self.telemetry_changed)
     }
 
     /// Take the condition that stops this device carrying traffic until reopened, if any.
@@ -287,7 +346,10 @@ impl Modem for RNode {
         }
         self.ready = !self.config.flow_control;
         self.queue_cmd(cmd::DATA, frame);
-        Ok(self.config.params.time_on_air(frame.len()))
+        Ok(self
+            .config
+            .params
+            .time_on_air_on(self.config.chip, frame.len()))
     }
 
     fn poll(&mut self) -> Option<ModemEvent> {
