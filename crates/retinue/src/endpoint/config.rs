@@ -21,9 +21,6 @@ pub(super) const DEFAULT_LINK_MTU: u32 = crate::packet::MTU as u32;
 /// eight-byte IFAC on a 255-byte packet radio.
 const MIN_LINK_MTU: u32 = 247;
 
-/// Default interval between identical link-request transmissions while setup is pending.
-pub(super) const DEFAULT_LINK_SETUP_RETRY_MS: u64 = 2_000;
-
 impl Endpoint {
     /// Spread announce relays over a random delay of `0..=max`, so neighbours relaying the
     /// same announce on a shared medium do not transmit simultaneously.
@@ -69,14 +66,6 @@ impl Endpoint {
             .reliable_decoded_frame_limit
             .store(limit, Ordering::Relaxed);
         Ok(())
-    }
-
-    /// Set the retry interval for link requests sent by subsequently opened links.
-    pub fn set_link_setup_retry(&self, interval: Duration) {
-        let millis = interval.as_millis().clamp(1, u128::from(u64::MAX)) as u64;
-        self.shared
-            .link_setup_retry_ms
-            .store(millis, Ordering::Relaxed);
     }
 
     /// Set the carrier's first-hop airtime for `iface`: the time its medium needs to carry one

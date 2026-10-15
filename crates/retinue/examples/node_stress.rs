@@ -195,7 +195,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let endpoint = Endpoint::new(PrivateIdentity::from_secret_bytes(&[0x41; 64]));
     endpoint.set_link_mtu(255);
-    endpoint.set_link_setup_retry(Duration::from_secs(12));
     let interface = endpoint.attach_interface();
     let driver = tokio::spawn(drive(interface, radio));
 

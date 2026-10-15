@@ -21,8 +21,7 @@ use crate::packet::Packet;
 
 use super::announces::{AnnounceFreshnessPolicy, AnnounceFreshnessState};
 use super::config::{
-    DEFAULT_LINK_MTU, DEFAULT_LINK_SETUP_RETRY_MS, DEFAULT_RELIABLE_INITIAL_RTT_MS,
-    DEFAULT_RELIABLE_MAX_WINDOW,
+    DEFAULT_LINK_MTU, DEFAULT_RELIABLE_INITIAL_RTT_MS, DEFAULT_RELIABLE_MAX_WINDOW,
 };
 use super::dedup::{HashList, LinkPacketMemory, PACKET_HASHES, PATH_REQUEST_TAGS};
 use super::facts::PeerAnnounce;
@@ -133,7 +132,6 @@ impl Endpoint {
             reliable_initial_rtt_ms: AtomicU64::new(DEFAULT_RELIABLE_INITIAL_RTT_MS),
             reliable_max_window: AtomicU32::new(DEFAULT_RELIABLE_MAX_WINDOW),
             reliable_decoded_frame_limit: AtomicUsize::new(DEFAULT_DECODED_FRAME_LIMIT),
-            link_setup_retry_ms: AtomicU64::new(DEFAULT_LINK_SETUP_RETRY_MS),
             first_hop_airtime_ms: Mutex::new(HashMap::new()),
             iface_policies: Mutex::new(HashMap::new()),
             link_mtu: AtomicU32::new(DEFAULT_LINK_MTU),

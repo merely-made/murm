@@ -152,8 +152,6 @@ pub(super) struct Shared {
     pub(super) reliable_max_window: AtomicU32,
     /// Decoded output ceiling for subsequently opened reliable streams.
     pub(super) reliable_decoded_frame_limit: AtomicUsize,
-    /// Link-request retry interval for subsequently opened links.
-    pub(super) link_setup_retry_ms: AtomicU64,
     /// Per-interface first-hop airtime allowances, in milliseconds, for link setup deadlines.
     pub(super) first_hop_airtime_ms: Mutex<HashMap<InterfaceId, u64>>,
     /// Per-interface announce and transmit policy, removed with its interface.

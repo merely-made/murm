@@ -390,3 +390,157 @@ async fn a_resent_message_is_a_duplicate() {
         outcomes[0]
     );
 }
+
+/// Connect two endpoints, dropping the first `drop` link requests `a` sends.
+fn connect_dropping_link_requests(a: &Endpoint, b: &Endpoint, drop: usize) {
+    use retinue::packet::PacketType;
+    let (mut a_out, a_sink) = a.attach_interface().split();
+    let (mut b_out, b_sink) = b.attach_interface().split();
+    tokio::spawn(async move {
+        let mut dropped = 0;
+        while let Some(packet) = a_out.recv().await {
+            if packet.packet_type == PacketType::LinkRequest && dropped < drop {
+                dropped += 1;
+                continue;
+            }
+            if !b_sink.deliver(packet) {
+                break;
+            }
+        }
+    });
+    tokio::spawn(async move {
+        while let Some(packet) = b_out.recv().await {
+            if !a_sink.deliver(packet) {
+                break;
+            }
+        }
+    });
+}
+
+/// MeshChatX on o-pc, 2026-10-14: one lost link proof used to doom a send, because Retinue
+/// resent the identical request and RNS drops duplicates. Setup now sends one request per
+/// attempt and the direct send retries on a fresh link.
+#[tokio::test]
+async fn a_lost_link_request_is_recovered_on_a_fresh_link() {
+    let sender_identity = PrivateIdentity::from_secret_bytes(&[0x33; 64]);
+    let receiver_identity = PrivateIdentity::from_secret_bytes(&[0x44; 64]);
+    let sender = Arc::new(Endpoint::new(sender_identity.clone()));
+    let receiver = Arc::new(Endpoint::new(receiver_identity));
+    connect_dropping_link_requests(&sender, &receiver, 1);
+    register_delivery(&sender, &DeliveryAnnounce::named(b"Sender".to_vec())).unwrap();
+    register_delivery(&receiver, &DeliveryAnnounce::named(b"Receiver".to_vec())).unwrap();
+    let receiver_announce = sender.next_announcement().await.unwrap();
+    receiver.next_announcement().await.unwrap();
+
+    let receive_task = tokio::spawn({
+        let receiver = Arc::clone(&receiver);
+        async move {
+            let accepted = receiver.accept_resource().await.unwrap();
+            receive_direct_with_stamp_cost(
+                &receiver,
+                accepted,
+                &DeliveredCache::default(),
+                4096,
+                None,
+            )
+            .await
+            .unwrap()
+        }
+    });
+    let payload = LxmfPayload::text(1_760_000_000.0, b"", b"second link".to_vec());
+    let receipt = send_direct_stamped(
+        &sender,
+        &sender_identity,
+        &receiver_announce,
+        &payload,
+        [0; 32],
+        100_000,
+    )
+    .await
+    .expect("the second link request reaches the receiver");
+    let received = receive_task.await.unwrap();
+    assert_eq!(received.message.message_id, receipt.message_id);
+    assert_eq!(received.message.payload.content, b"second link");
+}
+
+/// Connect two endpoints, dropping the first `drop` Resource advertisements `a` sends.
+fn connect_dropping_advertisements(a: &Endpoint, b: &Endpoint, drop: usize) {
+    use retinue::packet::PacketType;
+    let (mut a_out, a_sink) = a.attach_interface().split();
+    let (mut b_out, b_sink) = b.attach_interface().split();
+    tokio::spawn(async move {
+        let mut dropped = 0;
+        while let Some(packet) = a_out.recv().await {
+            if packet.packet_type == PacketType::Data
+                && packet.context == retinue::link::CTX_RESOURCE_ADV
+                && dropped < drop
+            {
+                dropped += 1;
+                continue;
+            }
+            if !b_sink.deliver(packet) {
+                break;
+            }
+        }
+    });
+    tokio::spawn(async move {
+        while let Some(packet) = b_out.recv().await {
+            if !a_sink.deliver(packet) {
+                break;
+            }
+        }
+    });
+}
+
+/// MeshChatX on o-pc, 2026-10-14: RNS ignores advertisements on a link it has not activated,
+/// so an offer can go unanswered through every re-advertisement. Nothing reached the
+/// receiver, and the direct send makes the offer again on a fresh link.
+#[tokio::test]
+async fn an_unanswered_offer_is_made_again_on_a_fresh_link() {
+    let sender_identity = PrivateIdentity::from_secret_bytes(&[0x35; 64]);
+    let receiver_identity = PrivateIdentity::from_secret_bytes(&[0x46; 64]);
+    let sender = Arc::new(Endpoint::new(sender_identity.clone()));
+    let receiver = Arc::new(Endpoint::new(receiver_identity));
+    // One attempt's whole offer: the advertisement and its four re-advertisements.
+    connect_dropping_advertisements(&sender, &receiver, 5);
+    register_delivery(&sender, &DeliveryAnnounce::named(b"Sender".to_vec())).unwrap();
+    register_delivery(&receiver, &DeliveryAnnounce::named(b"Receiver".to_vec())).unwrap();
+    let receiver_announce = sender.next_announcement().await.unwrap();
+    receiver.next_announcement().await.unwrap();
+
+    let content = vec![0x5a; 2000];
+    let receive_task = tokio::spawn({
+        let receiver = Arc::clone(&receiver);
+        async move {
+            loop {
+                let accepted = receiver.accept_resource().await.unwrap();
+                if let Ok(received) = receive_direct_with_stamp_cost(
+                    &receiver,
+                    accepted,
+                    &DeliveredCache::default(),
+                    64 * 1024,
+                    None,
+                )
+                .await
+                {
+                    return received;
+                }
+            }
+        }
+    });
+    let payload = LxmfPayload::text(1_760_000_000.0, b"", content.clone());
+    let receipt = send_direct_stamped(
+        &sender,
+        &sender_identity,
+        &receiver_announce,
+        &payload,
+        [0; 32],
+        100_000,
+    )
+    .await
+    .expect("the second offer is answered");
+    let received = receive_task.await.unwrap();
+    assert_eq!(receipt.mode, PayloadMode::Resource);
+    assert_eq!(received.message.message_id, receipt.message_id);
+    assert_eq!(received.message.payload.content, content);
+}

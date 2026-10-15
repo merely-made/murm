@@ -61,9 +61,6 @@ impl Station {
         // The board carries 255 on the air whatever the host protocol claims, so link traffic
         // is bounded here rather than discovered as a refusal later.
         endpoint.set_link_mtu(255);
-        // Pacing derived from the profile: constants picked for fast links fire retries into
-        // the answers they are waiting for.
-        endpoint.set_link_setup_retry(tulle::pacing::link_setup_retry(&params, false));
         let interface = endpoint.attach_interface();
         // RNS allows a link's first hop the time to carry one MTU at the medium's rate.
         endpoint.set_first_hop_airtime(interface.id(), params.time_on_air(500));
