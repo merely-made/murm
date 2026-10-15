@@ -3,36 +3,49 @@
 Topology:  RNS initiator  <->  retinue transport node (routing)  <->  RNS responder
 
 Both RNS peers use TCP with link MTU discovery on, so the initiator signals its interface's
-hardware MTU (far above 500) in the link request. RNS transport clamps that signal to what
-the hop can carry (Transport.py 2058-2088). A retinue relay that forwarded it unchanged let
-the peers agree on frames it then refused, so the link came up and every large frame died.
+hardware MTU in the link request, and each transport hop clamps that signal to what it can
+carry (Transport.py 2063-2088). The retinue node's TCP interfaces autoconfigure 16384 bytes.
+A relay that forwarded a larger signal unchanged let the peers agree on frames it then
+refused, so the link came up and every large frame died.
 
-The gate links the two RNS peers through the retinue node, sends a resource larger than
-64 KiB, and passes only if both ends negotiated an MTU of at most 500 and the transfer
-completes intact. It also exercises the relay's bridge validation: the proof must pass the
-relay's signature check before any link traffic is carried.
+Cases, each linking the two RNS peers through the retinue node and sending a resource
+larger than 64 KiB, passing only if both ends hold the expected MTU and the transfer
+completes intact:
+  * tcp:   stock TCP interfaces (16384), so 16384 end to end;
+  * clamp: both peers set fixed_mtu = 65536, so only retinue's clamp keeps the link at 16384.
+It also exercises the relay's bridge validation: the proof must pass the relay's signature
+check before any link traffic is carried.
 
 Run from the oracle/ directory:  python -u interop_transit_mtu.py
 """
 from __future__ import annotations
-import atexit, hashlib, os, shutil, subprocess, sys, tempfile, threading, time
+import atexit, hashlib, os, shutil, socket, subprocess, sys, tempfile, threading, time
 from pathlib import Path
 import RNS
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parent
-HUB_PORT = 46031
 APP, ASPECT = "retinue_gate", "transit_mtu"
 PAYLOAD_LEN = 200 * 1024
+EXPECTED_MTU = 16384
+CASES = {"tcp": None, "clamp": 65536}
+
+
+def free_port() -> int:
+    with socket.socket() as s:
+        s.bind(("127.0.0.1", 0))
+        return s.getsockname()[1]
 
 
 def rns_config(prefix: str) -> Path:
+    port, fixed = os.environ["RETINUE_HUB_PORT"], os.environ.get("RETINUE_FIXED_MTU")
+    fixed_line = f"    fixed_mtu = {fixed}\n" if fixed else ""
     cfg = Path(tempfile.mkdtemp(prefix=prefix))
     (cfg / "config").write_text(
         "[reticulum]\n  enable_transport = No\n  share_instance = No\n"
         "  panic_on_interface_error = No\n  link_mtu_discovery = Yes\n"
         "\n[logging]\n  loglevel = 3\n\n[interfaces]\n  [[hub]]\n    type = TCPClientInterface\n"
-        f"    enabled = yes\n    target_host = 127.0.0.1\n    target_port = {HUB_PORT}\n",
+        f"    enabled = yes\n    target_host = 127.0.0.1\n    target_port = {port}\n{fixed_line}",
         encoding="utf-8")
     atexit.register(shutil.rmtree, cfg, ignore_errors=True)
     return cfg
@@ -84,11 +97,11 @@ def field(line: str, key: str) -> str:
     return next(part.split("=", 1)[1] for part in line.split() if part.startswith(key + "="))
 
 
-def main() -> int:
-    print(f"RNS {RNS.__version__}\n")
+def run_case(name: str) -> int:
+    print(f"RNS {RNS.__version__}, case {name}\n")
     sink: list[str] = []
     hub = spawn(["cargo", "run", "--quiet", "--example", "transport_node"],
-                {"RETINUE_PORT": str(HUB_PORT)}, sink, "hub", REPO)
+                {"RETINUE_PORT": os.environ["RETINUE_HUB_PORT"]}, sink, "hub", REPO)
     deadline = time.time() + 180
     while time.time() < deadline and not any("TRANSPORT_NODE_UP" in l for l in sink):
         if hub.poll() is not None:
@@ -138,18 +151,37 @@ def main() -> int:
     recv_ok = (report is not None and int(field(report, "status")) == RNS.Resource.COMPLETE
                and int(field(report, "len")) == PAYLOAD_LEN
                and field(report, "sha") == hashlib.sha256(payload).hexdigest())
-    mtu_ok = init_mtu is not None and resp_mtu is not None and init_mtu <= 500 and resp_mtu <= 500
+    mtu_ok = init_mtu == EXPECTED_MTU and resp_mtu == EXPECTED_MTU
     print("\n" + "=" * 68)
-    print(f"Link MTU, initiator / responder (<= 500):      {init_mtu} / {resp_mtu}")
+    print(f"Link MTU, initiator / responder ({EXPECTED_MTU}):   {init_mtu} / {resp_mtu}")
     print(f"{PAYLOAD_LEN} B resource completed at the sender:     {sent_ok}")
     print(f"Resource received intact by the RNS responder:  {recv_ok}")
     print("=" * 68)
     ok = mtu_ok and sent_ok and recv_ok
-    print(f"TRANSIT-MTU RNS-LINK-THROUGH-RETINUE: {'PASS' if ok else 'FAIL'}")
+    print(f"TRANSIT-MTU RNS-LINK-THROUGH-RETINUE [{name}]: {'PASS' if ok else 'FAIL'}")
     exit_code = 0 if ok else 1
     RNS.exit(exit_code)
     return exit_code
 
 
+def main() -> int:
+    subprocess.run(["cargo", "build", "--quiet", "--example", "transport_node"], cwd=REPO, check=True)
+    failed = []
+    for name, fixed in CASES.items():
+        env = dict(os.environ, RETINUE_HUB_PORT=str(free_port()))
+        if fixed:
+            env["RETINUE_FIXED_MTU"] = str(fixed)
+        child = subprocess.run([sys.executable, "-u", __file__, "--case", name], env=env,
+                               timeout=300)
+        if child.returncode != 0:
+            failed.append(name)
+    print(f"TRANSIT-MTU: {'PASS' if not failed else 'FAIL (' + ', '.join(failed) + ')'}", flush=True)
+    return 0 if not failed else 1
+
+
 if __name__ == "__main__":
-    raise SystemExit(responder() if "--responder" in sys.argv[1:] else main())
+    if "--responder" in sys.argv[1:]:
+        raise SystemExit(responder())
+    if sys.argv[1:2] == ["--case"]:
+        raise SystemExit(run_case(sys.argv[2]))
+    raise SystemExit(main())
