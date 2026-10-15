@@ -29,6 +29,10 @@ serial = ["tokio", "dep:serial2-tokio"]
 # RNS AutoInterface and the UDP `device` option: host interface enumeration (getifaddrs,
 # if_nametoindex) through nix, which keeps the crate free of unsafe. Unix only.
 auto = ["tokio", "dep:nix"]
+# RNS PipeInterface: HDLC over a child process's stdio.
+pipe = ["tokio", "tokio/process"]
+# RNS RNodeInterface reached over TCP (`port = tcp://host`).
+rnode-tcp = ["tulle-radio", "tulle/rnode-tcp"]
 
 [dependencies]
 aes = "0.9.1"
@@ -372,3 +376,53 @@ required-features = ["auto"]
 [[example]]
 name = "auto_peer"
 required-features = ["auto"]
+
+# Interface batch 2 examples, one block per unit.
+
+[[example]]
+name = "shared_instance_peer"
+required-features = ["tokio"]
+
+[[example]]
+name = "tunnel_peer"
+required-features = ["tokio"]
+
+[[example]]
+name = "discovery_node"
+required-features = ["tokio"]
+
+[[example]]
+name = "inbound_priority_peer"
+required-features = ["tokio"]
+
+[[example]]
+name = "interface_stats_peer"
+required-features = ["tokio"]
+
+[[example]]
+name = "pipe_peer"
+required-features = ["pipe"]
+
+[[example]]
+name = "tcp_kiss_peer"
+required-features = ["tokio"]
+
+[[example]]
+name = "listen_device_peer"
+required-features = ["auto"]
+
+[[example]]
+name = "ax25_peer"
+required-features = ["serial"]
+
+[[example]]
+name = "rnode_tcp_peer"
+required-features = ["rnode-tcp"]
+
+[[example]]
+name = "link_mtu_peer"
+required-features = ["tokio"]
+
+[[example]]
+name = "rns_config_peer"
+required-features = ["tokio"]

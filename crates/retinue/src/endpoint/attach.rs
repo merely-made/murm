@@ -9,7 +9,9 @@ use std::sync::atomic::{AtomicBool, AtomicU64, AtomicUsize, Ordering};
 use crate::ifac::Ifac;
 use crate::node::InterfaceMode;
 
+use super::iface_stats::InterfaceStats;
 use super::interface::{Iface, Interface, InterfaceId};
+use super::mtu::HwMtu;
 use super::queue::{OutboundPackets, OutboundQueues, QueueDepths, QueueWeights};
 use super::runtime::Endpoint;
 use super::shared::{Lifecycle, Shared};
@@ -45,14 +47,15 @@ impl Shared {
         })
     }
 
-    /// Register a new interface whose frame limit is `max_frame_len`, capped at the protocol
-    /// MTU plus the access code.
+    /// Register a new interface whose frame limit is `max_frame_len`, bounded by `hw_mtu`
+    /// plus the access code.
     pub(super) fn add_interface(
         &self,
         max_frame_len: usize,
         ifac: Option<Ifac>,
         mode: InterfaceMode,
         online: bool,
+        hw_mtu: HwMtu,
     ) -> Attached {
         let id = self.next_iface_id.fetch_add(1, Ordering::Relaxed);
         let wire_overhead = ifac.as_ref().map_or(0, Ifac::size);
@@ -61,9 +64,10 @@ impl Shared {
             self.queue_depths(),
         ));
         let frame_limit = Arc::new(AtomicUsize::new(
-            max_frame_len.min(crate::packet::MTU + wire_overhead),
+            hw_mtu.frame_limit(max_frame_len, wire_overhead),
         ));
         let online = Arc::new(AtomicBool::new(online));
+        let stats = Arc::new(InterfaceStats::default());
         let registered = self.register_interface(Iface {
             id,
             outbound: Arc::clone(&queues),
@@ -72,6 +76,7 @@ impl Shared {
             mode,
             online: Arc::clone(&online),
             unsendable: AtomicU64::new(0),
+            stats: Arc::clone(&stats),
         });
         if !registered {
             queues.close();
@@ -82,6 +87,8 @@ impl Shared {
                 queues,
                 delivery_in_flight: false,
                 ifac,
+                frame_limit: Arc::clone(&frame_limit),
+                stats,
             },
             frame_limit,
             online,
@@ -135,6 +142,7 @@ impl Shared {
             self.held_release_wake.notify_waiters();
             ((), removed || routes_removed)
         });
+        self.tunnel_interface_lost(id);
     }
 
     /// The mode of an attached interface; [`InterfaceMode::Full`] if it is not attached.
@@ -237,14 +245,19 @@ impl Endpoint {
                 "interface frame limit cannot hold a Reticulum header and access code",
             ));
         }
-        let attached = self
-            .shared
-            .add_interface(max_frame_len, ifac, InterfaceMode::Full, true);
+        let attached = self.shared.add_interface(
+            max_frame_len,
+            ifac,
+            InterfaceMode::Full,
+            true,
+            HwMtu::Protocol,
+        );
         Ok(Interface {
             id: attached.id,
-            router_tx: self.shared.router_tx.clone(),
+            inbound: self.shared.inbound_queue.clone(),
             frame_limit: attached.frame_limit,
             ifac: attached.outbound.ifac.clone(),
+            stats: Arc::clone(&attached.outbound.stats),
             outbound: attached.outbound,
             dropped: Arc::new(AtomicU64::new(0)),
         })

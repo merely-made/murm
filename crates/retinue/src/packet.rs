@@ -169,12 +169,18 @@ pub struct Packet {
 impl Packet {
     /// Decode a packet from the wire.
     pub fn decode(bytes: &[u8]) -> Result<Self> {
+        Self::decode_with_limit(bytes, MTU)
+    }
+
+    /// Decode a packet received on an interface whose hardware MTU is `max` bytes, which may
+    /// exceed [`MTU`] for a link that negotiated more (`Transport.py` 1790-1791).
+    pub fn decode_with_limit(bytes: &[u8], max: usize) -> Result<Self> {
         if bytes.len() < HEADER_MIN_LEN {
             return Err(Error::Truncated);
         }
         // RNS drops over-MTU packets; reject them here so a peer cannot get us to hold an
         // arbitrarily large buffer as a valid packet.
-        if bytes.len() > MTU {
+        if bytes.len() > max {
             return Err(Error::Oversize);
         }
 
