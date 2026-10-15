@@ -27,7 +27,7 @@ pub struct Interface {
     pub(super) inbound: InboundTx,
     pub(super) frame_limit: Arc<AtomicUsize>,
     pub(super) ifac: Option<Ifac>,
-    /// Inbound packets dropped because the router's queue was full. Shared with every
+    /// Inbound packets dropped because their router lane was full. Shared with every
     /// [`InterfaceSink`] split off this interface.
     pub(super) dropped: Arc<AtomicU64>,
     pub(super) stats: Arc<InterfaceStats>,
@@ -112,7 +112,7 @@ impl InterfaceSink {
     /// Deliver a received packet into the router.
     ///
     /// Returns whether the endpoint is **still there**, not whether the packet was queued: a
-    /// burst must not look like a dead endpoint to the caller. A full router queue drops the
+    /// burst must not look like a dead endpoint to the caller. A full router lane drops the
     /// packet, since Reticulum's upper layers retransmit, and counts it in [`Self::dropped`].
     pub fn deliver(&self, pkt: Packet) -> bool {
         match self.inbound.try_send(self.id, pkt) {
@@ -147,8 +147,9 @@ impl InterfaceSink {
 }
 
 /// Count one received carrier frame, strip its access code and decode it, as every carrier's
-/// ingress does. `frame_limit` includes the access code. A frame that fails is counted as an
-/// IFAC or protocol violation (`Transport.py` 1272-1322, 1790-1791).
+/// ingress does. `frame_limit` includes the access code. A frame that fails is counted as RNS
+/// classifies it (`Transport.py` 1764-1794): too short for a header, oversized or undecodable
+/// is a protocol violation; a missing, wrong or forged access code is an IFAC violation.
 pub(super) fn open_frame(
     frame: &[u8],
     ifac: Option<&Ifac>,
@@ -156,13 +157,18 @@ pub(super) fn open_frame(
     stats: &InterfaceStats,
 ) -> crate::Result<Packet> {
     stats.note_rx(frame.len());
+    if frame.len() <= 2 {
+        stats.note_protocol_violation();
+        return Err(crate::Error::Truncated);
+    }
     let overhead = ifac.map_or(0, Ifac::size);
     let opened;
     let logical = match ifac {
         Some(ifac) => {
-            opened = ifac
-                .open(frame)
-                .inspect_err(|_| stats.note_ifac_violation())?;
+            opened = ifac.open(frame).inspect_err(|err| match err {
+                crate::Error::Oversize => stats.note_protocol_violation(),
+                _ => stats.note_ifac_violation(),
+            })?;
             &opened[..]
         }
         None => frame,

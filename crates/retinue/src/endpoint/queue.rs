@@ -348,7 +348,7 @@ impl OutboundPackets {
             Some(ifac) => ifac.seal(&logical)?,
             None => logical,
         };
-        self.stats.note_tx(wire.len());
+        self.stats.note_tx(packet, wire.len());
         Ok(wire)
     }
 
