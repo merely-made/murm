@@ -368,7 +368,8 @@ async fn interface_counters_classify_traffic() {
 }
 
 /// Frame failures are classified as stock does (`Transport.py` 1764-1794): an unflagged or
-/// wrongly keyed frame is an IFAC violation; a headerless or oversized one is a protocol one.
+/// wrongly keyed frame is an IFAC violation; a headerless one, or one past the MTU under the
+/// right key, is a protocol one.
 #[tokio::test]
 async fn frame_failures_are_classified_as_stock_does() {
     let ep = Endpoint::new(PrivateIdentity::from_secret_bytes(&[0x55; 64]));
@@ -380,7 +381,11 @@ async fn frame_failures_are_classified_as_stock_does() {
     for frame in [plain.clone(), other.seal(&plain).unwrap()] {
         assert!(sink.deliver_frame(&frame).is_err());
     }
-    for frame in [vec![0x80, 0], vec![0x80; crate::packet::MTU + 64]] {
+    // Past the interface's MTU but under the right key: IFAC passes, then decoding fails.
+    // A wrongly keyed oversized frame is an IFAC violation, as stock checks IFAC first.
+    let keyed = crate::ifac::Ifac::for_stream(Some("stats"), None).unwrap();
+    let oversized = keyed.seal(&[0x00; crate::packet::MTU + 64]).unwrap();
+    for frame in [vec![0x80, 0], oversized] {
         assert!(sink.deliver_frame(&frame).is_err());
     }
     let stats = ep.interface_counters(wire.id()).unwrap();
