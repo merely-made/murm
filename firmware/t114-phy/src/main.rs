@@ -398,6 +398,7 @@ async fn main(spawner: Spawner) {
         rx: rx_params,
         tx_power_dbm: TX_POWER_DBM,
         prepare_rx: true,
+        front_end: radio_hand::front_end::FrontEnd::Direct,
     };
     let face = Face {
         publish: ui::publish,

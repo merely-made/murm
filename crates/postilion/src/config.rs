@@ -49,6 +49,8 @@ pub struct StationConfig {
     pub bandwidth_hz: u32,
     /// Which host protocol the board speaks.
     pub radio: Radio,
+    /// Transmit power at the antenna, in dBm. The board's front end and the region bound it.
+    pub tx_power_dbm: i8,
     /// How often to re-announce. A receiver cannot verify an identity it has never heard
     /// announce; the 30 s default suits a small group, not a shared band.
     pub announce_interval: Duration,
@@ -76,6 +78,7 @@ impl StationConfig {
             name: name.into(),
             bandwidth_hz: 250_000,
             radio: Radio::Phy,
+            tx_power_dbm: DEFAULT_TX_POWER_DBM,
             announce_interval: Duration::from_secs(30),
             announce_history_bound: DEFAULT_ANNOUNCE_HISTORY_BOUND,
             resource_timeout: DEFAULT_RESOURCE_TIMEOUT,
@@ -106,6 +109,9 @@ impl From<&StationConfig> for StationRadioConfig {
     }
 }
 
+/// Antenna power a station transmits at unless configured otherwise.
+pub const DEFAULT_TX_POWER_DBM: i8 = 17;
+
 /// This family's trunk profile at a chosen bandwidth.
 pub fn profile(bandwidth_hz: u32) -> PhyProfile {
     PhyProfile {
@@ -118,6 +124,6 @@ pub fn profile(bandwidth_hz: u32) -> PhyProfile {
         explicit_header: true,
         crc: true,
         invert_iq: false,
-        tx_power_dbm: 17,
+        tx_power_dbm: DEFAULT_TX_POWER_DBM,
     }
 }

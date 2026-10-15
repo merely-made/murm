@@ -37,7 +37,10 @@ mod event;
 mod held;
 mod station;
 
-pub use config::{DEFAULT_RESOURCE_TIMEOUT, Radio, StationConfig, StationRadioConfig, profile};
+pub use config::{
+    DEFAULT_RESOURCE_TIMEOUT, DEFAULT_TX_POWER_DBM, Radio, StationConfig, StationRadioConfig,
+    profile,
+};
 pub use error::Error;
 pub use event::{Event, Peer, Sent};
 pub use station::Station;

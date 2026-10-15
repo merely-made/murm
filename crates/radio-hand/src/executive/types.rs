@@ -15,9 +15,13 @@ pub struct RadioState {
     pub modulation: ModulationParams,
     pub tx: PacketParams,
     pub rx: PacketParams,
+    /// The chip's output setting. `profile.tx_power_dbm` is the antenna power it produces
+    /// through `front_end`.
     pub tx_power_dbm: i32,
     /// Set when the radio must be put back into receive before the next wait.
     pub prepare_rx: bool,
+    /// What sits between the chip and the antenna.
+    pub front_end: crate::front_end::FrontEnd,
 }
 
 /// The board's local face. Function pointers, since both images expose these as free

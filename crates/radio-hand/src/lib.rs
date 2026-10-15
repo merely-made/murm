@@ -33,6 +33,7 @@ pub mod control;
 pub mod dispatch;
 #[cfg(feature = "radio")]
 pub mod executive;
+pub mod front_end;
 pub mod gnss;
 #[cfg(feature = "instances")]
 pub mod instances;
