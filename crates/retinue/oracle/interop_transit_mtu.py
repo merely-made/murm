@@ -19,9 +19,10 @@ check before any link traffic is carried.
 Run from the oracle/ directory:  python -u interop_transit_mtu.py
 """
 from __future__ import annotations
-import atexit, hashlib, os, shutil, socket, subprocess, sys, tempfile, threading, time
+import atexit, hashlib, os, shutil, subprocess, sys, tempfile, threading, time
 from pathlib import Path
 import RNS
+from ingress_harness import free_port
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parent
@@ -29,12 +30,6 @@ APP, ASPECT = "retinue_gate", "transit_mtu"
 PAYLOAD_LEN = 200 * 1024
 EXPECTED_MTU = 16384
 CASES = {"tcp": None, "clamp": 65536}
-
-
-def free_port() -> int:
-    with socket.socket() as s:
-        s.bind(("127.0.0.1", 0))
-        return s.getsockname()[1]
 
 
 def rns_config(prefix: str) -> Path:

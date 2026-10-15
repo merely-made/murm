@@ -143,15 +143,16 @@ pub(super) fn carrier(kind: &str, keys: &Keys<'_>) -> Result<(Carrier, usize), R
 }
 
 fn backbone_client(keys: &Keys<'_>) -> Result<Carrier, RnsConfigError> {
-    let host = if keys.str("target_host").is_some() {
-        "target_host"
-    } else {
+    // `remote` and `port` overwrite their target_ spellings (`Reticulum.py` 1116-1118).
+    let host = if keys.str("remote").is_some() {
         "remote"
-    };
-    let port = if keys.str("target_port").is_some() {
-        "target_port"
     } else {
+        "target_host"
+    };
+    let port = if keys.str("port").is_some() {
         "port"
+    } else {
+        "target_port"
     };
     tcp_client(keys, host, port, true)
 }

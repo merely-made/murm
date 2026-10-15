@@ -268,15 +268,17 @@ impl Ifac {
 fn mask(salt: &[u8], ikm: &[u8], len: usize) -> Vec<u8> {
     use hmac::{Hmac, KeyInit, Mac};
     let (prk, _) = Hkdf::<Sha256>::extract(Some(salt), ikm);
+    let keyed = <Hmac<Sha256> as KeyInit>::new_from_slice(&prk).expect("HMAC takes any key length");
     let mut out = Vec::with_capacity(len + 32);
-    let mut block: Vec<u8> = Vec::new();
+    let mut block = [0_u8; 32];
     let mut counter = 1_u8;
     while out.len() < len {
-        let mut mac =
-            <Hmac<Sha256> as KeyInit>::new_from_slice(&prk).expect("HMAC takes any key length");
-        mac.update(&block);
+        let mut mac = keyed.clone();
+        if !out.is_empty() {
+            mac.update(&block);
+        }
         mac.update(&[counter]);
-        block = mac.finalize().into_bytes().to_vec();
+        block = mac.finalize().into_bytes().into();
         out.extend_from_slice(&block);
         counter = counter.wrapping_add(1);
     }

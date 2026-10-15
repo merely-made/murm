@@ -195,6 +195,17 @@ impl<'a> Keys<'a> {
         self.parsed(key, |v| v.trim().parse::<i64>().ok()?.try_into().ok())
     }
 
+    /// An integer RNS keeps only inside `keep`: anything else is ignored, not refused
+    /// (`Reticulum.py` 930-943).
+    fn ranged<T: TryFrom<i64>>(
+        &self,
+        key: &str,
+        keep: impl Fn(i64) -> bool,
+    ) -> Result<Option<T>, RnsConfigError> {
+        let value = self.int::<i64>(key)?;
+        Ok(value.filter(|&v| keep(v)).and_then(|v| v.try_into().ok()))
+    }
+
     fn float(&self, key: &str) -> Result<Option<f64>, RnsConfigError> {
         self.parsed(key, |v| {
             v.trim().parse::<f64>().ok().filter(|x| x.is_finite())

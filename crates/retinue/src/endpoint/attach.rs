@@ -172,13 +172,13 @@ impl Shared {
                 .frame_limit
                 .load(Ordering::Acquire)
                 .saturating_sub(i.wire_overhead);
-            let signalled = if i.hw_mtu.signalled() {
-                i.hw_mtu.mtu()
-            } else {
-                crate::packet::MTU
-            };
-            u32::try_from(carried.min(signalled)).unwrap_or(link::MAX_MTU)
+            u32::try_from(carried.min(i.hw_mtu.mtu())).unwrap_or(link::MAX_MTU)
         })
+    }
+
+    /// Whether links learn `iface`'s MTU (`AUTOCONFIGURE_MTU` or `FIXED_MTU`).
+    pub(super) fn signals_mtu(&self, iface: InterfaceId) -> Option<bool> {
+        self.with_iface(iface, |i| i.hw_mtu.signalled())
     }
 }
 
