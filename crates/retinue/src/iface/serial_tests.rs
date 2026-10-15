@@ -41,12 +41,17 @@ fn name() -> DestinationName {
     DestinationName::new("retinue", ["serial-test"])
 }
 
+fn n0call() -> Ax25Header {
+    Ax25Header::new("N0CALL", 7).unwrap()
+}
+
 #[tokio::test]
-async fn hdlc_and_kiss_carriers_exchange_announces() {
-    for kiss in [false, true] {
+async fn hdlc_kiss_and_ax25_carriers_exchange_announces() {
+    for kiss in [0, 1, 2] {
         let framing = || match kiss {
-            true => Framing::Kiss(KissTnc::new(kiss::TncConfig::default(), None)),
-            false => Framing::Hdlc,
+            1 => Framing::Kiss(KissTnc::new(kiss::TncConfig::default(), None)),
+            2 => Framing::ax25(n0call(), TncConfig::default()),
+            _ => Framing::Hdlc,
         };
         let (a, b) = (endpoint(1), endpoint(2));
         let (left, right) = duplex(4096);
@@ -139,4 +144,46 @@ fn bad_line_settings_are_refused() {
     };
     assert!(config.char_size().is_err());
     assert!(SerialConfig::new("/dev/null").stop_bits().is_ok());
+}
+
+#[tokio::test]
+async fn ax25_frames_carry_the_header_and_headerless_frames_are_dropped() {
+    let ep = endpoint(3);
+    let (carrier, mut wire) = duplex(8192);
+    spawn_carrier(
+        &ep,
+        vec![carrier],
+        Framing::ax25(n0call(), TncConfig::default()),
+    );
+    tokio::time::sleep(Duration::from_millis(2_100)).await;
+
+    // A peer's announce without the header is not AX.25 and goes nowhere.
+    let peer = endpoint(4);
+    let (mut out, _) = peer.attach_interface().split();
+    peer.announce(&name(), b"ax25");
+    let packet = out.recv().await.unwrap();
+    let bytes = out.encode(&packet).unwrap();
+    use tokio::io::{AsyncReadExt, AsyncWriteExt};
+    wire.write_all(&kiss::encode(kiss::cmd::DATA, &bytes))
+        .await
+        .unwrap();
+    assert!(!announce_received(&ep).await);
+    wire.write_all(&kiss::encode(kiss::cmd::DATA, &n0call().wrap(&bytes)))
+        .await
+        .unwrap();
+    assert!(announce_received(&ep).await);
+
+    ep.announce(&name(), b"from retinue");
+    let mut buf = vec![0; 4096];
+    let mut seen = Vec::new();
+    while !seen
+        .windows(18)
+        .any(|w| w[..2] == [kiss::FEND, 0] && w[2..] == n0call().bytes()[..])
+    {
+        let n = tokio::time::timeout(Duration::from_secs(3), wire.read(&mut buf))
+            .await
+            .expect("an AX.25 frame")
+            .unwrap();
+        seen.extend_from_slice(&buf[..n]);
+    }
 }
