@@ -1,0 +1,72 @@
+{
+  "schema": 1,
+  "protocol": "meshtastic",
+  "port": "COM6",
+  "peer_port": "COM7",
+  "self_address": "f66afb28",
+  "peer_address": "f66afa64",
+  "realm": "opc-baseline",
+  "channel": 0,
+  "tag": "signalman-ui-c292180921f840e7a5db32334f124a18",
+  "desktop_sha256": "A282815D3FFFBF8A62EA723D3C307CA21651E519B90776F2EFB56776E4A83548",
+  "peer_sha256": "FE9536F612E94DA16A19BDAE814EFC00F2A3114FC2D68D996CB4152F0D90A7B9",
+  "scenario_sha256": "1028A50631DF5F8459AC215FAC510E774975313C2CBF68960E3B3D016C06F3A5",
+  "deadline_seconds": 180,
+  "firmware_or_configuration_mutated": false,
+  "result": "passed",
+  "peer_pid": 45012,
+  "desktop_pid": 49320,
+  "desktop_exit": 0,
+  "peer_exit": 0,
+  "closed_utc": "2026-10-15T21:27:26.3612451Z",
+  "source_base": "5052c93026040df9eab4155f88e63853d9210663",
+  "source_files": {
+    "apps/signalman/src/radio_comms/companion.rs": "8b5519749a365c9fa98400d22232dce123dd9a841f96c1aa44748da8e32ca953",
+    "apps/signalman-desktop/src/companion_scenario.rs": "c340b90d91fe7c884a2219f757170fa1e4e5b321f7bbbac03899041e856d982b",
+    "apps/signalman-desktop/scenarios/companion.scn.in": "faec88b827ece918e53099da6f24d1bdbfa09282d5c37fc997ed7c0088c39239",
+    "apps/signalman-desktop/Cargo.lock": "f6eb4ec9d7b3aa5a92383fbec413f7d184e5123206192ba6d4011d301bc7c464",
+    "apps/signalman-desktop/scenarios/run_companion.ps1": "33ed9eced34fa66b319fc9cc2b0d61ed37611b1bbad313978c213da1b24c7c69",
+    "apps/signalman/examples/stock_companion_pair.rs": "b9c0267d656e9b86fc8cffafe117e67c484adefef2850dd33549d2255918f9e6"
+  },
+  "evidence_directory": "validation/results/stock-baseline-20261014/ui-mt-keyboard",
+  "evidence": {
+    "connected.png": "9d51ef7202e324126fdb225b0000e200b98868c8a881139858f84d87ceb4db8d",
+    "run.json": "0ac9e5105521eee75b76d83e0a32443fc36be413ec5769bee73e4f5469c72771",
+    "peer.stdout.log": "b5ce67f4663176dc25581a5a11b0ddc7d27c071b5d36b36cc6c76d35a04227e3",
+    "desktop-journal.json": "cef35ca044a87cf786756e5855f64c3d1a0deb7647c56f7b18df042f027d568f",
+    "messages.json": "82680928f6285b83b0df0202a41b8ed59f1991fb74873101965e824bc9473a1a",
+    "scenario.done": "33de4be9f0f9cc6258b321f5f4e30850c1deca036a3de63006e42bcf1dd4b999",
+    "stopped.png": "91cabccd6deba389d981472803326d98a810f450343664875c56d86405d660a3",
+    "roundtrip.png": "eb492f1816a27d1648b08f9516288dd3ecfeade8fcddb5d6405efeec9743a287",
+    "peer.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "form.png": "9bb97f2208eabab6c4db51a20802770aa944b81ea6d469d2c5ceadedd4c3704c",
+    "companion.scn": "1028a50631df5f8459ac215fac510e774975313c2cbf68960e3b3d016c06f3a5",
+    "disconnected.png": "1ff0b8e6e617f20ffe975756bc34bcaae4bdd0beb2210b10d9d5ce5a86a11f60",
+    "desktop.stderr.log": "2f14fd666267cd17a36ed9a3e440c0f43aa7a05609cf71dec26c28c1b2e858b0",
+    "desktop-journal.json.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "desktop.stdout.log": "4119693cbb4dc63607846f398f4421dfccca1de9fac6f3bf53286de35f1e6ee1",
+    "reconnected.png": "25476452f78bc93c08977d83874edd5fee18c994cb85d3577ded29552745d688"
+  },
+  "visual_review": {
+    "notes": [
+      "All six native captures reviewed. Form values, connected/disconnected states, tagged return and protocol ACK history are visible.",
+      "The reconnect view retains duplicate diagnostics and a stale compose notice; the outgoing row reaches the lower viewport edge. Functional acceptance only, not a complete appearance review."
+    ],
+    "blank": 0,
+    "distinct": 6,
+    "passed": true,
+    "captures": 6
+  },
+  "acceptance": [
+    "form_values_asserted",
+    "connect",
+    "queue_text",
+    "matched_protocol_ack",
+    "tagged_return_received",
+    "disconnect",
+    "reconnect_with_tagged_history",
+    "final_disconnect",
+    "desktop_and_peer_exit_zero"
+  ],
+  "firmware": "Meshtastic 2.7.26.54e0d8d, both Heltec V4 boards"
+}

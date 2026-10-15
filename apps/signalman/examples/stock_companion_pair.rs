@@ -1,6 +1,6 @@
 //! Finite stock-radio Comms bench. No flashing, key import or radio configuration.
 //! Probe: stock_companion_pair probe <meshtastic|meshcore> <port> <realm> <new-output-dir> [channel]
-//! Pair:  stock_companion_pair pair <meshtastic|meshcore> <left-port> <right-port> <realm> <new-output-dir> [channel]
+//! Pair:  stock_companion_pair pair <meshtastic|meshcore> <left-port> <right-port> <realm> <new-output-dir> [channel] [reconnect-delay-ms]
 //! Peer: stock_companion_pair peer <meshtastic|meshcore> <port> <realm> <new-output-dir> <signalman-ui-tag> <expected-sender> [channel]
 //! Pair requires two already configured stock radios with compatible profiles.
 //! MeshCore contacts must already contain each other's full public keys.
@@ -227,7 +227,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     } else {
         5
     };
-    if args.len() < required || args.len() > required + 1 {
+    if args.len() < required || args.len() > required + if pair { 2 } else { 1 } {
         return Err("see example's probe/pair/peer usage; explicit ports, realm and new output directory required".into());
     }
     let channel = args
@@ -237,6 +237,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .unwrap_or(0);
     if channel > 7 {
         return Err("channel index must be 0..7".into());
+    }
+    let reconnect_delay_ms = args
+        .get(required + 1)
+        .map(|s| s.parse::<u64>())
+        .transpose()?
+        .unwrap_or(0);
+    if reconnect_delay_ms > 5000 {
+        return Err("reconnect delay must be 0..5000 ms".into());
     }
     let protocol = match args[1].as_str() {
         "meshtastic" => CompanionProtocol::Meshtastic { channel },
@@ -281,7 +289,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     }
     let output = Path::new(&args[if peer_mode { 4 } else { required - 1 }]);
     std::fs::create_dir(output)?; // Fresh evidence; never overwrite an earlier trial.
-    let mut receipt = serde_json::json!({"schema":1,"protocol":args[1],"ports":if pair{vec![left_port.as_str(),right_port.unwrap()]}else{vec![left_port.as_str()]},"realm":realm,"channel":channel,"mode":mode,"result":"not_completed","exchanges":[],"firmware_or_configuration_mutated":false});
+    let mut receipt = serde_json::json!({"schema":1,"protocol":args[1],"ports":if pair{vec![left_port.as_str(),right_port.unwrap()]}else{vec![left_port.as_str()]},"realm":realm,"channel":channel,"reconnect_delay_ms":reconnect_delay_ms,"mode":mode,"result":"not_completed","exchanges":[],"firmware_or_configuration_mutated":false});
     let result = async {
         let left_path = output.join("left.json");
         let mut left = connect(left_port, protocol, realm, left_path.clone()).await?;
@@ -318,6 +326,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 let right_history = right.session.owner().records()?;
                 drop(left);
                 drop(right);
+                if reconnect_delay_ms != 0 {
+                    tokio::time::sleep(Duration::from_millis(reconnect_delay_ms)).await;
+                }
                 left = connect(left_port, protocol, realm, left_path.clone()).await?;
                 right = connect(right_port, protocol, realm, right_path.clone()).await?;
                 check_history(&left.session.owner(), &left_history)?;

@@ -1,0 +1,137 @@
+{
+  "schema": 1,
+  "protocol": "meshcore",
+  "port": "COM6",
+  "peer_port": "COM7",
+  "self_address": "a6300d0e2bd97bd6f9629199155d23e92b8dc1c50a4634c4135832a1c38d891d",
+  "peer_address": "b69769f1068d3558660a2e4dbcbe6aa334af6628e334ef6cba6ada202f99b632",
+  "realm": "opc-meshcore-baseline",
+  "channel": 0,
+  "tag": "signalman-ui-7e7517d4cafb481d885cbf51cec3d563",
+  "desktop_sha256": "A282815D3FFFBF8A62EA723D3C307CA21651E519B90776F2EFB56776E4A83548",
+  "peer_sha256": "C9DAE7ABC37A2B74E65A44514A247C9A4D8F986FA77EF9533D82723030A6FEE8",
+  "scenario_sha256": "0B80C423759DB6069800CD5D50375ACBF87907F0DB6516947B53DF3661203ABF",
+  "deadline_seconds": 90,
+  "firmware_or_configuration_mutated": false,
+  "result": "passed",
+  "peer_pid": 49848,
+  "desktop_pid": 31464,
+  "desktop_exit": 0,
+  "peer_exit": 0,
+  "closed_utc": "2026-10-15T21:45:21.8210667Z",
+  "source_base": "5052c93026040df9eab4155f88e63853d9210663",
+  "scope": "Native functional run; stock provisioning and Tulle restoration are separate recorded operations.",
+  "source_files": {
+    "apps/signalman-desktop/scenarios/run_companion.ps1": "049b40b44ff5a893c55437a58b14964016a32ca3986e78f05863cd49395b79a4",
+    "apps/signalman/src/radio_comms/companion.rs": "8b5519749a365c9fa98400d22232dce123dd9a841f96c1aa44748da8e32ca953",
+    "apps/signalman-desktop/scenarios/companion.scn.in": "fcd728828561a02a1e50bd65ae8070c0bf02033f1fdbeae2b1ed45def9bcb9dd",
+    "apps/signalman/examples/stock_companion_pair.rs": "7532b27b34409ad29a04e594aad3edba70c61248944ad720867566f29b90590c",
+    "apps/signalman-desktop/src/companion_scenario.rs": "c340b90d91fe7c884a2219f757170fa1e4e5b321f7bbbac03899041e856d982b",
+    "apps/signalman-desktop/Cargo.lock": "f6eb4ec9d7b3aa5a92383fbec413f7d184e5123206192ba6d4011d301bc7c464"
+  },
+  "evidence_directory": "validation/results/stock-baseline-20261014/ui-mc-fit",
+  "evidence": {
+    "messages.json": "82680928f6285b83b0df0202a41b8ed59f1991fb74873101965e824bc9473a1a",
+    "stopped.png": "ee2e40a7bfc8888f1811bb4c6f906653844ae0e88b8a638c5182ee83c8ef6b8c",
+    "peer.stdout.log": "b5ce67f4663176dc25581a5a11b0ddc7d27c071b5d36b36cc6c76d35a04227e3",
+    "desktop-journal.json.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "scenario.done": "0a8a0c6b8d6d70dfff65e3db54ffca45f970208d757564313097c5b11f04a571",
+    "roundtrip.png": "a4d603dc94244015359943301095f0cfac1aa93823a68cbb792db6c97142758e",
+    "desktop-journal.json": "c0eb029af221316eb27d1d55f8a089cc71dac59a1c1967abb51db5fc18732ae1",
+    "peer.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "form.png": "6f3ba057a636b62ca58103882ad8f515125e9af7b6bbaeef7ed1be67043b942e",
+    "disconnected.png": "fc3bd7f59d6cd92efe4a5dc86ba4e790119e2367785fb5d07f3020613d95f0c0",
+    "reconnected.png": "3a0a276c93ed0a50bd8f71518f7a3cb10b1c34dc6a4312d106896bc9d5b778e5",
+    "desktop.stderr.log": "2f14fd666267cd17a36ed9a3e440c0f43aa7a05609cf71dec26c28c1b2e858b0",
+    "run.json": "585f9587e116ef8f940773f777fb694945f23a829dab2bbc2fd1aab6b78f8096",
+    "desktop.stdout.log": "bb00d5bdda94b26617205437be039ae7b8edb91edc548eae2713058b268593f4",
+    "connected.png": "ee001d8e7b336eeb2c9745093d022981f6fe35bcc3d2ee990b5c54542369284f",
+    "companion.scn": "0b80c423759db6069800cd5d50375acbf87907f0db6516947b53df3661203abf"
+  },
+  "visual_review": {
+    "captures": 6,
+    "zoom": 0.75,
+    "distinct": 6,
+    "blank": 0,
+    "notes": [
+      "All six native captures reviewed. Both tagged message rows and protocol ACK label are fully visible at this zoom, including after reconnect.",
+      "Duplicate reconnect diagnostics and a stale compose notice remain; this is functional acceptance, not a general appearance review."
+    ],
+    "passed": true
+  },
+  "acceptance": [
+    "form_values_asserted",
+    "connect",
+    "queue_text",
+    "matched_protocol_ack",
+    "tagged_return_received",
+    "disconnect",
+    "reconnect_with_tagged_history",
+    "final_disconnect",
+    "desktop_and_peer_exit_zero"
+  ],
+  "firmware": "MeshCore v1.17.1-d929643, Heltec V4.3 OLED, build 14-Aug-2026, companion API 13, both boards",
+  "pair": {
+    "reconnect_delay_ms": 500,
+    "retained_failures": [
+      "pair-mc: no receive/ACK before business-card exchange and adverts",
+      "pair-mc-business-cards: both directions passed, contacts timeout on immediate reconnect",
+      "pair-mc-reconnect: both directions passed, handshake timeout on immediate reconnect"
+    ],
+    "immediate_reconnect_qualified": false,
+    "receipt_sha256": "06ed190c6b572c18f178da638f821e42b6467b3adc711590469018aaa701ca9c",
+    "result": "passed",
+    "history_preserved": true,
+    "exchanges": [
+      {
+        "matched_protocol_ack": true,
+        "elapsed_ms": 1157,
+        "recipient_text_match": true
+      },
+      {
+        "matched_protocol_ack": true,
+        "elapsed_ms": 1068,
+        "recipient_text_match": true
+      },
+      {
+        "matched_protocol_ack": true,
+        "elapsed_ms": 1166,
+        "recipient_text_match": true
+      },
+      {
+        "matched_protocol_ack": true,
+        "elapsed_ms": 1050,
+        "recipient_text_match": true
+      }
+    ]
+  },
+  "restoration": {
+    "boards": [
+      {
+        "channel": "rnode",
+        "port": "COM6",
+        "identity_sequence": 10,
+        "region": "US915",
+        "identity_slot": "A"
+      },
+      {
+        "channel": "modem",
+        "port": "COM7",
+        "identity_sequence": 5,
+        "region": "US915",
+        "identity_slot": "B"
+      }
+    ],
+    "source_build_reported": "unidentified; exact host ELF and successful pinned-helper transfer recorded",
+    "image_sha256": "ba10d49e8a38fdef95c5204b912dec27970bbf96b7846e50006822d02cac1c01",
+    "result": "passed"
+  },
+  "local_operation_evidence": {
+    "tulle-restored-status.json": "3c48fad31b748e28ba50dc5cb9c330be9d0912b6ce4099a43d8da35bd1778beb",
+    "tulle-restore.json": "e2b9a051f2957a631560376b5d057a164c4e5866a09f433b62bbe669a13b7e91",
+    "meshcore-business-cards.json": "a2ad0c98880be42e0e5002ae9cda6ba3b7f7697e80a2df3c5caffff6266da732",
+    "meshcore-setup.json": "88adaa6a081a3b80fb90252f6e1d8d99db1843b770cda5265b7bd6024c89228f",
+    "meshcore-setup-current.json": "b59ac905c37073d7417b0853ce3ae7d8f68416581c3948fa97fcb1ae4c151918",
+    "meshcore-flash.json": "9963f56b621467f68346f5fb0728903d59c4e16edaf32b269fec651d510ac039"
+  }
+}
