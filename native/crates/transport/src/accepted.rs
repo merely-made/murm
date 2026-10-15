@@ -48,6 +48,11 @@ pub enum TransportKind {
     /// initiator; link identity instead comes from a host-signed
     /// DTLS-fingerprint challenge, not from the transport itself.
     WebRtc,
+    /// An in-process stream between two halves of one resident, such as a
+    /// local door's duplex after its own hello. Nothing on the stream
+    /// authenticates an initiator; the link is the value both halves derived
+    /// from the door's challenge.
+    InProcess,
 }
 
 /// Opaque local identifier for the interface a session arrived on.
@@ -102,6 +107,16 @@ impl IngressContext {
             transport: TransportKind::Reticulum,
             interface: Some(interface),
             link: Some(link),
+        }
+    }
+
+    /// Context for an in-process stream, carrying the link both halves of the
+    /// local door derived. There is no interface and no transport identity.
+    pub fn in_process(shared_link: [u8; 16]) -> Self {
+        Self {
+            transport: TransportKind::InProcess,
+            interface: None,
+            link: Some(shared_link),
         }
     }
 
@@ -188,6 +203,14 @@ mod tests {
             !anonymous.is_transport_authenticated(),
             "a transport that cannot identify its initiator must not look authenticated"
         );
+    }
+
+    #[test]
+    fn in_process_context_carries_the_link_and_nothing_else() {
+        let ctx = IngressContext::in_process([2u8; 16]);
+        assert_eq!(ctx.transport, TransportKind::InProcess);
+        assert_eq!(ctx.interface, None);
+        assert_eq!(ctx.link, Some([2u8; 16]));
     }
 
     #[test]
