@@ -20,7 +20,7 @@ use alloc::vec::Vec;
 use heapless::index_map::FnvIndexMap;
 
 use crate::capacity::desktop;
-use crate::channel::{Buffer, Envelope, MAX_DATA_LEN};
+use crate::channel::{Buffer, Envelope, MAX_CHUNK_LEN};
 use crate::hash::AddressHash;
 use crate::identity::{Identity, PrivateIdentity};
 use crate::link::{CTX_CHANNEL, Link};
@@ -142,16 +142,16 @@ impl<
         initial_rtt_ms: Option<u64>,
         max_window: Option<u32>,
     ) -> Self {
-        // Type-1 link header + token framing + CBC padding + Channel/Stream headers.
-        // This reproduces RNS's 423-byte default at MTU 500 and shrinks when a radio
-        // endpoint negotiates a smaller link MTU.
+        // Type-1 link header + token framing + CBC padding + Channel/Stream headers: the
+        // link MDU less 8, as RNS's writer chunks (`Buffer.py` 230). RNS's 423 bytes at MTU
+        // 500, less on a radio's smaller link MTU, up to 16 KiB on a larger one.
         let token_room = (link.mtu() as usize).saturating_sub(crate::packet::HEADER_MIN_LEN);
         let cipher_room = token_room.saturating_sub(crate::token::TOKEN_OVERHEAD);
         let padded_plain = (cipher_room / 16) * 16;
         let max_chunk = padded_plain
             .saturating_sub(1)
             .saturating_sub(6 + 2)
-            .clamp(1, MAX_DATA_LEN);
+            .clamp(1, MAX_CHUNK_LEN);
         Self {
             link,
             buffer: match (initial_rtt_ms, max_window) {

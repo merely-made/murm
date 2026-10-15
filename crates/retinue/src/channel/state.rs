@@ -48,9 +48,8 @@ pub(super) struct Outstanding {
 /// - `QUEUE` bounds the application-facing queues in each direction.
 /// - `REORDER` bounds held-back future sequences, defaulting to [`REORDER_MAX`].
 ///
-/// Payloads stay on the heap, so an entry costs a `Vec` header rather than
-/// [`MAX_DATA_LEN`](super::MAX_DATA_LEN) bytes; what is bounded is the entry count, which is
-/// what grows without limit on a lossy medium.
+/// Payloads stay on the heap, so an entry costs a `Vec` header rather than a full chunk; what
+/// is bounded is the entry count, which is what grows without limit on a lossy medium.
 pub struct Channel<
     const WINDOW: usize = 64,
     const QUEUE: usize = 256,

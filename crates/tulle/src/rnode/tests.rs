@@ -213,4 +213,80 @@ fn config_ranges_follow_rns() {
     bad = ok;
     bad.st_alock = Some(10_001);
     assert_eq!(bad.validate(), Err(ConfigError::AirtimeLimit));
+    // RNS's edges (`RNodeInterface.py` 312-326): SF 5-12, BW 7.8-1625 kHz, TX power <= 37.
+    for (sf, bw, txp, valid) in [
+        (5, 7_800, 0, true),
+        (12, 1_625_000, 37, true),
+        (4, 125_000, 14, false),
+        (7, 7_799, 14, false),
+        (7, 1_625_001, 14, false),
+        (7, 125_000, 38, false),
+    ] {
+        let mut c = ok;
+        (c.params.spreading_factor, c.params.bandwidth_hz) = (sf, bw);
+        c.params.tx_power_dbm = txp;
+        assert_eq!(c.validate().is_ok(), valid, "SF{sf} BW{bw} {txp} dBm");
+    }
+}
+
+#[test]
+fn telemetry_and_echoed_bitrate_are_kept() {
+    let config = RNodeConfig::new(params());
+    let mut rnode = online(config);
+    assert!(rnode.take_telemetry_changed(), "the echoes set the bitrate");
+    assert_eq!(rnode.telemetry().bitrate, Some(21_875.0));
+    let reports = [
+        vec![cmd::STAT_BAT, 1, 77],
+        vec![cmd::STAT_CSMA, 1, 2, 6],
+        // CHTM with escaped payload bytes (0xC0, 0xDB), unescaped before parsing.
+        vec![cmd::STAT_CHTM, 0, 0xC0, 0, 0xDB, 0, 0, 0, 0, 157, 157, 0xFF],
+    ];
+    rnode.on_serial(
+        &reports
+            .iter()
+            .flat_map(|f| kiss::encode(f))
+            .collect::<Vec<_>>(),
+    );
+    assert!(rnode.take_telemetry_changed());
+    let t = rnode.telemetry();
+    assert_eq!(t.battery.unwrap().state_name(), "discharging");
+    assert_eq!(t.csma.unwrap().cw_max, 6);
+    let c = t.channel.unwrap();
+    assert_eq!((c.airtime_short, c.airtime_long), (1.92, 2.19));
+    assert_eq!(c.noise_floor_dbm, 0);
+    assert!(!rnode.take_telemetry_changed());
+    assert!(
+        rnode.is_online(),
+        "telemetry never disturbs the radio state"
+    );
+    rnode.reopen();
+    assert!(!rnode.is_online());
+    assert_eq!(
+        rnode.telemetry().csma.unwrap().cw_max,
+        6,
+        "a reopen keeps telemetry"
+    );
+}
+
+#[test]
+fn the_keepalive_is_rns_s_detect_probe() {
+    let mut rnode = online(RNodeConfig::new(params()));
+    rnode.keepalive();
+    // Byte for byte as RNS writes it, FENDs shared (`RNodeInterface.py` 490-494).
+    let stock = [
+        0xC0, 0x08, 0x73, 0xC0, 0x50, 0x00, 0xC0, 0x48, 0x00, 0xC0, 0x49, 0x00, 0xC0,
+    ];
+    assert_eq!(rnode.take_outbound(), stock);
+}
+
+#[test]
+fn sx126x_paces_short_spreading_factors_by_its_own_airtime() {
+    let mut p = params();
+    p.spreading_factor = 6;
+    let mut config = RNodeConfig::new(p);
+    config.chip = crate::lora::PhyChip::Sx126x;
+    let mut rnode = online(config);
+    let airtime = rnode.enqueue(&[0; 64]).unwrap();
+    assert_eq!(airtime, p.time_on_air_on(crate::lora::PhyChip::Sx126x, 64));
+    assert_ne!(airtime, p.time_on_air(64));
 }

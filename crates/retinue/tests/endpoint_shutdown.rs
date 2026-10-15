@@ -304,3 +304,51 @@ async fn abrupt_close_releases_an_active_resource_operation() {
     assert_eq!(error.kind(), std::io::ErrorKind::BrokenPipe);
     drop(client_session);
 }
+
+/// PipeInterface children: respawned on exit under one id, and killed with the endpoint
+/// (`PipeInterface.py` 160-190).
+#[cfg(all(feature = "pipe", unix))]
+mod pipe {
+    use std::time::Duration;
+
+    use retinue::endpoint::{Endpoint, PipeConfig};
+    use retinue::identity::PrivateIdentity;
+
+    fn sh(script: &str) -> PipeConfig {
+        let mut config = PipeConfig::new(["sh", "-c", script].map(Into::into).to_vec());
+        config.respawn_delay = Duration::from_millis(100);
+        config
+    }
+
+    fn spawns(log: &std::path::Path) -> usize {
+        std::fs::read_to_string(log).map_or(0, |s| s.lines().count())
+    }
+
+    #[tokio::test]
+    async fn an_exiting_child_is_respawned_until_the_endpoint_closes() {
+        let dir = std::env::temp_dir().join(format!("retinue-pipe-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let log = dir.join("spawns");
+        let ep = Endpoint::new(PrivateIdentity::from_secret_bytes(&[0x70; 64]));
+        let script = format!("echo up >> '{}'", log.display());
+        let id = ep.attach_pipe(sh(&script)).await.unwrap();
+        tokio::time::sleep(Duration::from_millis(800)).await;
+        assert!(spawns(&log) >= 3, "respawned: {}", spawns(&log));
+        assert_eq!(ep.interface_ids(), [id]);
+        ep.close();
+        tokio::time::sleep(Duration::from_millis(150)).await;
+        let after = spawns(&log);
+        tokio::time::sleep(Duration::from_millis(400)).await;
+        assert_eq!(spawns(&log), after, "no respawn after close");
+        std::fs::remove_dir_all(&dir).unwrap();
+    }
+
+    #[tokio::test]
+    async fn a_command_that_cannot_start_fails_the_attach() {
+        let ep = Endpoint::new(PrivateIdentity::from_secret_bytes(&[0x71; 64]));
+        let missing = PipeConfig::new(vec!["/nonexistent/retinue-pipe".into()]);
+        assert!(ep.attach_pipe(missing).await.is_err());
+        assert!(ep.attach_pipe(PipeConfig::new(Vec::new())).await.is_err());
+        assert_eq!(ep.interface_count(), 0);
+    }
+}

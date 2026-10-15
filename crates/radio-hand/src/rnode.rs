@@ -58,6 +58,12 @@ pub mod cmd {
     pub const READY: u8 = 0x0F;
     pub const STAT_RSSI: u8 = 0x23;
     pub const STAT_SNR: u8 = 0x24;
+    /// Telemetry reports (`RNodeInterface.py` 64-68): channel, PHY, battery, CSMA, temperature.
+    pub const STAT_CHTM: u8 = 0x25;
+    pub const STAT_PHYPRM: u8 = 0x26;
+    pub const STAT_BAT: u8 = 0x27;
+    pub const STAT_CSMA: u8 = 0x28;
+    pub const STAT_TEMP: u8 = 0x29;
     pub const PLATFORM: u8 = 0x48;
     pub const MCU: u8 = 0x49;
     pub const FW_VERSION: u8 = 0x50;

@@ -37,10 +37,10 @@ const fn link_mdu(mtu: usize) -> usize {
 pub(super) const WRITE_CHUNK: usize = link_mdu(crate::packet::MTU);
 
 /// Largest single-packet link plaintext (data, request or response) at the MTU negotiated
-/// for this link, so the interface driver never has to reject a packet after `AsyncWrite`
-/// already accepted its bytes.
+/// for this link (`Link.py` 493, 512-514, 849), so the interface driver never has to reject
+/// a packet after `AsyncWrite` already accepted its bytes.
 pub(super) fn write_chunk_for_mtu(mtu: u32) -> usize {
-    link_mdu(mtu as usize).clamp(1, WRITE_CHUNK)
+    link_mdu(mtu as usize).max(1)
 }
 
 /// In-memory buffer for a stream's inbound side.

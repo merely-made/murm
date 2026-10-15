@@ -2890,6 +2890,7 @@ dependencies = [
  "selvage",
  "serde_json",
  "serial2-tokio",
+ "socket2",
  "tokio",
 ]
 

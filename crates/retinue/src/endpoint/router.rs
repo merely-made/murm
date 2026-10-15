@@ -12,13 +12,14 @@ use crate::packet::{DestinationType, Packet, PacketType};
 
 use super::announces::admit_verified_announce;
 use super::dedup::LinkPacketAdmission;
+use super::discovery::handle_path_request;
 use super::entropy::{ephemeral_seed, next_iv};
 use super::facts::{LinkDirection, LinkRemoteFact};
 use super::inbound::{
     Accepted, AcceptedResource, Admission, LINK_REQUEST_CACHE, LINK_REQUEST_CACHE_TTL,
 };
 use super::interface::InterfaceId;
-use super::queue::TrafficClass;
+use super::mtu::link_request_mtu;
 use super::registration::RegistrationKind;
 use super::reliable_driver::register_reliable_stream;
 use super::resource_session::register_resource_session;
@@ -29,7 +30,20 @@ use super::transit::{forward, forward_on};
 use super::watchdog::note_link_inbound;
 
 /// Dispatch one inbound packet that arrived on `iface`.
+#[cfg(test)]
 pub(super) fn route(shared: &Arc<Shared>, iface: InterfaceId, pkt: Packet) {
+    dispatch(shared, iface, pkt, false);
+}
+
+/// [`route`], for a packet the inbound queue marks `ingress_limited`.
+pub(super) fn dispatch(
+    shared: &Arc<Shared>,
+    iface: InterfaceId,
+    pkt: Packet,
+    ingress_limited: bool,
+) {
+    // Hop transparency on a shared-instance interface (`Transport.py` 1936-1939).
+    let pkt = shared.local_ingress(iface, pkt);
     // RNS's packet filter, ahead of any dispatch (`Transport.py` 1629-1660): a header-type-2
     // packet is carried only by the transport it names, and a PLAIN or GROUP packet never
     // travels past its first hop.
@@ -47,21 +61,12 @@ pub(super) fn route(shared: &Arc<Shared>, iface: InterfaceId, pkt: Packet) {
             .fetch_add(1, Ordering::Relaxed);
         return;
     }
-    // Answer a path request for one of our destinations with a path response. RNS drops a
-    // tagless request and a repeated target and tag (`Transport.py` 1838-1856), and answers
-    // on the requesting interface only (`Transport.py` 3452-3456).
+    // A tunnel synthesis is control traffic for this node (`Transport.py` 2788-2860).
+    if shared.tunnel_intercept(iface, &pkt) {
+        return;
+    }
     if let Some(request) = crate::path::PathRequest::parse(&pkt) {
-        let fresh = request
-            .unique_tag()
-            .is_some_and(|tag| shared.path_request_tags.lock().unwrap().insert(tag));
-        if !fresh {
-            shared
-                .routing_stats
-                .filtered_packets
-                .fetch_add(1, Ordering::Relaxed);
-        } else if let Some(resp) = shared.path_response(request.target) {
-            shared.send_on_class(iface, resp, TrafficClass::Control);
-        }
+        handle_path_request(shared, iface, request, ingress_limited);
         return;
     }
     // Transit. Announces are relayed from their own arm, so they still reach the book.
@@ -186,26 +191,13 @@ pub(super) fn route(shared: &Arc<Shared>, iface: InterfaceId, pkt: Packet) {
                 }
                 let ephemeral = ephemeral_seed();
                 // As in RNS, the link is no larger than the interface that heard its request.
-                let configured_mtu = shared.link_mtu.load(Ordering::Relaxed);
-                let configured_mtu = shared
-                    .link_mtu_on(iface)
-                    .map_or(configured_mtu, |limit| configured_mtu.min(limit));
-                let requested_mtu = pkt
-                    .payload
-                    .get(link::LINK_KEYS_LEN..link::LINK_KEYS_LEN + link::TRAILER_LEN)
-                    .and_then(|bytes| bytes.try_into().ok())
-                    .and_then(|trailer| LinkTrailer::decode(trailer).ok())
-                    .map(|trailer| trailer.mtu)
-                    // As in RNS a signalled 0 means the default; a smaller request is floored.
-                    .filter(|&mtu| mtu != 0)
-                    .map_or(configured_mtu, |mtu| mtu.max(crate::node::MIN_LOGICAL_MTU));
                 if let Ok((link, proof)) = link::accept(
                     &pkt,
                     &shared.identity,
                     &ephemeral,
                     LinkTrailer {
                         mode: LinkMode::Aes256Cbc,
-                        mtu: configured_mtu.min(requested_mtu),
+                        mtu: link_request_mtu(shared, iface, &pkt),
                     },
                 ) {
                     {

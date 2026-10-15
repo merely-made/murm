@@ -159,6 +159,14 @@ pub fn request_trailer(request: &Packet) -> Result<Option<LinkTrailer>> {
     }
 }
 
+/// Drop a link request's mode/MTU trailer, so the next hop falls back to the protocol MTU.
+/// The link id covers only the keys, so it is unchanged.
+pub fn strip_request_mtu(request: &mut Packet) {
+    if request.payload.len() == LINK_KEYS_LEN + TRAILER_LEN {
+        request.payload.truncate(LINK_KEYS_LEN);
+    }
+}
+
 /// Lower the MTU a link request signals to at most `limit`: what a transport hop can carry
 /// between its two interfaces, or what a destination's receiving interface can. The link id
 /// covers only the keys, so it is unchanged. A request without a trailer, or one that already

@@ -4,8 +4,8 @@ use alloc::collections::VecDeque;
 use alloc::vec::Vec;
 
 use super::{
-    Channel, ChannelError, Envelope, MAX_DATA_LEN, REORDER_MAX, STREAM_ID_MAX, STREAM_MSGTYPE,
-    StreamFrame,
+    Channel, ChannelError, Envelope, MAX_CHUNK_LEN, MAX_DATA_LEN, REORDER_MAX, STREAM_ID_MAX,
+    STREAM_MSGTYPE, StreamFrame,
 };
 
 /// Default per-frame chunk: RNS's own `MAX_DATA_LEN` — the most stream bytes that fit in
@@ -132,7 +132,7 @@ impl<const WINDOW: usize, const QUEUE: usize, const REORDER: usize, const READ_B
     ) -> Self {
         Self {
             channel,
-            max_chunk: max_chunk.clamp(1, MAX_DATA_LEN),
+            max_chunk: max_chunk.clamp(1, MAX_CHUNK_LEN),
             send_stream_id: send_stream_id & STREAM_ID_MAX,
             recv_stream_id: recv_stream_id & STREAM_ID_MAX,
             read_buf: VecDeque::new(),

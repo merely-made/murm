@@ -8,7 +8,7 @@ use std::time::{Duration, Instant};
 use crate::address_book::AddressBook;
 use crate::hash::AddressHash;
 use crate::link;
-use crate::packet::{Packet, PacketType};
+use crate::packet::{MTU, Packet, PacketType};
 
 use super::interface::InterfaceId;
 use super::queue::TrafficClass;
@@ -159,6 +159,16 @@ impl Shared {
     }
 }
 
+impl Shared {
+    /// Drop the return paths that run through `iface`.
+    pub(super) fn forget_reverse_via(&self, iface: InterfaceId) {
+        self.reverse_table
+            .lock()
+            .unwrap()
+            .retain(|_, entry| entry.received != iface && entry.outbound != iface);
+    }
+}
+
 /// Forward a header-type-2 packet addressed to us as a transport hop, toward its
 /// destination. `from` is the interface it arrived on.
 pub(super) fn forward(
@@ -251,7 +261,11 @@ fn admit_link_request(
         .into_iter()
         .filter_map(|iface| shared.link_mtu_on(iface))
         .min();
-    if let Some(limit) = limit
+    // RNS drops the trailer toward an interface that does not signal its MTU (`Transport.py`
+    // 2069-2076); a carrier under the protocol MTU still needs the clamp.
+    if shared.signals_mtu(out) == Some(false) && limit.is_none_or(|l| l >= MTU as u32) {
+        link::strip_request_mtu(pkt);
+    } else if let Some(limit) = limit
         && link::clamp_request_mtu(pkt, limit).is_err()
     {
         return BridgeAdmission::Refused;

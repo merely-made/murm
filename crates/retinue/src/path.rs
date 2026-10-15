@@ -5,8 +5,8 @@
 //! whoever owns the destination (or a transport node holding its announce) replies with a
 //! *path response*: an ordinary announce whose context byte is [`CTX_PATH_RESPONSE`] rather
 //! than `0`. retinue *sends* path requests, *ingests* the announces that result, and
-//! *answers* path requests for destinations it owns (see [`PathRequest`]), on the interface the
-//! request came in on. It does not yet answer on behalf of others (no announce cache).
+//! *answers* path requests (see [`PathRequest`]) on the interface the request came in on: for
+//! destinations it owns, and as a transport from the announces behind its routes.
 //!
 //! The request is a plain data packet:
 //!
@@ -51,9 +51,19 @@ pub fn path_request_destination() -> AddressHash {
 /// reproducible; it must be fresh per request in production, where it lets a requester
 /// recognise the response to its own query.
 pub fn path_request(target: AddressHash, tag: &[u8; TAG_LEN]) -> Packet {
-    let mut payload = Vec::with_capacity(crate::hash::ADDRESS_HASH_LEN + TAG_LEN);
+    path_request_via(target, None, tag)
+}
+
+/// [`path_request`] in either form: a transport instance names itself between the target and
+/// the tag (`Transport.py` 3295-3296), so a node never answers it with a path through the
+/// requester. A forwarded request keeps its requester's tag, which may be shorter.
+pub fn path_request_via(target: AddressHash, requestor: Option<AddressHash>, tag: &[u8]) -> Packet {
+    let mut payload = Vec::with_capacity(2 * crate::hash::ADDRESS_HASH_LEN + TAG_LEN);
     payload.extend_from_slice(target.as_slice());
-    payload.extend_from_slice(tag);
+    if let Some(requestor) = requestor {
+        payload.extend_from_slice(requestor.as_slice());
+    }
+    payload.extend_from_slice(&tag[..tag.len().min(TAG_LEN)]);
 
     Packet {
         ifac: false,
@@ -220,9 +230,8 @@ mod tests {
         assert_eq!(two.requestor, None);
         assert_eq!(two.tag(), Some(&[0x11; TAG_LEN][..]));
 
-        let mut three = path_request(target, &[0x22; TAG_LEN]);
-        three.payload.splice(16..16, [0x33; 16]);
-        let three = PathRequest::parse(&three).unwrap();
+        let via = Some(AddressHash::from_bytes([0x33; 16]));
+        let three = PathRequest::parse(&path_request_via(target, via, &[0x22; TAG_LEN])).unwrap();
         assert_eq!(three.requestor, Some(AddressHash::from_bytes([0x33; 16])));
         assert_eq!(three.tag(), Some(&[0x22; TAG_LEN][..]));
 

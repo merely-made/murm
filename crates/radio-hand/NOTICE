@@ -30,3 +30,11 @@ From the interface batch (2026-10-09):
 - The `rnode_air` example emulates RNode devices for host-side gates, answering
   as RNS's host expects. RNS `Interfaces/RNodeInterface.py` 428-500, 650-695,
   746-1135. Target: `examples/rnode_air.rs`.
+
+From the interface batch 2 (2026-10-14), same source:
+
+- The telemetry command values (CHTM, PHYPRM, BAT, CSMA, TEMP), and
+  `rnode_air --telemetry`, which emits fixed reports in RNS's layouts for the
+  host-side telemetry gate. RNS `Interfaces/RNodeInterface.py` 64-68,
+  882-1069.
+  Targets: `src/rnode.rs`, `examples/rnode_air.rs`.

@@ -13,21 +13,30 @@ mod attach;
 mod config;
 mod dedup;
 mod dial;
+mod discovery;
 mod entropy;
 mod facts;
+mod iface_config;
 mod iface_policy;
+mod iface_stats;
 mod inbound;
+mod inbound_queue;
 mod interface;
 mod known_destinations;
 mod link_receipt;
 mod link_setup;
 mod listen;
+mod local;
+mod mtu;
 mod paths;
+#[cfg(feature = "pipe")]
+mod pipe;
 mod pump;
 mod queue;
 mod rebroadcast;
 mod registration;
 mod reliable_driver;
+mod resource_errors;
 mod resource_inbound;
 mod resource_pace;
 mod resource_requests;
@@ -43,6 +52,7 @@ mod stream;
 #[cfg(test)]
 mod tests;
 mod transit;
+mod tunnel;
 mod watchdog;
 
 pub use announces::AnnounceFreshnessPolicy;
@@ -51,12 +61,21 @@ pub use facts::{
     AnnounceFact, EndpointFacts, LinkDirection, LinkFact, LinkFactKind, LinkRemoteFact,
     PeerAnnounce, RouteFact,
 };
-pub use iface_policy::{AnnounceRate, IfacePolicy};
+pub use iface_config::{
+    Carrier, IdBeacon, InterfaceSettings, RnsAttached, RnsConfig, RnsConfigError, RnsInterface,
+    UdpCarrier,
+};
+pub use iface_policy::{AnnounceRate, IfacePolicy, PathRequestPolicy};
+pub use iface_stats::InterfaceCounters;
 pub use inbound::{Accepted, AcceptedResource, InboundLinkLimits};
 pub use interface::{Interface, InterfaceId, InterfaceSink};
 pub use link_receipt::{LinkDelivery, PayloadReceipt};
 pub use link_setup::{LinkSetupTimedOut, is_link_setup_timeout};
-pub use listen::{ListenPolicy, Listener};
+pub use listen::{FlapPolicy, ListenAddr, ListenPolicy, Listener};
+pub use local::{SHARED_INSTANCE_PORT, SharedInstance, SharedInstanceKind};
+pub use mtu::HwMtu;
+#[cfg(feature = "pipe")]
+pub use pipe::{PIPE_HW_MTU, PipeConfig};
 pub use queue::{
     ClassCounters, OutboundPackets, QueueCounters, QueueDepths, QueueWeights, TrafficClass,
 };

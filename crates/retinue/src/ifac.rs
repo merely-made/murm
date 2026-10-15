@@ -5,7 +5,6 @@
 //! egress interface signs and masks the logical packet again with its own
 //! credentials.
 
-use alloc::vec;
 use alloc::vec::Vec;
 
 use core::fmt;
@@ -20,6 +19,10 @@ use crate::{Error, Result};
 pub const MIN_SIZE: usize = 1;
 /// Largest supported access code: one complete Ed25519 signature.
 pub const MAX_SIZE: usize = 64;
+
+/// The largest logical packet sealed or opened: the most a link MTU can signal
+/// ([`crate::link::MAX_MTU`]). Each interface's frame limit is the real bound.
+const MAX_PACKET: usize = crate::link::MAX_MTU as usize;
 /// RNS's default code size for TCP, UDP, Auto, Backbone, I2P and Local interfaces
 /// (`Interface.py` 96, `TCPInterface.py` 77/466, `UDPInterface.py` 42, `AutoInterface.py` 50).
 pub const STREAM_SIZE: usize = 16;
@@ -169,12 +172,13 @@ impl Ifac {
         self.size
     }
 
-    /// Sign and mask one logical packet for this interface.
+    /// Sign and mask one logical packet for this interface. The interface's own frame limit
+    /// bounds it; here only the largest MTU a link can signal does.
     pub fn seal(&self, packet: &[u8]) -> Result<Vec<u8>> {
         if packet.len() < 2 {
             return Err(Error::Truncated);
         }
-        if packet.len() > crate::packet::MTU {
+        if packet.len() > MAX_PACKET {
             return Err(Error::Oversize);
         }
 
@@ -205,7 +209,7 @@ impl Ifac {
         if frame.len() < 2 + self.size {
             return Err(Error::Truncated);
         }
-        if frame.len() > crate::packet::MTU + self.size {
+        if frame.len() > MAX_PACKET + self.size {
             return Err(Error::Oversize);
         }
 
@@ -249,10 +253,7 @@ impl Ifac {
     }
 
     fn apply_mask(&self, packet: &mut [u8], ifac: &[u8]) {
-        let hkdf = Hkdf::<Sha256>::new(Some(&self.key), ifac);
-        let mut mask = vec![0_u8; packet.len()];
-        hkdf.expand(&[], &mut mask)
-            .expect("a Reticulum packet is a valid SHA-256 HKDF output");
+        let mask = mask(&self.key, ifac, packet.len());
         for (index, (byte, mask_byte)) in packet.iter_mut().zip(mask).enumerate() {
             if index <= 1 || index >= 2 + self.size {
                 *byte ^= mask_byte;
@@ -261,9 +262,34 @@ impl Ifac {
     }
 }
 
+/// RNS's HKDF-SHA256 with an empty context (`HKDF.py` 43-84). Past RFC 5869's 255 blocks,
+/// which a link MTU above 8 KiB needs, RNS wraps the one-byte block counter rather than
+/// refusing, so this does too; below that it is plain HKDF.
+fn mask(salt: &[u8], ikm: &[u8], len: usize) -> Vec<u8> {
+    use hmac::{Hmac, KeyInit, Mac};
+    let (prk, _) = Hkdf::<Sha256>::extract(Some(salt), ikm);
+    let keyed = <Hmac<Sha256> as KeyInit>::new_from_slice(&prk).expect("HMAC takes any key length");
+    let mut out = Vec::with_capacity(len + 32);
+    let mut block = [0_u8; 32];
+    let mut counter = 1_u8;
+    while out.len() < len {
+        let mut mac = keyed.clone();
+        if !out.is_empty() {
+            mac.update(&block);
+        }
+        mac.update(&[counter]);
+        block = mac.finalize().into_bytes().into();
+        out.extend_from_slice(&block);
+        counter = counter.wrapping_add(1);
+    }
+    out.truncate(len);
+    out
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use alloc::vec;
 
     const LOGICAL_HEX: &str =
         "0800c3421c254bb3b6e25d8040f395d960f900726574696e75652d696661632d66697874757265";
@@ -429,14 +455,27 @@ mod tests {
     }
 
     #[test]
+    fn the_mask_is_hkdf_and_wraps_its_counter_past_255_blocks() {
+        let mut expected = vec![0_u8; 255 * 32];
+        Hkdf::<Sha256>::new(Some(b"salt"), b"ikm")
+            .expand(&[], &mut expected)
+            .unwrap();
+        let long = mask(b"salt", b"ikm", 300 * 32);
+        assert_eq!(long[..255 * 32], expected[..]);
+        // Block 256 takes counter 0; RNS's `_counters[255]` is `256 % 256`.
+        assert_ne!(long[255 * 32..256 * 32], long[..32]);
+        let ifac = oracle_ifac();
+        let mut logical = vec![0x55_u8; 16_384];
+        logical[0] = 0x08;
+        assert_eq!(ifac.open(&ifac.seal(&logical).unwrap()).unwrap(), logical);
+    }
+
+    #[test]
     fn oversized_logical_and_carrier_packets_are_rejected() {
         let ifac = oracle_ifac();
+        assert_eq!(ifac.seal(&vec![0_u8; MAX_PACKET + 1]), Err(Error::Oversize));
         assert_eq!(
-            ifac.seal(&vec![0_u8; crate::packet::MTU + 1]),
-            Err(Error::Oversize)
-        );
-        assert_eq!(
-            ifac.open(&vec![0_u8; crate::packet::MTU + ifac.size() + 1]),
+            ifac.open(&vec![0_u8; MAX_PACKET + ifac.size() + 1]),
             Err(Error::Oversize)
         );
     }
