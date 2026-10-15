@@ -5,7 +5,6 @@
 //! egress interface signs and masks the logical packet again with its own
 //! credentials.
 
-use alloc::vec;
 use alloc::vec::Vec;
 
 use core::fmt;
@@ -254,10 +253,7 @@ impl Ifac {
     }
 
     fn apply_mask(&self, packet: &mut [u8], ifac: &[u8]) {
-        let hkdf = Hkdf::<Sha256>::new(Some(&self.key), ifac);
-        let mut mask = vec![0_u8; packet.len()];
-        hkdf.expand(&[], &mut mask)
-            .expect("a Reticulum packet is a valid SHA-256 HKDF output");
+        let mask = mask(&self.key, ifac, packet.len());
         for (index, (byte, mask_byte)) in packet.iter_mut().zip(mask).enumerate() {
             if index <= 1 || index >= 2 + self.size {
                 *byte ^= mask_byte;
@@ -266,9 +262,32 @@ impl Ifac {
     }
 }
 
+/// RNS's HKDF-SHA256 with an empty context (`HKDF.py` 43-84). Past RFC 5869's 255 blocks,
+/// which a link MTU above 8 KiB needs, RNS wraps the one-byte block counter rather than
+/// refusing, so this does too; below that it is plain HKDF.
+fn mask(salt: &[u8], ikm: &[u8], len: usize) -> Vec<u8> {
+    use hmac::{Hmac, KeyInit, Mac};
+    let (prk, _) = Hkdf::<Sha256>::extract(Some(salt), ikm);
+    let mut out = Vec::with_capacity(len + 32);
+    let mut block: Vec<u8> = Vec::new();
+    let mut counter = 1_u8;
+    while out.len() < len {
+        let mut mac =
+            <Hmac<Sha256> as KeyInit>::new_from_slice(&prk).expect("HMAC takes any key length");
+        mac.update(&block);
+        mac.update(&[counter]);
+        block = mac.finalize().into_bytes().to_vec();
+        out.extend_from_slice(&block);
+        counter = counter.wrapping_add(1);
+    }
+    out.truncate(len);
+    out
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use alloc::vec;
 
     const LOGICAL_HEX: &str =
         "0800c3421c254bb3b6e25d8040f395d960f900726574696e75652d696661632d66697874757265";
@@ -431,6 +450,22 @@ mod tests {
             .unwrap()
             .seal(&logical);
         assert_eq!(alone, with_none);
+    }
+
+    #[test]
+    fn the_mask_is_hkdf_and_wraps_its_counter_past_255_blocks() {
+        let mut expected = vec![0_u8; 255 * 32];
+        Hkdf::<Sha256>::new(Some(b"salt"), b"ikm")
+            .expand(&[], &mut expected)
+            .unwrap();
+        let long = mask(b"salt", b"ikm", 300 * 32);
+        assert_eq!(long[..255 * 32], expected[..]);
+        // Block 256 takes counter 0; RNS's `_counters[255]` is `256 % 256`.
+        assert_ne!(long[255 * 32..256 * 32], long[..32]);
+        let ifac = oracle_ifac();
+        let mut logical = vec![0x55_u8; 16_384];
+        logical[0] = 0x08;
+        assert_eq!(ifac.open(&ifac.seal(&logical).unwrap()).unwrap(), logical);
     }
 
     #[test]

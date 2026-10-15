@@ -1,9 +1,10 @@
-"""Requests sent as Resources: a 2 KiB request each way with stock RNS.
+"""Requests sent as Resources: a 32 KiB request each way with stock RNS.
 
 A request whose packed form exceeds the link MDU goes as a Resource flagged as a request
 (`u`, 0x08), its `q` the truncated hash of the packed request, which is also the request
 id the response names (Link.py 473-510, 885-895, 1036-1043). Each side here sends a
-2 KiB request to a handler that echoes it, so the response travels as a Resource too.
+32 KiB request to a handler that echoes it, so the response travels as a Resource too: past
+the link MDU even at the 16384-byte MTU a TCP link autoconfigures.
 
 Retinue's side is the public Endpoint API (`library_oracle request-resource`):
 `ResourceSession::request` on a link to RNS, and `receive_raw_request` plus
@@ -27,7 +28,7 @@ import time
 from library_gate import Retinue, payload, start_rns, supervise, verdict
 
 TITLE = "LIBRARY REQUEST RESOURCE INTEROP"
-LENGTH = 2048
+LENGTH = 32 * 1024
 SEED = 0x2B16
 REQUEST_SEED = bytes([0x5D] * 64)  # RNS_BIG_REQUEST_SEED in examples/library_oracle/main.rs
 RETINUE_SEED = bytes([0x47] * 64)  # IDENTITY_SEED in examples/library_oracle/main.rs
@@ -112,7 +113,7 @@ def main() -> int:
         out_id = retinue.find(r"OUT_REQUEST_ID ([0-9a-f]{32})")
         print("\n" + "=" * 72)
         print(f"advertisements: to Retinue {adverts_in}, to RNS {adverts_out}")
-        ok = verdict("RNS served Retinue's 2 KiB request whole", state.get("served") == RETINUE_DATA)
+        ok = verdict("RNS served Retinue's 32 KiB request whole", state.get("served") == RETINUE_DATA)
         ok &= verdict("RNS named Retinue's request by its packed hash",
                       out_id is not None and state.get("served_id", b"").hex() == out_id.group(1))
         ok &= verdict("Retinue received the echo", retinue.find(r"OUT_REQUEST_OK \d+") is not None)
