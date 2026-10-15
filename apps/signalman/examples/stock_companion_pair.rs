@@ -37,7 +37,7 @@ async fn connect(
     realm: &str,
     journal: PathBuf,
 ) -> Result<Radio, Box<dyn Error>> {
-    let serial = serial2_tokio::SerialPort::open(port, 115_200)?;
+    let serial = signalman::radio_comms::companion::open_port(port).await?;
     #[cfg(unix)]
     let exclusive = {
         let file = std::fs::OpenOptions::new()
