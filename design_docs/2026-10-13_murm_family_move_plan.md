@@ -1490,3 +1490,31 @@ less 17 dB with no PA gain) and its damaged receptions. The GC1109 truth table
 and PA gain are not on the schematic, and they must be known before any change
 drives `PA_CSD`/`PA_CPS`/`Vfem`. With the PA engaged, today's 17 dBm SX1262
 setting could radiate far more than intended.
+11. *GC1109 data.* Put: measure at low power, find the datasheet, or stop.
+    Owner chose **"Find GC1109 datasheet"**, then approved downloading it.
+
+**GC1109 datasheet facts.** Source: GEO-CHIP (地芯科技) Preliminary Data Sheet
+Rev0.9.2, `https://www.geochipinc.com/uploads/23940615_1756826539.pdf`,
+546,296 bytes, SHA-256
+`08759546915c53283b9bbc4fc4a4701050758c77ee85be43eaaefc458e8beda5`. Read as
+data and not committed.
+
+- Control logic (Table 4, VBAT and VCC on): Shutdown CSD=0. Receive LNA CSD=1
+  CTX=0. Transmit bypass CSD=1 CTX=1 CPS=0. Transmit PA CSD=1 CTX=1 CPS=1.
+- Sequencing (Table 3 notes): VBAT before CSD/CPS/CTX, and control levels must
+  not exceed VBAT.
+- PA: 30 dB small-signal gain, 30 dBm saturated. Absolute maximum TX-port input
+  is +5 dBm in PA mode and +20 dBm in bypass. Bypass insertion loss is about
+  1 dB.
+- RX: 17 dB gain, 2 dB NF, input P1dB −10 dBm, IIP3 −2 dBm. Absolute maximum
+  at the antenna port is +10 dBm.
+
+On the V4.2 the CTX line is SX1262 DIO2. The vendored lora-phy's `Sx1262`
+variant keeps the trait default `use_dio2_as_rfswitch() = true`, so DIO2 is
+high during TX and low in RX. The current firmware leaves CSD at its 10 kΩ
+pull-down, so the module is in **shutdown** for both RX and TX.
+
+Antenna power is the SX1262 setting − 17 dB (π pad) + 30 dB in PA mode, or
+− 1 dB in bypass. The station's 17 dBm would be +30 dBm at the antenna in PA
+mode, and the +17 dBm reaching the module's TX input would exceed its +5 dBm
+absolute maximum. In bypass the same setting gives about −1 dBm.
