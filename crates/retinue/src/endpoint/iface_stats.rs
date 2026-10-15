@@ -224,11 +224,7 @@ impl Endpoint {
         })?;
         counters.held_announces = shared.held_announces.lock().unwrap().held(id) as u64;
         let now = shared.announce_admission_now_ms();
-        counters.burst_active = shared
-            .announce_admission
-            .lock()
-            .unwrap()
-            .bursting(id, now);
+        counters.burst_active = shared.announce_admission.lock().unwrap().bursting(id, now);
         Some(counters)
     }
 }

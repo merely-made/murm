@@ -67,6 +67,18 @@ impl HwMtu {
         }
     }
 
+    /// Refuse an MTU below the protocol MTU, as RNS refuses a small `fixed_mtu`
+    /// (`TCPInterface.py` 111-112), or past what a link can signal.
+    pub(super) fn checked(self) -> std::io::Result<Self> {
+        if self.mtu() < MTU || self.mtu() > link::MAX_MTU as usize {
+            return Err(std::io::Error::new(
+                std::io::ErrorKind::InvalidInput,
+                "hardware MTU is below the protocol MTU or past what a link can signal",
+            ));
+        }
+        Ok(self)
+    }
+
     /// Whether links learn this MTU (`Transport.py` 3173-3178).
     pub fn signalled(self) -> bool {
         !matches!(self, Self::Protocol)

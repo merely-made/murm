@@ -320,7 +320,9 @@ impl AnnounceAdmission {
         allow(dead_code, reason = "used by the endpoint")
     )]
     pub(crate) fn bursting(&self, id: u32, now: u64) -> bool {
-        self.interfaces.get(&id).is_some_and(|r| now < r.burst_until)
+        self.interfaces
+            .get(&id)
+            .is_some_and(|r| now < r.burst_until)
     }
 
     pub(crate) fn note_held(&mut self, id: u32) {

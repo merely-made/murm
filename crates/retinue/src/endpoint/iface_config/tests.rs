@@ -277,6 +277,47 @@ fn backbone_reads_its_aliases_and_flap_keys() {
 }
 
 #[test]
+fn tcp_hardware_mtus_follow_rns() {
+    use crate::endpoint::HwMtu;
+    let client = |extra: &str| {
+        let text = format!(
+            "    type = TCPClientInterface\n    target_host = h\n    target_port = 1\n{extra}"
+        );
+        match section(&text).unwrap().carrier {
+            Carrier::TcpClient { client, .. } => client.hw_mtu,
+            _ => panic!("TCP client"),
+        }
+    };
+    assert_eq!(
+        client(""),
+        HwMtu::Auto {
+            bitrate: 10_000_000
+        }
+    );
+    assert_eq!(
+        client("    bitrate = 1000000\n"),
+        HwMtu::Auto { bitrate: 1_000_000 }
+    );
+    assert_eq!(
+        client("    fixed_mtu = 1064\n    bitrate = 1000000\n"),
+        HwMtu::Fixed(1064)
+    );
+    let backbone = |extra: &str| {
+        section(&format!("    type = BackboneInterface\n{extra}"))
+            .unwrap()
+            .carrier
+    };
+    assert!(matches!(
+        backbone("    remote = hub\n    port = 1\n"),
+        Carrier::TcpClient { client, .. } if client.hw_mtu == HwMtu::Auto { bitrate: 100_000_000 }
+    ));
+    assert!(matches!(
+        backbone("    listen_on = 127.0.0.1\n    port = 1\n"),
+        Carrier::TcpServer { policy, .. } if policy.hw_mtu == Some(HwMtu::Auto { bitrate: 100_000_000 })
+    ));
+}
+
+#[test]
 fn out_of_range_values_are_ignored_as_rns_does() {
     let settings = tcp_client(concat!(
         "    bitrate = -1\n    ifac_size = -8\n    networkname = n\n",
