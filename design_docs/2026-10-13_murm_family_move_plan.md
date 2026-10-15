@@ -1426,3 +1426,26 @@ variants are not a source: Prns was withdrawn as a reference on 2026-09-26.
    built with `--ignore-rust-version`. Owner chose **"Update via espup"**:
    install a newer esp toolchain so V4 builds meet the floor without the
    override.
+
+**A/B 1 result (2026-10-14).** COM6 at `txpower = 2` arrived 3–4 dB lower (the
+witness heard −72/−73 instead of −69, and COM7 −57/−58 instead of −55). COM7
+received 13 of 20 COM6 frames, and its counters moved by exactly Δrxok=13 and
+Δrxbad=7. Every miss was a damaged reception, at a higher rate than run 8's
+2 of 14 at 7 dBm. Lower power did not reduce damage, so receiver overload is
+unlikely. COM6 is back at 7 dBm.
+
+**espup result.** `espup update --targets esp32s3` installed Xtensa Rust
+1.97.0.0 (`rustc 1.97.0-nightly 2026-07-08`), the newest esp-rs release it
+offers. V4 builds still refuse without the override: radio-face, radio-hand,
+retinue, selvage, seneschal and tulle-heltec-v4-phy require 1.97.1.
+
+8. *MSRV gap* (amends ruling 7). Put: the newest esp toolchain is 1.97.0, below
+   the 1.97.1 floor. Options: override on esp 1.97.0, lower the MSRV to 1.97.0,
+   or wait for esp-rs ≥1.97.1. Owner chose **"Override on esp 1.97.0"**: build
+   bench V4 images on the new toolchain with `--ignore-rust-version`, recorded
+   as one patch below the floor, until esp-rs ships ≥1.97.1.
+9. *A/B 2 separation.* Put: move COM6 and COM7 about 2 m apart without
+   unplugging. Owner: "They cannot be moved 2m apart without unplugging them.
+   That’s like six feet, the cables aren’t even long enough". *Reading, not
+   ruled:* the separation test as put is not possible on this bench. It goes
+   back to the owner with alternatives.
