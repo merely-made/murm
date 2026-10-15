@@ -32,6 +32,9 @@ fn carrier_of(transport: TransportKind) -> CarrierKind {
         // notochord has no WebRTC-specific vocabulary yet either, and
         // inventing a variant would claim knowledge that crate does not have.
         TransportKind::WebRtc => CarrierKind::Other,
+        // An in-process door is no carrier notochord names: `Other`, as a
+        // local door's facts have always said.
+        TransportKind::InProcess => CarrierKind::Other,
     }
 }
 
@@ -197,6 +200,15 @@ mod tests {
         );
         assert_eq!(facts.ingress.local_interface, None);
         assert_eq!(facts.ingress.shared_link, Some([0x11; 16]));
+    }
+
+    #[test]
+    fn in_process_facts_are_a_local_doors_facts() {
+        let facts = accepted(None, IngressContext::in_process([0x33; 16])).session_facts();
+        assert_eq!(facts.transport, CarrierKind::Other);
+        assert_eq!(facts.authenticated_initiator, None);
+        assert_eq!(facts.ingress.local_interface, None);
+        assert_eq!(facts.ingress.shared_link, Some([0x33; 16]));
     }
 
     #[test]
