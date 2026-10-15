@@ -70,9 +70,11 @@ impl Default for TncConfig {
     }
 }
 
-/// Reassembles KISS frames as (command with its port nibble stripped, payload).
-#[derive(Debug, Default)]
+/// Reassembles KISS frames as (command with its port nibble stripped, payload), dropping
+/// any longer than `limit`.
+#[derive(Debug)]
 struct Deframer {
+    limit: usize,
     command: Option<u8>,
     buf: Vec<u8>,
     escaped: bool,
@@ -81,13 +83,24 @@ struct Deframer {
 }
 
 impl Deframer {
+    fn new(limit: usize) -> Self {
+        Self {
+            limit,
+            command: None,
+            buf: Vec::new(),
+            escaped: false,
+            poisoned: false,
+            in_frame: false,
+        }
+    }
+
     /// Feed one byte; a completed frame comes back as `(command, payload)`.
     fn push(&mut self, byte: u8) -> Option<(u8, Vec<u8>)> {
         if byte == FEND {
             let complete = self.in_frame && !self.poisoned;
             let command = self.command.filter(|_| complete);
             let frame = command.map(|c| (c, core::mem::take(&mut self.buf)));
-            *self = Self::default();
+            *self = Self::new(self.limit);
             self.in_frame = true;
             return frame;
         }
@@ -114,7 +127,7 @@ impl Deframer {
             }
         };
         // Oversize frames are dropped, not truncated as RNS does (`KISSInterface.py` 320).
-        if self.buf.len() == HW_MTU {
+        if self.buf.len() == self.limit {
             self.poisoned = true;
         } else {
             self.buf.push(byte);
@@ -138,7 +151,7 @@ impl KissTnc {
         Self {
             config,
             beacon,
-            deframer: Deframer::default(),
+            deframer: Deframer::new(HW_MTU),
             ready: false,
             locked_at_ms: 0,
         }
@@ -162,6 +175,13 @@ impl KissTnc {
         .iter()
         .flat_map(|&(command, value)| encode(command, &[value]))
         .collect()
+    }
+
+    /// Deframe received frames up to `limit` bytes rather than [`HW_MTU`], for a framing
+    /// that adds a header (AX.25).
+    pub fn with_frame_limit(mut self, limit: usize) -> Self {
+        self.deframer = Deframer::new(limit);
+        self
     }
 
     /// Whether the next frame may go out now.
@@ -196,7 +216,7 @@ impl KissTnc {
     /// Discard a partial frame, as RNS does after 100 ms without bytes (`KISSInterface.py`
     /// 342-348).
     pub fn reset_partial(&mut self) {
-        self.deframer = Deframer::default();
+        self.deframer = Deframer::new(self.deframer.limit);
     }
 
     /// Run the timers: unlock a TNC that never answered READY, then return the beacon frame

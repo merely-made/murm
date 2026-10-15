@@ -6,10 +6,13 @@
 //! The framing (`hdlc`) is sans-io and needs only the `alloc` feature. The TCP interface
 //! (`tcp`) needs a runtime and sits behind the `tokio` feature, which is on by default.
 //! The datagram carriers are `udp` (`tokio`) and `auto`, RNS's AutoInterface, which with
-//! `netinfo` needs the `auto` feature on a unix host.
+//! `netinfo` needs the `auto` feature on a unix host. `serial` carries HDLC, KISS and AX.25
+//! (`ax25`) over a tty; `tulle` bridges to an RNode on a port or over TCP.
 
 #[cfg(all(feature = "auto", unix))]
 pub mod auto;
+#[cfg(feature = "alloc")]
+pub mod ax25;
 #[cfg(feature = "alloc")]
 pub mod beacon;
 #[cfg(feature = "alloc")]

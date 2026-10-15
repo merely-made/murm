@@ -1,21 +1,28 @@
-//! Bridge between an endpoint raw interface and a Tulle packet radio.
+//! Bridge between an endpoint raw interface and a Tulle packet radio, and RNS's
+//! RNodeInterface on top of it ([`attach_rnode`]).
 
 use alloc::format;
 use alloc::string::ToString;
+use alloc::sync::Arc;
 use alloc::vec::Vec;
 
 use std::future::Future;
 use std::io;
 use std::time::Duration;
 
+use tokio::sync::watch;
 use tokio::time::{Instant, sleep_until};
+use tulle::airtime::AirtimeBudget;
 use tulle::lora::LoRaParams;
 use tulle::radio_io::PacketRadio;
+use tulle::rnode::{HW_MTU, RNodeConfig, Telemetry};
 use tulle::serial::TransmitError;
+use tulle::serial::{PumpError, PumpStatus, RNodePort, RNodeSerialLink, SerialPumpConfig};
 
 use super::beacon::Beacon;
 use crate::announce_admission::AnnounceIngressPolicy;
 use crate::endpoint::{Endpoint, Interface, InterfaceId};
+use crate::ifac::Ifac;
 use crate::packet::PacketType;
 
 /// How often a station ID that a reopening radio dropped is offered again.
@@ -148,8 +155,7 @@ pub fn lora_bitrate(params: &LoRaParams) -> u64 {
         Cr47 => 7,
         Cr48 => 8,
     };
-    let sf = u64::from(params.spreading_factor);
-    sf * 4 * u64::from(params.bandwidth_hz) / (cr << sf)
+    tulle::rnode::bitrate(params.spreading_factor, cr, params.bandwidth_hz).round() as u64
 }
 
 /// Apply RNS's RNode interface policy to `id`: the bitrate from `params`, and no announce
@@ -161,6 +167,83 @@ pub fn apply_rnode_policy(endpoint: &Endpoint, id: InterfaceId, params: &LoRaPar
     };
     endpoint.set_interface_bitrate(id, Some(lora_bitrate(params)))
         && endpoint.set_interface_ingress_policy(id, Some(exempt))
+}
+
+/// An RNode attached to an endpoint. Spawn `run`; it ends when the endpoint closes or a
+/// frame cannot be carried.
+pub struct RNodeCarrier<F> {
+    pub id: InterfaceId,
+    pub status: watch::Receiver<PumpStatus>,
+    pub telemetry: watch::Receiver<Telemetry>,
+    pub run: F,
+}
+
+/// Attach the RNode at `port`, RNS's `port` value (a device path or `tcp://host`), as one
+/// supervised interface that reopens after any failure (`RNodeInterface.py` 170-193,
+/// 1175-1187). It takes RNS's RNode policy ([`apply_rnode_policy`]); each time the radio
+/// comes online the bitrate follows the device's echoed SF, CR and bandwidth (698-704).
+pub fn attach_rnode(
+    endpoint: &Arc<Endpoint>,
+    port: &RNodePort,
+    rnode: RNodeConfig,
+    budget: AirtimeBudget,
+    pump: SerialPumpConfig,
+    ifac: Option<Ifac>,
+    beacon: Option<Beacon>,
+) -> io::Result<RNodeCarrier<impl Future<Output = io::Result<()>> + Send + 'static>> {
+    let radio =
+        RNodeSerialLink::supervise_port(port, rnode, budget, pump).map_err(|e| match e {
+            PumpError::Io(error) => error,
+            other => io::Error::other(other.to_string()),
+        })?;
+    let interface = match ifac {
+        Some(ifac) => endpoint.attach_interface_with_ifac(HW_MTU, ifac)?,
+        None => endpoint.attach_interface_with_frame_limit(HW_MTU)?,
+    };
+    let id = interface.id();
+    apply_rnode_policy(endpoint, id, &rnode.params);
+    let (status, telemetry) = (radio.watch_status(), radio.watch_telemetry());
+    let weak = Arc::downgrade(endpoint);
+    let set = move |bps| {
+        weak.upgrade()
+            .is_some_and(|ep| ep.set_interface_bitrate(id, Some(bps)))
+    };
+    let echoed = follow_echoed_bitrate(status.clone(), telemetry.clone(), set);
+    let drive = drive_with_beacon(interface, radio, beacon);
+    let run = async move {
+        tokio::pin!(drive);
+        tokio::select! {
+            result = &mut drive => result,
+            () = echoed => drive.await,
+        }
+    };
+    Ok(RNodeCarrier {
+        id,
+        status,
+        telemetry,
+        run,
+    })
+}
+
+/// `set` the echoed bitrate whenever the radio comes online, until `set` fails or the radio
+/// stops.
+async fn follow_echoed_bitrate(
+    mut status: watch::Receiver<PumpStatus>,
+    telemetry: watch::Receiver<Telemetry>,
+    mut set: impl FnMut(u64) -> bool,
+) {
+    loop {
+        let online = matches!(*status.borrow_and_update(), PumpStatus::Online { .. });
+        let bitrate = telemetry.borrow().bitrate;
+        if let (true, Some(bps)) = (online, bitrate)
+            && !set(bps.round() as u64)
+        {
+            return;
+        }
+        if status.changed().await.is_err() {
+            return;
+        }
+    }
 }
 
 #[cfg(test)]
@@ -256,6 +339,30 @@ mod tests {
             "one announce, then the beacon once back online"
         );
         assert_eq!(got[1], b"N0CALL");
+    }
+
+    #[tokio::test]
+    async fn the_echoed_bitrate_is_set_each_time_the_radio_comes_online() {
+        let (status_tx, status) = watch::channel(PumpStatus::Initializing);
+        let (telemetry_tx, telemetry) = watch::channel(Telemetry::default());
+        let set = Arc::new(Mutex::new(Vec::new()));
+        let seen = Arc::clone(&set);
+        let follow = tokio::spawn(follow_echoed_bitrate(status, telemetry, move |bps| {
+            seen.lock().unwrap().push(bps);
+            true
+        }));
+        let online = PumpStatus::Online { firmware: None };
+        telemetry_tx.send_modify(|t| t.bitrate = Some(tulle::rnode::bitrate(12, 8, 125_000)));
+        tokio::task::yield_now().await;
+        status_tx.send(online.clone()).unwrap();
+        tokio::time::sleep(Duration::from_millis(20)).await;
+        status_tx.send(PumpStatus::Fault("gone".into())).unwrap();
+        telemetry_tx.send_modify(|t| t.bitrate = Some(21_875.0));
+        status_tx.send(online).unwrap();
+        tokio::time::sleep(Duration::from_millis(20)).await;
+        drop(status_tx);
+        follow.await.unwrap();
+        assert_eq!(*set.lock().unwrap(), [183, 21_875]);
     }
 
     #[test]
