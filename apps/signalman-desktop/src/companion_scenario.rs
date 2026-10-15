@@ -7,6 +7,7 @@ use crate::{
     views::{Child, Logic},
 };
 use genet_probe::ProbeSnapshot;
+use layout_dom_api::LayoutDom;
 use signalman::comms_adapter::comms::{DeliveryStatus, Direction, ProtocolKind};
 use std::cell::Cell;
 
@@ -133,6 +134,10 @@ impl mesquite::Product for Product {
             .with_field("protocol_ack", ack.to_string())
             .with_field("incoming", rx.to_string())
             .with_field("captures", captures.to_string())
+            .with_field("port", ctx.runner.state().companion_port.text())
+            .with_field("realm", ctx.runner.state().companion_realm.text())
+            .with_field("journal", ctx.runner.state().companion_journal.text())
+            .with_field("channel", ctx.runner.state().companion_channel.text())
             .with_field(
                 "protocol_selected",
                 (ctx.runner.state().message_protocol == self.protocol).to_string(),
@@ -140,10 +145,36 @@ impl mesquite::Product for Product {
     }
     fn app_step(
         &mut self,
-        _: &mut Context<'_>,
+        ctx: &mut Context<'_>,
         _: mesquite::Checkpoints<'_>,
         line: &str,
     ) -> Result<(), String> {
+        if let Some(target) = line.strip_prefix("key tab-until data-text-field=") {
+            for _ in 0..200 {
+                let matched = ctx.runner.focus().is_some_and(|node| {
+                    let dom = ctx.runner.dom();
+                    let dom = dom.borrow();
+                    let mut cursor = Some(node);
+                    while let Some(current) = cursor {
+                        if dom.attributes(current).any(|a| {
+                            a.name.local.as_ref() == "data-text-field" && a.value == target
+                        }) {
+                            return true;
+                        }
+                        cursor = dom.parent(current);
+                    }
+                    false
+                });
+                if matched {
+                    return Ok(());
+                }
+                ctx.runner
+                    .dispatch_key(cambium::KeyEvent::new(cambium::Key::Named(
+                        cambium::NamedKey::Tab,
+                    )));
+            }
+            return Err(format!("Tab never reached text field {target}"));
+        }
         self.condition = Some(match line {
             "await companion connected" => Condition::Connected,
             "await companion stopped" => Condition::Stopped,

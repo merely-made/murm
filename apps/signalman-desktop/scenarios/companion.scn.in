@@ -1,0 +1,58 @@
+# Filled by run_companion.ps1 after identifying both stock radios.
+log Signalman stock @@PROTOCOL@@ companion through production controls
+zoom @@ZOOM@@
+settle 4
+click role:button Messages
+click role:button @data-message-protocol=@@LABEL@@
+key tab-until data-text-field=companion-port
+input-text @@PORT@@
+key tab-until data-text-field=companion-realm
+input-text @@REALM@@
+key tab-until data-text-field=companion-journal
+input-text @@JOURNAL@@
+key tab-until data-text-field=companion-channel
+input-text @@CHANNEL@@
+assert snap port == @@PORT@@
+assert snap realm == @@REALM@@
+assert snap journal == @@JOURNAL@@
+assert snap channel == @@CHANNEL@@
+capture form
+click role:button Connect companion
+await companion connected
+wait 1800
+assert snap connected == true
+assert snap protocol_selected == true
+capture connected
+key tab-until data-text-field=message-recipient
+input-text @@PEER@@
+key tab-until data-text-field=message-draft
+input-text @@TAG@@
+click role:button Queue text
+await companion acknowledged
+wait 1800
+assert snap protocol_ack == 1
+await companion received
+wait 1800
+assert snap incoming == 1
+capture roundtrip
+click role:button Disconnect companion
+await companion stopped
+wait 600
+assert snap connected == false
+assert snap protocol_ack == 1
+assert snap incoming == 1
+capture disconnected
+click role:button Connect companion
+await companion connected
+wait 1800
+assert snap connected == true
+assert snap protocol_ack == 1
+assert snap incoming == 1
+capture reconnected
+click role:button Disconnect companion
+await companion stopped
+wait 600
+assert snap connected == false
+assert snap protocol_ack == 1
+assert snap incoming == 1
+capture stopped

@@ -1,7 +1,7 @@
 # Murm family and repository move
 
 **Date:** 2026-10-13
-**Status:** In progress (2026-10-14). The native implementation import and named
+**Status:** In progress (2026-10-15). The native implementation import and named
 MOVE3 consumer adoption are published. MOVE4 renamed the continuing Retinue
 repository to Murm with the same repository identity and refs; canonical URL
 validation passed and the canonical URLs are published on main. Crate names and history remain
@@ -13,7 +13,10 @@ adoptions are published; Signalman's final supplier cohort is qualified.
 Post-cutover R1 implements Signalman's LXMF software path and initial R2
 recorded-delivery diagnostics; R3 supplies resident radio Comms and R4 adds
 stock Meshtastic/MeshCore companion actors and attended desktop controls.
-Physical/live qualification retains its gates below.
+R5 records Windows Meshtastic/MeshCore stock-pair and native functional
+acceptance, with a 500 ms MeshCore pair reconnect fixture and verified Tulle
+restoration. Immediate MeshCore reopen, UI cleanup and host-personality stack
+legs retain their gates below.
 
 **Canonical home:** this repository owns the migration. Mere and Genet should
 cite this plan rather than keep another migration specification. The canonical
@@ -1731,3 +1734,109 @@ matched the recipient text and the protocol ACK (3041, 3284, 2969 and 3258 ms),
 and `reconnect_history_preserved` was true. The receipt is under ignored
 `validation/results/stock-baseline-20261014/pair-mt-5/`. The UI lane, MeshCore
 and the Tulle restore are next.
+
+#### R5 Windows desktop scenario (2026-10-15, stock functional acceptance recorded)
+
+Resumed from clean `5052c930260`; the port-reopen checkpoint is committed.
+Fresh production-actor probes still identify COM6 as `f66afb28` and COM7 as
+`f66afa64`, both Meshtastic `2.7.26.54e0d8d`; their USB parents still end in
+`FB:28` and `FA:64`. Probe receipts are under
+`validation/results/stock-baseline-20261014/ui-mt-preflight-COM{6,7}/`.
+
+The missing native fixture now has a reusable template,
+`apps/signalman-desktop/scenarios/companion.scn.in`, and an attended Windows
+runner, `run_companion.ps1` in the same directory. The runner requires explicit
+protocol, distinct identified ports and full public addresses, configured realm
+and a fresh output directory. It records binary/fixture hashes, starts the real
+desktop and `stock_companion_pair peer`, supervises an absolute 180-second
+maximum, closes its own processes, restores its environment and retains failed
+trials. Message/appearance stores are local to the trial. The scenario covers
+form values, Connect, Queue, matched protocol ACK and tagged return, Disconnect,
+reconnect/history and final Disconnect with six native captures. Completion
+still requires visual review of those captures.
+
+The initial runner attempt exposed empty environment variables being inherited
+as configured scenario paths; clearing them now removes the variables. Two
+further attempts retained blank-field captures: the companion lane lacked the
+appearance lane's Tab helper, and clicking a wide field wrapper centered outside
+its narrower textbox. The companion lane now traverses real keyboard focus to
+the marked field and exposes filled form values for scenario assertions. It
+does not insert identities, radio events or journal facts. All attempted trial
+directories remain under the ignored stock-baseline evidence directory.
+
+Both locked offline Rust 1.99.0 executable builds passed, using the existing
+desktop target with development debug info disabled (3m11s for the reopened
+companion build, 1m09s for the scenario helper). Optional unused-patch warnings
+remain. Strict desktop library/binary Clippy also passed (1m47s).
+
+**Meshtastic native functional acceptance: passed.** The keyboard-driven run
+at `validation/results/stock-baseline-20261014/ui-mt-keyboard/` completed with
+both processes at exit zero. Its scenario receipt reports `RESULT ok`, six
+captures, zero blank frames and six distinct digests. All six native captures
+were visually reviewed: actual form values, connection state, the tagged
+incoming text and outgoing protocol ACK history survive disconnect/reconnect.
+The public source/binary/fixture/evidence hash ledger is
+`testing/receipts/stock-companions/windows-meshtastic.json`. This is functional
+acceptance; the view still has duplicate reconnect diagnostics and a stale
+compose notice, and the outgoing row reaches the viewport's lower edge.
+The serial/native processes were released. The old R4 software receipt remains
+frozen at its original source.
+
+**MeshCore in progress.** Both V4s were flashed with the retained, verified
+official MeshCore 1.17.1 USB merged image and pinned official espflash 4.5.0.
+Both production probes identify `v1.17.1-d929643`, model `Heltec V4.3 OLED`,
+build `14-Aug-2026`, companion API 13. The bench names are Signalman bench 1/2,
+with 906.875 MHz, BW 250 kHz, SF10, CR4/5 and 0 dBm read back on both.
+Distinct full public keys were read from the devices and reciprocal contacts
+were added and read back through the public companion API. A clock-set
+refusal on COM7 was retained; reading its clock before choosing a later value
+resolved it.
+
+**MeshCore stock traffic and reconnect.** The first manually seeded-contact
+attempt timed out with zero receives and `HandedToRadio`. Exchanging each
+stock-generated public business card (`CMD_EXPORT_CONTACT` / `CMD_IMPORT_CONTACT`)
+and sending self adverts made both directions pass. These are the documented
+[public companion operations](https://github.com/meshcore-dev/MeshCore/wiki/Companion-Radio-Protocol).
+This does not isolate which of contact import or adverts was decisive.
+Two immediate-reconnect pair runs then failed, one on contact refresh and one
+on the identity handshake, after two successful exchanges each. Their failed
+receipts remain under `pair-mc-business-cards/` and `pair-mc-reconnect/`.
+
+The pair bench now accepts optional `[channel] [reconnect-delay-ms]` arguments
+for pair mode; the delay defaults to zero and is bounded at 5000 ms, recorded
+in its receipt, and applied after closing both ports. This changes the bench's
+explicit timing input, not production connection recovery. With `0 500`, the
+full MeshCore pair passed four recipient-text/protocol-ACK matches in 1157,
+1068, 1166 and 1050 ms, with exact journal history preserved across reconnect.
+Receipt: `validation/results/stock-baseline-20261014/pair-mc-delay/receipt.json`.
+Immediate reconnect remains unqualified; the passing 500 ms fixture does not
+establish its cause or a production retry policy.
+
+**MeshCore native functional acceptance: passed twice.** The same production
+controls and journal assertions passed at default zoom (`ui-mc/`) and at an
+explicit 0.75 zoom (`ui-mc-fit/`), with both processes at exit zero. All six
+captures from each run were reviewed. The latter keeps both full-key history
+rows and their delivery labels entirely visible after reconnect. The runner
+exposes zoom and window dimensions as inputs; its default zoom remains 1.0.
+`testing/receipts/stock-companions/windows-meshcore.json` freezes the final
+native fixture, source/binary/evidence hashes, conditional pair result and
+retained failures. It records the same duplicate diagnostics/stale compose
+notice as the Meshtastic run. Strict example Clippy, root/desktop formatting,
+PowerShell parsing, distinct-port refusal and out-of-range delay refusal pass.
+
+**Tulle restored.** Both V4s were reflashed using the retained FEM-enabled ELF,
+SHA-256 `ba10d49e8a38fdef95c5204b912dec27970bbf96b7846e50006822d02cac1c01`,
+with the pinned official espflash 4.5.0 helper. Both transfers returned zero.
+Post-flash read-only status/region/channel probes verify Tulle 0.0.1,
+`image=v4-modem-usb`, SX1262 online, 906.875 MHz and US915. COM6 retains
+`channel=rnode`, identity slot A seq 10; COM7 retains `channel=modem`, slot B
+seq 5. The firmware reports `build=unidentified`, so host ELF/transfer hashes
+and live Tulle diagnostics are the evidence, not an on-board source-revision
+claim. Restore logs and status receipts remain under the stock-baseline
+directory. COM10/T114 was not modified. All owned radio/native/helper processes
+are closed. Existing repository targets were reused; no isolated target,
+Cargo home or worktree was created.
+
+Remaining gates: MeshCore immediate reconnect; duplicate diagnostics/stale
+compose notice and broader UI appearance; Sennet/Tucket stack legs. These stock
+companion receipts do not qualify the host personalities over Tulle.

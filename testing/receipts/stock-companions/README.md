@@ -45,3 +45,32 @@ journal failure. Device acceptance is not recipient delivery; protocol ACKs
 are not authenticated/read receipts and Signalman does not verify Meshtastic
 PKI ACK proofs. Firmware/distribution/native/wire suppliers and prior frozen
 receipts are unchanged. GitHub Actions stays disabled.
+
+## Windows physical and native follow-up, 2026-10-15
+
+[Windows Meshtastic evidence](windows-meshtastic.json) records the R5 native
+functional acceptance on two Heltec V4s with stock Meshtastic 2.7.26.54e0d8d.
+The production desktop controls connect, queue a unique message, observe its
+matched protocol ACK and a peer's tagged return, disconnect, reconnect with
+tagged history retained, and disconnect again. Both processes exit zero; all
+six nonblank native captures were visually reviewed. The receipt freezes source
+file, binary, fixture and local evidence hashes. Local captures and journals
+remain in the ignored evidence directory named there.
+
+[Windows MeshCore evidence](windows-meshcore.json) records the equivalent native
+run on stock MeshCore v1.17.1-d929643, at an explicit 0.75 zoom so both full-key
+history rows remain visible. All six captures were reviewed. The stock-pair
+baseline passes four text/ACK matches and exact reconnect history with an
+explicit 500 ms reconnect delay. Two immediate-reconnect attempts failed and
+remain recorded; immediate reconnect is unqualified. The bench's optional delay
+defaults to zero and changes no production recovery behavior.
+
+Both V4s were restored to the verified Tulle FEM image and answered US915 status
+probes: COM6 RNode, identity slot A seq 10; COM7 modem, slot B seq 5. The MeshCore
+ledger binds the restore image and local receipt hashes. All owned processes
+were closed; no isolated build directories were created.
+
+The views retain duplicate reconnect diagnostics and a stale compose notice;
+these receipts do not close a general appearance review or the Sennet/Tucket
+stack legs. The original R4 software qualification above remains frozen. The
+canonical plan's R5 Windows section records all bounds and remaining gates.
