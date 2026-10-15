@@ -108,16 +108,32 @@ impl RNode {
 
     /// Queue RNS's detect probe: DETECT, FW_VERSION, PLATFORM, MCU (`RNodeInterface.py`
     /// 490-494). Over TCP it doubles as the idle keepalive (1151-1154).
+    /// The four frames share their FENDs, byte for byte as stock writes them.
     pub fn keepalive(&mut self) {
-        self.queue_cmd(cmd::DETECT, &[DETECT_REQ]);
-        self.queue_cmd(cmd::FW_VERSION, &[0x00]);
-        self.queue_cmd(cmd::PLATFORM, &[0x00]);
-        self.queue_cmd(cmd::MCU, &[0x00]);
+        use kiss::FEND;
+        self.outbound.extend_from_slice(&[
+            FEND,
+            cmd::DETECT,
+            DETECT_REQ,
+            FEND,
+            cmd::FW_VERSION,
+            0x00,
+            FEND,
+            cmd::PLATFORM,
+            0x00,
+            FEND,
+            cmd::MCU,
+            0x00,
+            FEND,
+        ]);
     }
 
-    /// Forget everything about the last session, for a reopened port.
+    /// Forget the last session for a reopened port, keeping the telemetry last reported, as
+    /// stock keeps its `r_*` values across `reconnect_port`.
     pub fn reopen(&mut self) {
+        let telemetry = std::mem::take(&mut self.telemetry);
         *self = Self::with_config(self.config);
+        self.telemetry = telemetry;
     }
 
     fn queue_config(&mut self) {

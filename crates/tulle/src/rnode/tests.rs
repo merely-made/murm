@@ -259,18 +259,24 @@ fn telemetry_and_echoed_bitrate_are_kept() {
         rnode.is_online(),
         "telemetry never disturbs the radio state"
     );
+    rnode.reopen();
+    assert!(!rnode.is_online());
+    assert_eq!(
+        rnode.telemetry().csma.unwrap().cw_max,
+        6,
+        "a reopen keeps telemetry"
+    );
 }
 
 #[test]
 fn the_keepalive_is_rns_s_detect_probe() {
     let mut rnode = online(RNodeConfig::new(params()));
     rnode.keepalive();
-    // RNS shares FENDs between the four frames (`RNodeInterface.py` 490-494); KISS reads the
-    // same frames either way.
+    // Byte for byte as RNS writes it, FENDs shared (`RNodeInterface.py` 490-494).
     let stock = [
         0xC0, 0x08, 0x73, 0xC0, 0x50, 0x00, 0xC0, 0x48, 0x00, 0xC0, 0x49, 0x00, 0xC0,
     ];
-    assert_eq!(frames(&rnode.take_outbound()), frames(&stock));
+    assert_eq!(rnode.take_outbound(), stock);
 }
 
 #[test]

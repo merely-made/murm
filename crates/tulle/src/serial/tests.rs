@@ -219,7 +219,7 @@ async fn a_supervised_link_reopens_after_a_fatal_device_error() {
     pump.shutdown().await.unwrap();
 }
 
-#[tokio::test]
+#[tokio::test(start_paused = true)]
 async fn an_idle_link_sends_detect_keepalives_and_publishes_telemetry() {
     let (host, device) = tokio::io::duplex(4096);
     let emulator = tokio::spawn(emulate(device, false));
@@ -287,6 +287,59 @@ async fn an_unanswered_detect_ends_the_port_for_a_reopen() {
     assert!(matches!(fault, PumpStatus::Fault(m) if m.contains("DETECT")));
     tokio::time::sleep(Duration::from_millis(300)).await;
     assert!(opens.load(std::sync::atomic::Ordering::Relaxed) >= 2);
+    pump.shutdown().await.unwrap();
+}
+
+/// A device that answered DETECT once keeps its port through re-inits, however long the
+/// radio refuses to come on or slowly it answers.
+#[tokio::test]
+async fn a_re_init_after_a_detect_answer_keeps_the_port() {
+    let opens = std::sync::Arc::new(std::sync::atomic::AtomicUsize::new(0));
+    let counted = std::sync::Arc::clone(&opens);
+    let mut pump = RNodeSerialLink::spawn(
+        move || {
+            counted.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+            let (host, mut device) = tokio::io::duplex(4096);
+            tokio::spawn(async move {
+                let (mut deframer, mut read) = (kiss::Deframer::new(600), [0u8; 256]);
+                let mut refusals = 4;
+                while let Ok(count @ 1..) = device.read(&mut read).await {
+                    let mut frames = Vec::new();
+                    deframer.push(&read[..count], &mut frames);
+                    for mut frame in frames {
+                        match frame[0] {
+                            cmd::DETECT => {
+                                // Telemetry first wakes the host before the slow answer.
+                                device.write_all(&kiss::encode(&TEMP)).await.ok();
+                                tokio::time::sleep(Duration::from_millis(30)).await;
+                                frame[1] = crate::rnode::DETECT_RESP;
+                            }
+                            cmd::FW_VERSION => frame = vec![cmd::FW_VERSION, 1, 86],
+                            cmd::RADIO_STATE if refusals > 0 => {
+                                refusals -= 1;
+                                frame[1] = 0;
+                            }
+                            cmd::PLATFORM | cmd::MCU => continue,
+                            _ => {}
+                        }
+                        device.write_all(&kiss::encode(&frame)).await.ok();
+                    }
+                }
+            });
+            std::future::ready(Ok(host))
+        },
+        crate::rnode::RNodeConfig::new(params()),
+        AirtimeBudget::new(60_000, 1000),
+        SerialPumpConfig {
+            detect_timeout: Some(Duration::from_millis(150)),
+            reconnect: Duration::from_millis(50),
+            ..config()
+        },
+        true,
+    );
+    let online = tokio::time::timeout(Duration::from_secs(3), pump.wait_online()).await;
+    assert!(matches!(online, Ok(Ok(_))), "{online:?}");
+    assert_eq!(opens.load(std::sync::atomic::Ordering::Relaxed), 1);
     pump.shutdown().await.unwrap();
 }
 

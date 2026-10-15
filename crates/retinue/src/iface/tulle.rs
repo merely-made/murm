@@ -155,7 +155,8 @@ pub fn lora_bitrate(params: &LoRaParams) -> u64 {
         Cr47 => 7,
         Cr48 => 8,
     };
-    tulle::rnode::bitrate(params.spreading_factor, cr, params.bandwidth_hz).round() as u64
+    // Floored, as retinue has always set it; RNS keeps the float.
+    tulle::rnode::bitrate(params.spreading_factor, cr, params.bandwidth_hz) as u64
 }
 
 /// Apply RNS's RNode interface policy to `id`: the bitrate from `params`, and no announce
@@ -182,6 +183,10 @@ pub struct RNodeCarrier<F> {
 /// supervised interface that reopens after any failure (`RNodeInterface.py` 170-193,
 /// 1175-1187). It takes RNS's RNode policy ([`apply_rnode_policy`]); each time the radio
 /// comes online the bitrate follows the device's echoed SF, CR and bandwidth (698-704).
+///
+/// # Panics
+///
+/// Outside a Tokio runtime: the port's supervisor is spawned at once.
 pub fn attach_rnode(
     endpoint: &Arc<Endpoint>,
     port: &RNodePort,
@@ -236,7 +241,7 @@ async fn follow_echoed_bitrate(
         let online = matches!(*status.borrow_and_update(), PumpStatus::Online { .. });
         let bitrate = telemetry.borrow().bitrate;
         if let (true, Some(bps)) = (online, bitrate)
-            && !set(bps.round() as u64)
+            && !set(bps as u64)
         {
             return;
         }

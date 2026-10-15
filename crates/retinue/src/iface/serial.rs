@@ -74,16 +74,23 @@ pub enum Framing {
     Hdlc,
     /// RNS KISSInterface: KISS DATA frames to a TNC.
     Kiss(KissTnc),
-    /// RNS AX25KISSInterface: each packet behind an AX.25 UI header, through a TNC that has
-    /// no ID beacon. Build it with [`Framing::ax25`].
-    Ax25(KissTnc, Ax25Header),
+    /// RNS AX25KISSInterface: each packet behind an AX.25 UI header. Build it with
+    /// [`Framing::ax25`].
+    Ax25(Ax25Tnc),
+}
+
+/// A KISS TNC carrying AX.25 UI frames: no ID beacon, deframing up to [`ax25::MAX_FRAME`].
+#[derive(Debug)]
+pub struct Ax25Tnc {
+    tnc: KissTnc,
+    header: Ax25Header,
 }
 
 impl Framing {
-    /// AX.25 framing for `header`'s station, deframing up to [`ax25::MAX_FRAME`].
+    /// AX.25 framing for `header`'s station (`AX25KISSInterface.py` 60-65).
     pub fn ax25(header: Ax25Header, config: TncConfig) -> Self {
         let tnc = KissTnc::new(config, None).with_frame_limit(ax25::MAX_FRAME);
-        Self::Ax25(tnc, header)
+        Self::Ax25(Ax25Tnc { tnc, header })
     }
 
     /// Time the device gets after open before traffic (`SerialInterface.py` 144-150;
@@ -91,7 +98,7 @@ impl Framing {
     fn settle(&self) -> Duration {
         match self {
             Self::Hdlc => Duration::from_millis(500),
-            Self::Kiss(_) | Self::Ax25(..) => Duration::from_secs(2),
+            Self::Kiss(_) | Self::Ax25(_) => Duration::from_secs(2),
         }
     }
 
@@ -100,14 +107,14 @@ impl Framing {
     fn bitrate(&self, speed: u32) -> u64 {
         match self {
             Self::Hdlc => u64::from(speed),
-            Self::Kiss(_) | Self::Ax25(..) => kiss::BITRATE_GUESS,
+            Self::Kiss(_) | Self::Ax25(_) => kiss::BITRATE_GUESS,
         }
     }
 
     fn tnc(&mut self) -> Option<&mut KissTnc> {
         match self {
             Self::Hdlc => None,
-            Self::Kiss(tnc) | Self::Ax25(tnc, _) => Some(tnc),
+            Self::Kiss(tnc) | Self::Ax25(Ax25Tnc { tnc, .. }) => Some(tnc),
         }
     }
 }
@@ -243,7 +250,7 @@ where
                 let wire = match framing {
                     Framing::Hdlc => hdlc::frame(&bytes),
                     Framing::Kiss(tnc) => tnc.send(&bytes, now_ms()),
-                    Framing::Ax25(tnc, header) => tnc.send(&header.wrap(&bytes), now_ms()),
+                    Framing::Ax25(Ax25Tnc { tnc, header }) => tnc.send(&header.wrap(&bytes), now_ms()),
                 };
                 io.write_all(&wire).await?;
                 io.flush().await?;
@@ -264,7 +271,7 @@ where
                 match framing {
                     Framing::Hdlc => frames = deframer.push(&buf[..count]),
                     Framing::Kiss(tnc) => tnc.receive(&buf[..count], &mut frames),
-                    Framing::Ax25(tnc, _) => {
+                    Framing::Ax25(Ax25Tnc { tnc, .. }) => {
                         let mut wrapped = Vec::new();
                         tnc.receive(&buf[..count], &mut wrapped);
                         frames = wrapped.iter().filter_map(|f| ax25::strip(f)).map(<[u8]>::to_vec).collect();
