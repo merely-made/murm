@@ -35,11 +35,24 @@ class TcpDevice(threading.Thread):
         self.listener = socket.create_server(("127.0.0.1", 0))
         self.port = self.listener.getsockname()[1]
         self.connections = 0
+        self.closed = False
         self.start()
 
+    def close(self) -> None:
+        self.closed = True
+        self.listener.close()
+        os.close(self.fd)
+
     def run(self) -> None:
+        try:
+            self._serve()
+        except (OSError, ValueError):
+            if not self.closed:
+                raise
+
+    def _serve(self) -> None:
         conn = None
-        while True:
+        while not self.closed:
             watched = [self.fd, conn or self.listener]
             ready, _, _ = select.select(watched, [], [])
             if self.listener in ready:
@@ -48,6 +61,8 @@ class TcpDevice(threading.Thread):
                 self.connections += 1
             if self.fd in ready:
                 data = os.read(self.fd, 4096)
+                if not data:
+                    return
                 if conn is not None:
                     try:
                         conn.sendall(data)
@@ -67,6 +82,7 @@ class TcpDevice(threading.Thread):
 
 class Air:
     def __init__(self, devices: int = 2, flags: tuple[str, ...] = (), tcp: bool = False):
+        self.tcp: list[TcpDevice] = []
         pairs = [open_pty() for _ in range(devices)]
         masters = [master for master, _ in pairs]
         self.ports = [port for _, port in pairs]
@@ -108,6 +124,8 @@ class Air:
                 if d == dev and direction == "d2h" and f[0] == command]
 
     def close(self) -> None:
+        for device in self.tcp:
+            device.close()
         self.proc.kill()
 
 

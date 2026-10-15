@@ -122,11 +122,12 @@ impl Telemetry {
 }
 
 /// Link quality in percent from a packet's SNR at `sf`: -9 dB (2 dB lower per SF above 7)
-/// maps to 0, +6 dB to 100, rounded to 0.1 (`RNodeInterface.py` 124-126, 945-957).
+/// maps to 0, +6 dB to 100, rounded to 0.1 (`RNodeInterface.py` 124-126, 882-893).
 pub fn quality(snr_db: f32, sf: u8) -> f32 {
-    let min = -9.0 - 2.0 * (f32::from(sf) - 7.0);
-    let q = (snr_db - min) / (6.0 - min) * 100.0;
-    ((q * 10.0).round() / 10.0).clamp(0.0, 100.0)
+    let min = -9.0 - 2.0 * (f64::from(sf) - 7.0);
+    let q = (f64::from(snr_db) - min) / (6.0 - min) * 100.0;
+    // Python's round() takes ties to even.
+    ((q * 10.0).round_ties_even() / 10.0).clamp(0.0, 100.0) as f32
 }
 
 /// RNS's on-air bitrate in bits per second: `sf * (4 / cr) / (2^sf / bw_khz) * 1000`, with

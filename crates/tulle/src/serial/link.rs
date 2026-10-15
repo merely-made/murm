@@ -220,7 +220,7 @@ impl RNodeSerialLink {
     }
 
     /// A receiver of the device's latest telemetry and echoed bitrate
-    /// ([`crate::rnode::Telemetry`]); it keeps the last values across a reopen.
+    /// ([`crate::rnode::Telemetry`]); a reopen keeps the last values until the device reports anew.
     pub fn watch_telemetry(&self) -> watch::Receiver<Telemetry> {
         self.telemetry.clone()
     }

@@ -15,6 +15,10 @@ use crate::rnode::{RNode, Telemetry};
 /// How long the detach handshake may take before the port is abandoned.
 pub(super) const DETACH_GRACE: Duration = Duration::from_secs(1);
 
+/// How long one write may block (a TCP peer that stopped reading) before the port is failed
+/// for a reopen, so neither traffic nor shutdown waits on the OS to drop the socket.
+const WRITE_TIMEOUT: Duration = Duration::from_secs(5);
+
 pub(super) struct TxRequest {
     pub(super) frame: Vec<u8>,
     pub(super) announce: bool,
@@ -67,8 +71,10 @@ where
     let mut last_write = Instant::now();
     link.modem_mut().start();
     flush_modem(&mut io, link, &mut last_write).await?;
-    // The detect wait runs from the first probe on this port, through any re-init.
+    // The detect wait runs from the first probe on this port until any DETECT answer; a
+    // re-init clears the modem's flag but not the port's proof of a live device.
     let probed_at = Instant::now();
+    let mut answered = false;
     let mut next_init = probed_at + config.init_retry;
     let mut next_tx = Instant::now();
     let mut locked_at = Instant::now();
@@ -102,8 +108,9 @@ where
         }
 
         let now = Instant::now();
+        answered |= link.modem().is_detected();
         if let Some(wait) = config.detect_timeout
-            && !link.modem().is_detected()
+            && !answered
             && now >= probed_at + wait
         {
             return Err(io::Error::new(
@@ -181,7 +188,7 @@ where
 
         let detect_by = config
             .detect_timeout
-            .filter(|_| !link.modem().is_detected())
+            .filter(|_| !answered)
             .map(|wait| probed_at + wait);
         let wake = if !online {
             detect_by.map_or(next_init, |by| by.min(next_init))
@@ -241,8 +248,15 @@ where
 {
     let bytes = link.modem_mut().take_outbound();
     if !bytes.is_empty() {
-        io.write_all(&bytes).await?;
-        io.flush().await?;
+        let write = async {
+            io.write_all(&bytes).await?;
+            io.flush().await
+        };
+        tokio::time::timeout(WRITE_TIMEOUT, write)
+            .await
+            .map_err(|_| {
+                io::Error::new(io::ErrorKind::TimedOut, "RNode port stopped draining")
+            })??;
         *last_write = Instant::now();
     }
     Ok(())
