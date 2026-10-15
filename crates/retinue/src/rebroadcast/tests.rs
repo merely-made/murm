@@ -158,6 +158,26 @@ fn concurrent_path_responses_each_reach_their_interface() {
 }
 
 #[test]
+fn forgetting_an_interface_drops_what_it_carried() {
+    let on = |seed, iface| Rebroadcast {
+        interface: iface,
+        ..rebroadcast(seed, 1, 0)
+    };
+    let mut table = Rebroadcasts::new(4);
+    assert!(table.schedule(on(1, 3), 0, 500));
+    assert!(table.schedule(on(2, 4), 0, 500));
+    let answer = Rebroadcast {
+        answer: Some(3),
+        ..on(2, 4)
+    };
+    assert!(table.answer(answer, 0, 400), "holds the relay heard on 4");
+    table.forget_interface(3);
+    assert!(!table.contains(AddressHash::from_bytes([1; 16])));
+    let relay = table.pop_due(500).expect("the relay heard on 4 is restored");
+    assert_eq!((relay.interface, relay.answer), (4, None));
+}
+
+#[test]
 fn a_recursive_path_request_spends_the_announce_budget() {
     let rate = CapRate::from_bitrate(1_200, 2);
     let mut cap = AnnounceCap::new(4);

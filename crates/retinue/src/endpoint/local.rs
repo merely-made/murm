@@ -123,8 +123,10 @@ impl Shared {
     }
 
     /// The instance on `id` went away (`shared_connection_disappeared`, `Transport.py`
-    /// 3690-3703): tear down its links as lost and drop what was learned through it. Scoped
-    /// to `id`, since this endpoint may hold other carriers.
+    /// 3690-3703): tear down its links as lost and drop the paths, bridges, return paths,
+    /// pending relays, held announces and tunnels learned through it. Scoped to `id`, since
+    /// this endpoint may hold other carriers. Links still awaiting a proof record no
+    /// interface; they lapse at their setup deadline.
     fn shared_connection_lost(&self, id: InterfaceId) {
         let lost: Vec<_> = self.write_diagnostic(|| {
             let mut links = self.links.lock().unwrap();
@@ -157,6 +159,8 @@ impl Shared {
         }
         self.held_announces.lock().unwrap().purge(id);
         self.held_release_wake.notify_waiters();
+        self.forget_reverse_via(id);
+        self.forget_rebroadcasts_on(id);
         self.drop_tunnels_on(id);
     }
 
@@ -406,9 +410,13 @@ mod tests {
         );
         ep.shared.learn_path(a, local, 1, None);
         ep.shared.learn_path(b, other, 1, None);
+        ep.shared.remember_reverse(a, local, other);
+        ep.shared.remember_reverse(b, other, other);
         ep.shared.shared_connection_lost(local);
         assert!(ep.route_to(a).is_none());
         assert_eq!(ep.route_to(b), Some((other, 1)));
+        assert_eq!(ep.shared.take_reverse(a, other), None);
+        assert_eq!(ep.shared.take_reverse(b, other), Some(other));
     }
 
     #[cfg(not(any(target_os = "linux", target_os = "android")))]

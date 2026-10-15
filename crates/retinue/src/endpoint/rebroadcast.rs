@@ -110,6 +110,13 @@ impl Shared {
         queued
     }
 
+    /// Drop pending relays heard on `iface` and answers bound for it, with its cap queue.
+    pub(super) fn forget_rebroadcasts_on(&self, iface: InterfaceId) {
+        let mut state = self.rebroadcasts.lock().unwrap();
+        state.table.forget_interface(iface);
+        state.caps.remove(&iface);
+    }
+
     /// Whether a recursive path request of `len` bytes may go out on `iface` now, charging its
     /// announce budget (`Transport.py` 3301-3318). An interface of unknown airtime is uncapped.
     pub(super) fn admit_recursive_path_request(&self, iface: InterfaceId, len: usize) -> bool {
