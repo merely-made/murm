@@ -110,7 +110,7 @@ pub(super) fn rnode(keys: &Keys<'_>) -> Result<Carrier, RnsConfigError> {
     let alock = |key| {
         keys.parsed(key, |v: &str| {
             let pct = v.trim().parse::<f64>().ok()?;
-            (0.0..=100.0).contains(&pct).then(|| (pct * 100.0) as u16)
+            (0.0..=100.0).contains(&pct).then_some((pct * 100.0) as u16)
         })
     };
     config.st_alock = alock("airtime_limit_short")?;

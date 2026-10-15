@@ -24,7 +24,7 @@ pub enum HwMtu {
     /// A carrier-fixed MTU, signalled to links (`FIXED_MTU`): AutoInterface's 1196, or a TCP
     /// client's `fixed_mtu`.
     Fixed(usize),
-    /// Derived from the bitrate by [`autoconfig_mtu`] and signalled to links
+    /// Derived from the bitrate by RNS's `optimise_mtu` table and signalled to links
     /// (`AUTOCONFIGURE_MTU`): TCP guesses 10 Mbit/s, Backbone 100 Mbit/s, Local 1 Gbit/s.
     Auto {
         /// The interface's bitrate in bits per second.
