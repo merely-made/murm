@@ -60,6 +60,10 @@ pub use facts::{
     AnnounceFact, EndpointFacts, LinkDirection, LinkFact, LinkFactKind, LinkRemoteFact,
     PeerAnnounce, RouteFact,
 };
+pub use iface_config::{
+    Carrier, IdBeacon, InterfaceSettings, RnsAttached, RnsConfig, RnsConfigError, RnsInterface,
+    UdpCarrier,
+};
 pub use iface_policy::{AnnounceRate, IfacePolicy, PathRequestPolicy};
 pub use iface_stats::InterfaceCounters;
 pub use inbound::{Accepted, AcceptedResource, InboundLinkLimits};
