@@ -237,6 +237,28 @@ impl Rebroadcasts {
         self.entries.iter().map(|entry| entry.due).min()
     }
 
+    /// Drop every entry heard on `iface` or answering there, held ones included: what was
+    /// learned through a carrier that went away (`Transport.py` 3690-3703, per interface).
+    #[cfg_attr(
+        not(feature = "tokio"),
+        allow(dead_code, reason = "used by the endpoint")
+    )]
+    pub(crate) fn forget_interface(&mut self, iface: InterfaceId) {
+        let keep = |entry: &Entry| {
+            entry.rebroadcast.interface != iface && entry.rebroadcast.answer != Some(iface)
+        };
+        self.held.retain(keep);
+        let mut index = 0;
+        while index < self.entries.len() {
+            if keep(&self.entries[index]) {
+                index += 1;
+            } else {
+                // Puts back a surviving held entry for the destination.
+                self.remove(index);
+            }
+        }
+    }
+
     #[cfg(test)]
     pub(crate) fn len(&self) -> usize {
         self.entries.len()

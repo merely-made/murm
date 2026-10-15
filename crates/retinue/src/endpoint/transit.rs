@@ -159,6 +159,16 @@ impl Shared {
     }
 }
 
+impl Shared {
+    /// Drop the return paths that run through `iface`.
+    pub(super) fn forget_reverse_via(&self, iface: InterfaceId) {
+        self.reverse_table
+            .lock()
+            .unwrap()
+            .retain(|_, entry| entry.received != iface && entry.outbound != iface);
+    }
+}
+
 /// Forward a header-type-2 packet addressed to us as a transport hop, toward its
 /// destination. `from` is the interface it arrived on.
 pub(super) fn forward(
