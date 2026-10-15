@@ -1,5 +1,6 @@
-//! Serial carriers over a host tty: RNS's SerialInterface (HDLC) and KISSInterface (a KISS
-//! TNC) (`SerialInterface.py` 63-230; `KISSInterface.py` 84-394).
+//! Serial carriers over a host tty: RNS's SerialInterface (HDLC), KISSInterface (a KISS
+//! TNC) and AX25KISSInterface (AX.25 UI frames through a KISS TNC) (`SerialInterface.py`
+//! 63-230; `KISSInterface.py` 84-394; `AX25KISSInterface.py` 67-394).
 //!
 //! [`attach`] attaches one endpoint interface for the life of the carrier. A port that
 //! fails is reopened every 5 s under the same [`InterfaceId`], and packets offered while it
@@ -17,8 +18,9 @@ use tokio::io::{AsyncRead, AsyncReadExt, AsyncWrite, AsyncWriteExt};
 use tokio::sync::watch;
 use tokio::time::{Instant, sleep_until};
 
+use super::ax25::{self, Ax25Header};
 use super::hdlc;
-use super::kiss::{self, KissTnc};
+use super::kiss::{self, KissTnc, TncConfig};
 use crate::announce_admission::AnnounceIngressPolicy;
 use crate::endpoint::{Endpoint, InterfaceId, InterfaceSink, OutboundPackets};
 use crate::ifac::Ifac;
@@ -72,23 +74,40 @@ pub enum Framing {
     Hdlc,
     /// RNS KISSInterface: KISS DATA frames to a TNC.
     Kiss(KissTnc),
+    /// RNS AX25KISSInterface: each packet behind an AX.25 UI header, through a TNC that has
+    /// no ID beacon. Build it with [`Framing::ax25`].
+    Ax25(KissTnc, Ax25Header),
 }
 
 impl Framing {
+    /// AX.25 framing for `header`'s station, deframing up to [`ax25::MAX_FRAME`].
+    pub fn ax25(header: Ax25Header, config: TncConfig) -> Self {
+        let tnc = KissTnc::new(config, None).with_frame_limit(ax25::MAX_FRAME);
+        Self::Ax25(tnc, header)
+    }
+
     /// Time the device gets after open before traffic (`SerialInterface.py` 144-150;
     /// `KISSInterface.py` 178-180).
     fn settle(&self) -> Duration {
         match self {
             Self::Hdlc => Duration::from_millis(500),
-            Self::Kiss(_) => Duration::from_secs(2),
+            Self::Kiss(_) | Self::Ax25(..) => Duration::from_secs(2),
         }
     }
 
-    /// RNS's bitrate for the carrier: the line speed, or the KISS guess.
+    /// RNS's bitrate for the carrier: the line speed, or the KISS guess
+    /// (`AX25KISSInterface.py` 69).
     fn bitrate(&self, speed: u32) -> u64 {
         match self {
             Self::Hdlc => u64::from(speed),
-            Self::Kiss(_) => kiss::BITRATE_GUESS,
+            Self::Kiss(_) | Self::Ax25(..) => kiss::BITRATE_GUESS,
+        }
+    }
+
+    fn tnc(&mut self) -> Option<&mut KissTnc> {
+        match self {
+            Self::Hdlc => None,
+            Self::Kiss(tnc) | Self::Ax25(tnc, _) => Some(tnc),
         }
     }
 }
@@ -202,16 +221,16 @@ where
     T: AsyncRead + AsyncWrite + Unpin,
 {
     let now_ms = || u64::try_from(epoch.elapsed().as_millis()).unwrap_or(u64::MAX);
-    if let Framing::Kiss(tnc) = framing {
+    if let Some(tnc) = framing.tnc() {
         io.write_all(&tnc.startup()).await?;
     }
     let mut deframer = hdlc::Deframer::new();
     let mut last_rx = Instant::now();
     let mut buf = [0_u8; 1024];
     loop {
-        let (ready, wake_ms) = match framing {
-            Framing::Hdlc => (true, None),
-            Framing::Kiss(tnc) => (tnc.is_ready(), tnc.wake_at_ms()),
+        let (ready, wake_ms) = match framing.tnc() {
+            None => (true, None),
+            Some(tnc) => (tnc.is_ready(), tnc.wake_at_ms()),
         };
         let wake = wake_ms.map_or(Instant::now() + Duration::from_secs(3600), |ms| {
             epoch + Duration::from_millis(ms)
@@ -224,6 +243,7 @@ where
                 let wire = match framing {
                     Framing::Hdlc => hdlc::frame(&bytes),
                     Framing::Kiss(tnc) => tnc.send(&bytes, now_ms()),
+                    Framing::Ax25(tnc, header) => tnc.send(&header.wrap(&bytes), now_ms()),
                 };
                 io.write_all(&wire).await?;
                 io.flush().await?;
@@ -235,7 +255,7 @@ where
                 }
                 if last_rx.elapsed() > IDLE_RESET {
                     deframer = hdlc::Deframer::new();
-                    if let Framing::Kiss(tnc) = framing {
+                    if let Some(tnc) = framing.tnc() {
                         tnc.reset_partial();
                     }
                 }
@@ -244,6 +264,11 @@ where
                 match framing {
                     Framing::Hdlc => frames = deframer.push(&buf[..count]),
                     Framing::Kiss(tnc) => tnc.receive(&buf[..count], &mut frames),
+                    Framing::Ax25(tnc, _) => {
+                        let mut wrapped = Vec::new();
+                        tnc.receive(&buf[..count], &mut wrapped);
+                        frames = wrapped.iter().filter_map(|f| ax25::strip(f)).map(<[u8]>::to_vec).collect();
+                    }
                 }
                 for frame in frames {
                     // An undecodable or wrongly sealed frame is dropped; only a closed
@@ -254,7 +279,7 @@ where
                 }
             }
             _ = sleep_until(wake) => {
-                if let Framing::Kiss(tnc) = framing
+                if let Some(tnc) = framing.tnc()
                     && let Some(wire) = tnc.poll(now_ms())
                 {
                     io.write_all(&wire).await?;
