@@ -1,5 +1,6 @@
 //! The path table, path requests, and path responses.
 
+use alloc::vec::Vec;
 use std::collections::HashSet;
 use std::sync::atomic::Ordering;
 use std::time::{Duration, Instant};
@@ -95,8 +96,8 @@ impl Shared {
     }
 
     /// A path response for `target` if it is one of our registered destinations: an announce
-    /// with context [`crate::path::CTX_PATH_RESPONSE`]. `None` otherwise, since we hold no
-    /// announce cache to answer for others.
+    /// with context [`crate::path::CTX_PATH_RESPONSE`]. A transport answers for others from
+    /// its announce cache instead (see [`super::discovery`]).
     pub(super) fn path_response(&self, target: AddressHash) -> Option<Packet> {
         self.path_response_at(target, host_announce_seconds())
     }
@@ -130,7 +131,7 @@ impl Shared {
         self.live_route(dest).is_some()
     }
 
-    fn live_route(&self, dest: AddressHash) -> Option<PathEntry> {
+    pub(super) fn live_route(&self, dest: AddressHash) -> Option<PathEntry> {
         let route_ttl = self.route_ttl();
         let paths = self.path_table.lock().unwrap();
         paths
@@ -166,9 +167,10 @@ impl Shared {
         })
     }
 
-    /// Drop `dest`'s route, if any.
+    /// Drop `dest`'s route, if any, and the announce cached with it.
     pub(super) fn forget_path(&self, dest: AddressHash) {
         self.write_diagnostic(|| ((), self.path_table.lock().unwrap().remove(&dest).is_some()));
+        self.discovery.forget(dest);
     }
 
     /// Record that `dest` is reachable via `iface` at `hops`.
@@ -196,12 +198,19 @@ impl Shared {
         now: Instant,
     ) {
         let mode = self.interface_mode(iface);
+        let mut evicted = Vec::new();
         let learned = self.write_diagnostic(|| {
             let mut t = self.path_table.lock().unwrap();
             let route_ttl = self.route_ttl();
             if t.len() >= PATH_TABLE_CAPACITY && !t.contains_key(&dest) {
                 // The dead first: a table full of expired routes must never evict a live one.
-                t.retain(|_, e| e.live_at(now, route_ttl));
+                t.retain(|dest, e| {
+                    let live = e.live_at(now, route_ttl);
+                    if !live {
+                        evicted.push(*dest);
+                    }
+                    live
+                });
                 // Every route is live, so the quietest peer loses.
                 if t.len() >= PATH_TABLE_CAPACITY
                     && let Some(stalest) = t
@@ -210,6 +219,7 @@ impl Shared {
                         .map(|(dest, _)| *dest)
                 {
                     t.remove(&stalest);
+                    evicted.push(stalest);
                     self.routing_stats
                         .paths_evicted
                         .fetch_add(1, Ordering::Relaxed);
@@ -226,6 +236,9 @@ impl Shared {
             t.insert(dest, next);
             (next, changed)
         });
+        evicted
+            .into_iter()
+            .for_each(|gone| self.discovery.forget(gone));
         self.tunnel_path_learned(dest, &learned);
     }
 
@@ -256,17 +269,21 @@ impl Shared {
     /// route as a side effect, so a stale path never lingers past a lookup.
     pub(super) fn path_iface(&self, dest: AddressHash) -> Option<InterfaceId> {
         let route_ttl = self.route_ttl();
-        self.write_diagnostic(|| {
+        let (iface, expired) = self.write_diagnostic(|| {
             let mut t = self.path_table.lock().unwrap();
             match t.get(&dest) {
-                Some(e) if e.live_at(Instant::now(), route_ttl) => (Some(e.iface), false),
+                Some(e) if e.live_at(Instant::now(), route_ttl) => ((Some(e.iface), false), false),
                 Some(_) => {
                     t.remove(&dest);
-                    (None, true)
+                    ((None, true), true)
                 }
-                None => (None, false),
+                None => ((None, false), false),
             }
-        })
+        });
+        if expired {
+            self.discovery.forget(dest);
+        }
+        iface
     }
 
     /// Whether a path request for `dest` may go out now, under the per-destination floor and
@@ -310,7 +327,8 @@ impl Shared {
 impl Endpoint {
     /// Broadcast a path request for `dest`. The path response is an announce, which fills the
     /// path table *and the address book*: use it when a route has gone stale, or to learn the
-    /// identity of a source whose keys we lack.
+    /// identity of a source whose keys we lack. A transport sends the three-field form naming
+    /// itself, as RNS does.
     ///
     /// Rate-limited per destination and overall, silently. Returns whether a request went out.
     pub fn request_path(&self, dest: AddressHash) -> bool {
@@ -319,7 +337,7 @@ impl Endpoint {
         }
         let mut tag = [0u8; crate::path::TAG_LEN];
         fill_random(&mut tag);
-        self.shared.broadcast(crate::path::path_request(dest, &tag));
+        super::discovery::broadcast_path_request(&self.shared, dest, &tag);
         true
     }
 }

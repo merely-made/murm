@@ -62,6 +62,7 @@ impl Shared {
             packet,
             interface: iface,
             emitted,
+            answer: None,
         };
         let now = self.announce_admission_now_ms();
         if self
@@ -76,6 +77,67 @@ impl Shared {
             self.routing_stats
                 .refused_rebroadcasts
                 .fetch_add(1, Ordering::Relaxed);
+        }
+    }
+
+    /// Queue a path response for transmission on `iface` alone after `delay`, through the
+    /// announce table as RNS does, so a neighbour's answer heard first ends it
+    /// (`Transport.py` 3486-3519).
+    pub(super) fn schedule_path_response(
+        &self,
+        iface: InterfaceId,
+        packet: Packet,
+        delay: Duration,
+    ) -> bool {
+        let rebroadcast = Rebroadcast {
+            destination: packet.destination,
+            packet,
+            interface: iface,
+            emitted: 0,
+            answer: Some(iface),
+        };
+        let now = self.announce_admission_now_ms();
+        let delay = u64::try_from(delay.as_millis()).unwrap_or(u64::MAX);
+        let queued = self
+            .rebroadcasts
+            .lock()
+            .unwrap()
+            .table
+            .answer(rebroadcast, now, delay);
+        if queued {
+            self.rebroadcast_wake.notify_one();
+        }
+        queued
+    }
+
+    /// Whether a recursive path request of `len` bytes may go out on `iface` now, charging its
+    /// announce budget (`Transport.py` 3301-3318). An interface of unknown airtime is uncapped.
+    pub(super) fn admit_recursive_path_request(&self, iface: InterfaceId, len: usize) -> bool {
+        let Some(rate) = self.cap_rate(iface) else {
+            return true;
+        };
+        let now = self.announce_admission_now_ms();
+        self.rebroadcasts
+            .lock()
+            .unwrap()
+            .caps
+            .entry(iface)
+            .or_insert_with(|| AnnounceCap::new(QUEUED_ANNOUNCES))
+            .admit_path_request(len, now, rate)
+    }
+
+    /// `iface`'s announce budget: its share of the configured bitrate, or of the carrier's MTU
+    /// airtime; `None` when neither is known.
+    fn cap_rate(&self, iface: InterfaceId) -> Option<CapRate> {
+        let policy = self.iface_policy(iface);
+        let percent = u64::from(policy.cap_percent);
+        match policy.bitrate_bps.filter(|&bps| bps > 0) {
+            Some(bps) => Some(CapRate::from_bitrate(bps, percent)),
+            None => {
+                let carrier = self.first_hop_airtime_ms.lock().unwrap();
+                let ms = carrier.get(&iface).copied().filter(|&ms| ms > 0)?;
+                Some(CapRate::from_airtime(ms, percent))
+            }
         }
     }
 
@@ -115,7 +177,7 @@ impl Shared {
 
     /// Send everything due at `now` on every interface that egress policy, `outgoing` and the
     /// mode rules permit, the ingress one included, through the caps of interfaces with a
-    /// known airtime. The next hop is the destination's live path interface at release, so an
+    /// known airtime. A path response goes to its requester's interface alone, uncapped. The next hop is the destination's live path interface at release, so an
     /// announce whose path has lapsed is not relayed (`Transport.py` 1461-1469). RNS caps only
     /// the modes its rule chain leaves to its last branch (1518-1585), so relays to roaming,
     /// boundary and internal interfaces go uncapped there; every mode is capped here. Returns
@@ -169,6 +231,7 @@ impl Shared {
         };
         let (mut capped, mut dropped) = (0, 0);
         let mut sends: Vec<Vec<(InterfaceId, Packet)>> = Vec::new();
+        let mut answers: Vec<(InterfaceId, Packet)> = Vec::new();
         let next = {
             let mut state = self.rebroadcasts.lock().unwrap();
             let Rebroadcasting { table, caps } = &mut *state;
@@ -181,6 +244,12 @@ impl Shared {
                 }
             }
             for (rebroadcast, next_hop) in due.into_iter().zip(next_hops) {
+                if let Some(id) = rebroadcast.answer {
+                    if ifaces.iter().any(|(i, _)| *i == id) {
+                        answers.push((id, rebroadcast.packet));
+                    }
+                    continue;
+                }
                 let from = next_hop.and_then(|hop| modes.iter().find(|(id, _)| *id == hop));
                 let to_internal = next_hop.is_some_and(|hop| policy(hop).announces_to_internal);
                 let mut out = Vec::new();
@@ -217,6 +286,9 @@ impl Shared {
         stats
             .dropped_announces
             .fetch_add(dropped, Ordering::Relaxed);
+        for (id, packet) in answers {
+            self.push_to(id, packet, TrafficClass::Transit);
+        }
         for transmission in sends {
             let mut queued = false;
             for (id, packet) in transmission {

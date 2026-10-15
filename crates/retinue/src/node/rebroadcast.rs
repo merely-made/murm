@@ -42,6 +42,7 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
             packet,
             interface,
             emitted,
+            answer: None,
         };
         if !self.rebroadcasts.schedule(rebroadcast, now, delay) {
             self.transport_counters.refused_rebroadcasts = self
@@ -99,9 +100,10 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
     }
 
     /// Pass a due rebroadcast through its interface's mode rule, then its cap where the
-    /// airtime is known (`Transport.py` 1458-1585). It leaves where it was heard, so that
-    /// interface is both the next hop and the egress. An interface without a cap slot sends
-    /// uncapped.
+    /// airtime is known (`Transport.py` 1458-1585). It leaves where it was heard. The next hop
+    /// is the destination's live route at release (1461-1469), or the ingress interface once
+    /// the bounded route table has evicted it, so a small table never silently stops relaying.
+    /// An interface without a cap slot sends uncapped.
     fn offer_rebroadcast(
         &mut self,
         rebroadcast: Rebroadcast,
@@ -109,8 +111,11 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
         actions: &mut Actions<ACTIONS>,
     ) {
         let interface = rebroadcast.interface;
-        let mode = self.interface_mode(interface);
-        if !announce_permitted(mode, Some(mode), false, ModeFlags::default()) {
+        let from = self
+            .next_hop(rebroadcast.destination, now)
+            .map_or(interface, |hop| hop.interface);
+        let (out, from) = (self.interface_mode(interface), self.interface_mode(from));
+        if !announce_permitted(out, Some(from), false, ModeFlags::default()) {
             return;
         }
         let airtime = self.first_hop_airtime(interface);
@@ -162,5 +167,71 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
                 .forwarded_announces
                 .saturating_add(1);
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::super::*;
+    use crate::announce::{AnnounceBlob, RAND_HASH_LEN};
+    use crate::destination::DestinationName;
+
+    fn blob(seed: u8) -> AnnounceBlob {
+        AnnounceBlob::from_wire([seed; RAND_HASH_LEN])
+    }
+
+    fn sent<const N: usize>(actions: &Actions<N>) -> alloc::vec::Vec<AddressHash> {
+        actions
+            .iter()
+            .filter_map(|action| match action {
+                Action::Send { packet, .. } => Some(packet.destination),
+                _ => None,
+            })
+            .collect()
+    }
+
+    fn relay<const R: usize>() -> Node<32, 8, 4, R> {
+        Node::new(
+            PrivateIdentity::from_secret_bytes(&[0x61; 64]),
+            DestinationName::new("retinue", ["relay"]).name_hash(),
+        )
+        .with_transport_config(TransportConfig::transit())
+    }
+
+    fn announcer(seed: u8) -> Node<32, 8, 4> {
+        Node::new(
+            PrivateIdentity::from_secret_bytes(&[seed; 64]),
+            DestinationName::new("retinue", ["announcer"]).name_hash(),
+        )
+    }
+
+    /// The mode rule reads the route as it stands at release: heard on a roaming interface,
+    /// then re-routed by a path response through a full one, the relay goes out.
+    #[test]
+    fn the_next_hop_is_the_route_at_release() {
+        let mut relay = relay::<4>();
+        relay.set_interface_mode(1, InterfaceMode::Roaming).unwrap();
+        let source = announcer(0x71);
+        relay.ingest(1, &source.announce(&blob(0x71), None), 1_000);
+        let mut response = source.announce(&blob(0x72), None);
+        response.context = crate::path::CTX_PATH_RESPONSE;
+        relay.ingest(2, &response, 1_001);
+        assert_eq!(relay.route_to(source.destination(), 1_001).unwrap().0, 2);
+        let due = relay.next_rebroadcast().unwrap();
+        assert_eq!(sent(&relay.poll(due, 1, None)), [source.destination()]);
+    }
+
+    /// A route the bounded table has evicted falls back to the ingress interface.
+    #[test]
+    fn an_evicted_route_falls_back_to_the_ingress_interface() {
+        let mut relay = relay::<1>();
+        let first = announcer(0x71);
+        relay.ingest(1, &first.announce(&blob(0x71), None), 1_000);
+        let due = relay.next_rebroadcast().unwrap();
+        let second = announcer(0x73);
+        relay.ingest(1, &second.announce(&blob(0x73), None), 1_000);
+        assert!(relay.route_to(first.destination(), 1_000).is_none());
+        let relayed = sent(&relay.poll(due + REBROADCAST_WINDOW, 1, None));
+        assert!(relayed.contains(&first.destination()));
     }
 }
