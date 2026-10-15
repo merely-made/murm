@@ -265,6 +265,28 @@ fn backbone_reads_its_aliases_and_flap_keys() {
         client.carrier,
         Carrier::TcpClient { client, backbone: true, .. } if client.host == "hub.example"
     ));
+    let both = section(concat!(
+        "    type = BackboneInterface\n    target_host = a\n    remote = b\n",
+        "    target_port = 1\n    port = 2\n",
+    ))
+    .unwrap();
+    assert!(matches!(
+        both.carrier,
+        Carrier::TcpClient { client, .. } if client.host == "b" && client.port == 2
+    ));
+}
+
+#[test]
+fn out_of_range_values_are_ignored_as_rns_does() {
+    let settings = tcp_client(concat!(
+        "    bitrate = -1\n    ifac_size = -8\n    networkname = n\n",
+        "    announce_rate_target = -5\n    announce_rate_grace = -1\n",
+        "    announce_rate_penalty = -1\n",
+    ))
+    .settings;
+    assert_eq!(settings.bitrate, None);
+    assert!(settings.announce_rate.is_none());
+    assert_eq!(settings.ifac.unwrap().size(), 16);
 }
 
 #[test]

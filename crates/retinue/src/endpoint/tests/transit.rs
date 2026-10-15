@@ -488,14 +488,14 @@ const TCP: crate::endpoint::HwMtu = crate::endpoint::HwMtu::Auto {
 };
 
 /// A transit hop between two autoconfigured TCP interfaces keeps 16384 end to end, clamps a
-/// larger request to it, and holds a request leaving by a protocol interface to 500
+/// larger request to it, and drops the trailer of a request leaving by a protocol interface
 /// (`Transport.py` 2063-2088).
 #[tokio::test]
 async fn a_transit_hop_clamps_to_what_both_interfaces_signal() {
     for (out_mtu, asked, carried) in [
-        (Some(TCP), 16_384, 16_384),
-        (Some(TCP), 1 << 20, 16_384),
-        (None, 16_384, 500),
+        (Some(TCP), 16_384, Some(16_384)),
+        (Some(TCP), 1 << 20, Some(16_384)),
+        (None, 16_384, None),
     ] {
         let endpoint = Endpoint::new(PrivateIdentity::from_secret_bytes(&[0xA1; 64]));
         let a = endpoint.attach_interface_with_hw_mtu(TCP, None).unwrap();
@@ -516,7 +516,7 @@ async fn a_transit_hop_clamps_to_what_both_interfaces_signal() {
                 mode: InterfaceMode::default(),
             },
         );
-        let (_, mut request) = link::PendingLink::open(
+        let (pending, mut request) = link::PendingLink::open(
             announce.destination,
             *responder.public(),
             &[0xA3; 64],
@@ -529,10 +529,8 @@ async fn a_transit_hop_clamps_to_what_both_interfaces_signal() {
         request.transport = Some(endpoint.identity().hash());
         route(&endpoint.shared, a.id(), request);
         let out = b.outbound.queues.pop().expect("the request is carried");
-        assert_eq!(
-            link::request_trailer(&out).unwrap().map(|t| t.mtu),
-            Some(carried)
-        );
+        assert_eq!(link::request_trailer(&out).unwrap().map(|t| t.mtu), carried);
+        assert_eq!(link::link_id(&out).unwrap(), pending.link_id());
     }
 }
 

@@ -73,7 +73,7 @@ impl InterfaceSettings {
         let set = |key| keys.str(key).filter(|v| !v.is_empty() && *v != "None");
         let name = set("network_name").or_else(|| set("networkname"));
         let pass = set("pass_phrase").or_else(|| set("passphrase"));
-        let bits = keys.int::<u32>("ifac_size")?;
+        let bits = keys.ranged::<u32>("ifac_size", |b| b >= 8)?;
         let ifac = Ifac::from_config_bits(name, pass, bits, ifac_default).map_err(|error| {
             RnsConfigError::Ifac {
                 interface: keys.name.into(),
@@ -81,9 +81,9 @@ impl InterfaceSettings {
             }
         })?;
 
-        let target = keys.int::<u64>("announce_rate_target")?.filter(|&t| t > 0);
-        let grace = keys.int::<u16>("announce_rate_grace")?;
-        let penalty = keys.int::<u64>("announce_rate_penalty")?;
+        let target = keys.ranged::<u64>("announce_rate_target", |t| t > 0)?;
+        let grace = keys.ranged::<u16>("announce_rate_grace", |g| g >= 0)?;
+        let penalty = keys.ranged::<u64>("announce_rate_penalty", |p| p >= 0)?;
         let announce_rate = target.map(|target| AnnounceRate {
             target: Duration::from_secs(target),
             grace: grace.unwrap_or(0),
@@ -106,7 +106,7 @@ impl InterfaceSettings {
         Ok(Self {
             mode,
             ifac,
-            bitrate: keys.int::<u64>("bitrate")?.filter(|&b| b >= 5),
+            bitrate: keys.ranged::<u64>("bitrate", |b| b >= 5)?,
             announce_cap: keys
                 .float("announce_cap")?
                 .filter(|&c| c > 0.0 && c <= 100.0)
