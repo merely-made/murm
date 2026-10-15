@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "cargo",
+    "test",
+    "--locked",
+    "-p",
+    "mere-webrtc-carrier",
+    "-j",
+    "2"
+  ],
+  "workdir": "/Users/markik/Code/testing/cleromancy/c1-20261013/murm-callback-lifetime/native",
+  "exit": 0,
+  "seconds": 15.333,
+  "source_head": "b49df894635bac95823284efee6c445885eaf62a",
+  "tracked_diff_sha256": "ed6e26de966afbff659116149c743534caec728beb6ecc9b79a2d1a853eaa575",
+  "profile": {
+    "TMPDIR": "/tmp",
+    "CARGO_PROFILE_DEV_DEBUG": "0",
+    "CARGO_INCREMENTAL": "0",
+    "CARGO_TARGET_DIR": "/Users/markik/Code/testing/stack-state-20261011/mere-knot-repin-target"
+  },
+  "log_sha256": "be9a6fafa620dcf023eda50df5a4a12c712f9ee0eb8ff4e38b1bc0774e5700b9"
+}
