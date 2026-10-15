@@ -4,8 +4,7 @@
 
 use std::{
     fs,
-    path::{Path, PathBuf},
-    process::Stdio,
+    path::Path,
     time::{Duration, Instant},
 };
 
@@ -16,7 +15,7 @@ use iroh::{
 };
 use postilion::control::{
     sign_request,
-    verified::{ControlClient, ControlExchange, Mutation, ProvisionalReceipt},
+    verified::{ControlClient, ControlExchange, ProvisionalReceipt},
 };
 use retinue::{
     command::{Command, MAX_COMMAND_LEN, TargetClass},
@@ -26,126 +25,16 @@ use retinue::{
 use seneschal::control::*;
 use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
-use tokio::{
-    process::{Child, Command as Process},
-    time::{sleep, timeout},
-};
+use tokio::time::{sleep, timeout};
 
 use crate::{
     board::{NODE, owner, public, read_state},
     carrier::{ALPN, IO_TIMEOUT, IrohCarrier, endpoint},
 };
 
-struct Server {
-    child: Child,
-    address: EndpointAddr,
-    directory: PathBuf,
-}
+mod support;
 
-impl Server {
-    async fn start(directory: &Path) -> Result<Self> {
-        let ready = directory.join("ready.json");
-        if ready.exists() {
-            fs::remove_file(&ready)?;
-        }
-        let mut child = Process::new(std::env::current_exe()?)
-            .arg("serve")
-            .arg(directory)
-            .stdin(Stdio::null())
-            .stdout(Stdio::null())
-            .stderr(Stdio::inherit())
-            .kill_on_drop(true)
-            .spawn()?;
-        let deadline = Instant::now() + Duration::from_secs(10);
-        loop {
-            if let Some(status) = child.try_wait()? {
-                return Err(anyhow!("server exited before ready: {status}"));
-            }
-            if ready.exists() {
-                let address = serde_json::from_slice(&fs::read(&ready)?)?;
-                return Ok(Self {
-                    child,
-                    address,
-                    directory: directory.to_owned(),
-                });
-            }
-            ensure!(Instant::now() < deadline, "server readiness timeout");
-            sleep(Duration::from_millis(10)).await;
-        }
-    }
-    async fn stop(&mut self) -> Result<()> {
-        self.child.kill().await?;
-        self.child.wait().await?;
-        Ok(())
-    }
-    fn snapshot(&self) -> Result<Value> {
-        Ok(serde_json::from_slice(&fs::read(
-            self.directory.join("snapshot.json"),
-        )?)?)
-    }
-    fn rejection(&self) -> Result<String> {
-        let value: Value =
-            serde_json::from_slice(&fs::read(self.directory.join("rejection.json"))?)?;
-        Ok(value["reason"].as_str().unwrap().to_owned())
-    }
-}
-
-fn request(
-    operation: Operation,
-    transaction: u8,
-    sequence: u64,
-    generation: u64,
-    arguments: &[u8],
-) -> Request {
-    Request {
-        operation,
-        transaction: TransactionId([transaction; 16]),
-        transaction_sequence: sequence,
-        expected_generation: ConfigGeneration(generation),
-        arguments: heapless::Vec::from_slice(arguments).unwrap(),
-    }
-}
-
-fn signed(request: &Request, counter: u64) -> Vec<u8> {
-    sign_request(request, &owner(), AddressHash::from_bytes(NODE.0), counter).unwrap()
-}
-
-fn counter(directory: &Path) -> Result<u64> {
-    Ok(read_state(directory)?.owner_grants()[0].accepted_outer_counter())
-}
-fn mutation(sequence: u64, generation: u64) -> Mutation {
-    Mutation {
-        sequence,
-        expected_generation: ConfigGeneration(generation),
-    }
-}
-
-fn pass(cases: &mut Vec<Value>, id: &str, observation: Value) {
-    cases.push(json!({ "id": id, "status": "pass", "evidence_class": "host-process-composition", "observation": observation }));
-}
-
-async fn rejected(
-    carrier: &mut IrohCarrier,
-    server: &Server,
-    bytes: &[u8],
-    reason: &str,
-    unchanged_counter: u64,
-) -> Result<()> {
-    ensure!(
-        carrier.exchange(bytes).await.is_err(),
-        "{reason}: command unexpectedly accepted"
-    );
-    ensure!(
-        server.rejection()? == reason,
-        "wrong refusal: {}",
-        server.rejection()?
-    );
-    ensure!(
-        counter(&server.directory)? == unchanged_counter,
-        "refusal changed durable counter"
-    );
-    Ok(())
-}
+use support::*;
 
 pub async fn run() -> Result<Value> {
     let started = Instant::now();
