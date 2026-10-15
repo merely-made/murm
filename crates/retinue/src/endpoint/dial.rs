@@ -14,7 +14,6 @@ use tokio::net::{TcpStream, lookup_host};
 
 use crate::identity::PrivateIdentity;
 use crate::ifac::Ifac;
-use crate::iface::hdlc;
 use crate::node::InterfaceMode;
 
 use super::interface::{InterfaceId, QueueAdmission};
@@ -56,6 +55,9 @@ pub struct TcpClient {
     /// Frame with KISS rather than HDLC, to reach a KISS TNC over TCP (`kiss_framing`,
     /// `TCPInterface.py` 55-67). Such a client synthesizes no tunnel (178-179).
     pub kiss_framing: bool,
+    /// Hardware MTU: autoconfigured from the 10 Mbit/s guess by default, from a configured
+    /// bitrate, Backbone's 100 Mbit/s, or a `fixed_mtu` (`TCPInterface.py` 76-78, 110-116).
+    pub hw_mtu: HwMtu,
 }
 
 impl TcpClient {
@@ -71,6 +73,9 @@ impl TcpClient {
             reconnect_wait: Duration::from_secs(5),
             max_reconnect_tries: None,
             kiss_framing: false,
+            hw_mtu: HwMtu::Auto {
+                bitrate: TCP_BITRATE_GUESS,
+            },
         }
     }
 
@@ -111,6 +116,7 @@ impl Endpoint {
         if !self.shared.is_running() {
             return Err(endpoint_closed());
         }
+        client.hw_mtu.checked()?;
         let first = dial(&client).await.ok();
         self.supervise(client, first)
     }
@@ -158,14 +164,13 @@ impl Endpoint {
         client: TcpClient,
         mut stream: Option<TcpStream>,
     ) -> io::Result<InterfaceId> {
+        // A stream's framing has no bound of its own: the hardware MTU sets the limit.
         let attached = self.shared.add_interface(
-            hdlc::MAX_FRAME,
+            usize::MAX,
             client.ifac.clone(),
             InterfaceMode::Full,
             stream.is_some(),
-            HwMtu::Auto {
-                bitrate: TCP_BITRATE_GUESS,
-            },
+            client.hw_mtu,
         );
         let framing = if client.kiss_framing {
             Framing::Kiss

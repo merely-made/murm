@@ -14,7 +14,6 @@ use tokio::sync::{Notify, mpsc};
 use tokio::time::Instant;
 
 use crate::ifac::Ifac;
-use crate::iface::hdlc;
 use crate::node::InterfaceMode;
 
 use super::dial::TCP_BITRATE_GUESS;
@@ -55,6 +54,9 @@ pub struct ListenPolicy {
     /// Refuse peers that reconnect too fast, as BackboneInterface does; `None` accepts all,
     /// as TCPServerInterface does.
     pub flap: Option<FlapPolicy>,
+    /// Hardware MTU of each spawned interface; `None` autoconfigures from TCP's 10 Mbit/s
+    /// guess (`TCPInterface.py` 465-467, 612), as Backbone does from 100 Mbit/s.
+    pub hw_mtu: Option<HwMtu>,
 }
 
 /// Backbone's fast-flap blocking (`BackboneInterface.py` 48-53, 126-161, 807-835).
@@ -156,6 +158,7 @@ impl Endpoint {
         if !self.shared.is_running() {
             return Err(endpoint_closed());
         }
+        policy.hw_mtu.map(HwMtu::checked).transpose()?;
         let listener = TcpListener::bind(addr).await?;
         let local = listener.local_addr()?;
         let stop = Arc::new(Notify::new());
@@ -236,16 +239,11 @@ fn spawn(
 ) -> (InterfaceId, bool) {
     let accepted_at = Instant::now();
     let _ = sockopt::tune(&stream, policy.i2p_tunneled);
-    let hw_mtu = HwMtu::Auto {
+    let hw_mtu = policy.hw_mtu.unwrap_or(HwMtu::Auto {
         bitrate: TCP_BITRATE_GUESS,
-    };
-    let attached = shared.add_interface(
-        hdlc::MAX_FRAME,
-        policy.ifac.clone(),
-        policy.mode,
-        true,
-        hw_mtu,
-    );
+    });
+    // A stream's framing has no bound of its own: the hardware MTU sets the limit.
+    let attached = shared.add_interface(usize::MAX, policy.ifac.clone(), policy.mode, true, hw_mtu);
     let id = attached.id;
     if !attached.registered {
         return (id, false);

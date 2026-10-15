@@ -173,7 +173,9 @@ fn forgetting_an_interface_drops_what_it_carried() {
     assert!(table.answer(answer, 0, 400), "holds the relay heard on 4");
     table.forget_interface(3);
     assert!(!table.contains(AddressHash::from_bytes([1; 16])));
-    let relay = table.pop_due(500).expect("the relay heard on 4 is restored");
+    let relay = table
+        .pop_due(500)
+        .expect("the relay heard on 4 is restored");
     assert_eq!((relay.interface, relay.answer), (4, None));
 }
 

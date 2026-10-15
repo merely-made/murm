@@ -15,8 +15,12 @@ use crate::iface::udp::{UdpConfig, UdpHandle};
 use super::super::dial::TcpClient;
 use super::super::interface::InterfaceId;
 use super::super::listen::{FlapPolicy, ListenAddr, ListenPolicy, Listener};
+use super::super::mtu::HwMtu;
 use super::super::runtime::Endpoint;
 use super::{InterfaceSettings, Keys, RnsConfigError, RnsInterface};
+
+/// Backbone's bitrate guess, which sets its hardware MTU (`BackboneInterface.py` 44, 844).
+const BACKBONE_BITRATE_GUESS: u64 = 100_000_000;
 
 /// A station ID beacon: `id_callsign` sent every `id_interval` seconds (KISS and RNode).
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -62,13 +66,9 @@ impl UdpCarrier {
 #[derive(Clone, Debug)]
 #[non_exhaustive]
 pub enum Carrier {
-    /// `TCPClientInterface`, or a `BackboneInterface` with a `target_host`/`remote`.
-    /// `fixed_mtu` is kept for the dialer; retinue's dialer autoconfigures.
-    TcpClient {
-        client: TcpClient,
-        fixed_mtu: Option<usize>,
-        backbone: bool,
-    },
+    /// `TCPClientInterface`, or a `BackboneInterface` with a `target_host`/`remote`. A
+    /// `fixed_mtu` is the client's [`HwMtu::Fixed`].
+    TcpClient { client: TcpClient, backbone: bool },
     /// `TCPServerInterface`, or a listening `BackboneInterface` with fast-flap blocking in
     /// `policy.flap`.
     TcpServer {
@@ -173,21 +173,19 @@ fn tcp_client(
         client.connect_timeout = Duration::from_secs(secs);
     }
     client.max_reconnect_tries = keys.int("max_reconnect_tries")?;
-    // RNS refuses a fixed MTU below the protocol MTU (`TCPInterface.py` 110-114).
-    let fixed_mtu = keys
-        .int::<usize>("fixed_mtu")?
-        .filter(|&mtu| mtu != 0)
-        .map(|mtu| {
-            (mtu >= crate::packet::MTU)
-                .then_some(mtu)
-                .ok_or_else(|| keys.bad("fixed_mtu", &mtu.to_string()))
-        })
-        .transpose()?;
-    Ok(Carrier::TcpClient {
-        client,
-        fixed_mtu,
-        backbone,
-    })
+    if backbone {
+        client.hw_mtu = HwMtu::Auto {
+            bitrate: BACKBONE_BITRATE_GUESS,
+        };
+    }
+    // RNS refuses a fixed MTU below the protocol MTU (`TCPInterface.py` 110-116); one past
+    // what a link signals is refused too.
+    if let Some(mtu) = keys.int::<usize>("fixed_mtu")?.filter(|&mtu| mtu != 0) {
+        client.hw_mtu = HwMtu::Fixed(mtu)
+            .checked()
+            .map_err(|_| keys.bad("fixed_mtu", &mtu.to_string()))?;
+    }
+    Ok(Carrier::TcpClient { client, backbone })
 }
 
 fn tcp_server(keys: &Keys<'_>, backbone: bool) -> Result<Carrier, RnsConfigError> {
@@ -240,6 +238,9 @@ fn tcp_server(keys: &Keys<'_>, backbone: bool) -> Result<Carrier, RnsConfigError
     let policy = ListenPolicy {
         i2p_tunneled: keys.bool("i2p_tunneled")?.unwrap_or(false),
         flap,
+        hw_mtu: backbone.then_some(HwMtu::Auto {
+            bitrate: BACKBONE_BITRATE_GUESS,
+        }),
         ..ListenPolicy::default()
     };
     Ok(Carrier::TcpServer {
@@ -306,15 +307,24 @@ fn pipe(keys: &Keys<'_>) -> Result<Carrier, RnsConfigError> {
 }
 
 impl Carrier {
-    /// Fill in what the carrier config itself carries: IFAC, and for a listener or Auto
-    /// parent the mode and policy every spawned interface inherits.
+    /// Fill in what the carrier config itself carries: IFAC, a configured bitrate's
+    /// autoconfigured MTU (`Reticulum.py` 1038-1039), and for a listener or Auto parent the
+    /// mode and policy every spawned interface inherits.
     pub(super) fn with_settings(mut self, settings: &InterfaceSettings) -> Self {
         match &mut self {
-            Self::TcpClient { client, .. } => client.ifac = settings.ifac.clone(),
+            Self::TcpClient { client, .. } => {
+                client.ifac = settings.ifac.clone();
+                if let (HwMtu::Auto { .. }, Some(bitrate)) = (client.hw_mtu, settings.bitrate) {
+                    client.hw_mtu = HwMtu::Auto { bitrate };
+                }
+            }
             Self::TcpServer { policy, .. } => {
                 policy.mode = settings.mode;
                 policy.ifac = settings.ifac.clone();
                 policy.iface = settings.iface_policy();
+                if let Some(bitrate) = settings.bitrate {
+                    policy.hw_mtu = Some(HwMtu::Auto { bitrate });
+                }
             }
             #[cfg(all(feature = "auto", unix))]
             Self::Auto(cfg) => {
@@ -349,9 +359,6 @@ impl Endpoint {
     pub async fn attach_rns_interface(&self, section: &RnsInterface) -> io::Result<RnsAttached> {
         let unsupported = |why: &str| io::Error::new(io::ErrorKind::Unsupported, why.to_string());
         let id = match &section.carrier {
-            Carrier::TcpClient {
-                fixed_mtu: Some(_), ..
-            } => return Err(unsupported("fixed_mtu on a TCP client")),
             Carrier::TcpClient { client, .. } => self.attach_tcp(client.clone()).await?,
             Carrier::TcpServer { addr, policy, .. } => {
                 return Ok(RnsAttached::Listener(

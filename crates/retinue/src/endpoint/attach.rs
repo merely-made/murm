@@ -255,13 +255,7 @@ impl Endpoint {
         hw_mtu: HwMtu,
         ifac: Option<Ifac>,
     ) -> io::Result<Interface> {
-        if hw_mtu.mtu() < crate::packet::MTU || hw_mtu.mtu() > link::MAX_MTU as usize {
-            return Err(io::Error::new(
-                io::ErrorKind::InvalidInput,
-                "hardware MTU is below the protocol MTU or past what a link can signal",
-            ));
-        }
-        self.attach_access(usize::MAX, ifac, hw_mtu)
+        self.attach_access(usize::MAX, ifac, hw_mtu.checked()?)
     }
 
     fn attach_interface_access(
