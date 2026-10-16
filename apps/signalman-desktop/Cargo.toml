@@ -73,7 +73,7 @@ cpal = "=0.18.2"
 # not cross duplicate package instances.
 mere-signalman = { git = "https://www.github.com/merely-made/mere.git", rev = "864757da78214bdd810e17355df5b2309721d651" }
 chartulary = { git = "https://www.github.com/merely-made/mere.git", rev = "864757da78214bdd810e17355df5b2309721d651" }
-gaz = { git = "https://github.com/merely-made/dramatis.git", rev = "0234e7eea6f2ddf2330a71b9425da01b06ae0391" }
+gaz = { git = "https://github.com/merely-made/dramatis.git", branch = "main" }
 muniment = { git = "https://www.github.com/merely-made/mere.git", rev = "864757da78214bdd810e17355df5b2309721d651", features = ["redb"] }
 sceno = { git = "https://www.github.com/merely-made/mere.git", rev = "864757da78214bdd810e17355df5b2309721d651" }
 scenomise = { git = "https://www.github.com/merely-made/mere.git", rev = "864757da78214bdd810e17355df5b2309721d651" }
@@ -86,7 +86,7 @@ thiserror = "2"
 # consumes. Djinn releases station-scoped keys and signs grants; Pandect
 # supplies the public device id and lease records.
 postilion = { version = "0.3.0", path = "../../crates/postilion" }
-personae = { git = "https://github.com/merely-made/dramatis.git", rev = "0234e7eea6f2ddf2330a71b9425da01b06ae0391" }
+personae = { git = "https://github.com/merely-made/dramatis.git", branch = "main" }
 pandect = { git = "https://www.github.com/merely-made/mere.git", rev = "864757da78214bdd810e17355df5b2309721d651" }
 # Application choice and authoring use the existing shared stack.
 tabard = { git = "https://www.github.com/merely-made/mere.git", rev = "864757da78214bdd810e17355df5b2309721d651" }
@@ -172,14 +172,14 @@ graphshell = { git = "https://www.github.com/merely-made/mere.git", rev = "86475
 graphshell-endpoint = { git = "https://www.github.com/merely-made/mere.git", rev = "864757da78214bdd810e17355df5b2309721d651" }
 illume = { git = "https://www.github.com/merely-made/mere.git", rev = "864757da78214bdd810e17355df5b2309721d651" }
 inker = { git = "https://www.github.com/merely-made/mere.git", rev = "864757da78214bdd810e17355df5b2309721d651" }
-insigne = { git = "https://github.com/merely-made/dramatis.git", rev = "0234e7eea6f2ddf2330a71b9425da01b06ae0391" }
+insigne = { git = "https://github.com/merely-made/dramatis.git", branch = "main" }
 mere-proofs = { git = "https://www.github.com/merely-made/mere.git", rev = "864757da78214bdd810e17355df5b2309721d651" }
 mere-surface-api = { git = "https://www.github.com/merely-made/mere.git", rev = "864757da78214bdd810e17355df5b2309721d651" }
 mere-transport = { git = "https://github.com/merely-made/murm.git", rev = "b49df894635bac95823284efee6c445885eaf62a" }
 muniment = { git = "https://www.github.com/merely-made/mere.git", rev = "864757da78214bdd810e17355df5b2309721d651" }
-notochord = { git = "https://github.com/merely-made/dramatis.git", rev = "0234e7eea6f2ddf2330a71b9425da01b06ae0391" }
+notochord = { git = "https://github.com/merely-made/dramatis.git", branch = "main" }
 pandect = { git = "https://www.github.com/merely-made/mere.git", rev = "864757da78214bdd810e17355df5b2309721d651" }
-personae = { git = "https://github.com/merely-made/dramatis.git", rev = "0234e7eea6f2ddf2330a71b9425da01b06ae0391" }
+personae = { git = "https://github.com/merely-made/dramatis.git", branch = "main" }
 sceno = { git = "https://www.github.com/merely-made/mere.git", rev = "864757da78214bdd810e17355df5b2309721d651" }
 scenograph = { git = "https://www.github.com/merely-made/mere.git", rev = "864757da78214bdd810e17355df5b2309721d651" }
 scenomise = { git = "https://www.github.com/merely-made/mere.git", rev = "864757da78214bdd810e17355df5b2309721d651" }

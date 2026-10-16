@@ -16,9 +16,9 @@ blake3 = "1"
 serde_json = "1"
 hkdf = "0.13"
 sha2 = "0.11"
-identity = { package = "personae", version = "0.3.0", git = "https://github.com/merely-made/dramatis.git", rev = "0234e7eea6f2ddf2330a71b9425da01b06ae0391" }
-insigne = { package = "insigne", version = "0.0.2", git = "https://github.com/merely-made/dramatis.git", rev = "0234e7eea6f2ddf2330a71b9425da01b06ae0391" }
-notochord = { package = "notochord", version = "0.1.1", git = "https://github.com/merely-made/dramatis.git", rev = "0234e7eea6f2ddf2330a71b9425da01b06ae0391" }
+identity = { package = "personae", version = "0.3.0", git = "https://github.com/merely-made/dramatis.git", branch = "main" }
+insigne = { package = "insigne", version = "0.0.2", git = "https://github.com/merely-made/dramatis.git", branch = "main" }
+notochord = { package = "notochord", version = "0.1.1", git = "https://github.com/merely-made/dramatis.git", branch = "main" }
 muniment = { package = "muniment", version = "0.1.2", git = "https://github.com/merely-made/mere.git", branch = "main" }
 stickleback = { package = "stickleback", version = "0.1.1", git = "https://github.com/merely-made/mere.git", branch = "main" }
 proofs = { package = "mere-proofs", version = "0.1.0", git = "https://github.com/merely-made/mere.git", branch = "main" }
