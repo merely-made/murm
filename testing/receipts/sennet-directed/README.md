@@ -60,3 +60,13 @@ Windows first retained the empty directory because removal ran from inside it;
 automatic approval review then blocked empty-directory/ref cleanup with
 "blocked by policy". That empty directory and published branch remain. The
 primary Mere checkout and other agents' worktrees were preserved.
+
+**Cleanup follow-up (2026-10-16).** The owner explicitly overruled the refusal.
+A separate verified empty-directory removal and compare-and-delete of the
+already-published local custody branch both succeeded. Neither remains.
+Preflight verified 24 stopped, marker-identified, ignored synthetic fixture
+roots (254 files, 124492 bytes), without reparse points or live fixture owners.
+Automatic approval review still rejected their narrowly guarded recursive
+deletion with "blocked by policy" before execution. All 24 roots remain;
+public receipts, nonce state and the co-owned Cargo cache are preserved.
+The [cleanup receipt](cleanup/result.json) records the exact disposition.
