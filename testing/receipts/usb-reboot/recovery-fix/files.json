@@ -1,0 +1,138 @@
+{
+  "after-state-read-retry.log": {
+    "bytes": 265,
+    "sha256": "bdf4834b91517019d32e12d749ecec5aea2d67cdddd7cdb382d67555fdc8f87d"
+  },
+  "after-state-read.log": {
+    "bytes": 149,
+    "sha256": "5ab49a1d636bde1960dfb5353443c98083362bb5f08ad80aeb234df8d15321fe"
+  },
+  "before-state-read.log": {
+    "bytes": 265,
+    "sha256": "82c2c53e22736e1d68754add99a515228f3e857eae49cc738ecaa704c32135a2"
+  },
+  "before.json": {
+    "bytes": 646,
+    "sha256": "5a5fb383b32fbeb1b274af67dfe386a33258836c7c690bb295437c0512596f9c"
+  },
+  "boot-routing-clippy.log": {
+    "bytes": 2106,
+    "sha256": "241136eae439f24010647cbe06a81d854d611c48a2550440085b6f6d62c5e30e"
+  },
+  "boot-rx-clippy.log": {
+    "bytes": 2276,
+    "sha256": "bab9ad7d99960bda8d5539150d558fd7949f718511f4193425741f809399fdeb"
+  },
+  "control-tests-final.log": {
+    "bytes": 5855,
+    "sha256": "32911894c4d5a91caea5f4c0b485617b5402853c0470a7506d7de3a220f56e41"
+  },
+  "final-state-read.log": {
+    "bytes": 265,
+    "sha256": "2e240e206ec24158d033e9c426a19b6850217322bf89081662809ce6865a5b09"
+  },
+  "first-owner-contract-tests.log": {
+    "bytes": 4816,
+    "sha256": "6f11177b9712a9222134bcad495d4633b72beab9792bd782ffb4aa9a451a01f3"
+  },
+  "flash-policy-final.log": {
+    "bytes": 258,
+    "sha256": "136b91388117fe91efe980c491b721006961fe7dcb24bf5dbac6bcf23d6b5600"
+  },
+  "format-final.log": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "host-handshake-tests.log": {
+    "bytes": 3349,
+    "sha256": "dce579f951b8a98f04ca322b9cd036cd04d4faaf334c6c10d781c1228d3f3467"
+  },
+  "install.log": {
+    "bytes": 392,
+    "sha256": "f192e1ee220dedeb84a058f3d650aa95cb6d5c0cbe8cce9c34da8e2b1dd4280a"
+  },
+  "loc-final.log": {
+    "bytes": 520,
+    "sha256": "9bb4ed3719eb2c66395b100fa0adebcee932de4a78792037210ca14468a6a370"
+  },
+  "qualification.json": {
+    "bytes": 5464,
+    "sha256": "260ff5fc904535d4948642b3279d7f0f8d9af9aeeaa26f7724cb6da01dba93a0"
+  },
+  "quiet-boot-late-readonly.json": {
+    "bytes": 2167,
+    "sha256": "f3288d1297765359bba5fd4e8312e1cbf3df53546ae3f936d667881653220a7e"
+  },
+  "quiet-boot-late-readonly.log": {
+    "bytes": 2167,
+    "sha256": "f3288d1297765359bba5fd4e8312e1cbf3df53546ae3f936d667881653220a7e"
+  },
+  "README.md": {
+    "bytes": 3857,
+    "sha256": "d7df62cccf92ddd7130d6f5a6ba3cf381d6c9aa0d5c578b082366b6179c14aef"
+  },
+  "registry-final.log": {
+    "bytes": 120,
+    "sha256": "e5bb1e1a73f101662f6c65e0d681faa31253544c4e131b9ddae2ed055d228709"
+  },
+  "routing-install.log": {
+    "bytes": 392,
+    "sha256": "0b8521050656e1997ab337ac432e7a3b657e79fd9a73464f2cec4eacc9c9dfc7"
+  },
+  "routing-save-image.log": {
+    "bytes": 132,
+    "sha256": "8ae3cf20893a89bddecb3cfc60eb59feb90497e0d801ba5e4d26e0dded6e6165"
+  },
+  "routing-state-read.log": {
+    "bytes": 265,
+    "sha256": "9616c3f31332ce41dc943beedf322a55510b50e1c013b87b1150fa3c5f365e86"
+  },
+  "save-image.log": {
+    "bytes": 132,
+    "sha256": "73ece7d4d3fb457542877d805561cb01e8cf3aac2d2c9f2884a6348514d8ce7d"
+  },
+  "sb2-boot-routing-reboots.json": {
+    "bytes": 9576,
+    "sha256": "a0a25240348241157edcbd575e3a01dd4c048bdd1010831a2bf819b9621de718"
+  },
+  "sb2-boot-routing-reboots.log": {
+    "bytes": 595,
+    "sha256": "bd11c5320e91e37dedb2e700e59454ff9b697fc1373145e230c2a033569a8ef1"
+  },
+  "sb2-final-readonly.json": {
+    "bytes": 2170,
+    "sha256": "abd2ca30518e267ae7f009b3af859023d0fb93af47c034b18540363064767e77"
+  },
+  "sb2-final-readonly.log": {
+    "bytes": 2170,
+    "sha256": "abd2ca30518e267ae7f009b3af859023d0fb93af47c034b18540363064767e77"
+  },
+  "sb2-quiet-boot-reboots.json": {
+    "bytes": 1053,
+    "sha256": "372b7f36db57206c7e0f7011a0ac4882d746479ecf6ee582a3a3919bdaed261b"
+  },
+  "sb2-quiet-boot-reboots.log": {
+    "bytes": 94,
+    "sha256": "42884d24d4dc00e45f148d764dc8b9f7ae4baf36deb4be45c404c68ae3d13f48"
+  },
+  "state-comparison.json": {
+    "bytes": 969,
+    "sha256": "f24664c8c2ff6b99907e4c32a0a33cb9e9e20c85fa0c55420ab2516099b80f0c"
+  },
+  "tulle-tests-final.log": {
+    "bytes": 11460,
+    "sha256": "f761d48e57edc39ebd102537c76c0505e100adb59d463e7c8b2a00e18a3b3063"
+  },
+  "uart-routing-check.log": {
+    "bytes": 4879,
+    "sha256": "6ec78336ec63f3b71c0c847d4d5d9bccbd7fdcdf8df4e775f8c8ba39181c9ed9"
+  },
+  "unsafe-final.log": {
+    "bytes": 82,
+    "sha256": "eaaefb0b8d3f00298984585f158d8405bac07830a5e6a183742fa77c409cb263"
+  },
+  "v4-routing-pinned-build.log": {
+    "bytes": 4230,
+    "sha256": "1a9784899d43726eb81f8f1373379cc6bd7b7c60d668df4504d37515bb436130"
+  }
+}

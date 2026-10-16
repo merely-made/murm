@@ -1,0 +1,49 @@
+{
+  "device": "SB2",
+  "expected_usb": [
+    12346,
+    4097,
+    "44:1B:F6:6A:FA:64"
+  ],
+  "connection_user_reported": "direct-pc",
+  "requested_rounds": 5,
+  "source_sha256": "2ef5e6d6197850fb5fc82a0241fab1b345cc505c63c36eb3a04ff0de68d712ba",
+  "sessions": [
+    {
+      "phase": "baseline",
+      "port": "COM7",
+      "responses": [
+        {
+          "command": "status",
+          "response": "",
+          "seconds": 1.681
+        },
+        {
+          "command": "name",
+          "response": "",
+          "seconds": 2.01
+        }
+      ],
+      "attached": ""
+    }
+  ],
+  "completed_rounds": 0,
+  "passed": false,
+  "reboot_method": "channel modem: verified settings save then software_reset",
+  "serial_lines": {
+    "dtr": false,
+    "rts": false
+  },
+  "reopen_delay_seconds": 6,
+  "error": "SerialTimeoutException('Write timeout')",
+  "enumerated_after_failure": [
+    {
+      "port": "COM7",
+      "usb": [
+        12346,
+        4097,
+        "44:1B:F6:6A:FA:64"
+      ]
+    }
+  ]
+}

@@ -2392,7 +2392,7 @@ required USB reattachment rather than a full board power cycle. No further
 reset or firmware change is performed in this control.
 
 
-USB recovery implementation (2026-10-16, physical qualification pending):
+USB recovery implementation (2026-10-16, SB2 physically qualified):
 tracing finds that SB2's control and pending journals are blank, so its boot
 waits for a 20-second physical-claim window before reading USB. SB1 has durable
 control state and skips the window. The quiet-output-only candidate at
@@ -2416,7 +2416,13 @@ TX wait before the first read. UART announcements remain. Five tests import the
 actual board prefetch adapter and exercise fragmented queries, byte-preserving
 replay/cancellation, denied eligibility and mutation/binary refusal. The full
 Tulle host suites, control/first-owner tests, target Clippy with existing
-allowances and UART check pass. Physical qualification of the complete routing
-fix is the next gate. V4 main and control_boot fit their existing LOC baselines;
+allowances and UART check pass. The complete routing fix at `c8e5eb9309e`
+passes five consecutive save/software-reboot cycles on SB2 without manual USB
+reattachment, advancing slot A sequence 8 to slot B sequence 13. A final ROM
+state read and two read-only USB sessions also pass. The CRC-checked active
+settings body, including identity and preferences, is unchanged; protected
+bytes outside the settings pair match exactly. The [recovery receipt](../testing/receipts/usb-reboot/recovery-fix/README.md)
+keeps the failed quiet-only baseline and late no-replug pass separate. SB2 now
+runs this fixed modem/US915 image; SB1 and T114 retain `cb042329232`. V4 main and control_boot fit their existing LOC baselines;
 five pre-existing violations elsewhere remain. No new unsafe surface or durable
 field is added.

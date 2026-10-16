@@ -1,0 +1,60 @@
+warning: patch `mere-p2panda-net v0.7.5 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `mere-proofs v0.1.0 (https://github.com/merely-made/mere.git?branch=main#71405bc6)` was not used in the crate graph
+warning: patch `muniment v0.1.2 (https://github.com/merely-made/mere.git?branch=main#71405bc6)` was not used in the crate graph
+warning: patch `p2panda-auth v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-core v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-discovery v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-encryption v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-store v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-stream v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-sync v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+help: Check that the patched package version and available features are compatible
+      with the dependency requirements. If the patch has a different version from
+      what is locked in the Cargo.lock file, run `cargo update` to use the new
+      version. This may also occur with an optional dependency that is not enabled.
+   Compiling seneschal v0.2.0 (C:\Users\mark_\Code\repos\retinue\crates\seneschal)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.79s
+     Running tests\control_contract.rs (target\build\debug\deps\control_contract-c8fadd04749c7f90.exe)
+
+running 6 tests
+test canonical_request_and_provisional_response_round_trip ... ok
+test response_rejects_unknown_capability_role ... ok
+test frame_ceilings_and_bounded_capabilities_hold ... ok
+test observation_and_debug_redaction_are_explicit ... ok
+test codec_rejects_bad_version_tags_lengths_and_tails ... ok
+test generation_never_wraps_and_read_only_operations_are_identified ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\first_write_staging.rs (target\build\debug\deps\first_write_staging-6964ac999ab3a17a.exe)
+
+running 8 tests
+test only_two_erased_pending_slots_are_blank_and_torn_data_is_corrupt ... ok
+test corrupt_control_without_valid_pending_faults ... ok
+test non_initial_generation_cannot_be_staged ... ok
+test write_helpers_reject_foreign_or_unrecoverable_state ... ok
+test canonical_initial_state_round_trips_through_staging_and_rhd1 ... ok
+test pending_initial_state_recovers_blank_or_corrupt_control_pair ... ok
+test pending_state_must_match_this_node_and_current_recovery_facts ... ok
+test valid_control_wins_over_stale_pending_state ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\portable_first_write\main.rs (target\build\debug\deps\portable_first_write-716b2c11b724d942.exe)
+
+running 12 tests
+test wire::every_simple_request_and_response_variant_is_exact_and_rejects_bad_dispositions ... ok
+test wire::inspect_action_bits_are_exact_for_every_recovery_shape ... ok
+test storage::inspection_read_failures_are_typed_and_scratch_refuses_mismatched_slots ... ok
+test wire::exact_wire_round_trips_and_rejects_truncation_trailing_versions_and_opcodes ... ok
+test storage::abandon_requires_blank_control_and_its_partial_cleanup_is_safe_to_retry ... ok
+test storage::corrupt_repair_advances_outer_sequence_and_handles_max_without_losing_pending ... ok
+test storage::abandon_erases_corrupt_pending_only_with_blank_control_and_can_retry_after_slot_b_failure ... ok
+test storage::corrupt_control_can_be_repaired_from_valid_pending_but_torn_control_never_hides_pending ... ok
+test storage::valid_control_wins_stale_pending_and_abandon_will_not_erase_it ... ok
+test storage::stage_failures_never_touch_control_and_leave_a_safe_retry_state ... ok
+test storage::resume_failures_preserve_pending_until_control_is_durable_then_report_cleanup ... ok
+test wire::claim_proof_binds_every_authority_bearing_byte_and_is_one_shot ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+

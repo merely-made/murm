@@ -1,0 +1,11 @@
+round 1: save/reboot acknowledged; waiting for USB
+round 1: USB recovered, name/settings intact, sequence=9
+round 2: save/reboot acknowledged; waiting for USB
+round 2: USB recovered, name/settings intact, sequence=10
+round 3: save/reboot acknowledged; waiting for USB
+round 3: USB recovered, name/settings intact, sequence=11
+round 4: save/reboot acknowledged; waiting for USB
+round 4: USB recovered, name/settings intact, sequence=12
+round 5: save/reboot acknowledged; waiting for USB
+round 5: USB recovered, name/settings intact, sequence=13
+{"passed": true, "completed_rounds": 5}

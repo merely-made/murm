@@ -1,0 +1,33 @@
+{
+  "before": {
+    "slot": "A",
+    "sequence": 8
+  },
+  "after": {
+    "slot": "B",
+    "sequence": 13
+  },
+  "settings_body_equal": true,
+  "outside_settings_pair_equal": true,
+  "control_pair_blank_before": true,
+  "pending_pair_blank_before": true,
+  "private_raw_state_published": false,
+  "private_inputs": {
+    "sb2-before-private-tail.bin": {
+      "bytes": 65536,
+      "sha256": "62a6765e70b5f4c9d3f896b87be8d1620e6539fc4237ebbcc6f33e4d6ed77b08"
+    },
+    "sb2-after-install-private-tail-retry.bin": {
+      "bytes": 65536,
+      "sha256": "62a6765e70b5f4c9d3f896b87be8d1620e6539fc4237ebbcc6f33e4d6ed77b08"
+    },
+    "sb2-after-routing-private-tail.bin": {
+      "bytes": 65536,
+      "sha256": "62a6765e70b5f4c9d3f896b87be8d1620e6539fc4237ebbcc6f33e4d6ed77b08"
+    },
+    "sb2-final-private-tail.bin": {
+      "bytes": 65536,
+      "sha256": "e64bad0345508759ebbfc8bdc397f49ba0a54b6aaadaa83902dec7e3b6c64d04"
+    }
+  }
+}

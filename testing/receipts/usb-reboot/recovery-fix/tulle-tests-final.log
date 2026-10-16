@@ -1,0 +1,161 @@
+warning: patch `mere-p2panda-net v0.7.5 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `mere-proofs v0.1.0 (https://github.com/merely-made/mere.git?branch=main#71405bc6)` was not used in the crate graph
+warning: patch `muniment v0.1.2 (https://github.com/merely-made/mere.git?branch=main#71405bc6)` was not used in the crate graph
+warning: patch `p2panda-auth v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-core v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-discovery v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-encryption v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-store v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-stream v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-sync v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+help: Check that the patched package version and available features are compatible
+      with the dependency requirements. If the patch has a different version from
+      what is locked in the Cargo.lock file, run `cargo update` to use the new
+      version. This may also occur with an optional dependency that is not enabled.
+   Compiling tulle v0.2.0 (C:\Users\mark_\Code\repos\retinue\crates\tulle)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 13.24s
+     Running unittests src\lib.rs (target\build\debug\deps\tulle-9b45cd71e50108b4.exe)
+
+running 84 tests
+test airtime::tests::fresh_budget_allows ... ok
+test airtime::tests::announce_cap_spaces_by_modeled_airtime_without_weakening_shared_budget ... ok
+test airtime::tests::next_slot_impossible_duration ... ok
+test airtime::tests::next_slot_now_when_budget_free ... ok
+test airtime::tests::next_slot_waits_for_ageout ... ok
+test airtime::tests::announce_pacing_rounds_up_and_zero_cap_blocks_all_egress ... ok
+test airtime::tests::straddling_send_counts_partially ... ok
+test airtime::tests::budget_ages_out ... ok
+test direct_phy::tests::decoder_resynchronizes_after_oversize_observation_header ... ok
+test direct_phy::tests::decoder_discards_bad_observation_crc_and_recovers ... ok
+test direct_phy::tests::decoder_resynchronizes_after_an_impossible_length ... ok
+test direct_phy::tests::decoder_reassembles_large_observation_and_following_rx ... ok
+test airtime::tests::spending_reduces_allowance ... ok
+test direct_phy::tests::decoder_skips_status_and_reassembles_usb_chunks ... ok
+test direct_phy::tests::transmit_command_has_little_endian_length ... ok
+test direct_phy::tests::ui_snapshot_command_is_opaque_and_self_delimiting ... ok
+test direct_phy_serial::tests::charge_duration_ms_preserves_exact_milliseconds_and_rounds_up_fractions ... ok
+test kiss::tests::back_to_back_frames_share_fend ... ok
+test kiss::tests::idle_fends_produce_nothing ... ok
+test kiss::tests::invalid_escape_discards_frame ... ok
+test kiss::tests::oversize_frame_discarded_and_resyncs ... ok
+test kiss::tests::reset_discards_a_partial_frame ... ok
+test kiss::tests::roundtrip_plain ... ok
+test kiss::tests::roundtrip_with_escapes ... ok
+test kiss::tests::split_across_pushes ... ok
+test link::tests::a_frame_larger_than_the_whole_allowance_can_never_fit ... ok
+test link::tests::a_send_within_budget_goes_out_and_is_received ... ok
+test link::tests::announce_pacing_uses_the_same_shared_airtime_budget ... ok
+test link::tests::budget_recovers_after_the_window_passes ... ok
+test link::tests::the_duty_cycle_gate_blocks_and_reports_a_retry_time ... ok
+test lora::tests::low_data_rate_optimize_threshold ... ok
+test lora::tests::sx126x_short_spreading_factors_follow_the_datasheet ... ok
+test lora::tests::symbol_time_is_two_pow_sf_over_bw ... ok
+test lora::tests::time_on_air_matches_semtech_reference_vectors ... ok
+test direct_phy_serial::tests::announce_cap_spaces_direct_phy_egress_from_the_modeled_airtime ... ok
+test lora::tests::time_on_air_ms_rounds ... ok
+test modem::tests::drives_as_a_trait_object ... ok
+test modem::tests::rejects_an_oversize_frame ... ok
+test pacing::tests::fast_profiles_still_get_the_floor_margin ... ok
+test pacing::tests::listening_first_widens_every_floor ... ok
+test observation_serial::tests::only_observation_commands_and_split_replies ... ok
+test pacing::tests::show_the_derived_floors ... ok
+test pacing::tests::slower_profiles_get_longer_floors ... ok
+test pacing::tests::the_link_floor_beats_the_constant_that_failed_on_hardware ... ok
+test pacing::tests::the_resource_floor_clears_a_request_and_a_full_part ... ok
+test pacing::tests::transfer_timeout_scales_with_payload_and_window ... ok
+test rnode::stats::tests::bitrate_matches_rns ... ok
+test personality_serial::tests::cancelled_profile_future_latches_recovery_and_refuses_send ... ok
+test rnode::stats::tests::channel_report_follows_rns_layout ... ok
+test personality_serial::tests::rejects_duplicate_and_uninstalled_profile_mappings ... ok
+test personality_serial::tests::away_receive_stops_at_excursion_deadline_before_return_budget ... ok
+test rnode::stats::tests::phy_csma_battery_and_temperature ... ok
+test rnode::stats::tests::quality_spans_the_sf_window ... ok
+test rnode::tests::a_reset_while_online_is_a_fault ... ok
+test rnode::tests::airtime_locks_are_sent_before_the_radio_comes_up ... ok
+test rnode::tests::airtime_lock_echoes_are_recorded_not_compared ... ok
+test rnode::tests::config_ranges_follow_rns ... ok
+test rnode::tests::errors_are_classified_as_rns_does ... ok
+test rnode::tests::flow_control_holds_one_frame_until_ready ... ok
+test rnode::tests::leave_turns_the_radio_off_then_says_goodbye ... ok
+test rnode::tests::mismatched_echoes_fault_instead_of_going_online ... ok
+test rnode::tests::old_firmware_is_refused ... ok
+test rnode::tests::sx126x_paces_short_spreading_factors_by_its_own_airtime ... ok
+test rnode::tests::telemetry_and_echoed_bitrate_are_kept ... ok
+test rnode::tests::the_keepalive_is_rns_s_detect_probe ... ok
+test rnode::tests::the_hardware_mtu_is_rns_s_508 ... ok
+test serial::tests::rejects_a_frame_that_can_never_fit_the_budget ... ok
+test serial::tests::an_idle_link_sends_detect_keepalives_and_publishes_telemetry ... ok
+test serial::tests::rnode_port_parses_rns_port_values ... ok
+test observation_serial::tests::timeout_and_external_cancellation_retire_the_stream ... ok
+test personality_serial::tests::acknowledges_only_the_firmware_accepted_profile ... ok
+test serial::tests::shutdown_turns_the_radio_off_and_leaves ... ok
+test serial::tests::initializes_paces_and_delivers_frames ... ok
+test serial::tests::announce_cap_spaces_rnode_egress_from_the_modeled_airtime ... ok
+test direct_phy_serial::tests::truncated_snapshot_timeout_resynchronizes_following_transmit ... ok
+test serial::tests::a_supervised_link_reopens_after_a_fatal_device_error ... ok
+test direct_phy_serial::tests::usb_configuration_sends_no_wake_prefix ... ok
+test direct_phy_serial::tests::live_reconfiguration_updates_the_profile_without_reopening_the_link ... ok
+test direct_phy_serial::tests::wake_preamble_precedes_every_command ... ok
+test direct_phy_serial::tests::fragmented_firmware_events_reassemble ... ok
+test serial::tests::a_re_init_after_a_detect_answer_keeps_the_port ... ok
+test serial::tests::an_unanswered_detect_ends_the_port_for_a_reopen ... ok
+test direct_phy_serial::tests::pump_sends_and_receives_complete_frames ... ok
+test direct_phy_serial::tests::pump_retries_status_and_profile_during_startup ... ok
+
+test result: ok. 84 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.55s
+
+     Running tests\personality\main.rs (target\build\debug\deps\personality-479394429a190106.exe)
+
+running 21 tests
+test admission::constructor_rejects_uninstalled_home_and_pin ... ok
+test admission::busy_departure_is_deferred_only_within_bound_and_can_cancel ... ok
+test coverage::coverage_loss_during_activation_is_latched_until_return ... ok
+test admission::repeated_busy_reports_cannot_extend_the_original_deferral_bound ... ok
+test admission::pin_and_unsupported_targets_are_refused ... ok
+test coverage::current_but_short_coverage_during_activation_still_latches_return ... ok
+test coverage::deferred_required_coverage_is_revalidated_with_fresh_evidence ... ok
+test coverage::recovered_coverage_cannot_clear_a_latched_activation_cancellation ... ok
+test admission::session_loss_requires_explicit_permission_on_departure_and_return ... ok
+test coverage::recovered_coverage_cannot_clear_a_latched_activation_return ... ok
+test recovery::return_transition_deadline_is_capped_and_late_ack_recovers ... ok
+test recovery::stalled_activation_and_failed_restore_require_recovery ... ok
+test recovery::clock_regression_and_overflow_are_visible ... ok
+test coverage::required_coverage_expires_but_optional_gap_is_allowed ... ok
+test recovery::wrong_departure_ack_preserves_transition_for_the_matching_ack ... ok
+test recovery::pending_return_remains_visible_and_overdue_return_requires_recovery ... ok
+test returns::cancellation_after_activation_requests_return_and_ack_is_required ... ok
+test returns::cancellation_during_activation_is_visible_before_any_home_report ... ok
+test returns::cancellation_during_departure_acknowledges_only_into_a_return_obligation ... ok
+test returns::explicit_finish_uses_completed_return_reason ... ok
+test returns::two_stateful_adapters_keep_local_state_across_a_normal_return ... ok
+
+test result: ok. 21 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\rnode_capture.rs (target\build\debug\deps\rnode_capture-961ceb40edd1d6f7.exe)
+
+running 5 tests
+test a_device_error_is_taken_once_and_then_cleared ... ok
+test replaying_device_responses_brings_the_radio_online ... ok
+test enqueue_frames_data_and_prices_airtime ... ok
+test init_sequence_matches_the_oracle_capture ... ok
+test rx_capture_replays_to_three_received_announces ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\v4_boot_rx.rs (target\build\debug\deps\v4_boot_rx-a0ce05921893d190.exe)
+
+running 5 tests
+test pending_or_unreadable_state_cannot_bypass_physical_presence ... ok
+test mutations_binary_frames_and_unknown_data_remain_for_the_real_parser ... ok
+test gesture_winning_during_prefetch_keeps_every_received_byte ... ok
+test permitted_read_only_queries_select_ordinary_service ... ok
+test fragmented_query_is_recognized_and_replayed_once_before_live_data ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests tulle
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
