@@ -71,10 +71,10 @@ def main():
             before = {cmd: query(link, session, cmd) for cmd in ["status", "name", "region", "channel", "ui"]}
             assert "phy online" in before["status"], "firmware is not online"
             assert "name=" in before["name"], "firmware lacks the name command"
-            invalid = query(link, session, "name set bad\tname")
-            assert invalid.startswith("name invalid:"), "invalid name was not refused"
-            assert query(link, session, "name") == before["name"], "invalid name changed settings"
             if args.provision:
+                invalid = query(link, session, "name set bad\tname")
+                assert invalid.startswith("name invalid:"), "invalid name was not refused"
+                assert query(link, session, "name") == before["name"], "invalid name changed settings"
                 answer = query(link, session, "name set " + args.name)
                 assert answer == "name saved; rebooting\r\n" or answer == "name=" + args.name + "\r\n", answer
         time.sleep(6)
@@ -85,8 +85,9 @@ def main():
             assert "name=" + args.name + "\r\n" in after["status"]
             assert after["region"] == before["region"], "region changed"
             assert after["channel"] == before["channel"], "channel changed"
-            # An unchanged name must not write or reboot, including on the second session.
-            assert query(link, session, "name set " + args.name) == after["name"]
+            # Verification without --provision sends read-only queries exclusively.
+            if args.provision:
+                assert query(link, session, "name set " + args.name) == after["name"]
             assert query(link, session, "status") == after["status"], "unchanged name caused a reset/write"
         report["passed"] = True
     except Exception as error:

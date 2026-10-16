@@ -1,0 +1,41 @@
+{
+  "device": "SB1",
+  "name": "SB1",
+  "expected_usb": [
+    12346,
+    4097,
+    "44:1B:F6:6A:FB:28"
+  ],
+  "source_sha256": "2aa7382dfa7092d3b0704d41aa87865dc5af0556a73a8c6ff6631f06d695ea30",
+  "provision": true,
+  "sessions": [
+    {
+      "port": "COM6",
+      "attached": "",
+      "responses": [
+        {
+          "command": "status",
+          "response": "tulle/heltec-v4 phy online; version=0.0.1; sx1262 online; sync=2b reg=24b4; longfast=906875000; build=09b414908b1e9ec3f0a3e8e988c02068fb831852; image=v4-modem-usb\r\nidentity=unavailable\r\nname unavailable\r\n"
+        },
+        {
+          "command": "name",
+          "response": "name unavailable\r\n"
+        },
+        {
+          "command": "region",
+          "response": "region unavailable: no identity\r\n"
+        },
+        {
+          "command": "channel",
+          "response": "channel unavailable: no identity\r\n"
+        },
+        {
+          "command": "ui",
+          "response": "ui=ok; display=on; screen=status; button=0; host=none\r\n"
+        }
+      ]
+    }
+  ],
+  "passed": false,
+  "error": "AssertionError('firmware lacks the name command')"
+}

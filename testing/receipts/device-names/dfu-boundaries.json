@@ -1,0 +1,26 @@
+{
+  "revision": "09b414908b1",
+  "images": {
+    "t114.zip": {
+      "sha256": "869924adf0b15940cbed21506751af6a0603fded09c0902be298ebb3096cab43",
+      "payload_sha256": "c3df45baf6b1776922398a60ac912671dd458153eccef6c28956f163fea27bca",
+      "payload_bytes": 364484,
+      "erase_end": "0x7f000",
+      "application_only": true
+    },
+    "t114-handoff.zip": {
+      "sha256": "7ef7e6c2d50e8aa5e5536cdcda124cb2dda9636dcb40fa6dd9efb32feae41740",
+      "payload_sha256": "4f3f12328fd1f28391dba2aac2b4a8a456e7b9decb4d97ba57cb9e64c293a44e",
+      "payload_bytes": 1368,
+      "erase_end": "0x27000",
+      "application_only": true
+    },
+    "t114-restore.zip": {
+      "sha256": "c1e0dc9e62cc6f5d100a1e6d7b8581f2c639a7ca65f35ceaecc7ac8e3b94355f",
+      "payload_sha256": "191df2ab67159eab83a144f71b40bb4fec7bd5132dacb8d1391427c2eea249cc",
+      "payload_bytes": 311396,
+      "erase_end": "0x73000",
+      "application_only": true
+    }
+  }
+}

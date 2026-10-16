@@ -1,0 +1,117 @@
+{
+  "source_revision": "cb042329232571cd3c50b2ef9b5e386fbe4f434a",
+  "software_passed": true,
+  "all_devices_provisioned": true,
+  "physical_screen_observation": false,
+  "devices": {
+    "SB1": {
+      "installed": true,
+      "provisioned": true,
+      "reboot_readback": true,
+      "channel": "rnode",
+      "region": "US915",
+      "settings_sequence_before": 10,
+      "settings_sequence_after": 11
+    },
+    "SB2": {
+      "installed": true,
+      "provisioned": true,
+      "reboot_readback": true,
+      "channel": "modem",
+      "region": "US915",
+      "settings_sequence_before": 5,
+      "settings_sequence_after": 6,
+      "readback_mode": "read-only across two USB sessions; user power-reconnected after post-save reboot timeout"
+    },
+    "T114": {
+      "installed": true,
+      "provisioned": true,
+      "reboot_readback": true,
+      "channel": "modem",
+      "region": "US915",
+      "settings_sequence_before": 93,
+      "settings_sequence_after": 94,
+      "public_node_prefix": "599997c8"
+    }
+  },
+  "first_install_failure": {
+    "device": "SB1",
+    "reason": "85-byte body made word-aligned NorFlash read lengths invalid",
+    "corrected_body_bytes": 88,
+    "provisioning_was_not_attempted": true,
+    "protected_64k_tail_exact_before_after": true,
+    "tail_sha256": "4118655d606257118b01262653dbd4ac49f2efff4c17ddd5c2d99a2ba0f3ab9e"
+  },
+  "checks": {
+    "radio_face_tests": 20,
+    "radio_hand_tests": 149,
+    "format": true,
+    "shared_strict_clippy": true,
+    "target_clippy_with_existing_allowances": true,
+    "normal_target_links": true,
+    "flash_classification": true,
+    "unsafe_audit": true,
+    "validation_inventory": true,
+    "loc_gate_passed": false,
+    "preexisting_loc_violations": 6,
+    "new_loc_violations": 0
+  },
+  "images": {
+    "v4.bin": {
+      "bytes": 404928,
+      "sha256": "de53d54630a64423756c6039f3413e50e7cd3167bc6fd2b0501bc28e381b9a42",
+      "role": "failed first alignment install; not qualified"
+    },
+    "v4-aligned.bin": {
+      "bytes": 407600,
+      "sha256": "8dbdf181989d26f0064f7c9a0d585e695000a791bc67f82645025de18d5f6c14",
+      "role": "installed and reboot/name qualified"
+    },
+    "t114.bin": {
+      "bytes": 364482,
+      "sha256": "e30cecd7094809d62918567d7674146a66d3589e6842236c47d86ae4c7f5314b",
+      "role": "uninstalled first build; not qualified"
+    },
+    "t114-aligned.bin": {
+      "bytes": 364482,
+      "sha256": "b63a0520baff338fa17aec63286fc0cfa703a12d1fe22077aa65cf27cb6f4af4",
+      "role": "installed and reboot/name qualified"
+    },
+    "t114-aligned.zip": {
+      "bytes": 365319,
+      "sha256": "4c56670f0cd51387b26802b29fe160439ce173a8c66e0538d6e97a3113d6605d",
+      "payload_matches_raw_plus_word_padding": true,
+      "role": "installed application-only DFU package"
+    }
+  },
+  "sources_sha256": {
+    "crates/radio-face/src/render/pages.rs": "36c62e549fab29b333e98ea2fbb0e46ab9d38c4ad8fb3a9ef534efd8d51ade70",
+    "crates/radio-face/src/render/screens.rs": "5fbc1a445b64481e700a31a6c3f7b3757dd8df959f4311f6354d6d3dde3d757c",
+    "crates/radio-face/src/render/tests.rs": "7439c07734a922435049d4a2e2dd59cd7712eb4484f89200e31039139b9976b6",
+    "crates/radio-face/src/render/tests/projection.rs": "a5f37bd96c8f277590aa51c9e63de95959db5831b61e2c7e3c14e54ff07ba992",
+    "crates/radio-face/src/status.rs": "0e5b1f6af50b1152cdb8ada2e287087cb382223ebea4d24d8df4692735cd28a3",
+    "crates/radio-hand/src/settings.rs": "9ff2fcc6008ae506dfb11eeaa8fb5a1f09ad5b3bfa2f69dae1bd2e4bd115b779",
+    "crates/radio-hand/src/settings/name.rs": "d3e7cd21d2ea635e56fce40f9f40a4026ddde37f9c6b5e1a05a46cffbfdc5d5e",
+    "firmware/heltec-v4-phy/src/board.rs": "ae296143c561176f4c609e53a8950010cecf7de283862c646b92e748f7eaf356",
+    "firmware/heltec-v4-phy/src/channels.rs": "e64cee8cf31218bf78da4bb7efd3e49820654ceb886c7f8df2d17a581d329b22",
+    "firmware/heltec-v4-phy/src/channels/name.rs": "62a33a748b2612b7624404f39cfb8ae008f7ecc48bf1c52f72f4788c2a7c4d2c",
+    "firmware/heltec-v4-phy/src/main.rs": "fbd5c145518b2793f5981952b9be972b43fa20c0f72922c77837133424f079cd",
+    "firmware/t114-phy/src/board.rs": "dd552319fd5eaeabe98192007fb2ac1e11f5d0ce2bd9252acd8169faf4bf2537",
+    "firmware/t114-phy/src/main.rs": "92c7bfe8dc77adb4e175d41b75d68631c438163589319c37a25cc05b2d78fb51",
+    "firmware/t114-phy/src/probes.rs": "abbbd302330dd5e6cdcfdae74e04971c4f1a7f83f33281fe92d57ff27fd2e747",
+    "firmware/t114-phy/src/probes/name.rs": "2958811c22756891e906ff797834d0f9b4d053683de3a322bca15675a3108176",
+    "testing/device_names.py": "2aa7382dfa7092d3b0704d41aa87865dc5af0556a73a8c6ff6631f06d695ea30",
+    "validation/manifest.toml": "68689c37764403e0184f727c0f87a8789c2a96a161991637094492bbe9f88dff",
+    "validation/security/flash-policy.toml": "feccd3cea4360e8ad228e25b240dc1be8efc56bb1c7a0260b2d5068132c423fc"
+  },
+  "state_scope": "All names reload from the settings journal after reboot. V4 original sequences advance exactly once; T114 sequence advances exactly once and public node prefix is unchanged. No raw protected-state readback after intentional name saves.",
+  "retained_artifacts_owner": "This receipt owns ignored validation/results/device-names images and private state comparison plus prior recovery backups; shared existing Cargo target/home reused; no isolated target/home/worktree.",
+  "all_devices_reboot_verified": true,
+  "completed": true,
+  "known_limitations": [
+    "SB2 USB endpoint required physical reconnect after flashing and after its settings-save software reboot; this naming change does not fix that existing USB recovery issue.",
+    "Physical screen pixels are not independently observed; both panel renderers and USB UI health pass.",
+    "Protocol memory stack/reserve acceptance remains separate and open."
+  ],
+  "read_only_runner_sha256": "b88f74468c53f7c924a6754e8f0e236b9e4a3878425d3d94609e3a2372d572e4"
+}

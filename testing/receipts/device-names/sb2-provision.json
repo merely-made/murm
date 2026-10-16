@@ -1,0 +1,29 @@
+{
+  "device": "SB2",
+  "name": "SB2",
+  "expected_usb": [
+    12346,
+    4097,
+    "44:1B:F6:6A:FA:64"
+  ],
+  "source_sha256": "2aa7382dfa7092d3b0704d41aa87865dc5af0556a73a8c6ff6631f06d695ea30",
+  "provision": true,
+  "sessions": [
+    {
+      "port": "COM7",
+      "attached": "",
+      "responses": [
+        {
+          "command": "status",
+          "response": ""
+        },
+        {
+          "command": "name",
+          "response": ""
+        }
+      ]
+    }
+  ],
+  "passed": false,
+  "error": "SerialTimeoutException('Write timeout')"
+}

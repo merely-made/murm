@@ -2304,38 +2304,50 @@ deletion of this run's stopped synthetic custodian root with "blocked by
 policy"; it remains ignored, bringing the retained roots in this lane to 25.
 The shared Cargo cache remains co-owned; no new target/home/worktree is created.
 
-### Board names (2026-10-16, implementation in progress)
+### Board names (2026-10-16)
 
 The owner requested persistent, visible names because the two unmarked V4s
 cannot be identified physically by COM port or USB serial. The board owns a
 public local label of up to sixteen printable ASCII characters. It appears as
-the boot and default status title and in USB `status` / `name` replies. It is
-separate from radio addresses, relay keys, host identity and RF profile names.
-`name set SB1` saves through the existing verified A/B settings journal and
-reboots; `name clear` restores the unnamed presentation. Invalid commands and
-unchanged labels do not write flash. Leading/trailing whitespace, control
-characters and oversized labels are rejected rather than silently truncated.
+the boot and default status title and in USB `status` / `name` replies,
+independently of relay keys, host identity, radio addresses and RF profiles.
+`name set SB1` saves through the verified A/B settings journal and reboots;
+`name clear` restores the unnamed presentation. Invalid commands and unchanged
+labels do not write. Oversized names, control bytes and edge spaces are refused.
 
-The settings body appends the name after the original 68-byte prefix. Old
-records remain readable with an empty name; malformed extensions do not discard
-the identity or region/channel. Both stores retain their existing addresses,
-sequences, checksums and write verification. A downgrade preserves the old
-prefix, although an older firmware rewriting settings will discard the label.
-The public flash inventory classifies the label explicitly.
+Implementation and installation are complete. Both normal firmware images at
+`cb042329232` are installed. SB1 (COM6, RNode, US915) reloads slot B sequence 11
+from sequence 10. SB2 (COM7, modem, US915) reloads slot A sequence 6 from
+sequence 5. T114 (COM10, modem, US915) reloads slot A sequence 94 from sequence
+93 and still reports public node prefix `599997c8`. All three saved names pass
+post-reboot USB readback with their original radio preferences. Invalid-name
+and unchanged-name checks pass on SB1/T114. SB2 acknowledged its name save,
+then required a physical reconnect after its USB endpoint stalled on reboot;
+its final checks are exclusively read-only across two USB sessions. The
+existing USB reset-recovery issue remains separate.
 
-Done conditions: shared settings/parser and both display renderer tests pass;
-both normal firmware images link; application-only updates preserve existing
-identity and settings; SB1/SB2/T114 are provisioned through the command; names
-survive reboot and are reported consistently. Physical screen observation is
-recorded separately from software rendering and USB checks. This change does
-not close the protocol memory plan's stack/reserve gates.
+The settings body appends the label after the original 68-byte prefix and pads
+to 88 bytes for word-aligned board flash reads. Old records remain readable
+with an empty name; malformed extensions do not discard identity or region/
+channel. A downgrade retains the original prefix, although older firmware
+rewriting settings discards the label. Existing store addresses, sequences,
+checksums and verification are retained. The public flash inventory explicitly
+classifies the label.
 
-Software checkpoint: 20 radio-face tests (including both physical panel layouts)
-and 149 radio-hand tests pass. Shared strict Clippy and both normal release
-links pass; board Clippy passes with the pre-existing board lint allowances.
-Flash classification and unsafe audits pass with four classified settings
-fields and the same 61 approved unsafe tokens. The LOC check retains the same
-six pre-existing violations; this slice adds none. Hardware installation and
-provisioning are next, so no physical display observation is claimed here.
+The [naming receipt](../testing/receipts/device-names/README.md) preserves a
+failed first install with an unaligned 85-byte body and the exact unchanged
+protected-tail comparison, plus separate SB2 USB failures and successful final
+readback. It binds the source, images and commands. Twenty radio-face tests,
+149 radio-hand tests, formatting, strict shared Clippy, both release links,
+target Clippy with existing allowances, flash classification, unsafe audit and
+validation inventory pass. The same six pre-existing LOC violations remain;
+this slice adds none. Both panel renderers and USB UI health pass. Physical
+screen pixels have not been independently observed, and no new RF, stack
+high-water or memory-reserve acceptance follows.
 
-First physical install refused settings reads because the appended 85-byte body made derived flash-read buffers unaligned. No provisioning write ran. The body now pads to 88 bytes, preserving the original prefix and name offsets; a settings regression asserts word alignment. The failed SB1 receipt is retained separately from the corrected image qualification.
+The current baseline is the named firmware at `cb042329232` and the labelled
+settings on each board. Before another stock-firmware excursion, refresh the
+guarded input hashes and take fresh current-state backups; older unnamed
+restoration inputs would undo these labels. Images, private state comparison
+and prior recovery artifacts remain receipt-owned. Existing shared Cargo
+caches were reused; no isolated target, Cargo home or worktree was created.

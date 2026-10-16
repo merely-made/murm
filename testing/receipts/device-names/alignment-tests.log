@@ -1,0 +1,36 @@
+warning: patch `mere-p2panda-net v0.7.5 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `mere-proofs v0.1.0 (https://github.com/merely-made/mere.git?branch=main#594c5b38)` was not used in the crate graph
+warning: patch `muniment v0.1.2 (https://github.com/merely-made/mere.git?branch=main#594c5b38)` was not used in the crate graph
+warning: patch `p2panda-auth v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-core v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-discovery v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-encryption v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-store v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-stream v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-sync v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+help: Check that the patched package version and available features are compatible
+      with the dependency requirements. If the patch has a different version from
+      what is locked in the Cargo.lock file, run `cargo update` to use the new
+      version. This may also occur with an optional dependency that is not enabled.
+   Compiling radio-face v0.0.1 (C:\Users\mark_\Code\repos\retinue\crates\radio-face)
+   Compiling radio-hand v0.0.1 (C:\Users\mark_\Code\repos\retinue\crates\radio-hand)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.09s
+     Running unittests src\lib.rs (target\build\debug\deps\radio_hand-387cb3eac9741c62.exe)
+
+running 13 tests
+test rnode::tests::non_settings_commands_are_not_accepted_as_settings ... ok
+test settings::tests::a_body_shorter_than_an_identity_is_refused ... ok
+test settings::name::tests::names_fit_both_displays_and_reject_invisible_or_truncated_labels ... ok
+test settings::name::tests::malformed_commands_are_consumed_without_a_settings_write ... ok
+test settings::tests::a_legacy_identity_only_body_keeps_its_identity ... ok
+test settings::tests::a_longer_body_from_a_later_firmware_is_read_as_far_as_it_is_understood ... ok
+test settings::tests::an_unknown_channel_falls_back_without_losing_the_identity ... ok
+test settings::tests::every_known_channel_round_trips ... ok
+test settings::tests::legacy_node_byte_is_read_but_every_rewrite_arms_the_guard ... ok
+test settings::tests::debug_redacts_private_identity_but_keeps_boot_metadata ... ok
+test settings::tests::names_extend_old_settings_without_changing_identity_or_preferences ... ok
+test settings::tests::old_firmware_unknown_channel_rule_will_recover_from_guarded_node ... ok
+test settings::tests::round_trips ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 136 filtered out; finished in 0.00s
+
