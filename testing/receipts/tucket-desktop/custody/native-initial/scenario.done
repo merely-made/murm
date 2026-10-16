@@ -1,0 +1,22 @@
+RESULT ok
+Signalman Tucket over Tulle against stock meshcore through production controls
+captured form
+waited 37 frames
+captured connected
+waited 115 frames
+waited 0 frames
+captured roundtrip
+waited 0 frames
+captured disconnected
+waited 36 frames
+captured reconnected
+waited 0 frames
+captured stopped
+capture form 2400x1504 digest=e183b6b06d93ccbe file=C:\Users\mark_\Code\repos\retinue\validation\results\tucket-desktop-20261015\native-djinn\native\form.png
+capture connected 2400x1504 digest=2b2544b9937d654c file=C:\Users\mark_\Code\repos\retinue\validation\results\tucket-desktop-20261015\native-djinn\native\connected.png
+capture roundtrip 2400x1504 digest=762778dc33c87fa5 file=C:\Users\mark_\Code\repos\retinue\validation\results\tucket-desktop-20261015\native-djinn\native\roundtrip.png
+capture disconnected 2400x1504 digest=6079f9674738d037 file=C:\Users\mark_\Code\repos\retinue\validation\results\tucket-desktop-20261015\native-djinn\native\disconnected.png
+capture reconnected 2400x1504 digest=e2b300444b2fb1a5 file=C:\Users\mark_\Code\repos\retinue\validation\results\tucket-desktop-20261015\native-djinn\native\reconnected.png
+capture stopped 2400x1504 digest=65727553498cdfbd file=C:\Users\mark_\Code\repos\retinue\validation\results\tucket-desktop-20261015\native-djinn\native\stopped.png
+frames: 6 captured, 0 blank, 6 distinct digests
+presentation: 253 frames, 253 redraws, 0 unpresented redraws

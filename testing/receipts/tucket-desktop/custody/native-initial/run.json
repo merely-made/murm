@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "source": "8bd89bedc5d543063073b1ff25762e96bb41c8a6",
+  "protocol": "meshcore",
+  "port": "COM7",
+  "peer_port": "COM6",
+  "self_address": "ab0bd0135352e3fd9736e2d0e38b3d660fe7b8cd6e2673b7930a885127486e07",
+  "peer_address": "a6300d0e2bd97bd6f9629199155d23e92b8dc1c50a4634c4135832a1c38d891d",
+  "realm": "bench-tucket-djinn",
+  "channel": 0,
+  "tag": "signalman-ui-79b1b06663784530a8f37df28dae2450",
+  "desktop_sha256": "374BD6B13D6456B48A1DE47DF23D86688B17E88B19434DC173EE3AC9268F4685",
+  "peer_sha256": "B756CF7339DA327C72E3DF4C5BEA110AE09E843B5B3A89DA7C1D84A4307796BF",
+  "scenario_sha256": "F9FDFB3BA3399D1B210417A01C749F7F1EBE0F520C09131606F24B9E3EFCB87E",
+  "deadline_seconds": 180,
+  "firmware_or_configuration_mutated": false,
+  "result": "failed",
+  "carriage": "djinn_tucket_over_tulle",
+  "peer_pid": 28212,
+  "desktop_pid": 15704,
+  "error": "Absolute acceptance deadline exceeded.",
+  "closed_utc": "2026-10-16T04:52:35.7357898Z"
+}

@@ -34,6 +34,9 @@ assert snap protocol_ack == 1
 await companion received
 wait 1800
 assert snap incoming == 1
+await companion peer acknowledged
+wait 600
+assert snap peer_protocol_ack == true
 capture roundtrip
 remember companion history
 click role:button Disconnect companion

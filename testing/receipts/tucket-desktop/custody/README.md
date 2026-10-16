@@ -12,7 +12,7 @@ activation, carriage ingress, dispatch and physical transmission. Public
 configuration rejects private-material fields. An absent Djinn test stops
 before serial or journal access, leaving its temporary directory empty.
 
-The desktop and public contact-card exporter build. All 40 desktop library
+The desktop and public contact-card exporter build. The custody checkpoint's 40 desktop library
 tests and 63 core Signalman tests pass; one existing desktop test stays ignored.
 Formatting and strict desktop all-target Clippy pass. The source inventory has one canonical source each for Mere, Genet,
 Dramatis and Netrender. The legacy Comms source declaration was updated after
@@ -23,3 +23,10 @@ here; the live Djinn wallet, runtime and journals remain in ignored local
 validation results. The guarded runner restores the saved DUT profile and
 pinned Tulle peer image even when the test fails. Software checks do not imply
 successful Tulle-to-stock RF delivery.
+
+The [first Djinn native trial](native-initial/README.md) delivers both texts and
+the desktop's outbound ACK, but fails waiting for the stock return ACK. Both
+boards restore successfully. The native scenario now waits for the matching
+peer receipt before teardown; its extra regression brings the current desktop
+suite to 41 passed (one existing ignored), with build and strict all-target
+Clippy passing. This stronger fixture still needs its physical retry.
