@@ -1,0 +1,25 @@
+warning: patch `mere-p2panda-net v0.7.5 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `mere-proofs v0.1.0 (https://github.com/merely-made/mere.git?branch=main#6d1908f4)` was not used in the crate graph
+warning: patch `muniment v0.1.2 (https://github.com/merely-made/mere.git?branch=main#6d1908f4)` was not used in the crate graph
+warning: patch `p2panda-auth v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-core v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-discovery v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-encryption v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-store v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-stream v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-sync v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+help: Check that the patched package version and available features are compatible
+      with the dependency requirements. If the patch has a different version from
+      what is locked in the Cargo.lock file, run `cargo update` to use the new
+      version. This may also occur with an optional dependency that is not enabled.
+   Compiling signalman v0.1.0 (C:\Users\mark_\Code\repos\retinue\apps\signalman)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.36s
+     Running unittests src\lib.rs (target/build\debug\deps\signalman-e8c686ef66b7cfbf.exe)
+
+running 3 tests
+test radio_comms::sennet_ids::tests::lost_allocator_cannot_be_reinitialized_under_the_existing_commissioning_fence ... ok
+test radio_comms::sennet_ids::tests::missing_corrupt_and_exhausted_state_refuse_without_repair ... ok
+test radio_comms::sennet_ids::tests::reopen_abandons_unused_ids_and_refuses_a_second_owner_or_scope ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 63 filtered out; finished in 0.02s
+

@@ -20,6 +20,7 @@ use tucket::{
 
 mod carrier;
 mod links;
+mod sennet_only;
 mod tucket_only;
 
 fn runtime(tx_budget_ms: u64, frame_ttl_ms: u64) -> Runtime {

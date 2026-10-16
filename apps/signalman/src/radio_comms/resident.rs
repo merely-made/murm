@@ -35,7 +35,9 @@ impl RadioComms {
         if runtime
             .installed_sennet()
             .is_some_and(|s| s.address() != (scope.meshtastic_node, scope.meshtastic_channel))
-            || runtime.tucket().node().identity().pub_key != scope.meshcore_key
+            || runtime
+                .installed_tucket()
+                .is_some_and(|t| t.node().identity().pub_key != scope.meshcore_key)
         {
             return Err(backend(
                 "resident public identity does not match journal realm",
@@ -72,9 +74,8 @@ impl ResidentSession<'_> {
     /// Full-key contact match, after the protocol has verified its advert.
     pub fn knows_tucket_peer(&self, key: &[u8; 32]) -> bool {
         self.runtime
-            .tucket()
-            .node()
-            .contact(key[0])
+            .installed_tucket()
+            .and_then(|t| t.node().contact(key[0]))
             .is_some_and(|c| c.pub_key == *key)
     }
     pub fn transmit_budget_ms(&self) -> u64 {

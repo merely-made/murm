@@ -37,7 +37,9 @@ impl Runtime {
                 self.event(Event::SennetReceived(e));
             }
             TUCKET => {
-                let out = self.tucket.on_frame(now, frame)?;
+                let tucket = self.tucket.as_mut().ok_or(Error::WrongInstance)?;
+                let delay = tucket.reply_delay_ms();
+                let out = tucket.on_frame(now, frame)?;
                 self.tucket_lost(now, out.expired)?;
                 for op in out.acknowledged {
                     for id in self.work.cancel_operation(now, u64::from(op.0))? {
@@ -49,7 +51,7 @@ impl Runtime {
                     self.event(Event::Tucket(e));
                 }
                 let deadline = self.ttl(now)?;
-                let ready_at = now.saturating_add(self.tucket.reply_delay_ms());
+                let ready_at = now.saturating_add(delay);
                 for f in out.outbound {
                     self.queue_at(now, None, ready_at, deadline, &f);
                 }
@@ -73,6 +75,8 @@ impl Runtime {
             TUCKET => {
                 let due: Vec<_, 8> = self
                     .tucket
+                    .as_ref()
+                    .ok_or(Error::WrongInstance)?
                     .operations()
                     .filter(|op| op.retry_at <= now && op.attempts_remaining > 0)
                     .take(8)
@@ -93,7 +97,12 @@ impl Runtime {
                     {
                         continue;
                     }
-                    if let Some(a) = self.tucket.next_retry(now, op.id, finish)? {
+                    if let Some(a) = self
+                        .tucket
+                        .as_mut()
+                        .ok_or(Error::WrongInstance)?
+                        .next_retry(now, op.id, finish)?
+                    {
                         self.queue(
                             now,
                             Some(u64::from(op.id.0)),
@@ -172,7 +181,11 @@ impl Runtime {
         {
             return Err(WorkError::Expired.into());
         }
-        Ok(self.tucket.begin_send(now, to, text, policy, timing)?)
+        Ok(self
+            .tucket
+            .as_mut()
+            .ok_or(Error::WrongInstance)?
+            .begin_send(now, to, text, policy, timing)?)
     }
     pub fn advertise_tucket(
         &mut self,
@@ -184,7 +197,12 @@ impl Runtime {
         if data.len() > 32 {
             return Err(Error::FrameTooLong);
         }
-        let f = self.tucket.active_node_mut()?.advert_frame(timestamp, data);
+        let f = self
+            .tucket
+            .as_mut()
+            .ok_or(Error::WrongInstance)?
+            .active_node_mut()?
+            .advert_frame(timestamp, data);
         let d = self.ttl(now)?;
         self.queue(now, None, d, &f);
         Ok(self.take_report())

@@ -7,6 +7,7 @@
 //! The companion client cannot attach its journal to a resident PHY runtime.
 pub mod carriage;
 pub mod companion;
+pub mod sennet_ids;
 mod journal;
 mod resident;
 #[cfg(test)]
