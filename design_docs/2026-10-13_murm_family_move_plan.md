@@ -2144,3 +2144,53 @@ Existing targets are reused, the temporary Mere integration worktree/branch
 is removed, and the shared upstream cache remains co-owned. Ignored synthetic
 wallet fixtures remain with helpers stopped after the recorded automatic
 approval-review deletion block; private runtime files are excluded.
+
+### R8 — Sennet directed text and delivery ACKs (2026-10-16, in progress)
+
+The owner approved continuation after R7. Use the pinned Meshtastic 2.7.26
+peer for PKI directed text and correlated delivery ACKs across reconnect.
+Keep the passing public-channel receipt frozen. The public security reference
+describes rejection of channel-encrypted directed text by normal nodes; do
+not present legacy addressed channel traffic as PKI/private messaging.
+
+First extend Dramatis/Mere's existing exact device/realm Sennet child release
+with transient, zeroizing station material. Preserve the already commissioned
+public node number and durable nonce allocation. Sennet owns X25519/AES-CCM,
+explicitly pinned public peer keys and observed routing envelopes; the desktop
+retains the same sticky custody guards and physical owner. Use official public
+documentation and newly captured stock bytes, excluding upstream implementation
+and schema sources. Current public docs describe 2.8 as well, so 2.7 behavior
+and any underspecified wire details require identified black-box evidence.
+
+Done when exact directed texts and matched protocol ACKs pass in both directions
+over two connections, history stays exact, IDs remain disjoint, native captures
+are reviewed and both boards restore/read back. Reject wrong/missing peer keys,
+malformed ciphertext and unrelated/negative/stale routing responses. Channel
+ACKs on this peer are unauthenticated correlation facts, not read receipts or
+2.8 authenticated ACK-proof parity. Private-channel provisioning, 2.8 signing
+and broader mesh routing remain separate gates.
+
+The owner explicitly approved synthetic-fixture cleanup on 2026-10-16.
+Automatic approval review nevertheless rejected deletion of the eight verified
+stopped fixture roots with "blocked by policy". They remain ignored; no alternate
+deletion route was attempted. Public receipts, nonce state and shared caches
+remain preserved.
+
+**Producer/primitive checkpoint.** Dramatis `2f27f1a` publishes transient
+material from the existing exact Sennet child, with all 74 Personae tests and
+selected Clippy passing. Mere `594c5b38` publishes material under the existing
+sticky lease, unchanged broker policy, six actual Keeper cases and selected
+port/example strict Clippy. Its broader Clippy invocation retains unrelated
+Tabard failures separately. The primary Mere checkout's unpublished work stays
+untouched; a real integration collision required an isolated worktree.
+
+The receiving canonical cohort is Mere `594c5b38`, Dramatis `2f27f1a`, Genet
+`e37762d7`, Netrender `f4f9c0d8`. All 57 Sennet, 66 Signalman and 44 desktop
+tests pass (one existing desktop test ignored). Pairwise X25519/SHA-256 and
+AES-256-CCM primitives match an independent cryptography 50.0.2 vector and
+refuse modified inputs/noncontributory peers. Strict Sennet and selected
+capture/exporter Clippy pass. These primitives do not yet assign wire nonce
+positions, create protocol ACKs or change the retained text instance.
+The public [receipts](../testing/receipts/sennet-directed/README.md) record
+the qualified scope and corrected executable paths before a fresh receive-only
+stock PKI capture; directed/native/ACK qualification is still open.
