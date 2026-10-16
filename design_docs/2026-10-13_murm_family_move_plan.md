@@ -2194,3 +2194,21 @@ positions, create protocol ACKs or change the retained text instance.
 The public [receipts](../testing/receipts/sennet-directed/README.md) record
 the qualified scope and corrected executable paths before a fresh receive-only
 stock PKI capture; directed/native/ACK qualification is still open.
+
+**Wire checkpoint.** The corrected stock contact clone keeps both observed
+numeric and textual addresses consistent, omits the copied hardware MAC and
+passes independent SDK/QR public-key readback. An identified stock 2.7.26
+packet then authenticates and matches the exact Sennet bench text. Its nonce
+is `LE32(packet_id) | extra(4) | LE32(source) | 0`, with an eight-byte tag and
+four-byte appended extra nonce. A subsequent physically completed Sennet PKI
+reply gets a stock channel response with port 5, body `18 00`, fixed32 field 6
+equal to the reply ID, and trailing field 9 value zero. The strict response
+parser promotes only a complete code-zero response in that observed profile;
+instance correlation/lifecycle integration is still pending. Peer-bound codec
+and routing tests bring Sennet to 60 passing tests. See the
+[wire receipts](../testing/receipts/sennet-directed/README.md).
+
+The completed supplier worktree's checkout/registration were removed, but
+Windows retained its empty directory and automatic approval review blocked
+further empty-directory/ref cleanup. The empty approved-path directory and
+published branch remain; primary Mere and unrelated worktrees stay untouched.

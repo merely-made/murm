@@ -80,7 +80,8 @@ def main():
                           override_frequency=float(lora.override_frequency), tx_power=int(lora.tx_power),
                           use_preset=bool(lora.use_preset), channel_role=int(channel.role),
                           device_role=int(node.localConfig.device.role), managed=bool(node.localConfig.device.is_managed),
-                          channel_name=channel.settings.name, public_default_key_match=public)
+                          channel_name=channel.settings.name, public_default_key_match=public,
+                          pki_public_key=bytes(node.localConfig.security.public_key).hex())
             if report["node_number"] != a.expected_node or not report["firmware"].startswith("2.7.26."):
                 raise RuntimeError("stock node or firmware differs from the pinned bench")
             if not public or not report["use_preset"] or report["channel_role"] != 1 or report["region"] != 1 or report["modem_preset"] != 0 or report["override_frequency"] != 906.875 or report["tx_power"] != a.power_dbm or report["channel_name"] not in ("", "LongFast"):

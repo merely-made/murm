@@ -1,0 +1,33 @@
+{
+  "result": "failed",
+  "action": "contact",
+  "node_number": 2706756095,
+  "peer_node": 4134206248,
+  "private_material_included": false,
+  "stock_contact_url": "https://meshtastic.org/v/#CKj2q7MPElAKCSFmNjZhZmIyOBIPTWVzaHRhc3RpYyBmYjI4GgRmYjI4IgZEG_Zq-ygobkIgzVNnmGRxdvj1aBtPHHYnxbOzsKLXzoMz9Iab8JB7XhVIACAB",
+  "station_contact_url": "https://meshtastic.org/v/#CKj2q7MPElAKCSFhMTU1ZDFmZhIPTWVzaHRhc3RpYyBmYjI4GgRmYjI4IgZEG_Zq-ygobkIgbn0lH1ttBwIgOylgQpNrhPtqroo0qGYWjfIPHI0j-CVIACAB",
+  "replaced_exact_public_leaves": [
+    1,
+    1
+  ],
+  "import": {
+    "exit": 0,
+    "public_diagnostics": [
+      "Connected to radio",
+      "Waiting 5 seconds before disconnecting"
+    ]
+  },
+  "selected_sdk_readback": {
+    "present": false,
+    "id_match": false,
+    "public_key_match": false
+  },
+  "qr_readback": {
+    "exit": 1,
+    "public_diagnostics": [
+      "Connected to radio",
+      "Warning: Node !a155d1ff not found in NodeDB"
+    ]
+  },
+  "error_type": "RuntimeError"
+}

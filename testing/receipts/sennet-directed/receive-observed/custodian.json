@@ -1,0 +1,11 @@
+{
+  "result": "stock_pki_receive_observed_no_ack_or_native_gate",
+  "authority": "isolated Djinn wallet through real Keeper route",
+  "host_sha256": "25f41c90f231bbf88d573e5ad74e0bfa181523cd9e59f2fc1729f7f0316b2dcc",
+  "station_sha256": "5380dc0dac3ca12b977957fc03d1c601a8c2776831bcc15d5d16b860b49a1b16",
+  "private_wallet_tracked": false,
+  "radio_result": "pki-contact-numeric/bench.json",
+  "node_number": 1194197574,
+  "custodian_stopped": true,
+  "closed_utc": "2026-10-16T10:40:00.1516728Z"
+}

@@ -1,7 +1,7 @@
 # An isolated real Keeper, explicit public LongFast configuration and nonce
 # commissioning, followed by the guarded two-connection native/restoration gate.
 [CmdletBinding()]
-param([ValidatePattern('^[a-z][a-z0-9-]{2,48}$')][string]$TrialName='native-djinn-channel')
+param([ValidatePattern('^[a-z][a-z0-9-]{2,48}$')][string]$TrialName='native-djinn-channel',[switch]$PkiCapture,[switch]$PkiReplyCapture,[switch]$PkiAcknowledgeCapture)
 $ErrorActionPreference='Stop'
 $repo=(Resolve-Path (Join-Path $PSScriptRoot '../../..')).Path
 $root=Join-Path $repo 'validation/results/sennet-desktop'
@@ -21,7 +21,7 @@ $endpoint='\\.\pipe\signalman-sennet-radio-'+[guid]::NewGuid().ToString('N')
 $oldEndpoint=$env:GRAPHSHELL_APP_ENDPOINT
 $oldStation=$env:SIGNALMAN_STATION_PORT
 $custodian=$null
-$report=[ordered]@{result='not_completed';authority='isolated Djinn wallet through real Keeper route';host_sha256=$expected.host_sha256;private_wallet_tracked=$false;radio_result="$TrialName/bench.json"}
+$report=[ordered]@{result='not_completed';authority='isolated Djinn wallet through real Keeper route';host_sha256=$expected.host_sha256;station_sha256=(Get-FileHash $stationBinary).Hash.ToLowerInvariant();private_wallet_tracked=$false;radio_result="$TrialName/bench.json"}
 try {
     $custodian=Start-Process -FilePath $hostBinary -ArgumentList @($endpoint,$privateRoot,'unlocked') -PassThru -WindowStyle Hidden -RedirectStandardOutput (Join-Path $root "$TrialName-host.stdout.log") -RedirectStandardError (Join-Path $root "$TrialName-host.stderr.log")
     $until=[DateTime]::UtcNow.AddSeconds(20)
@@ -32,9 +32,9 @@ try {
     if($LASTEXITCODE -ne 0){throw 'Djinn station/nonce commissioning refused'}
     $card=Get-Content $public -Raw|ConvertFrom-Json
     $report.node_number=$card.node_number
-    & (Join-Path $repo 'testing/run_sennet_desktop.ps1') -SennetConfig $configPath -PublicStation $public -DutUsbSerial '44:1B:F6:6A:FA:64' -PeerPort COM6 -PeerUsbSerial '44:1B:F6:6A:FB:28' -OutputDirectory $trial -Python (Join-Path $repo 'validation/results/sennet-tucket-radios/stock-cli/Scripts/python.exe') -DutBaseline (Join-Path $repo 'validation/results/tucket-desktop-20261015/baseline-com7-after-reconnect.json')
+    & (Join-Path $repo 'testing/run_sennet_desktop.ps1') -SennetConfig $configPath -PublicStation $public -DutUsbSerial '44:1B:F6:6A:FA:64' -PeerPort COM6 -PeerUsbSerial '44:1B:F6:6A:FB:28' -OutputDirectory $trial -Python (Join-Path $repo 'validation/results/sennet-tucket-radios/stock-cli/Scripts/python.exe') -DutBaseline (Join-Path $repo 'validation/results/tucket-desktop-20261015/baseline-com7-after-reconnect.json') -PkiCapture:$PkiCapture -PkiReplyCapture:$PkiReplyCapture -PkiAcknowledgeCapture:$PkiAcknowledgeCapture
     if((Get-FileHash $hostBinary).Hash -ne $expected.host_sha256){throw 'Custodian binary changed during native trial'}
-    $report.result='native_completed_pending_visual_review'
+    $report.result=$(if($PkiAcknowledgeCapture){'stock_protocol_ack_exchange_observed_not_native_gate'}elseif($PkiReplyCapture){'stock_routing_candidate_observed_no_ack_or_native_gate'}elseif($PkiCapture){'stock_pki_receive_observed_no_ack_or_native_gate'}else{'native_completed_pending_visual_review'})
 } catch {$report.result='failed';$report.error=$_.Exception.Message;throw}
 finally {
     if($custodian -and !$custodian.HasExited){[IO.File]::WriteAllText((Join-Path $privateRoot 'stop'),'owned Sennet trial shutdown');if(!$custodian.WaitForExit(10000)){Stop-Process -Id $custodian.Id;$custodian.WaitForExit()}}
