@@ -6,6 +6,7 @@ metadata and the intentionally public LongFast key are admitted to receipts.
 """
 import argparse
 import json
+import re
 from pathlib import Path
 import subprocess
 import sys
@@ -43,6 +44,16 @@ def main():
             report["configure_exit"] = result.returncode
             # Never retain unrestricted client config dumps or credential fields.
             if result.returncode:
+                # Public CLI diagnostics only, without traceback source lines
+                # or unrestricted config/credential dumps.
+                diagnostics=[]
+                for line in (result.stderr+"\n"+result.stdout).splitlines():
+                    line=re.sub(r"\x1b\[[0-9;]*m", "", line)
+                    if re.match(r"^(OS Error:|Original error:|Aborting|Timed out|Unexpected|Invalid|No |Error:|ERROR:|[\w.]+(?:Error|Exception):)",line):
+                        if re.search(r"private|password|passphrase|seed|psk",line,re.I):
+                            line="credential-related diagnostic withheld"
+                        diagnostics.append(re.sub(r"[A-Za-z0-9+/=]{40,}","<redacted>",line)[:240])
+                report["configure_diagnostics"]=diagnostics[-8:]
                 raise RuntimeError("stock public-channel configuration refused")
             time.sleep(4)
         identified(a.port, a.usb_serial)

@@ -1,0 +1,2 @@
+# Frozen failed attempt; preserve its raw bytes.
+* -text whitespace=cr-at-eol

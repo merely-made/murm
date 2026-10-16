@@ -49,7 +49,7 @@ try {
     Copy-Item -LiteralPath $config.packet_ids -Destination (Join-Path $output 'packet-ids-before.json')
     Copy-Item -LiteralPath ($config.packet_ids+'.initialized') -Destination (Join-Path $output 'packet-ids-fence.json')
     $peerTouched=$true
-    & $helper write-bin --port $PeerPort --chip esp32s3 --before usb-reset --baud 921600 --non-interactive --skip-update-check 0 $stockImage *> (Join-Path $output 'stock-flash.log')
+    & $helper write-bin --port $PeerPort --chip esp32s3 --before usb-reset --after watchdog-reset --baud 921600 --non-interactive --skip-update-check 0 $stockImage *> (Join-Path $output 'stock-flash.log')
     if($LASTEXITCODE -ne 0){throw 'Stock Meshtastic firmware transfer failed'}
     Start-Sleep -Seconds 4
     & $Python -B (Join-Path $PSScriptRoot 'setup_sennet_stock.py') --port $PeerPort --usb-serial $PeerUsbSerial --expected-node ('{0:x8}' -f [uint32]$config.peer_node) --configure --output (Join-Path $output 'stock-setup.json') *> (Join-Path $output 'stock-setup.log')

@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "C:\Users\mark_\Code\repos\retinue\testing\setup_sennet_stock.py", line 78, in <module>
+    main()
+    ~~~~^^
+  File "C:\Users\mark_\Code\repos\retinue\testing\setup_sennet_stock.py", line 46, in main
+    raise RuntimeError("stock public-channel configuration refused")
+RuntimeError: stock public-channel configuration refused

@@ -1,0 +1,9 @@
+{
+  "result": "not_completed",
+  "port": "COM6",
+  "usb_serial": "44:1B:F6:6A:FB:28",
+  "public_channel": "LongFast",
+  "configured": true,
+  "configure_exit": 1,
+  "error_type": "RuntimeError"
+}
