@@ -15,6 +15,7 @@ param(
     [string]$RawFloodText,
     [switch]$RawDirectFirst,
     [switch]$DjinnCustody,
+    [switch]$ExchangeAfterReconnect,
     [ValidateRange(0.5,2.0)][double]$Zoom = 0.75
 )
 $ErrorActionPreference = 'Stop'
@@ -43,6 +44,7 @@ $report = [ordered]@{schema=1;bench_only=$true;source=(git -C $repo rev-parse HE
 $report.tucket_tx_power_dbm = $config.tx_power_dbm
 $report.stock_tx_power_dbm = $StockPowerDbm
 $report.authority = $(if ($DjinnCustody) { 'djinn' } else { 'isolated_bench_seed_file' })
+$report.exchange_after_reconnect = [bool]$ExchangeAfterReconnect
 $report.opened_utc = [DateTime]::UtcNow.ToString('o')
 $report.bench_config_sha256 = (Get-FileHash $BenchConfig -Algorithm SHA256).Hash.ToLowerInvariant()
 $report.self_public_key = $SelfAddress
@@ -104,6 +106,7 @@ try {
     } else {
         $nativeArgs = @{Protocol='meshcore';Port=$config.port;PeerPort=$PeerPort;SelfAddress=$SelfAddress;PeerAddress=$stock.after.key;Realm=$config.realm;OutputDirectory=(Join-Path $output 'native');Zoom=$Zoom;BenchPython=$Python;PeerUsbSerial=$PeerUsbSerial}
         if ($DjinnCustody) { $nativeArgs.TucketConfig = $BenchConfig } else { $nativeArgs.TucketBenchConfig = $BenchConfig }
+        $nativeArgs.ExchangeAfterReconnect = $ExchangeAfterReconnect
         & (Join-Path $repo 'apps/signalman-desktop/scenarios/run_companion.ps1') @nativeArgs
         $report.result = 'native_completed_pending_visual_review'
     }

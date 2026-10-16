@@ -54,6 +54,7 @@ assert snap protocol_ack == 1
 assert snap incoming == 1
 capture reconnected
 assert companion history
+@@RECONNECT_EXCHANGE@@
 click role:button Disconnect companion
 await companion stopped
 wait 600
