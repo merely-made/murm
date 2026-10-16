@@ -28,7 +28,11 @@ where
         TextRole::Title,
         Point::new(0, title_y),
         layout.width,
-        "RETINUE",
+        if local.device_name.is_empty() {
+            "RETINUE"
+        } else {
+            local.device_name.as_str()
+        },
         layout.value_font,
         theme.accent,
         None,

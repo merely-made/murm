@@ -1,0 +1,7 @@
+{
+  "mode": "restore-profile",
+  "result": "not_completed",
+  "port": "COM7",
+  "usb_serial": "44:1B:F6:6A:FA:64",
+  "error": "boot/profile continuity failed: {'restore_ack': {'kind': 'config', 'status': 0}, 'cursor': {'request_id': 1801, 'status': 0, 'boot_id': 15828058867860565860, 'oldest': 259, 'newest': 290, 'next': 0, 'recorded': 290, 'overwritten': 258, 'encode_failed': 0, 'profile_count': 3, 'record_len': 0, 'raw_record': '', 'record_class': None}, 'status': 'tulle/heltec-v4 phy online; version=0.0.1; sx1262 online; sync=2b reg=24b4; longfast=906875000; build=unidentified; image=v4-modem-usb\\r\\nidentity=loaded slot=B seq=5\\r\\n\ufffd\\x1d\\x00\ufffd\ufffd\\x06\\x00\ufffd|\ufffd}(\ufffdj\ufffd\ufffdf>)J\\x08\ufffd(\ufffd\ufffd\ufffd\ufffd4\ufffdXy\ufffd\ufffd\\x06B\\x12', 'sync': '2b 24b4\\r\\n\ufffd\\x1d\\x00\ufffd\ufffd\\x06\\x00\ufffd|\ufffd}(\ufffdj\ufffd\ufffdF6ZJ\\x08\\x00(\ufffd\ufffd/\ufffd8\ufffd\ufffd\\x1e/\ufffd)\\x1b\ufffd', 'same_boot': True, 'same_status': False, 'same_sync': False}"
+}

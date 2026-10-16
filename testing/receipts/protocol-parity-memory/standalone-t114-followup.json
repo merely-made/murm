@@ -1,0 +1,23 @@
+{
+  "scope": "T114 default bin built separately from dev-dependency example feature unification",
+  "gnu_readelf_sections_match": true,
+  "source_inventory_unchanged": true,
+  "elf_sha256": "165a83be50270a911aeb22736ee02f9faf70717c5930c77a3ca3c89daa960608",
+  "application_ram": {
+    "capacity": 237568,
+    "allocated_sections": 152540,
+    "highest_allocated_end": 537048028,
+    "unallocated_above_sections": 85028,
+    "scope": "linker gap, not measured stack high-water"
+  },
+  "application_flash": {
+    "capacity": 786432,
+    "load_end": 518754,
+    "span_from_origin": 363106
+  },
+  "file_sha256": {
+    "standalone-t114-elf.json": "ff68fc426b60d27f895445c6f812c726fbce635094dc0fe696f013a9791e661a",
+    "standalone-t114-readelf.log": "f3d94b67d07ec497bf1727641fd516aae777c522a195d84ebe679aafe886bc57",
+    "standalone-t114-build.log": "349179e32e7d13042f0221331b930d53880701245d622f9696526871c07e3dac"
+  }
+}

@@ -1,5 +1,50 @@
 # Sennet provenance
 
+## Pairwise primitive continuation (2026-10-16)
+
+The official public security reference describes X25519 followed by SHA-256,
+AES-256-CCM, an eight-byte authentication tag and no associated data for direct
+messages: <https://meshtastic.org/docs/development/reference/encryption-technical/>.
+That page now describes version 2.8, so the primitive composition alone does
+not establish compatibility with the pinned 2.7.26 peer. RFC 7748 supplies the
+X25519 standard: <https://www.rfc-editor.org/rfc/rfc7748.html>.
+
+`pki.rs` initially supplies these primitives without assigning packet fields,
+constructing a wire nonce, producing an ACK or changing the retained instance.
+Its deterministic public test uses synthetic private inputs `[7;32]` and
+`[9;32]`, nonce bytes 0 through 12, and `Sennet pairwise primitive`. Public keys
+and exact ciphertext/tag were independently generated with Python cryptography
+50.0.2's X25519 and AESCCM APIs, then pinned in the Rust test. Wrong-key,
+modified-ciphertext, modified-nonce, short-input and noncontributory-peer checks
+are independent refusal gates. Wire nonce placement and routing envelopes
+remain stock-capture work. Implementation-derived search summaries are excluded
+as provenance; no upstream firmware, schema or protocol-client source is used.
+
+The identified 2.7.26 receive in
+`testing/receipts/sennet-directed/receive-observed/` authenticates the exact
+tagged stock text with nonce `LE32(packet_id) | extra(4) | LE32(source) | 0`,
+using the four appended payload bytes as `extra` after the eight-byte tag.
+Its RF header discriminator is zero. `PeerSession` now encodes that observed
+layout and requires explicitly pinned source/destination/key bindings. A
+second independent cryptography vector pins an entire synthetic directed
+packet; changed ciphertext, extra nonce, source, destination and discriminator
+are refused by the codec.
+
+The later `routing-observed/` capture records a successful physical Sennet
+PKI reply and a stock channel response with application port 5, body `18 00`,
+fixed32 field 6 equal to the transmitted packet ID and trailing scalar field 9
+equal to zero. `routing.rs` accepts only this observed envelope shape; it never
+promotes nonzero, ambiguous, malformed, unrelated or unsupported responses to
+success. The observed stock response's transport want-ACK bit is set, so the
+parser does not use that bit to classify response versus request. Unknown
+application extensions remain outside this narrow response profile.
+
+The public CLI contact capture distinguishes an outer numeric node field from
+the nested textual ID. Updating only the latter leaves an imported key at the
+old numeric address. The separate stock-oracle helper replaces both observed
+addresses and the exact public key, and omits the copied hardware MAC. SDK and
+CLI QR public identity/key readback both pass before the tagged send.
+
 Sennet is an independent implementation of interoperability with an existing
 LoRa mesh messaging protocol. Its auditability depends on keeping observation,
 implementation, and distribution boundaries explicit.

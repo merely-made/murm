@@ -19,8 +19,13 @@ restoration. R6 passes a bounded Djinn-backed Tucket-over-Tulle native functiona
 run against stock MeshCore: four tagged texts with all four protocol ACKs across
 two connections, with exact history checked before fresh work after reconnect.
 Both boards are restored. The fixture explicitly advertises after each Tucket
-commissioning; automatic contact restoration, immediate stock MeshCore reopen,
-UI cleanup and the Sennet stack leg retain their gates below.
+commissioning; automatic contact restoration and immediate stock MeshCore
+reopen retain their gates below. R7 passes Sennet public-channel text across
+native reconnect. R8 passes directed PKI text and correlated ACKs across native
+reconnect, including a full automated pass of the revised board-restoration
+order. The earlier failed readback and separate recovery stay frozen;
+private-channel custody, personal-daemon integration, 2.8 ACK proofs and UI
+cleanup remain open.
 
 **Canonical home:** this repository owns the migration. Mere and Genet should
 cite this plan rather than keep another migration specification. The canonical
@@ -2144,3 +2149,205 @@ Existing targets are reused, the temporary Mere integration worktree/branch
 is removed, and the shared upstream cache remains co-owned. Ignored synthetic
 wallet fixtures remain with helpers stopped after the recorded automatic
 approval-review deletion block; private runtime files are excluded.
+
+### R8 — Sennet directed text and delivery ACKs (2026-10-16, functional pass)
+
+The owner approved continuation after R7. Use the pinned Meshtastic 2.7.26
+peer for PKI directed text and correlated delivery ACKs across reconnect.
+Keep the passing public-channel receipt frozen. The public security reference
+describes rejection of channel-encrypted directed text by normal nodes; do
+not present legacy addressed channel traffic as PKI/private messaging.
+
+First extend Dramatis/Mere's existing exact device/realm Sennet child release
+with transient, zeroizing station material. Preserve the already commissioned
+public node number and durable nonce allocation. Sennet owns X25519/AES-CCM,
+explicitly pinned public peer keys and observed routing envelopes; the desktop
+retains the same sticky custody guards and physical owner. Use official public
+documentation and newly captured stock bytes, excluding upstream implementation
+and schema sources. Current public docs describe 2.8 as well, so 2.7 behavior
+and any underspecified wire details require identified black-box evidence.
+
+Done when exact directed texts and matched protocol ACKs pass in both directions
+over two connections, history stays exact, IDs remain disjoint, native captures
+are reviewed and both boards restore/read back. Reject wrong/missing peer keys,
+malformed ciphertext and unrelated/negative/stale routing responses. Channel
+ACKs on this peer are unauthenticated correlation facts, not read receipts or
+2.8 authenticated ACK-proof parity. Private-channel provisioning, 2.8 signing
+and broader mesh routing remain separate gates.
+
+The owner explicitly approved synthetic-fixture cleanup on 2026-10-16.
+Automatic approval review nevertheless rejected deletion of the eight verified
+stopped fixture roots with "blocked by policy". They remain ignored; no alternate
+deletion route was attempted. Public receipts, nonce state and shared caches
+remain preserved.
+
+**Producer/primitive checkpoint.** Dramatis `2f27f1a` publishes transient
+material from the existing exact Sennet child, with all 74 Personae tests and
+selected Clippy passing. Mere `594c5b38` publishes material under the existing
+sticky lease, unchanged broker policy, six actual Keeper cases and selected
+port/example strict Clippy. Its broader Clippy invocation retains unrelated
+Tabard failures separately. The primary Mere checkout's unpublished work stays
+untouched; a real integration collision required an isolated worktree.
+
+The receiving canonical cohort is Mere `594c5b38`, Dramatis `2f27f1a`, Genet
+`e37762d7`, Netrender `f4f9c0d8`. All 57 Sennet, 66 Signalman and 44 desktop
+tests pass (one existing desktop test ignored). Pairwise X25519/SHA-256 and
+AES-256-CCM primitives match an independent cryptography 50.0.2 vector and
+refuse modified inputs/noncontributory peers. Strict Sennet and selected
+capture/exporter Clippy pass. These primitives do not yet assign wire nonce
+positions, create protocol ACKs or change the retained text instance.
+The public [receipts](../testing/receipts/sennet-directed/README.md) record
+the qualified scope and corrected executable paths before a fresh receive-only
+stock PKI capture; directed/native/ACK qualification is still open.
+
+**Wire checkpoint.** The corrected stock contact clone keeps both observed
+numeric and textual addresses consistent, omits the copied hardware MAC and
+passes independent SDK/QR public-key readback. An identified stock 2.7.26
+packet then authenticates and matches the exact Sennet bench text. Its nonce
+is `LE32(packet_id) | extra(4) | LE32(source) | 0`, with an eight-byte tag and
+four-byte appended extra nonce. A subsequent physically completed Sennet PKI
+reply gets a stock channel response with port 5, body `18 00`, fixed32 field 6
+equal to the reply ID, and trailing field 9 value zero. The strict response
+parser promotes only a complete code-zero response in that observed profile;
+instance correlation/lifecycle integration is still pending. Peer-bound codec
+and routing tests bring Sennet to 60 passing tests. See the
+[wire receipts](../testing/receipts/sennet-directed/README.md).
+
+The completed supplier worktree's checkout/registration were removed, but
+Windows retained its empty directory and automatic approval review blocked
+further empty-directory/ref cleanup. The empty approved-path directory and
+published branch remain; primary Mere and unrelated worktrees stay untouched.
+
+**Retained directed runtime checkpoint.** The wire experiment now completes an
+ACK to the stock sender (the stock client independently reports its ACK), then a
+distinct Sennet PKI reply whose stock channel response matches request ID 2 and
+code zero. Both boards restore and the custodian stops. The retained instance
+uses one pinned peer, one logical response obligation and the existing physical
+slot/packet-ID lease; its window starts after physical completion. Authenticated
+duplicate texts get fresh control IDs but no duplicate delivery. Private dedup
+is separate from public flood traffic, and channel-directed downgrade is refused.
+Comms persists both public identities and refuses historical key replacement.
+Missing ACKs and disconnect retain physical truth without replay.
+
+All 64 Sennet, 146 radio-hand, 69 Signalman, 19 integration and 45 desktop tests
+pass (one existing desktop custody test ignored), as do the bare runtime check,
+selected strict core/desktop Clippy and desktop/station/stock-peer builds. The
+directed native runner selects its pinned key from identified USB readback and
+uses protocol-ACK expectations on both connections. Full native directed,
+reconnect and visual qualification remain pending; software/wire success does
+not complete R8. See the [updated receipts](../testing/receipts/sennet-directed/README.md).
+
+**Native directed/reconnect gate (2026-10-16, passed with separate restoration
+recovery).** At `826752791da`, the native Messages controls pass four exact PKI
+directed texts and four correlated protocol ACKs against identified stock
+Meshtastic 2.7.26.54e0d8d. Exact history is checked before fresh work on the
+second connection; all four records remain after final disconnect. Both native
+outgoing records have physical completion plus exact-peer/request code-zero
+routing facts. Both returns authenticate with the pinned public key, and the
+stock peer independently matches the text and both return ACKs. These channel
+ACKs remain unauthenticated correlation facts; no read-receipt or 2.8 proof
+claim follows. The isolated real Keeper supplies the same scoped identity on
+reopen; the installed personal daemon remains unqualified.
+
+Text IDs 1/257 and control IDs 2/258 use disjoint intervals 1–256 and 257–512;
+durable next state is 513. Seven reviewed captures show 226 presented frames,
+zero blank captures, seven distinct digests and all four final rows visible.
+The stale connecting notice and clipped journal input remain cosmetic findings.
+Stock helper totals 16843/4258 ms are service durations, not message latencies.
+
+The native processes exit 0, but the first wrapper DUT restoration readback
+fails when radio bytes interleave textual diagnostics. The original failed
+reports remain intact. After COM6's pinned Tulle/exact-state restoration, the
+same strict probe is invoked separately and verifies COM7's same boot, status,
+sync and config ACK zero. Both boards are restored and the custodian stops.
+The [qualification](../testing/receipts/sennet-directed/native-reconnect/README.md)
+records this native pass plus separate restoration recovery, with hashes of 53
+public evidence files. A subsequent wrapper change restores the peer before
+checking DUT text diagnostics; that later wrapper revision has parsing evidence,
+not a new end-to-end hardware receipt. Private-channel provisioning, broader
+mesh routing, 2.8 signing/ACK proofs, personal-daemon integration and UI polish
+remain open. The recorded cleanup-review block and retained resources above
+are unchanged; existing targets and the co-owned Cargo cache were reused.
+
+**Cleanup follow-up (2026-10-16).** The owner explicitly overruled the earlier
+refusal. Separate empty-directory removal and deletion of the exact published
+local `codex/sennet-direct-custody` ref succeeded; the directory and branch no
+longer remain. The primary Mere checkout and unrelated worktrees are unchanged.
+Preflight identifies 24 stopped, ignored synthetic fixture roots, each marked
+`isolated synthetic Djinn fixture`, with no live owner or reparse point.
+Automatic approval review rejects their guarded recursive deletion before
+execution with "blocked by policy". Those roots remain despite explicit owner
+authorization. Public receipts, durable nonce state and the shared Cargo cache
+are preserved. The [cleanup receipt](../testing/receipts/sennet-directed/cleanup/result.json)
+records the completed removals and remaining tool refusal.
+
+**Automated restoration continuation (2026-10-16, passed).** The revised
+wrapper at `feab8c3f29b` now passes the whole two-connection native fixture,
+including both board restorations in its own finally path. No manual recovery
+is required. Four exact PKI texts and four correlated ACKs match; exact history
+is checked before fresh work on reconnect and all four records remain at final
+disconnect. Text IDs 1/257 and control IDs 2/258 use disjoint durable intervals,
+with next state 513. All seven captures are reviewed: 403 presented frames,
+zero blank captures, seven distinct digests and four visible final rows. The
+existing cosmetic findings remain. Helper totals 15010/3217 ms are service
+durations, not per-message latencies.
+
+COM6 restores first to pinned Tulle with exact status/identity/region/channel;
+COM7 then acknowledges its original same-boot profile with exact status/sync.
+The desktop and both peer processes exit 0 and the real Keeper custodian stops.
+The qualified executables are unchanged by hash; Rust sources and supplier pins
+are unchanged, so no additional build/software-suite claim follows. The
+[automated restoration receipt](../testing/receipts/sennet-directed/native-restoration/README.md)
+freezes 51 public evidence files and their SHA-256 hashes. The earlier failed
+wrapper/recovery receipt remains intact. Automatic approval review rejects
+deletion of this run's stopped synthetic custodian root with "blocked by
+policy"; it remains ignored, bringing the retained roots in this lane to 25.
+The shared Cargo cache remains co-owned; no new target/home/worktree is created.
+
+### Board names (2026-10-16)
+
+The owner requested persistent, visible names because the two unmarked V4s
+cannot be identified physically by COM port or USB serial. The board owns a
+public local label of up to sixteen printable ASCII characters. It appears as
+the boot and default status title and in USB `status` / `name` replies,
+independently of relay keys, host identity, radio addresses and RF profiles.
+`name set SB1` saves through the verified A/B settings journal and reboots;
+`name clear` restores the unnamed presentation. Invalid commands and unchanged
+labels do not write. Oversized names, control bytes and edge spaces are refused.
+
+Implementation and installation are complete. Both normal firmware images at
+`cb042329232` are installed. SB1 (COM6, RNode, US915) reloads slot B sequence 11
+from sequence 10. SB2 (COM7, modem, US915) reloads slot A sequence 6 from
+sequence 5. T114 (COM10, modem, US915) reloads slot A sequence 94 from sequence
+93 and still reports public node prefix `599997c8`. All three saved names pass
+post-reboot USB readback with their original radio preferences. Invalid-name
+and unchanged-name checks pass on SB1/T114. SB2 acknowledged its name save,
+then required a physical reconnect after its USB endpoint stalled on reboot;
+its final checks are exclusively read-only across two USB sessions. The
+existing USB reset-recovery issue remains separate.
+
+The settings body appends the label after the original 68-byte prefix and pads
+to 88 bytes for word-aligned board flash reads. Old records remain readable
+with an empty name; malformed extensions do not discard identity or region/
+channel. A downgrade retains the original prefix, although older firmware
+rewriting settings discards the label. Existing store addresses, sequences,
+checksums and verification are retained. The public flash inventory explicitly
+classifies the label.
+
+The [naming receipt](../testing/receipts/device-names/README.md) preserves a
+failed first install with an unaligned 85-byte body and the exact unchanged
+protected-tail comparison, plus separate SB2 USB failures and successful final
+readback. It binds the source, images and commands. Twenty radio-face tests,
+149 radio-hand tests, formatting, strict shared Clippy, both release links,
+target Clippy with existing allowances, flash classification, unsafe audit and
+validation inventory pass. The same six pre-existing LOC violations remain;
+this slice adds none. Both panel renderers and USB UI health pass. Physical
+screen pixels have not been independently observed, and no new RF, stack
+high-water or memory-reserve acceptance follows.
+
+The current baseline is the named firmware at `cb042329232` and the labelled
+settings on each board. Before another stock-firmware excursion, refresh the
+guarded input hashes and take fresh current-state backups; older unnamed
+restoration inputs would undo these labels. Images, private state comparison
+and prior recovery artifacts remain receipt-owned. Existing shared Cargo
+caches were reused; no isolated target, Cargo home or worktree was created.

@@ -19,11 +19,16 @@
 
 use core::fmt;
 
+pub mod name;
+pub use name::DeviceName;
+
 /// Bytes of a device identity: an X25519 secret followed by an Ed25519 seed.
 pub const IDENTITY_LEN: usize = 64;
 
 /// Bytes this module writes. Room for the identity and the fields after it.
-pub const ENCODED_LEN: usize = IDENTITY_LEN + 4;
+// Board stores also derive their read buffers from this length. Both flash
+// adapters require word-aligned reads, including the otherwise unused tail.
+pub const ENCODED_LEN: usize = (IDENTITY_LEN + 4 + 1 + name::MAX_NAME_LEN + 3) & !3;
 
 /// Which personality the board boots into.
 ///
@@ -102,6 +107,8 @@ pub struct Settings {
     pub channel: Channel,
     /// The regulatory region this board operates under. `Unset` means no transmit.
     pub region: crate::region::Region,
+    /// Public local display label, unrelated to cryptographic or host identities.
+    pub device_name: DeviceName,
 }
 impl fmt::Debug for Settings {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -109,6 +116,7 @@ impl fmt::Debug for Settings {
             .field("identity", &"[redacted]")
             .field("channel", &self.channel)
             .field("region", &self.region)
+            .field("device_name", &self.device_name)
             .finish()
     }
 }
@@ -127,6 +135,7 @@ impl Settings {
             identity,
             channel: Channel::default(),
             region: crate::region::Region::default(),
+            device_name: DeviceName::default(),
         }
     }
 
@@ -158,10 +167,19 @@ impl Settings {
             .and_then(crate::region::Region::from_byte)
             .unwrap_or_default();
 
+        let device_name = body
+            .get(68)
+            .and_then(|&len| {
+                body.get(69..69 + usize::from(len))
+                    .and_then(DeviceName::parse)
+            })
+            .unwrap_or_default();
+
         Ok(Self {
             identity,
             channel,
             region,
+            device_name,
         })
     }
 
@@ -173,6 +191,9 @@ impl Settings {
         // Reserved, written as zero so a later field has a defined starting value rather
         // than whatever the erase left.
         out[IDENTITY_LEN + 2..].fill(0);
+        let name = self.device_name.as_str().as_bytes();
+        out[68] = name.len() as u8;
+        out[69..69 + name.len()].copy_from_slice(name);
         ENCODED_LEN
     }
 }
@@ -197,6 +218,7 @@ mod tests {
             identity: identity(),
             channel: Channel::Node,
             region: crate::region::Region::Us915,
+            device_name: DeviceName::parse(b"SB1").unwrap(),
         };
         let mut body = [0_u8; ENCODED_LEN];
         let len = settings.encode(&mut body);
@@ -271,6 +293,41 @@ mod tests {
         );
     }
 
+    #[test]
+    fn names_extend_old_settings_without_changing_identity_or_preferences() {
+        assert_eq!(
+            ENCODED_LEN % 4,
+            0,
+            "board flash reads require word alignment"
+        );
+        let mut settings = Settings::new(identity());
+        settings.channel = Channel::Rnode;
+        settings.region = crate::region::Region::Us915;
+        settings.device_name = DeviceName::parse(b"SB1").unwrap();
+        let mut body = [0; ENCODED_LEN];
+        settings.encode(&mut body);
+        assert_eq!(&body[..64], &identity());
+        assert_eq!(&body[66..68], &[0, 0]);
+        for len in [64, 68, 69, 70, 71] {
+            let old = Settings::decode(&body[..len]).unwrap();
+            assert_eq!(old.identity, settings.identity);
+            assert_eq!(old.device_name, DeviceName::default());
+        }
+        let old = Settings::decode(&body[..68]).unwrap();
+        assert_eq!(
+            (old.channel, old.region),
+            (settings.channel, settings.region)
+        );
+        assert_eq!(Settings::decode(&body).unwrap(), settings);
+        body[69] = b'\n';
+        assert_eq!(
+            Settings::decode(&body).unwrap().device_name,
+            DeviceName::default()
+        );
+        body[68] = 255;
+        assert_eq!(Settings::decode(&body).unwrap().identity, settings.identity);
+    }
+
     /// Every channel this build knows survives a round trip, so adding one cannot silently
     /// break the ones already shipped.
     #[test]
@@ -280,6 +337,7 @@ mod tests {
                 identity: identity(),
                 channel,
                 region: crate::region::Region::Unset,
+                device_name: DeviceName::default(),
             };
             let mut body = [0_u8; ENCODED_LEN];
             let len = settings.encode(&mut body);
@@ -303,6 +361,7 @@ mod tests {
             identity,
             channel: Channel::Node,
             region: crate::region::Region::Us915,
+            device_name: DeviceName::default(),
         };
         let mut rendered = String::<256>::new();
         write!(&mut rendered, "{settings:?}").unwrap();

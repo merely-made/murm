@@ -1,0 +1,86 @@
+{
+  "device": "SB1",
+  "name": "SB1",
+  "expected_usb": [
+    12346,
+    4097,
+    "44:1B:F6:6A:FB:28"
+  ],
+  "source_sha256": "2aa7382dfa7092d3b0704d41aa87865dc5af0556a73a8c6ff6631f06d695ea30",
+  "provision": true,
+  "sessions": [
+    {
+      "port": "COM6",
+      "attached": "",
+      "responses": [
+        {
+          "command": "status",
+          "response": "tulle/heltec-v4 phy online; version=0.0.1; sx1262 online; sync=2b reg=24b4; longfast=906875000; build=cb042329232571cd3c50b2ef9b5e386fbe4f434a; image=v4-modem-usb\r\nidentity=loaded slot=A seq=10\r\nname=\r\n"
+        },
+        {
+          "command": "name",
+          "response": "name=\r\n"
+        },
+        {
+          "command": "region",
+          "response": "region=US915\r\n"
+        },
+        {
+          "command": "channel",
+          "response": "channel=rnode\r\n"
+        },
+        {
+          "command": "ui",
+          "response": "ui=ok; display=on; screen=status; button=0; host=none\r\n"
+        },
+        {
+          "command": "name set bad\tname",
+          "response": "name invalid: use 1-16 printable ASCII characters\r\n"
+        },
+        {
+          "command": "name",
+          "response": "name=\r\n"
+        },
+        {
+          "command": "name set SB1",
+          "response": "name saved; rebooting\r\n"
+        }
+      ]
+    },
+    {
+      "port": "COM6",
+      "attached": "",
+      "responses": [
+        {
+          "command": "status",
+          "response": "tulle/heltec-v4 phy online; version=0.0.1; sx1262 online; sync=2b reg=24b4; longfast=906875000; build=cb042329232571cd3c50b2ef9b5e386fbe4f434a; image=v4-modem-usb\r\nidentity=loaded slot=B seq=11\r\nname=SB1\r\n"
+        },
+        {
+          "command": "name",
+          "response": "name=SB1\r\n"
+        },
+        {
+          "command": "region",
+          "response": "region=US915\r\n"
+        },
+        {
+          "command": "channel",
+          "response": "channel=rnode\r\n"
+        },
+        {
+          "command": "ui",
+          "response": "ui=ok; display=on; screen=status; button=0; host=none\r\n"
+        },
+        {
+          "command": "name set SB1",
+          "response": "name=SB1\r\n"
+        },
+        {
+          "command": "status",
+          "response": "tulle/heltec-v4 phy online; version=0.0.1; sx1262 online; sync=2b reg=24b4; longfast=906875000; build=cb042329232571cd3c50b2ef9b5e386fbe4f434a; image=v4-modem-usb\r\nidentity=loaded slot=B seq=11\r\nname=SB1\r\n"
+        }
+      ]
+    }
+  ],
+  "passed": true
+}

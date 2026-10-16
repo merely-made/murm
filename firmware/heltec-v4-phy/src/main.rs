@@ -178,7 +178,7 @@ async fn main(spawner: Spawner) {
     // Safety: startup initializes this exact static once, before any retained
     // protocol state or task is constructed.
     unsafe {
-        heap::init();
+        heap::init(spawner);
     }
     let peripherals = esp_hal::init(Config::default());
     #[cfg(feature = "rf-sleep-proof")]
@@ -272,7 +272,7 @@ async fn main(spawner: Spawner) {
         standby: Output::new(peripherals.GPIO40, Level::High, OutputConfig::default()),
     };
     spawner.spawn(gnss::gnss_task(gnss_rx, gnss_pins).unwrap());
-    let mut local_status = board::initial_status();
+    let mut local_status = board::initial_status(settings);
     spawner.spawn(ui::screen_task(i2c, oled_reset, vext, led, local_status).unwrap());
 
     let spi = Spi::new(

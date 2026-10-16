@@ -15,6 +15,8 @@ const PUBLIC_LONGFAST: [u8; 16] = [
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 struct ConfigFile {
+    #[serde(default)]
+    directed: Option<DirectedConfig>,
     device_id: pandect::DeviceId,
     port: PathBuf,
     realm: String,
@@ -36,6 +38,27 @@ struct ConfigFile {
     transmit_timeout_ms: u64,
     dtr: bool,
 }
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct DirectedConfig {
+    peer_public_key: String,
+    ack_timeout_ms: u64,
+    seen_capacity: usize,
+}
+fn directed_key(config: &DirectedConfig) -> Result<[u8; 32], String> {
+    let key: [u8; 32] = hex::decode(&config.peer_public_key)
+        .map_err(|_| "invalid peer public key")?
+        .try_into()
+        .map_err(|_| "require full peer public key")?;
+    if config.ack_timeout_ms == 0
+        || config.seen_capacity == 0
+        || config.seen_capacity > 4096
+        || key == [0; 32]
+    {
+        return Err("directed Sennet requires a pinned peer public key, response window and bounded seen capacity".into());
+    }
+    Ok(key)
+}
 struct Authority {
     config: ConfigFile,
     djinn: DjinnStationAuthority,
@@ -46,6 +69,9 @@ fn parse(path: &std::path::Path) -> Result<ConfigFile, String> {
             .map_err(|e| e.to_string())?;
     personae::sennet::station_salt(config.device_id.as_uuid().as_bytes(), &config.realm)
         .map_err(|e| e.to_string())?;
+    if let Some(directed) = &config.directed {
+        directed_key(directed)?;
+    }
     if config.public_channel != "LongFast"
         || !config.journal.is_absolute()
         || !config.packet_ids.is_absolute()
@@ -109,8 +135,9 @@ pub fn station_card(path: &std::path::Path, initialize: bool) -> Result<serde_js
             .map_err(|e| e.to_string())?;
     }
     released.lease.check().map_err(|e| e.to_string())?;
+    let pki = sennet::pki::LocalIdentity::from_secret(*released.material.seed_bytes());
     Ok(
-        serde_json::json!({"schema":1,"authority":"djinn","device_id":config.device_id,"realm":config.realm,"node_number":source,"address":format!("{source:08x}"),"public_channel":"LongFast","channel_hash":8,"packet_ids_initialized":initialize}),
+        serde_json::json!({"schema":1,"authority":"djinn","device_id":config.device_id,"realm":config.realm,"node_number":source,"address":format!("{source:08x}"),"pki_public_key":hex::encode(pki.public_key()),"public_channel":"LongFast","channel_hash":8,"packet_ids_initialized":initialize}),
     )
 }
 impl ResidentAuthority for Authority {
@@ -133,6 +160,16 @@ impl ResidentAuthority for Authority {
         if source == config.peer_node {
             return Err("Sennet public node number collides with the identified stock peer".into());
         }
+        let directed = if let Some(d) = &config.directed {
+            let identity = sennet::pki::LocalIdentity::from_secret(*released.material.seed_bytes());
+            let public = directed_key(d)?;
+            identity
+                .peer(source, config.peer_node, public)
+                .map_err(|e| format!("invalid pinned PKI peer: {e:?}"))?;
+            Some((identity, public, d.ack_timeout_ms, d.seen_capacity))
+        } else {
+            None
+        };
         let (reservation, ids) = SennetPacketIds::reserve(
             &config.packet_ids,
             &config.realm,
@@ -143,6 +180,7 @@ impl ResidentAuthority for Authority {
         let lease = Arc::new(released.lease);
         let live = lease.clone();
         let profile = settings.profile;
+        let peer_node = config.peer_node;
         let tx_budget_ms = config.tx_budget_ms;
         let frame_ttl_ms = config.frame_ttl_ms;
         Ok(PreparedResident {
@@ -156,7 +194,7 @@ impl ResidentAuthority for Authority {
             authorize: Box::new(move || lease.check().map_err(|e| e.to_string())),
             can_transmit: Box::new(move || live.check_live().map_err(|e| e.to_string())),
             build: Box::new(move |now| {
-                let instance = sennet::instance::SennetInstance::new(
+                let mut instance = sennet::instance::SennetInstance::new(
                     sennet::instance::SennetInstanceConfig {
                         channel: sennet::node::Channel {
                             hash: 8,
@@ -178,6 +216,11 @@ impl ResidentAuthority for Authority {
                     ids,
                 )
                 .map_err(|e| format!("{e:?}"))?;
+                if let Some((identity, public, timeout, capacity)) = directed {
+                    instance
+                        .install_pki(peer_node, identity, public, timeout, capacity)
+                        .map_err(|e| format!("{e:?}"))?;
+                }
                 Runtime::sennet_only(
                     now,
                     Config {
@@ -214,6 +257,33 @@ mod tests {
             "tx_power_dbm":0,"tx_budget_ms":2000,"frame_ttl_ms":15000,"reservation_size":256,
             "airtime_window_ms":60000,"airtime_allowance_ms":12000,"receive_wait_ms":50,
             "open_settle_ms":800,"online_timeout_ms":3000,"transmit_timeout_ms":3000,"dtr":false})
+    }
+    #[test]
+    fn directed_config_requires_public_key_window_and_bounded_dedup_only() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("config.json");
+        let mut value = config(dir.path());
+        let public = hex::encode(sennet::pki::LocalIdentity::from_secret([7; 32]).public_key());
+        value["directed"] =
+            serde_json::json!({"peer_public_key":public,"ack_timeout_ms":15000,"seen_capacity":64});
+        std::fs::write(&path, serde_json::to_vec(&value).unwrap()).unwrap();
+        assert!(load(&path).is_ok());
+        for (field, bad) in [
+            ("peer_public_key", serde_json::json!("00".repeat(32))),
+            ("peer_public_key", serde_json::json!("0123")),
+            ("ack_timeout_ms", serde_json::json!(0)),
+            ("seen_capacity", serde_json::json!(0)),
+            ("seen_capacity", serde_json::json!(4097)),
+        ] {
+            let mut bad_value = value.clone();
+            bad_value["directed"][field] = bad;
+            std::fs::write(&path, serde_json::to_vec(&bad_value).unwrap()).unwrap();
+            assert!(load(&path).is_err());
+        }
+        value["directed"]["private_key"] = serde_json::json!("forbidden");
+        std::fs::write(&path, serde_json::to_vec(&value).unwrap()).unwrap();
+        assert!(load(&path).is_err());
+        assert_eq!(std::fs::read_dir(dir.path()).unwrap().count(), 1);
     }
     #[test]
     fn absent_sennet_custody_never_initializes_nonce_state_or_opens_serial_or_history() {

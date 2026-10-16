@@ -1,12 +1,12 @@
-//! Link-only MC4a capacity image. Not the radio firmware and not installed by
-//! the validation workflow. It links the same workload measured on the host,
-//! with a fixed heap and explicit RAM reservations for later integration.
+//! Link-only current retained-state capacity image, including Sennet PKI.
+//! Not the radio firmware and not installed by this validation workflow. It
+//! links the host workload with a fixed heap and explicit integration reserves.
 #![no_std]
 #![no_main]
 
 use embedded_alloc::LlffHeap;
 use esp_backtrace as _;
-use protocol_capacity_probe::Residents;
+use protocol_capacity_probe::current::Residents;
 use static_cell::StaticCell;
 
 esp_bootloader_esp_idf::esp_app_desc!();
@@ -38,7 +38,8 @@ fn main() -> ! {
     };
     core::hint::black_box(core::ptr::addr_of_mut!(RADIO_RUNTIME_RESERVE));
     core::hint::black_box(core::ptr::addr_of_mut!(QUEUE_STATE_RESERVE));
-    RESIDENTS.init_with(protocol_capacity_probe::workload);
+    core::hint::black_box(&protocol_capacity_probe::current::PROTOCOL_LAYOUT_V2);
+    RESIDENTS.init_with(protocol_capacity_probe::current::workload);
     loop {
         core::hint::spin_loop();
     }

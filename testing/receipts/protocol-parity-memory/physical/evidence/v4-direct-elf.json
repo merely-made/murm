@@ -1,0 +1,119 @@
+{
+  "path": "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\protocol-parity-memory\\v4-direct.elf",
+  "sha256": "3f51abaecaecb0f739e54d515be9644ea054e4ecae5c288c26f116446f04b4fc",
+  "elf_bytes": 13056680,
+  "machine": 94,
+  "entry": 1077380612,
+  "allocated_sections": [
+    {
+      "name": ".rwtext",
+      "address": 1077380096,
+      "bytes": 8216,
+      "type": 1
+    },
+    {
+      "name": ".rwdata_dummy",
+      "address": 1070104576,
+      "bytes": 9240,
+      "type": 8
+    },
+    {
+      "name": ".data",
+      "address": 1070113816,
+      "bytes": 5356,
+      "type": 1
+    },
+    {
+      "name": ".bss",
+      "address": 1070119184,
+      "bytes": 219112,
+      "type": 8
+    },
+    {
+      "name": ".flash.appdesc",
+      "address": 1006632992,
+      "bytes": 256,
+      "type": 1
+    },
+    {
+      "name": ".rodata",
+      "address": 1006633248,
+      "bytes": 58960,
+      "type": 1
+    },
+    {
+      "name": ".defmt.end",
+      "address": 1006692208,
+      "bytes": 2,
+      "type": 1
+    },
+    {
+      "name": ".vectors",
+      "address": 1077379072,
+      "bytes": 1024,
+      "type": 1
+    },
+    {
+      "name": ".rotext_dummy",
+      "address": 1107296288,
+      "bytes": 65536,
+      "type": 8
+    },
+    {
+      "name": ".text",
+      "address": 1107361824,
+      "bytes": 680437,
+      "type": 1
+    },
+    {
+      "name": ".stack",
+      "address": 1070338296,
+      "bytes": 108040,
+      "type": 8
+    }
+  ],
+  "load_segments": [
+    {
+      "virtual_address": 1006632992,
+      "physical_address": 1006632992,
+      "file_bytes": 59218,
+      "memory_bytes": 59218,
+      "flags": 4
+    },
+    {
+      "virtual_address": 1070104576,
+      "physical_address": 1070104576,
+      "file_bytes": 14596,
+      "memory_bytes": 341760,
+      "flags": 6
+    },
+    {
+      "virtual_address": 1077379072,
+      "physical_address": 1077379072,
+      "file_bytes": 1024,
+      "memory_bytes": 1024,
+      "flags": 5
+    },
+    {
+      "virtual_address": 1077380096,
+      "physical_address": 1077380096,
+      "file_bytes": 8216,
+      "memory_bytes": 8216,
+      "flags": 5
+    },
+    {
+      "virtual_address": 1107296288,
+      "physical_address": 1107296288,
+      "file_bytes": 745973,
+      "memory_bytes": 745973,
+      "flags": 7
+    }
+  ],
+  "target_layouts": {},
+  "linker_symbols": {
+    "_stack_end_cpu0": 1070338296,
+    "_stack_start": 1070446336,
+    "_stack_start_cpu0": 1070446336
+  },
+  "stack_region_bytes": 108040
+}

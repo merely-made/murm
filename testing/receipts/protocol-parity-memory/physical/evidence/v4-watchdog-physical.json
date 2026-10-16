@@ -1,0 +1,167 @@
+{
+  "passed": false,
+  "actions": [
+    {
+      "name": "watchdog-v4-install",
+      "command": [
+        "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\sennet-tucket-radios\\artifacts\\espflash.exe",
+        "write-bin",
+        "--port",
+        "COM7",
+        "--chip",
+        "esp32s3",
+        "--before",
+        "usb-reset",
+        "--after",
+        "watchdog-reset",
+        "--baud",
+        "921600",
+        "--non-interactive",
+        "--skip-update-check",
+        "65536",
+        "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\protocol-parity-memory\\v4-worker.bin"
+      ],
+      "exit_code": 0,
+      "seconds": 7.741
+    },
+    {
+      "name": "watchdog-v4-campaign",
+      "command": [
+        "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\sennet-tucket-radios\\stock-cli\\Scripts\\python.exe",
+        "-B",
+        "testing/protocol-capacity/board_probe.py",
+        "v4",
+        "--port",
+        "COM7",
+        "--rounds",
+        "16",
+        "--output",
+        "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\protocol-parity-memory\\v4-watchdog-campaign.json"
+      ],
+      "exit_code": 1,
+      "seconds": 4.427
+    },
+    {
+      "name": "watchdog-v4-restore",
+      "command": [
+        "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\sennet-tucket-radios\\artifacts\\espflash.exe",
+        "write-bin",
+        "--port",
+        "COM7",
+        "--chip",
+        "esp32s3",
+        "--before",
+        "usb-reset",
+        "--after",
+        "watchdog-reset",
+        "--baud",
+        "921600",
+        "--non-interactive",
+        "--skip-update-check",
+        "65536",
+        "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\protocol-parity-memory\\v4-original-private-app.bin"
+      ],
+      "exit_code": 0,
+      "seconds": 10.026
+    },
+    {
+      "name": "watchdog-v4-restored-prefix-read",
+      "command": [
+        "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\sennet-tucket-radios\\artifacts\\espflash.exe",
+        "read-flash",
+        "--port",
+        "COM7",
+        "--chip",
+        "esp32s3",
+        "--before",
+        "usb-reset",
+        "--after",
+        "watchdog-reset",
+        "--baud",
+        "921600",
+        "--non-interactive",
+        "--skip-update-check",
+        "--block-size",
+        "1024",
+        "--max-in-flight",
+        "1",
+        "0",
+        "1048576",
+        "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\protocol-parity-memory\\v4-watchdog-restored-private-prefix.bin"
+      ],
+      "exit_code": 0,
+      "seconds": 11.776
+    },
+    {
+      "name": "watchdog-v4-restored-tail-read",
+      "command": [
+        "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\sennet-tucket-radios\\artifacts\\espflash.exe",
+        "read-flash",
+        "--port",
+        "COM7",
+        "--chip",
+        "esp32s3",
+        "--before",
+        "usb-reset",
+        "--after",
+        "watchdog-reset",
+        "--baud",
+        "921600",
+        "--non-interactive",
+        "--skip-update-check",
+        "--block-size",
+        "1024",
+        "--max-in-flight",
+        "1",
+        "4128768",
+        "65536",
+        "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\protocol-parity-memory\\v4-watchdog-restored-private-tail.bin"
+      ],
+      "exit_code": 0,
+      "seconds": 1.211
+    },
+    {
+      "name": "watchdog-v4-restored-status",
+      "command": [
+        "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\sennet-tucket-radios\\stock-cli\\Scripts\\python.exe",
+        "-B",
+        "testing/protocol-capacity/board_probe.py",
+        "v4",
+        "--port",
+        "COM7",
+        "--output",
+        "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\protocol-parity-memory\\v4-watchdog-restored.json"
+      ],
+      "exit_code": 1,
+      "seconds": 4.412
+    }
+  ],
+  "application_only_write_offset": 65536,
+  "protected_range": "0x3f0000..0x400000",
+  "inputs": {
+    "v4-worker.bin": {
+      "sha256": "b7eb9eb1089dce00cfe45702add75e6987b104de0ab2602356840a1d00381a39",
+      "bytes": 755376
+    },
+    "v4-worker.elf": {
+      "sha256": "40d97981581a491eeac844ef126afa4034466d478f47eb469a92a1bd469397f6",
+      "bytes": 13112684
+    },
+    "v4-original-private-prefix.bin": {
+      "sha256": "37285b729fac58354103d50e9faf9b77f78c90f769f6cdd404f973f4ab4230a3",
+      "bytes": 1048576
+    },
+    "v4-original-private-app.bin": {
+      "sha256": "2346b814a1e2c90c392b45b0b006b34e4a71ea347cb8e92ce95a6fb0ff770696",
+      "bytes": 983040
+    },
+    "v4-original-private-tail.bin": {
+      "sha256": "acba765c11cc2bdef36e5a39064ecb401f5be9ca96f371947d47b2b6d49fb0a0",
+      "bytes": 65536
+    }
+  },
+  "error": "AssertionError('watchdog-v4-campaign failed')",
+  "original_prefix_exact": true,
+  "protected_tail_exact": true,
+  "restoration_error": "AssertionError('watchdog-v4-restored-status failed')"
+}

@@ -1,0 +1,367 @@
+{"round": 1, "measurement": {"initial": "0", "fragmented": "4544", "retained": "14476", "final": "0", "peak": "18452", "capacity": "65536", "failures": "1", "expected_refusals": "1", "stack_sample": "97344", "stack_region": "107960", "stack_valid": "true", "worker_min_sp_sample": "1070394752"}}
+{"round": 2, "measurement": {"initial": "0", "fragmented": "4544", "retained": "14476", "final": "0", "peak": "18452", "capacity": "65536", "failures": "2", "expected_refusals": "1", "stack_sample": "97344", "stack_region": "107960", "stack_valid": "true", "worker_min_sp_sample": "1070394752"}}
+{"round": 3, "measurement": {"initial": "0", "fragmented": "4544", "retained": "14476", "final": "0", "peak": "18452", "capacity": "65536", "failures": "3", "expected_refusals": "1", "stack_sample": "97344", "stack_region": "107960", "stack_valid": "true", "worker_min_sp_sample": "1070394752"}}
+{"round": 4, "measurement": {"initial": "0", "fragmented": "4544", "retained": "14476", "final": "0", "peak": "18452", "capacity": "65536", "failures": "4", "expected_refusals": "1", "stack_sample": "97344", "stack_region": "107960", "stack_valid": "true", "worker_min_sp_sample": "1070394752"}}
+{"round": 5, "measurement": {"initial": "0", "fragmented": "4544", "retained": "14476", "final": "0", "peak": "18452", "capacity": "65536", "failures": "5", "expected_refusals": "1", "stack_sample": "97344", "stack_region": "107960", "stack_valid": "true", "worker_min_sp_sample": "1070394752"}}
+{"round": 6, "measurement": {"initial": "0", "fragmented": "4544", "retained": "14476", "final": "0", "peak": "18452", "capacity": "65536", "failures": "6", "expected_refusals": "1", "stack_sample": "97344", "stack_region": "107960", "stack_valid": "true", "worker_min_sp_sample": "1070394752"}}
+{"round": 7, "measurement": {"initial": "0", "fragmented": "4544", "retained": "14476", "final": "0", "peak": "18452", "capacity": "65536", "failures": "7", "expected_refusals": "1", "stack_sample": "97344", "stack_region": "107960", "stack_valid": "true", "worker_min_sp_sample": "1070394752"}}
+{"round": 8, "measurement": {"initial": "0", "fragmented": "4544", "retained": "14476", "final": "0", "peak": "18452", "capacity": "65536", "failures": "8", "expected_refusals": "1", "stack_sample": "97344", "stack_region": "107960", "stack_valid": "true", "worker_min_sp_sample": "1070394752"}}
+{"round": 9, "measurement": {"initial": "0", "fragmented": "4544", "retained": "14476", "final": "0", "peak": "18452", "capacity": "65536", "failures": "9", "expected_refusals": "1", "stack_sample": "97344", "stack_region": "107960", "stack_valid": "true", "worker_min_sp_sample": "1070394752"}}
+{"round": 10, "measurement": {"initial": "0", "fragmented": "4544", "retained": "14476", "final": "0", "peak": "18452", "capacity": "65536", "failures": "10", "expected_refusals": "1", "stack_sample": "97344", "stack_region": "107960", "stack_valid": "true", "worker_min_sp_sample": "1070394752"}}
+{"round": 11, "measurement": {"initial": "0", "fragmented": "4544", "retained": "14476", "final": "0", "peak": "18452", "capacity": "65536", "failures": "11", "expected_refusals": "1", "stack_sample": "97344", "stack_region": "107960", "stack_valid": "true", "worker_min_sp_sample": "1070394752"}}
+{"round": 12, "measurement": {"initial": "0", "fragmented": "4544", "retained": "14476", "final": "0", "peak": "18452", "capacity": "65536", "failures": "12", "expected_refusals": "1", "stack_sample": "97344", "stack_region": "107960", "stack_valid": "true", "worker_min_sp_sample": "1070394752"}}
+{"round": 13, "measurement": {"initial": "0", "fragmented": "4544", "retained": "14476", "final": "0", "peak": "18452", "capacity": "65536", "failures": "13", "expected_refusals": "1", "stack_sample": "97344", "stack_region": "107960", "stack_valid": "true", "worker_min_sp_sample": "1070394752"}}
+{"round": 14, "measurement": {"initial": "0", "fragmented": "4544", "retained": "14476", "final": "0", "peak": "18452", "capacity": "65536", "failures": "14", "expected_refusals": "1", "stack_sample": "97344", "stack_region": "107960", "stack_valid": "true", "worker_min_sp_sample": "1070394752"}}
+{"round": 15, "measurement": {"initial": "0", "fragmented": "4544", "retained": "14476", "final": "0", "peak": "18452", "capacity": "65536", "failures": "15", "expected_refusals": "1", "stack_sample": "97344", "stack_region": "107960", "stack_valid": "true", "worker_min_sp_sample": "1070394752"}}
+{"round": 16, "measurement": {"initial": "0", "fragmented": "4544", "retained": "14476", "final": "0", "peak": "18452", "capacity": "65536", "failures": "16", "expected_refusals": "1", "stack_sample": "97344", "stack_region": "107960", "stack_valid": "true", "worker_min_sp_sample": "1070394752"}}
+{
+  "board": "v4",
+  "usb": [
+    12346,
+    4097,
+    "44:1B:F6:6A:FB:28"
+  ],
+  "port": "COM6",
+  "runner_sha256": "de1012ce6a190a6b1cdb4febab4efc30bdcaf20fb0d94cc58d5f81f7f8b51fb4",
+  "requested_rounds": 16,
+  "responses": [
+    {
+      "command": "status",
+      "response": "I (286) esp_image: segment 4: paddr=000c6604 vaddr=40378390 sizetulle/heltec-v4 phy online; version=0.0.1; sx1262 online; sync=2b reg=24b4; longfast=906875000; build=280e40dd34c-memory-bench-worker; image=v4-resident-usb\r\nidentity=loaded slot=A seq=10\r\n",
+      "seconds": 1.564
+    },
+    {
+      "command": "region",
+      "response": "region=US915\r\n",
+      "seconds": 1.57
+    },
+    {
+      "command": "channel",
+      "response": "channel=rnode\r\n",
+      "seconds": 1.57
+    },
+    {
+      "command": "sync",
+      "response": "2b 24b4\r\n",
+      "seconds": 1.588
+    },
+    {
+      "command": "protocol memory",
+      "response": "memory initial=0 fragmented=4544 retained=14476 final=0 peak=18452 capacity=65536 failures=1 expected_refusals=1 stack_sample=97344 stack_region=107960 stack_valid=true worker_min_sp_sample=1070394752\r\n",
+      "seconds": 8.067,
+      "measurement": {
+        "initial": "0",
+        "fragmented": "4544",
+        "retained": "14476",
+        "final": "0",
+        "peak": "18452",
+        "capacity": "65536",
+        "failures": "1",
+        "expected_refusals": "1",
+        "stack_sample": "97344",
+        "stack_region": "107960",
+        "stack_valid": "true",
+        "worker_min_sp_sample": "1070394752"
+      }
+    },
+    {
+      "command": "protocol memory",
+      "response": "memory initial=0 fragmented=4544 retained=14476 final=0 peak=18452 capacity=65536 failures=2 expected_refusals=1 stack_sample=97344 stack_region=107960 stack_valid=true worker_min_sp_sample=1070394752\r\n",
+      "seconds": 8.103,
+      "measurement": {
+        "initial": "0",
+        "fragmented": "4544",
+        "retained": "14476",
+        "final": "0",
+        "peak": "18452",
+        "capacity": "65536",
+        "failures": "2",
+        "expected_refusals": "1",
+        "stack_sample": "97344",
+        "stack_region": "107960",
+        "stack_valid": "true",
+        "worker_min_sp_sample": "1070394752"
+      }
+    },
+    {
+      "command": "protocol memory",
+      "response": "memory initial=0 fragmented=4544 retained=14476 final=0 peak=18452 capacity=65536 failures=3 expected_refusals=1 stack_sample=97344 stack_region=107960 stack_valid=true worker_min_sp_sample=1070394752\r\n",
+      "seconds": 8.071,
+      "measurement": {
+        "initial": "0",
+        "fragmented": "4544",
+        "retained": "14476",
+        "final": "0",
+        "peak": "18452",
+        "capacity": "65536",
+        "failures": "3",
+        "expected_refusals": "1",
+        "stack_sample": "97344",
+        "stack_region": "107960",
+        "stack_valid": "true",
+        "worker_min_sp_sample": "1070394752"
+      }
+    },
+    {
+      "command": "protocol memory",
+      "response": "memory initial=0 fragmented=4544 retained=14476 final=0 peak=18452 capacity=65536 failures=4 expected_refusals=1 stack_sample=97344 stack_region=107960 stack_valid=true worker_min_sp_sample=1070394752\r\n",
+      "seconds": 8.081,
+      "measurement": {
+        "initial": "0",
+        "fragmented": "4544",
+        "retained": "14476",
+        "final": "0",
+        "peak": "18452",
+        "capacity": "65536",
+        "failures": "4",
+        "expected_refusals": "1",
+        "stack_sample": "97344",
+        "stack_region": "107960",
+        "stack_valid": "true",
+        "worker_min_sp_sample": "1070394752"
+      }
+    },
+    {
+      "command": "protocol memory",
+      "response": "memory initial=0 fragmented=4544 retained=14476 final=0 peak=18452 capacity=65536 failures=5 expected_refusals=1 stack_sample=97344 stack_region=107960 stack_valid=true worker_min_sp_sample=1070394752\r\n",
+      "seconds": 8.021,
+      "measurement": {
+        "initial": "0",
+        "fragmented": "4544",
+        "retained": "14476",
+        "final": "0",
+        "peak": "18452",
+        "capacity": "65536",
+        "failures": "5",
+        "expected_refusals": "1",
+        "stack_sample": "97344",
+        "stack_region": "107960",
+        "stack_valid": "true",
+        "worker_min_sp_sample": "1070394752"
+      }
+    },
+    {
+      "command": "protocol memory",
+      "response": "memory initial=0 fragmented=4544 retained=14476 final=0 peak=18452 capacity=65536 failures=6 expected_refusals=1 stack_sample=97344 stack_region=107960 stack_valid=true worker_min_sp_sample=1070394752\r\n",
+      "seconds": 8.098,
+      "measurement": {
+        "initial": "0",
+        "fragmented": "4544",
+        "retained": "14476",
+        "final": "0",
+        "peak": "18452",
+        "capacity": "65536",
+        "failures": "6",
+        "expected_refusals": "1",
+        "stack_sample": "97344",
+        "stack_region": "107960",
+        "stack_valid": "true",
+        "worker_min_sp_sample": "1070394752"
+      }
+    },
+    {
+      "command": "protocol memory",
+      "response": "memory initial=0 fragmented=4544 retained=14476 final=0 peak=18452 capacity=65536 failures=7 expected_refusals=1 stack_sample=97344 stack_region=107960 stack_valid=true worker_min_sp_sample=1070394752\r\n",
+      "seconds": 8.067,
+      "measurement": {
+        "initial": "0",
+        "fragmented": "4544",
+        "retained": "14476",
+        "final": "0",
+        "peak": "18452",
+        "capacity": "65536",
+        "failures": "7",
+        "expected_refusals": "1",
+        "stack_sample": "97344",
+        "stack_region": "107960",
+        "stack_valid": "true",
+        "worker_min_sp_sample": "1070394752"
+      }
+    },
+    {
+      "command": "protocol memory",
+      "response": "memory initial=0 fragmented=4544 retained=14476 final=0 peak=18452 capacity=65536 failures=8 expected_refusals=1 stack_sample=97344 stack_region=107960 stack_valid=true worker_min_sp_sample=1070394752\r\n",
+      "seconds": 8.067,
+      "measurement": {
+        "initial": "0",
+        "fragmented": "4544",
+        "retained": "14476",
+        "final": "0",
+        "peak": "18452",
+        "capacity": "65536",
+        "failures": "8",
+        "expected_refusals": "1",
+        "stack_sample": "97344",
+        "stack_region": "107960",
+        "stack_valid": "true",
+        "worker_min_sp_sample": "1070394752"
+      }
+    },
+    {
+      "command": "protocol memory",
+      "response": "memory initial=0 fragmented=4544 retained=14476 final=0 peak=18452 capacity=65536 failures=9 expected_refusals=1 stack_sample=97344 stack_region=107960 stack_valid=true worker_min_sp_sample=1070394752\r\n",
+      "seconds": 8.097,
+      "measurement": {
+        "initial": "0",
+        "fragmented": "4544",
+        "retained": "14476",
+        "final": "0",
+        "peak": "18452",
+        "capacity": "65536",
+        "failures": "9",
+        "expected_refusals": "1",
+        "stack_sample": "97344",
+        "stack_region": "107960",
+        "stack_valid": "true",
+        "worker_min_sp_sample": "1070394752"
+      }
+    },
+    {
+      "command": "protocol memory",
+      "response": "memory initial=0 fragmented=4544 retained=14476 final=0 peak=18452 capacity=65536 failures=10 expected_refusals=1 stack_sample=97344 stack_region=107960 stack_valid=true worker_min_sp_sample=1070394752\r\n",
+      "seconds": 8.082,
+      "measurement": {
+        "initial": "0",
+        "fragmented": "4544",
+        "retained": "14476",
+        "final": "0",
+        "peak": "18452",
+        "capacity": "65536",
+        "failures": "10",
+        "expected_refusals": "1",
+        "stack_sample": "97344",
+        "stack_region": "107960",
+        "stack_valid": "true",
+        "worker_min_sp_sample": "1070394752"
+      }
+    },
+    {
+      "command": "protocol memory",
+      "response": "memory initial=0 fragmented=4544 retained=14476 final=0 peak=18452 capacity=65536 failures=11 expected_refusals=1 stack_sample=97344 stack_region=107960 stack_valid=true worker_min_sp_sample=1070394752\r\n",
+      "seconds": 8.075,
+      "measurement": {
+        "initial": "0",
+        "fragmented": "4544",
+        "retained": "14476",
+        "final": "0",
+        "peak": "18452",
+        "capacity": "65536",
+        "failures": "11",
+        "expected_refusals": "1",
+        "stack_sample": "97344",
+        "stack_region": "107960",
+        "stack_valid": "true",
+        "worker_min_sp_sample": "1070394752"
+      }
+    },
+    {
+      "command": "protocol memory",
+      "response": "memory initial=0 fragmented=4544 retained=14476 final=0 peak=18452 capacity=65536 failures=12 expected_refusals=1 stack_sample=97344 stack_region=107960 stack_valid=true worker_min_sp_sample=1070394752\r\n",
+      "seconds": 8.067,
+      "measurement": {
+        "initial": "0",
+        "fragmented": "4544",
+        "retained": "14476",
+        "final": "0",
+        "peak": "18452",
+        "capacity": "65536",
+        "failures": "12",
+        "expected_refusals": "1",
+        "stack_sample": "97344",
+        "stack_region": "107960",
+        "stack_valid": "true",
+        "worker_min_sp_sample": "1070394752"
+      }
+    },
+    {
+      "command": "protocol memory",
+      "response": "memory initial=0 fragmented=4544 retained=14476 final=0 peak=18452 capacity=65536 failures=13 expected_refusals=1 stack_sample=97344 stack_region=107960 stack_valid=true worker_min_sp_sample=1070394752\r\n",
+      "seconds": 8.078,
+      "measurement": {
+        "initial": "0",
+        "fragmented": "4544",
+        "retained": "14476",
+        "final": "0",
+        "peak": "18452",
+        "capacity": "65536",
+        "failures": "13",
+        "expected_refusals": "1",
+        "stack_sample": "97344",
+        "stack_region": "107960",
+        "stack_valid": "true",
+        "worker_min_sp_sample": "1070394752"
+      }
+    },
+    {
+      "command": "protocol memory",
+      "response": "memory initial=0 fragmented=4544 retained=14476 final=0 peak=18452 capacity=65536 failures=14 expected_refusals=1 stack_sample=97344 stack_region=107960 stack_valid=true worker_min_sp_sample=1070394752\r\n",
+      "seconds": 8.067,
+      "measurement": {
+        "initial": "0",
+        "fragmented": "4544",
+        "retained": "14476",
+        "final": "0",
+        "peak": "18452",
+        "capacity": "65536",
+        "failures": "14",
+        "expected_refusals": "1",
+        "stack_sample": "97344",
+        "stack_region": "107960",
+        "stack_valid": "true",
+        "worker_min_sp_sample": "1070394752"
+      }
+    },
+    {
+      "command": "protocol memory",
+      "response": "memory initial=0 fragmented=4544 retained=14476 final=0 peak=18452 capacity=65536 failures=15 expected_refusals=1 stack_sample=97344 stack_region=107960 stack_valid=true worker_min_sp_sample=1070394752\r\n",
+      "seconds": 8.097,
+      "measurement": {
+        "initial": "0",
+        "fragmented": "4544",
+        "retained": "14476",
+        "final": "0",
+        "peak": "18452",
+        "capacity": "65536",
+        "failures": "15",
+        "expected_refusals": "1",
+        "stack_sample": "97344",
+        "stack_region": "107960",
+        "stack_valid": "true",
+        "worker_min_sp_sample": "1070394752"
+      }
+    },
+    {
+      "command": "protocol memory",
+      "response": "memory initial=0 fragmented=4544 retained=14476 final=0 peak=18452 capacity=65536 failures=16 expected_refusals=1 stack_sample=97344 stack_region=107960 stack_valid=true worker_min_sp_sample=1070394752\r\n",
+      "seconds": 8.091,
+      "measurement": {
+        "initial": "0",
+        "fragmented": "4544",
+        "retained": "14476",
+        "final": "0",
+        "peak": "18452",
+        "capacity": "65536",
+        "failures": "16",
+        "expected_refusals": "1",
+        "stack_sample": "97344",
+        "stack_region": "107960",
+        "stack_valid": "true",
+        "worker_min_sp_sample": "1070394752"
+      }
+    },
+    {
+      "command": "status",
+      "response": "tulle/heltec-v4 phy online; version=0.0.1; sx1262 online; sync=2b reg=24b4; longfast=906875000; build=280e40dd34c-memory-bench-worker; image=v4-resident-usb\r\nidentity=loaded slot=A seq=10\r\n",
+      "seconds": 1.575
+    },
+    {
+      "command": "air",
+      "response": "air uptime=144004ms region=US915 armed=0 armfail=0 rxok=0 rxerr=0 rxbad=0 txok=0 txerr=0 noregion=0 overduty=0 cadclear=0 cadbusy=0 cadgiveup=0 cadover=0 cadfault=0 beats=0 frames=0\r\n",
+      "seconds": 1.57
+    }
+  ],
+  "passed": false,
+  "stack_scope": "point-in-time samples only; no high-water claim",
+  "attached": "",
+  "error": "AssertionError('status changed during campaign')"
+}

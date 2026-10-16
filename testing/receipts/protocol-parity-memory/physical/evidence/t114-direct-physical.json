@@ -1,0 +1,133 @@
+{
+  "passed": false,
+  "actions": [
+    {
+      "name": "direct-t114-stage",
+      "command": [
+        "C:\\Users\\mark_\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts\\adafruit-nrfutil.exe",
+        "dfu",
+        "serial",
+        "--package",
+        "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\protocol-parity-memory\\t114-handoff.zip",
+        "--port",
+        "COM4",
+        "--baudrate",
+        "115200",
+        "--singlebank"
+      ],
+      "exit_code": 0,
+      "seconds": 1.985
+    },
+    {
+      "name": "direct-t114-install",
+      "command": [
+        "C:\\Users\\mark_\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts\\adafruit-nrfutil.exe",
+        "dfu",
+        "serial",
+        "--package",
+        "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\protocol-parity-memory\\t114-direct.zip",
+        "--port",
+        "COM4",
+        "--baudrate",
+        "115200",
+        "--singlebank"
+      ],
+      "exit_code": 0,
+      "seconds": 29.867
+    },
+    {
+      "name": "direct-t114-campaign",
+      "command": [
+        "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\sennet-tucket-radios\\stock-cli\\Scripts\\python.exe",
+        "-B",
+        "testing/protocol-capacity/board_probe.py",
+        "t114",
+        "--port",
+        "COM10",
+        "--rounds",
+        "16",
+        "--output",
+        "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\protocol-parity-memory\\t114-direct-campaign.json"
+      ],
+      "exit_code": 1,
+      "seconds": 12.742
+    },
+    {
+      "name": "direct-t114-restore-stage",
+      "command": [
+        "C:\\Users\\mark_\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts\\adafruit-nrfutil.exe",
+        "dfu",
+        "serial",
+        "--package",
+        "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\protocol-parity-memory\\t114-handoff.zip",
+        "--port",
+        "COM4",
+        "--baudrate",
+        "115200",
+        "--singlebank"
+      ],
+      "exit_code": 0,
+      "seconds": 2.211
+    },
+    {
+      "name": "direct-t114-restore",
+      "command": [
+        "C:\\Users\\mark_\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts\\adafruit-nrfutil.exe",
+        "dfu",
+        "serial",
+        "--package",
+        "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\protocol-parity-memory\\t114-restore.zip",
+        "--port",
+        "COM4",
+        "--baudrate",
+        "115200",
+        "--singlebank"
+      ],
+      "exit_code": 0,
+      "seconds": 19.813
+    },
+    {
+      "name": "direct-t114-restored-status",
+      "command": [
+        "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\sennet-tucket-radios\\stock-cli\\Scripts\\python.exe",
+        "-B",
+        "testing/protocol-capacity/board_probe.py",
+        "t114",
+        "--port",
+        "COM10",
+        "--output",
+        "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\protocol-parity-memory\\t114-direct-restored.json"
+      ],
+      "exit_code": 0,
+      "seconds": 10.563
+    }
+  ],
+  "inputs": {
+    "t114-direct.zip": {
+      "sha256": "bae64ab21874ea22e6f3417ef76326e0b4fd75480c32a9c65420f4bec951f69c",
+      "payload_bytes": 488324,
+      "payload_sha256": "b4a4667dec288668a9bb0dab1974f9e11341fb2ad408ee860b6dfd15d996e460",
+      "start": 155648,
+      "erase_end": 647168
+    },
+    "t114-restore.zip": {
+      "sha256": "c1e0dc9e62cc6f5d100a1e6d7b8581f2c639a7ca65f35ceaecc7ac8e3b94355f",
+      "payload_bytes": 311396,
+      "payload_sha256": "191df2ab67159eab83a144f71b40bb4fec7bd5132dacb8d1391427c2eea249cc",
+      "start": 155648,
+      "erase_end": 471040
+    },
+    "t114-handoff.zip": {
+      "sha256": "7ef7e6c2d50e8aa5e5536cdcda124cb2dda9636dcb40fa6dd9efb32feae41740",
+      "payload_bytes": 1368,
+      "payload_sha256": "4f3f12328fd1f28391dba2aac2b4a8a456e7b9decb4d97ba57cb9e64c293a44e",
+      "start": 155648,
+      "erase_end": 159744
+    }
+  },
+  "state_scope": "application-only DFU, live identity/sequence/profile; no protected-flash readback",
+  "error": "AssertionError('direct-t114-campaign failed')",
+  "original_status_profile_exact": true,
+  "reset_comparison_scope": "Intentional watchdog bridge changes boot cause/crash residue; only those two fields normalized. Campaign itself requires identical before/after status.",
+  "original_identity_sequence_node": true
+}

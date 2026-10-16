@@ -1,0 +1,6 @@
+{
+  "final_source_bench_binary_exactly_matches_installed": true,
+  "bytes": 489122,
+  "sha256": "81cdc215f0ea0b6514a4b377e1c22984cca4e1a67612d8bc21d9fa62f6be9a06",
+  "change": "cfg-gate bench-only failure-counter getter to avoid a new default-image warning"
+}

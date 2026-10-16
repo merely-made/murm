@@ -1,0 +1,20 @@
+{
+  "t114-aligned.zip": {
+    "sha256": "4c56670f0cd51387b26802b29fe160439ce173a8c66e0538d6e97a3113d6605d",
+    "payload_bytes": 364484,
+    "payload_sha256": "72d969aee4405a20a6e60ada8455854ab8d1b8b292a11601bcc108859e91221e",
+    "erase_end": "0x7f000"
+  },
+  "t114-handoff.zip": {
+    "sha256": "7ef7e6c2d50e8aa5e5536cdcda124cb2dda9636dcb40fa6dd9efb32feae41740",
+    "payload_bytes": 1368,
+    "payload_sha256": "4f3f12328fd1f28391dba2aac2b4a8a456e7b9decb4d97ba57cb9e64c293a44e",
+    "erase_end": "0x27000"
+  },
+  "t114-restore.zip": {
+    "sha256": "c1e0dc9e62cc6f5d100a1e6d7b8581f2c639a7ca65f35ceaecc7ac8e3b94355f",
+    "payload_bytes": 311396,
+    "payload_sha256": "191df2ab67159eab83a144f71b40bb4fec7bd5132dacb8d1391427c2eea249cc",
+    "erase_end": "0x73000"
+  }
+}

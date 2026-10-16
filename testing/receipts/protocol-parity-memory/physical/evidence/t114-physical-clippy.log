@@ -1,0 +1,46 @@
+warning: patch `mere-p2panda-net v0.7.5 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `mere-proofs v0.1.0 (https://github.com/merely-made/mere.git?branch=main#594c5b38)` was not used in the crate graph
+warning: patch `muniment v0.1.2 (https://github.com/merely-made/mere.git?branch=main#594c5b38)` was not used in the crate graph
+warning: patch `p2panda-auth v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-core v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-discovery v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-encryption v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-store v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-stream v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-sync v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+help: Check that the patched package version and available features are compatible
+      with the dependency requirements. If the patch has a different version from
+      what is locked in the Cargo.lock file, run `cargo update` to use the new
+      version. This may also occur with an optional dependency that is not enabled.
+    Checking retinue v0.3.0 (C:\Users\mark_\Code\repos\retinue\crates\retinue)
+    Checking selvage v0.1.0 (C:\Users\mark_\Code\repos\retinue\crates\selvage)
+    Checking seneschal v0.2.0 (C:\Users\mark_\Code\repos\retinue\crates\seneschal)
+    Checking tucket v0.0.2 (C:\Users\mark_\Code\repos\retinue\crates\tucket)
+    Checking sennet v0.0.2 (C:\Users\mark_\Code\repos\retinue\crates\sennet)
+    Checking radio-face v0.0.1 (C:\Users\mark_\Code\repos\retinue\crates\radio-face)
+   Compiling tulle-t114-phy v0.0.1 (C:\Users\mark_\Code\repos\retinue\firmware\t114-phy)
+    Checking radio-hand v0.0.1 (C:\Users\mark_\Code\repos\retinue\crates\radio-hand)
+    Checking outrider v0.3.0 (C:\Users\mark_\Code\repos\retinue\crates\outrider)
+    Checking protocol-capacity-probe v0.0.0 (C:\Users\mark_\Code\repos\retinue\testing\protocol-capacity)
+error: this `if` has identical blocks
+   --> firmware\t114-phy\src\main.rs:378:32
+    |
+378 |           if boot_crash.fallback {
+    |  ________________________________^
+379 | |             " FALLBACK=modem"
+380 | |         } else if timebase_fault {
+    | |_________^
+    |
+note: same as this
+   --> firmware\t114-phy\src\main.rs:380:34
+    |
+380 |           } else if timebase_fault {
+    |  __________________________________^
+381 | |             " FALLBACK=modem"
+382 | |         } else {
+    | |_________^
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#if_same_then_else
+    = note: `-D clippy::if-same-then-else` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::if_same_then_else)]`
+
+error: could not compile `tulle-t114-phy` (bin "tulle-t114-phy") due to 1 previous error

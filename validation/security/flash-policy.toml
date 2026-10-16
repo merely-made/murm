@@ -26,6 +26,14 @@ schema_source = "crates/radio-hand/src/settings.rs"
 schema_struct = "Settings"
 
 [[field]]
+name = "device_name"
+classification = "public"
+reason = """
+User-configured board label, deliberately visible on the device display and USB
+status. It does not change the relay identity or contain host custody material.
+"""
+
+[[field]]
 name = "identity"
 classification = "pseudonymous"
 reason = """

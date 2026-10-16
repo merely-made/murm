@@ -1,0 +1,16 @@
+tulle/t114 phy online; version=0.0.1; sx1262 online; spi=software; irq=poll; sync=2b reg=24b4; region=US915 freq=906875000 reset=soft crash=1 timebase=inactive; build=280e40dd34c-memory-bench; image=t114-native
+
+identity=loaded slot=B seq=93
+
+node=599997c8 heap=0/49152 highwater=24
+
+
+tulle/t114 phy online; version=0.0.1; sx1262 online; spi=software; irq=poll; sync=2b reg=24b4; region=US915 freq=906875000 reset=soft crash=1 timebase=inactive; build=280e40dd34c-memory-bench; image=t114-native
+
+
+crash count=0 msg=panicked at testing\protocol-capacity\src\target_round.rs:28:5:.oversize allocation was not refu
+
+
+heap=0/49152 highwater=24 free=49152
+
+

@@ -1,0 +1,82 @@
+{
+  "passed": false,
+  "actions": [
+    {
+      "name": "handoff-t114-stage",
+      "command": [
+        "C:\\Users\\mark_\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts\\adafruit-nrfutil.exe",
+        "dfu",
+        "serial",
+        "--package",
+        "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\protocol-parity-memory\\t114-handoff.zip",
+        "--port",
+        "COM4",
+        "--baudrate",
+        "115200",
+        "--singlebank"
+      ],
+      "exit_code": 0,
+      "seconds": 1.678
+    },
+    {
+      "name": "handoff-t114-install",
+      "command": [
+        "C:\\Users\\mark_\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts\\adafruit-nrfutil.exe",
+        "dfu",
+        "serial",
+        "--package",
+        "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\protocol-parity-memory\\t114-physical.zip",
+        "--port",
+        "COM4",
+        "--baudrate",
+        "115200",
+        "--singlebank"
+      ],
+      "exit_code": 0,
+      "seconds": 29.28
+    },
+    {
+      "name": "handoff-t114-campaign",
+      "command": [
+        "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\sennet-tucket-radios\\stock-cli\\Scripts\\python.exe",
+        "-B",
+        "testing/protocol-capacity/board_probe.py",
+        "t114",
+        "--port",
+        "COM10",
+        "--rounds",
+        "16",
+        "--output",
+        "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\protocol-parity-memory\\t114-handoff-campaign.json"
+      ],
+      "exit_code": 1,
+      "seconds": 12.69
+    }
+  ],
+  "inputs": {
+    "t114-physical.zip": {
+      "sha256": "6d78fb59bbf21e327c99ca72a781619a99b7aeed214c281bb6d1097cfd154bd1",
+      "payload_bytes": 487044,
+      "payload_sha256": "6e31ac5d492de674f5c4a2b6a1c767b7ffdbeebf76f83e9bbf06e84ab3e58aab",
+      "start": 155648,
+      "erase_end": 643072
+    },
+    "t114-restore.zip": {
+      "sha256": "c1e0dc9e62cc6f5d100a1e6d7b8581f2c639a7ca65f35ceaecc7ac8e3b94355f",
+      "payload_bytes": 311396,
+      "payload_sha256": "191df2ab67159eab83a144f71b40bb4fec7bd5132dacb8d1391427c2eea249cc",
+      "start": 155648,
+      "erase_end": 471040
+    },
+    "t114-handoff.zip": {
+      "sha256": "7ef7e6c2d50e8aa5e5536cdcda124cb2dda9636dcb40fa6dd9efb32feae41740",
+      "payload_bytes": 1368,
+      "payload_sha256": "4f3f12328fd1f28391dba2aac2b4a8a456e7b9decb4d97ba57cb9e64c293a44e",
+      "start": 155648,
+      "erase_end": 159744
+    }
+  },
+  "state_scope": "application-only DFU, live identity/sequence/profile; no protected-flash readback",
+  "error": "AssertionError('handoff-t114-campaign failed')",
+  "restoration_error": "AssertionError('application identity absent')"
+}

@@ -1,0 +1,5 @@
+{
+  "captured_rom_prefix_case": true,
+  "unknown_noise_not_hidden": true,
+  "identity_and_reset_changes_not_hidden": true
+}

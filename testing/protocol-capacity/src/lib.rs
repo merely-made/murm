@@ -3,6 +3,8 @@
 #![no_std]
 
 extern crate alloc;
+pub mod current;
+pub mod target_round;
 use alloc::{vec, vec::Vec};
 
 use core::mem::size_of;
@@ -75,6 +77,12 @@ fn sends(actions: retinue::node::Actions<4>) -> Vec<retinue::Packet> {
 /// Seeds and keys are fixtures. Returned objects retain full directories and
 /// pending work. Temporary oracle peers are included in the measured peak.
 pub fn workload() -> Residents {
+    workload_with_checkpoint(|| {})
+}
+
+/// The same fixture, with sampled-stack/supervisor hooks at its frame boundaries.
+pub fn workload_with_checkpoint(checkpoint: fn()) -> Residents {
+    checkpoint();
     use sennet::flood::{ManagedFlood, ManagedFloodConfig, RelayDelayWindow};
     use sennet::node_info::{NodeDirectory, NodeDirectoryConfig};
     use tucket::node::{NodeCapacity, PendingTexts, TextRetryPolicy};

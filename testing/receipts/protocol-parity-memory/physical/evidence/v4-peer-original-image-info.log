@@ -1,0 +1,46 @@
+esptool v5.3.1
+Image size: 983040 bytes
+
+ESP32-S3 Image Header
+=====================
+Image version: 1
+Entry point: 0x40378604
+Segments: 5
+Flash size: 16MB
+Flash freq: 40m
+Flash mode: DIO
+
+ESP32-S3 Extended Image Header
+==============================
+WP pin: 0xee (disabled)
+Flash pins drive settings: clk_drv: 0x0, q_drv: 0x0, d_drv: 0x0, cs0_drv: 0x0, hd_drv: 0x0, wp_drv: 0x0
+Chip ID: 9 (ESP32-S3)
+Minimal chip revision: v0.0, (legacy min_rev = 0)
+Maximal chip revision: v0.99
+
+Segments Information
+====================
+Segment   Length   Load addr   File offs  Memory types
+-------  -------  ----------  ----------  ------------
+      0  0x050b4  0x3c000020  0x00000018  DROM
+      1  0x0112c  0x3fc8a418  0x000050d4  BYTE_ACCESSIBLE, MEM_INTERNAL, DRAM
+      2  0x02418  0x40378000  0x00006208  MEM_INTERNAL, IRAM
+      3  0x079e8  0x00000000  0x00008628  PADDING
+      4  0x530d4  0x42010020  0x00010018  IROM
+
+ESP32-S3 Image Footer
+=====================
+Checksum: 0xf3 (valid)
+Validation hash: 66ce7f7623a2aa381275d93cb2be08e1923cc2bb22ede6d1c4a84443d35209eb (valid)
+
+Application Information
+=======================
+Project name: tulle-heltec-v4-phy
+App version: 0.0.1
+Compile time: 2026-10-15 00:37:16
+ELF file SHA256: ba10d49e8a38fdef95c5204b912dec27970bbf96b7846e50006822d02cac1c01
+ESP-IDF: 0.0.0
+Minimal eFuse block revision: 0.0
+Maximal eFuse block revision: 655.35
+MMU page size: 64 KB
+Secure version: 0

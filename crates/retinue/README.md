@@ -3,11 +3,14 @@
 An endpoint-scoped Rust implementation of the
 [Reticulum](https://reticulum.network/) protocol: identity, announces, links,
 resources, request/response, and a reliable byte stream, built for embedding as
-a library. Qualified against RNS 1.5.4 within the recorded local interoperability scope.
+a library. Qualified against RNS 1.5.7 within the recorded local interoperability scope;
+historical receipts below retain their original producer versions. Current
+comparative status is tracked in the [core review](../../design_docs/2026-10-07_rns_157_comparative_review.md)
+and [interface review](../../design_docs/2026-10-09_rns_157_interface_review.md).
 
 **Status: working, wire-verified, pre-1.0.** Not the reference implementation,
 and not yet hardened for adversarial deployment (see *Maturity* below). The plan
-and wire notes live in [`design_docs/`](design_docs/).
+and wire notes live in [`design_docs/`](../../design_docs/).
 
 ## What works
 
@@ -74,7 +77,9 @@ Honest about what is *not* done, so nobody deploys it expecting more:
   2 KiB reliable stream and a 4 KiB Resource byte-exactly. A second headed
   exchange through the Tulle direct-PHY pair covers 4 KiB Resource publish and
   fetch in both endpoint directions; see
-  `design_docs/2026-07-23_direct_phy_resource_acceptance.md`. UDP is not implemented.
+  `design_docs/2026-07-23_direct_phy_resource_acceptance.md`. UDP and Unix
+  AutoInterface are now implemented in `src/iface/`; their platform and
+  stock-peer acceptance scopes remain in the interface review.
 - **Radio MTU**: link MTU, reliable in-flight window, setup retry interval, and
   Resource request window are caller settings. Reliable chunks, Resource parts,
   advertisements, and hashmap updates derive their size from the selected link

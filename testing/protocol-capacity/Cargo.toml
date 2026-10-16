@@ -4,16 +4,31 @@ name = "protocol-capacity-probe"
 version = "0.0.0"
 edition = "2024"
 publish = false
+default-run = "protocol-capacity-probe"
 license = "MPL-2.0"
 
 [dependencies]
 retinue = { path = "../../crates/retinue", default-features = false, features = ["alloc"] }
 sennet = { path = "../../crates/sennet", default-features = false }
 tucket = { path = "../../crates/tucket", default-features = false }
+radio-hand = { path = "../../crates/radio-hand", features = ["instances"] }
+embedded-alloc = { version = "0.7.0", features = ["llff"], optional = true }
+critical-section = { version = "1.2", features = ["std"], optional = true }
 
 [features]
 host = []
+fixed-heap = ["host", "dep:embedded-alloc", "dep:critical-section"]
 
 [[bin]]
 name = "protocol-capacity-probe"
 required-features = ["host"]
+
+[[bin]]
+name = "protocol-capacity-fixed-48"
+path = "src/fixed48.rs"
+required-features = ["fixed-heap"]
+
+[[bin]]
+name = "protocol-capacity-fixed-64"
+path = "src/fixed64.rs"
+required-features = ["fixed-heap"]

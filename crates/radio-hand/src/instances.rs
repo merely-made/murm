@@ -359,11 +359,16 @@ impl Runtime {
         for id in self.work.expire(now)? {
             self.settle_loss(now, id)?;
         }
-        if self.work.inflight().is_none()
-            && let Some(sennet) = self.sennet.as_mut()
-            && let Some(e) = sennet.advance(now)?
-        {
-            self.event(Event::Sennet(e));
+        if self.work.inflight().is_none() {
+            while let Some(e) = self
+                .sennet
+                .as_mut()
+                .map(|s| s.advance(now))
+                .transpose()?
+                .flatten()
+            {
+                self.event(Event::Sennet(e));
+            }
         }
         if let Some(tucket) = self.tucket.as_mut() {
             let t = tucket.advance(now)?;

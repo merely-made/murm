@@ -1,0 +1,17 @@
+{
+  "source_before_commit": "0f2f4d8b02008e99189775359392dd3a44a944ec",
+  "artifacts": [
+    {
+      "path": "C:\\Users\\mark_\\Code\\repos\\retinue\\target\\debug\\examples\\stock_companion_pair.exe",
+      "sha256": "edffbf9bc67c795e441b8b789a018a22a6f3432417f0e82fac944d65fef0f9de"
+    },
+    {
+      "path": "C:\\Users\\mark_\\Code\\repos\\retinue\\apps\\signalman-desktop\\target\\debug\\signalman-desktop.exe",
+      "sha256": "3f4855d3d51457c774212ef8d62da7838cc2aff79d10382953a3692c59aaf9a6"
+    },
+    {
+      "path": "C:\\Users\\mark_\\Code\\repos\\retinue\\apps\\signalman-desktop\\target\\debug\\examples\\sennet_station.exe",
+      "sha256": "742a7f98d6db4b5bdcebf6f99d9bc96b7ceaf24498b21106e04cb9267410755e"
+    }
+  ]
+}

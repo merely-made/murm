@@ -24,6 +24,9 @@ use core::sync::atomic::{AtomicUsize, Ordering};
 
 use embedded_alloc::LlffHeap;
 
+#[cfg(feature = "memory-bench")]
+pub mod memory_bench;
+
 #[global_allocator]
 static HEAP: TrackingHeap = TrackingHeap::empty();
 
@@ -33,6 +36,7 @@ static HEAP: TrackingHeap = TrackingHeap::empty();
 struct TrackingHeap {
     inner: LlffHeap,
     high_water: AtomicUsize,
+    allocation_failures: AtomicUsize,
 }
 
 impl TrackingHeap {
@@ -40,6 +44,7 @@ impl TrackingHeap {
         Self {
             inner: LlffHeap::empty(),
             high_water: AtomicUsize::new(0),
+            allocation_failures: AtomicUsize::new(0),
         }
     }
 
@@ -72,6 +77,8 @@ unsafe impl GlobalAlloc for TrackingHeap {
         let allocation = unsafe { self.inner.alloc(layout) };
         if !allocation.is_null() {
             self.note_high_water();
+        } else {
+            self.allocation_failures.fetch_add(1, Ordering::Relaxed);
         }
         allocation
     }
@@ -86,9 +93,9 @@ unsafe impl GlobalAlloc for TrackingHeap {
 ///
 /// Sized against the bounded tables above it: one resource reassembly at
 /// `MAX_RESOURCE_PARTS` parts is roughly 14 KB, link and packet buffers are a few KB more,
-/// and the rest is headroom so fragmentation has somewhere to go. The board has 232 KB of
-/// RAM and used 11 KB of static before this, so the ceiling is generous on purpose: an
-/// allocator that fails is far worse than one that is larger than it needs to be.
+/// and the rest is headroom so fragmentation has somewhere to go. The linker accounts
+/// for this reservation together with all other static RAM; runtime acceptance still
+/// requires measuring the selected workload and its stack separately.
 pub const HEAP_SIZE: usize = 48 * 1024;
 
 static mut HEAP_MEMORY: [u8; HEAP_SIZE] = [0; HEAP_SIZE];
@@ -99,9 +106,13 @@ static mut HEAP_MEMORY: [u8; HEAP_SIZE] = [0; HEAP_SIZE];
 ///
 /// Must be called exactly once, and before any allocation. Both hold because the only
 /// caller is the first statement of `main`.
-pub unsafe fn init() {
+pub unsafe fn init(spawner: embassy_executor::Spawner) {
     let start = &raw const HEAP_MEMORY as usize;
-    unsafe { HEAP.init(start, HEAP_SIZE) }
+    unsafe { HEAP.init(start, HEAP_SIZE) };
+    #[cfg(feature = "memory-bench")]
+    spawner.spawn(memory_bench::worker().expect("one memory worker"));
+    #[cfg(not(feature = "memory-bench"))]
+    let _ = spawner;
 }
 
 /// Bytes currently allocated. The figure a receipt reports.
@@ -120,4 +131,25 @@ pub fn free() -> usize {
 /// receipt needs. It resets only on reboot, alongside every other board counter.
 pub fn high_water() -> usize {
     HEAP.high_water.load(Ordering::Relaxed)
+}
+
+/// Failed allocation calls since boot, including a failed realloc's new allocation.
+#[cfg(feature = "memory-bench")]
+pub fn allocation_failures() -> usize {
+    HEAP.allocation_failures.load(Ordering::Relaxed)
+}
+
+/// Direct bench-only refusal, bypassing the optimizer's global allocation shim.
+#[cfg(feature = "memory-bench")]
+#[inline(never)]
+pub fn bench_refuse_oversize() -> bool {
+    let layout = Layout::from_size_align(HEAP_SIZE * 2, 16).unwrap();
+    // SAFETY: initialized allocator, valid layout. A successful allocation is
+    // released with the exact same layout before reporting the failed test.
+    let pointer = unsafe { HEAP.alloc(layout) };
+    if !pointer.is_null() {
+        // SAFETY: this is the live allocation returned immediately above.
+        unsafe { HEAP.dealloc(pointer, layout) };
+    }
+    pointer.is_null()
 }

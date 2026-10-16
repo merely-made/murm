@@ -1,0 +1,55 @@
+{
+  "board": "t114",
+  "usb": [
+    6421,
+    21023,
+    "TULLE-T114-01"
+  ],
+  "port": "COM10",
+  "requested_rounds": 0,
+  "responses": [
+    {
+      "command": "status",
+      "response": "tulle/t114 phy online; version=0.0.1; sx1262 online; spi=software; irq=poll; sync=2b reg=24b4; region=US915 freq=906875000 reset=watchdog crash=1 timebase=inactive; build=711816a8124bd58cd8cc314ec4de5009be7df166; image=t114-native\r\n",
+      "seconds": 1.567
+    },
+    {
+      "command": "region",
+      "response": "region=US915\r\n",
+      "seconds": 1.579
+    },
+    {
+      "command": "channel",
+      "response": "channel=modem\r\n",
+      "seconds": 1.57
+    },
+    {
+      "command": "sync",
+      "response": "2b 24b4\r\n",
+      "seconds": 1.573
+    },
+    {
+      "command": "crash",
+      "response": "crash count=1 msg=WATCHDOG\r\n",
+      "seconds": 1.56
+    },
+    {
+      "command": "status",
+      "response": "tulle/t114 phy online; version=0.0.1; sx1262 online; spi=software; irq=poll; sync=2b reg=24b4; region=US915 freq=906875000 reset=watchdog crash=1 timebase=inactive; build=711816a8124bd58cd8cc314ec4de5009be7df166; image=t114-native\r\n",
+      "seconds": 1.564
+    },
+    {
+      "command": "air",
+      "response": "air region=US915 duty=0ms listen=off armed=1 armfail=0 rxok=0 rxerr=0 rxbad=0 txok=0 txerr=0 noregion=0 overduty=0 cadclear=0 cadbusy=0 cadgiveup=0 cadover=0 cadfault=0 beats=0 frames=0\r\nscan cad1=0/0 cad2=0/0 rx1=0/0 rx2=0/0 rx3=0/0\r\n",
+      "seconds": 1.554
+    },
+    {
+      "command": "crash",
+      "response": "crash count=1 msg=WATCHDOG\r\n",
+      "seconds": 1.564
+    }
+  ],
+  "passed": true,
+  "stack_scope": "point-in-time samples only; no high-water claim",
+  "attached": "tulle/t114 phy online; version=0.0.1; sx1262 online; spi=software; irq=poll; sync=2b reg=24b4; region=US915 freq=906875000 reset=watchdog crash=1 timebase=inactive; build=711816a8124bd58cd8cc314ec4de5009be7df166; image=t114-native\r\nidentity=loaded slot=B seq=93\r\nnode=599997c8 heap=0/49152 highwater=24\r\n"
+}
