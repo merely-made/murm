@@ -5,7 +5,15 @@ mapping is taken from Heltec's published v4.2 schematic:
 <https://resource.heltec.cn/download/WiFi_LoRa_32_V4/Schematic/WiFi_LoRa_32_V4.2.pdf>.
 
 The firmware uses the same USB framing and LongFast profile documented by the
-T114 target. Build it with the Espressif Rust toolchain:
+T114 target.
+
+USB startup is quiet: hosts send `status` after opening to obtain the boot and
+identity report. This also applies to status-only recovery after radio/control
+initialization failures. Waiting to transmit a banner before reading USB can
+block modem startup while the host port is closed across a software reset.
+The UART low-power image retains its startup announcement.
+
+Build it with the Espressif Rust toolchain:
 
 ```text
 . $HOME/export-esp.ps1

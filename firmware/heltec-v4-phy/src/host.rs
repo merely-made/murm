@@ -15,6 +15,10 @@
 //!
 //! Contrast the T114, whose CDC endpoint does fail a write on departure and therefore does
 //! end sessions. Same dispatch, opposite behaviour, decided entirely by the transport.
+//!
+//! USB boot is quiet, including status-only recovery. A banner written before the
+//! first read can wait forever on an unopened host and prevent command service.
+//! Hosts request `status` after opening; UART retains its startup announcement.
 
 // The active-radio USB image wires this transport into main's shared command dispatch. The
 // same generic adapter also compiles for the UART low-power personality, whose timing and
@@ -62,6 +66,36 @@ impl<R: Read, W: Write> SplitHost<R, W> {
             rx,
             tx,
             diagnostic_retired: false,
+        }
+    }
+
+    /// Announce only on UART. USB must reach its receive loop without awaiting TX.
+    pub async fn boot_status(&mut self, status: &[u8], identity: &[u8]) {
+        #[cfg(feature = "host-usb")]
+        let _ = (status, identity);
+        #[cfg(feature = "host-uart-low-power")]
+        {
+            let _ = self.write_all(status).await;
+            let _ = self.write_all(identity).await;
+        }
+    }
+}
+
+/// Keep recovery probes available even when radio initialization fails.
+pub async fn serve_status_only<R: Read, W: Write>(rx: R, tx: W, status: &'static [u8]) -> ! {
+    let mut host = SplitHost::new(rx, tx);
+    host.boot_status(status, &[]).await;
+    let mut buffer = [0_u8; 64];
+    loop {
+        if let Ok(length) = host.read(&mut buffer).await
+            && length > 0
+        {
+            let reply = if &buffer[..length] == b"sync\n" || &buffer[..length] == b"sync\r\n" {
+                b"2b 24b4\r\n".as_slice()
+            } else {
+                status
+            };
+            let _ = host.write_all(reply).await;
         }
     }
 }
