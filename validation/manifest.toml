@@ -194,6 +194,36 @@ tier = "local"
 command = ["python3", "-u", "crates/sennet/capture/capture_airmsg.py"]
 asset_globs = ["crates/sennet/capture/*.py"]
 
+[[asset_exemption]]
+path = "testing/protocol-capacity/measure_elf.py"
+reason = "Offline ELF measurement CLI requires a named built target artifact; the protocol parity memory receipt owns its actual input paths, tool comparison and results."
+expires = "2027-01-16"
+
+[[asset_exemption]]
+path = "testing/sennet_pki_stock.py"
+reason = "Attended stock PKI contact/send helper; the guarded Sennet wire/native bench owns physical execution and restoration."
+expires = "2027-01-16"
+
+[[asset_exemption]]
+path = "testing/setup_sennet_stock.py"
+reason = "Attended stock-radio setup/readback helper; the guarded Sennet bench owns physical execution and restoration."
+expires = "2027-01-16"
+
+[[asset_exemption]]
+path = "testing/stock_tucket_bench.py"
+reason = "Attended identified-radio status/setup/restoration helper; the guarded native radio benches own physical execution."
+expires = "2027-01-16"
+
+[[asset_exemption]]
+path = "testing/receipts/sennet-directed/ack-wire/source/sennet_pki_stock.py"
+reason = "Immutable historical source snapshot in the ACK wire receipt, not an independent executable suite."
+expires = "2027-01-16"
+
+[[asset_exemption]]
+path = "testing/receipts/sennet-directed/routing-observed/source/sennet_pki_stock.py"
+reason = "Immutable historical source snapshot in the routing observation receipt, not an independent executable suite."
+expires = "2027-01-16"
+
 # This is a physical serial bridge helper, not an executable validation suite.
 # It is intentionally registered as an expiring exemption rather than silently
 # disappearing from the derived asset inventory.

@@ -1,0 +1,31 @@
+There are 22 section headers, starting at offset 0x639414:
+
+Section Headers:
+  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
+  [ 0]                   NULL            00000000 000000 000000 00      0   0  0
+  [ 1] .vector_table     PROGBITS        00026000 000114 000100 00   A  0   0  4
+  [ 2] .text             PROGBITS        00026100 000218 03640c 00  AX  0   0  8
+  [ 3] .rodata           PROGBITS        0005c510 036628 009ff8 00 AMS  0   0  8
+  [ 4] .data             PROGBITS        20006000 040620 000018 00  WA  0   0  8
+  [ 5] .gnu.sgstubs      PROGBITS        00066520 040640 000000 08   A  0   0 32
+  [ 6] .defmt.end        PROGBITS        00066520 040640 000002 00  AR  0   0  1
+  [ 7] .bss              NOBITS          20006018 040648 02293c 00  WA  0   0  8
+  [ 8] .uninit           NOBITS          20028954 040648 000000 00  WA  0   0  4
+  [ 9] .debug_loc        PROGBITS        00000000 040648 173087 00      0   0  1
+  [10] .debug_abbrev     PROGBITS        00000000 1b36cf 001e85 00      0   0  1
+  [11] .debug_info       PROGBITS        00000000 1b5554 1c08d6 00      0   0  1
+  [12] .debug_aranges    PROGBITS        00000000 375e2a 001978 00      0   0  1
+  [13] .debug_ranges     PROGBITS        00000000 3777a2 05e6b0 00      0   0  1
+  [14] .debug_str        PROGBITS        00000000 3d5e52 1fd0b6 01  MS  0   0  1
+  [15] .comment          PROGBITS        00000000 5d2f08 000099 01  MS  0   0  1
+  [16] .ARM.attributes   ARM_ATTRIBUTES  00000000 5d2fa1 000038 00      0   0  1
+  [17] .debug_frame      PROGBITS        00000000 5d2fdc 00409c 00      0   0  4
+  [18] .debug_line       PROGBITS        00000000 5d7078 0520db 00      0   0  1
+  [19] .symtab           SYMTAB          00000000 629154 003e20 10     21 906  4
+  [20] .shstrtab         STRTAB          00000000 62cf74 0000e1 00      0   0  1
+  [21] .strtab           STRTAB          00000000 62d055 00c3be 00      0   0  1
+Key to Flags:
+  W (write), A (alloc), X (execute), M (merge), S (strings), I (info),
+  L (link order), O (extra OS processing required), G (group), T (TLS),
+  C (compressed), x (unknown), o (OS specific), E (exclude),
+  R (retain), D (mbind), y (purecode), p (processor specific)

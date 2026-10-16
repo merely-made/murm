@@ -1,10 +1,13 @@
 # Murm Documentation Index
 
-Protocol parity proposal (2026-10-16): [the three-family plan](2026-10-16_protocol_parity_plan.md)
+Protocol parity work (2026-10-16): [the three-family plan](2026-10-16_protocol_parity_plan.md)
 separates pinned wire, device-role and firmware/product targets; ranks Tucket
 first, Retinue next and Sennet's full product surface last; records measured
 V4/T114 memory scopes and requires a current combined-image memory refresh
-before wider firmware claims. It is proposed work, not a new qualification.
+before wider firmware claims. The [current host/target memory checkpoint](../testing/receipts/protocol-parity-memory/README.md)
+passes maximum-PKI retained workloads, fragmented 48/64 KiB host allocator
+campaigns and both target capacity links. On-device peak/stack/fault and reserve
+acceptance remain open; no firmware was installed for this checkpoint.
 
 Sennet directed carriage (2026-10-16):
 [R8](2026-10-13_murm_family_move_plan.md#r8--sennet-directed-text-and-delivery-acks-2026-10-16-functional-pass)

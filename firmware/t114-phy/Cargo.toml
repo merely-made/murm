@@ -34,3 +34,6 @@ radio-hand = { path = "../../crates/radio-hand", features = ["node"] }
 static_cell = "2.1.1"
 selvage = { path = "../../crates/selvage" }
 embedded-alloc = { version = "0.7.0", features = ["llff"] }
+
+[dev-dependencies]
+protocol-capacity-probe = { path = "../../testing/protocol-capacity" }
