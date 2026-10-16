@@ -109,8 +109,9 @@ pub fn station_card(path: &std::path::Path, initialize: bool) -> Result<serde_js
             .map_err(|e| e.to_string())?;
     }
     released.lease.check().map_err(|e| e.to_string())?;
+    let pki = sennet::pki::LocalIdentity::from_secret(*released.material.seed_bytes());
     Ok(
-        serde_json::json!({"schema":1,"authority":"djinn","device_id":config.device_id,"realm":config.realm,"node_number":source,"address":format!("{source:08x}"),"public_channel":"LongFast","channel_hash":8,"packet_ids_initialized":initialize}),
+        serde_json::json!({"schema":1,"authority":"djinn","device_id":config.device_id,"realm":config.realm,"node_number":source,"address":format!("{source:08x}"),"pki_public_key":hex::encode(pki.public_key()),"public_channel":"LongFast","channel_hash":8,"packet_ids_initialized":initialize}),
     )
 }
 impl ResidentAuthority for Authority {

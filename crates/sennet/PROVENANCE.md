@@ -20,6 +20,31 @@ are independent refusal gates. Wire nonce placement and routing envelopes
 remain stock-capture work. Implementation-derived search summaries are excluded
 as provenance; no upstream firmware, schema or protocol-client source is used.
 
+The identified 2.7.26 receive in
+`testing/receipts/sennet-directed/receive-observed/` authenticates the exact
+tagged stock text with nonce `LE32(packet_id) | extra(4) | LE32(source) | 0`,
+using the four appended payload bytes as `extra` after the eight-byte tag.
+Its RF header discriminator is zero. `PeerSession` now encodes that observed
+layout and requires explicitly pinned source/destination/key bindings. A
+second independent cryptography vector pins an entire synthetic directed
+packet; changed ciphertext, extra nonce, source, destination and discriminator
+are refused by the codec.
+
+The later `routing-observed/` capture records a successful physical Sennet
+PKI reply and a stock channel response with application port 5, body `18 00`,
+fixed32 field 6 equal to the transmitted packet ID and trailing scalar field 9
+equal to zero. `routing.rs` accepts only this observed envelope shape; it never
+promotes nonzero, ambiguous, malformed, unrelated or unsupported responses to
+success. The observed stock response's transport want-ACK bit is set, so the
+parser does not use that bit to classify response versus request. Unknown
+application extensions remain outside this narrow response profile.
+
+The public CLI contact capture distinguishes an outer numeric node field from
+the nested textual ID. Updating only the latter leaves an imported key at the
+old numeric address. The separate stock-oracle helper replaces both observed
+addresses and the exact public key, and omits the copied hardware MAC. SDK and
+CLI QR public identity/key readback both pass before the tagged send.
+
 Sennet is an independent implementation of interoperability with an existing
 LoRa mesh messaging protocol. Its auditability depends on keeping observation,
 implementation, and distribution boundaries explicit.

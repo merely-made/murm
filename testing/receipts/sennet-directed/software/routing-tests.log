@@ -1,0 +1,82 @@
+warning: patch `mere-p2panda-net v0.7.5 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `mere-proofs v0.1.0 (https://github.com/merely-made/mere.git?branch=main#594c5b38)` was not used in the crate graph
+warning: patch `muniment v0.1.2 (https://github.com/merely-made/mere.git?branch=main#594c5b38)` was not used in the crate graph
+warning: patch `p2panda-auth v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-core v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-discovery v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-encryption v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-store v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-stream v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-sync v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+help: Check that the patched package version and available features are compatible
+      with the dependency requirements. If the patch has a different version from
+      what is locked in the Cargo.lock file, run `cargo update` to use the new
+      version. This may also occur with an optional dependency that is not enabled.
+   Compiling sennet v0.0.2 (C:\Users\mark_\Code\repos\retinue\crates\sennet)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.35s
+     Running unittests src\lib.rs (target\build\debug\deps\sennet-da5cf77bf9e46060.exe)
+
+running 60 tests
+test application::tests::application_envelope_round_trips ... ok
+test application::tests::decodes_the_direct_phy_text_capture ... ok
+test application::tests::encodes_only_the_reconstructed_fields ... ok
+test application::tests::encoding_refuses_before_allocating_an_oversized_message ... ok
+test application::tests::text_requires_the_observed_port_and_utf8 ... ok
+test flood::tests::duplicate_identity_is_source_and_packet_id ... ok
+test flood::tests::filters_channels_before_mutating_the_seen_table ... ok
+test flood::tests::zero_hop_is_remembered_but_not_relayed ... ok
+test instance::tests::absence_advances_time_and_requires_explicit_loss ... ok
+test instance::tests::dispatched_failure_settles_late_but_queued_failure_is_refused ... ok
+test instance::tests::absence_keeps_directory_and_advances_the_instance_clock ... ok
+test instance::tests::expiry_time_and_lease_extension_are_checked ... ok
+test instance::tests::expiry_boundary_stays_queued_until_advance_accounts_for_it ... ok
+test instance::tests::denied_pause_does_not_mutate_state ... ok
+test application::tests::malformed_or_ambiguous_envelopes_are_rejected ... ok
+test instance::tests::in_flight_loss_is_refused_without_mutation ... ok
+test flood::tests::bounded_seen_table_evicts_oldest_identity ... ok
+test instance::tests::paused_operations_are_refused ... ok
+test instance::tests::invalid_composition_does_not_burn_ids_or_operations ... ok
+test instance::tests::queued_completion_is_refused_without_mutation ... ok
+test instance::tests::retained_channel_ids_and_dedup_survive_lifecycle ... ok
+test node::tests::channel_seals_the_live_direct_phy_fixture ... ok
+test node::tests::other_channels_are_ignored_before_decryption ... ok
+test node_info::tests::decodes_the_observed_identity_fields ... ok
+test node_info::tests::directory_refuses_long_names_before_retaining_them ... ok
+test node_info::tests::directory_refuses_new_records_at_configured_capacity ... ok
+test node_info::tests::directory_retains_owned_names ... ok
+test node_info::tests::malformed_and_ambiguous_records_are_rejected ... ok
+test node_info::tests::other_from_radio_variants_are_ignored ... ok
+test packet_id::tests::allocation_exhausts_instead_of_wrapping ... ok
+test packet_id::tests::corrupt_or_unknown_records_are_rejected ... ok
+test packet_id::tests::restored_state_does_not_reuse_reserved_ids ... ok
+test packet_id::tests::state_round_trip_persists_source_and_next_id ... ok
+test protobuf::tests::descends_into_a_nested_message ... ok
+test protobuf::tests::reads_a_length_delimited_field ... ok
+test protobuf::tests::reads_a_varint_field ... ok
+test protobuf::tests::reads_fixed_width_fields ... ok
+test protobuf::tests::rejects_field_zero_and_unsupported_wire_types ... ok
+test protobuf::tests::reports_a_complete_message ... ok
+test protobuf::tests::stops_cleanly_at_truncation ... ok
+test protobuf::tests::structure_summarizes_field_numbers_and_types ... ok
+test protobuf::tests::varint_round_trips ... ok
+test routing::tests::response_matches_the_identified_stock_capture ... ok
+test routing::tests::unsupported_requests_ambiguous_fields_and_partial_responses_are_refused ... ok
+test stream::tests::chunks ... ok
+test stream::tests::corrupt_length_resyncs ... ok
+test stream::tests::oversized_encode_is_refused ... ok
+test stream::tests::quota_preserves_coalesced_frames ... ok
+test stream::tests::round_trips ... ok
+test stream::tests::skips_leading_noise_and_preserves_a_split_magic ... ok
+test transport::tests::bounds_are_checked ... ok
+test transport::tests::channel_cipher_matches_independent_published_example ... ok
+test transport::tests::channel_cipher_round_trips_opaque_payload ... ok
+test transport::tests::forwarding_preserves_cipher_identity ... ok
+test transport::tests::header_matches_published_byte_layout ... ok
+test transport::tests::nonce_matches_published_two_little_endian_words ... ok
+test transport::tests::zero_hop_packet_is_not_forwarded ... ok
+test transport::tests::packet_round_trips_without_interpreting_payload ... ok
+test pki::tests::independent_cryptography_oracle_and_authentication_refusals ... ok
+test pki::tests::directed_packets_are_bound_to_pinned_addresses_and_capture_nonce_layout ... ok
+
+test result: ok. 60 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+

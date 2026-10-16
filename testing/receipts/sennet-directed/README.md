@@ -27,5 +27,18 @@ public key. The trial refused before contact import or RF transmission, both
 boards restored and packet IDs stayed unused. Rebuilding with explicit
 repository target/build paths records the actual compiler-reported executable
 paths and hashes in `software/capture-executables.jsonl`. PKI mode now refuses
-an old public card before touching hardware. A fresh receive-only trial is the
-next wire discriminator.
+an old public card before touching hardware.
+
+The [identified receive](receive-observed/README.md) now authenticates and
+matches the exact stock PKI text. It fixes the wire nonce placement and four-byte
+tail independently of the current 2.8 documentation. A later
+[reply/control capture](routing-observed/README.md) records a physically completed
+Sennet PKI reply and the stock channel response with port 5, request field 6 and
+code zero. The peer-bound packet codec and strict routing profile pass 60 tests;
+protocol instance state and native directed/ACK delivery remain pending.
+
+The qualified Mere worktree's checkout and registration have been removed.
+Windows first retained the empty directory because removal ran from inside it;
+automatic approval review then blocked empty-directory/ref cleanup with
+"blocked by policy". That empty directory and published branch remain. The
+primary Mere checkout and other agents' worktrees were preserved.

@@ -1,0 +1,18 @@
+{
+  "authority": "djinn",
+  "frames": [
+    {
+      "application_hex": "0801122b73656e6e65742d706b692d30326165313037383231646634643736626366316366653533616636313564304800",
+      "authenticated_candidate": true,
+      "expected_text_match": true,
+      "frame_hex": "46022e4728fb6af65fdd464a6b000028fea3bfe3a2f11d465dd38bb32bc98684a61c0be06eadba4a96597c127d2999a8d187ab0a062ddfc0c979472635d32fe645172e21553c02a52a2df45158"
+    }
+  ],
+  "node_number": 1194197574,
+  "nonce_placement": "experimental CTR prefix with extra nonce in bytes 4..8, first 13 bytes",
+  "peer_node": 4134206248,
+  "peer_public_key": "cd536798647176f8f5681b4f1c7627c5b3b3b0a2d7ce8333f4869bf0907b5e15",
+  "pki_public_key": "5cf15afc3ae5603697d776cb057be0eef7d9d11cd87943cfef38508c6d3e0445",
+  "result": "matched_stock_pki_text",
+  "transmitted": false
+}
