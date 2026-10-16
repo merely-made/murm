@@ -1,5 +1,10 @@
 # Murm Documentation Index
 
+Sennet directed continuation (2026-10-16, in progress):
+[R8](2026-10-13_murm_family_move_plan.md#r8--sennet-directed-text-and-delivery-acks-2026-10-16-in-progress)
+extends scoped station material before PKI directed text and correlated delivery
+ACKs against pinned 2.7.26. R7's public-channel receipt remains frozen.
+
 Sennet carriage (2026-10-16): [R7](2026-10-13_murm_family_move_plan.md#r7--sennet-channel-text-over-tulle-2026-10-16-functional-pass)
 records a [Djinn-backed public LongFast reconnect pass](../testing/receipts/sennet-desktop/native-reconnect/README.md):
 four tagged texts across two connections, exact history, disjoint packet IDs,

@@ -1,5 +1,25 @@
 # Sennet provenance
 
+## Pairwise primitive continuation (2026-10-16)
+
+The official public security reference describes X25519 followed by SHA-256,
+AES-256-CCM, an eight-byte authentication tag and no associated data for direct
+messages: <https://meshtastic.org/docs/development/reference/encryption-technical/>.
+That page now describes version 2.8, so the primitive composition alone does
+not establish compatibility with the pinned 2.7.26 peer. RFC 7748 supplies the
+X25519 standard: <https://www.rfc-editor.org/rfc/rfc7748.html>.
+
+`pki.rs` initially supplies these primitives without assigning packet fields,
+constructing a wire nonce, producing an ACK or changing the retained instance.
+Its deterministic public test uses synthetic private inputs `[7;32]` and
+`[9;32]`, nonce bytes 0 through 12, and `Sennet pairwise primitive`. Public keys
+and exact ciphertext/tag were independently generated with Python cryptography
+50.0.2's X25519 and AESCCM APIs, then pinned in the Rust test. Wrong-key,
+modified-ciphertext, modified-nonce, short-input and noncontributory-peer checks
+are independent refusal gates. Wire nonce placement and routing envelopes
+remain stock-capture work. Implementation-derived search summaries are excluded
+as provenance; no upstream firmware, schema or protocol-client source is used.
+
 Sennet is an independent implementation of interoperability with an existing
 LoRa mesh messaging protocol. Its auditability depends on keeping observation,
 implementation, and distribution boundaries explicit.
