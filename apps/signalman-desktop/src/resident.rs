@@ -22,6 +22,20 @@ use tulle::{
     direct_phy_serial::{DirectPhySerialConfig, DirectPhySerialLink},
 };
 pub mod bench;
+pub mod djinn;
+
+/// Load one explicitly selected authority configuration. Simultaneous
+/// production and bench activation is an error, including when Djinn is absent.
+pub fn settings_from_env() -> Result<Option<ResidentSettings>, String> {
+    let production = std::env::var_os("SIGNALMAN_TUCKET_CONFIG");
+    let bench = std::env::var_os("SIGNALMAN_TUCKET_BENCH_CONFIG");
+    match (production, bench) {
+        (Some(_), Some(_)) => Err("Choose one explicit Tucket authority configuration".into()),
+        (Some(path), None) => djinn::load(&PathBuf::from(path)).map(Some),
+        (None, Some(path)) => self::bench::load(&PathBuf::from(path)).map(Some),
+        (None, None) => Ok(None),
+    }
+}
 #[cfg(test)]
 mod tests;
 
@@ -30,6 +44,10 @@ mod tests;
 pub struct PreparedResident {
     pub scope: RadioScope,
     pub build: Box<dyn FnOnce(u64) -> Result<Runtime, String> + Send>,
+    /// Connection-scoped custody guard. Dropped after the runtime stops.
+    pub authorize: Box<dyn Fn() -> Result<(), String> + Send>,
+    /// Fast lock/loss guard for the boundaries inside a carriage turn.
+    pub can_transmit: Box<dyn Fn() -> Result<(), String> + Send>,
 }
 pub trait ResidentAuthority: Send + Sync {
     fn prepare(&self, settings: &ResidentSettings) -> Result<PreparedResident, String>;
@@ -130,6 +148,7 @@ fn run(
     validate(settings)?;
     settings.authority.check()?;
     let prepared = settings.authority.prepare(settings)?;
+    (prepared.authorize)()?;
     if prepared.scope.realm != settings.realm {
         return Err("Tucket authority returned another realm".into());
     }
@@ -154,6 +173,7 @@ fn run(
                     _ = stopped(stop) => return Err("Tucket connection cancelled".into()),
                 }
                 settings.authority.check()?;
+                (prepared.authorize)()?;
                 let epoch = tokio::time::Instant::now();
                 let mut runtime = (prepared.build)(0)?;
                 if runtime.active().is_none_or(|a| a.instance != TUCKET)
@@ -186,7 +206,15 @@ fn run(
                 wake();
                 while !stop.load(Ordering::Relaxed) {
                     settings.authority.check()?;
-                    if carriage.poll().await.map_err(|e| e.to_string())? {
+                    (prepared.authorize)()?;
+                    if carriage
+                        .poll_authorized(|| {
+                            (prepared.can_transmit)()
+                                .map_err(signalman::comms_adapter::comms::AdapterError::Backend)
+                        })
+                        .await
+                        .map_err(|e| e.to_string())?
+                    {
                         progress.store(true, Ordering::Release);
                         wake();
                     }

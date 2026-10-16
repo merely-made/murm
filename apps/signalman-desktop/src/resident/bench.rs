@@ -131,6 +131,8 @@ impl ResidentAuthority for Authority {
         let retry_after_ms = self.retry_after_ms;
         let node_number = scope.meshtastic_node;
         Ok(PreparedResident {
+            authorize: Box::new(|| Ok(())),
+            can_transmit: Box::new(|| Ok(())),
             scope,
             build: Box::new(move |now| {
                 let node = retinue::node::Node::<8, 4, 1, 4>::new(

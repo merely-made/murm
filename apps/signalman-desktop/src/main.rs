@@ -568,11 +568,11 @@ fn main() {
                 }
             }
             if !offline_appearance_receipt {
-                match signalman_desktop::resident::bench::settings_from_env() {
+                match signalman_desktop::resident::settings_from_env() {
                     Ok(settings) => state.resident_settings = settings,
                     Err(error) => {
                         state.message_notice =
-                            Some(format!("Tucket bench configuration refused: {error}"))
+                            Some(format!("Tucket configuration refused: {error}"))
                     }
                 }
                 match signalman_desktop::companion::settings_from_env() {

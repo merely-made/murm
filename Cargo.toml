@@ -100,7 +100,7 @@ p2panda-encryption = { git = "https://github.com/mark-ik/p2panda.git", tag = "me
 p2panda-store = { git = "https://github.com/mark-ik/p2panda.git", tag = "mere-p2panda-net-0.7.5-upstream-20261013" }
 p2panda-stream = { git = "https://github.com/mark-ik/p2panda.git", tag = "mere-p2panda-net-0.7.5-upstream-20261013" }
 p2panda-sync = { git = "https://github.com/mark-ik/p2panda.git", tag = "mere-p2panda-net-0.7.5-upstream-20261013" }
-muniment = { git = "https://www.github.com/merely-made/mere.git", rev = "864757da78214bdd810e17355df5b2309721d651" }
-mere-proofs = { git = "https://www.github.com/merely-made/mere.git", rev = "864757da78214bdd810e17355df5b2309721d651" }
+muniment = { git = "https://github.com/merely-made/mere.git", branch = "main" }
+mere-proofs = { git = "https://github.com/merely-made/mere.git", branch = "main" }
 
 [patch."https://github.com/merely-made/mere.git"]
