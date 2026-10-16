@@ -22,6 +22,8 @@ struct ConfigFile {
     tx_budget_ms: u64,
     frame_ttl_ms: u64,
     retry_after_ms: u64,
+    #[serde(default)]
+    reply_delay_ms: Option<u64>,
     airtime_window_ms: u64,
     airtime_allowance_ms: u64,
     receive_wait_ms: u64,
@@ -38,6 +40,7 @@ struct Authority {
     tx_budget_ms: u64,
     frame_ttl_ms: u64,
     retry_after_ms: u64,
+    reply_delay_ms: u64,
 }
 
 /// Export a signed public contact card through the same scoped Djinn release.
@@ -78,12 +81,18 @@ pub fn load(path: &std::path::Path) -> Result<ResidentSettings, String> {
             .map_err(|e| e.to_string())?;
     personae::tucket::station_salt(config.device_id.as_uuid().as_bytes(), &config.realm)
         .map_err(|e| e.to_string())?;
+    let reply_delay_ms = config
+        .reply_delay_ms
+        .unwrap_or(tucket::instance::DEFAULT_REPLY_DELAY_MS);
     if !config.journal.is_absolute()
         || config.tx_budget_ms == 0
         || config.tx_budget_ms >= config.frame_ttl_ms
         || config.retry_after_ms == 0
         || config.online_timeout_ms == 0
         || config.transmit_timeout_ms == 0
+        || reply_delay_ms
+            .checked_add(config.tx_budget_ms)
+            .is_none_or(|end| end >= config.frame_ttl_ms)
     {
         return Err("Tucket requires an absolute journal and nonzero bounded timing".into());
     }
@@ -117,6 +126,7 @@ pub fn load(path: &std::path::Path) -> Result<ResidentSettings, String> {
             tx_budget_ms: config.tx_budget_ms,
             frame_ttl_ms: config.frame_ttl_ms,
             retry_after_ms: config.retry_after_ms,
+            reply_delay_ms,
         }),
     };
     validate(&settings)?;
@@ -149,6 +159,7 @@ impl ResidentAuthority for Authority {
         let tx_budget_ms = self.tx_budget_ms;
         let frame_ttl_ms = self.frame_ttl_ms;
         let retry_after_ms = self.retry_after_ms;
+        let reply_delay_ms = self.reply_delay_ms;
         let lease = Arc::new(released.lease);
         let live = lease.clone();
         Ok(PreparedResident {
@@ -177,7 +188,8 @@ impl ResidentAuthority for Authority {
                     tucket::instance::Instance::new(
                         tucket::node::Node::new(identity, false),
                         tucket::instance::InstanceConfig::new(8, retry_after_ms)
-                            .ok_or("invalid Tucket retry bounds")?,
+                            .ok_or("invalid Tucket retry bounds")?
+                            .with_reply_delay_ms(reply_delay_ms),
                     ),
                 )
                 .map_err(|e| format!("{e:?}"))
@@ -204,6 +216,7 @@ mod tests {
             tx_budget_ms: 2_000,
             frame_ttl_ms: 15_000,
             retry_after_ms: 3_000,
+            reply_delay_ms: 200,
         });
         let settings = ResidentSettings {
             port: dir.path().join("radio-does-not-exist"),

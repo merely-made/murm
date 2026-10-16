@@ -52,7 +52,8 @@ foreach ($path in @('Cargo.toml','apps/signalman/Cargo.toml','apps/signalman/src
     'apps/signalman-desktop/Cargo.toml','apps/signalman-desktop/Cargo.lock','apps/signalman-desktop/src/main.rs',
     'apps/signalman-desktop/src/resident.rs','apps/signalman-desktop/src/resident/bench.rs','apps/signalman-desktop/src/resident/djinn.rs','apps/signalman-desktop/examples/tucket_contact_card.rs','apps/signalman-desktop/src/state/messages.rs',
     'apps/signalman-desktop/src/companion_scenario.rs','apps/signalman-desktop/src/views/messages.rs',
-    'apps/signalman-desktop/scenarios/run_companion.ps1','crates/tucket/src/instance.rs',
+    'apps/signalman-desktop/scenarios/run_companion.ps1','apps/signalman-desktop/scenarios/companion.scn.in',
+    'crates/radio-hand/src/work.rs','crates/radio-hand/src/instances.rs','crates/radio-hand/src/instances/traffic.rs','crates/tucket/src/instance.rs',
     'crates/tucket/examples/meshcore_headed/main.rs','crates/tucket/examples/meshcore_headed/companion.rs',
     'crates/tucket/examples/meshcore_headed/radio.rs','testing/stock_tucket_bench.py','testing/run_tucket_desktop.ps1')) {
     $report.source_sha256[$path] = (Get-FileHash (Join-Path $repo $path) -Algorithm SHA256).Hash.ToLowerInvariant()

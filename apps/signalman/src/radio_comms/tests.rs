@@ -27,6 +27,17 @@ pub(super) fn runtime(
     home: selvage::personality::PersonalityId,
     next: u32,
 ) -> Runtime {
+    // Fast model tests select zero turnaround; the physical-driver test below
+    // selects and checks the real response delay explicitly.
+    runtime_with_reply_delay(scope, seed, home, next, 0)
+}
+pub(super) fn runtime_with_reply_delay(
+    scope: &RadioScope,
+    seed: u8,
+    home: selvage::personality::PersonalityId,
+    next: u32,
+    reply_delay_ms: u64,
+) -> Runtime {
     let node = retinue::node::Node::<8, 4, 1, 4>::new(
         retinue::identity::PrivateIdentity::from_secret_bytes(&[1; 64]),
         retinue::destination::DestinationName::new("retinue", ["resident"]).name_hash(),
@@ -70,7 +81,9 @@ pub(super) fn runtime(
             tucket::identity::LocalIdentity::from_seed([seed; 32]),
             false,
         ),
-        tucket::instance::InstanceConfig::new(8, 10).unwrap(),
+        tucket::instance::InstanceConfig::new(8, 10)
+            .unwrap()
+            .with_reply_delay_ms(reply_delay_ms),
     );
     Runtime::new(0, config, node, sennet, tucket).unwrap()
 }

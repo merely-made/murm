@@ -29,4 +29,7 @@ the desktop's outbound ACK, but fails waiting for the stock return ACK. Both
 boards restore successfully. The native scenario now waits for the matching
 peer receipt before teardown; its extra regression brings the current desktop
 suite to 41 passed (one existing ignored), with build and strict all-target
-Clippy passing. This stronger fixture still needs its physical retry.
+Clippy passing. Its [physical retry](native-peer-gate/README.md) still misses
+the return ACK while connected. A configurable 200 ms reply turnaround is
+now software-qualified (300 core executions, 41 desktop tests, strict Clippy,
+bare `no_std` checks); its physical trial remains separate.

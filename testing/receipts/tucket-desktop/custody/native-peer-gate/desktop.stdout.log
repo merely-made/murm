@@ -1,0 +1,16 @@
+signalman-stock-companion: Signalman Tucket over Tulle against stock meshcore through production controls
+signalman-stock-companion: captured form
+signalman-stock-companion: waited 40 frames
+signalman-stock-companion: captured connected
+signalman-stock-companion: waited 294 frames
+signalman-stock-companion: waited 0 frames
+signalman-stock-companion: wait: still busy after 600 frames
+signalman-stock-companion: FAIL: assert snap peer_protocol_ack Eq 'true': got 'false'
+signalman-stock-companion: captured roundtrip
+signalman-stock-companion: waited 0 frames
+signalman-stock-companion: captured disconnected
+signalman-stock-companion: waited 36 frames
+signalman-stock-companion: captured reconnected
+signalman-stock-companion: waited 0 frames
+signalman-stock-companion: captured stopped
+signalman-stock-companion: RESULT fail (1038 frames, 6 captures)

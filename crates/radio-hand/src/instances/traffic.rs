@@ -49,8 +49,9 @@ impl Runtime {
                     self.event(Event::Tucket(e));
                 }
                 let deadline = self.ttl(now)?;
+                let ready_at = now.saturating_add(self.tucket.reply_delay_ms());
                 for f in out.outbound {
-                    self.queue(now, None, deadline, &f);
+                    self.queue_at(now, None, ready_at, deadline, &f);
                 }
             }
             _ => return Err(Error::WrongInstance),

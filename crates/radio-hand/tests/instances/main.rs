@@ -95,7 +95,10 @@ fn runtime_from(
     .unwrap();
     let tucket = TucketInstance::new(
         TucketNode::new(LocalIdentity::from_seed([3; 32]), false),
-        tucket::instance::InstanceConfig::new(2, 10).unwrap(),
+        // These clock-model tests exercise protocol/activation state, not RF turnaround.
+        tucket::instance::InstanceConfig::new(2, 10)
+            .unwrap()
+            .with_reply_delay_ms(0),
     );
     Runtime::new_with_carrier(0, config, node, sennet, tucket, carrier).unwrap()
 }

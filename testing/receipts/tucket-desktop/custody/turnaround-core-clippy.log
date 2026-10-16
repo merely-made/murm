@@ -1,0 +1,124 @@
+warning: patch `mere-p2panda-net v0.7.5 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `mere-proofs v0.1.0 (https://github.com/merely-made/mere.git?branch=main#6d1908f4)` was not used in the crate graph
+warning: patch `muniment v0.1.2 (https://github.com/merely-made/mere.git?branch=main#6d1908f4)` was not used in the crate graph
+warning: patch `p2panda-auth v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-core v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-discovery v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-encryption v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-store v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-stream v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-sync v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+help: Check that the patched package version and available features are compatible
+      with the dependency requirements. If the patch has a different version from
+      what is locked in the Cargo.lock file, run `cargo update` to use the new
+      version. This may also occur with an optional dependency that is not enabled.
+    Checking typenum v1.20.1
+    Checking cfg-if v1.0.4
+    Checking cmov v0.5.4
+    Checking ctutils v0.4.2
+    Checking subtle v2.6.1
+    Checking const-oid v0.10.2
+    Checking hybrid-array v0.4.13
+    Checking generic-array v0.14.7
+    Checking crypto-common v0.2.2
+    Checking block-buffer v0.12.1
+    Checking windows-link v0.2.1
+    Checking windows-sys v0.61.2
+    Checking digest v0.11.3
+    Checking cpufeatures v0.3.0
+    Checking crypto-common v0.1.7
+    Checking zeroize v1.9.0
+    Checking pin-project-lite v0.2.17
+    Checking curve25519-dalek v5.0.0
+    Checking byteorder v1.5.0
+    Checking signature v3.0.0
+    Checking ed25519 v3.0.0
+    Checking sha2 v0.11.0
+    Checking block-padding v0.4.2
+    Checking inout v0.2.2
+    Checking ed25519-dalek v3.0.0
+    Checking num-traits v0.2.19
+    Checking serde_core v1.0.228
+    Checking serial2 v0.2.37
+    Checking mio v1.2.2
+    Checking socket2 v0.6.5
+    Checking inout v0.1.4
+    Checking block-buffer v0.10.4
+    Checking bytes v1.12.1
+    Checking cpufeatures v0.2.17
+    Checking digest v0.10.7
+    Checking cipher v0.4.4
+    Checking cipher v0.5.2
+    Checking tokio v1.53.1
+    Checking hash32 v0.3.1
+    Checking hmac v0.13.0
+    Checking libbz2-rs-sys v0.2.5
+    Checking cpubits v0.1.1
+    Checking stable_deref_trait v1.2.1
+    Checking rand_core v0.10.1
+    Checking memchr v2.8.3
+    Checking selvage v0.1.0 (C:\Users\mark_\Code\repos\retinue\crates\selvage)
+    Checking x25519-dalek v3.0.0
+    Checking heapless v0.9.3
+    Checking aes v0.9.1
+    Checking bzip2 v0.6.1
+    Checking hkdf v0.13.0
+    Checking cbc v0.2.1
+    Checking aes v0.8.4
+    Checking sha2 v0.10.9
+    Checking serial2-tokio v0.1.24
+    Checking getrandom v0.2.17
+    Checking hmac v0.12.1
+    Checking tulle v0.2.0 (C:\Users\mark_\Code\repos\retinue\crates\tulle)
+    Checking az v1.3.0
+    Checking embedded-graphics-core v0.4.1 (C:\Users\mark_\Code\repos\retinue\vendor\embedded-graphics-core)
+    Checking retinue v0.3.0 (C:\Users\mark_\Code\repos\retinue\crates\retinue)
+    Checking float-cmp v0.9.0
+    Checking micromath v2.1.0
+    Checking embedded-graphics v0.8.2 (C:\Users\mark_\Code\repos\retinue\vendor\embedded-graphics)
+    Checking zmij v1.0.23
+    Checking tucket v0.0.2 (C:\Users\mark_\Code\repos\retinue\crates\tucket)
+    Checking ctr v0.9.2
+    Checking itoa v1.0.18
+    Checking serde_json v1.0.151
+    Checking seneschal v0.2.0 (C:\Users\mark_\Code\repos\retinue\crates\seneschal)
+    Checking serde v1.0.228
+    Checking sennet v0.0.2 (C:\Users\mark_\Code\repos\retinue\crates\sennet)
+    Checking radio-face v0.0.1 (C:\Users\mark_\Code\repos\retinue\crates\radio-face)
+    Checking lora-modulation v0.1.5
+    Checking radio-hand v0.0.1 (C:\Users\mark_\Code\repos\retinue\crates\radio-hand)
+    Checking hashbrown v0.17.1
+    Checking equivalent v1.0.2
+    Checking indexmap v2.14.0
+    Checking thiserror v2.0.19
+    Checking toml_datetime v0.6.11
+    Checking serde_spanned v0.6.9
+    Checking rmp v0.8.15
+    Checking winnow v0.7.15
+    Checking toml_write v0.1.2
+    Checking rmpv v1.3.1
+    Checking getrandom v0.3.4
+    Checking pipit v0.2.0
+    Checking outrider v0.3.0 (C:\Users\mark_\Code\repos\retinue\crates\outrider)
+    Checking toml_edit v0.22.27
+    Checking minisign-verify v0.2.5
+    Checking once_cell v1.21.4
+    Checking fastrand v2.5.0
+    Checking tempfile v3.27.0
+    Checking toml v0.8.23
+    Checking mere-comms v0.0.1 (https://github.com/merely-made/mere.git?branch=main#6d1908f4)
+    Checking linkboy v0.1.0 (C:\Users\mark_\Code\repos\retinue\apps\linkboy)
+    Checking postilion v0.3.0 (C:\Users\mark_\Code\repos\retinue\crates\postilion)
+    Checking quick-xml v0.39.4
+    Checking hex v0.4.3
+    Checking futures-core v0.3.33
+    Checking futures-sink v0.3.33
+    Checking futures-channel v0.3.33
+    Checking signalman v0.1.0 (C:\Users\mark_\Code\repos\retinue\apps\signalman)
+    Checking slab v0.4.12
+    Checking futures-task v0.3.33
+    Checking futures-io v0.3.33
+    Checking futures-util v0.3.33
+    Checking futures-executor v0.3.33
+    Checking futures v0.3.33
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 45.12s

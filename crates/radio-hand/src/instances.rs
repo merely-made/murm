@@ -260,10 +260,13 @@ impl Runtime {
             .ok_or(Error::TimeOverflow)
     }
     fn queue(&mut self, now: u64, op: Option<u64>, deadline: u64, frame: &[u8]) {
+        self.queue_at(now, op, now, deadline, frame);
+    }
+    fn queue_at(&mut self, now: u64, op: Option<u64>, ready_at: u64, deadline: u64, frame: &[u8]) {
         if let Some(a) = self.active()
             && let Err(reason) =
                 self.work
-                    .enqueue(now, a, op, deadline.min(self.work_until()), frame)
+                    .enqueue_at(now, a, op, ready_at, deadline.min(self.work_until()), frame)
         {
             self.event(Event::FrameDropped {
                 instance: a.instance,

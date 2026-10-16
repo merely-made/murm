@@ -35,19 +35,21 @@ fn one_protocol_runtime_needs_no_other_identity_or_packet_id_lease() {
     runtime.ingest(1, &peer.advert_frame(1, &[])).unwrap();
     let (text, expected) = peer.text_frame(own_hash, 2, "one scoped key").unwrap();
     runtime.ingest(2, &text).unwrap();
-    let tx = runtime.begin_tx(3).unwrap().unwrap();
+    assert_eq!(runtime.next_deadline(), Some(202));
+    assert!(runtime.begin_tx(201).unwrap().is_none());
+    let tx = runtime.begin_tx(202).unwrap().unwrap();
     let (events, _) = peer.on_frame(&tx.frame);
     assert!(
         events
             .iter()
             .any(|e| matches!(e, tucket::node::Event::Ack(ack) if *ack == expected))
     );
-    runtime.complete_tx(4, tx.id, true).unwrap();
+    runtime.complete_tx(203, tx.id, true).unwrap();
     for target in [RETINUE, SENNET] {
         assert!(
             runtime
                 .request(
-                    5,
+                    204,
                     Excursion {
                         target,
                         duration_ms: 10,

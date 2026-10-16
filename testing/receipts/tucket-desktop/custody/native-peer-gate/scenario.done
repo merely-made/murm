@@ -1,0 +1,25 @@
+RESULT fail
+Signalman Tucket over Tulle against stock meshcore through production controls
+captured form
+waited 40 frames
+captured connected
+waited 294 frames
+waited 0 frames
+wait: still busy after 600 frames
+FAIL: assert snap peer_protocol_ack Eq 'true': got 'false'
+captured roundtrip
+waited 0 frames
+captured disconnected
+waited 36 frames
+captured reconnected
+waited 0 frames
+captured stopped
+capture form 2400x1504 digest=2c26c2b636f43949 file=C:\Users\mark_\Code\repos\retinue\validation\results\tucket-desktop-20261015\native-djinn-peer-ack\native\form.png
+capture connected 2400x1504 digest=2cc16dd1a769805f file=C:\Users\mark_\Code\repos\retinue\validation\results\tucket-desktop-20261015\native-djinn-peer-ack\native\connected.png
+capture roundtrip 2400x1504 digest=f2c9f0342e0e6824 file=C:\Users\mark_\Code\repos\retinue\validation\results\tucket-desktop-20261015\native-djinn-peer-ack\native\roundtrip.png
+capture disconnected 2400x1504 digest=eca4804164ec3cfc file=C:\Users\mark_\Code\repos\retinue\validation\results\tucket-desktop-20261015\native-djinn-peer-ack\native\disconnected.png
+capture reconnected 2400x1504 digest=6f255c9bfa03f3fe file=C:\Users\mark_\Code\repos\retinue\validation\results\tucket-desktop-20261015\native-djinn-peer-ack\native\reconnected.png
+capture stopped 2400x1504 digest=7e79edb096279716 file=C:\Users\mark_\Code\repos\retinue\validation\results\tucket-desktop-20261015\native-djinn-peer-ack\native\stopped.png
+frames: 6 captured, 0 blank, 6 distinct digests
+presentation: 1038 frames, 1038 redraws, 0 unpresented redraws
+FAIL: product completion: native companion acceptance incomplete: connected=false, ack=1, receive=1
