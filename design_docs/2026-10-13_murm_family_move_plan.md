@@ -2392,23 +2392,31 @@ required USB reattachment rather than a full board power cycle. No further
 reset or firmware change is performed in this control.
 
 
-USB recovery implementation (2026-10-16, physical qualification pending): tracing
-finds modem startup awaiting two unsolicited USB writes before it reaches its
-receive loop; RNode startup is already quiet. The pinned esp-hal 1.1.1 USB
-writer awaits SERIAL_IN_EMPTY without a deadline. Espressif's
-[USB Serial/JTAG reference](https://documentation.espressif.com/esp32-s3_technical_reference_manual_en.pdf)
-warns that closed host ports can leave transmitted packets unconsumed and the
-TX buffer nonempty. This is a concrete firmware path matching the CPU/UI-alive,
-USB-input-stalled symptom, rather than a demonstrated board/cable defect.
+USB recovery implementation (2026-10-16, physical qualification pending):
+tracing finds that SB2's control and pending journals are blank, so its boot
+waits for a 20-second physical-claim window before reading USB. SB1 has durable
+control state and skips the window. The quiet-output-only candidate at
+`a7c4f67da39` still fails an early post-programming probe; a later read succeeds
+without physical reattachment and preserves sequence 8. Those records remain
+separate. The original observation of "replug recovery" did not isolate USB
+reset from the time spent waiting for the claim window.
 
-The USB modem now enters receive service without a startup announcement. Hosts
-already request status when opening the direct-PHY link. The same quiet boot
-policy applies to status-only radio/control recovery, now using the shared
-board host adapter. UART retains its startup status/identity announcement.
-Diagnostic-write retirement and its explicit reset boundary are unchanged.
-Nine host direct-PHY tests pass, including request-driven startup and retries;
-the normal USB release link, board Clippy with existing allowances, UART check,
-unsafe audit and flash classification pass. Moving recovery service beside the
-host adapter also brings V4 main below its prior LOC baseline, leaving five
-pre-existing LOC violations elsewhere. Physical installation/reboot qualification
-on SB2 is the next gate; no recovery pass is claimed at this checkpoint.
+Ordinary service was already permitted when both journals were blank. A bounded
+64-byte USB prefetch now races the unchanged physical observer. A complete
+read-only ordinary query can select that permitted service early and is replayed
+exactly once to the normal parser. Fragmented query prefixes are accumulated;
+mutation commands, unknown/binary frames and partial data are preserved for the
+physical carrier or ordinary parser after timeout. Pending/corrupt state cannot
+select ordinary service. No host bytes mint physical presence or owner authority.
+First-owner clients retain the released/new press/three-second hold requirement;
+normal modem clients should not probe during that commissioning boot.
+
+USB normal and status-only recovery also start quietly, avoiding an unbounded
+TX wait before the first read. UART announcements remain. Five tests import the
+actual board prefetch adapter and exercise fragmented queries, byte-preserving
+replay/cancellation, denied eligibility and mutation/binary refusal. The full
+Tulle host suites, control/first-owner tests, target Clippy with existing
+allowances and UART check pass. Physical qualification of the complete routing
+fix is the next gate. V4 main and control_boot fit their existing LOC baselines;
+five pre-existing violations elsewhere remain. No new unsafe surface or durable
+field is added.

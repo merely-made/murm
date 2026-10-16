@@ -13,6 +13,14 @@ initialization failures. Waiting to transmit a banner before reading USB can
 block modem startup while the host port is closed across a software reset.
 The UART low-power image retains its startup announcement.
 
+An uncommissioned board also watches for a physical first-owner gesture for
+20 seconds after boot. When both control journals are blank, a read-only USB
+query (`status`, `name`, `region`, `channel`, `sync` or `ui`) selects ordinary
+service immediately; the request is retained and answered by the normal
+parser. First-owner frames retain the full physical-gesture requirement, and
+pending/corrupt state cannot use this shortcut. Use the first-owner client
+before opening an ordinary modem client when commissioning on that boot.
+
 Build it with the Espressif Rust toolchain:
 
 ```text

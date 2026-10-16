@@ -33,6 +33,9 @@ use radio_hand::store::Slot;
 use sha2::Sha256;
 use static_cell::StaticCell;
 
+mod gate;
+use gate::{FirstWriteBootGate, first_write_boot_gate};
+
 #[cfg(all(feature = "host-usb", not(feature = "host-uart-low-power")))]
 use crate::physical_presence::PhysicalPresence;
 use crate::radio_owner::{V4BootOwner, V4ConfigError, V4FirstWriteStoreError, V4RadioOwner};
@@ -178,28 +181,6 @@ fn first_write_scratch() -> FirstWriteScratch<'static> {
         SESSION_READBACK.init([0; CONTROL_SLOT_LEN]),
     )
     .expect("V4 first-write scratch matches the four fixed A/B slots")
-}
-
-/// Whether a post-witness carrier session can start for this exact evidence.
-/// `Blank` is the only state allowed to return to ordinary service if its
-/// claim-only session does not write pending state.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum FirstWriteBootGate {
-    ControlPresent,
-    ClaimOnly,
-    StatusOnly,
-}
-
-const fn first_write_boot_gate(status: FirstWriteStatus) -> FirstWriteBootGate {
-    if matches!(status.control, radio_hand::control::PairEvidence::Valid) {
-        FirstWriteBootGate::ControlPresent
-    } else if status.ordinary_service_eligible() {
-        FirstWriteBootGate::ClaimOnly
-    } else if status.actions().permits_resume() || status.actions().permits_abandon() {
-        FirstWriteBootGate::ClaimOnly
-    } else {
-        FirstWriteBootGate::StatusOnly
-    }
 }
 
 /// Board-local admission for a portable pending image. Portable resume proves
@@ -562,7 +543,7 @@ pub(crate) async fn boot_pre_radio_owner<RK, DLY, R, W>(
     owner: &mut V4RadioOwner<RK, DLY>,
     identity: &[u8; IDENTITY_LEN],
     button: Input<'static>,
-    rx: &mut R,
+    rx: &mut crate::host::BootRx<R>,
     tx: &mut W,
 ) -> (Input<'static>, Result<ControlBootOutcome, ControlBootError>)
 where
@@ -615,7 +596,12 @@ where
         FirstWriteBootGate::ClaimOnly => {
             #[cfg(all(feature = "host-usb", not(feature = "host-uart-low-power")))]
             {
-                let (button, presence) = crate::physical_presence::observe(button).await;
+                let (button, presence) = crate::physical_presence::observe(
+                    button,
+                    rx,
+                    first_write_status.ordinary_service_eligible(),
+                )
+                .await;
                 let Some(presence) = presence else {
                     return match first_write_status.ordinary_service_eligible() {
                         true => (button, Ok(ControlBootOutcome::BlankUncommissioned)),
