@@ -125,6 +125,8 @@ struct InterfaceBudget {
     last_used: u64,
     arrival: u64,
     resume: u64,
+    /// End of the current burst's hold (RNS `ic_burst_active` while `now` is before it).
+    burst_until: u64,
     counters: AnnounceIngressCounters,
 }
 
@@ -206,6 +208,7 @@ impl AnnounceAdmission {
                 last_used: now,
                 arrival: now,
                 resume: now,
+                burst_until: now,
                 counters: AnnounceIngressCounters::default(),
             },
         );
@@ -271,9 +274,9 @@ impl AnnounceAdmission {
             return InterfaceVerdict::Process;
         }
         if excess {
-            row.resume = row.resume.max(
-                now.saturating_add(millis(policy.burst_hold).max(millis(policy.burst_penalty))),
-            );
+            row.burst_until =
+                now.saturating_add(millis(policy.burst_hold).max(millis(policy.burst_penalty)));
+            row.resume = row.resume.max(row.burst_until);
         }
         if excess || now < row.resume {
             InterfaceVerdict::Hold {
@@ -311,6 +314,17 @@ impl AnnounceAdmission {
             .map(|r| r.counters)
             .unwrap_or_default()
     }
+    /// Whether interface `id` is in an announce burst at `now` (`Interface.py` 98-180).
+    #[cfg_attr(
+        not(feature = "tokio"),
+        allow(dead_code, reason = "used by the endpoint")
+    )]
+    pub(crate) fn bursting(&self, id: u32, now: u64) -> bool {
+        self.interfaces
+            .get(&id)
+            .is_some_and(|r| now < r.burst_until)
+    }
+
     pub(crate) fn note_held(&mut self, id: u32) {
         if let Some(r) = self.interfaces.get_mut(&id) {
             r.counters.held = r.counters.held.saturating_add(1);
@@ -407,6 +421,9 @@ mod tests {
             observe(1, true, 3),
         ];
         assert_eq!(verdicts, [false, false, true, false, false]);
+        let hold = millis(AnnounceIngressPolicy::default().burst_hold);
+        assert!(a.bursting(1, 3) && !a.bursting(2, 3));
+        assert!(!a.bursting(1, 2 + hold), "the burst ends with its hold");
     }
 
     /// A storm of re-announces for known destinations trips the burst for the next unknown

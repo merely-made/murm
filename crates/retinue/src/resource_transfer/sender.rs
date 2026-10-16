@@ -15,7 +15,7 @@ use crate::link::{
 use crate::packet::Packet;
 #[cfg(feature = "compression")]
 use crate::resource::compress_after;
-use crate::resource::{Outgoing, RANDOM_HASH_LEN, SDU, pack_metadata, parse_proof, parse_request};
+use crate::resource::{Outgoing, RANDOM_HASH_LEN, pack_metadata, parse_proof, parse_request};
 use crate::token::{IV_LEN, MAC_LEN};
 
 /// What sealing adds around the content: the IV, a padding block and the HMAC.
@@ -409,9 +409,9 @@ pub(super) fn outgoing(
     };
     let token = link.seal_owned(transfer, iv);
     // The link MTU less `HEADER_MAXSIZE` and `IFAC_MIN_SIZE` (`Resource.py` 343-344), so a
-    // part still fits once a relay addresses it. Held to the SDU above MTU 500.
+    // part still fits once a relay addresses it: the SDU at MTU 500, more on a larger link.
     let part_size = (link.mtu() as usize)
         .saturating_sub(crate::packet::HEADER_MAX_LEN + 1)
-        .clamp(1, SDU);
+        .max(1);
     Outgoing::from_token(data, token, random_hash, compressed, part_size)
 }

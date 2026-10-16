@@ -401,6 +401,8 @@ async fn held_announces_are_per_interface_and_released_fewest_hops_first() {
     assert_eq!((counters.held, counters.held_dropped), (2, 2));
     assert_eq!(ep.announce_ingress_counters(other).held, 1);
     assert_eq!(ep.announce_ingress_counters(serial).held, 0);
+    let stats = |id| ep.interface_counters(id).unwrap().held_announces;
+    assert_eq!((stats(noisy), stats(other), stats(serial)), (2, 1, 0));
 
     while ep.announce_ingress_counters(noisy).released == 0 {
         tokio::time::sleep(Duration::from_millis(1)).await;
@@ -461,10 +463,10 @@ async fn held_announces_have_an_endpoint_ceiling_and_leave_with_their_row() {
     );
     assert!(held.hold(entry(2, 0x73), 2, 3));
     assert!(!held.hold(entry(3, 0x74), 2, 3), "the endpoint is full");
-    assert!(!held.holds(3));
+    assert_eq!(held.held(3), 0);
     held.purge(1);
     assert!(held.hold(entry(3, 0x74), 2, 3));
-    assert!(held.take_nearest(2).is_some() && !held.holds(2));
+    assert!(held.take_nearest(2).is_some() && held.held(2) == 0);
 
     // A row evicted by a newcomer takes its held announces with it.
     let ep = Endpoint::new(PrivateIdentity::from_secret_bytes(&[0x58; 64]));
@@ -477,8 +479,8 @@ async fn held_announces_have_an_endpoint_ceiling_and_leave_with_their_row() {
     for seed in 0x75..0x78 {
         route(&ep.shared, noisy, peer_announce(seed, "evicted").0);
     }
-    assert!(ep.shared.held_announces.lock().unwrap().holds(noisy));
+    assert!(ep.shared.held_announces.lock().unwrap().held(noisy) > 0);
     let newcomer = ep.attach_interface().id();
     route(&ep.shared, newcomer, peer_announce(0x78, "evicted").0);
-    assert!(!ep.shared.held_announces.lock().unwrap().holds(noisy));
+    assert_eq!(ep.shared.held_announces.lock().unwrap().held(noisy), 0);
 }

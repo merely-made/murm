@@ -10,9 +10,13 @@ mod error;
 mod link;
 mod port;
 mod pump;
+#[cfg(feature = "rnode-tcp")]
+mod tcp;
 #[cfg(test)]
 mod tests;
 
-pub use config::{PumpStatus, SerialPumpConfig};
+pub use config::{PumpStatus, RNODE_TCP_PORT, RNodePort, SerialPumpConfig};
 pub use error::{PumpError, TransmitError};
 pub use link::RNodeSerialLink;
+#[cfg(feature = "rnode-tcp")]
+pub use tcp::CONNECT_TIMEOUT;

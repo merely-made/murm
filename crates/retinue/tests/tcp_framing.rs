@@ -121,3 +121,103 @@ fn our_framing_escapes_the_escape_byte_like_rns_does() {
     let a = Announce::decode(&Packet::decode(&packet).unwrap()).unwrap();
     assert_eq!(a.app_data, [0x7e, 0x7d, 0x7e, 0x7d, 0x00, 0xff]);
 }
+
+/// The stream carriers' framing options, end to end through the endpoint.
+#[cfg(feature = "tokio")]
+mod carriers {
+    use std::net::{Ipv6Addr, SocketAddr};
+    use std::time::Duration;
+
+    use retinue::destination::DestinationName;
+    use retinue::endpoint::{Endpoint, FlapPolicy, ListenAddr, ListenPolicy, TcpClient};
+    use retinue::identity::PrivateIdentity;
+    use tokio::io::AsyncReadExt;
+    use tokio::net::TcpStream;
+    use tokio::sync::mpsc;
+    use tokio::time::timeout;
+
+    const WAIT: Duration = Duration::from_secs(5);
+
+    /// A KISS listener and a KISS client carry an announce (`TCPInterface.py` 322-388).
+    #[tokio::test]
+    async fn kiss_framed_endpoints_hear_each_other() {
+        let server_id = PrivateIdentity::from_secret_bytes(&[0x4b; 64]);
+        let server = Endpoint::new(server_id.clone());
+        let policy = ListenPolicy {
+            kiss_framing: true,
+            ..ListenPolicy::default()
+        };
+        let listener = server
+            .listen_tcp_with("127.0.0.1:0".parse().unwrap(), policy)
+            .await
+            .unwrap();
+        let client = Endpoint::new(PrivateIdentity::from_secret_bytes(&[0x4c; 64]));
+        let dial = TcpClient {
+            kiss_framing: true,
+            ..TcpClient::new("127.0.0.1", listener.local_addr().port())
+        };
+        client.attach_tcp(dial).await.unwrap();
+        let name = DestinationName::new("kiss", ["svc"]);
+        let dest = name.destination_hash(server_id.public());
+        server.register(name.clone(), b"svc");
+        let heard = timeout(WAIT, async {
+            loop {
+                server.announce(&name, b"svc");
+                let next = timeout(Duration::from_millis(200), client.next_announcement());
+                if let Ok(Ok(announce)) = next.await
+                    && announce.destination == dest
+                {
+                    return;
+                }
+            }
+        });
+        heard.await.expect("the KISS client heard the announce");
+    }
+
+    /// Six fast flaps from one address block its seventh connection, while another address
+    /// is still served (`BackboneInterface.py` 807-835, 1084-1109).
+    #[tokio::test]
+    async fn fast_flapping_addresses_are_refused() {
+        let ep = Endpoint::new(PrivateIdentity::from_secret_bytes(&[0x66; 64]));
+        let (spawned, mut ids) = mpsc::channel(16);
+        let policy = ListenPolicy {
+            flap: Some(FlapPolicy::default()),
+            spawned: Some(spawned),
+            ..ListenPolicy::default()
+        };
+        let any = ListenAddr::Socket("[::]:0".parse().unwrap());
+        let port = ep.listen_on(any, policy).await.unwrap().local_addr().port();
+        let v4 = SocketAddr::from(([127, 0, 0, 1], port));
+        // `[::]` takes IPv4 only on a dual-stack host (bindv6only off).
+        let Ok(first) = TcpStream::connect(v4).await else {
+            eprintln!("skipped: [::] does not accept IPv4 here");
+            return;
+        };
+        let mut first = Some(first);
+        for _ in 0..6 {
+            let stream = match first.take() {
+                Some(stream) => stream,
+                None => TcpStream::connect(v4).await.unwrap(),
+            };
+            let id = timeout(WAIT, ids.recv()).await.unwrap().unwrap();
+            drop(stream);
+            let gone = async {
+                while ep.interface_ids().contains(&id) {
+                    tokio::time::sleep(Duration::from_millis(10)).await;
+                }
+            };
+            timeout(WAIT, gone)
+                .await
+                .expect("the flap ended its interface");
+        }
+        let mut refused = TcpStream::connect(v4).await.unwrap();
+        let read = timeout(WAIT, refused.read(&mut [0; 1])).await.unwrap();
+        assert_eq!(read.unwrap_or(0), 0, "the seventh connection is closed");
+        assert!(ids.try_recv().is_err(), "and gets no interface");
+
+        let _v6 = TcpStream::connect((Ipv6Addr::LOCALHOST, port))
+            .await
+            .unwrap();
+        assert!(timeout(WAIT, ids.recv()).await.unwrap().is_some());
+    }
+}

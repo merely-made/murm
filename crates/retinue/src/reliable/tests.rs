@@ -105,3 +105,35 @@ fn server_sends(server: &mut ReliableChannel) -> Packet {
     assert_eq!(sent.len(), 1);
     sent.remove(0)
 }
+
+/// On a link that negotiated 16384 bytes a write goes out in frames of the link MDU less
+/// 8, as RNS's writer chunks (`Buffer.py` 230), and arrives whole.
+#[test]
+fn chunks_scale_with_the_link_mtu() {
+    let server_id = PrivateIdentity::from_secret_bytes(&[0x22; 64]);
+    let client_id = PrivateIdentity::from_secret_bytes(&[0x11; 64]);
+    let trailer = LinkTrailer {
+        mode: LinkMode::Aes256Cbc,
+        mtu: 16_384,
+    };
+    let dest = DestinationName::new("retinue", ["test"]).destination_hash(server_id.public());
+    let (pending, request) = PendingLink::open(dest, *server_id.public(), &[0x33; 64], trailer);
+    let (responder_link, proof) = accept(&request, &server_id, &[0x99; 64], trailer).unwrap();
+    let initiator_link = pending.prove(&proof).unwrap();
+    let mut client: ReliableChannel =
+        ReliableChannel::new(initiator_link, client_id.clone(), *server_id.public());
+    let mut server: ReliableChannel =
+        ReliableChannel::new(responder_link, server_id, *client_id.public());
+
+    let data: Vec<u8> = (0..20_000u32).map(|i| i as u8).collect();
+    assert_eq!(client.write(&data), data.len());
+    let mut ivc = 0u64;
+    let sent = client.poll_transmit(0, counting_iv(&mut ivc));
+    assert_eq!(sent.len(), 2, "two frames carry 20000 bytes");
+    let largest = sent.iter().map(|p| p.encoded_len()).max().unwrap();
+    assert!((16_000..=16_384).contains(&largest), "{largest}");
+    for packet in &sent {
+        assert!(server.on_data_packet(packet).is_some());
+    }
+    assert_eq!(server.read(), data);
+}

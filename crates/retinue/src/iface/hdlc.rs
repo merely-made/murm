@@ -44,7 +44,8 @@ pub const ESC_MASK: u8 = 0x20;
 /// code. RNS bounds a frame by `HW_MTU + ifac_size` before IFAC is stripped (`HDLC.py`
 /// 62-106, `Transport.py` 1790, `SerialInterface.py` 85), so a cap of the bare MTU would
 /// drop every full link packet on an IFAC carrier. `Ifac::open` and `Packet::decode`
-/// enforce the exact bounds afterwards.
+/// enforce the exact bounds afterwards. An autoconfigured TCP interface deframes to its own
+/// larger limit (`HwMtu::Auto`), not this one.
 pub const MAX_FRAME: usize = crate::packet::MTU + crate::ifac::MAX_SIZE;
 
 /// Wrap a packet in a frame, escaping as needed.
