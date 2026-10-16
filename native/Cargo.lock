@@ -2157,7 +2157,7 @@ dependencies = [
 [[package]]
 name = "insigne"
 version = "0.0.2"
-source = "git+https://github.com/merely-made/dramatis.git?rev=0234e7eea6f2ddf2330a71b9425da01b06ae0391#0234e7eea6f2ddf2330a71b9425da01b06ae0391"
+source = "git+https://github.com/merely-made/dramatis.git?branch=main#5c89001a6ff1aac3f6105ed50b6ae5f09c9f27e2"
 dependencies = [
  "blake3",
  "ed25519-dalek",
@@ -2784,7 +2784,7 @@ checksum = "4050469837a6ff301cd14c1f8f24f88549e6d548f24f64e2148eb0f72cebc51f"
 [[package]]
 name = "luggage"
 version = "0.1.0"
-source = "git+https://github.com/merely-made/mere.git?branch=main#4a74b1cf28da35b012a4df48cc6ffa785b304eaa"
+source = "git+https://github.com/merely-made/mere.git?branch=main#59f88e63d726bc5f2f5788e89cbd0c37a9ddaf6f"
 dependencies = [
  "semver",
  "serde",
@@ -2846,7 +2846,7 @@ dependencies = [
 [[package]]
 name = "mere-proofs"
 version = "0.1.0"
-source = "git+https://github.com/merely-made/mere.git?branch=main#4a74b1cf28da35b012a4df48cc6ffa785b304eaa"
+source = "git+https://github.com/merely-made/mere.git?branch=main#59f88e63d726bc5f2f5788e89cbd0c37a9ddaf6f"
 dependencies = [
  "blake3",
  "serde",
@@ -2930,7 +2930,7 @@ dependencies = [
 [[package]]
 name = "muniment"
 version = "0.1.2"
-source = "git+https://github.com/merely-made/mere.git?branch=main#4a74b1cf28da35b012a4df48cc6ffa785b304eaa"
+source = "git+https://github.com/merely-made/mere.git?branch=main#59f88e63d726bc5f2f5788e89cbd0c37a9ddaf6f"
 dependencies = [
  "async-trait",
  "blake3",
@@ -3315,7 +3315,7 @@ dependencies = [
 [[package]]
 name = "notochord"
 version = "0.1.1"
-source = "git+https://github.com/merely-made/dramatis.git?rev=0234e7eea6f2ddf2330a71b9425da01b06ae0391#0234e7eea6f2ddf2330a71b9425da01b06ae0391"
+source = "git+https://github.com/merely-made/dramatis.git?branch=main#5c89001a6ff1aac3f6105ed50b6ae5f09c9f27e2"
 dependencies = [
  "blake3",
  "insigne",
@@ -3711,7 +3711,7 @@ checksum = "9b4f627cb1b25917193a259e49bdad08f671f8d9708acfd5fe0a8c1455d87220"
 [[package]]
 name = "personae"
 version = "0.3.0"
-source = "git+https://github.com/merely-made/dramatis.git?rev=0234e7eea6f2ddf2330a71b9425da01b06ae0391#0234e7eea6f2ddf2330a71b9425da01b06ae0391"
+source = "git+https://github.com/merely-made/dramatis.git?branch=main#5c89001a6ff1aac3f6105ed50b6ae5f09c9f27e2"
 dependencies = [
  "blake3",
  "chacha20poly1305 0.11.0",
@@ -4894,7 +4894,7 @@ checksum = "6ce2be8dc25455e1f91df71bfa12ad37d7af1092ae736f3a6cd0e37bc7810596"
 [[package]]
 name = "stickleback"
 version = "0.1.1"
-source = "git+https://github.com/merely-made/mere.git?branch=main#4a74b1cf28da35b012a4df48cc6ffa785b304eaa"
+source = "git+https://github.com/merely-made/mere.git?branch=main#59f88e63d726bc5f2f5788e89cbd0c37a9ddaf6f"
 dependencies = [
  "blake3",
  "futures-util",
