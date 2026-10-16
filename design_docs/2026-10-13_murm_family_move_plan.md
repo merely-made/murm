@@ -2106,5 +2106,10 @@ and Netrender `f4f9c0d8`; an initial dependency update's identity-pin regression
 was caught and repaired before these gates. The bounded native fixture uses
 new channel-peer receipts after reconnect and requires zero protocol ACKs.
 [Software receipts](../testing/receipts/sennet-desktop/README.md) retain the
-exact scopes. Physical/native delivery remains pending; both boards are still
-in their restored Tulle state before the first R7 trial.
+exact scopes. Physical/native delivery remains pending. Initial stock setup
+failed before native launch; later client-success/readback-mismatch trials
+showed that post-process sleeps did not preserve queued writes. Restoring the
+public client's five-second connected wait passes independent CLI/SDK setup
+readback. The [setup receipts](../testing/receipts/sennet-desktop/setup-readback/README.md)
+retain a failed transaction experiment and the passing setup-only trial.
+Both boards are restored, custody stayed inactive and packet IDs stayed unused.

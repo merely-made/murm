@@ -1,0 +1,65 @@
+{
+  "result": "not_completed",
+  "port": "COM6",
+  "usb_serial": "44:1B:F6:6A:FB:28",
+  "public_channel": "LongFast",
+  "configured": true,
+  "operations": [
+    {
+      "name": "public-channel",
+      "exit": 0,
+      "public_diagnostics": [
+        "INFO file:node.py beginSettingsTransaction line:710 Telling open a transaction to edit settings",
+        "INFO file:node.py commitSettingsTransaction line:724 Telling node to commit open transaction for editing settings",
+        "Connected to radio",
+        "Writing modified channels to device"
+      ]
+    },
+    {
+      "name": "lora",
+      "exit": 0,
+      "public_diagnostics": [
+        "INFO file:node.py beginSettingsTransaction line:710 Telling open a transaction to edit settings",
+        "INFO file:node.py commitSettingsTransaction line:724 Telling node to commit open transaction for editing settings",
+        "Connected to radio",
+        "Set lora.region to US",
+        "Set lora.modem_preset to LONG_FAST",
+        "Set lora.use_preset to true",
+        "Set lora.override_frequency to 906.875",
+        "Set lora.tx_power to 1",
+        "Writing modified preferences to device",
+        "Writing lora configuration to device"
+      ]
+    },
+    {
+      "name": "final-commit",
+      "exit": 0,
+      "public_diagnostics": [
+        "INFO file:node.py commitSettingsTransaction line:724 Telling node to commit open transaction for editing settings",
+        "Connected to radio"
+      ]
+    }
+  ],
+  "configure_exit": 0,
+  "region_query": {
+    "exit": 0,
+    "public_diagnostics": [
+      "Connected to radio",
+      "lora.region: 0",
+      "Completed getting preferences"
+    ]
+  },
+  "node_number": 4134206248,
+  "firmware": "2.7.26.54e0d8d",
+  "region": 0,
+  "modem_preset": 0,
+  "override_frequency": 0.0,
+  "tx_power": 30,
+  "use_preset": true,
+  "channel_role": 1,
+  "device_role": 0,
+  "managed": false,
+  "channel_name": "",
+  "public_default_key_match": true,
+  "error_type": "RuntimeError"
+}
