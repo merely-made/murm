@@ -134,41 +134,12 @@ where
     }
 }
 
-/// Write to whichever host link this build selected. Generic over the transport so the USB
-/// and UART personalities share one protocol implementation rather than drifting apart.
-async fn write_all<W: embedded_io_async::Write>(tx: &mut W, bytes: &[u8]) -> bool {
-    embedded_io_async::Write::write_all(tx, bytes).await.is_ok()
-        && embedded_io_async::Write::flush(tx).await.is_ok()
-}
-
 #[cfg(feature = "rf-sleep-proof")]
 async fn ignore_host<R: embedded_io_async::Read>(
     _rx: &mut R,
     _buffer: &mut [u8],
 ) -> Result<usize, R::Error> {
     core::future::pending().await
-}
-
-async fn serve_status_only<R: embedded_io_async::Read, W: embedded_io_async::Write>(
-    mut rx: R,
-    mut tx: W,
-    status: &'static [u8],
-) -> ! {
-    let _ = write_all(&mut tx, status).await;
-    let mut buffer = [0_u8; 64];
-    loop {
-        match embedded_io_async::Read::read(&mut rx, &mut buffer).await {
-            Ok(length) if length > 0 => {
-                let reply = if &buffer[..length] == b"sync\n" || &buffer[..length] == b"sync\r\n" {
-                    b"2b 24b4\r\n".as_slice()
-                } else {
-                    status
-                };
-                let _ = write_all(&mut tx, reply).await;
-            }
-            _ => {}
-        }
-    }
 }
 
 #[esp_rtos::main]
@@ -320,7 +291,7 @@ async fn main(spawner: Spawner) {
                 message: radio_face::Text::from_truncated("SX1262 INIT"),
             });
             ui::publish(local_status, radio_face::LedSignal::Idle);
-            serve_status_only(
+            host::serve_status_only(
                 usb_rx,
                 usb_tx,
                 b"tulle/heltec-v4 phy online; sx1262 init failed\r\n",
@@ -343,7 +314,7 @@ async fn main(spawner: Spawner) {
                 message: radio_face::Text::from_truncated("PHY PARAMS"),
             });
             ui::publish(local_status, radio_face::LedSignal::Idle);
-            serve_status_only(
+            host::serve_status_only(
                 usb_rx,
                 usb_tx,
                 b"tulle/heltec-v4 phy modulation invalid\r\n",
@@ -360,7 +331,7 @@ async fn main(spawner: Spawner) {
                 message: radio_face::Text::from_truncated("TX PARAMS"),
             });
             ui::publish(local_status, radio_face::LedSignal::Idle);
-            serve_status_only(
+            host::serve_status_only(
                 usb_rx,
                 usb_tx,
                 b"tulle/heltec-v4 phy tx parameters invalid\r\n",
@@ -377,7 +348,7 @@ async fn main(spawner: Spawner) {
                 message: radio_face::Text::from_truncated("RX PARAMS"),
             });
             ui::publish(local_status, radio_face::LedSignal::Idle);
-            serve_status_only(
+            host::serve_status_only(
                 usb_rx,
                 usb_tx,
                 b"tulle/heltec-v4 phy rx parameters invalid\r\n",
@@ -455,7 +426,7 @@ async fn main(spawner: Spawner) {
             Ok(control_boot::ControlBootOutcome::BlankUncommissioned) => (button, None),
             Ok(control_boot::ControlBootOutcome::FirstWritePending) => {
                 owner.radio_fault(8, "CONTROL PENDING");
-                serve_status_only(
+                host::serve_status_only(
                     usb_rx,
                     usb_tx,
                     b"tulle/heltec-v4 phy control first-write pending\r\n",
@@ -465,7 +436,7 @@ async fn main(spawner: Spawner) {
             Err(control_boot::ControlBootError::FirstWriteStore(error)) => {
                 let _ = error;
                 owner.radio_fault(9, "FIRSTWRITE STORE");
-                serve_status_only(
+                host::serve_status_only(
                     usb_rx,
                     usb_tx,
                     b"tulle/heltec-v4 phy first-write storage failed\r\n",
@@ -474,7 +445,7 @@ async fn main(spawner: Spawner) {
             }
             Err(control_boot::ControlBootError::EntropyUnavailable) => {
                 owner.radio_fault(10, "CLAIM ENTROPY");
-                serve_status_only(
+                host::serve_status_only(
                     usb_rx,
                     usb_tx,
                     b"tulle/heltec-v4 phy claim entropy unavailable\r\n",
@@ -483,7 +454,7 @@ async fn main(spawner: Spawner) {
             }
             Err(control_boot::ControlBootError::OwnerUnavailable) => {
                 owner.radio_fault(11, "CONTROL OWNER");
-                serve_status_only(
+                host::serve_status_only(
                     usb_rx,
                     usb_tx,
                     b"tulle/heltec-v4 phy control boot owner unavailable\r\n",
@@ -493,7 +464,7 @@ async fn main(spawner: Spawner) {
             Err(control_boot::ControlBootError::Runtime(error)) => {
                 let _ = error;
                 owner.radio_fault(12, "CONTROL BOOT");
-                serve_status_only(
+                host::serve_status_only(
                     usb_rx,
                     usb_tx,
                     b"tulle/heltec-v4 phy control runtime boot failed\r\n",
@@ -520,8 +491,8 @@ async fn main(spawner: Spawner) {
         channels::serve_rnode(owner, online, &identity_line[..identity_line_len], host).await
     }
 
-    let _ = host.write_all(online).await;
-    let _ = host.write_all(&identity_line[..identity_line_len]).await;
+    host.boot_status(online, &identity_line[..identity_line_len])
+        .await;
     let mut command_stream = CommandStream::new();
     #[cfg(feature = "resident-protocols")]
     let mut resident_stream = radio_hand::resident_wire::ResidentSetupStream::new();

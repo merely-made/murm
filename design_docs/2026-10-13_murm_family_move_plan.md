@@ -2390,3 +2390,25 @@ The single expected journal increment confirms only one save/reset attempt.
 The battery-backed UI timer continued while USB was out, so this recovery
 required USB reattachment rather than a full board power cycle. No further
 reset or firmware change is performed in this control.
+
+
+USB recovery implementation (2026-10-16, physical qualification pending): tracing
+finds modem startup awaiting two unsolicited USB writes before it reaches its
+receive loop; RNode startup is already quiet. The pinned esp-hal 1.1.1 USB
+writer awaits SERIAL_IN_EMPTY without a deadline. Espressif's
+[USB Serial/JTAG reference](https://documentation.espressif.com/esp32-s3_technical_reference_manual_en.pdf)
+warns that closed host ports can leave transmitted packets unconsumed and the
+TX buffer nonempty. This is a concrete firmware path matching the CPU/UI-alive,
+USB-input-stalled symptom, rather than a demonstrated board/cable defect.
+
+The USB modem now enters receive service without a startup announcement. Hosts
+already request status when opening the direct-PHY link. The same quiet boot
+policy applies to status-only radio/control recovery, now using the shared
+board host adapter. UART retains its startup status/identity announcement.
+Diagnostic-write retirement and its explicit reset boundary are unchanged.
+Nine host direct-PHY tests pass, including request-driven startup and retries;
+the normal USB release link, board Clippy with existing allowances, UART check,
+unsafe audit and flash classification pass. Moving recovery service beside the
+host adapter also brings V4 main below its prior LOC baseline, leaving five
+pre-existing LOC violations elsewhere. Physical installation/reboot qualification
+on SB2 is the next gate; no recovery pass is claimed at this checkpoint.
