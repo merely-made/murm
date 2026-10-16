@@ -1,8 +1,9 @@
 # Directed Sennet continuation, 2026-10-16
 
-R8 in the [family plan](../../../design_docs/2026-10-13_murm_family_move_plan.md#r8--sennet-directed-text-and-delivery-acks-2026-10-16-in-progress)
-is in progress. The [R7 channel pass](../sennet-desktop/native-reconnect/README.md)
-remains frozen. No directed/native/ACK success is claimed by these software logs.
+R8 in the [family plan](../../../design_docs/2026-10-13_murm_family_move_plan.md#r8--sennet-directed-text-and-delivery-acks-2026-10-16-functional-pass)
+now has a [native directed reconnect pass](native-reconnect/README.md), with a
+separate verified restoration recovery. The [R7 channel pass](../sennet-desktop/native-reconnect/README.md)
+remains frozen. The earlier software/wire checkpoints below retain their scopes.
 
 Dramatis `2f27f1a` supplies transient zeroizing material from the existing
 device/realm child, with 74 tests and selected Clippy passing. Mere `594c5b38`
@@ -52,7 +53,7 @@ Desktop passes 45 library tests (one existing ignored), strict library/bin/examp
 Clippy and current desktop/station-exporter builds. The opt-in directed native
 fixture requires actual protocol ACKs and exact reopened history before fresh
 messages. [Runtime software receipts](runtime-software/) freeze these gates;
-the full native directed/reconnect gate remains pending at this checkpoint.
+the full native directed/reconnect gate was pending at that checkpoint.
 
 The qualified Mere worktree's checkout and registration have been removed.
 Windows first retained the empty directory because removal ran from inside it;

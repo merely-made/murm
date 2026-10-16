@@ -170,7 +170,6 @@ finally {
     if($captureProcess -and !$captureProcess.HasExited){Stop-Process -Id $captureProcess.Id;$captureProcess.WaitForExit()}
     Start-Sleep -Milliseconds 700
     if(Test-Path -LiteralPath $config.packet_ids){Copy-Item -LiteralPath $config.packet_ids -Destination (Join-Path $output 'packet-ids-after.json')}
-    if($dutStarted){try {Invoke-Probe @('restore-profile','--port',$config.port,'--usb-serial',$DutUsbSerial,'--baseline',(Join-Path $output 'dut-profile.json'),'--output',(Join-Path $output 'dut-restored-profile.json')); $report.restoration.dut_profile='acknowledged_same_boot_and_sync'}catch{$report.restoration.dut_error=$_.Exception.Message; if(!$failure){$failure=$_}}}
     if($peerTouched){try {
         & $Python -B -c 'import sys; from serial.tools.list_ports import comports; p=next(p for p in comports() if p.device==sys.argv[1]); assert (p.vid,p.pid,p.serial_number)==(0x303a,0x1001,sys.argv[2])' $PeerPort $PeerUsbSerial
         if($LASTEXITCODE -ne 0){throw 'Peer USB identity changed before restoration'}
@@ -183,6 +182,10 @@ finally {
         if($original.status -ne $restored.status -or $original.region -ne $restored.region -or $original.channel -ne $restored.channel){throw 'Peer Tulle status/identity/region/channel changed'}
         $report.restoration.peer='pinned_tulle_and_exact_status_region_channel'
     }catch{$report.restoration.peer_error=$_.Exception.Message; if(!$failure){$failure=$_}}}
+    # End stock RF before the DUT's exact textual status/sync comparison.
+    # Pending stock packets can otherwise interleave binary RX with those
+    # diagnostics. Keep the same strict check and preserve any failure.
+    if($dutStarted){try {Invoke-Probe @('restore-profile','--port',$config.port,'--usb-serial',$DutUsbSerial,'--baseline',(Join-Path $output 'dut-profile.json'),'--output',(Join-Path $output 'dut-restored-profile.json')); $report.restoration.dut_profile='acknowledged_same_boot_and_sync'}catch{$report.restoration.dut_error=$_.Exception.Message; if(!$failure){$failure=$_}}}
     if($failure){$report.result='failed'}
     $report.closed_utc=[DateTime]::UtcNow.ToString('o')
     $report|ConvertTo-Json -Depth 8|Set-Content -LiteralPath (Join-Path $output 'bench.json')

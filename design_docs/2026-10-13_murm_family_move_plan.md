@@ -2145,7 +2145,7 @@ is removed, and the shared upstream cache remains co-owned. Ignored synthetic
 wallet fixtures remain with helpers stopped after the recorded automatic
 approval-review deletion block; private runtime files are excluded.
 
-### R8 — Sennet directed text and delivery ACKs (2026-10-16, in progress)
+### R8 — Sennet directed text and delivery ACKs (2026-10-16, functional pass)
 
 The owner approved continuation after R7. Use the pinned Meshtastic 2.7.26
 peer for PKI directed text and correlated delivery ACKs across reconnect.
@@ -2231,3 +2231,35 @@ directed native runner selects its pinned key from identified USB readback and
 uses protocol-ACK expectations on both connections. Full native directed,
 reconnect and visual qualification remain pending; software/wire success does
 not complete R8. See the [updated receipts](../testing/receipts/sennet-directed/README.md).
+
+**Native directed/reconnect gate (2026-10-16, passed with separate restoration
+recovery).** At `826752791da`, the native Messages controls pass four exact PKI
+directed texts and four correlated protocol ACKs against identified stock
+Meshtastic 2.7.26.54e0d8d. Exact history is checked before fresh work on the
+second connection; all four records remain after final disconnect. Both native
+outgoing records have physical completion plus exact-peer/request code-zero
+routing facts. Both returns authenticate with the pinned public key, and the
+stock peer independently matches the text and both return ACKs. These channel
+ACKs remain unauthenticated correlation facts; no read-receipt or 2.8 proof
+claim follows. The isolated real Keeper supplies the same scoped identity on
+reopen; the installed personal daemon remains unqualified.
+
+Text IDs 1/257 and control IDs 2/258 use disjoint intervals 1–256 and 257–512;
+durable next state is 513. Seven reviewed captures show 226 presented frames,
+zero blank captures, seven distinct digests and all four final rows visible.
+The stale connecting notice and clipped journal input remain cosmetic findings.
+Stock helper totals 16843/4258 ms are service durations, not message latencies.
+
+The native processes exit 0, but the first wrapper DUT restoration readback
+fails when radio bytes interleave textual diagnostics. The original failed
+reports remain intact. After COM6's pinned Tulle/exact-state restoration, the
+same strict probe is invoked separately and verifies COM7's same boot, status,
+sync and config ACK zero. Both boards are restored and the custodian stops.
+The [qualification](../testing/receipts/sennet-directed/native-reconnect/README.md)
+records this native pass plus separate restoration recovery, with hashes of 53
+public evidence files. A subsequent wrapper change restores the peer before
+checking DUT text diagnostics; that later wrapper revision has parsing evidence,
+not a new end-to-end hardware receipt. Private-channel provisioning, broader
+mesh routing, 2.8 signing/ACK proofs, personal-daemon integration and UI polish
+remain open. The recorded cleanup-review block and retained resources above
+are unchanged; existing targets and the co-owned Cargo cache were reused.

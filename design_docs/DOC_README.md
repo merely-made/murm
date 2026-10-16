@@ -1,16 +1,21 @@
 # Murm Documentation Index
 
-Sennet directed continuation (2026-10-16, in progress):
-[R8](2026-10-13_murm_family_move_plan.md#r8--sennet-directed-text-and-delivery-acks-2026-10-16-in-progress)
-extends scoped station material before PKI directed text and correlated delivery
-ACKs against pinned 2.7.26. R7's public-channel receipt remains frozen.
+Sennet directed carriage (2026-10-16):
+[R8](2026-10-13_murm_family_move_plan.md#r8--sennet-directed-text-and-delivery-acks-2026-10-16-functional-pass)
+records a [native PKI directed reconnect pass](../testing/receipts/sennet-directed/native-reconnect/README.md):
+four exact texts and four correlated ACKs against pinned 2.7.26, exact history,
+disjoint text/control IDs and seven reviewed captures. Both boards restore,
+with the failed initial DUT readback and separate strict recovery preserved.
+Scoped custody and software gates pass. ACK proofs for 2.8, private-channel
+custody, personal-daemon integration and UI polish remain open. R7 stays frozen.
 
 Sennet carriage (2026-10-16): [R7](2026-10-13_murm_family_move_plan.md#r7--sennet-channel-text-over-tulle-2026-10-16-functional-pass)
 records a [Djinn-backed public LongFast reconnect pass](../testing/receipts/sennet-desktop/native-reconnect/README.md):
 four tagged texts across two connections, exact history, disjoint packet IDs,
 zero protocol ACK claims, seven reviewed captures and both boards restored.
 The Sennet-only runtime and scoped custody pass their software gates. Directed
-text, protocol ACKs, private-channel provisioning and UI polish remain separate.
+text and protocol ACKs are qualified separately in R8; private-channel
+provisioning and UI polish remain open.
 
 Tucket carriage (2026-10-16): [R6 in the family plan](2026-10-13_murm_family_move_plan.md#r6--tucket-over-tulle-through-signalman-2026-10-15-in-progress) records a [Djinn-backed reconnect-send functional pass](../testing/receipts/tucket-desktop/custody/native-reconnect/README.md): four tagged texts with all four protocol ACKs against stock MeshCore across two connections, with exact history checked before fresh work after reconnect. Seven captures are reviewed, both boards restored, and owned helpers stopped. Scoped custody passes real-broker, policy and restored-fallback controls; the 300-execution core gate is unchanged, and 41 desktop tests plus strict Clippy/builds pass again. The fixture explicitly advertises after each commissioning; automatic contact restoration, UI polish and Sennet remain separate gates.
 

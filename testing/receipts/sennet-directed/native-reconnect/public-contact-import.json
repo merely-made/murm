@@ -1,0 +1,39 @@
+{
+  "result": "public_contact_import_read_back",
+  "action": "contact",
+  "node_number": 2110356692,
+  "peer_node": 4134206248,
+  "private_material_included": false,
+  "stock_contact_url": "https://meshtastic.org/v/#CKj2q7MPElAKCSFmNjZhZmIyOBIPTWVzaHRhc3RpYyBmYjI4GgRmYjI4IgZEG_Zq-ygobkIgzVNnmGRxdvj1aBtPHHYnxbOzsKLXzoMz9Iab8JB7XhVIACAB",
+  "station_contact_url": "https://meshtastic.org/v/#CNT5pe4HEk8KCSE3ZGM5N2NkNBIWU2lnbmFsbWFuIFNlbm5ldCBiZW5jaBoEN2NkNChuQiA-B_L6LAioLJ_SjVKp_TScreCgeT70HvMGPCy-oK2bEEgAIAE",
+  "replaced_exact_public_leaves": {
+    "text_id": 1,
+    "public_key": 1,
+    "numeric_node": 1,
+    "hardware_mac_omitted": 1,
+    "long_name": 1,
+    "short_name": 1
+  },
+  "import": {
+    "exit": 0,
+    "public_diagnostics": [
+      "Connected to radio",
+      "Waiting 5 seconds before disconnecting"
+    ]
+  },
+  "selected_sdk_readback": {
+    "present": true,
+    "id_match": true,
+    "public_key_match": true
+  },
+  "qr_readback": {
+    "exit": 0,
+    "public_diagnostics": [
+      "Connected to radio",
+      "Contact URL: https://meshtastic.org/v/#<redacted>",
+      "Install pyqrcode to view a QR code printed to terminal.",
+      "Waiting 5 seconds before disconnecting"
+    ]
+  },
+  "readback_contact_url": "https://meshtastic.org/v/#CNT5pe4HElcKCSE3ZGM5N2NkNBIWU2lnbmFsbWFuIFNlbm5ldCBiZW5jaBoEN2NkNCIGAAAAAAAAKG5CID4H8vosCKgsn9KNUqn9NJyt4KB5PvQe8wY8LL6grZsQSAAgAQ"
+}
