@@ -11,7 +11,19 @@ mesh project.
 
 A sennet is a ceremonial fanfare for a procession.
 
-**Current comparison, September 30:** the stock target is Meshtastic
+**October 16 carriage:** the native Signalman public LongFast gate passes four
+exact channel texts over two connections with retained history, disjoint packet
+IDs, zero ACK claims and restored radios. See the
+[R7 receipt](../../testing/receipts/sennet-desktop/native-reconnect/README.md).
+The [R8 receipt](../../testing/receipts/sennet-directed/native-restoration/README.md)
+now passes four exact PKI directed texts and four correlated protocol ACKs across
+native reconnect, with scoped transient custody, exact history and automated
+board restoration. The target is stock 2.7.26; channel ACKs are unauthenticated
+correlation facts. Current 2.8 security modes, broader role/module parity and
+current-image embedded memory qualification remain separate in the
+[parity proposal](../../design_docs/2026-10-16_protocol_parity_plan.md).
+
+**Earlier comparison, September 30:** the stock target is Meshtastic
 `2.7.26.54e0d8d` beta, with `2.8.0.47db0e3` alpha kept as a separate comparison.
 The identified beta peer passed encrypted text in both directions, rebroadcast,
 node association and duplicate suppression. Both temporary stock radios are

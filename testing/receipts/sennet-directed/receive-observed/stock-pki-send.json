@@ -1,0 +1,14 @@
+{
+  "result": "stock_send_command_completed_not_delivery_proof",
+  "action": "send",
+  "node_number": 1194197574,
+  "peer_node": 4134206248,
+  "private_material_included": false,
+  "cli_exit": 0,
+  "public_diagnostics": [
+    "Connected to radio",
+    "Sending text message sennet-pki-02ae107821df4d76bcf1cfe53af615d0 to !472e0246 on channelIndex:0 ",
+    "Waiting 5 seconds before disconnecting"
+  ],
+  "text": "sennet-pki-02ae107821df4d76bcf1cfe53af615d0"
+}

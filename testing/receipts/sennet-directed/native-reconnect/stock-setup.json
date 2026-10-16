@@ -1,0 +1,55 @@
+{
+  "result": "passed",
+  "port": "COM6",
+  "usb_serial": "44:1B:F6:6A:FB:28",
+  "public_channel": "LongFast",
+  "configured": true,
+  "operations": [
+    {
+      "name": "public-channel",
+      "exit": 0,
+      "public_diagnostics": [
+        "Connected to radio",
+        "Writing modified channels to device",
+        "Waiting 5 seconds before disconnecting"
+      ]
+    },
+    {
+      "name": "lora",
+      "exit": 0,
+      "public_diagnostics": [
+        "Connected to radio",
+        "Set lora.region to US",
+        "Set lora.modem_preset to LONG_FAST",
+        "Set lora.use_preset to true",
+        "Set lora.override_frequency to 906.875",
+        "Set lora.tx_power to 1",
+        "Writing modified preferences to device",
+        "Writing lora configuration to device",
+        "Waiting 5 seconds before disconnecting"
+      ]
+    }
+  ],
+  "configure_exit": 0,
+  "region_query": {
+    "exit": 0,
+    "public_diagnostics": [
+      "Connected to radio",
+      "lora.region: 1",
+      "Completed getting preferences"
+    ]
+  },
+  "node_number": 4134206248,
+  "firmware": "2.7.26.54e0d8d",
+  "region": 1,
+  "modem_preset": 0,
+  "override_frequency": 906.875,
+  "tx_power": 1,
+  "use_preset": true,
+  "channel_role": 1,
+  "device_role": 0,
+  "managed": false,
+  "channel_name": "",
+  "public_default_key_match": true,
+  "pki_public_key": "cd536798647176f8f5681b4f1c7627c5b3b3b0a2d7ce8333f4869bf0907b5e15"
+}

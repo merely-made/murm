@@ -18,6 +18,7 @@ use crate::{publish_fault, publish_online};
 use le3::{serve_le3_cad, serve_le3_plan, serve_le3_rx};
 
 mod le3;
+mod name;
 
 /// What a batch of host bytes turned out to be.
 pub enum Outcome {
@@ -89,6 +90,31 @@ where
     DLY: lora_phy::DelayNs,
     D: ChipDiagnostics<RK, DLY>,
 {
+    if at_boundary && let Some(command) = radio_hand::settings::name::NameCommand::parse(packet) {
+        return name::serve(command, settings, exec, host).await;
+    }
+    #[cfg(feature = "memory-bench")]
+    if at_boundary && (packet == b"protocol memory\n" || packet == b"protocol memory\r\n") {
+        let values = heap::memory_bench::measure().await;
+        let mut reply = radio_face::Text::<320>::empty();
+        let _ = write!(
+            &mut reply,
+            "memory initial={} fragmented={} retained={} final={} peak={} capacity={} failures={} expected_refusals=1 msp_sample={} worker_min_sp_sample={}\r\n",
+            values[0],
+            values[1],
+            values[2],
+            values[3],
+            heap::high_water(),
+            heap::HEAP_SIZE,
+            heap::allocation_failures(),
+            cortex_m::register::msp::read(),
+            heap::memory_bench::sampled_min_sp()
+        );
+        if host.write_all(reply.as_str().as_bytes()).await.is_err() {
+            return Outcome::HostGone;
+        }
+        return Outcome::Served;
+    }
     if at_boundary && (packet == b"bootloader\n" || packet == b"bootloader\r\n") {
         let _ = host.write_all(b"entering serial bootloader\r\n").await;
         Timer::after_millis(20).await;
@@ -111,6 +137,17 @@ where
     }
     if at_boundary && (packet == b"status\n" || packet == b"status\r\n") {
         if host.write_all(online.as_str().as_bytes()).await.is_err() {
+            return Outcome::HostGone;
+        }
+        if host
+            .write_all(
+                radio_hand::settings::name::report(settings)
+                    .as_str()
+                    .as_bytes(),
+            )
+            .await
+            .is_err()
+        {
             return Outcome::HostGone;
         }
         return Outcome::Served;

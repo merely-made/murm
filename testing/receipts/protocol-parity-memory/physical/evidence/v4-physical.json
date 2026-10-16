@@ -1,0 +1,186 @@
+{
+  "passed": false,
+  "actions": [
+    {
+      "name": "v4-install",
+      "command": [
+        "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\sennet-tucket-radios\\artifacts\\espflash.exe",
+        "write-bin",
+        "--port",
+        "COM7",
+        "--chip",
+        "esp32s3",
+        "--before",
+        "usb-reset",
+        "--baud",
+        "921600",
+        "--non-interactive",
+        "--skip-update-check",
+        "65536",
+        "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\protocol-parity-memory\\v4-physical.bin"
+      ],
+      "exit_code": 0,
+      "seconds": 7.824
+    },
+    {
+      "name": "v4-installed-read",
+      "command": [
+        "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\sennet-tucket-radios\\artifacts\\espflash.exe",
+        "read-flash",
+        "--port",
+        "COM7",
+        "--chip",
+        "esp32s3",
+        "--before",
+        "usb-reset",
+        "--baud",
+        "921600",
+        "--non-interactive",
+        "--skip-update-check",
+        "--block-size",
+        "1024",
+        "--max-in-flight",
+        "1",
+        "65536",
+        "753456",
+        "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\protocol-parity-memory\\v4-installed-private-app.bin"
+      ],
+      "exit_code": 0,
+      "seconds": 8.669
+    },
+    {
+      "name": "v4-campaign",
+      "command": [
+        "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\sennet-tucket-radios\\stock-cli\\Scripts\\python.exe",
+        "-B",
+        "testing/protocol-capacity/board_probe.py",
+        "v4",
+        "--port",
+        "COM7",
+        "--rounds",
+        "16",
+        "--output",
+        "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\protocol-parity-memory\\v4-campaign.json"
+      ],
+      "exit_code": 1,
+      "seconds": 4.328
+    },
+    {
+      "name": "v4-restore",
+      "command": [
+        "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\sennet-tucket-radios\\artifacts\\espflash.exe",
+        "write-bin",
+        "--port",
+        "COM7",
+        "--chip",
+        "esp32s3",
+        "--before",
+        "usb-reset",
+        "--baud",
+        "921600",
+        "--non-interactive",
+        "--skip-update-check",
+        "65536",
+        "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\protocol-parity-memory\\v4-original-private-app.bin"
+      ],
+      "exit_code": 0,
+      "seconds": 10.228
+    },
+    {
+      "name": "v4-restored-prefix-read",
+      "command": [
+        "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\sennet-tucket-radios\\artifacts\\espflash.exe",
+        "read-flash",
+        "--port",
+        "COM7",
+        "--chip",
+        "esp32s3",
+        "--before",
+        "usb-reset",
+        "--baud",
+        "921600",
+        "--non-interactive",
+        "--skip-update-check",
+        "--block-size",
+        "1024",
+        "--max-in-flight",
+        "1",
+        "0",
+        "1048576",
+        "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\protocol-parity-memory\\v4-restored-private-prefix.bin"
+      ],
+      "exit_code": 0,
+      "seconds": 12.023
+    },
+    {
+      "name": "v4-restored-tail-read",
+      "command": [
+        "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\sennet-tucket-radios\\artifacts\\espflash.exe",
+        "read-flash",
+        "--port",
+        "COM7",
+        "--chip",
+        "esp32s3",
+        "--before",
+        "usb-reset",
+        "--baud",
+        "921600",
+        "--non-interactive",
+        "--skip-update-check",
+        "--block-size",
+        "1024",
+        "--max-in-flight",
+        "1",
+        "4128768",
+        "65536",
+        "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\protocol-parity-memory\\v4-restored-private-tail.bin"
+      ],
+      "exit_code": 0,
+      "seconds": 1.455
+    },
+    {
+      "name": "v4-restored-status",
+      "command": [
+        "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\sennet-tucket-radios\\stock-cli\\Scripts\\python.exe",
+        "-B",
+        "testing/protocol-capacity/board_probe.py",
+        "v4",
+        "--port",
+        "COM7",
+        "--output",
+        "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\protocol-parity-memory\\v4-restored.json"
+      ],
+      "exit_code": 1,
+      "seconds": 4.341
+    }
+  ],
+  "application_only_write_offset": 65536,
+  "protected_range": "0x3f0000..0x400000",
+  "inputs": {
+    "v4-physical.bin": {
+      "sha256": "5f8bb53fea09941e906612d8f8c3a906c74bcdf9df6de57a4b53c55f4412b961",
+      "bytes": 753456
+    },
+    "v4-physical.elf": {
+      "sha256": "3c1280ab0b095770cee77de85d58341cde4a452580db32b6f8615295d1a38371",
+      "bytes": 13044764
+    },
+    "v4-original-private-prefix.bin": {
+      "sha256": "37285b729fac58354103d50e9faf9b77f78c90f769f6cdd404f973f4ab4230a3",
+      "bytes": 1048576
+    },
+    "v4-original-private-app.bin": {
+      "sha256": "2346b814a1e2c90c392b45b0b006b34e4a71ea347cb8e92ce95a6fb0ff770696",
+      "bytes": 983040
+    },
+    "v4-original-private-tail.bin": {
+      "sha256": "acba765c11cc2bdef36e5a39064ecb401f5be9ca96f371947d47b2b6d49fb0a0",
+      "bytes": 65536
+    }
+  },
+  "installed_application_exact": true,
+  "error": "AssertionError('v4-campaign failed')",
+  "original_prefix_exact": true,
+  "protected_tail_exact": true,
+  "restoration_error": "AssertionError('v4-restored-status failed')"
+}

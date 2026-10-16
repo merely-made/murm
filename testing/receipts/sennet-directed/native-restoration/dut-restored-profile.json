@@ -1,0 +1,90 @@
+{
+  "mode": "restore-profile",
+  "result": "passed",
+  "port": "COM7",
+  "usb_serial": "44:1B:F6:6A:FA:64",
+  "restored": {
+    "restore_ack": {
+      "kind": "config",
+      "status": 0
+    },
+    "cursor": {
+      "request_id": 1801,
+      "status": 0,
+      "boot_id": 15828058867860565860,
+      "oldest": 295,
+      "newest": 326,
+      "next": 0,
+      "recorded": 326,
+      "overwritten": 294,
+      "encode_failed": 0,
+      "profile_count": 3,
+      "record_len": 0,
+      "raw_record": "",
+      "record_class": null
+    },
+    "status": "tulle/heltec-v4 phy online; version=0.0.1; sx1262 online; sync=2b reg=24b4; longfast=906875000; build=unidentified; image=v4-modem-usb\r\nidentity=loaded slot=B seq=5\r\n",
+    "sync": "2b 24b4\r\n",
+    "same_boot": true,
+    "same_status": true,
+    "same_sync": true
+  },
+  "transcript": [
+    {
+      "utc": "2026-10-16T12:28:04.079594+00:00",
+      "perf": 546876.9694961,
+      "port": "COM7",
+      "direction": "tx",
+      "hex": "0278d00d3690d003000b0510002b0311"
+    },
+    {
+      "utc": "2026-10-16T12:28:04.182471+00:00",
+      "perf": 546877.0723726,
+      "port": "COM7",
+      "direction": "rx",
+      "hex": "8300"
+    },
+    {
+      "utc": "2026-10-16T12:28:04.182733+00:00",
+      "perf": 546877.0726223,
+      "port": "COM7",
+      "direction": "tx",
+      "hex": "0004303130303030303030373039303030303030303030303030303030303030303030303030303030303030303000"
+    },
+    {
+      "utc": "2026-10-16T12:28:04.291096+00:00",
+      "perf": 546877.1809988,
+      "port": "COM7",
+      "direction": "rx",
+      "hex": "86004101000000070900dba88fadfeccef64000000000000012700000000000001460000000000000000000000000000014600000000000001260000000000000000030080376b55"
+    },
+    {
+      "utc": "2026-10-16T12:28:04.291823+00:00",
+      "perf": 546877.1817159,
+      "port": "COM7",
+      "direction": "tx",
+      "hex": "7374617475730a"
+    },
+    {
+      "utc": "2026-10-16T12:28:04.392660+00:00",
+      "perf": 546877.2825688,
+      "port": "COM7",
+      "direction": "rx",
+      "hex": "74756c6c652f68656c7465632d763420706879206f6e6c696e653b2076657273696f6e3d302e302e313b20737831323632206f6e6c696e653b2073796e633d3262207265673d323462343b206c6f6e67666173743d3930363837353030303b206275696c643d756e6964656e7469666965643b20696d6167653d76342d6d6f64656d2d7573620d0a6964656e746974793d6c6f6164656420736c6f743d42207365713d350d0a"
+    },
+    {
+      "utc": "2026-10-16T12:28:05.561715+00:00",
+      "perf": 546878.4516475,
+      "port": "COM7",
+      "direction": "tx",
+      "hex": "73796e630a"
+    },
+    {
+      "utc": "2026-10-16T12:28:05.668730+00:00",
+      "perf": 546878.5586768,
+      "port": "COM7",
+      "direction": "rx",
+      "hex": "326220323462340d0a"
+    }
+  ]
+}

@@ -38,6 +38,16 @@ pub(super) fn runtime_with_reply_delay(
     next: u32,
     reply_delay_ms: u64,
 ) -> Runtime {
+    runtime_configured(scope, seed, home, next, reply_delay_ms, None)
+}
+fn runtime_configured(
+    scope: &RadioScope,
+    seed: u8,
+    home: selvage::personality::PersonalityId,
+    next: u32,
+    reply_delay_ms: u64,
+    peer: Option<(u32, u8)>,
+) -> Runtime {
     let node = retinue::node::Node::<8, 4, 1, 4>::new(
         retinue::identity::PrivateIdentity::from_secret_bytes(&[1; 64]),
         retinue::destination::DestinationName::new("retinue", ["resident"]).name_hash(),
@@ -57,7 +67,7 @@ pub(super) fn runtime_with_reply_delay(
         tx_budget_ms: 1,
         frame_ttl_ms: 60_000,
     };
-    let sennet = SennetInstance::new(
+    let mut sennet = SennetInstance::new(
         SennetInstanceConfig {
             channel: Channel {
                 hash: 8,
@@ -76,6 +86,17 @@ pub(super) fn runtime_with_reply_delay(
         PacketIdLease::new(scope.meshtastic_node, next, next + 64, next).unwrap(),
     )
     .unwrap();
+    if let Some((node, key)) = peer {
+        sennet
+            .install_pki(
+                node,
+                sennet::pki::LocalIdentity::from_secret([seed; 32]),
+                sennet::pki::LocalIdentity::from_secret([key; 32]).public_key(),
+                50,
+                16,
+            )
+            .unwrap();
+    }
     let tucket = tucket::instance::Instance::new(
         tucket::node::Node::new(
             tucket::identity::LocalIdentity::from_seed([seed; 32]),
@@ -102,7 +123,7 @@ async fn meshtastic_real_owner_round_trip_and_reopen_preserve_packet_identity() 
     let b = scope(8, 4);
     let sender = owner(a.clone(), dir.path(), "a.json");
     let receiver = owner(b.clone(), dir.path(), "b.json");
-    let id = send(&sender.model(), a.meshtastic(8), "real channel text").await;
+    let id = send(&sender.model(), a.meshtastic(u32::MAX), "real channel text").await;
     let mut ar = runtime(&a, 3, SENNET, 10);
     let mut br = runtime(&b, 4, SENNET, 100);
     let mut ax = sender.attach(&mut ar).unwrap();
@@ -112,7 +133,7 @@ async fn meshtastic_real_owner_round_trip_and_reopen_preserve_packet_identity() 
     assert_eq!(
         sender
             .model()
-            .delivery_status(&a.meshtastic(8), &id)
+            .delivery_status(&a.meshtastic(u32::MAX), &id)
             .await
             .unwrap(),
         DeliveryStatus::Queued(DeliveryQueueReason::ReadyForCarriage)
@@ -123,7 +144,7 @@ async fn meshtastic_real_owner_round_trip_and_reopen_preserve_packet_identity() 
     assert_eq!(
         sender
             .model()
-            .delivery_status(&a.meshtastic(8), &id)
+            .delivery_status(&a.meshtastic(u32::MAX), &id)
             .await
             .unwrap(),
         DeliveryStatus::HandedToRadio
@@ -137,7 +158,7 @@ async fn meshtastic_real_owner_round_trip_and_reopen_preserve_packet_identity() 
         records[0].facts[0],
         RadioFact::MeshtasticPacket {
             source: 7,
-            destination: 8,
+            destination: u32::MAX,
             packet_id: 10,
             ..
         }
@@ -251,7 +272,7 @@ async fn routing_refusals_precede_mutation_and_uncertain_sessions_never_auto_rep
     bad.body = "é".repeat(86);
     assert!(model.send(&bad).await.is_err());
     assert!(owner.records().unwrap().is_empty());
-    let id = send(&model, a.meshtastic(8), "queued").await;
+    let id = send(&model, a.meshtastic(u32::MAX), "queued").await;
     let mut wrong = runtime(&scope(9, 3), 3, SENNET, 10);
     assert!(owner.attach(&mut wrong).is_err());
     let mut ar = runtime(&a, 3, SENNET, 10);
@@ -269,7 +290,7 @@ async fn routing_refusals_precede_mutation_and_uncertain_sessions_never_auto_rep
     assert!(matches!(
         reopened
             .model()
-            .delivery_status(&a.meshtastic(8), &id)
+            .delivery_status(&a.meshtastic(u32::MAX), &id)
             .await
             .unwrap(),
         DeliveryStatus::Failed { .. }
@@ -286,6 +307,127 @@ async fn routing_refusals_precede_mutation_and_uncertain_sessions_never_auto_rep
     assert!(RadioComms::open(scope(99, 3), FileJournal::new(dir.path().join("a.json"))).is_err());
 }
 struct FailingJournal;
+
+#[tokio::test]
+async fn directed_meshtastic_matches_ack_and_refuses_history_key_replacement() {
+    let dir = tempfile::tempdir().unwrap();
+    let a = scope(7, 3);
+    let b = scope(8, 4);
+    let sender = owner(a.clone(), dir.path(), "private-a.json");
+    let receiver = owner(b.clone(), dir.path(), "private-b.json");
+    let mut ar = runtime_configured(&a, 3, SENNET, 10, 0, Some((8, 4)));
+    let mut br = runtime_configured(&b, 4, SENNET, 100, 0, Some((7, 3)));
+    let id = send(&sender.model(), a.meshtastic(8), "private text").await;
+    let mut ax = sender.attach(&mut ar).unwrap();
+    let mut bx = receiver.attach(&mut br).unwrap();
+    ax.dispatch_next(1, 1).unwrap();
+    let tx = ax.begin_tx(2).unwrap().unwrap();
+    bx.ingest(2, &tx.frame).unwrap();
+    ax.complete_tx(3, tx.id, true).unwrap();
+    assert_eq!(
+        sender.records().unwrap()[0].delivery,
+        DeliveryStatus::HandedToRadio
+    );
+    let ack = bx.begin_tx(4).unwrap().unwrap();
+    bx.complete_tx(5, ack.id, true).unwrap();
+    ax.ingest(6, &ack.frame).unwrap();
+    assert_eq!(
+        sender
+            .model()
+            .delivery_status(&a.meshtastic(8), &id)
+            .await
+            .unwrap(),
+        DeliveryStatus::ProtocolAcknowledged
+    );
+    assert!(sender.records().unwrap()[0].facts.iter().any(|f| matches!(
+        f,
+        RadioFact::MeshtasticRouting {
+            request_id: 10,
+            code: 0,
+            authenticated: false,
+            ..
+        }
+    )));
+    assert!(
+        receiver.records().unwrap()[0]
+            .facts
+            .iter()
+            .any(|f| matches!(f, RadioFact::MeshtasticPkiBinding { peer: 7, .. }))
+    );
+    drop(ax);
+    drop(bx);
+    let mut changed = runtime_configured(&a, 3, SENNET, 74, 0, Some((8, 55)));
+    assert!(sender.attach(&mut changed).is_err());
+    let before = serde_json::to_vec(&sender.records().unwrap()).unwrap();
+    let mut fresh = runtime_configured(&a, 3, SENNET, 74, 0, Some((8, 4)));
+    let mut reopened = sender.attach(&mut fresh).unwrap();
+    assert!(reopened.dispatch_next(7, 2).unwrap().is_none());
+    assert_eq!(
+        before,
+        serde_json::to_vec(&sender.records().unwrap()).unwrap()
+    );
+}
+
+#[tokio::test]
+async fn directed_ack_timeout_and_disconnect_preserve_physical_facts_without_replay() {
+    for expire in [false, true] {
+        let dir = tempfile::tempdir().unwrap();
+        let a = scope(7, 3);
+        let owner = owner(a.clone(), dir.path(), "timeout.json");
+        let id = send(&owner.model(), a.meshtastic(8), "unconfirmed").await;
+        let mut runtime = runtime_configured(&a, 3, SENNET, 10, 0, Some((8, 4)));
+        let mut session = owner.attach(&mut runtime).unwrap();
+        session.dispatch_next(1, 1).unwrap();
+        let tx = session.begin_tx(2).unwrap().unwrap();
+        session.complete_tx(3, tx.id, true).unwrap();
+        if expire {
+            session.poll(53).unwrap();
+        }
+        drop(session);
+        assert_eq!(
+            owner
+                .model()
+                .delivery_status(&a.meshtastic(8), &id)
+                .await
+                .unwrap(),
+            DeliveryStatus::HandedToRadio
+        );
+        assert!(owner.records().unwrap()[0].facts.iter().any(|f| matches!(
+            f,
+            RadioFact::PhysicalCompletion {
+                transmitted: true,
+                ..
+            }
+        )));
+        let mut fresh = runtime_configured(&a, 3, SENNET, 74, 0, Some((8, 4)));
+        assert!(
+            owner
+                .attach(&mut fresh)
+                .unwrap()
+                .dispatch_next(54, 2)
+                .unwrap()
+                .is_none()
+        );
+    }
+}
+
+#[tokio::test]
+async fn directed_without_pinned_key_is_refused_before_a_protocol_packet_is_created() {
+    let dir = tempfile::tempdir().unwrap();
+    let a = scope(7, 3);
+    let owner = owner(a.clone(), dir.path(), "missing-peer.json");
+    send(&owner.model(), a.meshtastic(8), "private intent").await;
+    let mut runtime = runtime(&a, 3, SENNET, 10);
+    let mut session = owner.attach(&mut runtime).unwrap();
+    assert!(session.dispatch_next(1, 1).is_err());
+    assert!(session.begin_tx(2).unwrap().is_none());
+    drop(session);
+    assert_eq!(runtime.sennet().packet_id_state().next_packet_id(), 10);
+    assert!(matches!(
+        owner.records().unwrap()[0].delivery,
+        DeliveryStatus::Failed { .. }
+    ));
+}
 impl RadioJournal for FailingJournal {
     fn load(&mut self) -> std::io::Result<Option<Vec<u8>>> {
         Ok(None)

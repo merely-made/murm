@@ -14,6 +14,13 @@ cargo +esp build -p tulle-heltec-v4-phy --release --target xtensa-esp32s3-none-e
 
 ## On-device status face
 
+`name` reports the public device label. `name set SB1` saves up to 16 printable
+ASCII characters and reboots; `name clear` clears the label. Leading/trailing
+spaces are refused. The boot and default status titles show the saved name,
+and USB `status` includes it. Setting the same name again does not write flash
+or reboot. The name is separate from relay identity and RF profile; older
+settings upgrade without changing the identity, region or channel.
+
 The default USB image drives the fitted 128×64 OLED through `radio-face`:
 
 - GPIO17: OLED SDA
@@ -53,3 +60,12 @@ its client stream.
 
 The first on-device UI hardware acceptance is recorded in
 `design_docs/2026-07-28_v4_on_device_ui_acceptance.md`.
+
+The explicit `memory-bench` feature includes `resident-protocols` and adds the
+`protocol memory` text command. A separate executor task runs the synthetic
+combined-state fixture, exercises fragmented heap/refusal behavior, and reports
+allocator occupancy plus stack samples. Ordinary builds do not expose it.
+The [October 16 physical receipt](../../testing/receipts/protocol-parity-memory/physical/README.md)
+records the exact images, identified boards, failures and application/state
+restoration. The heap campaign passes on COM6; COM7's post-flash USB failure is
+separate. The tight main-stack sample is not accepted worst-case headroom.

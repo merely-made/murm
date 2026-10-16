@@ -19,6 +19,7 @@ param(
     [string]$TucketBenchConfig,
     [string]$TucketConfig,
     [string]$SennetConfig,
+    [switch]$SennetDirected,
     [string]$BenchPython,
     [string]$PeerUsbSerial,
     [switch]$ExchangeAfterReconnect
@@ -32,6 +33,8 @@ $PeerBinary = (Resolve-Path -LiteralPath $PeerBinary).Path
 if ($TucketBenchConfig -and $TucketConfig) { throw 'Choose one Tucket authority.' }
 $hasTucket = [bool]($TucketBenchConfig -or $TucketConfig)
 $hasSennet = [bool]$SennetConfig
+if ($SennetDirected -and !$hasSennet) { throw 'Directed Sennet requires its explicit configuration.' }
+$channelSennet = $hasSennet -and !$SennetDirected
 if ($hasTucket -and $hasSennet) { throw 'Choose one Tulle protocol authority.' }
 $hasResident = $hasTucket -or $hasSennet
 if ($hasResident) {
@@ -40,6 +43,9 @@ if ($hasResident) {
     $BenchPython = (Resolve-Path -LiteralPath $BenchPython).Path
     $tucketSettings = Get-Content -LiteralPath $configurationPath -Raw | ConvertFrom-Json
     if ($tucketSettings.realm -ne $Realm -or $tucketSettings.port -ne $Port) { throw 'Tucket config must explicitly match this port and realm.' }
+    if ($hasSennet -and ([bool]$tucketSettings.directed -ne [bool]$SennetDirected -or
+        ($SennetDirected -and ($tucketSettings.directed.peer_public_key -notmatch '^[0-9a-f]{64}$' -or
+        ('{0:x8}' -f [uint32]$tucketSettings.peer_node) -ne $PeerAddress)))) { throw 'Sennet mode must match its explicit pinned peer configuration.' }
     if ($TucketBenchConfig -and !$tucketSettings.bench_only) { throw 'Seed-file bench mode must be explicit.' }
     if ($TucketConfig -and (!$tucketSettings.device_id -or $tucketSettings.bench_only -or $tucketSettings.private_material)) { throw 'Djinn configuration must name a public device id and no private material.' }
 }
@@ -58,7 +64,7 @@ $fixture = Join-Path $output 'companion.scn'
 $tokens = @{
     PROTOCOL=$Protocol; LABEL=$(if ($Protocol -eq 'meshtastic') { 'Meshtastic' } else { 'MeshCore' })
     PORT=$Port; REALM=$Realm; JOURNAL=$journal; CHANNEL="$Channel"; PEER=$PeerAddress; TAG=$tag
-    RECIPIENT=$(if ($hasSennet) { 'ffffffff' } else { $PeerAddress })
+    RECIPIENT=$(if ($channelSennet) { 'ffffffff' } else { $PeerAddress })
     ZOOM=$Zoom.ToString([Globalization.CultureInfo]::InvariantCulture)
     RECONNECT_EXCHANGE=''
 }
@@ -92,11 +98,11 @@ if ($hasResident) {
     if ($SennetConfig) { $SennetConfig = $configurationPath } elseif ($TucketConfig) { $TucketConfig = $configurationPath } else { $TucketBenchConfig = $configurationPath }
 }
 if ($hasSennet) {
-    $script = $script.Replace('Tucket over Tulle', 'Sennet channel text over Tulle')
+    $script = $script.Replace('Tucket over Tulle', $(if ($SennetDirected) { 'Sennet directed text over Tulle' } else { 'Sennet channel text over Tulle' }))
 }
 $script = $script.Replace('@@RECONNECT_EXCHANGE@@', $tokens.RECONNECT_EXCHANGE)
 foreach ($token in $tokens.Keys) { $script = $script.Replace("@@$token@@", $tokens[$token]) }
-if ($hasSennet) {
+if ($channelSennet) {
     $script = $script.Replace('await companion acknowledged', 'await companion transmitted').Replace('assert snap protocol_ack == 1', "assert snap physical_tx == 1`nassert snap protocol_ack == 0").Replace('await companion peer acknowledged','await companion peer completed').Replace('assert snap peer_protocol_ack == true','assert snap peer_channel_completed == true')
 }
 [IO.File]::WriteAllText($fixture, $script)
@@ -119,7 +125,7 @@ $receipt = [ordered]@{
     scenario_sha256=(Get-FileHash $fixture -Algorithm SHA256).Hash
     deadline_seconds=$DeadlineSeconds; firmware_or_configuration_mutated=$false; result='not_completed'
     exchange_after_reconnect=[bool]$ExchangeAfterReconnect
-    carriage=$(if ($SennetConfig) { 'djinn_sennet_over_tulle' } elseif ($TucketConfig) { 'djinn_tucket_over_tulle' } elseif ($TucketBenchConfig) { 'isolated_bench_tucket_over_tulle' } else { 'stock_companion' })
+    carriage=$(if ($SennetDirected) { 'djinn_sennet_pki_over_tulle' } elseif ($SennetConfig) { 'djinn_sennet_over_tulle' } elseif ($TucketConfig) { 'djinn_tucket_over_tulle' } elseif ($TucketBenchConfig) { 'isolated_bench_tucket_over_tulle' } else { 'stock_companion' })
 }
 $desktop = $null
 $peer = $null
@@ -143,12 +149,13 @@ try {
     $env:SIGNALMAN_THEME_LIBRARY = Join-Path $output 'themes'
     $env:SIGNALMAN_WIDTH = "$Width"
     $env:SIGNALMAN_HEIGHT = "$Height"
-    $peerMode = if ($hasSennet) { 'channel-peer' } else { 'peer' }
+    $peerMode = if ($channelSennet) { 'channel-peer' } else { 'peer' }
     $peerArgs = "$peerMode $Protocol $PeerPort $Realm `"$(Join-Path $output 'peer')`" $tag $SelfAddress $Channel"
     $deadline = [DateTime]::UtcNow.AddSeconds($DeadlineSeconds)
     if ($TucketBenchConfig) { $env:SIGNALMAN_TUCKET_BENCH_CONFIG = $TucketBenchConfig }
     if ($TucketConfig) { $env:SIGNALMAN_TUCKET_CONFIG = $TucketConfig }
-    if ($SennetConfig) { $env:SIGNALMAN_SENNET_CONFIG = $SennetConfig; $env:SIGNALMAN_COMPANION_CHANNEL_ONLY = '1' }
+    if ($SennetConfig) { $env:SIGNALMAN_SENNET_CONFIG = $SennetConfig }
+    if ($channelSennet) { $env:SIGNALMAN_COMPANION_CHANNEL_ONLY = '1' }
     $desktop = Start-Process -FilePath $DesktopBinary -PassThru -WorkingDirectory $repo `
         -RedirectStandardOutput (Join-Path $output 'desktop.stdout.log') -RedirectStandardError (Join-Path $output 'desktop.stderr.log')
     if ($hasTucket) {

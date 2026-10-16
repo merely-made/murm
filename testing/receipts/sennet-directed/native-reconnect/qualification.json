@@ -1,0 +1,135 @@
+{
+  "schema": 1,
+  "result": "native_directed_reconnect_functional_passed_restoration_recovered",
+  "source": "826752791da6133fb9dab1bf75d8bfba1f66bbae",
+  "authority": "Djinn scoped release through real isolated Keeper wallet",
+  "coverage": {
+    "tagged_texts": 4,
+    "delivery_connections": 2,
+    "exact_history_before_new_send": true,
+    "new_texts_after_reconnect": 2,
+    "all_four_records_after_final_disconnect": true,
+    "observed_protocol_acks": 4,
+    "native_protocol_acks": 2,
+    "stock_protocol_acks": 2,
+    "outgoing_physical_completions": 2,
+    "stock_peer_exact_pki_receives": 2,
+    "native_exact_pki_receives": 2
+  },
+  "nonce_state": {
+    "outgoing_text_packet_ids": [
+      1,
+      257
+    ],
+    "outgoing_ack_packet_ids": [
+      2,
+      258
+    ],
+    "reserved_intervals_inclusive": [
+      [
+        1,
+        256
+      ],
+      [
+        257,
+        512
+      ]
+    ],
+    "next_before": 1,
+    "next_after": 513,
+    "unused_ids_abandoned_on_reconnect": true
+  },
+  "rounds": [
+    {
+      "tag": "signalman-ui-1107778679e1469491fc24ea2d13dfef",
+      "stock_peer_elapsed_ms": 16843,
+      "matched_protocol_ack": true
+    },
+    {
+      "tag": "signalman-ui-1107778679e1469491fc24ea2d13dfef-reconnect",
+      "stock_peer_elapsed_ms": 4258,
+      "matched_protocol_ack": true
+    }
+  ],
+  "visual_review": {
+    "result": "functional checks passed",
+    "captures": 7,
+    "blank_captures": 0,
+    "distinct_digests": 7,
+    "presented_frames": 226,
+    "polish_qualified": false,
+    "all_four_history_rows_visible_at_final_capture": true,
+    "cosmetic_notes": [
+      "connecting notice remains stale after connected",
+      "long journal path is horizontally clipped in its input"
+    ]
+  },
+  "restoration": {
+    "peer": "pinned_tulle_and_exact_status_region_channel",
+    "dut": "separate identical restore-profile probe after peer restoration; same boot, status, sync and config ACK verified",
+    "initial_wrapper_result": "failed",
+    "initial_error": "Tulle probe failed: restore-profile",
+    "raw_results_unchanged": true
+  },
+  "desktop_exit": 0,
+  "peer_exit": 0,
+  "reconnect_peer_exit": 0,
+  "custodian_stopped": true,
+  "private_runtime_included": false,
+  "ack_authentication": "2.7 channel-encrypted correlation only; no authenticated proof or read receipt",
+  "evidence_sha256": {
+    "bench.json": "93e8cc25656cb7f032c4ca57a730a4b2dfa2e6773541f9eaabc3dbcb4f6547ee",
+    "companion.scn": "b3f03e32a80af9171c7e248a08fb64fd2b4eca59ef4cdd21dd9bcbd59f5ae9c3",
+    "configured-stock-probe-receipt.json": "e86189fbdb033fbf7821822d71639886d565223f1da43109ab786f784a795a49",
+    "configured-stock-probe-settled-left.json": "69bb084499bec976aff0950412c5d90733a01076a7d7e2448260fe15ba071b43",
+    "configured-stock-probe-settled-receipt.json": "d6e0e9acc74954c27c0f327315fdbea576c426e0df39b07ccd9e6cff4b5867cd",
+    "connected.png": "9a5a83fdd118f200ddd1d930f96c619a7bbb4804e8a21d49faed48d7a9933626",
+    "contact-stock-probe-left.json": "69bb084499bec976aff0950412c5d90733a01076a7d7e2448260fe15ba071b43",
+    "contact-stock-probe-receipt.json": "d6e0e9acc74954c27c0f327315fdbea576c426e0df39b07ccd9e6cff4b5867cd",
+    "custodian.json": "57c65a4ddf531af7307eabb081d5aab6375e67e6ff7ad68d53bef85a276b1200",
+    "desktop-journal.json": "2d02696a60ef5a4fd9beb0dd9b31586c17632971373ae29ff236eddd2872c8f2",
+    "desktop.stderr.log": "2f14fd666267cd17a36ed9a3e440c0f43aa7a05609cf71dec26c28c1b2e858b0",
+    "desktop.stdout.log": "900e65bdcc1fe324eea6147462dd8da822fa9999b9fa95adcdc792b6aa6ab133",
+    "directed-activation-config.json": "7fc47071c86d5e98b052a0e084801fa0ee6d4f1ce34545b35edd416b07f5e92c",
+    "disconnected.png": "6611ecc017ab454f0ccccd9e25a686e1e40a7d4dba27cc67dc99d0114223739e",
+    "dut-before-capture.json": "a5624b5bc3e01724195fee72d3da9333d6d57e0aaa4eea15c447adfd7103bee0",
+    "dut-before.json": "0b9981b32510aebbe698ff564d93bcb38cc75d3a901dc3de9fefea6d6edf2559",
+    "dut-profile.json": "57768852c074d268b3b1c722c98fa52fd3f28b4a7fc87ec353d2833f0b70ac5c",
+    "dut-restored-after-peer.json": "a35641e128354da9f3d3fd6d3f68afd385e7c721d6ae441db21d22b7d06db40f",
+    "dut-restored-after-peer.log": "1fcac78504d49c408d099e5e179fc2272f8999cd495a8bc46dd4501bb910a8dd",
+    "dut-restored-profile.json": "17a79db3a42666804e7de6955be8ece568c40a211e3c22538c1bfbc1b785004e",
+    "form.png": "df4ddafbfda3418833e056013bdbc82380ae2f09271ad60e57252f259eb05d9a",
+    "packet-ids-after.json": "5801be48a41818ab18bc3bda92c28032dd0a09f61b9441ee4cf4b61c8cf6f110",
+    "packet-ids-before.json": "1c7e1471794f0cc06f7fba8a4fa858948a1dd57df504ca6c553a69f3ead22dfe",
+    "packet-ids-fence.json": "1c7e1471794f0cc06f7fba8a4fa858948a1dd57df504ca6c553a69f3ead22dfe",
+    "peer-before.json": "926d28fd936303d47e6b2b8c98aeae44d363d74187605c18c9317bad09d667c4",
+    "peer-reconnect.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "peer-reconnect.stdout.log": "b5ce67f4663176dc25581a5a11b0ddc7d27c071b5d36b36cc6c76d35a04227e3",
+    "peer-restored.json": "926d28fd936303d47e6b2b8c98aeae44d363d74187605c18c9317bad09d667c4",
+    "peer.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "peer.stdout.log": "b5ce67f4663176dc25581a5a11b0ddc7d27c071b5d36b36cc6c76d35a04227e3",
+    "public-config.json": "77679faa823d7541ba2c6992904dba66c42a0d81f832b597870846fe88debcae",
+    "public-contact-import.json": "d366cf6dae6ef5e5144fd5aa1aac72aabf7632a6cfa82a81ef2f3c50dfc2f7a0",
+    "public-station.json": "f67a9d71f6882a9ad4e37fdec0f57d60b04b667c10c674cc48e16f15a64526a8",
+    "reconnect-roundtrip.png": "0c7544f1ea8f194187a571546b90bb030f55976cffbb2e4b8679f0822eeb5734",
+    "reconnect.ready": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reconnected.png": "1e5f69ff8ac7bb6e51c555e22e8446de8fc75ab9e58bd28d09a827487fc03554",
+    "roundtrip.png": "6f99da4ecd650cd594ba0b3d38d6e6597dd2771e94fd913a051ff9e869efa9bb",
+    "run.json": "2963c655784fb0ea9a8e1030114722d24aa8319a0fc2be4e3298f276e7113f7b",
+    "scenario.done": "45884ca6da5a6f9e4f42e0d496462ce782977659a4dba78d0133d5eaa92ffbca",
+    "source/run-djinn-native.ps1": "7ba1f1d139f164c64447e84384fdbc591a834d99cff12b217a357eee291cb709",
+    "source/run_companion.ps1": "2274553a7f08d312a213eb9f31a6f074ca4008eed7a2f62dd74af614f2babf54",
+    "source/run_sennet_desktop.ps1": "9067b47b71020acecda60e6a7cef23983fa5d30b4845310bb5a5b80f0b143f59",
+    "stock-flash.log": "7e2ebac078412cc0feadfe11e80eaf5ea48ba5a4b5ae4d5547d11c4da9dfefa5",
+    "stock-peer-journal.json": "cfdfaa3c792bd4248e98f89f7470c898f533894d9a7ed542544788f953d16d7e",
+    "stock-peer-receipt.json": "c37b6380cecde40006eac503c77140e558f763f9512162bdc7ef45b0cdac2767",
+    "stock-peer-reconnect-journal.json": "41eb3cc3eb88e3064b6f02e7e577c4e89e14bd65220000cdb19d15669c37eab6",
+    "stock-peer-reconnect-receipt.json": "fb1cb39aa85b9abce73afe633f9470694c2ab38f5ffb8dedc25131055ee20711",
+    "stock-probe-receipt.json": "e86189fbdb033fbf7821822d71639886d565223f1da43109ab786f784a795a49",
+    "stock-probe-settled-left.json": "69bb084499bec976aff0950412c5d90733a01076a7d7e2448260fe15ba071b43",
+    "stock-probe-settled-receipt.json": "d6e0e9acc74954c27c0f327315fdbea576c426e0df39b07ccd9e6cff4b5867cd",
+    "stock-setup.json": "cef2247ab2335740172cce906407ad3b395e200fea01e6c6cadad06b20861b08",
+    "stopped.png": "665994966e257131a9762cf28d3c4a876e1939e1a81bd41c4c81cf1f3a3669c6",
+    "tulle-restore.log": "f625e753c0bfa4ca89edb55a33f1d9d593c24a3bddeaf5c159a24b467c2acad9"
+  }
+}

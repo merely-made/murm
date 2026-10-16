@@ -1,0 +1,70 @@
+warning: patch `mere-p2panda-net v0.7.5 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `mere-proofs v0.1.0 (https://github.com/merely-made/mere.git?branch=main#594c5b38)` was not used in the crate graph
+warning: patch `p2panda-auth v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-discovery v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-encryption v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-store v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-stream v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-sync v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+help: Check that the patched package version and available features are compatible
+      with the dependency requirements. If the patch has a different version from
+      what is locked in the Cargo.lock file, run `cargo update` to use the new
+      version. This may also occur with an optional dependency that is not enabled.
+   Compiling mere-curation v0.1.1 (https://github.com/merely-made/mere.git?branch=main#594c5b38)
+   Compiling sceno v0.0.5 (https://github.com/merely-made/mere.git?branch=main#594c5b38)
+   Compiling command-menu v0.1.0 (https://github.com/merely-made/mere.git?branch=main#594c5b38)
+   Compiling tinct v0.1.2 (https://github.com/merely-made/mere.git?branch=main#594c5b38)
+   Compiling workbench v0.1.0 (https://github.com/merely-made/mere.git?branch=main#594c5b38)
+   Compiling meristem v0.2.0 (https://github.com/merely-made/mere.git?branch=main#594c5b38)
+   Compiling muniment v0.1.2 (https://github.com/merely-made/mere.git?branch=main#594c5b38)
+   Compiling illume v0.0.2 (https://github.com/merely-made/mere.git?branch=main#594c5b38)
+   Compiling sprigging v0.2.1 (https://github.com/merely-made/mere.git?branch=main#594c5b38)
+   Compiling insigne v0.0.2 (https://github.com/merely-made/dramatis.git?branch=main#2f27f1a9)
+   Compiling curve25519-dalek v4.1.3
+   Compiling backstep v0.1.0 (https://github.com/merely-made/mere.git?branch=main#594c5b38)
+   Compiling numen v0.2.0 (https://github.com/merely-made/mere.git?branch=main#594c5b38)
+   Compiling mere-forme v0.2.0 (https://github.com/merely-made/mere.git?branch=main#594c5b38)
+   Compiling aes v0.8.4
+   Compiling tabard v0.0.1 (https://github.com/merely-made/mere.git?branch=main#594c5b38)
+   Compiling aead v0.5.2
+   Compiling inker v0.1.1 (https://github.com/merely-made/mere.git?branch=main#594c5b38)
+   Compiling incipit v0.2.0 (https://github.com/merely-made/mere.git?branch=main#594c5b38)
+   Compiling mere-surface-api v0.1.0 (https://github.com/merely-made/mere.git?branch=main#594c5b38)
+   Compiling ccm v0.5.0
+   Compiling scenograph v0.0.4 (https://github.com/merely-made/mere.git?branch=main#594c5b38)
+   Compiling scenotime v0.0.4 (https://github.com/merely-made/mere.git?branch=main#594c5b38)
+   Compiling mere-fleece v0.0.1 (https://github.com/merely-made/mere.git?branch=main#594c5b38)
+   Compiling tucket v0.0.2 (C:\Users\mark_\Code\repos\retinue\crates\tucket)
+   Compiling chatelaine v0.0.3 (https://github.com/merely-made/dramatis.git?branch=main#2f27f1a9)
+   Compiling chartulary v0.2.2 (https://github.com/merely-made/mere.git?branch=main#594c5b38)
+   Compiling personae v0.3.0 (https://github.com/merely-made/dramatis.git?branch=main#2f27f1a9)
+   Compiling chirograph v0.0.2 (https://github.com/merely-made/mere.git?branch=main#594c5b38)
+   Compiling mere-comms v0.0.1 (https://github.com/merely-made/mere.git?branch=main#594c5b38)
+   Compiling armillary v0.1.1 (https://github.com/merely-made/mere.git?branch=main#594c5b38)
+   Compiling mere-apparatus v0.0.1 (https://github.com/merely-made/mere.git?branch=main#594c5b38)
+   Compiling seiche v0.0.6 (https://github.com/merely-made/mere.git?branch=main#594c5b38)
+   Compiling gaz v0.0.2 (https://github.com/merely-made/dramatis.git?branch=main#2f27f1a9)
+   Compiling x25519-dalek v2.0.1
+   Compiling sennet v0.0.2 (C:\Users\mark_\Code\repos\retinue\crates\sennet)
+   Compiling scenomise v0.0.5 (https://github.com/merely-made/mere.git?branch=main#594c5b38)
+   Compiling document-canvas v0.1.0 (https://github.com/merely-made/mere.git?branch=main#594c5b38)
+   Compiling radio-hand v0.0.1 (C:\Users\mark_\Code\repos\retinue\crates\radio-hand)
+   Compiling notochord v0.1.1 (https://github.com/merely-made/dramatis.git?branch=main#2f27f1a9)
+   Compiling dramatis v0.0.3 (https://github.com/merely-made/dramatis.git?branch=main#2f27f1a9)
+   Compiling cambium v0.3.3 (https://github.com/merely-made/mere.git?branch=main#594c5b38)
+   Compiling mere-document-lanes v0.1.0 (https://github.com/merely-made/mere.git?branch=main#594c5b38)
+   Compiling signalman v0.1.0 (C:\Users\mark_\Code\repos\retinue\apps\signalman)
+   Compiling mere-kernel v0.0.2 (https://github.com/merely-made/mere.git?branch=main#594c5b38)
+   Compiling eidetic v0.0.2 (https://github.com/merely-made/mere.git?branch=main#594c5b38)
+   Compiling cambium-winit v0.3.0 (https://github.com/merely-made/mere.git?branch=main#594c5b38)
+   Compiling cambium-rootstock v0.1.0 (https://github.com/merely-made/mere.git?branch=main#594c5b38)
+   Compiling cambium-winit-a11y v0.3.0 (https://github.com/merely-made/mere.git?branch=main#594c5b38)
+   Compiling mesquite v0.1.0 (https://github.com/merely-made/mere.git?branch=main#594c5b38)
+   Compiling cambium-genet-winit-host v0.1.0 (https://github.com/merely-made/mere.git?branch=main#594c5b38)
+   Compiling tabard-workshop v0.0.1 (https://github.com/merely-made/mere.git?branch=main#594c5b38)
+   Compiling mere-alembic v0.0.1 (https://github.com/merely-made/mere.git?branch=main#594c5b38)
+   Compiling pandect v0.1.1 (https://github.com/merely-made/mere.git?branch=main#594c5b38)
+   Compiling graphshell-endpoint v0.0.2 (https://github.com/merely-made/mere.git?branch=main#594c5b38)
+   Compiling mere-signalman v0.0.1 (https://github.com/merely-made/mere.git?branch=main#594c5b38)
+   Compiling signalman-desktop v0.0.1 (C:\Users\mark_\Code\repos\retinue\apps\signalman-desktop)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2m 00s

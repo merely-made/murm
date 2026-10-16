@@ -1,0 +1,94 @@
+{
+  "path": "C:\\Users\\mark_\\Code\\repos\\retinue\\target\\thumbv7em-none-eabihf\\release\\examples\\dfu_watchdog_handoff",
+  "sha256": "c03cd2ca7b77b516294157840738a28904e665d23d9353b8e0eaae60e18ea4ae",
+  "elf_bytes": 174348,
+  "machine": 40,
+  "entry": 155905,
+  "allocated_sections": [
+    {
+      "name": ".vector_table",
+      "address": 155648,
+      "bytes": 256,
+      "type": 1
+    },
+    {
+      "name": ".text",
+      "address": 155904,
+      "bytes": 1080,
+      "type": 1
+    },
+    {
+      "name": ".rodata",
+      "address": 156984,
+      "bytes": 8,
+      "type": 1
+    },
+    {
+      "name": ".data",
+      "address": 536895488,
+      "bytes": 24,
+      "type": 1
+    },
+    {
+      "name": ".bss",
+      "address": 536895512,
+      "bytes": 448,
+      "type": 8
+    }
+  ],
+  "load_segments": [
+    {
+      "virtual_address": 155648,
+      "physical_address": 155648,
+      "file_bytes": 256,
+      "memory_bytes": 256,
+      "flags": 4
+    },
+    {
+      "virtual_address": 155904,
+      "physical_address": 155904,
+      "file_bytes": 1080,
+      "memory_bytes": 1080,
+      "flags": 5
+    },
+    {
+      "virtual_address": 156984,
+      "physical_address": 156984,
+      "file_bytes": 8,
+      "memory_bytes": 8,
+      "flags": 4
+    },
+    {
+      "virtual_address": 536895488,
+      "physical_address": 156992,
+      "file_bytes": 24,
+      "memory_bytes": 24,
+      "flags": 6
+    },
+    {
+      "virtual_address": 536895512,
+      "physical_address": 536895512,
+      "file_bytes": 0,
+      "memory_bytes": 448,
+      "flags": 6
+    }
+  ],
+  "target_layouts": {},
+  "linker_symbols": {
+    "_stack_start": 537133056,
+    "__sheap": 536895960,
+    "__euninit": 536895960
+  },
+  "application_ram": {
+    "capacity": 237568,
+    "allocated_sections": 472,
+    "highest_allocated_end": 536895960,
+    "unallocated_above_sections": 237096,
+    "scope": "linker gap, not measured stack high-water"
+  },
+  "application_flash": {
+    "capacity": 786432,
+    "load_end": 157016,
+    "span_from_origin": 1368
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "address": "472e0246",
+  "authority": "djinn",
+  "channel_hash": 8,
+  "device_id": "cbdb40d6-d433-4679-a355-86aea5aabb61",
+  "node_number": 1194197574,
+  "packet_ids_initialized": true,
+  "pki_public_key": "5cf15afc3ae5603697d776cb057be0eef7d9d11cd87943cfef38508c6d3e0445",
+  "public_channel": "LongFast",
+  "realm": "bench-sennet-djinn",
+  "schema": 1
+}

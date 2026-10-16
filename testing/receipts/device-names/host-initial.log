@@ -1,0 +1,206 @@
+warning: patch `mere-p2panda-net v0.7.5 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `mere-proofs v0.1.0 (https://github.com/merely-made/mere.git?branch=main#594c5b38)` was not used in the crate graph
+warning: patch `muniment v0.1.2 (https://github.com/merely-made/mere.git?branch=main#594c5b38)` was not used in the crate graph
+warning: patch `p2panda-auth v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-core v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-discovery v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-encryption v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-store v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-stream v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-sync v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+help: Check that the patched package version and available features are compatible
+      with the dependency requirements. If the patch has a different version from
+      what is locked in the Cargo.lock file, run `cargo update` to use the new
+      version. This may also occur with an optional dependency that is not enabled.
+   Compiling simd-adler32 v0.3.10
+   Compiling crc32fast v1.5.0
+   Compiling adler2 v2.0.1
+   Compiling fdeflate v0.3.7
+   Compiling bitflags v1.3.2
+   Compiling radio-face v0.0.1 (C:\Users\mark_\Code\repos\retinue\crates\radio-face)
+   Compiling miniz_oxide v0.8.9
+   Compiling flate2 v1.1.9
+   Compiling png v0.17.16
+   Compiling radio-hand v0.0.1 (C:\Users\mark_\Code\repos\retinue\crates\radio-hand)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 7.41s
+     Running unittests src\lib.rs (target\build\debug\deps\radio_face-24f2863fc3f9691c.exe)
+
+running 20 tests
+test controller::tests::one_button_menu_has_explicit_selection_grammar ... ok
+test controller::tests::display_wake_is_consumed_and_fault_preempts_pages ... ok
+test controller::tests::modem_pages_do_not_invent_node_truth ... ok
+test controller::tests::named_snapshot_adds_identity_links_and_peers ... ok
+test controller::tests::healthy_idle_and_sleep_are_led_dark ... ok
+test status::tests::bounded_text_rejects_ambiguous_display_input ... ok
+test render::tests::projection::readable_lines_join_labels_and_mark_the_selection ... ok
+test status::tests::bounded_text_supports_allocation_free_formatting ... ok
+test status::tests::host_truth_expires_and_minimal_policy_hides_identity ... ok
+test wire::tests::decoder_rejects_invalid_utf8_and_oversized_peer_count ... ok
+test controller::tests::timing_classifier_uses_settled_thresholds ... ok
+test wire::tests::decoder_rejects_unknown_truncated_and_trailing_data ... ok
+test wire::tests::minimal_snapshot_cannot_smuggle_named_state ... ok
+test wire::tests::named_snapshot_round_trips_without_allocation ... ok
+test wire::tests::validity_is_bounded ... ok
+test render::tests::selected_faces_have_stable_pixel_goldens ... ok
+test render::tests::worst_case_bounded_values_still_clip_at_glyph_boundaries ... ok
+test render::tests::projection::saved_names_are_fully_visible_on_boot_and_the_default_page_on_both_panels ... ok
+test render::tests::every_face_stays_inside_both_real_display_bounds ... ok
+test render::tests::projection::text_rows_are_what_the_pixels_show ... ok
+
+test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.23s
+
+     Running unittests src\lib.rs (target\build\debug\deps\radio_hand-3ac99560f587337f.exe)
+
+running 149 tests
+test announce_reservation::tests::body_length_is_part_of_the_format ... ok
+test announce_reservation::tests::a_future_version_is_refused ... ok
+test announce_reservation::tests::nonzero_reserved_byte_is_refused ... ok
+test announce_reservation::tests::a_nonblank_body_with_wrong_magic_is_not_a_new_board ... ok
+test announce_reservation::tests::valid_body_preserves_the_big_endian_u40_ceiling ... ok
+test announce_reservation::tests::next_boot_starts_above_the_old_durable_ceiling ... ok
+test announce_reservation::tests::checked_constructor_rejects_values_outside_u40 ... ok
+test announce_reservation::tests::only_a_proven_blank_outer_pair_is_uncommissioned ... ok
+test announce_reservation::tests::planned_lease_requires_exact_readback ... ok
+test announce_reservation::tests::first_commission_reserves_default_lease_above_zero ... ok
+test announce_reservation::tests::zero_lease_and_u40_exhaustion_fail_closed ... ok
+test announce_reservation::tests::malformed_readback_cannot_become_a_lease ... ok
+test control::position_disclosure::tests::capacity_refuses_and_never_evicts ... ok
+test control::position_disclosure::tests::absent_identity_gets_broadcast_by_default_and_fixed_when_set ... ok
+test control::position_disclosure::tests::decode_rejects_every_non_canonical_form ... ok
+test control::position_disclosure::tests::duplicate_hashes_are_refused_at_construction ... ok
+test control::position_disclosure::tests::no_table_resolves_everything_to_broadcast_and_never_fails ... ok
+test control::position_disclosure::tests::pd2_sequence_is_monotonic_and_replay_is_refused_and_counted ... ok
+test control::position_disclosure::tests::pd2_revocation_holds_and_a_lockout_table_is_still_correctable ... ok
+test control::position_disclosure::tests::round_trips_canonically_and_sorts_on_construction ... ok
+test control::position_disclosure::tests::stored_form_holds_no_plaintext_hash ... ok
+test control::runtime::tests::basic::blank_and_short_scratch_fail_closed ... ok
+test control::runtime::tests::authority::hash_mismatched_grant_journal_poisons_before_any_apply ... ok
+test control::runtime::tests::basic::clean_boot_foreign_and_apply_failure ... ok
+test control::runtime::tests::basic::boot_is_one_shot_and_new_runtime_acknowledges_simulated_reset ... ok
+test control::admission::tests::admission_debug_redacts_arguments ... ok
+test control::runtime::tests::basic::dropped_pre_radio_boot_cannot_admit_live_work ... ok
+test control::runtime::tests::commit::candidate_apply_failure_restores_and_persists_known_good ... ok
+test control::runtime::tests::commit::changed_refused_persists_counter_without_candidate_apply ... ok
+test control::runtime::tests::provisional_reboot_applies_known_good_before_rollback_persist ... ok
+test control::runtime::tests::quiet::dropped_live_apply_aborts_quiet_and_blocks_the_runtime ... ok
+test control::runtime::tests::quiet::apply_failure_recovery_reuses_the_entered_window ... ok
+test control::runtime::tests::quiet::dropped_quiet_entry_latches_reset_before_any_durable_or_apply_work ... ok
+test control::runtime::tests::recovery::incompatible_board_facts_poison_boot_before_apply ... ok
+test control::runtime::tests::commit::arm_counter_persists_before_apply_and_replay ... ok
+test control::runtime::tests::commit::nonmonotonic_counter_poisons_before_persist ... ok
+test control::runtime::tests::quiet::dropped_finish_aborts_quiet_and_leaves_the_runtime_blocked ... ok
+test control::runtime::tests::commit::produced_flash_reboots_and_commit_failure_poisons ... ok
+test front_end::tests::a_direct_chain_is_the_chip ... ok
+test front_end::tests::antenna_power_never_falls_as_the_request_rises ... ok
+test control::runtime::tests::commit::commit_success_persists_and_readback_selects_candidate ... ok
+test front_end::tests::high_requests_use_the_pa_under_the_cap ... ok
+test control::runtime::tests::expire_and_revert_apply_before_persist ... ok
+test front_end::tests::low_requests_use_the_bypass ... ok
+test front_end::tests::no_plan_exceeds_the_cap_or_the_pa_input_rating ... ok
+test gnss::tests::bad_checksum_overflow_and_unknown_sentences_are_dropped_without_changing_state ... ok
+test gnss::tests::gga_refines_satellites_and_hdop_but_never_asserts_a_fix ... ok
+test control::runtime::tests::quiet::operation_error_wins_finish_error_but_still_poisons ... ok
+test gnss::tests::line_noise_before_dollar_and_a_torn_first_sentence_are_ignored ... ok
+test gnss::tests::real_constants_carry_valid_checksums ... ok
+test gnss::tests::rmc_active_produces_a_fix_with_e7_coordinates ... ok
+test gnss::tests::rmc_void_falls_back_to_nofix_and_does_not_keep_the_old_position ... ok
+test gnss::tests::southern_and_eastern_hemispheres_sign_correctly ... ok
+test link::write_tests::complete_write_and_observed_reconnect_allow_reuse ... ok
+test link::write_tests::partial_failure_and_cancellation_require_reconnect ... ok
+test observation::collection::tests::wrong_boot_future_cursor_and_absent_owner_are_explicit ... ok
+test observation::owner::tests::profiles_are_exact_deduplicated_and_boot_local ... ok
+test observation::owner::tests::finished_transmit_is_closed_and_later_invalidation_is_silent ... ok
+test observation::owner::tests::confirmed_standby_closes_a_matching_listening_interval ... ok
+test observation::owner::tests::confirmed_start_is_not_repeated_and_invalidation_is_unknown ... ok
+test observation::collection::tests::discovery_and_pages_are_read_only_and_exact ... ok
+test observation::owner::tests::registry_overflow_disables_without_reusing_ids ... ok
+test observation::owner::tests::transmit_timeout_leaves_a_continuity_break_without_a_false_finish ... ok
+test observation::owner::tests::work_ids_start_nonzero_and_exhaust_without_wrapping ... ok
+test observation::recorder::tests::counters_saturate ... ok
+test observation::recorder::tests::exhaustive_small_rings_bound_every_drain ... ok
+test observation::recorder::tests::overwrite_emits_exact_gap_and_gap_counts_against_limit ... ok
+test observation::recorder::tests::invalid_event_counts_encode_failure_without_consuming_sequence ... ok
+test observation::recorder::tests::records_in_sequence_and_rejects_uptime_regression ... ok
+test observation::recorder::tests::rejects_wrong_boot_and_future_cursor_and_handles_empty_ring ... ok
+test observation::recorder::tests::rejects_zero_boot_and_zero_capacity ... ok
+test observation::recorder::tests::repeated_cursor_is_idempotent_and_bounds_are_exposed ... ok
+test observation::recorder::tests::sequence_exhaustion_does_not_wrap ... ok
+test observation::tests::continuity_loss_has_an_independent_literal ... ok
+test observation::tests::crc_vector ... ok
+test observation::tests::all_kinds_fit_and_roundtrip ... ok
+test observation::tests::boundary_unknown_and_raw_reasons_are_literal_and_lossless ... ok
+test observation::tests::every_truncation_point_and_checksum_valid_payload_mutation_reject ... ok
+test observation::tests::rejects_trailing_truncated_and_bad_values ... ok
+test observation::tests::literal_event_fixtures_pin_every_known_kind ... ok
+test observation::tests::unknown_and_gap_roundtrip ... ok
+test observation::tests::unknown_empty_payload_is_preserved ... ok
+test packet_reservation::tests::pair_refuses_torn_tail_ambiguous_sequence_and_counter_rollback ... ok
+test observation::tests::zero_identity_sequence_and_gap_end_overflow_are_rejected_after_checksum ... ok
+test packet_reservation::tests::corrupt_and_exhausted_state_never_restarts ... ok
+test phy::tests::bandwidth_is_exact_not_nearest ... ok
+test packet_reservation::tests::authoritative_pair_readback_precedes_lease_release ... ok
+test packet_reservation::tests::reset_skips_unused_ids_and_readback_is_required ... ok
+test phy::tests::coding_rate_takes_denominators_and_refuses_the_rest ... ok
+test phy::tests::every_spreading_factor_the_chip_has_decodes_and_nothing_else_does ... ok
+test phy::tests::nominal_airtime_follows_the_bitrate ... ok
+test phy::tests::the_longfast_profile_decodes_end_to_end ... ok
+test profiles::tests::overfull_registry_is_refused_before_scheduling ... ok
+test profiles::tests::separate_detection_groups_do_not_share_a_cad_step ... ok
+test profiles::tests::shared_detection_still_has_one_capture_slot_per_sync_word ... ok
+test resident_command::tests::fragmented_commands_and_payload_markers_remain_data ... ok
+test profiles::tests::registry_refuses_a_capture_without_an_exact_detection_group ... ok
+test profiles::tests::receive_slot_resolves_to_an_exact_hardware_profile ... ok
+test resident_command::tests::invalid_flags_lengths_text_and_retry_counts_are_refused ... ok
+test resident_command::tests::overlong_body_is_drained_without_interpreting_embedded_commands ... ok
+test resident_wire::tests::fragmented_stream_never_eats_an_ordinary_marker_in_payload ... ok
+test resident_wire::tests::debug_redacts_keys_and_seed_in_setup_and_nested_event ... ok
+test resident_wire::tests::malformed_profile_and_zero_lease_are_refused ... ok
+test rnode::tests::a_truncated_setting_is_unhandled_rather_than_guessed ... ok
+test resident_wire::tests::round_trip_is_fixed_and_lossless ... ok
+test rnode::tests::a_profile_is_withheld_until_every_field_the_host_controls_has_arrived ... ok
+test rnode::tests::airtime_locks_decode_and_leave_is_known ... ok
+test rnode::tests::signal_reports_encode_as_the_capture_did ... ok
+test rnode::tests::frames_encode_with_their_command_byte ... ok
+test rnode::tests::non_settings_commands_are_not_accepted_as_settings ... ok
+test rnode::tests::only_radio_failures_are_reported_as_errors ... ok
+test rnode::tests::data_carries_its_payload_verbatim ... ok
+test rnode::tests::the_captured_init_commands_decode ... ok
+test rnode::tests::the_worst_case_encoding_bound_holds ... ok
+test scheduler::tests::deadline_and_missing_restore_ack_are_visible ... ok
+test scheduler::tests::acknowledgement_at_a_deadline_cannot_represent_a_live_lease ... ok
+test scheduler::tests::designated_keeper_cannot_delegate_to_make_two_peers_each_sole_keeper ... ok
+test scheduler::tests::exact_expiry_during_a_lease_requests_restore_and_never_reuses_cover ... ok
+test scheduler::tests::invalid_capacity_and_unknown_or_unauthorized_profiles_are_explicit ... ok
+test scheduler::tests::ordinary_finish_requires_hardware_ack_before_another_lease ... ok
+test scheduler::tests::peer_loss_before_deadline_preempts_future_talk_at_safe_boundary ... ok
+test scheduler::tests::withdrawal_latches_restore_even_if_the_peer_renews_before_poll ... ok
+test scheduler::tests::recovery_hold_delays_re_admission_without_extending_expiry ... ok
+test control::runtime::tests::quiet::live_storage_and_apply_are_inside_one_quiet_window ... ok
+test settings::name::tests::malformed_commands_are_consumed_without_a_settings_write ... ok
+test scheduler::tests::time_overflow_and_regression_are_refused ... ok
+test settings::name::tests::names_fit_both_displays_and_reject_invisible_or_truncated_labels ... ok
+test settings::tests::a_body_shorter_than_an_identity_is_refused ... ok
+test settings::tests::a_legacy_identity_only_body_keeps_its_identity ... ok
+test settings::tests::a_longer_body_from_a_later_firmware_is_read_as_far_as_it_is_understood ... ok
+test settings::tests::an_unknown_channel_falls_back_without_losing_the_identity ... ok
+test settings::tests::debug_redacts_private_identity_but_keeps_boot_metadata ... ok
+test settings::tests::every_known_channel_round_trips ... ok
+test settings::tests::legacy_node_byte_is_read_but_every_rewrite_arms_the_guard ... ok
+test settings::tests::names_extend_old_settings_without_changing_identity_or_preferences ... ok
+test settings::tests::old_firmware_unknown_channel_rule_will_recover_from_guarded_node ... ok
+test settings::tests::round_trips ... ok
+test work::tests::a_previous_activation_cannot_submit_or_complete_work ... ok
+test work::tests::capacity_deadline_and_clock_refusals_preserve_queue ... ok
+test control::runtime::tests::recovery::unsafe_recovery_arm_journals_counter_and_refusal_without_apply ... ok
+test work::tests::delayed_work_cannot_outlive_its_deadline_or_activation ... ok
+test work::tests::scheduled_work_waits_for_readiness_and_keeps_its_completion_fence ... ok
+test work::tests::timer_or_permission_cannot_revoke_inflight_custody ... ok
+test control::runtime::tests::commit::erase_program_and_readback_failures_poison_before_candidate_apply ... ok
+test control::runtime::tests::quiet::expire_and_revert_keep_every_operation_inside_quiet_bounds ... ok
+test control::runtime::tests::quiet::reset_required_blocks_live_work_until_new_runtime ... ok
+test control::runtime::tests::recovery_apply_and_recovery_persistence_failures_poison ... ok
+test control::runtime::tests::quiet::quiet_entry_errors_are_retryable_but_finish_errors_poison ... ok
+test control::admission::tests::idempotence_is_scoped_by_verified_controller_and_read_only_requests_ignore_cas ... ok
+
+test result: ok. 149 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+

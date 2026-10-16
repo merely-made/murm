@@ -194,6 +194,36 @@ tier = "local"
 command = ["python3", "-u", "crates/sennet/capture/capture_airmsg.py"]
 asset_globs = ["crates/sennet/capture/*.py"]
 
+[[asset_exemption]]
+path = "testing/protocol-capacity/measure_elf.py"
+reason = "Offline ELF measurement CLI requires a named built target artifact; the protocol parity memory receipt owns its actual input paths, tool comparison and results."
+expires = "2027-01-16"
+
+[[asset_exemption]]
+path = "testing/sennet_pki_stock.py"
+reason = "Attended stock PKI contact/send helper; the guarded Sennet wire/native bench owns physical execution and restoration."
+expires = "2027-01-16"
+
+[[asset_exemption]]
+path = "testing/setup_sennet_stock.py"
+reason = "Attended stock-radio setup/readback helper; the guarded Sennet bench owns physical execution and restoration."
+expires = "2027-01-16"
+
+[[asset_exemption]]
+path = "testing/stock_tucket_bench.py"
+reason = "Attended identified-radio status/setup/restoration helper; the guarded native radio benches own physical execution."
+expires = "2027-01-16"
+
+[[asset_exemption]]
+path = "testing/receipts/sennet-directed/ack-wire/source/sennet_pki_stock.py"
+reason = "Immutable historical source snapshot in the ACK wire receipt, not an independent executable suite."
+expires = "2027-01-16"
+
+[[asset_exemption]]
+path = "testing/receipts/sennet-directed/routing-observed/source/sennet_pki_stock.py"
+reason = "Immutable historical source snapshot in the routing observation receipt, not an independent executable suite."
+expires = "2027-01-16"
+
 # This is a physical serial bridge helper, not an executable validation suite.
 # It is intentionally registered as an expiring exemption rather than silently
 # disappearing from the derived asset inventory.
@@ -246,3 +276,78 @@ expires = "2026-11-01"
 path = "testing/sennet_stock_bench.py"
 reason = "Physical Sennet stock-peer RF bench; current-reference receipt owns execution and requires separately identified/configured hardware."
 expires = "2026-11-01"
+
+[[asset_exemption]]
+path = "testing/protocol-capacity/board_probe.py"
+reason = "Attended target memory campaign; exact USB identities and separately installed bench-only firmware required. Physical receipt owns execution."
+expires = "2026-11-01"
+
+[[asset_exemption]]
+path = "testing/device_names.py"
+reason = "Attended device-label provisioning; requires identified hardware and separately qualified named firmware. Physical receipt owns execution."
+expires = "2027-01-16"
+
+[[asset_exemption]]
+path = "testing/receipts/protocol-parity-memory/physical/source/board_probe_t114.py"
+reason = "Frozen attended physical-memory evidence source; not an automatic hardware test."
+expires = "2027-01-16"
+
+[[asset_exemption]]
+path = "testing/receipts/protocol-parity-memory/physical/source/board_probe_v4.py"
+reason = "Frozen attended physical-memory evidence source; not an automatic hardware test."
+expires = "2027-01-16"
+
+[[asset_exemption]]
+path = "testing/receipts/protocol-parity-memory/physical/source/freeze_physical.py"
+reason = "Frozen attended physical-memory evidence source; not an automatic hardware test."
+expires = "2027-01-16"
+
+[[asset_exemption]]
+path = "testing/receipts/protocol-parity-memory/physical/source/t114_checkpoint_physical.py"
+reason = "Frozen attended physical-memory evidence source; not an automatic hardware test."
+expires = "2027-01-16"
+
+[[asset_exemption]]
+path = "testing/receipts/protocol-parity-memory/physical/source/t114_direct_physical.py"
+reason = "Frozen attended physical-memory evidence source; not an automatic hardware test."
+expires = "2027-01-16"
+
+[[asset_exemption]]
+path = "testing/receipts/protocol-parity-memory/physical/source/t114_fault_physical.py"
+reason = "Frozen attended physical-memory evidence source; not an automatic hardware test."
+expires = "2027-01-16"
+
+[[asset_exemption]]
+path = "testing/receipts/protocol-parity-memory/physical/source/t114_handoff_physical.py"
+reason = "Frozen attended physical-memory evidence source; not an automatic hardware test."
+expires = "2027-01-16"
+
+[[asset_exemption]]
+path = "testing/receipts/protocol-parity-memory/physical/source/t114_physical.py"
+reason = "Frozen attended physical-memory evidence source; not an automatic hardware test."
+expires = "2027-01-16"
+
+[[asset_exemption]]
+path = "testing/receipts/protocol-parity-memory/physical/source/t114_residue_physical.py"
+reason = "Frozen attended physical-memory evidence source; not an automatic hardware test."
+expires = "2027-01-16"
+
+[[asset_exemption]]
+path = "testing/receipts/protocol-parity-memory/physical/source/t114_worker_physical.py"
+reason = "Frozen attended physical-memory evidence source; not an automatic hardware test."
+expires = "2027-01-16"
+
+[[asset_exemption]]
+path = "testing/receipts/protocol-parity-memory/physical/source/v4_peer_physical.py"
+reason = "Frozen attended physical-memory evidence source; not an automatic hardware test."
+expires = "2027-01-16"
+
+[[asset_exemption]]
+path = "testing/receipts/protocol-parity-memory/physical/source/v4_physical.py"
+reason = "Frozen attended physical-memory evidence source; not an automatic hardware test."
+expires = "2027-01-16"
+
+[[asset_exemption]]
+path = "testing/receipts/protocol-parity-memory/physical/source/v4_watchdog_physical.py"
+reason = "Frozen attended physical-memory evidence source; not an automatic hardware test."
+expires = "2027-01-16"

@@ -21,8 +21,11 @@ pub const DEFAULT_SPREADING_FACTOR: u8 = 11;
 pub const DEFAULT_CODING_RATE_DENOMINATOR: u8 = 5;
 pub const DEFAULT_TX_POWER_DBM: i8 = 17;
 
-pub fn initial_status() -> LocalStatus {
+pub fn initial_status(settings: Option<radio_hand::settings::Settings>) -> LocalStatus {
     LocalStatus {
+        device_name: Text::from_truncated(
+            settings.map(|s| s.device_name).unwrap_or_default().as_str(),
+        ),
         board: Text::from_truncated("HELTEC T114"),
         firmware: Text::from_truncated(concat!("PHY ", env!("CARGO_PKG_VERSION"))),
         radio: RadioState::Booting,

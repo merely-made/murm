@@ -1,0 +1,23 @@
+Upgrading target on COM4 with DFU package C:\Users\mark_\Code\repos\retinue\validation\results\protocol-parity-memory\t114-physical.zip. Flow control is disabled, Single bank, Touch disabled
+
+Failed to upgrade target. Error is: WriteFile failed (PermissionError(13, 'The device does not recognize the command.', None, 22))
+Traceback (most recent call last):
+  File "C:\Users\mark_\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\nordicsemi\__main__.py", line 296, in serial
+    dfu.dfu_send_images()
+  File "C:\Users\mark_\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\nordicsemi\dfu\dfu.py", line 235, in dfu_send_images
+    self._dfu_send_image(HexType.APPLICATION, self.manifest.application)
+  File "C:\Users\mark_\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\nordicsemi\dfu\dfu.py", line 203, in _dfu_send_image
+    self.dfu_transport.send_init_packet(init_packet)
+  File "C:\Users\mark_\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\nordicsemi\dfu\dfu_transport_serial.py", line 155, in send_init_packet
+    self.send_packet(packet)
+  File "C:\Users\mark_\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\nordicsemi\dfu\dfu_transport_serial.py", line 241, in send_packet
+    self.serial_port.write(bytearray(pkt.data))
+  File "C:\Users\mark_\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\serial\serialwin32.py", line 317, in write
+    raise SerialException("WriteFile failed ({!r})".format(ctypes.WinError()))
+serial.serialutil.SerialException: WriteFile failed (PermissionError(13, 'The device does not recognize the command.', None, 22))
+
+Possible causes:
+- Selected Bootloader version does not match the one on Bluefruit device.
+    Please upgrade the Bootloader or select correct version in Tools->Bootloader.
+- Baud rate must be 115200, Flow control must be off.
+- Target is not in DFU mode. Ground DFU pin and RESET and release both to enter DFU mode.

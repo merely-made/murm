@@ -1,0 +1,27 @@
+{
+  "authority": "djinn",
+  "frames": [
+    {
+      "application_hex": "0801122b73656e6e65742d706b692d31616137643166626561353034393731613334623133373830663835623336354800",
+      "authenticated_candidate": true,
+      "expected_text_match": true,
+      "frame_hex": "8c4fa87a28fb6af61a3bed056b00002860aa98a027c917b79ea2523e18e6b97cf90913451f2c04f8792c2ef5a89fb91ec279d13ac338d05b5023ddb1fed171b7900c7a3e6d147056752df45158"
+    },
+    {
+      "authenticated": false,
+      "channel_application_hex": "08051202180035010000004800",
+      "correlated_fixed32_field": 6,
+      "frame_hex": "8c4fa87a28fb6af661e486934a080028b8a8bdd2217617d29a69c2161e"
+    }
+  ],
+  "node_number": 2057850764,
+  "nonce_placement": "LE32(packet_id), extra nonce(4), LE32(source), zero(1), observed on 2.7.26",
+  "peer_node": 4134206248,
+  "peer_public_key": "cd536798647176f8f5681b4f1c7627c5b3b3b0a2d7ce8333f4869bf0907b5e15",
+  "physical_airtime_ms": 845.8240000000001,
+  "pki_public_key": "2b39cc81175936520300f520b6aaed60a48bcf65686eb6610fb57e3b342a8453",
+  "reply_frame_hex": "28fb6af68c4fa87a010000006b00008c16fdda4f1343a0d8e284d2fc673e2c06fcfa1f056d599a8cb413f7b38aee7caa7786df79b47bcdfc1c7755de58ac9e5460ec933f6792f650b2fc0de77b070045a315",
+  "reply_packet_id": 1,
+  "result": "stock_routing_candidate_observed_not_ack_qualification",
+  "transmitted": true
+}

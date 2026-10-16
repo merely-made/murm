@@ -47,6 +47,13 @@ because a successful SPI transfer cannot detect whether the optional panel is
 populated. `bootloader\n` enters the board's serial-only DFU mode without a
 physical double-reset.
 
+`name` reports the public device label. `name set T114` saves a label of up to
+16 printable ASCII characters and reboots; `name clear` clears it. Names cannot
+start or end with a space. The label appears on the boot and default status
+screens and in `status`, independently of relay identity, host identity and
+radio profile. Setting the same name again does not write flash or reboot.
+Older settings upgrade without changing the identity, region or channel.
+
 `lxmf\n` and `lxmf stamp\n` are the board's own account of whether it can read
 LXMF, rather than an inference from the fact that outrider linked. Each decodes
 or scores a stock LXMF 0.9.6 artefact baked into flash and checks it against the
@@ -116,3 +123,19 @@ The v15 production image added host-snapshot state to `ui\n`. With a fresh
 named fixture, the fitted button traversed STATUS, POWER, RADIO, TRAFFIC,
 IDENTITY, LINKS, and PEERS. After a five-second fixture expired, the host-only
 pages disappeared and TRAFFIC wrapped directly to STATUS.
+
+The October 16 [physical memory continuation](../../testing/receipts/protocol-parity-memory/physical/README.md)
+adds an explicit `memory-bench` feature and a `protocol memory` text command.
+Synthetic retained protocol state runs in a separate executor task, with fixed
+heap accounting, oversize refusal and sampled stack checkpoints. These images
+are attended diagnostics; their fixture identities never drive the radio.
+The feature is absent from ordinary builds and does not qualify scheduling or
+worst-case stack use.
+
+For the measured large serial DFU transfer, the inherited eight-second watchdog
+outlasted a software reset and interrupted the helper's erase wait. The tiny
+[`dfu_watchdog_handoff` example](examples/dfu_watchdog_handoff.rs) provides an
+attended application-only bridge: wait for the inherited watchdog reset, then
+request serial DFU without restarting WDT. Use it only with an identified board
+and a verified restoration application ready. It changes neither the bootloader
+nor durable state and does not replace the current package/recovery procedure.

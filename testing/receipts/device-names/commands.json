@@ -1,0 +1,78 @@
+{
+  "environment": {
+    "CARGO_HOME": "C:\\t\\cargo-homes\\mere-upstreams",
+    "CARGO_TARGET_DIR": "C:\\Users\\mark_\\Code\\repos\\retinue\\target",
+    "CARGO_BUILD_BUILD_DIR": "C:\\Users\\mark_\\Code\\repos\\retinue\\target\\build",
+    "RETINUE_FIRMWARE_REVISION": "cb042329232571cd3c50b2ef9b5e386fbe4f434a"
+  },
+  "host_tests": [
+    "cargo test -p radio-hand -p radio-face --features radio-face/text --lib",
+    "cargo test -p radio-hand --lib"
+  ],
+  "builds": [
+    "cargo +stable build -p tulle-t114-phy --target thumbv7em-none-eabihf --release",
+    "cargo +esp build -p tulle-heltec-v4-phy --target xtensa-esp32s3-none-elf --release --ignore-rust-version -Zbuild-std=core"
+  ],
+  "clippy": {
+    "shared": "cargo clippy -p radio-hand -p radio-face --features radio-face/text --lib -- -D warnings",
+    "arm_allow": [
+      "unused_assignments",
+      "clippy::if_same_then_else"
+    ],
+    "v4_allow": [
+      "dead_code",
+      "linker_messages",
+      "clippy::redundant_closure",
+      "clippy::manual_is_multiple_of",
+      "clippy::if_same_then_else",
+      "clippy::too_many_arguments",
+      "clippy::large_enum_variant",
+      "clippy::op_ref",
+      "clippy::unused_enumerate_index"
+    ]
+  },
+  "v4_install": {
+    "tool": "validation/results/sennet-tucket-radios/artifacts/espflash.exe",
+    "arguments": [
+      "write-bin",
+      "--port",
+      "<identified COM6 or COM7>",
+      "--chip",
+      "esp32s3",
+      "--before",
+      "usb-reset",
+      "--after",
+      "watchdog-reset",
+      "--baud",
+      "921600",
+      "--non-interactive",
+      "--skip-update-check",
+      "65536",
+      "validation/results/device-names/v4-aligned.bin"
+    ]
+  },
+  "v4_failed_image_state_comparison": {
+    "command": "espflash read-flash --port COM6 --chip esp32s3 --before usb-reset --after watchdog-reset --baud 921600 --block-size 1024 --max-in-flight 1 --non-interactive --skip-update-check 4128768 65536 <private ignored output>",
+    "expected_tail_sha256": "4118655d606257118b01262653dbd4ac49f2efff4c17ddd5c2d99a2ba0f3ab9e"
+  },
+  "t114_install": {
+    "tool": "C:\\Users\\mark_\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts\\adafruit-nrfutil.exe",
+    "steps": [
+      "Validate known application and loader USB identities, all package hashes and application-only manifest/erase boundaries",
+      "Send bootloader line to identified COM10",
+      "dfu serial --package validation/results/protocol-parity-memory/t114-handoff.zip --port COM4 --baudrate 115200 --singlebank",
+      "Require Device programmed., wait 12 seconds, validate loader identity",
+      "dfu serial --package validation/results/device-names/t114-aligned.zip --port COM4 --baudrate 115200 --singlebank",
+      "Require Device programmed. before provisioning; original restore package ready"
+    ]
+  },
+  "provisioning_runner": {
+    "path": "testing/device_names.py",
+    "original_source_revision": "cb042329232571cd3c50b2ef9b5e386fbe4f434a",
+    "original_sha256": "2aa7382dfa7092d3b0704d41aa87865dc5af0556a73a8c6ff6631f06d695ea30",
+    "read_only_revision": "included in this receipt commit",
+    "read_only_sha256": "b88f74468c53f7c924a6754e8f0e236b9e4a3878425d3d94609e3a2372d572e4"
+  },
+  "provisioning_commands_recorded_in": "per-device *provision.json records; failures remain failures",
+  "physical_boundary": "USB replies and renderer tests; no camera capture of physical panels"
+}

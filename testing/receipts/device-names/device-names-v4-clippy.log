@@ -1,0 +1,144 @@
+warning: patch `mere-p2panda-net v0.7.5 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `mere-proofs v0.1.0 (https://github.com/merely-made/mere.git?branch=main#594c5b38)` was not used in the crate graph
+warning: patch `muniment v0.1.2 (https://github.com/merely-made/mere.git?branch=main#594c5b38)` was not used in the crate graph
+warning: patch `p2panda-auth v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-core v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-discovery v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-encryption v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-store v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-stream v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-sync v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+help: Check that the patched package version and available features are compatible
+      with the dependency requirements. If the patch has a different version from
+      what is locked in the Cargo.lock file, run `cargo update` to use the new
+      version. This may also occur with an optional dependency that is not enabled.
+    Checking typenum v1.20.1
+    Checking byteorder v1.5.0
+    Checking cfg-if v1.0.4
+    Checking stable_deref_trait v1.2.1
+    Checking critical-section v1.2.0
+    Checking futures-core v0.3.33
+    Checking cmov v0.5.4
+    Checking nb v1.1.0
+    Checking embedded-hal v1.0.0
+    Checking embedded-io v0.7.1
+    Checking embedded-io v0.6.1
+    Checking void v1.0.2
+    Checking futures-sink v0.3.33
+    Checking num-traits v0.2.19
+    Checking portable-atomic v1.14.0
+    Checking vcell v0.1.3
+    Checking rand_core v0.10.1
+    Checking embassy-time-driver v0.2.2
+    Checking xtensa-lx v0.13.0
+    Checking nb v0.1.3
+    Checking futures-task v0.3.33
+    Checking embedded-storage v0.3.1
+    Checking embedded-io-async v0.6.1
+    Checking pin-project-lite v0.2.17
+    Checking embedded-io-async v0.7.0
+    Checking hash32 v0.3.1
+    Checking esp-metadata-generated v0.4.0
+    Checking subtle v2.6.1
+    Checking embedded-hal v0.2.7
+    Checking zeroize v1.9.0
+    Checking embedded-hal-async v1.0.0
+    Checking esp32s3 v0.35.2
+    Checking signature v3.0.0
+    Checking embassy-futures v0.1.2
+    Checking ctutils v0.4.2
+    Checking futures-util v0.3.33
+    Checking esp-config v0.7.0
+    Checking heapless v0.9.3
+    Checking heapless v0.8.0
+    Checking embassy-usb-driver v0.2.2
+    Checking embedded-storage-async v0.4.1
+    Checking strum v0.27.2
+    Checking ed25519 v3.0.0
+    Checking cpubits v0.1.1
+    Checking gcd v2.3.0
+    Checking embassy-time v0.5.1
+    Checking ral-registers v0.1.3
+    Checking bitflags v1.3.2
+    Checking az v1.3.0
+    Checking bitfield v0.19.4
+    Checking xtensa-lx-rt v0.22.0
+    Checking enumset v1.1.14
+    Checking embedded-can v0.4.1
+    Checking fugit v0.3.9
+    Checking bitflags v2.13.1
+    Checking defmt v1.1.1
+    Checking rand_core v0.9.5
+    Checking bytemuck v1.25.2
+    Checking rand_core v0.6.4
+    Checking embassy-executor-timer-queue v0.1.0
+    Checking micromath v2.1.0
+    Checking embassy-hal-internal v0.4.0
+    Checking usb-device v0.3.2
+    Checking embassy-sync v0.7.2
+    Checking float-cmp v0.9.0
+    Checking ufmt-write v0.1.0
+    Checking cordyceps v0.3.4
+    Checking lora-modulation v0.1.5
+    Checking selvage v0.1.0 (C:\Users\mark_\Code\repos\retinue\crates\selvage)
+    Checking defmt v0.3.100
+    Checking hybrid-array v0.4.13
+    Checking generic-array v0.14.7
+    Checking esp-println v0.17.0
+    Checking static_cell v2.1.1
+    Checking embedded-hal-bus v0.3.0
+    Checking embassy-sync v0.8.0
+    Checking embassy-time-queue-utils v0.3.2
+    Checking lora-phy v3.0.1 (C:\Users\mark_\Code\repos\retinue\vendor\lora-phy)
+    Checking esp-backtrace v0.19.0
+    Checking esp-synopsys-usb-otg v0.4.2
+    Checking embassy-executor v0.10.0
+    Checking embedded-graphics-core v0.4.1 (C:\Users\mark_\Code\repos\retinue\vendor\embedded-graphics-core)
+    Checking embassy-sync v0.6.2
+    Checking crypto-common v0.2.2
+    Checking block-buffer v0.12.1
+    Checking block-padding v0.4.2
+    Checking block-buffer v0.10.4
+    Checking crypto-common v0.1.7
+    Checking embassy-embedded-hal v0.6.0
+    Checking embassy-usb-synopsys-otg v0.3.3
+    Checking inout v0.2.2
+    Checking digest v0.10.7
+    Checking esp-sync v0.2.1
+    Checking embedded-graphics v0.8.2 (C:\Users\mark_\Code\repos\retinue\vendor\embedded-graphics)
+    Checking digest v0.11.3
+    Checking cipher v0.5.2
+    Checking curve25519-dalek v5.0.0
+    Checking hmac v0.13.0
+    Checking sha2 v0.11.0
+    Checking cbc v0.2.1
+    Checking aes v0.9.1
+    Checking hkdf v0.13.0
+    Checking radio-face v0.0.1 (C:\Users\mark_\Code\repos\retinue\crates\radio-face)
+    Checking ed25519-dalek v3.0.0
+    Checking x25519-dalek v3.0.0
+    Checking retinue v0.3.0 (C:\Users\mark_\Code\repos\retinue\crates\retinue)
+    Checking seneschal v0.2.0 (C:\Users\mark_\Code\repos\retinue\crates\seneschal)
+    Checking radio-hand v0.0.1 (C:\Users\mark_\Code\repos\retinue\crates\radio-hand)
+    Checking esp-rom-sys v0.1.4
+    Checking esp-hal v1.1.1
+    Checking esp-bootloader-esp-idf v0.5.0
+    Checking esp-rtos v0.3.0
+    Checking esp-storage v0.9.0
+    Checking tulle-heltec-v4-phy v0.0.1 (C:\Users\mark_\Code\repos\retinue\firmware\heltec-v4-phy)
+error: you seem to use `.enumerate()` and immediately discard the index
+   --> firmware\heltec-v4-phy\src\main.rs:859:71
+    |
+859 |                     for (_resident_byte_index, &byte) in packet.iter().enumerate() {
+    |                                                                       ^^^^^^^^^^^^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#unused_enumerate_index
+    = note: `-D clippy::unused-enumerate-index` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::unused_enumerate_index)]`
+help: remove the `.enumerate()` call
+    |
+859 -                     for (_resident_byte_index, &byte) in packet.iter().enumerate() {
+859 +                     for &byte in packet.iter() {
+    |
+
+error: could not compile `tulle-heltec-v4-phy` (bin "tulle-heltec-v4-phy") due to 1 previous error
