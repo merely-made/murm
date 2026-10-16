@@ -1,0 +1,21 @@
+{
+  "firmware_revision": "cb042329232571cd3c50b2ef9b5e386fbe4f434a",
+  "reboot_test_passed": false,
+  "requested_rounds": 3,
+  "completed_rounds": 0,
+  "reboot_commands_issued": 1,
+  "usb_enumerated_after_failed_reboot": true,
+  "external_hub_required_for_failure": false,
+  "root_cause_identified": false,
+  "recovery_after_manual_usb_reconnect_passed": true,
+  "recovery_was_read_only": true,
+  "before_sequence": 6,
+  "after_sequence": 7,
+  "name": "SB2",
+  "region": "US915",
+  "channel": "modem",
+  "full_stored_identity_bytes_read": false,
+  "firmware_flashed": false,
+  "isolated_target_home_worktree_created": false,
+  "runner_sha256": "646159e17b093e412d64c27accb870796461b7cc685d3de35b35ba51556b2817"
+}

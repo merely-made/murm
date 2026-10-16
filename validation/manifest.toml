@@ -288,6 +288,11 @@ reason = "Attended device-label provisioning; requires identified hardware and s
 expires = "2027-01-16"
 
 [[asset_exemption]]
+path = "testing/usb_reboot.py"
+reason = "Attended SB2 settings-save/reboot campaign; requires identified hardware, writes one current-settings journal record per cycle, stops at first failed recovery."
+expires = "2027-01-16"
+
+[[asset_exemption]]
 path = "testing/receipts/protocol-parity-memory/physical/source/board_probe_t114.py"
 reason = "Frozen attended physical-memory evidence source; not an automatic hardware test."
 expires = "2027-01-16"

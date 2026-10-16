@@ -2351,3 +2351,16 @@ guarded input hashes and take fresh current-state backups; older unnamed
 restoration inputs would undo these labels. Images, private state comparison
 and prior recovery artifacts remain receipt-owned. Existing shared Cargo
 caches were reused; no isolated target, Cargo home or worktree was created.
+
+
+Direct-PC USB reboot control (2026-10-16): the owner moved SB2 off the external
+USB hub/cooling stand and directly onto the PC. The unchanged named firmware
+`cb042329232`, modem channel and US915 region pass baseline probes at slot A
+sequence 6. A three-cycle same-channel save/reboot campaign stops on cycle one:
+`channel modem` acknowledges `channel set; rebooting`, but after six seconds
+and a host reopen, COM7 returns no status and the next write times out. The
+carrier remains enumerated. Zero of three requested cycles complete; no
+additional resets run. The [direct-PC receipt](../testing/receipts/usb-reboot/direct-pc/README.md)
+retains the failure and exact probe sequence. The failure can occur without
+the external hub; cable/connector, firmware, board and Windows USB state remain
+unresolved. The owner physically reconnected SB2; a separate read-only recovery passes across two USB sessions at loaded slot B sequence 7, with SB2/modem/US915 unchanged. No further reset is issued. The failed reboot result remains a failure.
