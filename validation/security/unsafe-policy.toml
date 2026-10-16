@@ -13,6 +13,12 @@ exception_crate_lint = "#![deny(unsafe_op_in_unsafe_fn)]"
 # These files are the complete first-party unsafe surface at this baseline.
 # Counts are deliberate drift detection: a new unsafe token needs a new reviewed entry.
 [[exception]]
+path = "firmware/t114-phy/examples/protocol_capacity.rs"
+expected_unsafe = 1
+reason = "Build-only synthetic capacity image initializes its exclusively owned fixed static heap once before the protocol workload. No radio, USB or installation workflow is executed by the example build."
+review_by = "2027-10-16"
+
+[[exception]]
 path = "firmware/t114-phy/src/heap.rs"
 expected_unsafe = 9
 reason = "One-time fixed-allocator initialization, plus the TrackingHeap high-water wrapper: an unsafe GlobalAlloc impl whose alloc/dealloc/init forward to the wrapped LlffHeap under the caller's contract."

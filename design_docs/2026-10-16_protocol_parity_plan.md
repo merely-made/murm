@@ -1,8 +1,8 @@
 # Protocol and firmware feature parity
 
-**Date:** 2026-10-16. **Status:** proposed plan, with a source/evidence inventory.
-No protocol implementation, firmware installation or new memory measurement is
-performed by this document. The owner asked about parity for Sennet/Meshtastic,
+**Date:** 2026-10-16. **Status:** in progress; current host/target memory build
+checkpoint passed, with physical peak/stack/reserve acceptance open. The owner
+approved proceeding after the proposal. The owner asked about parity for Sennet/Meshtastic,
 Tucket/MeshCore and Retinue/Reticulum, relative difficulty, firmware and board
 memory. This plan proposes ordering and measurable completion conditions.
 
@@ -156,3 +156,19 @@ even while only one protocol is using the SX1262.
   firmware flash, physical test, selected capacity or acceptance claim follows.
   Recommended sequence: memory refresh, Tucket, Retinue, Sennet, with common
   firmware infrastructure advanced as each concrete role requires it.
+- 2026-10-16: current memory fixture now retains actual Sennet/Tucket instances
+  with maximum PKI texts, a full private seen window and ACK/resource work.
+  Host peak is 15528 requested bytes and zero remain after drop. The actual
+  LLFF allocator passes sixteen fragmented rounds at both 48/64 KiB, with an
+  occupied peak of 20624 bytes, no unexpected refusals and one deliberate
+  oversize refusal per campaign. These are host measurements, not target peaks.
+- 2026-10-16: both ARM/Xtensa combined capacity images link. Target inline
+  retained objects total 10064 bytes; radio-hand Runtime separately totals
+  20256 bytes. Actual V4 resident data+BSS is 224380 bytes and its linker stack
+  region is 108136, materially tighter than the old image. The T114 firmware
+  link and a separate combined capacity example fit their protected memory
+  windows. GNU readelf corroborates section reports. See the
+  [current memory receipt](../testing/receipts/protocol-parity-memory/README.md)
+  for exact artifacts, source hashes, compiler exception, workload and limits.
+  No image is installed and no serial port opened. This closes the fresh
+  host/build slice, not phase 2's on-device peak, stack, faults or reserve gate.

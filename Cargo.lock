@@ -2066,6 +2066,9 @@ dependencies = [
 name = "protocol-capacity-probe"
 version = "0.0.0"
 dependencies = [
+ "critical-section",
+ "embedded-alloc",
+ "radio-hand",
  "retinue",
  "sennet",
  "tucket",
@@ -3002,6 +3005,7 @@ dependencies = [
  "lora-modulation",
  "lora-phy",
  "outrider",
+ "protocol-capacity-probe",
  "radio-face",
  "radio-hand",
  "retinue",

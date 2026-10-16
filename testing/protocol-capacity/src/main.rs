@@ -29,11 +29,11 @@ unsafe impl GlobalAlloc for Measured {
     }
 }
 
-fn main() {
+fn measure<T>(workload: impl FnOnce() -> T, layout: &[u32]) {
     let baseline = LIVE.load(Relaxed);
     PEAK.store(baseline, Relaxed);
     let start_count = COUNT.load(Relaxed);
-    let residents = protocol_capacity_probe::workload();
+    let residents = workload();
     let retained = LIVE.load(Relaxed) - baseline;
     let peak = PEAK.load(Relaxed) - baseline;
     let allocations = COUNT.load(Relaxed) - start_count;
@@ -41,8 +41,24 @@ fn main() {
     let remaining = LIVE.load(Relaxed) - baseline;
     assert_eq!(remaining, 0, "workload leaked allocations");
     println!(
-        "{{\"host_pointer_bytes\":{},\"retained_requested_bytes\":{retained},\"peak_requested_bytes\":{peak},\"allocation_count\":{allocations},\"after_drop_bytes\":{remaining},\"layout\":{:?}}}",
+        "{{\"host_pointer_bytes\":{},\"retained_requested_bytes\":{retained},\"peak_requested_bytes\":{peak},\"allocation_count\":{allocations},\"after_drop_bytes\":{remaining},\"inline_bytes\":{},\"layout\":{:?}}}",
         size_of::<usize>(),
-        protocol_capacity_probe::PROTOCOL_LAYOUT_V1
+        size_of::<T>(),
+        layout
     );
+}
+
+fn main() {
+    // Parse before resetting accounting; argument buffers are not protocol state.
+    if std::env::args().any(|arg| arg == "--current") {
+        measure(
+            protocol_capacity_probe::current::workload,
+            &protocol_capacity_probe::current::PROTOCOL_LAYOUT_V2,
+        );
+    } else {
+        measure(
+            protocol_capacity_probe::workload,
+            &protocol_capacity_probe::PROTOCOL_LAYOUT_V1,
+        );
+    }
 }
