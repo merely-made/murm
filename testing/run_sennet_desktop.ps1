@@ -74,6 +74,20 @@ try {
     Start-Sleep -Seconds 2
     & $Python -B (Join-Path $PSScriptRoot 'setup_sennet_stock.py') --port $PeerPort --usb-serial $PeerUsbSerial --expected-node ('{0:x8}' -f [uint32]$config.peer_node) --power-dbm $StockPowerDbm --configure --output (Join-Path $output 'stock-setup.json') *> (Join-Path $output 'stock-setup.log')
     if($LASTEXITCODE -ne 0){throw 'Stock public LongFast setup/readback failed'}
+    # Returning from the stock Python client to this serial owner can expose a
+    # reboot indication. Settle that boundary with read-only handshakes before
+    # launching the message scenario; never retry a possibly submitted send.
+    Start-Sleep -Seconds 2
+    & $peerBinary probe meshtastic $PeerPort $config.realm (Join-Path $output 'configured-stock-probe') 0 *> (Join-Path $output 'configured-stock-probe.log')
+    $probePath=Join-Path $output 'configured-stock-probe/receipt.json'
+    $stockProbe=Get-Content $probePath -Raw|ConvertFrom-Json
+    if($LASTEXITCODE -ne 0 -and $stockProbe.error -eq 'Meshtastic rebooted during handshake'){
+        Start-Sleep -Seconds 5
+        & $peerBinary probe meshtastic $PeerPort $config.realm (Join-Path $output 'configured-stock-probe-settled') 0 *> (Join-Path $output 'configured-stock-probe-settled.log')
+        $probePath=Join-Path $output 'configured-stock-probe-settled/receipt.json'
+        $stockProbe=Get-Content $probePath -Raw|ConvertFrom-Json
+    }
+    if($LASTEXITCODE -ne 0 -or $stockProbe.result -ne 'passed' -or $stockProbe.left.identity -ne ('{0:x8}' -f [uint32]$config.peer_node)){throw 'Configured stock peer did not pass its independent handshake'}
     if($SetupOnly){$report.result='stock_setup_passed_native_not_run'}else{
         $dutStarted=$true
         & (Join-Path $repo 'apps/signalman-desktop/scenarios/run_companion.ps1') -Protocol meshtastic -Port $config.port -PeerPort $PeerPort -SelfAddress $card.address -PeerAddress ('{0:x8}' -f [uint32]$config.peer_node) -Realm $config.realm -OutputDirectory (Join-Path $output 'native') -Zoom 0.75 -BenchPython $Python -PeerUsbSerial $PeerUsbSerial -SennetConfig $SennetConfig -ExchangeAfterReconnect
