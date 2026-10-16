@@ -177,6 +177,31 @@ pub struct RoutingCounters {
     /// Routes moved to a higher-gravity interface by a copy of the same emission
     /// (`Transport.py` 2229-2251).
     pub gravity_repoints: u64,
+    /// Path requests answered for a destination this node holds a path to, as a transport
+    /// (`Transport.py` 3462-3524).
+    pub path_requests_answered: u64,
+    /// Path requests for an unknown destination forwarded on other interfaces on a
+    /// requester's behalf (`Transport.py` 3528-3583).
+    pub path_requests_searched: u64,
+    /// Recursive path requests withheld from an interface by its egress control
+    /// (`Interface.py` 241-250).
+    pub path_requests_egress_limited: u64,
+    /// Path requests from an interface in a path-request burst, which start no search
+    /// (`Interface.py` 213-239).
+    pub path_requests_ingress_limited: u64,
+    /// Inbound data, link and proof packets dropped because their lane was full
+    /// (`Transport.py` 46-95).
+    pub inbound_data_dropped: u64,
+    /// Inbound announces dropped because their lane was full.
+    pub inbound_announces_dropped: u64,
+    /// Inbound path requests dropped because their lane was full.
+    pub inbound_path_requests_dropped: u64,
+    /// Ingress-limited packets dropped because their lane was full.
+    pub inbound_ingress_limited_dropped: u64,
+    /// Tunnel synthesis packets sent by this node's TCP clients (`TCPInterface.py` 169-180).
+    pub tunnels_synthesized: u64,
+    /// Paths restored to a client whose tunnel reappeared (`Transport.py` 2836-2860).
+    pub tunnel_paths_restored: u64,
 }
 
 /// The live counter cells behind [`RoutingCounters`].
@@ -208,6 +233,16 @@ pub(super) struct RoutingStats {
     pub(super) link_queue_dropped: AtomicU64,
     pub(super) key_mismatch_announces: AtomicU64,
     pub(super) gravity_repoints: AtomicU64,
+    pub(super) path_requests_answered: AtomicU64,
+    pub(super) path_requests_searched: AtomicU64,
+    pub(super) path_requests_egress_limited: AtomicU64,
+    pub(super) path_requests_ingress_limited: AtomicU64,
+    pub(super) inbound_data_dropped: AtomicU64,
+    pub(super) inbound_announces_dropped: AtomicU64,
+    pub(super) inbound_path_requests_dropped: AtomicU64,
+    pub(super) inbound_ingress_limited_dropped: AtomicU64,
+    pub(super) tunnels_synthesized: AtomicU64,
+    pub(super) tunnel_paths_restored: AtomicU64,
 }
 
 impl RoutingStats {
@@ -239,6 +274,22 @@ impl RoutingStats {
             link_queue_dropped: self.link_queue_dropped.load(Ordering::Relaxed),
             key_mismatch_announces: self.key_mismatch_announces.load(Ordering::Relaxed),
             gravity_repoints: self.gravity_repoints.load(Ordering::Relaxed),
+            path_requests_answered: self.path_requests_answered.load(Ordering::Relaxed),
+            path_requests_searched: self.path_requests_searched.load(Ordering::Relaxed),
+            path_requests_egress_limited: self.path_requests_egress_limited.load(Ordering::Relaxed),
+            path_requests_ingress_limited: self
+                .path_requests_ingress_limited
+                .load(Ordering::Relaxed),
+            inbound_data_dropped: self.inbound_data_dropped.load(Ordering::Relaxed),
+            inbound_announces_dropped: self.inbound_announces_dropped.load(Ordering::Relaxed),
+            inbound_path_requests_dropped: self
+                .inbound_path_requests_dropped
+                .load(Ordering::Relaxed),
+            inbound_ingress_limited_dropped: self
+                .inbound_ingress_limited_dropped
+                .load(Ordering::Relaxed),
+            tunnels_synthesized: self.tunnels_synthesized.load(Ordering::Relaxed),
+            tunnel_paths_restored: self.tunnel_paths_restored.load(Ordering::Relaxed),
         }
     }
 }

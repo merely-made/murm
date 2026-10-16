@@ -413,14 +413,18 @@ async fn freshness_capacity_eviction_is_visible() {
 }
 
 /// The same emission heard again with no more hops on a higher-gravity interface moves the
-/// route there and does nothing else (`Transport.py` 2229-2251).
+/// route there and is relayed as a new path would be, but not published again
+/// (`Transport.py` 2229-2251, 2335-2395).
 #[tokio::test]
-async fn a_higher_gravity_copy_of_the_same_emission_moves_only_the_route() {
+async fn a_higher_gravity_copy_of_the_same_emission_moves_the_route_and_relays() {
     let ep = Endpoint::new(PrivateIdentity::from_secret_bytes(&[0x45; 64]));
-    ep.enable_routing();
     let low = ep.attach_interface().id();
     let high = ep.attach_interface().id();
     let lower = ep.attach_interface().id();
+    ep.set_routing_policy(crate::endpoint::RoutingPolicy {
+        allowed_ingress: crate::endpoint::InterfaceSelector::Only(vec![high]),
+        ..crate::endpoint::RoutingPolicy::transit()
+    });
     assert!(ep.set_interface_gravity(high, 5));
     assert!(ep.set_interface_gravity(lower, -1));
     let peer = PrivateIdentity::from_secret_bytes(&[0x46; 64]);
@@ -429,6 +433,14 @@ async fn a_higher_gravity_copy_of_the_same_emission_moves_only_the_route() {
     route(&ep.shared, low, packet.clone());
     assert_eq!(ep.route_to(destination), Some((low, 2)));
     let sequence = ep.shared.announce_sequence.load(Ordering::Relaxed);
+    let scheduled = || {
+        ep.shared
+            .rebroadcasts
+            .lock()
+            .unwrap()
+            .scheduled(destination)
+    };
+    assert!(!scheduled(), "this ingress is not relayed");
 
     let mut farther = packet.clone();
     farther.hops = 3;
@@ -440,6 +452,7 @@ async fn a_higher_gravity_copy_of_the_same_emission_moves_only_the_route() {
 
     route(&ep.shared, high, packet.clone());
     assert_eq!(ep.route_to(destination), Some((high, 2)));
+    assert!(scheduled(), "the re-pointed path is relayed");
     route(&ep.shared, low, packet);
     assert_eq!(ep.route_to(destination), Some((high, 2)));
     assert_eq!(

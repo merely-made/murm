@@ -27,6 +27,27 @@ pub struct SerialPumpConfig {
     pub flow_unlock: Duration,
     /// Delay before a supervised link reopens a failed port (`RNodeInterface.py` 1175-1187).
     pub reconnect: Duration,
+    /// Send the detect probe whenever nothing was written for this long, so a dead peer
+    /// shows up as a write error (TCP: `RNodeInterface.py` 1151-1154, 1457-1458).
+    pub keepalive: Option<Duration>,
+    /// Give up on the port, for a supervisor to reopen, if the device has not answered
+    /// DETECT this long after the probe (TCP: `RNodeInterface.py` 437-441).
+    pub detect_timeout: Option<Duration>,
+}
+
+impl SerialPumpConfig {
+    /// RNS's profile for an RNode over TCP: 2 s settle, a 1.5 s partial-frame timeout, a
+    /// 5 s detect wait and a detect keepalive after 3.5 s without writes
+    /// (`RNodeInterface.py` 402-441, 1151-1154, 1452-1458).
+    pub fn tcp() -> Self {
+        Self {
+            open_settle: Duration::from_secs(2),
+            idle_reset: Duration::from_millis(1_500),
+            keepalive: Some(Duration::from_millis(3_500)),
+            detect_timeout: Some(Duration::from_secs(5)),
+            ..Self::default()
+        }
+    }
 }
 
 impl Default for SerialPumpConfig {
@@ -42,7 +63,45 @@ impl Default for SerialPumpConfig {
             idle_reset: Duration::from_millis(100),
             flow_unlock: Duration::from_secs(5),
             reconnect: Duration::from_secs(5),
+            keepalive: None,
+            detect_timeout: None,
         }
+    }
+}
+
+/// RNS's port for an RNode reached over TCP (`RNodeInterface.py` 1453).
+pub const RNODE_TCP_PORT: u16 = 7633;
+
+/// Where an RNode is reached: RNS's `port` key (`RNodeInterface.py` 170-193).
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum RNodePort {
+    /// A serial device path.
+    Serial(String),
+    /// `tcp://host`, on [`RNODE_TCP_PORT`] unless a test overrides it.
+    Tcp { host: String, port: u16 },
+}
+
+impl RNodePort {
+    /// Parse RNS's `port` value: `tcp://host` (scheme case-insensitive) or a device path.
+    /// `None` for `tcp://` without a host, which RNS would leave unresolved, and for
+    /// `ble://`, which is not supported.
+    pub fn parse(value: &str) -> Option<Self> {
+        let scheme = |name: &str| {
+            value
+                .get(..name.len())
+                .is_some_and(|head| head.eq_ignore_ascii_case(name))
+        };
+        if scheme("ble://") {
+            return None;
+        }
+        if scheme("tcp://") {
+            let host = &value["tcp://".len()..];
+            return (!host.is_empty()).then(|| Self::Tcp {
+                host: host.to_string(),
+                port: RNODE_TCP_PORT,
+            });
+        }
+        Some(Self::Serial(value.to_string()))
     }
 }
 

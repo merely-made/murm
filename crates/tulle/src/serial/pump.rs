@@ -10,10 +10,14 @@ use tokio::time::{Instant, sleep, sleep_until};
 use super::{PumpStatus, SerialPumpConfig, TransmitError};
 use crate::link::{RadioLink, Received, SendOutcome};
 use crate::modem::ModemError;
-use crate::rnode::RNode;
+use crate::rnode::{RNode, Telemetry};
 
 /// How long the detach handshake may take before the port is abandoned.
 pub(super) const DETACH_GRACE: Duration = Duration::from_secs(1);
+
+/// How long one write may block (a TCP peer that stopped reading) before the port is failed
+/// for a reopen, so neither traffic nor shutdown waits on the OS to drop the socket.
+const WRITE_TIMEOUT: Duration = Duration::from_secs(5);
 
 pub(super) struct TxRequest {
     pub(super) frame: Vec<u8>,
@@ -28,6 +32,7 @@ pub(super) struct PumpChannels {
     pub(super) rx_tx: mpsc::Sender<Received>,
     pub(super) status_tx: watch::Sender<PumpStatus>,
     pub(super) error_tx: mpsc::Sender<Vec<u8>>,
+    pub(super) telemetry_tx: watch::Sender<Telemetry>,
     pub(super) shutdown: oneshot::Receiver<()>,
     /// A frame taken from `tx_rx` and not yet answered.
     pub(super) pending: Option<TxRequest>,
@@ -63,9 +68,14 @@ where
     }
 
     let _ = ch.status_tx.send(PumpStatus::Initializing);
+    let mut last_write = Instant::now();
     link.modem_mut().start();
-    flush_modem(&mut io, link).await?;
-    let mut next_init = Instant::now() + config.init_retry;
+    flush_modem(&mut io, link, &mut last_write).await?;
+    // The detect wait runs from the first probe on this port until any DETECT answer; a
+    // re-init clears the modem's flag but not the port's proof of a live device.
+    let probed_at = Instant::now();
+    let mut answered = false;
+    let mut next_init = probed_at + config.init_retry;
     let mut next_tx = Instant::now();
     let mut locked_at = Instant::now();
     let mut last_read = Instant::now();
@@ -98,10 +108,26 @@ where
         }
 
         let now = Instant::now();
+        answered |= link.modem().is_detected();
+        if let Some(wait) = config.detect_timeout
+            && !answered
+            && now >= probed_at + wait
+        {
+            return Err(io::Error::new(
+                io::ErrorKind::TimedOut,
+                "RNode did not answer DETECT",
+            ));
+        }
         if !online && now >= next_init {
             link.modem_mut().start();
-            flush_modem(&mut io, link).await?;
+            flush_modem(&mut io, link, &mut last_write).await?;
             next_init = Instant::now() + config.init_retry;
+        }
+        if let Some(idle) = config.keepalive
+            && now >= last_write + idle
+        {
+            link.modem_mut().keepalive();
+            flush_modem(&mut io, link, &mut last_write).await?;
         }
         if link.modem().is_flow_locked() && now >= locked_at + config.flow_unlock {
             link.modem_mut().release();
@@ -117,7 +143,7 @@ where
             };
             let answer = match outcome {
                 SendOutcome::Sent { airtime } => {
-                    if let Err(error) = flush_modem(&mut io, link).await {
+                    if let Err(error) = flush_modem(&mut io, link, &mut last_write).await {
                         let _ = request
                             .done
                             .send(Err(TransmitError::Transport(error.to_string())));
@@ -160,8 +186,12 @@ where
             continue;
         }
 
+        let detect_by = config
+            .detect_timeout
+            .filter(|_| !answered)
+            .map(|wait| probed_at + wait);
         let wake = if !online {
-            next_init
+            detect_by.map_or(next_init, |by| by.min(next_init))
         } else if ch.pending.is_some() {
             next_tx
         } else {
@@ -169,13 +199,17 @@ where
             // do not produce a readiness edge for modem-control changes.
             Instant::now() + Duration::from_millis(250)
         };
+        let wake = config
+            .keepalive
+            .map_or(wake, |idle| wake.min(last_write + idle));
 
         tokio::select! {
             biased;
             _ = &mut ch.shutdown => {
                 // The detach handshake, best effort: the port may be gone or wedged.
                 link.modem_mut().leave();
-                let _ = tokio::time::timeout(DETACH_GRACE, flush_modem(&mut io, link)).await;
+                let detach = flush_modem(&mut io, link, &mut last_write);
+                let _ = tokio::time::timeout(DETACH_GRACE, detach).await;
                 return Ok(());
             }
             read = io.read(&mut read_buf) => {
@@ -188,7 +222,10 @@ where
                 }
                 last_read = Instant::now();
                 link.modem_mut().on_serial(&read_buf[..count]);
-                flush_modem(&mut io, link).await?;
+                if link.modem_mut().take_telemetry_changed() {
+                    ch.telemetry_tx.send_replace(link.modem().telemetry().clone());
+                }
+                flush_modem(&mut io, link, &mut last_write).await?;
             }
             request = ch.tx_rx.recv(), if ch.pending.is_none() && !tx_closed => {
                 match request {
@@ -201,14 +238,26 @@ where
     }
 }
 
-async fn flush_modem<T>(io: &mut T, link: &mut RadioLink<RNode>) -> Result<(), io::Error>
+async fn flush_modem<T>(
+    io: &mut T,
+    link: &mut RadioLink<RNode>,
+    last_write: &mut Instant,
+) -> Result<(), io::Error>
 where
     T: AsyncWrite + Unpin,
 {
     let bytes = link.modem_mut().take_outbound();
     if !bytes.is_empty() {
-        io.write_all(&bytes).await?;
-        io.flush().await?;
+        let write = async {
+            io.write_all(&bytes).await?;
+            io.flush().await
+        };
+        tokio::time::timeout(WRITE_TIMEOUT, write)
+            .await
+            .map_err(|_| {
+                io::Error::new(io::ErrorKind::TimedOut, "RNode port stopped draining")
+            })??;
+        *last_write = Instant::now();
     }
     Ok(())
 }

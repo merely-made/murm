@@ -7,9 +7,12 @@ use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, AtomicU64, AtomicUsize, Ordering};
 
 use crate::ifac::Ifac;
+use crate::link;
 use crate::node::InterfaceMode;
 
+use super::iface_stats::InterfaceStats;
 use super::interface::{Iface, Interface, InterfaceId};
+use super::mtu::HwMtu;
 use super::queue::{OutboundPackets, OutboundQueues, QueueDepths, QueueWeights};
 use super::runtime::Endpoint;
 use super::shared::{Lifecycle, Shared};
@@ -45,14 +48,15 @@ impl Shared {
         })
     }
 
-    /// Register a new interface whose frame limit is `max_frame_len`, capped at the protocol
-    /// MTU plus the access code.
+    /// Register a new interface whose frame limit is `hw_mtu` plus the access code, capped
+    /// by `max_frame_len` unless `hw_mtu` autoconfigures (see [`HwMtu`]).
     pub(super) fn add_interface(
         &self,
         max_frame_len: usize,
         ifac: Option<Ifac>,
         mode: InterfaceMode,
         online: bool,
+        hw_mtu: HwMtu,
     ) -> Attached {
         let id = self.next_iface_id.fetch_add(1, Ordering::Relaxed);
         let wire_overhead = ifac.as_ref().map_or(0, Ifac::size);
@@ -61,17 +65,20 @@ impl Shared {
             self.queue_depths(),
         ));
         let frame_limit = Arc::new(AtomicUsize::new(
-            max_frame_len.min(crate::packet::MTU + wire_overhead),
+            hw_mtu.frame_limit(max_frame_len, wire_overhead),
         ));
         let online = Arc::new(AtomicBool::new(online));
+        let stats = Arc::new(InterfaceStats::default());
         let registered = self.register_interface(Iface {
             id,
             outbound: Arc::clone(&queues),
             frame_limit: Arc::clone(&frame_limit),
             wire_overhead,
+            hw_mtu,
             mode,
             online: Arc::clone(&online),
             unsendable: AtomicU64::new(0),
+            stats: Arc::clone(&stats),
         });
         if !registered {
             queues.close();
@@ -82,6 +89,8 @@ impl Shared {
                 queues,
                 delivery_in_flight: false,
                 ifac,
+                frame_limit: Arc::clone(&frame_limit),
+                stats,
             },
             frame_limit,
             online,
@@ -135,6 +144,7 @@ impl Shared {
             self.held_release_wake.notify_waiters();
             ((), removed || routes_removed)
         });
+        self.tunnel_interface_lost(id);
     }
 
     /// The mode of an attached interface; [`InterfaceMode::Full`] if it is not attached.
@@ -153,12 +163,22 @@ impl Shared {
         self.routing.lock().unwrap().queue_depths
     }
 
-    /// The largest packet an attached interface carries: its frame limit less its access code.
+    /// The link MTU an attached interface signals: its hardware MTU if it autoconfigures or
+    /// is fixed, else the protocol MTU (`Transport.py` 2543-2549, 3173-3178), and never past
+    /// what its frame limit carries.
     pub(super) fn link_mtu_on(&self, iface: InterfaceId) -> Option<u32> {
         self.with_iface(iface, |i| {
-            let limit = i.frame_limit.load(Ordering::Acquire);
-            u32::try_from(limit.saturating_sub(i.wire_overhead)).unwrap_or(u32::MAX)
+            let carried = i
+                .frame_limit
+                .load(Ordering::Acquire)
+                .saturating_sub(i.wire_overhead);
+            u32::try_from(carried.min(i.hw_mtu.mtu())).unwrap_or(link::MAX_MTU)
         })
+    }
+
+    /// Whether links learn `iface`'s MTU (`AUTOCONFIGURE_MTU` or `FIXED_MTU`).
+    pub(super) fn signals_mtu(&self, iface: InterfaceId) -> Option<bool> {
+        self.with_iface(iface, |i| i.hw_mtu.signalled())
     }
 }
 
@@ -206,7 +226,8 @@ impl Endpoint {
 
     /// Attach a raw packet interface with an explicit complete-frame limit.
     ///
-    /// The effective limit cannot exceed Reticulum's own protocol MTU. Interface
+    /// The effective limit cannot exceed Reticulum's own protocol MTU, and links over it
+    /// stay at that MTU; [`Self::attach_interface_with_hw_mtu`] carries more. Interface
     /// drivers may lower it again if they discover a stricter carrier limit.
     pub fn attach_interface_with_frame_limit(&self, max_frame_len: usize) -> io::Result<Interface> {
         self.attach_interface_access(max_frame_len, None)
@@ -225,10 +246,31 @@ impl Endpoint {
         self.attach_interface_access(max_frame_len, Some(ifac))
     }
 
+    /// Attach a raw packet interface whose frame limit is `hw_mtu` plus the access code. A
+    /// [`HwMtu::Fixed`] or [`HwMtu::Auto`] MTU is signalled to links, so links over it
+    /// may negotiate past the protocol MTU. A fixed MTU below the protocol MTU is refused,
+    /// as RNS refuses it (`TCPInterface.py` 111-112).
+    pub fn attach_interface_with_hw_mtu(
+        &self,
+        hw_mtu: HwMtu,
+        ifac: Option<Ifac>,
+    ) -> io::Result<Interface> {
+        self.attach_access(usize::MAX, ifac, hw_mtu.checked()?)
+    }
+
     fn attach_interface_access(
         &self,
         max_frame_len: usize,
         ifac: Option<Ifac>,
+    ) -> io::Result<Interface> {
+        self.attach_access(max_frame_len, ifac, HwMtu::Protocol)
+    }
+
+    fn attach_access(
+        &self,
+        max_frame_len: usize,
+        ifac: Option<Ifac>,
+        hw_mtu: HwMtu,
     ) -> io::Result<Interface> {
         let wire_overhead = ifac.as_ref().map_or(0, Ifac::size);
         if max_frame_len < crate::packet::HEADER_MIN_LEN + wire_overhead {
@@ -237,14 +279,15 @@ impl Endpoint {
                 "interface frame limit cannot hold a Reticulum header and access code",
             ));
         }
-        let attached = self
-            .shared
-            .add_interface(max_frame_len, ifac, InterfaceMode::Full, true);
+        let attached =
+            self.shared
+                .add_interface(max_frame_len, ifac, InterfaceMode::Full, true, hw_mtu);
         Ok(Interface {
             id: attached.id,
-            router_tx: self.shared.router_tx.clone(),
+            inbound: self.shared.inbound_queue.clone(),
             frame_limit: attached.frame_limit,
             ifac: attached.outbound.ifac.clone(),
+            stats: Arc::clone(&attached.outbound.stats),
             outbound: attached.outbound,
             dropped: Arc::new(AtomicU64::new(0)),
         })

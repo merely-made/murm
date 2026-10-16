@@ -41,3 +41,30 @@ From the interface batch (2026-10-09):
 - The hardware MTU is 508, so a full packet with an 8-byte access code crosses.
   RNS `Interfaces/RNodeInterface.py` 110, 195, 770.
   Targets: `src/rnode/config.rs`, `src/radio_io.rs`.
+
+From the interface batch 2 (2026-10-14), same source:
+
+- RNodes over TCP: RNS's `tcp://host` port on 7633, a 5 s connect timeout,
+  TCP_NODELAY and keepalive (5 s idle, 2 s interval, 12 probes, a 24 s user
+  timeout on Linux and Android; macOS also gets the interval and count), a
+  DETECT keepalive in stock's exact bytes after 3.5 s without writes, a 1.5 s
+  partial-frame reset and a 5 s DETECT wait. Unlike RNS: the wait applies only
+  until a port's first DETECT answer; the link reconnects after 5 s, as stock
+  actually does (its 4 s `RECONNECT_WAIT` is unused); each write has a 5 s
+  limit. RNS `Interfaces/RNodeInterface.py` 170-193, 402-441, 490-494,
+  1151-1154, 1175-1187, 1452-1582.
+  Targets: `src/serial/tcp.rs`, `src/serial/link.rs`, `src/serial/pump.rs`,
+  `src/serial/config.rs`, `src/rnode.rs`.
+- Telemetry reports CHTM, PHYPRM, BAT, CSMA and TEMP parsed from unescaped
+  frames, kept across a reopen, with the SNR quality window and the LoRa
+  bitrate from the echoed parameters. Stock's interference timestamp and its
+  host CPU and memory loads are not kept; the STAT_RX/TX `ord()` slip and the
+  unescaped single-byte reports are not ported. RNS
+  `Interfaces/RNodeInterface.py` 64-68, 124-131, 698-704, 816-895, 882-1069,
+  1217-1225; `Reticulum.py` 1538-1567.
+  Targets: `src/rnode/stats.rs`, `src/rnode.rs`, `src/serial/link.rs`.
+- Parameter ranges: spreading factor 5-12, coding rate 5-8, bandwidth 7.8 kHz
+  to 1.625 MHz, TX power 0-37 dBm; signed TX power (RNodeMultiInterface) is
+  not adopted. The SX126x SF5 and SF6 airtime follows the Semtech SX1261/2
+  datasheet, not RNS. RNS `Interfaces/RNodeInterface.py` 312-326.
+  Targets: `src/rnode/config.rs`, `src/lora.rs`.

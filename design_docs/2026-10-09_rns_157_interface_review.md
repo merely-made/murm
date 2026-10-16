@@ -4,26 +4,41 @@
 adaptation goes in `crates/retinue/NOTICE`. The relicence to adapt RNS is on
 record (2026-10-05).
 
+**Status, 2026-10-14:** batch 2 integrated on `iv/integration` (seam S0, then
+units V1-V6 and the integrator's follow-ups), its adaptations listed in
+`crates/retinue/NOTICE`, `crates/tulle/NOTICE` and `crates/radio-hand/NOTICE`.
+- **Landed in batch 2:** A6 (attach to a stock shared instance; loss scoped to
+  the lost interface); A4's path-request rules with recursive discovery and
+  answering from an announce cache; path-request ingress and egress control;
+  B4 (four inbound lanes); B5 (RNS `[interfaces]` and shared-instance keys for
+  every carrier, attaching TCP, Backbone, UDP, Pipe, Serial, KISS and AX.25);
+  B6 (tunnel synthesis; the payload is 176 bytes, not 170); B10, B11, B13;
+  C2 (per-interface statistics, held announces and burst flags exact); C4-C7;
+  C8's ranges and the SX126x SF5/6 airtime; L1 (per-interface hardware MTU,
+  link MTU discovery with transit clamps, dial and listen MTUs from a
+  configured bitrate, `fixed_mtu` and Backbone's 100 Mbit/s, and Resource,
+  Channel and Buffer sizes scaled to the link MTU).
+- **Batch 1 leftovers closed:** the Node core takes its next hop from the live
+  route, falling back to the ingress interface once the route is evicted;
+  spawned TCP interfaces inherit egress control and the path-request rates
+  (RNS 1.5.7 never reads IN); a gravity re-point is relayed.
+- **Remaining:** L2 (serving as the shared instance, with local-client
+  path-request forwarding); L3 (RNodeMultiInterface, with signed TX power);
+  L4 (Weave); L5 (RNode BLE and display); the shared-instance RPC port;
+  RNS's `local_hops_delta` (Transport.py 240, 337, 1608-1616), unscoped;
+  the `qlen_in_*` overrides and the announce-queue length in the statistics;
+  failing pending outbound links at once on shared-instance loss (they record
+  no interface, so they lapse at their setup deadline). Auto against stock
+  live (`datagram-lan`, `datagram-root`) still needs host setup.
+- **Not run on macOS:** the abstract AF_UNIX shared-instance path (a Linux-only
+  test) and Backbone flap blocking against stock (a Rust test).
+- **Gates:** lanes `local` (2), `discovery` (1), `ingress` (2), `stream` (3),
+  `radio` (2, macOS) and `mtu` (3) in `testing/receipts/rns-1.5.7-repin/run.py`.
+
 **Status, 2026-10-09:** batch 1 landed on `main` (units U1-U4 and U6 after
-seam S0, then U5), its adaptations listed in `crates/retinue/NOTICE`.
-- **Landed:** A1, A2, A3, A5, A9, A10, A11; A4 for announces (the path-request
-  rules wait for recursive discovery); B1, B2, B3, B7, B8, B12; B5 in part
-  (`Ifac::from_config_bits` only); C1, C3; C7's `prefer_ipv6` for dialing;
-  A7 (UDP), A8 (Auto) and B9 from U5. Auto peers are capped at 64 per
-  interface (stock has no cap).
-- **Not yet verified live:** Auto against stock. The `datagram` lane checks
-  UDP on stock's state and Auto's addresses and tokens against stock vectors;
-  the `datagram-lan` (en1) lane needs the oracle Python and the examples
-  admitted by the macOS application firewall, and `datagram-root` needs feth
-  pairs created as root.
-- **Deferred:** batch 2 as planned: A6,
-  B4, the rest of B5, B6, B10, B11, B13, C2, C4-C6, C8 and the rest of C7.
-- **Open within batch 1:** the Node core relays with the ingress interface as
-  next hop (its bounded route table can evict a route before release), and
-  keeps the 2% cap; spawned TCP interfaces do not inherit IN, egress-control
-  or path-request rates; a gravity re-point queues no rebroadcast.
-- **Gates:** the live lane gains 5, the routing lane 5 and the serial lane 5
-  (macOS ptys), in `testing/receipts/rns-1.5.7-repin/run.py`.
+seam S0, then U5): A1, A2, A3, A5, A7-A11, A4 for announces, B1, B2, B3, B5 in
+part, B7, B8, B9, B12, C1, C3 and C7's `prefer_ipv6`; the live, routing and
+serial lanes gained 5 gates each.
 
 ## Source and provenance
 
@@ -294,4 +309,4 @@ All of the following match upstream:
 - B4, B5, B6, B10, B11 and B13;
 - C2 and C4-C8.
 
-L1 to L5 stay deferred.
+L1 joined batch 2; L2 to L5 stay deferred.

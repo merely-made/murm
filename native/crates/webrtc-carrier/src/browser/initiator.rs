@@ -608,6 +608,18 @@ impl BrowserInitiator {
 
 impl Drop for BrowserInitiator {
     fn drop(&mut self) {
+        // The browser may queue close/error/state events after close returns.
+        // Detach every JS registration before our Rust Closure fields drop,
+        // including failed joins that never reached an open channel. Explicit
+        // close() keeps its registrations and still reports the terminal state.
+        self.channel.set_onopen(None);
+        self.channel.set_onclose(None);
+        self.channel.set_onerror(None);
+        self.channel.set_onmessage(None);
+        self.channel.set_onbufferedamountlow(None);
+        self.peer.set_onconnectionstatechange(None);
+        self.peer.set_onicecandidate(None);
+
         // Best-effort: a normal drop (the caller replacing or discarding
         // this value while the page keeps running) should not leak the
         // underlying JS objects. This is not what makes a browser refresh
@@ -721,9 +733,59 @@ fn set_terminal(inner: &Rc<RefCell<Inner>>, err: BrowserError) {
 
 #[cfg(test)]
 mod tests {
+    use std::cell::Cell;
+
     use wasm_bindgen_test::wasm_bindgen_test;
 
     use super::*;
+
+    /// A failed pre-admission join drops a connecting channel. JS objects can
+    /// outlive that Rust owner and receive queued events; none may retain a
+    /// pointer to a dropped wasm-bindgen closure.
+    #[wasm_bindgen_test]
+    fn dropping_connecting_initiator_detaches_all_browser_handlers() {
+        let initiator = BrowserInitiator::new(BrowserInitiatorConfig::default()).unwrap();
+        let channel = initiator.channel.clone();
+        let peer = initiator.peer.clone();
+        assert!(channel.onopen().is_some());
+        assert!(channel.onclose().is_some());
+        assert!(channel.onerror().is_some());
+        assert!(channel.onmessage().is_some());
+        assert!(channel.onbufferedamountlow().is_some());
+        assert!(peer.onconnectionstatechange().is_some());
+        assert!(peer.onicecandidate().is_some());
+
+        drop(initiator);
+
+        assert!(channel.onopen().is_none());
+        assert!(channel.onclose().is_none());
+        assert!(channel.onerror().is_none());
+        assert!(channel.onmessage().is_none());
+        assert!(channel.onbufferedamountlow().is_none());
+        assert!(peer.onconnectionstatechange().is_none());
+        assert!(peer.onicecandidate().is_none());
+    }
+
+    /// Detachment is destructor-only: deliberate live close must retain its
+    /// callback route and deliver one terminal reason even if close repeats.
+    #[wasm_bindgen_test]
+    fn explicit_close_keeps_handlers_and_reports_terminal_once() {
+        let initiator = BrowserInitiator::new(BrowserInitiatorConfig::default()).unwrap();
+        let calls = Rc::new(Cell::new(0));
+        let observed = calls.clone();
+        initiator.on_closed(move |reason| {
+            assert_eq!(reason, BrowserError::ChannelClosed);
+            observed.set(observed.get() + 1);
+        });
+        initiator.close();
+        assert!(initiator.channel.onclose().is_some());
+        assert!(initiator.peer.onconnectionstatechange().is_some());
+        let event = Event::new("close").unwrap();
+        let callback = initiator.channel.onclose().unwrap();
+        callback.call1(&initiator.channel, &event).unwrap();
+        callback.call1(&initiator.channel, &event).unwrap();
+        assert_eq!(calls.get(), 1);
+    }
 
     #[wasm_bindgen_test]
     fn ice_server_maps_urls_username_and_credential() {

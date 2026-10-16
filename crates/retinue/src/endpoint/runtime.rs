@@ -17,27 +17,25 @@ use crate::announce_freshness::AnnounceFreshnessConfigError;
 use crate::channel::DEFAULT_DECODED_FRAME_LIMIT;
 use crate::hash::AddressHash;
 use crate::identity::{Identity, PrivateIdentity};
-use crate::packet::Packet;
 
 use super::announces::{AnnounceFreshnessPolicy, AnnounceFreshnessState};
 use super::config::{
     DEFAULT_LINK_MTU, DEFAULT_RELIABLE_INITIAL_RTT_MS, DEFAULT_RELIABLE_MAX_WINDOW,
 };
 use super::dedup::{HashList, LinkPacketMemory, PACKET_HASHES, PATH_REQUEST_TAGS};
+use super::discovery::Discovery;
 use super::facts::PeerAnnounce;
 use super::inbound::{Accepted, AcceptedResource, InboundLinks};
-use super::interface::InterfaceId;
+use super::inbound_queue;
 use super::known_destinations::KNOWN_DESTINATIONS_INTERVAL;
+use super::local::LocalState;
 use super::rebroadcast::{Rebroadcasting, start_rebroadcast_driver};
-use super::router::route;
+use super::router::dispatch;
 use super::routing::{RoutingPolicy, RoutingStats};
 use super::shared::{Lifecycle, Quiesce, Shared};
 use super::single::ReceivedSingle;
+use super::tunnel::Tunnels;
 use super::watchdog::{LINK_WATCHDOG_TICK, watch_links};
-
-/// Depth of the router's inbound queue. When it is full a TCP reader awaits, back-pressuring
-/// the peer, and [`InterfaceSink::deliver`], which cannot await, drops.
-const ROUTER_QUEUE: usize = 1024;
 
 /// A Reticulum endpoint over any number of interfaces.
 ///
@@ -93,7 +91,7 @@ impl Endpoint {
         identity: PrivateIdentity,
         freshness_policy: AnnounceFreshnessPolicy,
     ) -> Result<Self, AnnounceFreshnessConfigError> {
-        let (router_tx, mut router_rx) = mpsc::channel::<(InterfaceId, Packet)>(ROUTER_QUEUE);
+        let (inbound_queue, mut inbound_rx) = inbound_queue::channel();
         let (accepted_tx, accepted_rx) = mpsc::unbounded_channel::<Accepted>();
         let (reliable_accepted_tx, reliable_accepted_rx) = mpsc::unbounded_channel::<Accepted>();
         let (resource_accepted_tx, resource_accepted_rx) =
@@ -112,7 +110,7 @@ impl Endpoint {
             ratchet_persistence: Mutex::new(None),
             announce_timebases: Mutex::new(HashMap::new()),
             interfaces: Mutex::new(Vec::new()),
-            router_tx,
+            inbound_queue,
             accepted_tx,
             reliable_accepted_tx,
             resource_accepted_tx,
@@ -163,21 +161,32 @@ impl Endpoint {
             drainable: Mutex::new(Vec::new()),
             active_resources: AtomicUsize::new(0),
             resource_notify: tokio::sync::Notify::new(),
+            local: LocalState::default(),
+            tunnels: Tunnels::default(),
+            discovery: Discovery::default(),
         });
 
+        shared.inbound_queue.bind(&shared);
         let router = Arc::clone(&shared);
         track(&shared, async move {
-            while let Some((iface, pkt)) = router_rx.recv().await {
+            while let Some(inbound) = inbound_rx.recv().await {
                 // Every ingress path (TCP, `deliver`, `deliver_frame`) funnels through here,
                 // so this is the one place a flagged frame from a plain interface is refused.
-                if pkt.ifac {
+                if inbound.packet.ifac {
                     router
                         .routing_stats
                         .ifac_flag_rejected
                         .fetch_add(1, Ordering::Relaxed);
+                    // RNS counts it against the interface too (`Transport.py` 1784).
+                    router.with_iface(inbound.iface, |iface| iface.stats.note_ifac_violation());
                     continue;
                 }
-                route(&router, iface, pkt);
+                dispatch(
+                    &router,
+                    inbound.iface,
+                    inbound.packet,
+                    inbound.ingress_limited,
+                );
             }
         });
         start_rebroadcast_driver(&shared);
