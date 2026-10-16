@@ -1954,7 +1954,7 @@ working tree. Private bench material stays under ignored validation results.
 The existing repository targets were reused; no isolated target, Cargo home
 or worktree was created.
 
-**Custody continuation (2026-10-15, in progress).** The owner's delayed reply
+**Custody continuation (2026-10-16, software-qualified; native/RF open).** The owner's delayed reply
 selected **extend Djinn custody first**, superseding the isolated seed-file
 choice for further physical runs. COM7's physical USB reconnect recovered its
 endpoint. Exact Tulle status, identity slot B sequence 5, US915 and modem
@@ -1963,11 +1963,36 @@ snapshot (`baseline-com7-after-reconnect.json`). The earlier failure receipts
 retain their original pending-restoration status as historical evidence.
 
 Personae's scoped Tucket derivation is published at `5c89001`; its complete
-71-test library suite passes. Djinn's release policy and Signalman's port add
-a single device/realm wallet child and a sticky connection custody watch.
-The consumer is being changed to a Tucket-only runtime, avoiding dormant
-Reticulum identities and a synthetic Sennet packet-id reservation. The 18
-retained-instance tests pass, including direct wire ACK and refusal to
-activate an uninstalled personality. New custody code still needs receiving
-compiler and actual broker receipts before any further RF run. Mere owns the
-custody route and policy; the Dramatis repository owns the derivation.
+71-test library suite passes. Mere's scoped release and sticky connection watch
+are published in `0e6178bc`, with current-upstream receiving checks recorded in
+`6d1908f4`. Real-broker probes pass absent/Locked/no-wallet refusal, stable
+identity on reopen, wrong-app release/sign/attest refusal, and independent
+lock/resident-loss closure. Two policy tests pass. A deliberately restored
+local-seed fallback fails both absent and Locked controls; exact source
+restoration and the rebuilt clean executable then pass all six probes. The
+receipts retain a caught stale negative executable caused by Copy-Item's old
+timestamp. Strict port/example Clippy passes; existing Djinn sync/door Clippy
+diagnostics remain separate. Mere owns custody; Dramatis owns the derivation.
+
+Murm's `88a82726e0a` adds the Tucket-only runtime, avoiding dormant Reticulum
+identities and synthetic Sennet packet-id reservations, and carriage guards
+at ingress and physical transmit boundaries. All 298 core test executions pass,
+including direct wire ACK, uninstalled-personality refusal, and custody loss
+during receive with no ingress, journal mutation or physical transmit. The
+desktop adopts Mere `6d1908f4` in its standalone lock. Its Djinn-backed worker
+and public contact-card exporter build; all 40 desktop library tests pass (one
+existing case ignored), including absence before any serial/journal access.
+The canonical Comms source passes all 63 Signalman tests; its package source
+was verified byte-identical to the prior pin. Strict desktop all-target Clippy
+and formatting pass. The source audit has one canonical source per first-party
+supplier. [Consumer receipts](../testing/receipts/tucket-desktop/custody/README.md)
+retain these exact scopes. Native/RF remains open; further physical runs use
+Djinn custody and public configuration only.
+
+One approved Mere integration worktree was needed to publish this supplier
+without unrelated unpublished main commits or rewriting active build inputs;
+it and its branch are removed after publication. Existing targets were reused.
+The existing shared `C:\t\cargo-homes\mere-upstreams` cache remains co-owned by
+earlier family qualifiers and this gate. Ignored synthetic broker wallets remain
+after automatic approval review blocked their recursive deletion; helpers are
+stopped, and private runtime files were excluded from the published receipts.

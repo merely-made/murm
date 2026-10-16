@@ -17,6 +17,7 @@ param(
     [string]$DesktopBinary,
     [string]$PeerBinary,
     [string]$TucketBenchConfig,
+    [string]$TucketConfig,
     [string]$BenchPython,
     [string]$PeerUsbSerial
 )
@@ -26,12 +27,16 @@ if (!$DesktopBinary) { $DesktopBinary = Join-Path $repo 'apps/signalman-desktop/
 if (!$PeerBinary) { $PeerBinary = Join-Path $repo 'target/debug/examples/stock_companion_pair.exe' }
 $DesktopBinary = (Resolve-Path -LiteralPath $DesktopBinary).Path
 $PeerBinary = (Resolve-Path -LiteralPath $PeerBinary).Path
-if ($TucketBenchConfig) {
+if ($TucketBenchConfig -and $TucketConfig) { throw 'Choose one Tucket authority.' }
+$hasTucket = [bool]($TucketBenchConfig -or $TucketConfig)
+if ($hasTucket) {
     if ($Protocol -ne 'meshcore' -or !$BenchPython -or !$PeerUsbSerial) { throw 'Tucket bench requires MeshCore, BenchPython and an exact PeerUsbSerial.' }
-    $TucketBenchConfig = (Resolve-Path -LiteralPath $TucketBenchConfig).Path
+    $configurationPath = (Resolve-Path -LiteralPath $(if ($TucketConfig) { $TucketConfig } else { $TucketBenchConfig })).Path
     $BenchPython = (Resolve-Path -LiteralPath $BenchPython).Path
-    $tucketSettings = Get-Content -LiteralPath $TucketBenchConfig -Raw | ConvertFrom-Json
-    if (!$tucketSettings.bench_only -or $tucketSettings.realm -ne $Realm -or $tucketSettings.port -ne $Port) { throw 'Tucket bench config must explicitly match this port and bench realm.' }
+    $tucketSettings = Get-Content -LiteralPath $configurationPath -Raw | ConvertFrom-Json
+    if ($tucketSettings.realm -ne $Realm -or $tucketSettings.port -ne $Port) { throw 'Tucket config must explicitly match this port and realm.' }
+    if ($TucketBenchConfig -and !$tucketSettings.bench_only) { throw 'Seed-file bench mode must be explicit.' }
+    if ($TucketConfig -and (!$tucketSettings.device_id -or $tucketSettings.bench_only -or $tucketSettings.private_material)) { throw 'Djinn configuration must name a public device id and no private material.' }
 }
 $length = if ($Protocol -eq 'meshtastic') { 8 } else { 64 }
 if ($Port -eq $PeerPort -or $SelfAddress -eq $PeerAddress -or
@@ -51,11 +56,12 @@ $tokens = @{
     ZOOM=$Zoom.ToString([Globalization.CultureInfo]::InvariantCulture)
 }
 $script = Get-Content -LiteralPath (Join-Path $PSScriptRoot 'companion.scn.in') -Raw
-if ($TucketBenchConfig) {
-    $script = $script.Replace('Connect companion', 'Connect Tulle').Replace('Signalman stock @@PROTOCOL@@ companion', 'Signalman isolated Tucket over Tulle against stock @@PROTOCOL@@')
+if ($hasTucket) {
+    $script = $script.Replace('Connect companion', 'Connect Tulle').Replace('Signalman stock @@PROTOCOL@@ companion', 'Signalman Tucket over Tulle against stock @@PROTOCOL@@')
     $tucketSettings.journal = $journal
-    $TucketBenchConfig = Join-Path $output 'tucket-bench-config.json'
-    $tucketSettings | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath $TucketBenchConfig
+    $configurationPath = Join-Path $output 'tucket-config.json'
+    $tucketSettings | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath $configurationPath
+    if ($TucketConfig) { $TucketConfig = $configurationPath } else { $TucketBenchConfig = $configurationPath }
 }
 foreach ($token in $tokens.Keys) { $script = $script.Replace("@@$token@@", $tokens[$token]) }
 [IO.File]::WriteAllText($fixture, $script)
@@ -65,7 +71,7 @@ $envNames = @('SIGNALMAN_COMPANION_SCENARIO','SIGNALMAN_COMPANION_CAPTURE_DIR',
     'SIGNALMAN_APPEARANCE_SCENARIO','SIGNALMAN_STATION_PORT','SIGNALMAN_RADIO_JOURNAL',
     'SIGNALMAN_MESHTASTIC_PORT','SIGNALMAN_MESHCORE_PORT','SIGNALMAN_APPEARANCE_STORE',
     'SIGNALMAN_THEME_LIBRARY','SIGNALMAN_OBSERVATION_FIXTURES','SIGNALMAN_WIDTH','SIGNALMAN_HEIGHT',
-    'SIGNALMAN_TUCKET_BENCH_CONFIG')
+    'SIGNALMAN_TUCKET_BENCH_CONFIG','SIGNALMAN_TUCKET_CONFIG')
 $saved = @{}
 foreach ($name in $envNames) { $saved[$name] = [Environment]::GetEnvironmentVariable($name) }
 $receipt = [ordered]@{
@@ -75,7 +81,7 @@ $receipt = [ordered]@{
     peer_sha256=(Get-FileHash $PeerBinary -Algorithm SHA256).Hash
     scenario_sha256=(Get-FileHash $fixture -Algorithm SHA256).Hash
     deadline_seconds=$DeadlineSeconds; firmware_or_configuration_mutated=$false; result='not_completed'
-    carriage=$(if ($TucketBenchConfig) { 'isolated_bench_tucket_over_tulle' } else { 'stock_companion' })
+    carriage=$(if ($TucketConfig) { 'djinn_tucket_over_tulle' } elseif ($TucketBenchConfig) { 'isolated_bench_tucket_over_tulle' } else { 'stock_companion' })
 }
 $desktop = $null
 $peer = $null
@@ -96,9 +102,10 @@ try {
     $peerArgs = "peer $Protocol $PeerPort $Realm `"$(Join-Path $output 'peer')`" $tag $SelfAddress $Channel"
     $deadline = [DateTime]::UtcNow.AddSeconds($DeadlineSeconds)
     if ($TucketBenchConfig) { $env:SIGNALMAN_TUCKET_BENCH_CONFIG = $TucketBenchConfig }
+    if ($TucketConfig) { $env:SIGNALMAN_TUCKET_CONFIG = $TucketConfig }
     $desktop = Start-Process -FilePath $DesktopBinary -PassThru -WorkingDirectory $repo `
         -RedirectStandardOutput (Join-Path $output 'desktop.stdout.log') -RedirectStandardError (Join-Path $output 'desktop.stderr.log')
-    if ($TucketBenchConfig) {
+    if ($hasTucket) {
         # Wait for confirmed host carriage, then put a genuine stock advert on
         # air. The stock helper owns the port afterward and drains stored text.
         while (!(Test-Path -LiteralPath $journal)) {

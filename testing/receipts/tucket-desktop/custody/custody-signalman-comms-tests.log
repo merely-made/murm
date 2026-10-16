@@ -1,0 +1,197 @@
+warning: patch `mere-p2panda-net v0.7.5 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `mere-proofs v0.1.0 (https://github.com/merely-made/mere.git?branch=main#6d1908f4)` was not used in the crate graph
+warning: patch `muniment v0.1.2 (https://github.com/merely-made/mere.git?branch=main#6d1908f4)` was not used in the crate graph
+warning: patch `p2panda-auth v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-core v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-discovery v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-encryption v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-store v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-stream v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-sync v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+help: Check that the patched package version and available features are compatible
+      with the dependency requirements. If the patch has a different version from
+      what is locked in the Cargo.lock file, run `cargo update` to use the new
+      version. This may also occur with an optional dependency that is not enabled.
+   Compiling typenum v1.20.1
+   Compiling proc-macro2 v1.0.106
+   Compiling quote v1.0.46
+   Compiling unicode-ident v1.0.24
+   Compiling hybrid-array v0.4.13
+   Compiling cfg-if v1.0.4
+   Compiling syn v2.0.118
+   Compiling crypto-common v0.2.2
+   Compiling version_check v0.9.5
+   Compiling generic-array v0.14.7
+   Compiling cmov v0.5.4
+   Compiling windows-link v0.2.1
+   Compiling windows-sys v0.61.2
+   Compiling ctutils v0.4.2
+   Compiling block-buffer v0.12.1
+   Compiling subtle v2.6.1
+   Compiling const-oid v0.10.2
+   Compiling digest v0.11.3
+   Compiling semver v1.0.28
+   Compiling rustc_version v0.4.1
+   Compiling cpufeatures v0.3.0
+   Compiling autocfg v1.5.1
+   Compiling num-traits v0.2.19
+   Compiling curve25519-dalek v5.0.0
+   Compiling crypto-common v0.1.7
+   Compiling byteorder v1.5.0
+   Compiling serde_core v1.0.228
+   Compiling curve25519-dalek-derive v0.1.1
+   Compiling block-padding v0.4.2
+   Compiling zeroize v1.9.0
+   Compiling inout v0.2.2
+   Compiling socket2 v0.6.5
+   Compiling serial2 v0.2.37
+   Compiling mio v1.2.2
+   Compiling tokio-macros v2.7.0
+   Compiling pin-project-lite v0.2.17
+   Compiling bytes v1.12.1
+   Compiling signature v3.0.0
+   Compiling serde v1.0.228
+   Compiling tokio v1.53.1
+   Compiling ed25519 v3.0.0
+   Compiling cipher v0.5.2
+   Compiling sha2 v0.11.0
+   Compiling serde_derive v1.0.228
+   Compiling syn v3.0.3
+   Compiling heapless v0.9.3
+   Compiling serial2-tokio v0.1.24
+   Compiling ed25519-dalek v3.0.0
+   Compiling hash32 v0.3.1
+   Compiling hmac v0.13.0
+   Compiling inout v0.1.4
+   Compiling block-buffer v0.10.4
+   Compiling cpufeatures v0.2.17
+   Compiling libbz2-rs-sys v0.2.5
+   Compiling stable_deref_trait v1.2.1
+   Compiling rand_core v0.10.1
+   Compiling cpubits v0.1.1
+   Compiling aes v0.9.1
+   Compiling bzip2 v0.6.1
+   Compiling x25519-dalek v3.0.0
+   Compiling tulle v0.2.0 (C:\Users\mark_\Code\repos\retinue\crates\tulle)
+   Compiling digest v0.10.7
+   Compiling cipher v0.4.4
+   Compiling hkdf v0.13.0
+   Compiling cbc v0.2.1
+   Compiling getrandom v0.2.17
+   Compiling thiserror v2.0.19
+   Compiling retinue v0.3.0 (C:\Users\mark_\Code\repos\retinue\crates\retinue)
+   Compiling thiserror-impl v2.0.19
+   Compiling getrandom v0.3.4
+   Compiling hashbrown v0.17.1
+   Compiling az v1.3.0
+   Compiling zmij v1.0.23
+   Compiling equivalent v1.0.2
+   Compiling indexmap v2.14.0
+   Compiling embedded-graphics-core v0.4.1 (C:\Users\mark_\Code\repos\retinue\vendor\embedded-graphics-core)
+   Compiling aes v0.8.4
+   Compiling sha2 v0.10.9
+   Compiling serde_spanned v0.6.9
+   Compiling toml_datetime v0.6.11
+   Compiling rmp v0.8.15
+   Compiling float-cmp v0.9.0
+   Compiling serde_json v1.0.151
+   Compiling toml_write v0.1.2
+   Compiling memchr v2.8.3
+   Compiling micromath v2.1.0
+   Compiling winnow v0.7.15
+   Compiling toml_edit v0.22.27
+   Compiling embedded-graphics v0.8.2 (C:\Users\mark_\Code\repos\retinue\vendor\embedded-graphics)
+   Compiling rmpv v1.3.1
+   Compiling seneschal v0.2.0 (C:\Users\mark_\Code\repos\retinue\crates\seneschal)
+   Compiling ctr v0.9.2
+   Compiling hmac v0.12.1
+   Compiling itoa v1.0.18
+   Compiling pipit v0.2.0
+   Compiling outrider v0.3.0 (C:\Users\mark_\Code\repos\retinue\crates\outrider)
+   Compiling tucket v0.0.2 (C:\Users\mark_\Code\repos\retinue\crates\tucket)
+   Compiling sennet v0.0.2 (C:\Users\mark_\Code\repos\retinue\crates\sennet)
+   Compiling radio-face v0.0.1 (C:\Users\mark_\Code\repos\retinue\crates\radio-face)
+   Compiling toml v0.8.23
+   Compiling async-trait v0.1.92
+   Compiling lora-modulation v0.1.5
+   Compiling fastrand v2.5.0
+   Compiling once_cell v1.21.4
+   Compiling minisign-verify v0.2.5
+   Compiling mere-comms v0.0.1 (https://github.com/merely-made/mere.git?branch=main#6d1908f4)
+   Compiling linkboy v0.1.0 (C:\Users\mark_\Code\repos\retinue\apps\linkboy)
+   Compiling tempfile v3.27.0
+   Compiling radio-hand v0.0.1 (C:\Users\mark_\Code\repos\retinue\crates\radio-hand)
+   Compiling postilion v0.3.0 (C:\Users\mark_\Code\repos\retinue\crates\postilion)
+   Compiling quick-xml v0.39.4
+   Compiling hex v0.4.3
+   Compiling signalman v0.1.0 (C:\Users\mark_\Code\repos\retinue\apps\signalman)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2m 08s
+     Running unittests src\lib.rs (target/build\debug\deps\signalman-eb46e2ffb3669ca8.exe)
+
+running 63 tests
+test comms_adapter::tests::diagnostics_preserve_failure_detail_and_scope_without_inventing_delivery ... ok
+test message_view::tests::incoming_replay_distinguishes_direct_receipt_from_fetch_without_duplication ... ok
+test firmware::tests::installer_starts_with_the_first_owner_page ... ok
+test comms_adapter::tests::router_queues_then_reads_the_same_owner_and_exact_delivery_fact ... ok
+test comms_adapter::tests::another_station_history_cannot_be_read_or_misrouted ... ok
+test message::tests::status_words_keep_transport_facts_distinct ... ok
+test firmware::tests::an_owner_confirmed_t114_dfu_port_keeps_loader_evidence_and_transport_state ... ok
+test comms_adapter::tests::unsupported_or_wrong_station_drafts_refuse_before_queue_mutation ... ok
+test message::tests::restart_replay_is_exact_and_duplicate_receive_is_idempotent ... ok
+test management::tests::old_routes_and_their_transport_do_not_bypass_stale_policy ... ok
+test management::tests::projection_is_typed_stable_and_does_not_invent_links_or_peering ... ok
+test message::tests::authenticated_sender_must_match_the_wire_envelope ... ok
+test message_view::tests::outgoing_replay_preserves_queue_carriage_acceptance_and_terminal_facts ... ok
+test management::tests::stable_ids_and_order_do_not_depend_on_snapshot_order ... ok
+test observation::collect::tests::cancellation_after_discovery_stops_before_the_next_exchange ... ok
+test observation::collect::tests::capture_discovers_profiles_and_respects_finite_page_limit ... ok
+test observation::collect::tests::capture_retains_overwrite_gap_and_rejects_wrong_boot ... ok
+test observation::collect::tests::capture_and_replay_owner_lifecycle_preserves_durations_and_points ... ok
+test message::tests::text_and_voice_share_one_replayable_log_without_retagging_text ... ok
+test radio_comms::companion::tests::malformed_lengths_and_truncated_protobuf_stop_the_connection ... ok
+test message::tests::station_payload_keeps_text_and_voice_in_their_owned_lxmf_fields ... ok
+test radio_comms::companion::tests::meshcore_unknown_or_ambiguous_receive_is_not_given_a_synthetic_full_identity ... ok
+test radio_comms::companion::tests::meshtastic_disabled_channel_or_changed_identity_refuses_connection ... ok
+test radio_comms::carriage::tests::custody_lost_during_receive_stops_before_ingress_or_transmit ... ok
+test radio_comms::companion::tests::meshtastic_packets_during_configuration_are_persisted_after_identity_validation ... ok
+test observation::collect::tests::cancellation_before_discovery_sends_no_observation_command ... ok
+test radio_comms::carriage::tests::ambiguous_physical_error_stops_without_false_completion_or_replay ... ok
+test radio_comms::carriage::tests::protocol_expiry_wakes_history_without_radio_traffic ... ok
+test radio_comms::tests::failing_durable_owner_cannot_publish_a_mailbox ... ok
+test radio_comms::tests::failed_intent_commit_never_publishes_or_dispatches_and_file_owner_is_exclusive ... ok
+test radio_comms::carriage::tests::undiscovered_recipient_waits_without_blocking_verified_contacts ... ok
+test radio_comms::carriage::tests::physical_driver_carries_real_text_ack_and_full_key_contact ... ok
+test survey::tests::capture_import_has_explicit_clock_and_unknown_reverse_evidence ... ok
+test survey::tests::imports_a_moving_track_without_rewriting_source_times ... ok
+test survey::tests::imports_reset_capture_loss_and_asymmetric_reception_as_distinct_evidence ... ok
+test survey::tests::imports_stationary_points_and_retains_a_long_gps_gap ... ok
+test survey::tests::refuses_external_entity_declarations_and_nonfinite_coordinates ... ok
+test radio_comms::companion::tests::meshcore_early_ack_before_sent_response_is_retained ... ok
+test radio_comms::tests::meshtastic_real_owner_round_trip_and_reopen_preserve_packet_identity ... ok
+test survey::tests::refuses_oversize_nonfinite_and_wrong_typed_optional_capture_fields ... ok
+test radio_comms::tests::routing_refusals_precede_mutation_and_uncertain_sessions_never_auto_replay ... ok
+test radio_comms::companion::tests::meshtastic_fragmented_receive_survives_poll_timeout_and_deduplicates ... ok
+test survey::tests::reimport_revalidates_nonfinite_coordinates_and_clock_scope ... ok
+test survey::tests::rejects_impossible_dates_bad_fractions_and_nested_points ... ok
+test survey::tests::reimport_rejects_a_summary_that_disagrees_with_original_source_bytes ... ok
+test tests::a_bare_to_is_an_empty_prefix_rather_than_a_parse_failure ... ok
+test survey::tests::reverse_requires_receipt_or_test_opportunity_and_export_replays_settings ... ok
+test tests::commands_are_told_from_messages_by_their_slash ... ok
+test tests::only_a_leading_slash_commands ... ok
+test voice::tests::empty_pcm_is_refused_before_encoding ... ok
+test survey::tests::stored_capture_adapter_preserves_literal_evidence_and_rejects_tampered_summary ... ok
+test radio_comms::companion::tests::meshtastic_queue_rejection_and_routing_requests_are_not_acknowledgements ... ok
+test radio_comms::tests::meshcore_verified_contact_text_retries_and_protocol_ack_use_full_keys ... ok
+test radio_comms::companion::tests::meshcore_prefix_collision_refuses_send_before_touching_radio ... ok
+test radio_comms::companion::tests::journal_failure_prevents_serial_dispatch_and_retires_owner ... ok
+test radio_comms::companion::tests::meshtastic_queues_real_packet_and_only_matched_remote_ack_advances_delivery ... ok
+test voice::tests::clip_facts_survive_field_seven_and_decode ... ok
+test radio_comms::companion::tests::acknowledgement_expiry_preserves_observed_device_acceptance ... ok
+test radio_comms::companion::tests::meshcore_send_and_sync_use_stock_commands_and_matching_ack ... ok
+test radio_comms::companion::tests::meshtastic_disconnect_marks_uncertain_command_and_does_not_replay_on_reopen ... ok
+test radio_comms::companion::tests::meshcore_interrupted_sent_response_never_replays_after_reconnect ... ok
+test firmware::tests::catalog_loads_and_resolves_verified_packages ... ok
+test radio_comms::companion::tests::bound_pending_commands_leave_excess_intents_durable_and_offline ... ok
+
+test result: ok. 63 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.91s
+

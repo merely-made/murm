@@ -1,0 +1,61 @@
+warning: patch `mere-p2panda-net v0.7.5 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `mere-proofs v0.1.0 (https://github.com/merely-made/mere.git?branch=main#6d1908f4)` was not used in the crate graph
+warning: patch `p2panda-auth v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-discovery v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-encryption v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-store v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-stream v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-sync v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+help: Check that the patched package version and available features are compatible
+      with the dependency requirements. If the patch has a different version from
+      what is locked in the Cargo.lock file, run `cargo update` to use the new
+      version. This may also occur with an optional dependency that is not enabled.
+   Compiling signalman-desktop v0.0.1 (C:\Users\mark_\Code\repos\retinue\apps\signalman-desktop)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1m 04s
+     Running unittests src\lib.rs (target/build\debug\deps\signalman_desktop-92831b09ebc9101a.exe)
+
+running 41 tests
+test audio::pcm::tests::downmix_uses_every_channel_and_refuses_partial_frames ... ok
+test audio::pcm::tests::upsample_retains_duration_and_endpoints ... ok
+test collector::tests::stop_reaches_the_actor_and_terminal_event_is_retained_until_drain ... ok
+test comms::tests::companion_settings_refuse_port_aliases_and_separate_scope_paths ... ok
+test comms::tests::subject_refusal_does_not_write_the_durable_journal ... ok
+test device_mere::tests::identical_source_is_a_true_noop_and_selection_survives_refresh ... ok
+test device_mere::tests::projection_has_one_typed_relation_with_present_endpoints_and_retains_stale_nodes ... ok
+test device_mere::tests::absent_identity_waits_for_threshold_and_stales_only_once ... ok
+test messages::tests::duplicate_event_does_not_grow_journal ... ok
+test messages::tests::unknown_authenticated_sender_remains_outside_gaz_until_owner_saves_it ... ok
+test comms::tests::concurrent_clones_serialize_queue_intents_without_id_aliasing ... ok
+test comms::tests::invalid_companion_configuration_is_rejected_before_opening_serial_io ... ok
+test network::tests::physics_change_is_an_explicit_new_epoch ... ok
+test network::tests::stale_epochs_are_ignored_and_pin_unpin_use_the_same_actor ... ok
+test resident::djinn::tests::absent_djinn_cannot_open_serial_or_create_local_identity_state ... ok
+test audio::pcm::tests::stereo_48k_downmixes_and_resamples_to_exact_8k_duration ... ok
+test resident::bench::tests::explicit_bench_material_is_required_and_identity_survives_reconnect ... ok
+test resident::tests::locked_or_absent_identity_stops_before_serial_or_journal_access ... ok
+test state::tests::changing_selected_device_clears_its_observation_association ... ok
+test station::custody_receipts::desktop_station_pending_leaves_local_state_untouched ... ignored, run with the isolated DR-C absent/Locked keeper
+test state::tests::reselecting_the_same_device_keeps_its_observation_association ... ok
+test station::messages::tests::handoff_is_bounded_deduplicated_and_waits_for_persisted_acknowledgement ... ok
+test state::tests::survey_that_loses_selected_device_clears_its_observation_association ... ok
+test station::tests::a_durable_device_id_survives_reload ... ok
+test station::tests::corrupt_public_scope_is_refused_instead_of_reminted ... ok
+test station::tests::an_existing_wallet_is_not_silently_replaced ... ok
+test survey::tests::attached_station_port_is_not_opened_by_the_installer_survey ... ok
+test survey::tests::comma_separated_ports_ignore_whitespace_and_empty_entries ... ok
+test network::tests::actor_runs_off_thread_and_keeps_only_the_latest_snapshot ... ok
+test messages::tests::voice_reopens_from_the_same_journal_as_text ... ok
+test messages::tests::redb_reopen_replays_the_exact_journal_material ... ok
+test comms::tests::real_lxmf_delivery_reaches_the_shared_comms_journal_and_reopens_without_duplicates ... ok
+test comms::tests::face_queue_uses_comms_and_releases_handoff_only_after_a_valid_journal_outcome ... ok
+test comms::tests::companion_connection_controls_validate_before_dispatch_and_allow_explicit_reconnect ... ok
+test resident::tests::active_radio_blocks_observation_and_installer_serial_borrowing ... ok
+test comms::tests::messages_face_registers_both_radio_protocols_and_queues_in_the_owner_journal ... ok
+test resident::tests::desktop_requires_configured_authority_before_scheduling_a_connection ... ok
+test resident::tests::tucket_connection_exposes_only_its_commissioned_message_protocol ... ok
+test comms::tests::companion_identity_events_use_one_adapter_per_protocol_and_disconnect_preserves_history ... ok
+test comms::tests::reopened_history_supplies_offline_authoring_but_never_selects_between_station_identities ... ok
+test resident::tests::connecting_tucket_reserves_its_port_protocol_and_journal ... ok
+
+test result: ok. 40 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 1.97s
+

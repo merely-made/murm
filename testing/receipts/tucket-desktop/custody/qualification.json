@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "result": "software_qualified",
+  "source_basis": "54a602d914f0965d0e978f4d921d0a2f052ca76a",
+  "source_sha256": {
+    "Cargo.toml": "6a32b6b3e184a3a0477c83d63a296c0ac030c91731578493b78d45b9890a153f",
+    "Cargo.lock": "32be4370a558cd85bc4ff563e515f81870274cd4003063f50ee02eeb8be0b2a5",
+    "apps/signalman/Cargo.toml": "20c6804c8ad0f0a10b798b6b175e17f9643165c60375c17f1c27aa74c7c62ee7",
+    "apps/signalman/src/radio_comms.rs": "83bbdd43f6dc2aff7b2b125b761d6d3053430d91233cfc2baa5cf08f93e41ff3",
+    "apps/signalman/src/radio_comms/resident.rs": "33f6fc4c7e03c1f79bf795a205ccbcd6211c468872a7e9cfdcb94b1c8c71f5b3",
+    "apps/signalman/src/radio_comms/carriage.rs": "1c3f19c93e89e7587fc04b86129a44d1e9bc86b66de63b29dae2703566ec9152",
+    "apps/signalman-desktop/Cargo.toml": "c394540764fe795cbe20d06d2b676a72e75d203f160f6211546268ef68e16561",
+    "apps/signalman-desktop/Cargo.lock": "6bbf3cadb0770d072a622e50ba6c1226e702eec841f89659bd67ca136a77e129",
+    "apps/signalman-desktop/src/main.rs": "d981f6afac7adf83d6ba3dccbb31875985b81058a688fb303981a12d8453e812",
+    "apps/signalman-desktop/src/resident.rs": "d7f58f8eb264bbb8a70e838a3c57ce7b470f4a10e9a612b8ca509f9ff16a041d",
+    "apps/signalman-desktop/src/resident/bench.rs": "7f0264a689acba8bf9b047482647a3c6310cc89db32f56c81ee7a05fe1eb39f2",
+    "apps/signalman-desktop/src/resident/djinn.rs": "5b4fe122ed9da56a61bf6347dbcbed99a24a2cda7ebae58f64b2c17bb31d5441",
+    "apps/signalman-desktop/examples/tucket_contact_card.rs": "94c095cf09f8ffa962b05f53d31160c6e8328b3ce149d276b5b3ddd635ed16c0",
+    "apps/signalman-desktop/scenarios/run_companion.ps1": "8165891cc795821531ea6f3c1700709ad493b4ba9bd3e6ac3ee6354b76ecd4cc",
+    "testing/run_tucket_desktop.ps1": "f500c297b786fcd0310089d48388548aad2c17cefc3a0f907ff7f2a43f075881"
+  },
+  "dependencies": [
+    "git+https://github.com/merely-made/dramatis.git?branch=main#5c89001a6ff1aac3f6105ed50b6ae5f09c9f27e2",
+    "git+https://github.com/merely-made/genet.git?branch=main#e37762d752e423dc43f920bd728c83f70c47f2cc",
+    "git+https://github.com/merely-made/mere.git?branch=main#6d1908f4ca88f37a2081b557de3d29b46ec38b6b",
+    "git+https://github.com/merely-made/netrender.git?branch=main#f4f9c0d87e6a6030b61075a45118055dfe6a12df"
+  ],
+  "checks": {
+    "owned_source_format": "passed",
+    "powershell_syntax": "passed",
+    "desktop_strict_all_target_clippy": "passed",
+    "desktop_library_tests": {
+      "ignored": 1,
+      "passed": 40
+    },
+    "public_contact_exporter_build": "passed",
+    "desktop_build": "passed",
+    "signalman_library_tests": {
+      "ignored": 0,
+      "passed": 63
+    }
+  },
+  "binaries": {
+    "public_contact_exporter_sha256": "5aa6b6721c6319ffc54f24e988fc03d32895902aab9d64802bc589649814578c",
+    "desktop_sha256": "374bd6b13d6456b48a1de47df23d86688b17e88b19434dc173ee3ac9268f4685"
+  },
+  "native_rf": "not run in this software checkpoint",
+  "private_material_tracked": false,
+  "custody_broker": "Mere testing/receipts/tucket-custody",
+  "retained_cache": "existing co-owned C:/t/cargo-homes/mere-upstreams",
+  "isolated_worktree_retained": false
+}

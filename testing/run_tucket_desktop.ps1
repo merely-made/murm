@@ -14,6 +14,7 @@ param(
     [string]$RawProbe,
     [string]$RawFloodText,
     [switch]$RawDirectFirst,
+    [switch]$DjinnCustody,
     [ValidateRange(0.5,2.0)][double]$Zoom = 0.75
 )
 $ErrorActionPreference = 'Stop'
@@ -21,7 +22,10 @@ $repo = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $BenchConfig = (Resolve-Path -LiteralPath $BenchConfig).Path
 $Python = (Resolve-Path -LiteralPath $Python).Path
 $config = Get-Content -LiteralPath $BenchConfig -Raw | ConvertFrom-Json
-if (!$config.bench_only -or $config.realm -notlike 'bench-*' -or $config.port -eq $PeerPort -or $DutUsbSerial -eq $PeerUsbSerial -or $SelfAddress -notmatch '^[0-9a-f]{64}$') { throw 'Require an isolated bench config, full public key and distinct identified boards.' }
+if ($config.realm -notlike 'bench-*' -or $config.port -eq $PeerPort -or $DutUsbSerial -eq $PeerUsbSerial -or $SelfAddress -notmatch '^[0-9a-f]{64}$') { throw 'Require an explicit bench realm, full public key and distinct identified boards.' }
+if ($DjinnCustody) {
+    if (!$config.device_id -or $config.bench_only -or $config.private_material -or $RawProbe) { throw 'Djinn mode requires only public identity configuration and the real desktop worker.' }
+} elseif (!$config.bench_only) { throw 'Seed-file mode must be explicit.' }
 $output = [IO.Path]::GetFullPath($OutputDirectory)
 if (Test-Path -LiteralPath $output) { throw 'Choose a fresh evidence directory.' }
 $artifacts = Join-Path $repo 'validation/results/sennet-tucket-radios/artifacts'
@@ -38,12 +42,15 @@ $probe = Join-Path $repo 'testing/stock_tucket_bench.py'
 $report = [ordered]@{schema=1;bench_only=$true;source=(git -C $repo rev-parse HEAD);result='not_completed';dut_port=$config.port;peer_port=$PeerPort;dut_usb_serial=$DutUsbSerial;peer_usb_serial=$PeerUsbSerial;helper_sha256=$stockPin.helper_sha256;stock_image_sha256=$stockPin.image_sha256;tulle_image_sha256=$tullePin.image_sha256;restoration=@{}}
 $report.tucket_tx_power_dbm = $config.tx_power_dbm
 $report.stock_tx_power_dbm = $StockPowerDbm
+$report.authority = $(if ($DjinnCustody) { 'djinn' } else { 'isolated_bench_seed_file' })
 $report.opened_utc = [DateTime]::UtcNow.ToString('o')
 $report.bench_config_sha256 = (Get-FileHash $BenchConfig -Algorithm SHA256).Hash.ToLowerInvariant()
+$report.self_public_key = $SelfAddress
+if ($PublicCard) { $report.public_card_sha256 = (Get-FileHash -LiteralPath $PublicCard).Hash.ToLowerInvariant() }
 $report.source_sha256 = @{}
-foreach ($path in @('apps/signalman/src/radio_comms.rs','apps/signalman/src/radio_comms/resident.rs','apps/signalman/src/radio_comms/carriage.rs',
+foreach ($path in @('Cargo.toml','apps/signalman/Cargo.toml','apps/signalman/src/radio_comms.rs','apps/signalman/src/radio_comms/resident.rs','apps/signalman/src/radio_comms/carriage.rs',
     'apps/signalman-desktop/Cargo.toml','apps/signalman-desktop/Cargo.lock','apps/signalman-desktop/src/main.rs',
-    'apps/signalman-desktop/src/resident.rs','apps/signalman-desktop/src/resident/bench.rs','apps/signalman-desktop/src/state/messages.rs',
+    'apps/signalman-desktop/src/resident.rs','apps/signalman-desktop/src/resident/bench.rs','apps/signalman-desktop/src/resident/djinn.rs','apps/signalman-desktop/examples/tucket_contact_card.rs','apps/signalman-desktop/src/state/messages.rs',
     'apps/signalman-desktop/src/companion_scenario.rs','apps/signalman-desktop/src/views/messages.rs',
     'apps/signalman-desktop/scenarios/run_companion.ps1','crates/tucket/src/instance.rs',
     'crates/tucket/examples/meshcore_headed/main.rs','crates/tucket/examples/meshcore_headed/companion.rs',
@@ -94,7 +101,9 @@ try {
             if (!$raw.HasExited) { Stop-Process -Id $raw.Id; $raw.WaitForExit() }
         }
     } else {
-        & (Join-Path $repo 'apps/signalman-desktop/scenarios/run_companion.ps1') -Protocol meshcore -Port $config.port -PeerPort $PeerPort -SelfAddress $SelfAddress -PeerAddress $stock.after.key -Realm $config.realm -OutputDirectory (Join-Path $output 'native') -Zoom $Zoom -TucketBenchConfig $BenchConfig -BenchPython $Python -PeerUsbSerial $PeerUsbSerial
+        $nativeArgs = @{Protocol='meshcore';Port=$config.port;PeerPort=$PeerPort;SelfAddress=$SelfAddress;PeerAddress=$stock.after.key;Realm=$config.realm;OutputDirectory=(Join-Path $output 'native');Zoom=$Zoom;BenchPython=$Python;PeerUsbSerial=$PeerUsbSerial}
+        if ($DjinnCustody) { $nativeArgs.TucketConfig = $BenchConfig } else { $nativeArgs.TucketBenchConfig = $BenchConfig }
+        & (Join-Path $repo 'apps/signalman-desktop/scenarios/run_companion.ps1') @nativeArgs
         $report.result = 'native_completed_pending_visual_review'
     }
 } catch {
