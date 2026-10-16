@@ -16,6 +16,38 @@ fn introduce(a: &mut Instance, b: &mut Instance) {
 }
 
 #[test]
+fn direct_text_returns_a_wire_ack_without_a_separate_application_pump() {
+    let mut a = instance(1);
+    let mut b = instance(2);
+    introduce(&mut a, &mut b);
+    a.active_node_mut().unwrap().set_route(
+        b.node().my_hash(),
+        crate::node::DirectRoute::new(0, &[]).unwrap(),
+    );
+    let id = a
+        .begin_send(
+            1,
+            b.node().my_hash(),
+            "direct",
+            TextRetryPolicy::default(),
+            SendTiming {
+                timestamp: 3,
+                expires_at: 100,
+                allowed_until: 100,
+            },
+        )
+        .unwrap();
+    let attempt = a.next_retry(1, id, 2).unwrap().unwrap();
+    let received = b.on_frame(1, &attempt.frame).unwrap();
+    assert_eq!(received.outbound.len(), 1);
+    assert_eq!(
+        a.on_frame(2, &received.outbound[0]).unwrap().acknowledged,
+        [id]
+    );
+    assert_eq!(a.pending_len(), 0);
+}
+
+#[test]
 fn two_nodes_ack_a_retained_send() {
     let mut a = instance(1);
     let mut b = instance(2);

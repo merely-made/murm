@@ -11,7 +11,7 @@ use sennet::{
     node_info::NodeDirectoryConfig,
     transport::ChannelKey,
 };
-fn scope(node: u32, seed: u8) -> RadioScope {
+pub(super) fn scope(node: u32, seed: u8) -> RadioScope {
     RadioScope {
         realm: "household-a".into(),
         meshtastic_node: node,
@@ -21,7 +21,7 @@ fn scope(node: u32, seed: u8) -> RadioScope {
             .pub_key,
     }
 }
-fn runtime(
+pub(super) fn runtime(
     scope: &RadioScope,
     seed: u8,
     home: selvage::personality::PersonalityId,
@@ -74,7 +74,7 @@ fn runtime(
     );
     Runtime::new(0, config, node, sennet, tucket).unwrap()
 }
-fn owner(scope: RadioScope, directory: &std::path::Path, name: &str) -> RadioComms {
+pub(super) fn owner(scope: RadioScope, directory: &std::path::Path, name: &str) -> RadioComms {
     RadioComms::open(scope, FileJournal::new(directory.join(name))).unwrap()
 }
 async fn send(model: &comms::Comms, conversation: ConversationId, body: &str) -> MessageId {

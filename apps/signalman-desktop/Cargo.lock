@@ -8790,6 +8790,9 @@ dependencies = [
  "sceno",
  "scenomise",
  "seiche",
+ "selvage",
+ "sennet",
+ "serde",
  "serde_json",
  "serial2-tokio",
  "signalman",
@@ -8800,8 +8803,10 @@ dependencies = [
  "tempfile",
  "thiserror 2.0.20",
  "tokio",
+ "tucket",
  "tulle",
  "winit",
+ "zeroize",
 ]
 
 [[package]]

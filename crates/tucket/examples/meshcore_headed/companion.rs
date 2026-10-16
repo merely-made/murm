@@ -83,6 +83,9 @@ impl Companion {
                 continue;
             };
             if code >= 0x80 {
+                if code == 0x88 {
+                    println!("stock RF log: {frame:02x?}");
+                }
                 self.pushes.push_back(frame);
                 continue;
             }

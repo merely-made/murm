@@ -15,7 +15,10 @@ param(
     [ValidateRange(480,1600)][int]$Height = 1100,
     [ValidateRange(0.5,2.0)][double]$Zoom = 1.0,
     [string]$DesktopBinary,
-    [string]$PeerBinary
+    [string]$PeerBinary,
+    [string]$TucketBenchConfig,
+    [string]$BenchPython,
+    [string]$PeerUsbSerial
 )
 $ErrorActionPreference = 'Stop'
 $repo = (Resolve-Path (Join-Path $PSScriptRoot '../../..')).Path
@@ -23,6 +26,13 @@ if (!$DesktopBinary) { $DesktopBinary = Join-Path $repo 'apps/signalman-desktop/
 if (!$PeerBinary) { $PeerBinary = Join-Path $repo 'target/debug/examples/stock_companion_pair.exe' }
 $DesktopBinary = (Resolve-Path -LiteralPath $DesktopBinary).Path
 $PeerBinary = (Resolve-Path -LiteralPath $PeerBinary).Path
+if ($TucketBenchConfig) {
+    if ($Protocol -ne 'meshcore' -or !$BenchPython -or !$PeerUsbSerial) { throw 'Tucket bench requires MeshCore, BenchPython and an exact PeerUsbSerial.' }
+    $TucketBenchConfig = (Resolve-Path -LiteralPath $TucketBenchConfig).Path
+    $BenchPython = (Resolve-Path -LiteralPath $BenchPython).Path
+    $tucketSettings = Get-Content -LiteralPath $TucketBenchConfig -Raw | ConvertFrom-Json
+    if (!$tucketSettings.bench_only -or $tucketSettings.realm -ne $Realm -or $tucketSettings.port -ne $Port) { throw 'Tucket bench config must explicitly match this port and bench realm.' }
+}
 $length = if ($Protocol -eq 'meshtastic') { 8 } else { 64 }
 if ($Port -eq $PeerPort -or $SelfAddress -eq $PeerAddress -or
     $SelfAddress.Length -ne $length -or $PeerAddress.Length -ne $length) {
@@ -41,6 +51,12 @@ $tokens = @{
     ZOOM=$Zoom.ToString([Globalization.CultureInfo]::InvariantCulture)
 }
 $script = Get-Content -LiteralPath (Join-Path $PSScriptRoot 'companion.scn.in') -Raw
+if ($TucketBenchConfig) {
+    $script = $script.Replace('Connect companion', 'Connect Tulle').Replace('Signalman stock @@PROTOCOL@@ companion', 'Signalman isolated Tucket over Tulle against stock @@PROTOCOL@@')
+    $tucketSettings.journal = $journal
+    $TucketBenchConfig = Join-Path $output 'tucket-bench-config.json'
+    $tucketSettings | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath $TucketBenchConfig
+}
 foreach ($token in $tokens.Keys) { $script = $script.Replace("@@$token@@", $tokens[$token]) }
 [IO.File]::WriteAllText($fixture, $script)
 $envNames = @('SIGNALMAN_COMPANION_SCENARIO','SIGNALMAN_COMPANION_CAPTURE_DIR',
@@ -48,7 +64,8 @@ $envNames = @('SIGNALMAN_COMPANION_SCENARIO','SIGNALMAN_COMPANION_CAPTURE_DIR',
     'SIGNALMAN_COMPANION_PEER','SIGNALMAN_MESSAGE_STORE','SIGNALMAN_AVAILABILITY_SETTINGS',
     'SIGNALMAN_APPEARANCE_SCENARIO','SIGNALMAN_STATION_PORT','SIGNALMAN_RADIO_JOURNAL',
     'SIGNALMAN_MESHTASTIC_PORT','SIGNALMAN_MESHCORE_PORT','SIGNALMAN_APPEARANCE_STORE',
-    'SIGNALMAN_THEME_LIBRARY','SIGNALMAN_OBSERVATION_FIXTURES','SIGNALMAN_WIDTH','SIGNALMAN_HEIGHT')
+    'SIGNALMAN_THEME_LIBRARY','SIGNALMAN_OBSERVATION_FIXTURES','SIGNALMAN_WIDTH','SIGNALMAN_HEIGHT',
+    'SIGNALMAN_TUCKET_BENCH_CONFIG')
 $saved = @{}
 foreach ($name in $envNames) { $saved[$name] = [Environment]::GetEnvironmentVariable($name) }
 $receipt = [ordered]@{
@@ -58,6 +75,7 @@ $receipt = [ordered]@{
     peer_sha256=(Get-FileHash $PeerBinary -Algorithm SHA256).Hash
     scenario_sha256=(Get-FileHash $fixture -Algorithm SHA256).Hash
     deadline_seconds=$DeadlineSeconds; firmware_or_configuration_mutated=$false; result='not_completed'
+    carriage=$(if ($TucketBenchConfig) { 'isolated_bench_tucket_over_tulle' } else { 'stock_companion' })
 }
 $desktop = $null
 $peer = $null
@@ -77,10 +95,24 @@ try {
     $env:SIGNALMAN_HEIGHT = "$Height"
     $peerArgs = "peer $Protocol $PeerPort $Realm `"$(Join-Path $output 'peer')`" $tag $SelfAddress $Channel"
     $deadline = [DateTime]::UtcNow.AddSeconds($DeadlineSeconds)
-    $peer = Start-Process -FilePath $PeerBinary -ArgumentList $peerArgs -PassThru -WindowStyle Hidden `
-        -RedirectStandardOutput (Join-Path $output 'peer.stdout.log') -RedirectStandardError (Join-Path $output 'peer.stderr.log')
+    if ($TucketBenchConfig) { $env:SIGNALMAN_TUCKET_BENCH_CONFIG = $TucketBenchConfig }
     $desktop = Start-Process -FilePath $DesktopBinary -PassThru -WorkingDirectory $repo `
         -RedirectStandardOutput (Join-Path $output 'desktop.stdout.log') -RedirectStandardError (Join-Path $output 'desktop.stderr.log')
+    if ($TucketBenchConfig) {
+        # Wait for confirmed host carriage, then put a genuine stock advert on
+        # air. The stock helper owns the port afterward and drains stored text.
+        while (!(Test-Path -LiteralPath $journal)) {
+            $desktop.Refresh()
+            if ($desktop.HasExited) { throw 'Desktop exited before opening its Tucket journal.' }
+            if ([DateTime]::UtcNow -ge $deadline) { throw 'Tucket connection deadline exceeded.' }
+            Start-Sleep -Milliseconds 250
+        }
+        & $BenchPython -B (Join-Path $repo 'testing/stock_tucket_bench.py') advertise --port $PeerPort --usb-serial $PeerUsbSerial --output (Join-Path $output 'stock-advertise.json')
+        if ($LASTEXITCODE -ne 0) { throw 'Stock peer advertisement failed.' }
+        Start-Sleep -Milliseconds 500
+    }
+    $peer = Start-Process -FilePath $PeerBinary -ArgumentList $peerArgs -PassThru -WindowStyle Hidden `
+        -RedirectStandardOutput (Join-Path $output 'peer.stdout.log') -RedirectStandardError (Join-Path $output 'peer.stderr.log')
     $receipt.peer_pid = $peer.Id
     $receipt.desktop_pid = $desktop.Id
     while (!$desktop.HasExited -or !$peer.HasExited) {
@@ -97,6 +129,8 @@ try {
     if (!(Test-Path -LiteralPath $env:SIGNALMAN_COMPANION_RECEIPT)) { throw 'Desktop omitted its scenario receipt.' }
     $peerReceipt = Get-Content -LiteralPath (Join-Path $output 'peer/receipt.json') -Raw | ConvertFrom-Json
     if ($peerReceipt.result -ne 'passed') { throw 'Peer receipt did not pass.' }
+    if ((Get-FileHash $DesktopBinary -Algorithm SHA256).Hash -ne $receipt.desktop_sha256 -or
+        (Get-FileHash $PeerBinary -Algorithm SHA256).Hash -ne $receipt.peer_sha256) { throw 'A bench executable changed during the native run.' }
     $receipt.result = 'completed_pending_visual_review'
 } catch {
     $receipt.result = 'failed'

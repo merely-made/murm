@@ -21,10 +21,7 @@ fn stock_connection_controls_work_before_any_identity_has_been_opened() {
     assert!(h.click_on(&Selector::role("button").containing("Messages")));
     assert!(h.click_on(&Selector::role("button").with_attr("data-message-protocol", "Meshtastic")));
     h.with_surfaces(|surfaces| {
-        assert!(genet_probe::text_present(
-            surfaces,
-            "Stock companion serial port"
-        ));
+        assert!(genet_probe::text_present(surfaces, "Radio serial port"));
         assert!(genet_probe::text_present(surfaces, "Radio realm name"));
         assert!(genet_probe::text_present(
             surfaces,
@@ -38,9 +35,20 @@ fn stock_connection_controls_work_before_any_identity_has_been_opened() {
         s.companion_journal =
             cambium::TextInput::new(dir.path().join("stock.json").to_str().unwrap());
     });
-    assert!(h.click_on(&Selector::role("button").containing("Connect companion")));
+    let connect = Selector::role("button").containing("Connect companion");
+    let coordinate = h.resolve(&connect);
+    assert!(h.click_on(&connect));
     let mut request = None;
-    h.update(|s| request = s.take_companion_request());
+    let mut notice = None;
+    h.update(|s| {
+        request = s.take_companion_request();
+        notice = s.message_notice.clone();
+    });
+    assert!(
+        request.is_some(),
+        "connection action did not queue: {notice:?}; coordinate={coordinate:?}; focus={:?}",
+        h.focus()
+    );
     assert_eq!(request.unwrap().realm, "test-realm");
 }
 #[test]
@@ -55,7 +63,9 @@ fn stock_history_and_queue_button_share_the_actual_companion_journal() {
     )
     .unwrap();
     let mut state = DesktopState::new(&default_catalog_path());
-    state.companion_comms.push(owner.clone());
+    state
+        .companion_comms
+        .push((ProtocolKind::MeshCore, owner.clone()));
     state.select_message_protocol(ProtocolKind::MeshCore);
     state.message_recipient = cambium::TextInput::new(hex::encode([8; 32]));
     state.message_draft = cambium::TextInput::new("through stock companion");

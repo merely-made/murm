@@ -72,7 +72,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .map(|value| value.parse::<u32>())
         .transpose()?
         .unwrap_or(915_000_000);
-    let relay_path = args.next().map(|value| relay_path(&value)).transpose()?;
+    let route_argument = args.next();
+    let direct_first = route_argument.as_deref() == Some("--direct-first");
+    let flood_first = direct_first || route_argument.as_deref() == Some("--flood-first");
+    let flood_text = if flood_first {
+        args.next().unwrap_or_else(|| "Tucket flood text".into())
+    } else {
+        String::new()
+    };
+    let relay_path = if flood_first {
+        None
+    } else {
+        route_argument.map(|value| relay_path(&value)).transpose()?
+    };
     let flood_hash_size = std::env::var("MESHCORE_PATH_HASH_SIZE")
         .unwrap_or_else(|_| "1".into())
         .parse::<u8>()?;
@@ -127,7 +139,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         )
         .await?;
     let mut set_time = vec![CMD_SET_DEVICE_TIME];
-    set_time.extend_from_slice(&now().to_le_bytes());
+    let clock = companion.expect(&[5], 9).await?;
+    let device_time = u32::from_le_bytes(clock.get(1..5).ok_or("short device clock")?.try_into()?);
+    set_time.extend_from_slice(
+        &now()
+            .max(device_time)
+            .checked_add(1)
+            .ok_or("device clock exhausted")?
+            .to_le_bytes(),
+    );
     companion.expect(&set_time, RESP_OK).await?;
 
     let mut link = DirectPhySerialLink::open(
@@ -182,6 +202,55 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     }
     println!("authenticated adverts crossed the MeshCore/Tucket boundary");
+
+    if flood_first {
+        println!(
+            "stock packet counters before: {:02x?}",
+            companion.expect(&[56, 2], 24).await?
+        );
+        if direct_first {
+            assert!(node.set_route(stock_hash, DirectRoute::new(0, &[]).unwrap()));
+        }
+        let (frame, expected_ack) = node
+            .text_frame(stock_hash, now(), &flood_text)
+            .ok_or("missing stock contact")?;
+        println!(
+            "diagnostic flood: {} wire bytes, frame={frame:02x?}",
+            frame.len()
+        );
+        link.send(frame).await?;
+        tokio::time::sleep(Duration::from_millis(700)).await;
+        println!(
+            "stock packet counters after: {:02x?}",
+            companion.expect(&[56, 2], 24).await?
+        );
+        println!(
+            "stock radio counters after: {:02x?}",
+            companion.expect(&[56, 1], 24).await?
+        );
+        let received = sync_text(&mut companion, Duration::from_secs(45)).await?;
+        if contact_text(&received) != Some(flood_text.as_str()) {
+            return Err("diagnostic text mismatch".into());
+        }
+        println!("stock peer decoded diagnostic flood text");
+        let until = Instant::now() + Duration::from_secs(45);
+        loop {
+            let rx = timeout_at(until, link.recv()).await?.ok_or("radio ended")?;
+            let (events, outbound) = node.on_frame(&rx.frame);
+            for frame in outbound {
+                link.send(frame).await?;
+            }
+            if events
+                .iter()
+                .any(|e| matches!(e, Event::Ack(ack) if *ack == expected_ack))
+            {
+                break;
+            }
+        }
+        println!("TUCKET DIAGNOSTIC FLOOD TEXT AND ACK PASSED");
+        link.shutdown().await?;
+        return Ok(());
+    }
 
     if let Some(relay_path) = relay_path {
         let hash_size = relay_path.len() as u8;
@@ -245,16 +314,20 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut reset_path = vec![CMD_RESET_PATH];
     reset_path.extend_from_slice(&tucket_public);
+    println!("resetting the stock peer's route");
     companion.expect(&reset_path, RESP_OK).await?;
+    println!("requesting the stock peer's first flood text");
 
     let first_text = "Stock MeshCore flood establishes a route";
     let sent = companion
         .expect(&text_command(&tucket_prefix, now(), first_text), RESP_SENT)
         .await?;
+    println!("stock peer accepted its first flood text");
     if sent.get(1) != Some(&1) {
         return Err("stock MeshCore did not flood the route-discovery text".into());
     }
     receive_text(&mut link, &mut node, first_text).await?;
+    println!("Tucket received stock text; waiting for its ACK confirmation");
     companion
         .wait_push(PUSH_SEND_CONFIRMED, Duration::from_secs(45))
         .await?;

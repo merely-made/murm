@@ -1,0 +1,833 @@
+{
+  "before_reconnect": {
+    "left": {
+      "bench_records": [
+        {
+          "conversation": {
+            "key": "bench-stock-recheck/a6300d0e2bd97bd6f9629199155d23e92b8dc1c50a4634c4135832a1c38d891d/b69769f1068d3558660a2e4dbcbe6aa334af6628e334ef6cba6ada202f99b632",
+            "protocol": "MeshCore"
+          },
+          "delivery": "ProtocolAcknowledged",
+          "facts": [
+            {
+              "MeshCoreOperation": {
+                "timestamp": 1792111231
+              }
+            },
+            {
+              "CompanionAccepted": {
+                "correlation": 2555104544
+              }
+            },
+            {
+              "MeshCoreAck": {
+                "value": [
+                  32,
+                  205,
+                  75,
+                  152
+                ]
+              }
+            }
+          ],
+          "message": {
+            "author": {
+              "address": "a6300d0e2bd97bd6f9629199155d23e92b8dc1c50a4634c4135832a1c38d891d",
+              "display_name": null,
+              "protocol": "MeshCore"
+            },
+            "body": {
+              "PlainText": "signalman-stock-meshcore-3552075625-generation-0-reverse-false"
+            },
+            "direction": "Outgoing",
+            "id": "out-1",
+            "subject": null,
+            "timestamp_ms": 1792111231632
+          }
+        },
+        {
+          "conversation": {
+            "key": "bench-stock-recheck/a6300d0e2bd97bd6f9629199155d23e92b8dc1c50a4634c4135832a1c38d891d/b69769f1068d3558660a2e4dbcbe6aa334af6628e334ef6cba6ada202f99b632",
+            "protocol": "MeshCore"
+          },
+          "delivery": "ReceivedByRadio",
+          "facts": [
+            {
+              "CompanionReceived": {
+                "protocol": "MeshCore",
+                "source": "b69769f1068d3558660a2e4dbcbe6aa334af6628e334ef6cba6ada202f99b632",
+                "timestamp": 1792111233
+              }
+            }
+          ],
+          "message": {
+            "author": {
+              "address": "b69769f1068d3558660a2e4dbcbe6aa334af6628e334ef6cba6ada202f99b632",
+              "display_name": null,
+              "protocol": "MeshCore"
+            },
+            "body": {
+              "PlainText": "signalman-stock-meshcore-3552075625-generation-0-reverse-true"
+            },
+            "direction": "Incoming",
+            "id": "mc-b69769f1068d3558660a2e4dbcbe6aa334af6628e334ef6cba6ada202f99b632-1792111233-782efd4905e1f3be270461238ddbb26706f6e4d831dfb9d1c9f55b449a9b4459",
+            "subject": null,
+            "timestamp_ms": 1792111233000
+          }
+        }
+      ],
+      "diagnostics": [
+        "Meshtastic channel senders are unauthenticated; MeshCore private text uses a 16-bit pairwise MAC; ACKs are unencrypted 32-bit matches.",
+        "Stock companion observations are device-reported. Signalman does not verify PKI proofs or treat protocol ACKs as authenticated/read receipts.",
+        "MeshCore firmware v1.17.1-d929643, model Heltec V4.3 OLED, build 14-Aug-2026, companion API 13",
+        "Connected stock MeshCore companion; public identity read from device. Device acceptance and protocol ACKs are not authenticated/read receipts."
+      ],
+      "identity": "a6300d0e2bd97bd6f9629199155d23e92b8dc1c50a4634c4135832a1c38d891d",
+      "total_record_count": 2
+    },
+    "right": {
+      "bench_records": [
+        {
+          "conversation": {
+            "key": "bench-stock-recheck/b69769f1068d3558660a2e4dbcbe6aa334af6628e334ef6cba6ada202f99b632/a6300d0e2bd97bd6f9629199155d23e92b8dc1c50a4634c4135832a1c38d891d",
+            "protocol": "MeshCore"
+          },
+          "delivery": "ReceivedByRadio",
+          "facts": [
+            {
+              "CompanionReceived": {
+                "protocol": "MeshCore",
+                "source": "a6300d0e2bd97bd6f9629199155d23e92b8dc1c50a4634c4135832a1c38d891d",
+                "timestamp": 1792111231
+              }
+            }
+          ],
+          "message": {
+            "author": {
+              "address": "a6300d0e2bd97bd6f9629199155d23e92b8dc1c50a4634c4135832a1c38d891d",
+              "display_name": null,
+              "protocol": "MeshCore"
+            },
+            "body": {
+              "PlainText": "signalman-stock-meshcore-3552075625-generation-0-reverse-false"
+            },
+            "direction": "Incoming",
+            "id": "mc-a6300d0e2bd97bd6f9629199155d23e92b8dc1c50a4634c4135832a1c38d891d-1792111231-9c6769e6a840b0f49b2a2f697196fac8740baf785c7e301a486d4b20c8b0a500",
+            "subject": null,
+            "timestamp_ms": 1792111231000
+          }
+        },
+        {
+          "conversation": {
+            "key": "bench-stock-recheck/b69769f1068d3558660a2e4dbcbe6aa334af6628e334ef6cba6ada202f99b632/a6300d0e2bd97bd6f9629199155d23e92b8dc1c50a4634c4135832a1c38d891d",
+            "protocol": "MeshCore"
+          },
+          "delivery": "ProtocolAcknowledged",
+          "facts": [
+            {
+              "MeshCoreOperation": {
+                "timestamp": 1792111233
+              }
+            },
+            {
+              "CompanionAccepted": {
+                "correlation": 2255428175
+              }
+            },
+            {
+              "MeshCoreAck": {
+                "value": [
+                  79,
+                  26,
+                  111,
+                  134
+                ]
+              }
+            }
+          ],
+          "message": {
+            "author": {
+              "address": "b69769f1068d3558660a2e4dbcbe6aa334af6628e334ef6cba6ada202f99b632",
+              "display_name": null,
+              "protocol": "MeshCore"
+            },
+            "body": {
+              "PlainText": "signalman-stock-meshcore-3552075625-generation-0-reverse-true"
+            },
+            "direction": "Outgoing",
+            "id": "out-1",
+            "subject": null,
+            "timestamp_ms": 1792111233063
+          }
+        }
+      ],
+      "diagnostics": [
+        "Meshtastic channel senders are unauthenticated; MeshCore private text uses a 16-bit pairwise MAC; ACKs are unencrypted 32-bit matches.",
+        "Stock companion observations are device-reported. Signalman does not verify PKI proofs or treat protocol ACKs as authenticated/read receipts.",
+        "MeshCore firmware v1.17.1-d929643, model Heltec V4.3 OLED, build 14-Aug-2026, companion API 13",
+        "Connected stock MeshCore companion; public identity read from device. Device acceptance and protocol ACKs are not authenticated/read receipts."
+      ],
+      "identity": "b69769f1068d3558660a2e4dbcbe6aa334af6628e334ef6cba6ada202f99b632",
+      "total_record_count": 2
+    }
+  },
+  "channel": 0,
+  "exchanges": [
+    {
+      "destination": "b69769f1068d3558660a2e4dbcbe6aa334af6628e334ef6cba6ada202f99b632",
+      "elapsed_ms": 1428,
+      "matched_protocol_ack": true,
+      "received": {
+        "conversation": {
+          "key": "bench-stock-recheck/b69769f1068d3558660a2e4dbcbe6aa334af6628e334ef6cba6ada202f99b632/a6300d0e2bd97bd6f9629199155d23e92b8dc1c50a4634c4135832a1c38d891d",
+          "protocol": "MeshCore"
+        },
+        "delivery": "ReceivedByRadio",
+        "facts": [
+          {
+            "CompanionReceived": {
+              "protocol": "MeshCore",
+              "source": "a6300d0e2bd97bd6f9629199155d23e92b8dc1c50a4634c4135832a1c38d891d",
+              "timestamp": 1792111231
+            }
+          }
+        ],
+        "message": {
+          "author": {
+            "address": "a6300d0e2bd97bd6f9629199155d23e92b8dc1c50a4634c4135832a1c38d891d",
+            "display_name": null,
+            "protocol": "MeshCore"
+          },
+          "body": {
+            "PlainText": "signalman-stock-meshcore-3552075625-generation-0-reverse-false"
+          },
+          "direction": "Incoming",
+          "id": "mc-a6300d0e2bd97bd6f9629199155d23e92b8dc1c50a4634c4135832a1c38d891d-1792111231-9c6769e6a840b0f49b2a2f697196fac8740baf785c7e301a486d4b20c8b0a500",
+          "subject": null,
+          "timestamp_ms": 1792111231000
+        }
+      },
+      "recipient_text_match": true,
+      "sent": {
+        "conversation": {
+          "key": "bench-stock-recheck/a6300d0e2bd97bd6f9629199155d23e92b8dc1c50a4634c4135832a1c38d891d/b69769f1068d3558660a2e4dbcbe6aa334af6628e334ef6cba6ada202f99b632",
+          "protocol": "MeshCore"
+        },
+        "delivery": "ProtocolAcknowledged",
+        "facts": [
+          {
+            "MeshCoreOperation": {
+              "timestamp": 1792111231
+            }
+          },
+          {
+            "CompanionAccepted": {
+              "correlation": 2555104544
+            }
+          },
+          {
+            "MeshCoreAck": {
+              "value": [
+                32,
+                205,
+                75,
+                152
+              ]
+            }
+          }
+        ],
+        "message": {
+          "author": {
+            "address": "a6300d0e2bd97bd6f9629199155d23e92b8dc1c50a4634c4135832a1c38d891d",
+            "display_name": null,
+            "protocol": "MeshCore"
+          },
+          "body": {
+            "PlainText": "signalman-stock-meshcore-3552075625-generation-0-reverse-false"
+          },
+          "direction": "Outgoing",
+          "id": "out-1",
+          "subject": null,
+          "timestamp_ms": 1792111231632
+        }
+      },
+      "source": "a6300d0e2bd97bd6f9629199155d23e92b8dc1c50a4634c4135832a1c38d891d",
+      "text": "signalman-stock-meshcore-3552075625-generation-0-reverse-false"
+    },
+    {
+      "destination": "a6300d0e2bd97bd6f9629199155d23e92b8dc1c50a4634c4135832a1c38d891d",
+      "elapsed_ms": 1376,
+      "matched_protocol_ack": true,
+      "received": {
+        "conversation": {
+          "key": "bench-stock-recheck/a6300d0e2bd97bd6f9629199155d23e92b8dc1c50a4634c4135832a1c38d891d/b69769f1068d3558660a2e4dbcbe6aa334af6628e334ef6cba6ada202f99b632",
+          "protocol": "MeshCore"
+        },
+        "delivery": "ReceivedByRadio",
+        "facts": [
+          {
+            "CompanionReceived": {
+              "protocol": "MeshCore",
+              "source": "b69769f1068d3558660a2e4dbcbe6aa334af6628e334ef6cba6ada202f99b632",
+              "timestamp": 1792111233
+            }
+          }
+        ],
+        "message": {
+          "author": {
+            "address": "b69769f1068d3558660a2e4dbcbe6aa334af6628e334ef6cba6ada202f99b632",
+            "display_name": null,
+            "protocol": "MeshCore"
+          },
+          "body": {
+            "PlainText": "signalman-stock-meshcore-3552075625-generation-0-reverse-true"
+          },
+          "direction": "Incoming",
+          "id": "mc-b69769f1068d3558660a2e4dbcbe6aa334af6628e334ef6cba6ada202f99b632-1792111233-782efd4905e1f3be270461238ddbb26706f6e4d831dfb9d1c9f55b449a9b4459",
+          "subject": null,
+          "timestamp_ms": 1792111233000
+        }
+      },
+      "recipient_text_match": true,
+      "sent": {
+        "conversation": {
+          "key": "bench-stock-recheck/b69769f1068d3558660a2e4dbcbe6aa334af6628e334ef6cba6ada202f99b632/a6300d0e2bd97bd6f9629199155d23e92b8dc1c50a4634c4135832a1c38d891d",
+          "protocol": "MeshCore"
+        },
+        "delivery": "ProtocolAcknowledged",
+        "facts": [
+          {
+            "MeshCoreOperation": {
+              "timestamp": 1792111233
+            }
+          },
+          {
+            "CompanionAccepted": {
+              "correlation": 2255428175
+            }
+          },
+          {
+            "MeshCoreAck": {
+              "value": [
+                79,
+                26,
+                111,
+                134
+              ]
+            }
+          }
+        ],
+        "message": {
+          "author": {
+            "address": "b69769f1068d3558660a2e4dbcbe6aa334af6628e334ef6cba6ada202f99b632",
+            "display_name": null,
+            "protocol": "MeshCore"
+          },
+          "body": {
+            "PlainText": "signalman-stock-meshcore-3552075625-generation-0-reverse-true"
+          },
+          "direction": "Outgoing",
+          "id": "out-1",
+          "subject": null,
+          "timestamp_ms": 1792111233063
+        }
+      },
+      "source": "b69769f1068d3558660a2e4dbcbe6aa334af6628e334ef6cba6ada202f99b632",
+      "text": "signalman-stock-meshcore-3552075625-generation-0-reverse-true"
+    },
+    {
+      "destination": "b69769f1068d3558660a2e4dbcbe6aa334af6628e334ef6cba6ada202f99b632",
+      "elapsed_ms": 1200,
+      "matched_protocol_ack": true,
+      "received": {
+        "conversation": {
+          "key": "bench-stock-recheck/b69769f1068d3558660a2e4dbcbe6aa334af6628e334ef6cba6ada202f99b632/a6300d0e2bd97bd6f9629199155d23e92b8dc1c50a4634c4135832a1c38d891d",
+          "protocol": "MeshCore"
+        },
+        "delivery": "ReceivedByRadio",
+        "facts": [
+          {
+            "CompanionReceived": {
+              "protocol": "MeshCore",
+              "source": "a6300d0e2bd97bd6f9629199155d23e92b8dc1c50a4634c4135832a1c38d891d",
+              "timestamp": 1792111235
+            }
+          }
+        ],
+        "message": {
+          "author": {
+            "address": "a6300d0e2bd97bd6f9629199155d23e92b8dc1c50a4634c4135832a1c38d891d",
+            "display_name": null,
+            "protocol": "MeshCore"
+          },
+          "body": {
+            "PlainText": "signalman-stock-meshcore-3552075625-generation-1-reverse-false"
+          },
+          "direction": "Incoming",
+          "id": "mc-a6300d0e2bd97bd6f9629199155d23e92b8dc1c50a4634c4135832a1c38d891d-1792111235-e26240251249a735f82f2ad02a1c43be431a0af4c03a51dedf4d3fefd29f766d",
+          "subject": null,
+          "timestamp_ms": 1792111235000
+        }
+      },
+      "recipient_text_match": true,
+      "sent": {
+        "conversation": {
+          "key": "bench-stock-recheck/a6300d0e2bd97bd6f9629199155d23e92b8dc1c50a4634c4135832a1c38d891d/b69769f1068d3558660a2e4dbcbe6aa334af6628e334ef6cba6ada202f99b632",
+          "protocol": "MeshCore"
+        },
+        "delivery": "ProtocolAcknowledged",
+        "facts": [
+          {
+            "MeshCoreOperation": {
+              "timestamp": 1792111235
+            }
+          },
+          {
+            "CompanionAccepted": {
+              "correlation": 1318106315
+            }
+          },
+          {
+            "MeshCoreAck": {
+              "value": [
+                203,
+                180,
+                144,
+                78
+              ]
+            }
+          }
+        ],
+        "message": {
+          "author": {
+            "address": "a6300d0e2bd97bd6f9629199155d23e92b8dc1c50a4634c4135832a1c38d891d",
+            "display_name": null,
+            "protocol": "MeshCore"
+          },
+          "body": {
+            "PlainText": "signalman-stock-meshcore-3552075625-generation-1-reverse-false"
+          },
+          "direction": "Outgoing",
+          "id": "out-2",
+          "subject": null,
+          "timestamp_ms": 1792111235033
+        }
+      },
+      "source": "a6300d0e2bd97bd6f9629199155d23e92b8dc1c50a4634c4135832a1c38d891d",
+      "text": "signalman-stock-meshcore-3552075625-generation-1-reverse-false"
+    },
+    {
+      "destination": "a6300d0e2bd97bd6f9629199155d23e92b8dc1c50a4634c4135832a1c38d891d",
+      "elapsed_ms": 1183,
+      "matched_protocol_ack": true,
+      "received": {
+        "conversation": {
+          "key": "bench-stock-recheck/a6300d0e2bd97bd6f9629199155d23e92b8dc1c50a4634c4135832a1c38d891d/b69769f1068d3558660a2e4dbcbe6aa334af6628e334ef6cba6ada202f99b632",
+          "protocol": "MeshCore"
+        },
+        "delivery": "ReceivedByRadio",
+        "facts": [
+          {
+            "CompanionReceived": {
+              "protocol": "MeshCore",
+              "source": "b69769f1068d3558660a2e4dbcbe6aa334af6628e334ef6cba6ada202f99b632",
+              "timestamp": 1792111236
+            }
+          }
+        ],
+        "message": {
+          "author": {
+            "address": "b69769f1068d3558660a2e4dbcbe6aa334af6628e334ef6cba6ada202f99b632",
+            "display_name": null,
+            "protocol": "MeshCore"
+          },
+          "body": {
+            "PlainText": "signalman-stock-meshcore-3552075625-generation-1-reverse-true"
+          },
+          "direction": "Incoming",
+          "id": "mc-b69769f1068d3558660a2e4dbcbe6aa334af6628e334ef6cba6ada202f99b632-1792111236-4255e54e6a93b7463c2afc2824bc9106c5ec2fc933531c156f44bedf521384e3",
+          "subject": null,
+          "timestamp_ms": 1792111236000
+        }
+      },
+      "recipient_text_match": true,
+      "sent": {
+        "conversation": {
+          "key": "bench-stock-recheck/b69769f1068d3558660a2e4dbcbe6aa334af6628e334ef6cba6ada202f99b632/a6300d0e2bd97bd6f9629199155d23e92b8dc1c50a4634c4135832a1c38d891d",
+          "protocol": "MeshCore"
+        },
+        "delivery": "ProtocolAcknowledged",
+        "facts": [
+          {
+            "MeshCoreOperation": {
+              "timestamp": 1792111236
+            }
+          },
+          {
+            "CompanionAccepted": {
+              "correlation": 4190057039
+            }
+          },
+          {
+            "MeshCoreAck": {
+              "value": [
+                79,
+                50,
+                191,
+                249
+              ]
+            }
+          }
+        ],
+        "message": {
+          "author": {
+            "address": "b69769f1068d3558660a2e4dbcbe6aa334af6628e334ef6cba6ada202f99b632",
+            "display_name": null,
+            "protocol": "MeshCore"
+          },
+          "body": {
+            "PlainText": "signalman-stock-meshcore-3552075625-generation-1-reverse-true"
+          },
+          "direction": "Outgoing",
+          "id": "out-2",
+          "subject": null,
+          "timestamp_ms": 1792111236237
+        }
+      },
+      "source": "b69769f1068d3558660a2e4dbcbe6aa334af6628e334ef6cba6ada202f99b632",
+      "text": "signalman-stock-meshcore-3552075625-generation-1-reverse-true"
+    }
+  ],
+  "firmware_or_configuration_mutated": false,
+  "left": {
+    "bench_records": [
+      {
+        "conversation": {
+          "key": "bench-stock-recheck/a6300d0e2bd97bd6f9629199155d23e92b8dc1c50a4634c4135832a1c38d891d/b69769f1068d3558660a2e4dbcbe6aa334af6628e334ef6cba6ada202f99b632",
+          "protocol": "MeshCore"
+        },
+        "delivery": "ProtocolAcknowledged",
+        "facts": [
+          {
+            "MeshCoreOperation": {
+              "timestamp": 1792111231
+            }
+          },
+          {
+            "CompanionAccepted": {
+              "correlation": 2555104544
+            }
+          },
+          {
+            "MeshCoreAck": {
+              "value": [
+                32,
+                205,
+                75,
+                152
+              ]
+            }
+          }
+        ],
+        "message": {
+          "author": {
+            "address": "a6300d0e2bd97bd6f9629199155d23e92b8dc1c50a4634c4135832a1c38d891d",
+            "display_name": null,
+            "protocol": "MeshCore"
+          },
+          "body": {
+            "PlainText": "signalman-stock-meshcore-3552075625-generation-0-reverse-false"
+          },
+          "direction": "Outgoing",
+          "id": "out-1",
+          "subject": null,
+          "timestamp_ms": 1792111231632
+        }
+      },
+      {
+        "conversation": {
+          "key": "bench-stock-recheck/a6300d0e2bd97bd6f9629199155d23e92b8dc1c50a4634c4135832a1c38d891d/b69769f1068d3558660a2e4dbcbe6aa334af6628e334ef6cba6ada202f99b632",
+          "protocol": "MeshCore"
+        },
+        "delivery": "ReceivedByRadio",
+        "facts": [
+          {
+            "CompanionReceived": {
+              "protocol": "MeshCore",
+              "source": "b69769f1068d3558660a2e4dbcbe6aa334af6628e334ef6cba6ada202f99b632",
+              "timestamp": 1792111233
+            }
+          }
+        ],
+        "message": {
+          "author": {
+            "address": "b69769f1068d3558660a2e4dbcbe6aa334af6628e334ef6cba6ada202f99b632",
+            "display_name": null,
+            "protocol": "MeshCore"
+          },
+          "body": {
+            "PlainText": "signalman-stock-meshcore-3552075625-generation-0-reverse-true"
+          },
+          "direction": "Incoming",
+          "id": "mc-b69769f1068d3558660a2e4dbcbe6aa334af6628e334ef6cba6ada202f99b632-1792111233-782efd4905e1f3be270461238ddbb26706f6e4d831dfb9d1c9f55b449a9b4459",
+          "subject": null,
+          "timestamp_ms": 1792111233000
+        }
+      },
+      {
+        "conversation": {
+          "key": "bench-stock-recheck/a6300d0e2bd97bd6f9629199155d23e92b8dc1c50a4634c4135832a1c38d891d/b69769f1068d3558660a2e4dbcbe6aa334af6628e334ef6cba6ada202f99b632",
+          "protocol": "MeshCore"
+        },
+        "delivery": "ProtocolAcknowledged",
+        "facts": [
+          {
+            "MeshCoreOperation": {
+              "timestamp": 1792111235
+            }
+          },
+          {
+            "CompanionAccepted": {
+              "correlation": 1318106315
+            }
+          },
+          {
+            "MeshCoreAck": {
+              "value": [
+                203,
+                180,
+                144,
+                78
+              ]
+            }
+          }
+        ],
+        "message": {
+          "author": {
+            "address": "a6300d0e2bd97bd6f9629199155d23e92b8dc1c50a4634c4135832a1c38d891d",
+            "display_name": null,
+            "protocol": "MeshCore"
+          },
+          "body": {
+            "PlainText": "signalman-stock-meshcore-3552075625-generation-1-reverse-false"
+          },
+          "direction": "Outgoing",
+          "id": "out-2",
+          "subject": null,
+          "timestamp_ms": 1792111235033
+        }
+      },
+      {
+        "conversation": {
+          "key": "bench-stock-recheck/a6300d0e2bd97bd6f9629199155d23e92b8dc1c50a4634c4135832a1c38d891d/b69769f1068d3558660a2e4dbcbe6aa334af6628e334ef6cba6ada202f99b632",
+          "protocol": "MeshCore"
+        },
+        "delivery": "ReceivedByRadio",
+        "facts": [
+          {
+            "CompanionReceived": {
+              "protocol": "MeshCore",
+              "source": "b69769f1068d3558660a2e4dbcbe6aa334af6628e334ef6cba6ada202f99b632",
+              "timestamp": 1792111236
+            }
+          }
+        ],
+        "message": {
+          "author": {
+            "address": "b69769f1068d3558660a2e4dbcbe6aa334af6628e334ef6cba6ada202f99b632",
+            "display_name": null,
+            "protocol": "MeshCore"
+          },
+          "body": {
+            "PlainText": "signalman-stock-meshcore-3552075625-generation-1-reverse-true"
+          },
+          "direction": "Incoming",
+          "id": "mc-b69769f1068d3558660a2e4dbcbe6aa334af6628e334ef6cba6ada202f99b632-1792111236-4255e54e6a93b7463c2afc2824bc9106c5ec2fc933531c156f44bedf521384e3",
+          "subject": null,
+          "timestamp_ms": 1792111236000
+        }
+      }
+    ],
+    "diagnostics": [
+      "Meshtastic channel senders are unauthenticated; MeshCore private text uses a 16-bit pairwise MAC; ACKs are unencrypted 32-bit matches.",
+      "Stock companion observations are device-reported. Signalman does not verify PKI proofs or treat protocol ACKs as authenticated/read receipts.",
+      "MeshCore firmware v1.17.1-d929643, model Heltec V4.3 OLED, build 14-Aug-2026, companion API 13",
+      "Connected stock MeshCore companion; public identity read from device. Device acceptance and protocol ACKs are not authenticated/read receipts.",
+      "MeshCore firmware v1.17.1-d929643, model Heltec V4.3 OLED, build 14-Aug-2026, companion API 13",
+      "Connected stock MeshCore companion; public identity read from device. Device acceptance and protocol ACKs are not authenticated/read receipts."
+    ],
+    "identity": "a6300d0e2bd97bd6f9629199155d23e92b8dc1c50a4634c4135832a1c38d891d",
+    "total_record_count": 4
+  },
+  "mode": "pair",
+  "ports": [
+    "COM6",
+    "COM7"
+  ],
+  "protocol": "meshcore",
+  "realm": "bench-stock-recheck",
+  "reconnect_delay_ms": 500,
+  "reconnect_history_preserved": true,
+  "result": "passed",
+  "right": {
+    "bench_records": [
+      {
+        "conversation": {
+          "key": "bench-stock-recheck/b69769f1068d3558660a2e4dbcbe6aa334af6628e334ef6cba6ada202f99b632/a6300d0e2bd97bd6f9629199155d23e92b8dc1c50a4634c4135832a1c38d891d",
+          "protocol": "MeshCore"
+        },
+        "delivery": "ReceivedByRadio",
+        "facts": [
+          {
+            "CompanionReceived": {
+              "protocol": "MeshCore",
+              "source": "a6300d0e2bd97bd6f9629199155d23e92b8dc1c50a4634c4135832a1c38d891d",
+              "timestamp": 1792111231
+            }
+          }
+        ],
+        "message": {
+          "author": {
+            "address": "a6300d0e2bd97bd6f9629199155d23e92b8dc1c50a4634c4135832a1c38d891d",
+            "display_name": null,
+            "protocol": "MeshCore"
+          },
+          "body": {
+            "PlainText": "signalman-stock-meshcore-3552075625-generation-0-reverse-false"
+          },
+          "direction": "Incoming",
+          "id": "mc-a6300d0e2bd97bd6f9629199155d23e92b8dc1c50a4634c4135832a1c38d891d-1792111231-9c6769e6a840b0f49b2a2f697196fac8740baf785c7e301a486d4b20c8b0a500",
+          "subject": null,
+          "timestamp_ms": 1792111231000
+        }
+      },
+      {
+        "conversation": {
+          "key": "bench-stock-recheck/b69769f1068d3558660a2e4dbcbe6aa334af6628e334ef6cba6ada202f99b632/a6300d0e2bd97bd6f9629199155d23e92b8dc1c50a4634c4135832a1c38d891d",
+          "protocol": "MeshCore"
+        },
+        "delivery": "ProtocolAcknowledged",
+        "facts": [
+          {
+            "MeshCoreOperation": {
+              "timestamp": 1792111233
+            }
+          },
+          {
+            "CompanionAccepted": {
+              "correlation": 2255428175
+            }
+          },
+          {
+            "MeshCoreAck": {
+              "value": [
+                79,
+                26,
+                111,
+                134
+              ]
+            }
+          }
+        ],
+        "message": {
+          "author": {
+            "address": "b69769f1068d3558660a2e4dbcbe6aa334af6628e334ef6cba6ada202f99b632",
+            "display_name": null,
+            "protocol": "MeshCore"
+          },
+          "body": {
+            "PlainText": "signalman-stock-meshcore-3552075625-generation-0-reverse-true"
+          },
+          "direction": "Outgoing",
+          "id": "out-1",
+          "subject": null,
+          "timestamp_ms": 1792111233063
+        }
+      },
+      {
+        "conversation": {
+          "key": "bench-stock-recheck/b69769f1068d3558660a2e4dbcbe6aa334af6628e334ef6cba6ada202f99b632/a6300d0e2bd97bd6f9629199155d23e92b8dc1c50a4634c4135832a1c38d891d",
+          "protocol": "MeshCore"
+        },
+        "delivery": "ReceivedByRadio",
+        "facts": [
+          {
+            "CompanionReceived": {
+              "protocol": "MeshCore",
+              "source": "a6300d0e2bd97bd6f9629199155d23e92b8dc1c50a4634c4135832a1c38d891d",
+              "timestamp": 1792111235
+            }
+          }
+        ],
+        "message": {
+          "author": {
+            "address": "a6300d0e2bd97bd6f9629199155d23e92b8dc1c50a4634c4135832a1c38d891d",
+            "display_name": null,
+            "protocol": "MeshCore"
+          },
+          "body": {
+            "PlainText": "signalman-stock-meshcore-3552075625-generation-1-reverse-false"
+          },
+          "direction": "Incoming",
+          "id": "mc-a6300d0e2bd97bd6f9629199155d23e92b8dc1c50a4634c4135832a1c38d891d-1792111235-e26240251249a735f82f2ad02a1c43be431a0af4c03a51dedf4d3fefd29f766d",
+          "subject": null,
+          "timestamp_ms": 1792111235000
+        }
+      },
+      {
+        "conversation": {
+          "key": "bench-stock-recheck/b69769f1068d3558660a2e4dbcbe6aa334af6628e334ef6cba6ada202f99b632/a6300d0e2bd97bd6f9629199155d23e92b8dc1c50a4634c4135832a1c38d891d",
+          "protocol": "MeshCore"
+        },
+        "delivery": "ProtocolAcknowledged",
+        "facts": [
+          {
+            "MeshCoreOperation": {
+              "timestamp": 1792111236
+            }
+          },
+          {
+            "CompanionAccepted": {
+              "correlation": 4190057039
+            }
+          },
+          {
+            "MeshCoreAck": {
+              "value": [
+                79,
+                50,
+                191,
+                249
+              ]
+            }
+          }
+        ],
+        "message": {
+          "author": {
+            "address": "b69769f1068d3558660a2e4dbcbe6aa334af6628e334ef6cba6ada202f99b632",
+            "display_name": null,
+            "protocol": "MeshCore"
+          },
+          "body": {
+            "PlainText": "signalman-stock-meshcore-3552075625-generation-1-reverse-true"
+          },
+          "direction": "Outgoing",
+          "id": "out-2",
+          "subject": null,
+          "timestamp_ms": 1792111236237
+        }
+      }
+    ],
+    "diagnostics": [
+      "Meshtastic channel senders are unauthenticated; MeshCore private text uses a 16-bit pairwise MAC; ACKs are unencrypted 32-bit matches.",
+      "Stock companion observations are device-reported. Signalman does not verify PKI proofs or treat protocol ACKs as authenticated/read receipts.",
+      "MeshCore firmware v1.17.1-d929643, model Heltec V4.3 OLED, build 14-Aug-2026, companion API 13",
+      "Connected stock MeshCore companion; public identity read from device. Device acceptance and protocol ACKs are not authenticated/read receipts.",
+      "MeshCore firmware v1.17.1-d929643, model Heltec V4.3 OLED, build 14-Aug-2026, companion API 13",
+      "Connected stock MeshCore companion; public identity read from device. Device acceptance and protocol ACKs are not authenticated/read receipts."
+    ],
+    "identity": "b69769f1068d3558660a2e4dbcbe6aa334af6628e334ef6cba6ada202f99b632",
+    "total_record_count": 4
+  },
+  "schema": 1
+}
