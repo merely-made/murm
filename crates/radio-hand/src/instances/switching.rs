@@ -18,7 +18,12 @@ impl Runtime {
             });
         }
         let outcome = match id {
-            RETINUE => match self.retinue.assess_pause(now, return_by) {
+            RETINUE => match self
+                .retinue
+                .as_ref()
+                .ok_or(Error::WrongInstance)?
+                .assess_pause(now, return_by)
+            {
                 Ok(_) => PauseOutcome::Ready,
                 Err(retinue::instance::InstanceError::PauseBlocked(reason)) => match reason {
                     PauseBlocked::ClockBeforeLinkActivity { .. }
@@ -34,7 +39,12 @@ impl Runtime {
                 },
                 Err(e) => return Err(e.into()),
             },
-            SENNET => match self.sennet.assess_pause(now, return_by)? {
+            SENNET => match self
+                .sennet
+                .as_ref()
+                .ok_or(Error::WrongInstance)?
+                .assess_pause(now, return_by)?
+            {
                 sennet::instance::PauseOutcome::Ready => PauseOutcome::Ready,
                 sennet::instance::PauseOutcome::Busy { retry_at } => {
                     PauseOutcome::Busy { retry_at }
@@ -88,20 +98,35 @@ impl Runtime {
                 } else {
                     InterruptionPermission::PreserveSessions
                 };
-                if let Some(report) = self.retinue.pause(now, return_by, permission, iv)? {
+                if let Some(report) = self
+                    .retinue
+                    .as_mut()
+                    .ok_or(Error::WrongInstance)?
+                    .pause(now, return_by, permission, iv)?
+                {
                     self.event(Event::RetinueInterrupted(report));
                 }
             }
             SENNET => {
                 if allow
-                    && self.sennet.pending_identity().is_some()
+                    && self
+                        .sennet
+                        .as_mut()
+                        .ok_or(Error::WrongInstance)?
+                        .pending_identity()
+                        .is_some()
                     && let Some(e) = self
                         .sennet
+                        .as_mut()
+                        .ok_or(Error::WrongInstance)?
                         .discard_pending(now, sennet::instance::LossPermission::operator())?
                 {
                     self.event(Event::Sennet(e));
                 }
-                self.sennet.pause(now, return_by)?;
+                self.sennet
+                    .as_mut()
+                    .ok_or(Error::WrongInstance)?
+                    .pause(now, return_by)?;
             }
             TUCKET => {
                 if allow
@@ -258,11 +283,20 @@ impl Runtime {
         }
         match to {
             RETINUE => {
-                let r = self.retinue.resume(now)?;
+                let r = self
+                    .retinue
+                    .as_mut()
+                    .ok_or(Error::WrongInstance)?
+                    .resume(now)?;
                 self.retinue_expired(r);
             }
             SENNET => {
-                if let Some(e) = self.sennet.resume(now)? {
+                if let Some(e) = self
+                    .sennet
+                    .as_mut()
+                    .ok_or(Error::WrongInstance)?
+                    .resume(now)?
+                {
                     self.event(Event::Sennet(e));
                 }
             }

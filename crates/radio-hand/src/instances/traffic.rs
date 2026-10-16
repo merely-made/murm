@@ -21,11 +21,19 @@ impl Runtime {
                     self.carrier_rejected_rx = self.carrier_rejected_rx.saturating_add(1);
                     Error::Carrier(reason)
                 })?;
-                let a = self.retinue.ingest(now, &p)?;
+                let a = self
+                    .retinue
+                    .as_mut()
+                    .ok_or(Error::WrongInstance)?
+                    .ingest(now, &p)?;
                 self.retinue_actions(now, a)?;
             }
             SENNET => {
-                let e = self.sennet.receive(now, frame)?;
+                let e = self
+                    .sennet
+                    .as_mut()
+                    .ok_or(Error::WrongInstance)?
+                    .receive(now, frame)?;
                 self.event(Event::SennetReceived(e));
             }
             TUCKET => {
@@ -54,7 +62,11 @@ impl Runtime {
         self.expiry(now)?;
         match self.active().ok_or(Error::Inactive)?.instance {
             RETINUE => {
-                let a = self.retinue.poll(now, blob)?;
+                let a = self
+                    .retinue
+                    .as_mut()
+                    .ok_or(Error::WrongInstance)?
+                    .poll(now, blob)?;
                 self.retinue_actions(now, a)?;
             }
             TUCKET => {
@@ -113,8 +125,15 @@ impl Runtime {
         {
             return Err(WorkError::Expired.into());
         }
-        self.sennet.queue_text(now, header, text)?;
-        if let Some(out) = self.sennet.take_outbound(now)?
+        self.sennet
+            .as_mut()
+            .ok_or(Error::WrongInstance)?
+            .queue_text(now, header, text)?;
+        if let Some(out) = self
+            .sennet
+            .as_mut()
+            .ok_or(Error::WrongInstance)?
+            .take_outbound(now)?
             && let Err(reason) = self.work.enqueue(
                 now,
                 a,
@@ -123,7 +142,11 @@ impl Runtime {
                 &out.frame,
             )
         {
-            let e = self.sennet.fail_tx(now, out.operation_id, out.identity)?;
+            let e = self.sennet.as_mut().ok_or(Error::WrongInstance)?.fail_tx(
+                now,
+                out.operation_id,
+                out.identity,
+            )?;
             self.event(Event::Sennet(e));
             self.event(Event::FrameDropped {
                 instance: SENNET,
@@ -188,12 +211,23 @@ impl Runtime {
         self.time(now)?;
         self.work.complete(now, id)?;
         if id.activation.instance == SENNET {
-            let identity = self.sennet.pending_identity().ok_or(Error::Inactive)?;
+            let identity = self
+                .sennet
+                .as_mut()
+                .ok_or(Error::WrongInstance)?
+                .pending_identity()
+                .ok_or(Error::Inactive)?;
             let op = id.operation.ok_or(Error::Inactive)? as u32;
             let e = if transmitted {
-                self.sennet.complete_tx(now, op, identity)?
+                self.sennet
+                    .as_mut()
+                    .ok_or(Error::WrongInstance)?
+                    .complete_tx(now, op, identity)?
             } else {
-                self.sennet.fail_tx(now, op, identity)?
+                self.sennet
+                    .as_mut()
+                    .ok_or(Error::WrongInstance)?
+                    .fail_tx(now, op, identity)?
             };
             self.event(Event::Sennet(e));
         }

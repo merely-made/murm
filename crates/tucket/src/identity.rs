@@ -10,6 +10,7 @@
 use curve25519_dalek::edwards::CompressedEdwardsY;
 use ed25519_dalek::{Signature, Signer, SigningKey, Verifier, VerifyingKey};
 use sha2::{Digest, Sha512};
+use zeroize::Zeroize;
 
 use crate::packet::{PUB_KEY_SIZE, SIGNATURE_SIZE};
 
@@ -61,17 +62,20 @@ pub struct LocalIdentity {
 impl LocalIdentity {
     /// Build from a 32-byte Ed25519 seed (the caller owns seed generation
     /// and storage; this crate takes no dependency on an RNG).
-    pub fn from_seed(seed: [u8; 32]) -> Self {
+    pub fn from_seed(mut seed: [u8; 32]) -> Self {
         // The Ed25519 secret scalar is the clamped first half of SHA512(seed); this is what
         // MeshCore keeps as prv_key[0..32] and feeds to X25519 for ECDH.
-        let hash = Sha512::digest(seed);
+        let mut hash = Sha512::digest(seed);
         let mut scalar = [0u8; 32];
         scalar.copy_from_slice(&hash[..32]);
         scalar[0] &= 248;
         scalar[31] &= 127;
         scalar[31] |= 64;
+        let signing = SigningKey::from_bytes(&seed);
+        seed.zeroize();
+        hash[..].zeroize();
         LocalIdentity {
-            signing: SigningKey::from_bytes(&seed),
+            signing,
             x25519_scalar: scalar,
         }
     }
@@ -93,6 +97,13 @@ impl LocalIdentity {
             .decompress()?
             .to_montgomery();
         Some(montgomery.mul_clamped(self.x25519_scalar).to_bytes())
+    }
+}
+
+impl Drop for LocalIdentity {
+    fn drop(&mut self) {
+        // SigningKey clears its seed through ed25519-dalek's zeroize feature.
+        self.x25519_scalar.zeroize();
     }
 }
 

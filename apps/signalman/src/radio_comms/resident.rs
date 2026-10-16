@@ -32,7 +32,9 @@ impl RadioComms {
                 "stock companion journals cannot attach to a resident runtime",
             ));
         };
-        if runtime.sennet().address() != (scope.meshtastic_node, scope.meshtastic_channel)
+        if runtime
+            .installed_sennet()
+            .is_some_and(|s| s.address() != (scope.meshtastic_node, scope.meshtastic_channel))
             || runtime.tucket().node().identity().pub_key != scope.meshcore_key
         {
             return Err(backend(
