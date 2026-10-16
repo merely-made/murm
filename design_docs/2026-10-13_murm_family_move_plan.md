@@ -2026,6 +2026,22 @@ result qualifies function rather than visual polish. The curated
 records the completed visual review; raw runner results retain their original
 pending-review values.
 
+**Reconnect-send continuation (2026-10-16, in progress).** After publishing the
+checkpoint, the next bounded gate sends two further tagged texts after the
+verified history-only reopen. An opt-in native fixture uses a new tag and a
+separate stock-peer receipt, checks both exchanges at final completion, and
+starts the second peer only after the desktop confirms exact reopened history.
+The stock peer advertises after that readiness marker because the newly
+commissioned Tucket runtime must rediscover its contact. Done when both new
+protocol ACKs match, all four records survive final disconnect, seven captures
+are reviewed, and both board restorations are verified. Earlier results stay
+frozen; Sennet and UI cleanup remain separate.
+
+The extended fixture passes all 41 desktop library tests (one existing ignored),
+strict all-target Clippy, binary/contact-card builds, Rust formatting and
+PowerShell parsing. Its peer gate rejects the earlier tag for the reconnect
+exchange. Physical qualification of this extension is pending.
+
 One approved Mere integration worktree was needed to publish this supplier
 without unrelated unpublished main commits or rewriting active build inputs;
 it and its branch are removed after publication. Existing targets were reused.

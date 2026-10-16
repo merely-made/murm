@@ -20,6 +20,13 @@ pub struct Product {
     condition: Option<Condition>,
     connected_seen: Cell<bool>,
     history: Option<serde_json::Value>,
+    reconnect: Option<Reconnect>,
+    previous_exchange: Option<(String, Option<PathBuf>)>,
+}
+struct Reconnect {
+    tag: String,
+    peer_receipt: PathBuf,
+    ready: PathBuf,
 }
 enum Condition {
     Connected,
@@ -51,12 +58,23 @@ fn peer_confirmed(
 }
 impl Product {
     fn peer_acknowledged(&self) -> bool {
-        self.peer_receipt
-            .as_ref()
-            .and_then(|path| std::fs::read(path).ok())
-            .and_then(|bytes| serde_json::from_slice(&bytes).ok())
-            .is_some_and(|receipt| peer_confirmed(&receipt, self.protocol, &self.peer, &self.tag))
+        peer_acknowledged(
+            self.peer_receipt.as_ref(),
+            self.protocol,
+            &self.peer,
+            &self.tag,
+        )
     }
+}
+fn peer_acknowledged(
+    path: Option<&PathBuf>,
+    protocol: ProtocolKind,
+    peer: &str,
+    tag: &str,
+) -> bool {
+    path.and_then(|path| std::fs::read(path).ok())
+        .and_then(|bytes| serde_json::from_slice(&bytes).ok())
+        .is_some_and(|receipt| peer_confirmed(&receipt, protocol, peer, tag))
 }
 fn facts(
     state: &DesktopState,
@@ -126,6 +144,15 @@ pub fn from_env() -> Option<mesquite::Lane<Product>> {
                 .all(|b| b.is_ascii_hexdigit() && !b.is_ascii_uppercase()),
         "invalid native companion peer address"
     );
+    let reconnect =
+        std::env::var_os("SIGNALMAN_COMPANION_RECONNECT_PEER_RECEIPT").map(|path| Reconnect {
+            tag: format!("{tag}-reconnect"),
+            peer_receipt: PathBuf::from(path),
+            ready: PathBuf::from(
+                std::env::var_os("SIGNALMAN_COMPANION_RECONNECT_READY")
+                    .expect("reconnect exchange requires its explicit ready marker"),
+            ),
+        });
     Some(
         mesquite::Lane::from_config(
             config,
@@ -139,6 +166,8 @@ pub fn from_env() -> Option<mesquite::Lane<Product>> {
                 condition: None,
                 connected_seen: Cell::new(false),
                 history: None,
+                reconnect,
+                previous_exchange: None,
             },
             cambium_genet_winit_host::read_file,
         )
@@ -186,6 +215,46 @@ impl mesquite::Product for Product {
         _: mesquite::Checkpoints<'_>,
         line: &str,
     ) -> Result<(), String> {
+        if line == "begin companion reconnect exchange" {
+            if self.previous_exchange.is_some() {
+                return Err("only one post-reconnect exchange is configured".into());
+            }
+            let (connected, ack, rx) =
+                facts(ctx.runner.state(), &self.tag, self.protocol, &self.peer);
+            let records = ctx
+                .runner
+                .state()
+                .radio_owner(self.protocol)
+                .ok_or("reconnect has no commissioned owner")?
+                .records()
+                .map_err(|e| e.to_string())?;
+            let history = serde_json::to_value(records).map_err(|e| e.to_string())?;
+            if !connected
+                || ack != 1
+                || rx != 1
+                || !self.peer_acknowledged()
+                || self.history.as_ref() != Some(&history)
+            {
+                return Err(
+                    "reconnect exchange requires the first round trip and exact reopened history"
+                        .into(),
+                );
+            }
+            let next = self
+                .reconnect
+                .take()
+                .ok_or("reconnect exchange is not configured")?;
+            self.previous_exchange = Some((
+                std::mem::replace(&mut self.tag, next.tag),
+                self.peer_receipt.replace(next.peer_receipt),
+            ));
+            std::fs::OpenOptions::new()
+                .write(true)
+                .create_new(true)
+                .open(next.ready)
+                .map_err(|e| format!("reconnect readiness marker: {e}"))?;
+            return Ok(());
+        }
         if matches!(
             line,
             "remember companion history" | "assert companion history"
@@ -278,11 +347,17 @@ impl mesquite::Product for Product {
     }
     fn complete(&mut self, ctx: &mut Context<'_>, _: &genet_probe::Outcome) -> Result<(), String> {
         let (connected, ack, rx) = facts(ctx.runner.state(), &self.tag, self.protocol, &self.peer);
+        let previous_complete = self.previous_exchange.as_ref().is_none_or(|(tag, path)| {
+            let (_, ack, rx) = facts(ctx.runner.state(), tag, self.protocol, &self.peer);
+            ack == 1 && rx == 1 && peer_acknowledged(path.as_ref(), self.protocol, &self.peer, tag)
+        });
         if !self.connected_seen.get()
             || connected
             || (self.protocol == ProtocolKind::MeshCore && ctx.runner.state().resident_connecting)
             || ack != 1
             || rx != 1
+            || !previous_complete
+            || self.reconnect.is_some()
             || (self.peer_receipt.is_some() && !self.peer_acknowledged())
             || ctx.runner.state().message_protocol != self.protocol
         {
@@ -293,8 +368,15 @@ impl mesquite::Product for Product {
         Ok(())
     }
     fn receipt_checks(&self, captures: &[mesquite::CaptureRecord]) -> Vec<String> {
-        if captures.len() < 6 {
-            vec!["six native form/connected/roundtrip/disconnected/reconnected/stopped captures required".into()]
+        let required = if self.previous_exchange.is_some() {
+            7
+        } else {
+            6
+        };
+        if captures.len() < required {
+            vec![format!(
+                "{required} native captures required, including each completed round trip"
+            )]
         } else {
             vec![]
         }
@@ -322,6 +404,12 @@ mod tests {
             ProtocolKind::MeshCore,
             "peer",
             "signalman-ui-stale"
+        ));
+        assert!(!peer_confirmed(
+            &receipt,
+            ProtocolKind::MeshCore,
+            "peer",
+            "signalman-ui-check-reconnect"
         ));
         assert!(!peer_confirmed(
             &receipt,

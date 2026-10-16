@@ -40,3 +40,11 @@ the return ACK while connected. A configurable 200 ms reply turnaround is
 now software-qualified (300 core executions, 41 desktop tests, strict Clippy,
 bare `no_std` checks). Its subsequent physical trial is the first complete
 functional pass. Both earlier failures retain their original evidence.
+
+The opt-in `-ExchangeAfterReconnect` extension is software-qualified with the
+same 41 desktop tests, strict all-target Clippy and native/exporter builds.
+It keeps separate tags and peer receipts for each delivery connection, checks
+the old history before starting fresh work, and requires seven captures.
+`run-djinn-reconnect.ps1` supplies the guarded real-Keeper bench recipe; its
+physical receipt is pending. The `reconnect-desktop-*.log` files record these
+software checks.
