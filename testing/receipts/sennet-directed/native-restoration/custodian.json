@@ -1,0 +1,11 @@
+{
+  "result": "native_completed_pending_visual_review",
+  "authority": "isolated Djinn wallet through real Keeper route",
+  "host_sha256": "25f41c90f231bbf88d573e5ad74e0bfa181523cd9e59f2fc1729f7f0316b2dcc",
+  "station_sha256": "742a7f98d6db4b5bdcebf6f99d9bc96b7ceaf24498b21106e04cb9267410755e",
+  "private_wallet_tracked": false,
+  "radio_result": "native-directed-restoration/bench.json",
+  "node_number": 2622892345,
+  "custodian_stopped": true,
+  "closed_utc": "2026-10-16T12:28:07.0644936Z"
+}

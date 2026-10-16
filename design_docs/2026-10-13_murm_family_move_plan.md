@@ -19,8 +19,13 @@ restoration. R6 passes a bounded Djinn-backed Tucket-over-Tulle native functiona
 run against stock MeshCore: four tagged texts with all four protocol ACKs across
 two connections, with exact history checked before fresh work after reconnect.
 Both boards are restored. The fixture explicitly advertises after each Tucket
-commissioning; automatic contact restoration, immediate stock MeshCore reopen,
-UI cleanup and the Sennet stack leg retain their gates below.
+commissioning; automatic contact restoration and immediate stock MeshCore
+reopen retain their gates below. R7 passes Sennet public-channel text across
+native reconnect. R8 passes directed PKI text and correlated ACKs across native
+reconnect, including a full automated pass of the revised board-restoration
+order. The earlier failed readback and separate recovery stay frozen;
+private-channel custody, personal-daemon integration, 2.8 ACK proofs and UI
+cleanup remain open.
 
 **Canonical home:** this repository owns the migration. Mere and Genet should
 cite this plan rather than keep another migration specification. The canonical
@@ -2275,3 +2280,26 @@ execution with "blocked by policy". Those roots remain despite explicit owner
 authorization. Public receipts, durable nonce state and the shared Cargo cache
 are preserved. The [cleanup receipt](../testing/receipts/sennet-directed/cleanup/result.json)
 records the completed removals and remaining tool refusal.
+
+**Automated restoration continuation (2026-10-16, passed).** The revised
+wrapper at `feab8c3f29b` now passes the whole two-connection native fixture,
+including both board restorations in its own finally path. No manual recovery
+is required. Four exact PKI texts and four correlated ACKs match; exact history
+is checked before fresh work on reconnect and all four records remain at final
+disconnect. Text IDs 1/257 and control IDs 2/258 use disjoint durable intervals,
+with next state 513. All seven captures are reviewed: 403 presented frames,
+zero blank captures, seven distinct digests and four visible final rows. The
+existing cosmetic findings remain. Helper totals 15010/3217 ms are service
+durations, not per-message latencies.
+
+COM6 restores first to pinned Tulle with exact status/identity/region/channel;
+COM7 then acknowledges its original same-boot profile with exact status/sync.
+The desktop and both peer processes exit 0 and the real Keeper custodian stops.
+The qualified executables are unchanged by hash; Rust sources and supplier pins
+are unchanged, so no additional build/software-suite claim follows. The
+[automated restoration receipt](../testing/receipts/sennet-directed/native-restoration/README.md)
+freezes 51 public evidence files and their SHA-256 hashes. The earlier failed
+wrapper/recovery receipt remains intact. Automatic approval review rejects
+deletion of this run's stopped synthetic custodian root with "blocked by
+policy"; it remains ignored, bringing the retained roots in this lane to 25.
+The shared Cargo cache remains co-owned; no new target/home/worktree is created.
