@@ -72,6 +72,46 @@ fn radio(fail_send: bool) -> Radio {
         seen_acks: Default::default(),
     }
 }
+
+#[tokio::test]
+async fn custody_lost_during_receive_stops_before_ingress_or_transmit() {
+    let dir = tempfile::tempdir().unwrap();
+    let scope = scope(7, 3);
+    let owner = owner(scope.clone(), dir.path(), "custody.json");
+    let mut runtime = runtime(&scope, 3, TUCKET, 10);
+    let mut io = radio(false);
+    let emitted = io.emitted.clone();
+    let calls = std::cell::Cell::new(0);
+    let mut carriage = ResidentCarriage::new(
+        owner.attach(&mut runtime).unwrap(),
+        &mut io,
+        Instant::now(),
+        0,
+        Duration::from_millis(10),
+    )
+    .unwrap();
+    let result = carriage
+        .poll_authorized(|| {
+            calls.set(calls.get() + 1);
+            if calls.get() == 1 {
+                Ok(())
+            } else {
+                Err(backend("custody locked during receive"))
+            }
+        })
+        .await;
+    assert!(result.is_err());
+    assert!(
+        carriage.poll().await.is_err(),
+        "custody loss permanently stops this carriage"
+    );
+    assert!(emitted.lock().unwrap().is_empty());
+    let remote_key = tucket::identity::LocalIdentity::from_seed([4; 32])
+        .identity()
+        .pub_key;
+    assert!(!carriage.knows_peer(&remote_key));
+    assert!(owner.records().unwrap().is_empty());
+}
 #[tokio::test]
 async fn physical_driver_carries_real_text_ack_and_full_key_contact() {
     let dir = tempfile::tempdir().unwrap();

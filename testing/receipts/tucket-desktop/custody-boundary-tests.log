@@ -1,0 +1,30 @@
+warning: patch `mere-p2panda-net v0.7.5 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `mere-proofs v0.1.0 (https://www.github.com/merely-made/mere.git?rev=864757da78214bdd810e17355df5b2309721d651#864757da)` was not used in the crate graph
+warning: patch `muniment v0.1.2 (https://www.github.com/merely-made/mere.git?rev=864757da78214bdd810e17355df5b2309721d651#864757da)` was not used in the crate graph
+warning: patch `p2panda-auth v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-core v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-discovery v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-encryption v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-store v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-stream v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-sync v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+help: Check that the patched package version and available features are compatible
+      with the dependency requirements. If the patch has a different version from
+      what is locked in the Cargo.lock file, run `cargo update` to use the new
+      version. This may also occur with an optional dependency that is not enabled.
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+   Compiling signalman v0.1.0 (C:\Users\mark_\Code\repos\retinue\apps\signalman)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 53.62s
+     Running unittests src\lib.rs (target/build\debug\deps\signalman-6b9c107bb75c29aa.exe)
+
+running 5 tests
+test radio_comms::carriage::tests::custody_lost_during_receive_stops_before_ingress_or_transmit ... ok
+test radio_comms::carriage::tests::protocol_expiry_wakes_history_without_radio_traffic ... ok
+test radio_comms::carriage::tests::ambiguous_physical_error_stops_without_false_completion_or_replay ... ok
+test radio_comms::carriage::tests::undiscovered_recipient_waits_without_blocking_verified_contacts ... ok
+test radio_comms::carriage::tests::physical_driver_carries_real_text_ack_and_full_key_contact ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 58 filtered out; finished in 0.10s
+

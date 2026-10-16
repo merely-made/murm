@@ -2881,6 +2881,7 @@ dependencies = [
  "subtle",
  "tokio",
  "tulle",
+ "zeroize",
 ]
 
 [[package]]

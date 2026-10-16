@@ -63,19 +63,32 @@ impl<'a, 'r, R: PacketRadio> ResidentCarriage<'a, 'r, R> {
     /// perform at most one physical transmission. RX stays queued by the pump
     /// while a TX is in flight; no frame is dropped to cancel a receive wait.
     pub async fn poll(&mut self) -> Result<bool, AdapterError> {
+        self.poll_authorized(|| Ok(())).await
+    }
+    /// Recheck connection custody after receive and immediately before a
+    /// physical send. Refusal closes the driver without dispatching a retry.
+    pub async fn poll_authorized(
+        &mut self,
+        authorize: impl Fn() -> Result<(), AdapterError>,
+    ) -> Result<bool, AdapterError> {
         if self.stopped {
             return Err(backend("resident carriage stopped"));
         }
-        let result = self.turn().await;
+        let result = self.turn(&authorize).await;
         if result.is_err() {
             self.stopped = true;
         }
         result
     }
-    async fn turn(&mut self) -> Result<bool, AdapterError> {
+    async fn turn(
+        &mut self,
+        authorize: &impl Fn() -> Result<(), AdapterError>,
+    ) -> Result<bool, AdapterError> {
+        authorize()?;
         let mut changed = false;
         match timeout(self.receive_wait, self.radio.recv_frame()).await {
             Ok(Some(frame)) => {
+                authorize()?;
                 // The protocol owns RF validation and keeps loss accounting.
                 match self.session.ingest(self.now()?, &frame.frame) {
                     Ok(()) => changed = true,
@@ -85,6 +98,7 @@ impl<'a, 'r, R: PacketRadio> ResidentCarriage<'a, 'r, R> {
             Ok(None) => return Err(backend("resident physical receive ended")),
             Err(_) => (),
         }
+        authorize()?;
         changed |= self.session.poll_changed(self.now()?)?;
         changed |= self
             .session
@@ -92,6 +106,7 @@ impl<'a, 'r, R: PacketRadio> ResidentCarriage<'a, 'r, R> {
             .is_some();
         changed |= self.session.poll_changed(self.now()?)?;
         if let Some(tx) = self.session.begin_tx(self.now()?)? {
+            authorize()?;
             if tx.frame.len() > self.radio.max_frame_len() {
                 self.session.complete_tx(self.now()?, tx.id, false)?;
                 return Err(backend("resident frame exceeds physical radio limit"));
@@ -101,6 +116,7 @@ impl<'a, 'r, R: PacketRadio> ResidentCarriage<'a, 'r, R> {
             if budget == 0 {
                 return Err(backend("resident physical deadline expired before send"));
             }
+            authorize()?;
             match timeout(
                 Duration::from_millis(budget),
                 self.radio.send_frame(tx.frame.to_vec()),

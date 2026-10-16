@@ -1953,3 +1953,21 @@ and pending USB recovery. Source and public evidence hashes identify this
 working tree. Private bench material stays under ignored validation results.
 The existing repository targets were reused; no isolated target, Cargo home
 or worktree was created.
+
+**Custody continuation (2026-10-15, in progress).** The owner's delayed reply
+selected **extend Djinn custody first**, superseding the isolated seed-file
+choice for further physical runs. COM7's physical USB reconnect recovered its
+endpoint. Exact Tulle status, identity slot B sequence 5, US915 and modem
+channel now match the saved pre-flash state; the new boot has its own profile
+snapshot (`baseline-com7-after-reconnect.json`). The earlier failure receipts
+retain their original pending-restoration status as historical evidence.
+
+Personae's scoped Tucket derivation is published at `5c89001`; its complete
+71-test library suite passes. Djinn's release policy and Signalman's port add
+a single device/realm wallet child and a sticky connection custody watch.
+The consumer is being changed to a Tucket-only runtime, avoiding dormant
+Reticulum identities and a synthetic Sennet packet-id reservation. The 18
+retained-instance tests pass, including direct wire ACK and refusal to
+activate an uninstalled personality. New custody code still needs receiving
+compiler and actual broker receipts before any further RF run. Mere owns the
+custody route and policy; the Dramatis repository owns the derivation.

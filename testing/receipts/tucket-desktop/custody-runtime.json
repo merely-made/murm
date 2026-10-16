@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "recovery": "COM7 exact Tulle identity/status/region/channel verified after physical USB reconnect; fresh baseline saved",
+  "custody_supplier": "dramatis 5c89001a6ff1aac3f6105ed50b6ae5f09c9f27e2",
+  "source_base": "a9701a05aff14d77fc7d1506f582f4177a0a411b",
+  "public_log_sha256": {
+    "custody-runtime-final-tests.log": "160f5466f05b8cfce6714b09feb607198f491a4c44527e17ac367b0cfb8c3ee8",
+    "custody-protocol-clippy.log": "fb4176fabaf2aba88ab5cbe847e392e84947c38567b40df140555d7bcc935158",
+    "custody-runtime-clippy.log": "70f4518bdeddb2196f79d2f5cfcba2f632a3da9907e3e56099d6222d95174d4e",
+    "custody-boundary-tests.log": "71fc77181d7a23bb2b5cf24fb661e19c612c79e3bdf50c5c39573a359066161a"
+  },
+  "date": "2026-10-15",
+  "source_sha256": {
+    "crates/tucket/src/identity.rs": "4c2f2d6ff608181a187ed3ea3fd187c70934f949d0338ebc85b67fa4bdaf772d",
+    "crates/radio-hand/tests/instances/tucket_only.rs": "e76ba05b542c9ee2e1e9a3cd20726ac01fae1da61e95b6ebbc50b8c68959a1d9",
+    "crates/radio-hand/tests/instances/main.rs": "b659e02c844d6c33d71d416fe8b43cf6236190beb8d980cb54b6aa0bfbfdc814",
+    "crates/radio-hand/src/instances/traffic.rs": "a793d523280582b5ce136296cc4f8fb861b03226e21494ec4afbd1a40f101634",
+    "apps/signalman/src/radio_comms/carriage/tests.rs": "2ec4f2ed46d68bd6a1e88c1d6a4f3334b990c32fd6a5553a66db56342fc85683",
+    "crates/tucket/Cargo.toml": "ec9c335eb86564cbe8f5ef1dfbd6397695f885e1e0c51de079254930c130ccdd",
+    "apps/signalman/src/radio_comms/resident.rs": "33f6fc4c7e03c1f79bf795a205ccbcd6211c468872a7e9cfdcb94b1c8c71f5b3",
+    "crates/radio-hand/src/instances.rs": "5c0e057bf8fff555c3477a4e3422c72cb10e8c3502afbba1422e2a1390b50b39",
+    "design_docs/DOC_README.md": "ba814c0e0cb5955bf69847714039c32c98dbf9cfbbe04cdcf97b25263c0bc52c",
+    "apps/signalman/src/radio_comms/carriage.rs": "1c3f19c93e89e7587fc04b86129a44d1e9bc86b66de63b29dae2703566ec9152",
+    "design_docs/2026-10-13_murm_family_move_plan.md": "55c9fbb0ddcef04443b6d930ef21f29bae3f4818b21d8388d40eaa938f7f3200",
+    "crates/radio-hand/src/instances/switching.rs": "d4a8f271e2fd8ad5434259e440ea054d5edb5a0f604e3f92ca917af3bc4f6063",
+    "Cargo.lock": "bfeca16e86a5cd82d37eb189ea6ae634728636acb561c844f84996f8271d7522"
+  },
+  "remaining": [
+    "Mere scoped custody receiving compiler and real broker receipts",
+    "Forbidden local-seed fallback control",
+    "Desktop adoption and Djinn-backed native RF qualification"
+  ],
+  "result": "portable_custody_boundaries_qualified_receiving_integration_open",
+  "clippy": "strict Signalman library/tests/examples and radio-hand/Tucket library/tests passed",
+  "tests": {
+    "signalman_library": 63,
+    "tucket_library": 73,
+    "radio_hand_instances": 18,
+    "radio_hand_library": 144
+  }
+}

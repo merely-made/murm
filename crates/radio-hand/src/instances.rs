@@ -27,11 +27,11 @@ pub struct Runtime {
     config: Config,
     controller: Controller,
     last_now: u64,
-    retinue: retinue::instance::Instance,
+    retinue: Option<retinue::instance::Instance>,
     carrier: crate::retinue_carrier::RetinueCarrier,
     carrier_rejected_rx: u64,
     carrier_rejected_tx: u64,
-    sennet: sennet::instance::SennetInstance,
+    sennet: Option<sennet::instance::SennetInstance>,
     tucket: tucket::instance::Instance,
     work: WorkQueue<8>,
     report: Report,
@@ -93,8 +93,8 @@ impl Runtime {
             carrier_rejected_tx: 0,
             controller,
             last_now: now,
-            retinue: retinue::instance::Instance::new(node, now),
-            sennet,
+            retinue: Some(retinue::instance::Instance::new(node, now)),
+            sennet: Some(sennet),
             tucket,
             work: WorkQueue::new(now),
             report: Report::default(),
@@ -106,6 +106,40 @@ impl Runtime {
         }
         result.work.activate(now, config.controller.home)?;
         Ok(result)
+    }
+    /// Retain only Tucket, without constructing other protocol identities or
+    /// reserving Sennet packet ids. Missing personalities cannot be activated.
+    pub fn tucket_only(
+        now: u64,
+        config: Config,
+        tucket: tucket::instance::Instance,
+    ) -> Result<Self, Error> {
+        if config.controller.home != TUCKET
+            || config.controller.pin != Some(TUCKET)
+            || config.controller.installed != InstalledPersonalitySet::new(&[TUCKET]).unwrap()
+            || config.tx_budget_ms == 0
+            || config.frame_ttl_ms <= config.tx_budget_ms
+            || tucket.is_paused()
+        {
+            return Err(Error::Configuration);
+        }
+        let controller =
+            Controller::new(config.controller, now).map_err(|_| Error::Configuration)?;
+        let mut work = WorkQueue::new(now);
+        work.activate(now, TUCKET)?;
+        Ok(Self {
+            config,
+            controller,
+            last_now: now,
+            retinue: None,
+            carrier: Default::default(),
+            carrier_rejected_rx: 0,
+            carrier_rejected_tx: 0,
+            sennet: None,
+            tucket,
+            work,
+            report: Report::default(),
+        })
     }
     /// Rejected physical Retinue ingress and final egress, including authentication failures.
     pub fn carrier_rejections(&self) -> (u64, u64) {
@@ -121,17 +155,32 @@ impl Runtime {
         self.config.tx_budget_ms
     }
     pub fn profile(&self, id: PersonalityId) -> Result<PhyProfile, Error> {
+        if !self.config.controller.installed.contains(id) {
+            return Err(Error::WrongInstance);
+        }
         self.config
             .profiles
             .get(usize::from(id.0))
             .copied()
             .ok_or(Error::WrongInstance)
     }
+    /// Retinue in a full-family runtime. Panics if it is not installed;
+    /// use `installed_retinue` when accepting a single-protocol runtime.
     pub fn retinue(&self) -> &retinue::instance::Instance {
-        &self.retinue
+        self.retinue.as_ref().expect("Retinue must be installed")
     }
+    /// Sennet in a full-family runtime. Panics if it is not installed;
+    /// use `installed_sennet` when accepting a single-protocol runtime.
     pub fn sennet(&self) -> &sennet::instance::SennetInstance {
-        &self.sennet
+        self.sennet.as_ref().expect("Sennet must be installed")
+    }
+    /// An installed Sennet instance; absent in a Tucket-only runtime.
+    pub fn installed_sennet(&self) -> Option<&sennet::instance::SennetInstance> {
+        self.sennet.as_ref()
+    }
+    /// An installed Retinue instance; absent in a Tucket-only runtime.
+    pub fn installed_retinue(&self) -> Option<&retinue::instance::Instance> {
+        self.retinue.as_ref()
     }
     pub fn tucket(&self) -> &tucket::instance::Instance {
         &self.tucket
@@ -196,9 +245,11 @@ impl Runtime {
         [
             controller,
             self.work.next_deadline(),
-            self.sennet.next_deadline(),
+            self.sennet.as_ref().and_then(|s| s.next_deadline()),
             self.tucket.next_deadline(),
-            self.retinue.node().pause_assessment().earliest_link_expiry,
+            self.retinue
+                .as_ref()
+                .and_then(|r| r.node().pause_assessment().earliest_link_expiry),
         ]
         .into_iter()
         .flatten()
@@ -242,9 +293,10 @@ impl Runtime {
     fn settle_loss(&mut self, now: u64, id: WorkId) -> Result<(), Error> {
         self.event(Event::WorkLost(id));
         if id.activation.instance == SENNET
-            && let (Some(op), Some(identity)) = (id.operation, self.sennet.pending_identity())
+            && let Some(sennet) = self.sennet.as_mut()
+            && let (Some(op), Some(identity)) = (id.operation, sennet.pending_identity())
         {
-            let event = self.sennet.fail_tx(now, op as u32, identity)?;
+            let event = sennet.fail_tx(now, op as u32, identity)?;
             self.event(Event::Sennet(event));
         }
         Ok(())
@@ -265,14 +317,17 @@ impl Runtime {
             self.settle_loss(now, id)?;
         }
         if self.work.inflight().is_none()
-            && let Some(e) = self.sennet.advance(now)?
+            && let Some(sennet) = self.sennet.as_mut()
+            && let Some(e) = sennet.advance(now)?
         {
             self.event(Event::Sennet(e));
         }
         let t = self.tucket.advance(now)?;
         self.tucket_lost(now, t)?;
-        let r = self.retinue.advance(now)?;
-        self.retinue_expired(r);
+        if let Some(retinue) = self.retinue.as_mut() {
+            let r = retinue.advance(now)?;
+            self.retinue_expired(r);
+        }
         Ok(())
     }
     /// Report what a Retinue expiry pass removed. An unanswered link request is the
