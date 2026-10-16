@@ -113,20 +113,23 @@ impl Runtime {
                 }
             }
             SENNET => {
-                if allow
-                    && self
+                if allow {
+                    while self
                         .sennet
-                        .as_mut()
+                        .as_ref()
                         .ok_or(Error::WrongInstance)?
-                        .pending_identity()
-                        .is_some()
-                    && let Some(e) = self
-                        .sennet
-                        .as_mut()
-                        .ok_or(Error::WrongInstance)?
-                        .discard_pending(now, sennet::instance::LossPermission::operator())?
-                {
-                    self.event(Event::Sennet(e));
+                        .has_obligation()
+                    {
+                        let Some(e) = self
+                            .sennet
+                            .as_mut()
+                            .ok_or(Error::WrongInstance)?
+                            .discard_pending(now, sennet::instance::LossPermission::operator())?
+                        else {
+                            break;
+                        };
+                        self.event(Event::Sennet(e));
+                    }
                 }
                 self.sennet
                     .as_mut()

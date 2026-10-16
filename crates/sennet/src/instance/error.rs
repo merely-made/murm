@@ -10,6 +10,11 @@ use crate::{
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum InstanceError {
+    Pki(crate::pki::PkiError),
+    Routing(crate::routing::RoutingError),
+    PkiRequired,
+    InvalidDirectedConfig,
+    PrivateChannelDowngrade,
     Lease(LeaseError),
     FloodConfig(FloodConfigError),
     DirectoryConfig(DirectoryConfigError),
@@ -75,6 +80,16 @@ pub enum InstanceError {
 impl core::fmt::Display for InstanceError {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
+            Self::Pki(e) => write!(f, "PKI: {e:?}"),
+            Self::Routing(e) => write!(f, "routing: {e:?}"),
+            Self::PkiRequired => write!(f, "directed text requires an explicitly pinned PKI peer"),
+            Self::InvalidDirectedConfig => write!(
+                f,
+                "invalid, occupied or already configured directed station"
+            ),
+            Self::PrivateChannelDowngrade => {
+                write!(f, "directed channel text is not accepted by a PKI station")
+            }
             Self::Lease(error) => write!(f, "packet-ID lease: {error}"),
             Self::FloodConfig(error) => write!(f, "flood configuration: {error}"),
             Self::DirectoryConfig(error) => write!(f, "directory configuration: {error}"),

@@ -7,9 +7,9 @@
 //! The companion client cannot attach its journal to a resident PHY runtime.
 pub mod carriage;
 pub mod companion;
-pub mod sennet_ids;
 mod journal;
 mod resident;
+pub mod sennet_ids;
 #[cfg(test)]
 mod tests;
 
@@ -209,6 +209,19 @@ impl Scope {
 /// Native protocol facts remain available alongside the portable projection.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum RadioFact {
+    /// Public pairwise binding; private cipher material never enters history.
+    MeshtasticPkiBinding {
+        peer: u32,
+        local_public: [u8; 32],
+        peer_public: [u8; 32],
+    },
+    /// A matched routing response. Channel responses are not authenticated.
+    MeshtasticRouting {
+        peer: u32,
+        request_id: u32,
+        code: u32,
+        authenticated: bool,
+    },
     MeshtasticPacket {
         source: u32,
         destination: u32,

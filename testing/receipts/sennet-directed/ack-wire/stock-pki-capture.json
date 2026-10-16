@@ -1,0 +1,31 @@
+{
+  "ack_frame_hex": "28fb6af60c06f6e9010000006308000c8703fd6e1215cfc03614cd8078",
+  "ack_packet_id": 1,
+  "ack_physical_airtime_ms": 477.18399999999997,
+  "authority": "djinn",
+  "frames": [
+    {
+      "application_hex": "0801122b73656e6e65742d706b692d31633737353637343134356334626438623437623535636666333733396139644800",
+      "authenticated_candidate": true,
+      "expected_text_match": true,
+      "frame_hex": "0c06f6e928fb6af6a7dc9dc76b00002819b61d5816f9dcd1602beb33f3018eb7e4d255b395ca7f98d25a073ae7486eec87ee4c7df22341d568b17efef54a6c307aa717bf7de5e368042df45158"
+    },
+    {
+      "authenticated": false,
+      "channel_application_hex": "08051202180035020000004800",
+      "frame_hex": "0c06f6e928fb6af6342a6e154a080c289d908ff27c145fb4e6822303c3",
+      "matched_routing_code": 0
+    }
+  ],
+  "node_number": 3925214732,
+  "nonce_placement": "LE32(packet_id), extra nonce(4), LE32(source), zero(1), observed on 2.7.26",
+  "peer_node": 4134206248,
+  "peer_public_key": "cd536798647176f8f5681b4f1c7627c5b3b3b0a2d7ce8333f4869bf0907b5e15",
+  "physical_airtime_ms": 845.8240000000001,
+  "pki_public_key": "5ae45bb97bd0ebe259e4c4db1a15d813c5a4d91c306f9145960abe455812b030",
+  "pki_reply_transmitted": true,
+  "reply_frame_hex": "28fb6af60c06f6e9020000006b00000c8b7fe83d1654b0f5fcd9530bd403155286b6a720916bff53985abe147543181fb381af7f7b791c5bf71e0f8f15e049de9e0411a82a2aebbcd634d0a58304038d4ecc",
+  "reply_packet_id": 2,
+  "result": "matched_stock_routing_success_not_native_gate",
+  "transmitted": true
+}

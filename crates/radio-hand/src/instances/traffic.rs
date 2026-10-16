@@ -35,6 +35,7 @@ impl Runtime {
                     .ok_or(Error::WrongInstance)?
                     .receive(now, frame)?;
                 self.event(Event::SennetReceived(e));
+                self.queue_sennet_pending(now)?;
             }
             TUCKET => {
                 let tucket = self.tucket.as_mut().ok_or(Error::WrongInstance)?;
@@ -112,7 +113,9 @@ impl Runtime {
                     }
                 }
             }
-            SENNET => {}
+            SENNET => {
+                self.queue_sennet_pending(now)?;
+            }
             _ => return Err(Error::WrongInstance),
         }
         Ok(self.take_report())
@@ -123,7 +126,7 @@ impl Runtime {
         header: sennet::transport::Header,
         text: &str,
     ) -> Result<Report, Error> {
-        let a = self.require(now, SENNET)?;
+        self.require(now, SENNET)?;
         if self.work.available() == 0 {
             return Err(WorkError::Full.into());
         }
@@ -139,6 +142,40 @@ impl Runtime {
             .as_mut()
             .ok_or(Error::WrongInstance)?
             .queue_text(now, header, text)?;
+        self.queue_sennet_pending(now)?;
+        Ok(self.take_report())
+    }
+    /// Directed PKI text uses a caller-generated extra nonce and the retained
+    /// instance's existing durable packet-ID lease, never a fresh identity.
+    pub fn send_sennet_directed(
+        &mut self,
+        now: u64,
+        header: sennet::transport::Header,
+        text: &str,
+        extra: [u8; 4],
+    ) -> Result<Report, Error> {
+        self.require(now, SENNET)?;
+        if self.work.available() == 0 {
+            return Err(WorkError::Full.into());
+        }
+        let deadline = self.ttl(now)?.min(self.work_until());
+        if now
+            .checked_add(self.config.tx_budget_ms)
+            .ok_or(Error::TimeOverflow)?
+            > deadline
+        {
+            return Err(WorkError::Expired.into());
+        }
+        self.sennet
+            .as_mut()
+            .ok_or(Error::WrongInstance)?
+            .queue_directed_text(now, header, text, extra)?;
+        self.queue_sennet_pending(now)?;
+        Ok(self.take_report())
+    }
+    fn queue_sennet_pending(&mut self, now: u64) -> Result<(), Error> {
+        let a = self.require(now, SENNET)?;
+        let deadline = self.ttl(now)?.min(self.work_until());
         if let Some(out) = self
             .sennet
             .as_mut()
@@ -163,7 +200,7 @@ impl Runtime {
                 reason,
             });
         }
-        Ok(self.take_report())
+        Ok(())
     }
     pub fn send_tucket(
         &mut self,

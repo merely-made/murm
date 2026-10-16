@@ -17,7 +17,7 @@ use crate::{
 };
 
 #[derive(Debug)]
-enum PendingTx {
+pub(super) enum PendingTx {
     Queued {
         operation_id: u32,
         identity: PacketIdentity,
@@ -55,13 +55,14 @@ impl PendingTx {
 
 /// One retained Sennet instance in text-leaf mode.
 pub struct SennetInstance {
-    channel: Channel,
-    packet_ids: PacketIdState,
-    lease: PacketIdLease,
-    flood: ManagedFlood,
+    pub(super) channel: Channel,
+    pub(super) packet_ids: PacketIdState,
+    pub(super) lease: PacketIdLease,
+    pub(super) flood: ManagedFlood,
     directory: NodeDirectory,
-    pending_ttl: u64,
-    pending: Option<PendingTx>,
+    pub(super) pending_ttl: u64,
+    pub(super) pending: Option<PendingTx>,
+    pub(super) directed: Option<super::directed::Directed>,
     paused: bool,
     last_now: Option<u64>,
     next_operation_id: u32,
@@ -89,6 +90,7 @@ impl SennetInstance {
             directory,
             pending_ttl: config.pending_ttl,
             pending: None,
+            directed: None,
             paused: false,
             last_now: None,
             next_operation_id: 1,
@@ -122,7 +124,12 @@ impl SennetInstance {
         self.pending.as_ref().map(PendingTx::operation_id)
     }
     pub fn next_deadline(&self) -> Option<u64> {
-        self.pending.as_ref().map(PendingTx::expires_at)
+        self.pending
+            .as_ref()
+            .map(PendingTx::expires_at)
+            .into_iter()
+            .chain(self.directed.as_ref().and_then(|d| d.deadline()))
+            .min()
     }
 
     /// Extend only a contiguous reserved interval after caller persistence evidence.
@@ -163,11 +170,18 @@ impl SennetInstance {
                 });
             }
             let pending = self.pending.take().expect("checked pending");
+            if let Some(d) = &mut self.directed {
+                d.cancel(pending.operation_id());
+            }
             self.record_now(now)?;
             return Ok(Some(InstanceEvent::PendingExpired {
                 operation_id: pending.operation_id(),
                 identity: pending.identity(),
             }));
+        }
+        if let Some(event) = self.directed.as_mut().and_then(|d| d.expire(now)) {
+            self.record_now(now)?;
+            return Ok(Some(event));
         }
         self.record_now(now)?;
         Ok(None)
@@ -179,15 +193,20 @@ impl SennetInstance {
         if return_by < now {
             return Err(InstanceError::ReturnBeforeNow { now, return_by });
         }
-        let Some(pending) = self.pending.as_ref() else {
+        let Some(deadline) = self.next_deadline() else {
             return Ok(PauseOutcome::Ready);
         };
-        if pending.expires_at() <= return_by {
-            Ok(PauseOutcome::RequiresLoss { pending: 1 })
-        } else {
-            Ok(PauseOutcome::Busy {
-                retry_at: pending.expires_at(),
+        if deadline <= return_by {
+            Ok(PauseOutcome::RequiresLoss {
+                pending: usize::from(self.pending.is_some())
+                    + usize::from(
+                        self.directed
+                            .as_ref()
+                            .is_some_and(|d| d.deadline().is_some()),
+                    ),
             })
+        } else {
+            Ok(PauseOutcome::Busy { retry_at: deadline })
         }
     }
 
@@ -231,13 +250,16 @@ impl SennetInstance {
             });
         }
         self.record_now(now)?;
-        Ok(self
-            .pending
-            .take()
-            .map(|pending| InstanceEvent::PendingLost {
+        if let Some(pending) = self.pending.take() {
+            if let Some(d) = &mut self.directed {
+                d.cancel(pending.operation_id());
+            }
+            return Ok(Some(InstanceEvent::PendingLost {
                 operation_id: pending.operation_id(),
                 identity: pending.identity(),
-            }))
+            }));
+        }
+        Ok(self.directed.as_mut().and_then(|d| d.lose()))
     }
 
     /// Construct one text frame, retaining it until the board takes and completes it.
@@ -249,7 +271,7 @@ impl SennetInstance {
     ) -> Result<PacketIdentity, InstanceError> {
         self.require_active()?;
         self.check_now(now)?;
-        if self.pending.is_some() {
+        if self.pending.is_some() || self.directed.as_ref().is_some_and(|d| d.has_pending()) {
             return Err(InstanceError::PendingFull);
         }
         let expires_at =
@@ -383,6 +405,9 @@ impl SennetInstance {
             });
         }
         self.record_now(now)?;
+        if let Some(d) = &mut self.directed {
+            d.completed(operation_id, now, completed);
+        }
         self.pending = None;
         Ok(if completed {
             InstanceEvent::TxCompleted {
@@ -402,6 +427,9 @@ impl SennetInstance {
         self.require_active()?;
         self.record_now(now)?;
         let packet = crate::transport::Packet::decode(frame).map_err(InstanceError::Transport)?;
+        if self.directed.is_some() {
+            return self.receive_directed(now, packet, frame);
+        }
         if packet.header.channel_hash != self.channel.hash {
             return Ok(ReceiveOutcome::IgnoredChannel);
         }
@@ -436,7 +464,7 @@ impl SennetInstance {
             .map_err(InstanceError::NodeInfo)
     }
 
-    fn require_active(&self) -> Result<(), InstanceError> {
+    pub(super) fn require_active(&self) -> Result<(), InstanceError> {
         if self.paused {
             Err(InstanceError::Paused)
         } else {
@@ -444,7 +472,7 @@ impl SennetInstance {
         }
     }
 
-    fn check_now(&self, now: u64) -> Result<(), InstanceError> {
+    pub(super) fn check_now(&self, now: u64) -> Result<(), InstanceError> {
         if let Some(previous) = self.last_now
             && now < previous
         {
@@ -453,13 +481,13 @@ impl SennetInstance {
         Ok(())
     }
 
-    fn record_now(&mut self, now: u64) -> Result<(), InstanceError> {
+    pub(super) fn record_now(&mut self, now: u64) -> Result<(), InstanceError> {
         self.check_now(now)?;
         self.last_now = Some(now);
         Ok(())
     }
 
-    fn allocate_operation_id(&mut self) -> Result<u32, InstanceError> {
+    pub(super) fn allocate_operation_id(&mut self) -> Result<u32, InstanceError> {
         let operation_id = self.next_operation_id;
         self.next_operation_id = operation_id
             .checked_add(1)

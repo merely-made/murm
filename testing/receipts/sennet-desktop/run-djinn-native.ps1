@@ -1,7 +1,7 @@
 # An isolated real Keeper, explicit public LongFast configuration and nonce
 # commissioning, followed by the guarded two-connection native/restoration gate.
 [CmdletBinding()]
-param([ValidatePattern('^[a-z][a-z0-9-]{2,48}$')][string]$TrialName='native-djinn-channel',[switch]$PkiCapture,[switch]$PkiReplyCapture,[switch]$PkiAcknowledgeCapture)
+param([ValidatePattern('^[a-z][a-z0-9-]{2,48}$')][string]$TrialName='native-djinn-channel',[switch]$PkiCapture,[switch]$PkiReplyCapture,[switch]$PkiAcknowledgeCapture,[switch]$DirectedNative)
 $ErrorActionPreference='Stop'
 $repo=(Resolve-Path (Join-Path $PSScriptRoot '../../..')).Path
 $root=Join-Path $repo 'validation/results/sennet-desktop'
@@ -32,7 +32,7 @@ try {
     if($LASTEXITCODE -ne 0){throw 'Djinn station/nonce commissioning refused'}
     $card=Get-Content $public -Raw|ConvertFrom-Json
     $report.node_number=$card.node_number
-    & (Join-Path $repo 'testing/run_sennet_desktop.ps1') -SennetConfig $configPath -PublicStation $public -DutUsbSerial '44:1B:F6:6A:FA:64' -PeerPort COM6 -PeerUsbSerial '44:1B:F6:6A:FB:28' -OutputDirectory $trial -Python (Join-Path $repo 'validation/results/sennet-tucket-radios/stock-cli/Scripts/python.exe') -DutBaseline (Join-Path $repo 'validation/results/tucket-desktop-20261015/baseline-com7-after-reconnect.json') -PkiCapture:$PkiCapture -PkiReplyCapture:$PkiReplyCapture -PkiAcknowledgeCapture:$PkiAcknowledgeCapture
+    & (Join-Path $repo 'testing/run_sennet_desktop.ps1') -SennetConfig $configPath -PublicStation $public -DutUsbSerial '44:1B:F6:6A:FA:64' -PeerPort COM6 -PeerUsbSerial '44:1B:F6:6A:FB:28' -OutputDirectory $trial -Python (Join-Path $repo 'validation/results/sennet-tucket-radios/stock-cli/Scripts/python.exe') -DutBaseline (Join-Path $repo 'validation/results/tucket-desktop-20261015/baseline-com7-after-reconnect.json') -PkiCapture:$PkiCapture -PkiReplyCapture:$PkiReplyCapture -PkiAcknowledgeCapture:$PkiAcknowledgeCapture -DirectedNative:$DirectedNative
     if((Get-FileHash $hostBinary).Hash -ne $expected.host_sha256){throw 'Custodian binary changed during native trial'}
     $report.result=$(if($PkiAcknowledgeCapture){'stock_protocol_ack_exchange_observed_not_native_gate'}elseif($PkiReplyCapture){'stock_routing_candidate_observed_no_ack_or_native_gate'}elseif($PkiCapture){'stock_pki_receive_observed_no_ack_or_native_gate'}else{'native_completed_pending_visual_review'})
 } catch {$report.result='failed';$report.error=$_.Exception.Message;throw}
