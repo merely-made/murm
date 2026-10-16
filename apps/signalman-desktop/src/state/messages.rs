@@ -151,7 +151,11 @@ impl DesktopState {
                     .push((protocol, format!("Connected on {port}. {source}")));
             }
             CompanionEvent::Stopped { protocol, detail } => {
-                if protocol == signalman::comms_adapter::comms::ProtocolKind::MeshCore {
+                if self
+                    .resident_settings
+                    .as_ref()
+                    .is_some_and(|s| s.protocol.kind() == protocol)
+                {
                     self.resident_connecting = false;
                 }
                 self.companion_settings
@@ -212,7 +216,7 @@ impl DesktopState {
                 && let Some(resident) = &self.resident_settings
             {
                 active.push(crate::companion::CompanionSettings {
-                    protocol: CompanionProtocol::MeshCore,
+                    protocol: resident.protocol,
                     port: resident.port.clone(),
                     realm: resident.realm.clone(),
                     journal: resident.journal.clone(),
@@ -244,23 +248,30 @@ impl DesktopState {
     }
     pub fn request_resident_connection(&mut self) {
         use signalman::comms_adapter::comms::ProtocolKind;
+        let label = if self.message_protocol == ProtocolKind::Meshtastic {
+            "Sennet"
+        } else {
+            "Tucket"
+        };
         let result = (|| {
-            if self.message_protocol != ProtocolKind::MeshCore {
-                return Err("Select MeshCore for the Tucket connection".to_owned());
-            }
             if self.install_running || self.observation_collecting || self.resident_connecting {
-                return Err("Stop the active radio owner before connecting Tucket".into());
+                return Err(format!(
+                    "Stop the active radio owner before connecting {label}"
+                ));
             }
             let mut settings = self.resident_settings.clone().ok_or_else(|| {
-                "A scoped Tucket authority and radio profile must be configured first".to_owned()
+                format!("A scoped {label} authority and radio profile must be configured first")
             })?;
+            if self.message_protocol != settings.protocol.kind() {
+                return Err("Select the protocol matching the configured Tulle authority".into());
+            }
             settings.port = self.companion_port.text().trim().into();
             settings.realm = self.companion_realm.text().trim().into();
             settings.journal = self.companion_journal.text().trim().into();
             crate::resident::validate(&settings)?;
             let mut active = self.companion_settings.clone();
             active.push(crate::companion::CompanionSettings {
-                protocol: signalman::radio_comms::companion::CompanionProtocol::MeshCore,
+                protocol: settings.protocol,
                 port: settings.port.clone(),
                 realm: settings.realm.clone(),
                 journal: settings.journal.clone(),
@@ -276,14 +287,22 @@ impl DesktopState {
         match result {
             Ok(settings) => {
                 self.companion_comms
-                    .retain(|(kind, _)| *kind != ProtocolKind::MeshCore);
+                    .retain(|(kind, _)| *kind != settings.protocol.kind());
+                let label = if settings.protocol.kind() == ProtocolKind::MeshCore {
+                    "Tucket"
+                } else {
+                    "Sennet"
+                };
                 self.resident_settings = Some(settings);
                 self.resident_connecting = true;
                 self.pending_resident = true;
-                self.message_notice =
-                    Some("Connecting Tucket through Tulle; checking scoped identity first.".into());
+                self.message_notice = Some(format!(
+                    "Connecting {label} through Tulle; checking scoped identity first."
+                ));
             }
-            Err(error) => self.message_notice = Some(format!("Tucket connection refused: {error}")),
+            Err(error) => {
+                self.message_notice = Some(format!("{label} connection refused: {error}"))
+            }
         }
     }
     pub fn take_resident_request(&mut self) -> Option<crate::resident::ResidentSettings> {

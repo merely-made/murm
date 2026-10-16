@@ -490,7 +490,7 @@ fn radio_page(state: &DesktopState) -> Child {
         el("label", (el("div", text("Public message journal path")), el("div", cambium::lens(|input: &mut cambium::TextInput| cambium::text_field(input), |s: &mut DesktopState| &mut s.companion_journal)).attr("data-text-field", "companion-journal").attr("class", "companion-journal"))).attr("class", "revision-label"),
         el("label", (el("div", text("Meshtastic channel index (0–7; ignored for MeshCore)")), el("div", cambium::lens(|input: &mut cambium::TextInput| cambium::text_field(input), |s: &mut DesktopState| &mut s.companion_channel)).attr("data-text-field", "companion-channel").attr("class", "companion-channel"))).attr("class", "revision-label"),
         button("Connect companion", |s: &mut DesktopState, _| s.request_companion_connection()).attr("class", "primary"),
-        if protocol == ProtocolKind::MeshCore { Box::new(button("Connect Tulle", |s: &mut DesktopState, _| s.request_resident_connection()).attr("class", "primary")) as Child } else { Box::new(el("span", ())) as Child },
+        Box::new(button("Connect Tulle", |s: &mut DesktopState, _| s.request_resident_connection()).attr("class", "primary")) as Child,
         button("Disconnect companion", |s: &mut DesktopState, _| s.disconnect_companion()).attr("class", "primary secondary"),
         el("div", text(diagnostics)).attr("data-comms-diagnostics", label),
         el("label", (el("div", text(if protocol == ProtocolKind::Meshtastic {"Recipient node number (8 hex digits; ffffffff broadcasts)"} else {"Recipient public key (64 hex digits)"})),

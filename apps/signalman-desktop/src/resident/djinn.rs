@@ -104,6 +104,7 @@ pub fn load(path: &std::path::Path) -> Result<ResidentSettings, String> {
     );
     profile.tx_power_dbm = config.tx_power_dbm;
     let settings = ResidentSettings {
+        protocol: signalman::radio_comms::companion::CompanionProtocol::MeshCore,
         port: config.port,
         realm: config.realm.clone(),
         journal: config.journal,
@@ -163,6 +164,7 @@ impl ResidentAuthority for Authority {
         let lease = Arc::new(released.lease);
         let live = lease.clone();
         Ok(PreparedResident {
+            hold: None,
             scope,
             authorize: Box::new(move || lease.check().map_err(|e| e.to_string())),
             can_transmit: Box::new(move || live.check_live().map_err(|e| e.to_string())),
@@ -219,6 +221,7 @@ mod tests {
             reply_delay_ms: 200,
         });
         let settings = ResidentSettings {
+            protocol: signalman::radio_comms::companion::CompanionProtocol::MeshCore,
             port: dir.path().join("radio-does-not-exist"),
             realm: "custody-test".into(),
             journal: dir.path().join("journal.json"),

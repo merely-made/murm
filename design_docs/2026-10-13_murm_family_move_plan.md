@@ -2086,3 +2086,25 @@ identity-bound history stays exact before new sends, packet IDs do not overlap,
 all native captures are reviewed, both boards restore/read back, and owned
 serial/native/helper processes stop. First finish derivation/refusal, custody,
 nonce-state and software gates; compilation alone does not qualify RF.
+
+**Software checkpoint (2026-10-16).** Dramatis `19be4831` supplies the exact
+scoped public node derivation with 73 passing tests. Mere's API/real-Keeper
+receipts are published through `e12788bc`, with policy and strict port/example
+checks in `b31363d2`. Six real-broker cases pass, including wrong-app controls
+and independent sticky watch closure. The integration worktree/branch have
+been removed while preserving unrelated unpublished primary Mere commits.
+
+Murm `71f453ab23c` supplies a Sennet-only runtime and exclusive packet-ID
+intervals. The allocator's create-once commissioning fence prevents lost state
+from silently restarting the same identity; no global rollback or hardware
+power-cut claim follows. Its 146 radio-hand, 66 Signalman and 19 runtime tests,
+strict core Clippy and bare runtime gate pass. The desktop now passes 44 tests
+(one existing ignored), strict all-target Clippy and native/station-exporter
+builds. All 66 Signalman tests pass again with the receiving Comms source.
+The canonical cohort is Mere `e12788bc`, Dramatis `19be4831`, Genet `e37762d7`
+and Netrender `f4f9c0d8`; an initial dependency update's identity-pin regression
+was caught and repaired before these gates. The bounded native fixture uses
+new channel-peer receipts after reconnect and requires zero protocol ACKs.
+[Software receipts](../testing/receipts/sennet-desktop/README.md) retain the
+exact scopes. Physical/native delivery remains pending; both boards are still
+in their restored Tulle state before the first R7 trial.

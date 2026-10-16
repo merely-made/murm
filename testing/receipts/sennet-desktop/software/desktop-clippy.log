@@ -1,0 +1,63 @@
+warning: patch `mere-p2panda-net v0.7.5 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `mere-proofs v0.1.0 (https://github.com/merely-made/mere.git?branch=main#e12788bc)` was not used in the crate graph
+warning: patch `p2panda-auth v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-discovery v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-encryption v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-store v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-stream v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-sync v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+help: Check that the patched package version and available features are compatible
+      with the dependency requirements. If the patch has a different version from
+      what is locked in the Cargo.lock file, run `cargo update` to use the new
+      version. This may also occur with an optional dependency that is not enabled.
+    Checking mere-curation v0.1.1 (https://github.com/merely-made/mere.git?branch=main#e12788bc)
+    Checking sceno v0.0.5 (https://github.com/merely-made/mere.git?branch=main#e12788bc)
+    Checking command-menu v0.1.0 (https://github.com/merely-made/mere.git?branch=main#e12788bc)
+    Checking tinct v0.1.2 (https://github.com/merely-made/mere.git?branch=main#e12788bc)
+    Checking scenograph v0.0.4 (https://github.com/merely-made/mere.git?branch=main#e12788bc)
+    Checking workbench v0.1.0 (https://github.com/merely-made/mere.git?branch=main#e12788bc)
+    Checking mere-surface-api v0.1.0 (https://github.com/merely-made/mere.git?branch=main#e12788bc)
+    Checking meristem v0.2.0 (https://github.com/merely-made/mere.git?branch=main#e12788bc)
+    Checking illume v0.0.2 (https://github.com/merely-made/mere.git?branch=main#e12788bc)
+    Checking scenomise v0.0.5 (https://github.com/merely-made/mere.git?branch=main#e12788bc)
+    Checking muniment v0.1.2 (https://github.com/merely-made/mere.git?branch=main#e12788bc)
+    Checking sprigging v0.2.1 (https://github.com/merely-made/mere.git?branch=main#e12788bc)
+    Checking insigne v0.0.2 (https://github.com/merely-made/dramatis.git?branch=main#19be4831)
+    Checking backstep v0.1.0 (https://github.com/merely-made/mere.git?branch=main#e12788bc)
+    Checking numen v0.2.0 (https://github.com/merely-made/mere.git?branch=main#e12788bc)
+    Checking cambium v0.3.3 (https://github.com/merely-made/mere.git?branch=main#e12788bc)
+    Checking chartulary v0.2.2 (https://github.com/merely-made/mere.git?branch=main#e12788bc)
+    Checking personae v0.3.0 (https://github.com/merely-made/dramatis.git?branch=main#19be4831)
+    Checking cambium-winit v0.3.0 (https://github.com/merely-made/mere.git?branch=main#e12788bc)
+    Checking mere-forme v0.2.0 (https://github.com/merely-made/mere.git?branch=main#e12788bc)
+    Checking tabard v0.0.1 (https://github.com/merely-made/mere.git?branch=main#e12788bc)
+    Checking mere-kernel v0.0.2 (https://github.com/merely-made/mere.git?branch=main#e12788bc)
+    Checking cambium-rootstock v0.1.0 (https://github.com/merely-made/mere.git?branch=main#e12788bc)
+    Checking notochord v0.1.1 (https://github.com/merely-made/dramatis.git?branch=main#19be4831)
+    Checking eidetic v0.0.2 (https://github.com/merely-made/mere.git?branch=main#e12788bc)
+    Checking inker v0.1.1 (https://github.com/merely-made/mere.git?branch=main#e12788bc)
+    Checking mere-alembic v0.0.1 (https://github.com/merely-made/mere.git?branch=main#e12788bc)
+    Checking scenotime v0.0.4 (https://github.com/merely-made/mere.git?branch=main#e12788bc)
+    Checking incipit v0.2.0 (https://github.com/merely-made/mere.git?branch=main#e12788bc)
+    Checking radio-hand v0.0.1 (C:\Users\mark_\Code\repos\retinue\crates\radio-hand)
+    Checking chirograph v0.0.2 (https://github.com/merely-made/mere.git?branch=main#e12788bc)
+    Checking pandect v0.1.1 (https://github.com/merely-made/mere.git?branch=main#e12788bc)
+    Checking document-canvas v0.1.0 (https://github.com/merely-made/mere.git?branch=main#e12788bc)
+    Checking cambium-winit-a11y v0.3.0 (https://github.com/merely-made/mere.git?branch=main#e12788bc)
+    Checking mere-fleece v0.0.1 (https://github.com/merely-made/mere.git?branch=main#e12788bc)
+    Checking dramatis v0.0.3 (https://github.com/merely-made/dramatis.git?branch=main#19be4831)
+    Checking chatelaine v0.0.3 (https://github.com/merely-made/dramatis.git?branch=main#19be4831)
+    Checking cambium-genet-winit-host v0.1.0 (https://github.com/merely-made/mere.git?branch=main#e12788bc)
+    Checking graphshell-endpoint v0.0.2 (https://github.com/merely-made/mere.git?branch=main#e12788bc)
+    Checking mere-document-lanes v0.1.0 (https://github.com/merely-made/mere.git?branch=main#e12788bc)
+    Checking mere-comms v0.0.1 (https://github.com/merely-made/mere.git?branch=main#e12788bc)
+    Checking armillary v0.1.1 (https://github.com/merely-made/mere.git?branch=main#e12788bc)
+    Checking mere-apparatus v0.0.1 (https://github.com/merely-made/mere.git?branch=main#e12788bc)
+    Checking seiche v0.0.6 (https://github.com/merely-made/mere.git?branch=main#e12788bc)
+    Checking mesquite v0.1.0 (https://github.com/merely-made/mere.git?branch=main#e12788bc)
+    Checking signalman v0.1.0 (C:\Users\mark_\Code\repos\retinue\apps\signalman)
+    Checking mere-signalman v0.0.1 (https://github.com/merely-made/mere.git?branch=main#e12788bc)
+    Checking tabard-workshop v0.0.1 (https://github.com/merely-made/mere.git?branch=main#e12788bc)
+    Checking gaz v0.0.2 (https://github.com/merely-made/dramatis.git?branch=main#19be4831)
+    Checking signalman-desktop v0.0.1 (C:\Users\mark_\Code\repos\retinue\apps\signalman-desktop)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 34.51s
