@@ -16,10 +16,11 @@ stock Meshtastic/MeshCore companion actors and attended desktop controls.
 R5 records Windows Meshtastic/MeshCore stock-pair and native functional
 acceptance, with a 500 ms MeshCore pair reconnect fixture and verified Tulle
 restoration. R6 passes a bounded Djinn-backed Tucket-over-Tulle native functional
-run against stock MeshCore: two tagged texts with protocol ACKs, followed by
-reconnect with exact history retained. Both boards are restored. New sends after
-that reconnect, immediate stock MeshCore reopen, UI cleanup and the Sennet
-stack leg retain their gates below.
+run against stock MeshCore: four tagged texts with all four protocol ACKs across
+two connections, with exact history checked before fresh work after reconnect.
+Both boards are restored. The fixture explicitly advertises after each Tucket
+commissioning; automatic contact restoration, immediate stock MeshCore reopen,
+UI cleanup and the Sennet stack leg retain their gates below.
 
 **Canonical home:** this repository owns the migration. Mere and Genet should
 cite this plan rather than keep another migration specification. The canonical
@@ -1847,11 +1848,12 @@ companion receipts do not qualify the host personalities over Tulle.
 ### R6 — Tucket over Tulle through Signalman (2026-10-15, in progress)
 
 **Current checkpoint (2026-10-16): bounded native functional pass.** The
-[Djinn-backed trial](../testing/receipts/tucket-desktop/custody/native-turnaround/README.md)
-passes two tagged texts and both protocol ACKs on one delivery connection,
-then disconnect/reconnect with exact history. Six captures are visually reviewed;
-both boards are restored and owned helpers stopped. This trial sends no new
-message after reconnect. Cosmetic cleanup and the Sennet stack leg remain open.
+[Djinn-backed reconnect trial](../testing/receipts/tucket-desktop/custody/native-reconnect/README.md)
+passes four tagged texts and all four protocol ACKs over two delivery connections,
+with exact reopened history checked before new work. Seven captures are visually
+reviewed; both boards are restored and owned helpers stopped. The fixture
+explicitly advertises the stock peer after each commissioning. Automatic contact
+restoration, cosmetic cleanup and the Sennet stack leg remain open.
 Earlier failed trials below retain their original results.
 
 The owner approved the next stack leg: reuse `RadioComms::ResidentSession`,
@@ -2017,7 +2019,7 @@ complete exchange elapsed 4935 ms, not a per-message latency measurement. The
 COM7's saved same-boot profile/sync and COM6's pinned Tulle image with exact
 status/identity/region/channel were restored and verified.
 
-This run uses an isolated real Djinn Keeper wallet through the production
+That first passing run uses an isolated real Djinn Keeper wallet through the production
 scoped authority route. It does not qualify an installed personal daemon or
 close broader platform D13 revocation work. No messages were sent after
 reconnect. The lower connecting notice stays stale after connection, so the
@@ -2026,7 +2028,7 @@ result qualifies function rather than visual polish. The curated
 records the completed visual review; raw runner results retain their original
 pending-review values.
 
-**Reconnect-send continuation (2026-10-16, in progress).** After publishing the
+**Reconnect-send continuation (2026-10-16, passed).** After publishing the
 checkpoint, the next bounded gate sends two further tagged texts after the
 verified history-only reopen. An opt-in native fixture uses a new tag and a
 separate stock-peer receipt, checks both exchanges at final completion, and
@@ -2040,7 +2042,17 @@ frozen; Sennet and UI cleanup remain separate.
 The extended fixture passes all 41 desktop library tests (one existing ignored),
 strict all-target Clippy, binary/contact-card builds, Rust formatting and
 PowerShell parsing. Its peer gate rejects the earlier tag for the reconnect
-exchange. Physical qualification of this extension is pending.
+exchange. The physical run at `e00ccd32ce2` passes all four tagged texts and
+protocol ACKs across the two connections. The first exact history check occurs
+before new work; all four records remain after final disconnect. Seven reviewed
+captures show the 230-frame run, with zero blank captures and seven distinct
+digests. Stock helper round totals are 1937 ms and 1474 ms, not per-message
+latencies. Both boards' restorations pass and all owned helpers exit normally.
+The [reconnect receipt](../testing/receipts/tucket-desktop/custody/native-reconnect/README.md)
+records the exact scope and frozen evidence. Explicit stock advertisements
+after each commissioning qualify rediscovery with this fixture; automatic
+contact restoration remains open. The four-record viewport clips its oldest
+row, adding a cosmetic finding alongside the stale connecting notice.
 
 One approved Mere integration worktree was needed to publish this supplier
 without unrelated unpublished main commits or rewriting active build inputs;

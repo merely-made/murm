@@ -1,0 +1,86 @@
+{
+  "schema": 1,
+  "result": "native_reconnect_functional_passed",
+  "source": "e00ccd32ce2d26e633ea00f716be481c403bc76c",
+  "authority": "Djinn scoped release through real isolated Keeper wallet",
+  "coverage": {
+    "exact_history_before_new_send": true,
+    "new_sends_after_reconnect": 2,
+    "tagged_texts": 4,
+    "delivery_connections": 2,
+    "all_four_records_after_final_disconnect": true,
+    "matched_protocol_acks": 4
+  },
+  "reply_delay_ms": 200,
+  "discovery": "explicit stock advertisement after each Tucket commissioning",
+  "rounds": [
+    {
+      "stock_peer_elapsed_ms": 1937,
+      "matched_protocol_acks_both_directions": true,
+      "tag": "signalman-ui-6616d31923a84a66802c6a7e079beb45"
+    },
+    {
+      "stock_peer_elapsed_ms": 1474,
+      "matched_protocol_acks_both_directions": true,
+      "tag": "signalman-ui-6616d31923a84a66802c6a7e079beb45-reconnect"
+    }
+  ],
+  "visual_review": {
+    "polish_qualified": false,
+    "cosmetic_notes": [
+      "connecting notice remains stale after connected",
+      "four-record view clips oldest row at viewport bottom"
+    ],
+    "captures": 7,
+    "result": "functional checks passed",
+    "blank_captures": 0,
+    "distinct_digests": 7,
+    "presented_frames": 230
+  },
+  "restoration": {
+    "dut_profile": "acknowledged_same_boot_and_sync",
+    "peer": "pinned_tulle_and_exact_status_region_channel"
+  },
+  "desktop_exit": 0,
+  "peer_exit": 0,
+  "reconnect_peer_exit": 0,
+  "custodian_stopped": true,
+  "private_runtime_included": false,
+  "evidence_sha256": {
+    "bench.json": "892eb54472d7431b4c016304451975fccfd4af94a556f7c0ccf174dae9526839",
+    "companion.scn": "a1faf9dc50ab7e17cb1aab3a564e96ecb3c32d55c7b10ff4077176552cf5c99e",
+    "connected.png": "513fa8b9ff36db26675f81f333e7fc58464fab64f79c1bc13a1397452fb82d63",
+    "custodian.json": "520e68c0dd0b6846d37cda488499d10877b9ec4b7a50d0a94bff8c5f28aac8fa",
+    "desktop-journal.json": "8ba50ca8b5e8fde9bedd8bc2a60e34cccb4ae60ee17dc4313cb48aa4b3f3951b",
+    "desktop.stderr.log": "2f14fd666267cd17a36ed9a3e440c0f43aa7a05609cf71dec26c28c1b2e858b0",
+    "desktop.stdout.log": "74831fe3174fac7f30347997261b9145d0182f6ef1f04f03a76a193c9be3ab95",
+    "disconnected.png": "57966fe0c4aeb81d1e3f95552ab190752933b7223b6f7a3459e29340dbafaebf",
+    "dut-before.json": "0b9981b32510aebbe698ff564d93bcb38cc75d3a901dc3de9fefea6d6edf2559",
+    "dut-profile.json": "2423dc62fb7138edcd6f82bbd9068857208bff9bf3f60b4b1cdaa42f1725ecc6",
+    "dut-restored-profile.json": "22d1e86f2b15bdc22e87c934ec9af6ec1ae2543faa4f74b3f306b23e21bf5137",
+    "form.png": "568dd8395fe665b6506948cb819075ce8a257ff74b7b818e56968fc36e525880",
+    "peer-before.json": "926d28fd936303d47e6b2b8c98aeae44d363d74187605c18c9317bad09d667c4",
+    "peer-reconnect.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "peer-reconnect.stdout.log": "b5ce67f4663176dc25581a5a11b0ddc7d27c071b5d36b36cc6c76d35a04227e3",
+    "peer-restored.json": "926d28fd936303d47e6b2b8c98aeae44d363d74187605c18c9317bad09d667c4",
+    "peer.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "peer.stdout.log": "b5ce67f4663176dc25581a5a11b0ddc7d27c071b5d36b36cc6c76d35a04227e3",
+    "public-config.json": "557563cf6cb87e22d9668935598870876d76b03b116395e217025481bec2aed5",
+    "public-contact-card.json": "552b3536813dc4cbac7b82b9615bc0f18ff4dfc1e2129fda16ed1c56db3aaff3",
+    "reconnect-roundtrip.png": "74dd8434924c89fd6a328ed6c894b67b3f8f45e159a67917d4680bc1df3fedc0",
+    "reconnect.ready": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reconnected.png": "c40dbc29c562e894d0c1f8e9b5fd7859422016cbd00b045831040c7559822e74",
+    "roundtrip.png": "5f37621586ed83b97cbeddd1ffc893b5aa72c0caa25ccf870a2d82793ba291fe",
+    "run.json": "49232f14ebd868b5f4b2c4116532ed2d009db056a2d8b11f7ba80e7408353a2e",
+    "scenario.done": "3f5c388982ceeb2b544ec474d14d46830a762ea9539af901cd0488446b2272ba",
+    "stock-advertise.json": "66f2a14c58536fa3f739d274ddb0f35afde774886b3fa0f433b5a1b6de4c5767",
+    "stock-peer-journal.json": "4a7e129f6e6f57f439f2dade7dc60d4c9b929cf71e9c67a94b61d5af6449ff79",
+    "stock-peer-receipt.json": "aa973865b40dcdd75bb63b023bc3d09757d089ac5756bc87291a1b278eae4140",
+    "stock-peer-reconnect-journal.json": "f508a82a92dcea8b76b50f8837dacbcfaeb66433968110ba15dbe9ae1d9a5e9f",
+    "stock-peer-reconnect-receipt.json": "d3d746de1cc952f246609dce65cd73a9cc252fdeee38ce52fd6cbfabb50917dd",
+    "stock-reconnect-advertise.json": "66f2a14c58536fa3f739d274ddb0f35afde774886b3fa0f433b5a1b6de4c5767",
+    "stock-setup.json": "10302654231f49c80361a0cf08727b00fb56fbab8b41b43906f03cbfec7f1d1f",
+    "stopped.png": "1307e14ae5b4fd0c684c974a6cf080805068e4f70bd916fb02322fb1fd2dfb71",
+    "tucket-config.json": "be815415e0d4af4cd02782a6ce7b01059ab043e360a2db1b914b8da2f125a36a"
+  }
+}
