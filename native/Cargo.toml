@@ -19,10 +19,10 @@ sha2 = "0.11"
 identity = { package = "personae", version = "0.3.0", git = "https://github.com/merely-made/dramatis.git", rev = "0234e7eea6f2ddf2330a71b9425da01b06ae0391" }
 insigne = { package = "insigne", version = "0.0.2", git = "https://github.com/merely-made/dramatis.git", rev = "0234e7eea6f2ddf2330a71b9425da01b06ae0391" }
 notochord = { package = "notochord", version = "0.1.1", git = "https://github.com/merely-made/dramatis.git", rev = "0234e7eea6f2ddf2330a71b9425da01b06ae0391" }
-muniment = { package = "muniment", version = "0.1.2", git = "https://github.com/merely-made/mere.git", rev = "fabfd10ef7f8a34058907f9a9c2b1e1a311be82f" }
-stickleback = { package = "stickleback", version = "0.1.1", git = "https://github.com/merely-made/mere.git", rev = "fabfd10ef7f8a34058907f9a9c2b1e1a311be82f" }
-proofs = { package = "mere-proofs", version = "0.1.0", git = "https://github.com/merely-made/mere.git", rev = "fabfd10ef7f8a34058907f9a9c2b1e1a311be82f" }
-luggage = { package = "luggage", version = "0.1.0", git = "https://github.com/merely-made/mere.git", rev = "fabfd10ef7f8a34058907f9a9c2b1e1a311be82f", default-features = false }
+muniment = { package = "muniment", version = "0.1.2", git = "https://github.com/merely-made/mere.git", branch = "main" }
+stickleback = { package = "stickleback", version = "0.1.1", git = "https://github.com/merely-made/mere.git", branch = "main" }
+proofs = { package = "mere-proofs", version = "0.1.0", git = "https://github.com/merely-made/mere.git", branch = "main" }
+luggage = { package = "luggage", version = "0.1.0", git = "https://github.com/merely-made/mere.git", branch = "main", default-features = false }
 
 # Root patches keep one supplier source and type identity across the graph.
 [patch.crates-io]
@@ -34,5 +34,5 @@ p2panda-encryption = { git = "https://github.com/mark-ik/p2panda.git", tag = "me
 p2panda-store = { git = "https://github.com/mark-ik/p2panda.git", tag = "mere-p2panda-net-0.7.5-upstream-20261013" }
 p2panda-stream = { git = "https://github.com/mark-ik/p2panda.git", tag = "mere-p2panda-net-0.7.5-upstream-20261013" }
 p2panda-sync = { git = "https://github.com/mark-ik/p2panda.git", tag = "mere-p2panda-net-0.7.5-upstream-20261013" }
-muniment = { git = "https://github.com/merely-made/mere.git", rev = "fabfd10ef7f8a34058907f9a9c2b1e1a311be82f" }
-mere-proofs = { git = "https://github.com/merely-made/mere.git", rev = "fabfd10ef7f8a34058907f9a9c2b1e1a311be82f" }
+muniment = { git = "https://github.com/merely-made/mere.git", branch = "main" }
+mere-proofs = { git = "https://github.com/merely-made/mere.git", branch = "main" }

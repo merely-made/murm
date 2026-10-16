@@ -2784,7 +2784,7 @@ checksum = "4050469837a6ff301cd14c1f8f24f88549e6d548f24f64e2148eb0f72cebc51f"
 [[package]]
 name = "luggage"
 version = "0.1.0"
-source = "git+https://github.com/merely-made/mere.git?rev=fabfd10ef7f8a34058907f9a9c2b1e1a311be82f#fabfd10ef7f8a34058907f9a9c2b1e1a311be82f"
+source = "git+https://github.com/merely-made/mere.git?branch=main#4a74b1cf28da35b012a4df48cc6ffa785b304eaa"
 dependencies = [
  "semver",
  "serde",
@@ -2846,7 +2846,7 @@ dependencies = [
 [[package]]
 name = "mere-proofs"
 version = "0.1.0"
-source = "git+https://github.com/merely-made/mere.git?rev=fabfd10ef7f8a34058907f9a9c2b1e1a311be82f#fabfd10ef7f8a34058907f9a9c2b1e1a311be82f"
+source = "git+https://github.com/merely-made/mere.git?branch=main#4a74b1cf28da35b012a4df48cc6ffa785b304eaa"
 dependencies = [
  "blake3",
  "serde",
@@ -2930,7 +2930,7 @@ dependencies = [
 [[package]]
 name = "muniment"
 version = "0.1.2"
-source = "git+https://github.com/merely-made/mere.git?rev=fabfd10ef7f8a34058907f9a9c2b1e1a311be82f#fabfd10ef7f8a34058907f9a9c2b1e1a311be82f"
+source = "git+https://github.com/merely-made/mere.git?branch=main#4a74b1cf28da35b012a4df48cc6ffa785b304eaa"
 dependencies = [
  "async-trait",
  "blake3",
@@ -4894,7 +4894,7 @@ checksum = "6ce2be8dc25455e1f91df71bfa12ad37d7af1092ae736f3a6cd0e37bc7810596"
 [[package]]
 name = "stickleback"
 version = "0.1.1"
-source = "git+https://github.com/merely-made/mere.git?rev=fabfd10ef7f8a34058907f9a9c2b1e1a311be82f#fabfd10ef7f8a34058907f9a9c2b1e1a311be82f"
+source = "git+https://github.com/merely-made/mere.git?branch=main#4a74b1cf28da35b012a4df48cc6ffa785b304eaa"
 dependencies = [
  "blake3",
  "futures-util",
