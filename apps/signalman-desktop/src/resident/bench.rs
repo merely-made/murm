@@ -71,6 +71,7 @@ pub fn load(path: &std::path::Path) -> Result<ResidentSettings, String> {
     );
     profile.tx_power_dbm = config.tx_power_dbm;
     let settings = ResidentSettings {
+        protocol: signalman::radio_comms::companion::CompanionProtocol::MeshCore,
         port: config.port,
         realm: config.realm.clone(),
         journal: config.journal,
@@ -131,6 +132,7 @@ impl ResidentAuthority for Authority {
         let retry_after_ms = self.retry_after_ms;
         let node_number = scope.meshtastic_node;
         Ok(PreparedResident {
+            hold: None,
             authorize: Box::new(|| Ok(())),
             can_transmit: Box::new(|| Ok(())),
             scope,

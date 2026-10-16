@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "result": "passed",
+  "device_id": "b20d20b3-b9f2-411c-9de4-f6c0f29f8427",
+  "realm": "bench-tucket-custody",
+  "source": "94e1f99edafff380d5a22bee6f9c68da01f003e9",
+  "host_sha256": "25f41c90f231bbf88d573e5ad74e0bfa181523cd9e59f2fc1729f7f0316b2dcc",
+  "probe_sha256": "3ee49e7728cdcb534e494d19b69d2615fb36e4dd93a877b79bbe8bf424081ad5",
+  "expected_fallback_failure": false,
+  "cases": [
+    {
+      "receipt_sha256": "1284e99378f8020ca0bdfc0d7431eb3ff7feaf4984f6995bde0e6d507c2a4827",
+      "result": "refused",
+      "name": "absent",
+      "exit_code": 0
+    },
+    {
+      "receipt_sha256": "eddda997d6dbe0b40864d1dbea70e3ce84b74aa007467a33efb87fa09ad4fe4f",
+      "result": "refused",
+      "name": "locked",
+      "exit_code": 0
+    },
+    {
+      "receipt_sha256": "8142ac01ec39af2568f890c560da4e30b1de1c2478ed81f14fd41cd6f35a9e39",
+      "result": "refused",
+      "name": "no-wallet",
+      "exit_code": 0
+    },
+    {
+      "receipt_sha256": "90e1284c02bad4bd7179b39d563091bc70f07e8adbcd412cd63f939b56166e3d",
+      "result": "same_identity_on_reopen",
+      "name": "unlocked",
+      "exit_code": 0
+    },
+    {
+      "receipt_sha256": "5508dc1bd4134866125e0f0e8a981e6fc94ddb4dc055c42e243a6b3a56e66dc5",
+      "result": "custody_closed",
+      "name": "lock-watch"
+    },
+    {
+      "receipt_sha256": "f536dc0a531ba52f2f9055a4510e753e889ef31a0ecf8c1389745c763aafa1d9",
+      "result": "custody_closed",
+      "name": "resident-loss"
+    }
+  ],
+  "private_runtime_excluded": true,
+  "source_sha256": {
+    "Cargo.lock": "27c90d6f7088607019747caf6750c353e3034e7f0137fc40b50b4e1f395f53da",
+    "ports/signalman/src/authority/sennet.rs": "0a7913d0baa8d2983a74c76363cd0a6ed26dce9e1df0f969eb76a9df3f2b0428",
+    "ports/djinn/src/bin/tucket_custody_receipt_host.rs": "4f4855e09fda2e8939e827952a91f7053fc8df397397fd80536d765b474edd09",
+    "ports/signalman/src/authority/tucket.rs": "ab9970553edfd3140a6f61ee9c65b5ffa74dcc6a048b54fd86639bd5f9fa3f61",
+    "testing/run_sennet_custody.ps1": "dc4665e71e9fa1aabac5c510627e72967f29be231621d532648d8be3d4860cca",
+    "ports/djinn/src/custody.rs": "75d890fc1602a9d7f82f45a89dfc1dcf12361f9b34e28c4ae114b63101cdd761",
+    "ports/signalman/src/authority.rs": "30fdc6773d73a05fe3d8bb9a5210a00de360fc1738a3137241def423eb51e19d",
+    "ports/signalman/examples/sennet_custody_receipt.rs": "7763c6fd122adb96141ce4e919a61c007c0e86f5a0567e379a225bc0028127c3"
+  },
+  "generated_wallets_removed": false,
+  "private_runtime": "runtime/ (generated synthetic wallets; ignored by Git)",
+  "closed_utc": "2026-10-16T06:42:47.2918348Z"
+}

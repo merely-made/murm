@@ -1,7 +1,7 @@
-//! One attended Tucket runtime over Tulle. Hosts supply scoped authority;
+//! One attended scoped protocol runtime over Tulle. Hosts supply authority;
 //! neither the UI nor this worker invents a protocol identity.
 use crate::{companion::CompanionEvent, network::LayoutWake};
-use radio_hand::instances::{Runtime, TUCKET};
+use radio_hand::instances::{Runtime, SENNET, TUCKET};
 use signalman::{
     comms_adapter::comms::ProtocolKind,
     radio_comms::{FileJournal, RadioComms, RadioScope, carriage::ResidentCarriage},
@@ -23,12 +23,19 @@ use tulle::{
 };
 pub mod bench;
 pub mod djinn;
+pub mod sennet_station;
 
 /// Load one explicitly selected authority configuration. Simultaneous
 /// production and bench activation is an error, including when Djinn is absent.
 pub fn settings_from_env() -> Result<Option<ResidentSettings>, String> {
     let production = std::env::var_os("SIGNALMAN_TUCKET_CONFIG");
     let bench = std::env::var_os("SIGNALMAN_TUCKET_BENCH_CONFIG");
+    if let Some(path) = std::env::var_os("SIGNALMAN_SENNET_CONFIG") {
+        if production.is_some() || bench.is_some() {
+            return Err("Choose one explicit Tulle authority configuration".into());
+        }
+        return sennet_station::load(&PathBuf::from(path)).map(Some);
+    }
     match (production, bench) {
         (Some(_), Some(_)) => Err("Choose one explicit Tucket authority configuration".into()),
         (Some(path), None) => djinn::load(&PathBuf::from(path)).map(Some),
@@ -48,6 +55,8 @@ pub struct PreparedResident {
     pub authorize: Box<dyn Fn() -> Result<(), String> + Send>,
     /// Fast lock/loss guard for the boundaries inside a carriage turn.
     pub can_transmit: Box<dyn Fn() -> Result<(), String> + Send>,
+    /// Additional connection-lifetime resources, such as an exclusive nonce lease.
+    pub hold: Option<Box<dyn Send>>,
 }
 pub trait ResidentAuthority: Send + Sync {
     fn prepare(&self, settings: &ResidentSettings) -> Result<PreparedResident, String>;
@@ -55,6 +64,7 @@ pub trait ResidentAuthority: Send + Sync {
 }
 #[derive(Clone)]
 pub struct ResidentSettings {
+    pub protocol: signalman::radio_comms::companion::CompanionProtocol,
     pub port: PathBuf,
     pub realm: String,
     pub journal: PathBuf,
@@ -69,7 +79,7 @@ pub struct ResidentSettings {
 pub fn validate(settings: &ResidentSettings) -> Result<(), String> {
     crate::companion::validate_settings(
         &[crate::companion::CompanionSettings {
-            protocol: signalman::radio_comms::companion::CompanionProtocol::MeshCore,
+            protocol: settings.protocol,
             port: settings.port.clone(),
             realm: settings.realm.clone(),
             journal: settings.journal.clone(),
@@ -107,15 +117,16 @@ impl ResidentWorker {
         let progress = Arc::new(AtomicBool::new(false));
         let actor_progress = progress.clone();
         let join = thread::Builder::new()
-            .name("signalman-tucket".into())
+            .name("signalman-resident-radio".into())
             .spawn(move || {
                 let result = run(&settings, &actor_stop, &actor_progress, &tx, &wake);
+                let label = if settings.protocol.kind() == ProtocolKind::MeshCore { "Tucket" } else { "Sennet" };
                 let detail = match result {
-                    Ok(()) => "Tucket disconnected. History remains durable; reconnect uses the same scoped identity.".into(),
-                    Err(error) => format!("Tucket stopped: {error}. Uncertain commands require explicit resend."),
+                    Ok(()) => format!("{label} disconnected. History remains durable; reconnect uses the same scoped identity."),
+                    Err(error) => format!("{label} stopped: {error}. Uncertain commands require explicit resend."),
                 };
                 let _ = tx.try_send(CompanionEvent::Stopped {
-                    protocol: ProtocolKind::MeshCore, detail,
+                    protocol: settings.protocol.kind(), detail,
                 });
                 wake();
             })
@@ -176,8 +187,14 @@ fn run(
                 (prepared.authorize)()?;
                 let epoch = tokio::time::Instant::now();
                 let mut runtime = (prepared.build)(0)?;
-                if runtime.active().is_none_or(|a| a.instance != TUCKET)
-                    || runtime.profile(TUCKET).map_err(|e| format!("{e:?}"))? != settings.profile
+                let personality = if settings.protocol.kind() == ProtocolKind::MeshCore {
+                    TUCKET
+                } else {
+                    SENNET
+                };
+                if runtime.active().is_none_or(|a| a.instance != personality)
+                    || runtime.profile(personality).map_err(|e| format!("{e:?}"))?
+                        != settings.profile
                 {
                     return Err("Tucket runtime does not match the confirmed radio profile".into());
                 }
@@ -191,16 +208,22 @@ fn run(
                     settings.receive_wait,
                 )
                 .map_err(|e| e.to_string())?;
-                carriage
-                    .advertise(&settings.name)
-                    .map_err(|e| e.to_string())?;
+                if personality == TUCKET {
+                    carriage
+                        .advertise(&settings.name)
+                        .map_err(|e| e.to_string())?;
+                }
                 events
                     .try_send(CompanionEvent::Connected {
-                        protocol: ProtocolKind::MeshCore,
+                        protocol: settings.protocol.kind(),
                         owner,
                         stop: stop.clone(),
                         port: settings.port.display().to_string(),
-                        source: "Tucket runs on this computer; Tulle owns the radio.",
+                        source: if personality == TUCKET {
+                            "Tucket runs on this computer; Tulle owns the radio."
+                        } else {
+                            "Sennet runs on this computer; Tulle owns the radio."
+                        },
                     })
                     .map_err(|e| e.to_string())?;
                 wake();

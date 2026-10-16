@@ -24,7 +24,7 @@ assert snap connected == true
 assert snap protocol_selected == true
 capture connected
 key tab-until data-text-field=message-recipient
-input-text @@PEER@@
+input-text @@RECIPIENT@@
 key tab-until data-text-field=message-draft
 input-text @@TAG@@
 click role:button Queue text

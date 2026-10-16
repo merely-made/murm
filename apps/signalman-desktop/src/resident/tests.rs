@@ -19,6 +19,7 @@ impl ResidentAuthority for Denied {
 }
 fn settings(dir: &std::path::Path, authority: Arc<dyn ResidentAuthority>) -> ResidentSettings {
     ResidentSettings {
+        protocol: signalman::radio_comms::companion::CompanionProtocol::MeshCore,
         port: dir.join("radio-does-not-exist"),
         realm: "test-realm".into(),
         journal: dir.join("journal.json"),
@@ -33,31 +34,37 @@ fn settings(dir: &std::path::Path, authority: Arc<dyn ResidentAuthority>) -> Res
 }
 #[test]
 fn locked_or_absent_identity_stops_before_serial_or_journal_access() {
-    for locked in [true, false] {
-        let dir = tempfile::tempdir().unwrap();
-        let authority = Arc::new(Denied {
-            locked,
-            prepared: AtomicBool::new(false),
-        });
-        let settings = settings(dir.path(), authority.clone());
-        let worker = ResidentWorker::spawn(settings.clone(), Arc::new(|| {}));
-        let event = worker.events.recv_timeout(Duration::from_secs(5)).unwrap();
-        match event {
-            CompanionEvent::Stopped { detail, .. } => {
-                assert!(
-                    detail.contains(if locked {
-                        "custody locked"
-                    } else {
-                        "scoped Tucket identity absent"
-                    }),
-                    "{detail}"
-                );
+    for protocol in [
+        signalman::radio_comms::companion::CompanionProtocol::MeshCore,
+        signalman::radio_comms::companion::CompanionProtocol::Meshtastic { channel: 0 },
+    ] {
+        for locked in [true, false] {
+            let dir = tempfile::tempdir().unwrap();
+            let authority = Arc::new(Denied {
+                locked,
+                prepared: AtomicBool::new(false),
+            });
+            let mut settings = settings(dir.path(), authority.clone());
+            settings.protocol = protocol;
+            let worker = ResidentWorker::spawn(settings.clone(), Arc::new(|| {}));
+            let event = worker.events.recv_timeout(Duration::from_secs(5)).unwrap();
+            match event {
+                CompanionEvent::Stopped { detail, .. } => {
+                    assert!(
+                        detail.contains(if locked {
+                            "custody locked"
+                        } else {
+                            "scoped Tucket identity absent"
+                        }),
+                        "{detail}"
+                    );
+                }
+                _ => panic!("denied custody must never publish a connection"),
             }
-            _ => panic!("denied custody must never publish a connection"),
+            assert_eq!(authority.prepared.load(Ordering::Relaxed), !locked);
+            assert!(!settings.journal.exists());
+            assert_eq!(std::fs::read_dir(dir.path()).unwrap().count(), 0);
         }
-        assert_eq!(authority.prepared.load(Ordering::Relaxed), !locked);
-        assert!(!settings.journal.exists());
-        assert_eq!(std::fs::read_dir(dir.path()).unwrap().count(), 0);
     }
 }
 

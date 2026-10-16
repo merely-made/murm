@@ -22,6 +22,7 @@ pub struct Product {
     history: Option<serde_json::Value>,
     reconnect: Option<Reconnect>,
     previous_exchange: Option<(String, Option<PathBuf>)>,
+    channel_only: bool,
 }
 struct Reconnect {
     tag: String,
@@ -57,12 +58,22 @@ fn peer_confirmed(
         && receipt["ui_peer"]["sent"]["delivery"] == "ProtocolAcknowledged"
 }
 impl Product {
+    fn observed_protocol_acks(&self, state: &DesktopState) -> usize {
+        state
+            .radio_owner(self.protocol)
+            .and_then(|owner| owner.records().ok())
+            .unwrap_or_default()
+            .iter()
+            .filter(|record| record.delivery == DeliveryStatus::ProtocolAcknowledged)
+            .count()
+    }
     fn peer_acknowledged(&self) -> bool {
         peer_acknowledged(
             self.peer_receipt.as_ref(),
             self.protocol,
             &self.peer,
             &self.tag,
+            self.channel_only,
         )
     }
 }
@@ -71,16 +82,36 @@ fn peer_acknowledged(
     protocol: ProtocolKind,
     peer: &str,
     tag: &str,
+    channel_only: bool,
 ) -> bool {
     path.and_then(|path| std::fs::read(path).ok())
         .and_then(|bytes| serde_json::from_slice(&bytes).ok())
-        .is_some_and(|receipt| peer_confirmed(&receipt, protocol, peer, tag))
+        .is_some_and(|receipt| {
+            if channel_only {
+                channel_peer_confirmed(&receipt, peer, tag)
+            } else {
+                peer_confirmed(&receipt, protocol, peer, tag)
+            }
+        })
+}
+fn channel_peer_confirmed(receipt: &serde_json::Value, peer: &str, tag: &str) -> bool {
+    receipt["result"] == "passed"
+        && receipt["mode"] == "channel-peer"
+        && receipt["protocol"] == "meshtastic"
+        && receipt["ui_peer"]["broadcast_only"] == true
+        && receipt["ui_peer"]["matched_protocol_ack"] == false
+        && receipt["ui_peer"]["stock_device_accepted"] == true
+        && receipt["ui_peer"]["received"]["message"]["body"]["PlainText"] == tag
+        && receipt["ui_peer"]["sent"]["message"]["body"]["PlainText"] == format!("{tag}-return")
+        && receipt["ui_peer"]["sent"]["message"]["author"]["address"] == peer
+        && receipt["ui_peer"]["sent"]["delivery"] == "HandedToRadio"
 }
 fn facts(
     state: &DesktopState,
     tag: &str,
     protocol: ProtocolKind,
     peer: &str,
+    channel_only: bool,
 ) -> (bool, usize, usize) {
     let connected =
         state.companion_stops.iter().any(|(kind, stop)| {
@@ -90,7 +121,11 @@ fn facts(
             .iter()
             .any(|(kind, _)| *kind == protocol);
     let owner = state.radio_owner(protocol);
-    let conversation = owner.and_then(|owner| owner.conversation(protocol, peer).ok());
+    let conversation = owner.and_then(|owner| {
+        owner
+            .conversation(protocol, if channel_only { "ffffffff" } else { peer })
+            .ok()
+    });
     let records = owner
         .and_then(|owner| owner.records().ok())
         .unwrap_or_default();
@@ -100,7 +135,12 @@ fn facts(
             r.message.direction == Direction::Outgoing
                 && conversation.as_ref() == Some(&r.conversation)
                 && r.message.body.text() == tag
-                && r.delivery == DeliveryStatus::ProtocolAcknowledged
+                && r.delivery
+                    == (if channel_only {
+                        DeliveryStatus::HandedToRadio
+                    } else {
+                        DeliveryStatus::ProtocolAcknowledged
+                    })
         })
         .count();
     let rx = records
@@ -130,6 +170,11 @@ pub fn from_env() -> Option<mesquite::Lane<Product>> {
         Ok("meshcore") => ProtocolKind::MeshCore,
         _ => panic!("native companion scenario requires meshtastic or meshcore protocol"),
     };
+    let channel_only = std::env::var("SIGNALMAN_COMPANION_CHANNEL_ONLY").as_deref() == Ok("1");
+    assert!(
+        !channel_only || protocol == ProtocolKind::Meshtastic,
+        "channel-only fixture requires Meshtastic"
+    );
     let peer = std::env::var("SIGNALMAN_COMPANION_PEER")
         .expect("native companion scenario requires its identified peer");
     let length = if protocol == ProtocolKind::Meshtastic {
@@ -168,6 +213,7 @@ pub fn from_env() -> Option<mesquite::Lane<Product>> {
                 history: None,
                 reconnect,
                 previous_exchange: None,
+                channel_only,
             },
             cambium_genet_winit_host::read_file,
         )
@@ -190,15 +236,43 @@ impl mesquite::Product for Product {
         &self.sheet
     }
     fn snapshot(&self, ctx: &Context<'_>, captures: usize, _: f32) -> ProbeSnapshot {
-        let (connected, ack, rx) = facts(ctx.runner.state(), &self.tag, self.protocol, &self.peer);
+        let (connected, ack, rx) = facts(
+            ctx.runner.state(),
+            &self.tag,
+            self.protocol,
+            &self.peer,
+            self.channel_only,
+        );
         if connected {
             self.connected_seen.set(true);
         }
         ProbeSnapshot::default()
             .with_field("connected", connected.to_string())
-            .with_field("protocol_ack", ack.to_string())
+            .with_field(
+                "protocol_ack",
+                if self.channel_only {
+                    self.observed_protocol_acks(ctx.runner.state()).to_string()
+                } else {
+                    ack.to_string()
+                },
+            )
+            .with_field(
+                "physical_tx",
+                if self.channel_only {
+                    ack.to_string()
+                } else {
+                    "0".into()
+                },
+            )
             .with_field("incoming", rx.to_string())
-            .with_field("peer_protocol_ack", self.peer_acknowledged().to_string())
+            .with_field(
+                "peer_protocol_ack",
+                (!self.channel_only && self.peer_acknowledged()).to_string(),
+            )
+            .with_field(
+                "peer_channel_completed",
+                (self.channel_only && self.peer_acknowledged()).to_string(),
+            )
             .with_field("captures", captures.to_string())
             .with_field("port", ctx.runner.state().companion_port.text())
             .with_field("realm", ctx.runner.state().companion_realm.text())
@@ -219,8 +293,13 @@ impl mesquite::Product for Product {
             if self.previous_exchange.is_some() {
                 return Err("only one post-reconnect exchange is configured".into());
             }
-            let (connected, ack, rx) =
-                facts(ctx.runner.state(), &self.tag, self.protocol, &self.peer);
+            let (connected, ack, rx) = facts(
+                ctx.runner.state(),
+                &self.tag,
+                self.protocol,
+                &self.peer,
+                self.channel_only,
+            );
             let records = ctx
                 .runner
                 .state()
@@ -268,7 +347,13 @@ impl mesquite::Product for Product {
                 .map_err(|e| e.to_string())?;
             let value = serde_json::to_value(records).map_err(|e| e.to_string())?;
             if line == "remember companion history" {
-                let (_, ack, rx) = facts(ctx.runner.state(), &self.tag, self.protocol, &self.peer);
+                let (_, ack, rx) = facts(
+                    ctx.runner.state(),
+                    &self.tag,
+                    self.protocol,
+                    &self.peer,
+                    self.channel_only,
+                );
                 if ack != 1 || rx != 1 {
                     return Err("history checkpoint requires the matched round trip".into());
                 }
@@ -304,21 +389,35 @@ impl mesquite::Product for Product {
             }
             return Err(format!("Tab never reached text field {target}"));
         }
-        if line == "await companion peer acknowledged" && self.peer_receipt.is_none() {
+        if matches!(
+            line,
+            "await companion peer acknowledged" | "await companion peer completed"
+        ) && self.peer_receipt.is_none()
+        {
             return Err("native peer acknowledgement requires its explicit receipt path".into());
         }
         self.condition = Some(match line {
             "await companion connected" => Condition::Connected,
             "await companion stopped" => Condition::Stopped,
-            "await companion acknowledged" => Condition::Acknowledged,
+            "await companion acknowledged" if !self.channel_only => Condition::Acknowledged,
+            "await companion transmitted" if self.channel_only => Condition::Acknowledged,
             "await companion received" => Condition::Received,
-            "await companion peer acknowledged" => Condition::PeerAcknowledged,
+            "await companion peer acknowledged" if !self.channel_only => {
+                Condition::PeerAcknowledged
+            }
+            "await companion peer completed" if self.channel_only => Condition::PeerAcknowledged,
             _ => return Err(format!("unknown companion scenario verb: {line}")),
         });
         Ok(())
     }
     fn busy_mut(&mut self, ctx: &mut Context<'_>, capture_pending: bool) -> Option<bool> {
-        let (connected, ack, rx) = facts(ctx.runner.state(), &self.tag, self.protocol, &self.peer);
+        let (connected, ack, rx) = facts(
+            ctx.runner.state(),
+            &self.tag,
+            self.protocol,
+            &self.peer,
+            self.channel_only,
+        );
         if connected {
             self.connected_seen.set(true);
         }
@@ -326,8 +425,10 @@ impl mesquite::Product for Product {
             Some(Condition::Connected) => !connected,
             Some(Condition::Stopped) => {
                 connected
-                    || (self.protocol == ProtocolKind::MeshCore
-                        && ctx.runner.state().resident_connecting)
+                    || (matches!(
+                        self.protocol,
+                        ProtocolKind::MeshCore | ProtocolKind::Meshtastic
+                    ) && ctx.runner.state().resident_connecting)
                     || ctx
                         .runner
                         .state()
@@ -346,18 +447,42 @@ impl mesquite::Product for Product {
         Some(capture_pending || waiting)
     }
     fn complete(&mut self, ctx: &mut Context<'_>, _: &genet_probe::Outcome) -> Result<(), String> {
-        let (connected, ack, rx) = facts(ctx.runner.state(), &self.tag, self.protocol, &self.peer);
+        let (connected, ack, rx) = facts(
+            ctx.runner.state(),
+            &self.tag,
+            self.protocol,
+            &self.peer,
+            self.channel_only,
+        );
         let previous_complete = self.previous_exchange.as_ref().is_none_or(|(tag, path)| {
-            let (_, ack, rx) = facts(ctx.runner.state(), tag, self.protocol, &self.peer);
-            ack == 1 && rx == 1 && peer_acknowledged(path.as_ref(), self.protocol, &self.peer, tag)
+            let (_, ack, rx) = facts(
+                ctx.runner.state(),
+                tag,
+                self.protocol,
+                &self.peer,
+                self.channel_only,
+            );
+            ack == 1
+                && rx == 1
+                && peer_acknowledged(
+                    path.as_ref(),
+                    self.protocol,
+                    &self.peer,
+                    tag,
+                    self.channel_only,
+                )
         });
         if !self.connected_seen.get()
             || connected
-            || (self.protocol == ProtocolKind::MeshCore && ctx.runner.state().resident_connecting)
+            || (matches!(
+                self.protocol,
+                ProtocolKind::MeshCore | ProtocolKind::Meshtastic
+            ) && ctx.runner.state().resident_connecting)
             || ack != 1
             || rx != 1
             || !previous_complete
             || self.reconnect.is_some()
+            || (self.channel_only && self.observed_protocol_acks(ctx.runner.state()) != 0)
             || (self.peer_receipt.is_some() && !self.peer_acknowledged())
             || ctx.runner.state().message_protocol != self.protocol
         {
@@ -386,6 +511,38 @@ impl mesquite::Product for Product {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn channel_gate_uses_device_acceptance_and_refuses_protocol_ack_claims_or_stale_tags() {
+        let receipt = serde_json::json!({"mode":"channel-peer","protocol":"meshtastic","result":"passed",
+            "ui_peer":{"broadcast_only":true,"matched_protocol_ack":false,"stock_device_accepted":true,
+            "received":{"message":{"body":{"PlainText":"signalman-ui-channel"}}},
+            "sent":{"message":{"body":{"PlainText":"signalman-ui-channel-return"},"author":{"address":"peer"}},"delivery":"HandedToRadio"}}});
+        assert!(channel_peer_confirmed(
+            &receipt,
+            "peer",
+            "signalman-ui-channel"
+        ));
+        assert!(!channel_peer_confirmed(
+            &receipt,
+            "peer",
+            "signalman-ui-channel-reconnect"
+        ));
+        assert!(!peer_confirmed(
+            &receipt,
+            ProtocolKind::Meshtastic,
+            "peer",
+            "signalman-ui-channel"
+        ));
+        let mut claimed = receipt;
+        claimed["ui_peer"]["matched_protocol_ack"] = true.into();
+        claimed["ui_peer"]["sent"]["delivery"] = "ProtocolAcknowledged".into();
+        assert!(!channel_peer_confirmed(
+            &claimed,
+            "peer",
+            "signalman-ui-channel"
+        ));
+    }
 
     #[test]
     fn peer_gate_requires_the_matching_return_and_observed_ack() {
