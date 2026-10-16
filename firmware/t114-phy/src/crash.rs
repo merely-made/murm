@@ -224,6 +224,16 @@ pub async fn watchdog_task(mut handle: embassy_nrf::wdt::WatchdogHandle) {
     }
 }
 
+/// The explicit synchronous memory bench cannot poll the executor watchdog task.
+/// Only this feature-gated, bounded fixture may pet its sole handle between
+/// frames. Production service/hang behavior and the eight-second limit remain.
+#[cfg(feature = "memory-bench")]
+pub fn memory_bench_checkpoint() {
+    embassy_nrf::pac::WDT
+        .rr(0)
+        .write(|value| value.set_rr(embassy_nrf::pac::wdt::vals::Rr::Reload));
+}
+
 /// After a clean minute, the crash count no longer describes this boot.
 #[embassy_executor::task]
 pub async fn clean_run_task() {

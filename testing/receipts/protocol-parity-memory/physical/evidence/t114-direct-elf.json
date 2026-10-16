@@ -1,0 +1,113 @@
+{
+  "path": "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\protocol-parity-memory\\t114-direct.elf",
+  "sha256": "304928affef30b0191db15494f97b3f9dde149f2d1fdcf5febe08661f2f57e98",
+  "elf_bytes": 10472864,
+  "machine": 40,
+  "entry": 155905,
+  "allocated_sections": [
+    {
+      "name": ".vector_table",
+      "address": 155648,
+      "bytes": 256,
+      "type": 1
+    },
+    {
+      "name": ".text",
+      "address": 155904,
+      "bytes": 411968,
+      "type": 1
+    },
+    {
+      "name": ".rodata",
+      "address": 567872,
+      "bytes": 75696,
+      "type": 1
+    },
+    {
+      "name": ".data",
+      "address": 536895488,
+      "bytes": 384,
+      "type": 1
+    },
+    {
+      "name": ".defmt.end",
+      "address": 643968,
+      "bytes": 2,
+      "type": 1
+    },
+    {
+      "name": ".bss",
+      "address": 536895872,
+      "bytes": 152052,
+      "type": 8
+    },
+    {
+      "name": ".uninit",
+      "address": 537047924,
+      "bytes": 112,
+      "type": 8
+    }
+  ],
+  "load_segments": [
+    {
+      "virtual_address": 155648,
+      "physical_address": 155648,
+      "file_bytes": 256,
+      "memory_bytes": 256,
+      "flags": 4
+    },
+    {
+      "virtual_address": 155904,
+      "physical_address": 155904,
+      "file_bytes": 411968,
+      "memory_bytes": 411968,
+      "flags": 5
+    },
+    {
+      "virtual_address": 567872,
+      "physical_address": 567872,
+      "file_bytes": 75696,
+      "memory_bytes": 75696,
+      "flags": 4
+    },
+    {
+      "virtual_address": 536895488,
+      "physical_address": 643568,
+      "file_bytes": 384,
+      "memory_bytes": 384,
+      "flags": 6
+    },
+    {
+      "virtual_address": 643968,
+      "physical_address": 643968,
+      "file_bytes": 2,
+      "memory_bytes": 2,
+      "flags": 4
+    },
+    {
+      "virtual_address": 536895872,
+      "physical_address": 536895872,
+      "file_bytes": 0,
+      "memory_bytes": 152164,
+      "flags": 6
+    }
+  ],
+  "target_layouts": {},
+  "linker_symbols": {
+    "_stack_start": 537133056,
+    "__sheap": 537048036,
+    "__euninit": 537048036
+  },
+  "application_ram": {
+    "capacity": 237568,
+    "allocated_sections": 152548,
+    "highest_allocated_end": 537048036,
+    "unallocated_above_sections": 85020,
+    "scope": "linker gap, not measured stack high-water"
+  },
+  "application_flash": {
+    "capacity": 786432,
+    "load_end": 643970,
+    "span_from_origin": 488322
+  }
+}

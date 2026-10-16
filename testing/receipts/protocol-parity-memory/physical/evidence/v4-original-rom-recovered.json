@@ -1,0 +1,21 @@
+{
+  "board": "v4",
+  "usb": [
+    12346,
+    4097,
+    "44:1B:F6:6A:FA:64"
+  ],
+  "port": "COM7",
+  "requested_rounds": 0,
+  "responses": [
+    {
+      "command": "status",
+      "response": "",
+      "seconds": 1.585
+    }
+  ],
+  "passed": false,
+  "stack_scope": "point-in-time samples only; no high-water claim",
+  "attached": "",
+  "error": "SerialTimeoutException('Write timeout')"
+}

@@ -178,7 +178,7 @@ async fn main(spawner: Spawner) {
     // Safety: startup initializes this exact static once, before any retained
     // protocol state or task is constructed.
     unsafe {
-        heap::init();
+        heap::init(spawner);
     }
     let peripherals = esp_hal::init(Config::default());
     #[cfg(feature = "rf-sleep-proof")]

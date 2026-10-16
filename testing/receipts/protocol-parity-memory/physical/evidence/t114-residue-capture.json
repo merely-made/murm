@@ -1,0 +1,85 @@
+{
+  "passed": false,
+  "actions": [
+    {
+      "name": "residue-t114-stage",
+      "command": [
+        "C:\\Users\\mark_\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts\\adafruit-nrfutil.exe",
+        "dfu",
+        "serial",
+        "--package",
+        "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\protocol-parity-memory\\t114-handoff.zip",
+        "--port",
+        "COM4",
+        "--baudrate",
+        "115200",
+        "--singlebank"
+      ],
+      "exit_code": 0,
+      "seconds": 1.931
+    },
+    {
+      "name": "residue-t114-install",
+      "command": [
+        "C:\\Users\\mark_\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts\\adafruit-nrfutil.exe",
+        "dfu",
+        "serial",
+        "--package",
+        "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\protocol-parity-memory\\t114-checkpoint.zip",
+        "--port",
+        "COM4",
+        "--baudrate",
+        "115200",
+        "--singlebank"
+      ],
+      "exit_code": 0,
+      "seconds": 29.648
+    },
+    {
+      "name": "residue-t114-campaign",
+      "command": [
+        "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\sennet-tucket-radios\\stock-cli\\Scripts\\python.exe",
+        "-B",
+        "testing/protocol-capacity/board_probe.py",
+        "t114",
+        "--port",
+        "COM10",
+        "--rounds",
+        "1",
+        "--output",
+        "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\protocol-parity-memory\\t114-residue-campaign.json"
+      ],
+      "exit_code": 1,
+      "seconds": 14.321
+    }
+  ],
+  "inputs": {
+    "t114-checkpoint.zip": {
+      "sha256": "0c4828f1524c5cb0d9f7a32f5e4850625cb061fdb7a55c8e60cad702bf802048",
+      "payload_bytes": 488388,
+      "payload_sha256": "be44a2326bfbe2779afcec3aa4288c193d49afaaf649492005cb26cb80f200c0",
+      "start": 155648,
+      "erase_end": 647168
+    },
+    "t114-restore.zip": {
+      "sha256": "c1e0dc9e62cc6f5d100a1e6d7b8581f2c639a7ca65f35ceaecc7ac8e3b94355f",
+      "payload_bytes": 311396,
+      "payload_sha256": "191df2ab67159eab83a144f71b40bb4fec7bd5132dacb8d1391427c2eea249cc",
+      "start": 155648,
+      "erase_end": 471040
+    },
+    "t114-handoff.zip": {
+      "sha256": "7ef7e6c2d50e8aa5e5536cdcda124cb2dda9636dcb40fa6dd9efb32feae41740",
+      "payload_bytes": 1368,
+      "payload_sha256": "4f3f12328fd1f28391dba2aac2b4a8a456e7b9decb4d97ba57cb9e64c293a44e",
+      "start": 155648,
+      "erase_end": 159744
+    }
+  },
+  "state_scope": "application-only DFU, live identity/sequence/profile; no protected-flash readback",
+  "error": "AssertionError('residue-t114-campaign failed')",
+  "fault_attached": "tulle/t114 phy online; version=0.0.1; sx1262 online; spi=software; irq=poll; sync=2b reg=24b4; region=US915 freq=906875000 reset=soft crash=1 timebase=inactive; build=280e40dd34c-memory-bench-checkpoint; image=t114-native\r\nidentity=loaded slot=B seq=93\r\nnode=599997c8 heap=0/49152 highwater=24\r\n",
+  "fault_status": "tulle/t114 phy online; version=0.0.1; sx1262 online; spi=software; irq=poll; sync=2b reg=24b4; region=US915 freq=906875000 reset=soft crash=1 timebase=inactive; build=280e40dd34c-memory-bench-checkpoint; image=t114-native\r\n",
+  "fault_crash": "crash count=1 msg=HARDFAULT pc=0002b686 lr=0002b687\r\n",
+  "fault_heap": "heap=0/49152 highwater=24 free=49152\r\n"
+}

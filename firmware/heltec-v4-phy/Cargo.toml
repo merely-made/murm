@@ -26,8 +26,10 @@ resident-protocols = ["host-usb", "radio-hand/instances", "dep:embedded-alloc", 
 host-uart-low-power = []
 ui-bench = []
 rf-sleep-proof = []
+memory-bench = ["resident-protocols", "dep:protocol-capacity-probe"]
 
 [dependencies]
+protocol-capacity-probe = { path = "../../testing/protocol-capacity", optional = true }
 critical-section = "1.2.0"
 embassy-executor = "0.10.0"
 embassy-futures = "0.1.2"

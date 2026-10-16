@@ -1,0 +1,279 @@
+warning: patch `mere-p2panda-net v0.7.5 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `mere-proofs v0.1.0 (https://github.com/merely-made/mere.git?branch=main#594c5b38)` was not used in the crate graph
+warning: patch `muniment v0.1.2 (https://github.com/merely-made/mere.git?branch=main#594c5b38)` was not used in the crate graph
+warning: patch `p2panda-auth v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-core v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-discovery v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-encryption v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-store v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-stream v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-sync v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+help: Check that the patched package version and available features are compatible
+      with the dependency requirements. If the patch has a different version from
+      what is locked in the Cargo.lock file, run `cargo update` to use the new
+      version. This may also occur with an optional dependency that is not enabled.
+    Checking typenum v1.20.1
+    Checking cfg-if v1.0.4
+    Checking byteorder v1.5.0
+    Checking hash32 v0.3.1
+    Checking critical-section v1.2.0
+    Checking stable_deref_trait v1.2.1
+    Checking subtle v2.6.1
+    Checking heapless v0.9.3
+    Checking hybrid-array v0.4.13
+    Checking generic-array v0.14.7
+    Checking crypto-common v0.2.2
+    Checking crypto-common v0.1.7
+    Checking futures-core v0.3.33
+    Checking cmov v0.5.4
+    Checking zeroize v1.9.0
+    Checking ctutils v0.4.2
+    Checking block-buffer v0.12.1
+    Checking nb v1.1.0
+    Checking digest v0.11.3
+    Checking num-traits v0.2.19
+    Checking embedded-hal v1.0.0
+    Checking embedded-hal-async v1.0.0
+    Checking nb v0.1.3
+    Checking block-buffer v0.10.4
+    Checking void v1.0.2
+    Checking digest v0.10.7
+    Checking embedded-hal v0.2.7
+    Checking futures-sink v0.3.33
+    Checking embedded-io v0.6.1
+    Checking embedded-io v0.7.1
+    Checking embedded-io-async v0.6.1
+    Checking embedded-io-async v0.7.0
+    Checking heapless v0.8.0
+    Checking inout v0.1.4
+    Checking block-padding v0.4.2
+    Checking rand_core v0.10.1
+    Checking inout v0.2.2
+    Checking cipher v0.4.4
+    Checking curve25519-dalek v5.0.0
+    Checking portable-atomic v1.14.0
+    Checking embassy-time-driver v0.2.2
+    Checking rand_core v0.6.4
+    Checking vcell v0.1.3
+    Checking signature v3.0.0
+    Checking embassy-time v0.5.1
+    Checking ed25519 v3.0.0
+    Checking cipher v0.5.2
+    Checking embassy-sync v0.8.0
+    Checking sha2 v0.11.0
+    Checking xtensa-lx v0.13.0
+    Checking pin-project-lite v0.2.17
+    Checking esp-metadata-generated v0.4.0
+    Checking futures-task v0.3.33
+    Checking embedded-storage v0.3.1
+    Checking embassy-futures v0.1.2
+    Checking futures-util v0.3.33
+    Checking ed25519-dalek v3.0.0
+    Checking esp32s3 v0.35.2
+    Checking hmac v0.13.0
+    Checking esp-config v0.7.0
+    Checking cpubits v0.1.1
+    Checking az v1.3.0
+    Checking bitflags v1.3.2
+    Checking defmt v1.1.1
+    Checking embedded-graphics-core v0.4.1 (C:\Users\mark_\Code\repos\retinue\vendor\embedded-graphics-core)
+    Checking aes v0.9.1
+    Checking hkdf v0.13.0
+    Checking embassy-sync v0.6.2
+    Checking curve25519-dalek v4.1.3
+    Checking embassy-hal-internal v0.4.0
+    Checking embassy-sync v0.7.2
+    Checking strum v0.27.2
+    Checking embedded-storage-async v0.4.1
+    Checking cbc v0.2.1
+    Checking x25519-dalek v3.0.0
+    Checking usb-device v0.3.2
+    Checking esp-rom-sys v0.1.4
+    Checking ctr v0.9.2
+    Checking aes v0.8.4
+    Checking embassy-usb-driver v0.2.2
+    Checking sha2 v0.10.9
+    Checking float-cmp v0.9.0
+    Checking aead v0.5.2
+    Checking gcd v2.3.0
+    Checking micromath v2.1.0
+    Checking ral-registers v0.1.3
+    Checking esp-synopsys-usb-otg v0.4.2
+    Checking embedded-graphics v0.8.2 (C:\Users\mark_\Code\repos\retinue\vendor\embedded-graphics)
+    Checking fugit v0.3.9
+    Checking ccm v0.5.0
+    Checking bitfield v0.19.4
+    Checking xtensa-lx-rt v0.22.0
+    Checking embassy-usb-synopsys-otg v0.3.3
+    Checking retinue v0.3.0 (C:\Users\mark_\Code\repos\retinue\crates\retinue)
+    Checking embassy-embedded-hal v0.6.0
+    Checking esp-sync v0.2.1
+    Checking x25519-dalek v2.0.1
+    Checking enumset v1.1.14
+    Checking defmt v0.3.100
+    Checking hmac v0.12.1
+    Checking embedded-can v0.4.1
+    Checking embassy-executor-timer-queue v0.1.0
+    Checking bitflags v2.13.1
+    Checking rand_core v0.9.5
+    Checking ufmt-write v0.1.0
+    Checking lora-modulation v0.1.5
+    Checking selvage v0.1.0 (C:\Users\mark_\Code\repos\retinue\crates\selvage)
+    Checking bytemuck v1.25.2
+    Checking esp-hal v1.1.1
+    Checking seneschal v0.2.0 (C:\Users\mark_\Code\repos\retinue\crates\seneschal)
+    Checking lora-phy v3.0.1 (C:\Users\mark_\Code\repos\retinue\vendor\lora-phy)
+    Checking tucket v0.0.2 (C:\Users\mark_\Code\repos\retinue\crates\tucket)
+    Checking sennet v0.0.2 (C:\Users\mark_\Code\repos\retinue\crates\sennet)
+    Checking radio-face v0.0.1 (C:\Users\mark_\Code\repos\retinue\crates\radio-face)
+    Checking const-default v1.0.0
+    Checking cordyceps v0.3.4
+    Checking embassy-executor v0.10.0
+    Checking rlsf v0.2.3
+    Checking radio-hand v0.0.1 (C:\Users\mark_\Code\repos\retinue\crates\radio-hand)
+    Checking embassy-time-queue-utils v0.3.2
+    Checking esp-println v0.17.0
+    Checking linked_list_allocator v0.10.6
+    Checking embedded-alloc v0.7.0
+    Checking esp-backtrace v0.19.0
+    Checking protocol-capacity-probe v0.0.0 (C:\Users\mark_\Code\repos\retinue\testing\protocol-capacity)
+    Checking esp-bootloader-esp-idf v0.5.0
+    Checking static_cell v2.1.1
+    Checking embedded-hal-bus v0.3.0
+    Checking esp-storage v0.9.0
+    Checking esp-rtos v0.3.0
+    Checking tulle-heltec-v4-phy v0.0.1 (C:\Users\mark_\Code\repos\retinue\firmware\heltec-v4-phy)
+error: redundant closure
+   --> firmware\heltec-v4-phy\src\channels.rs:213:40
+    |
+213 |     timebase_reserve_lease(packet).map(|lease| TimebaseProbe::Reserve(lease))
+    |                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: replace the closure with the tuple variant itself: `TimebaseProbe::Reserve`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#redundant_closure
+    = note: `-D clippy::redundant-closure` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::redundant_closure)]`
+
+error: manual implementation of `.is_multiple_of()`
+  --> firmware\heltec-v4-phy\src\commissioning_store.rs:27:23
+   |
+27 | const _: () = assert!(PENDING_SLOT_A_ORIGIN % SECTOR == 0);
+   |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: replace with: `PENDING_SLOT_A_ORIGIN.is_multiple_of(SECTOR)`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#manual_is_multiple_of
+   = note: `-D clippy::manual-is-multiple-of` implied by `-D warnings`
+   = help: to override `-D warnings` add `#[allow(clippy::manual_is_multiple_of)]`
+
+error: this `if` has identical blocks
+   --> firmware\heltec-v4-phy\src\control_boot.rs:196:50
+    |
+196 |       } else if status.ordinary_service_eligible() {
+    |  __________________________________________________^
+197 | |         FirstWriteBootGate::ClaimOnly
+198 | |     } else if status.actions().permits_resume() || status.actions().permits_abandon() {
+    | |_____^
+    |
+note: same as this
+   --> firmware\heltec-v4-phy\src\control_boot.rs:198:87
+    |
+198 |       } else if status.actions().permits_resume() || status.actions().permits_abandon() {
+    |  _______________________________________________________________________________________^
+199 | |         FirstWriteBootGate::ClaimOnly
+200 | |     } else {
+    | |_____^
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#if_same_then_else
+    = note: `-D clippy::if-same-then-else` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::if_same_then_else)]`
+
+error: this function has too many arguments (10/7)
+   --> firmware\heltec-v4-phy\src\control_boot.rs:312:1
+    |
+312 | / async fn first_owner_usb_session<R: Read, W: Write, RK, DLY>(
+313 | |     _presence: PhysicalPresence,
+314 | |     owner: &mut V4BootOwner<'_, RK, DLY>,
+315 | |     rx: &mut R,
+...   |
+325 | |     RK: lora_phy::mod_traits::RadioKind,
+326 | |     DLY: lora_phy::DelayNs,
+    | |___________________________^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#too_many_arguments
+    = note: `-D clippy::too-many-arguments` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::too_many_arguments)]`
+
+error: large size difference between variants
+   --> firmware\heltec-v4-phy\src\control_boot.rs:546:1
+    |
+546 | / pub(crate) enum ControlBootOutcome {
+547 | |     /// An ordinary control journal was present and completed runtime recovery.
+548 | |     ControlReady(ControlReady),
+    | |     -------------------------- the largest variant contains at least 1472 bytes
+549 | |     /// Both journals were blank. This creates no authority.
+550 | |     BlankUncommissioned,
+    | |     ------------------- the second-largest variant carries no data at all
+551 | |     /// A first-write pair needs physical USB recovery before normal service may start.
+552 | |     FirstWritePending,
+553 | | }
+    | |_^ the entire enum is at least 1472 bytes
+    |
+help: consider boxing the large fields or introducing indirection in some other way to reduce the total size of the enum
+   --> firmware\heltec-v4-phy\src\control_boot.rs:548:5
+    |
+548 |     ControlReady(ControlReady),
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#large_enum_variant
+    = note: `-D clippy::large-enum-variant` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::large_enum_variant)]`
+
+error: manual implementation of `.is_multiple_of()`
+  --> firmware\heltec-v4-phy\src\control_store.rs:30:23
+   |
+30 | const _: () = assert!(CONTROL_ORIGIN % SECTOR == 0);
+   |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: replace with: `CONTROL_ORIGIN.is_multiple_of(SECTOR)`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#manual_is_multiple_of
+
+error: manual implementation of `.is_multiple_of()`
+  --> firmware\heltec-v4-phy\src\host.rs:39:29
+   |
+39 |     if !bytes.is_empty() && bytes.len() % USB_PACKET_BYTES == 0 {
+   |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: replace with: `bytes.len().is_multiple_of(USB_PACKET_BYTES)`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#manual_is_multiple_of
+
+error: manual implementation of `.is_multiple_of()`
+  --> firmware\heltec-v4-phy\src\store.rs:63:5
+   |
+63 |     STORE_ORIGIN % SECTOR == 0,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^ help: replace with: `STORE_ORIGIN.is_multiple_of(SECTOR)`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#manual_is_multiple_of
+
+error: manual implementation of `.is_multiple_of()`
+  --> firmware\heltec-v4-phy\src\store.rs:66:23
+   |
+66 | const _: () = assert!(PACKET_RESERVATION_ORIGIN % SECTOR == 0);
+   |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: replace with: `PACKET_RESERVATION_ORIGIN.is_multiple_of(SECTOR)`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#manual_is_multiple_of
+
+error: manual implementation of `.is_multiple_of()`
+  --> firmware\heltec-v4-phy\src\store.rs:72:5
+   |
+72 |     ANNOUNCE_RESERVATION_ORIGIN % SECTOR == 0,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: replace with: `ANNOUNCE_RESERVATION_ORIGIN.is_multiple_of(SECTOR)`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#manual_is_multiple_of
+
+error: taken reference of right operand
+   --> firmware\heltec-v4-phy\src\store.rs:311:43
+    |
+311 |         if record.sequence != sequence || record.body != &body {
+    |                                           ^^^^^^^^^^^^^^^-----
+    |                                                          |
+    |                                                          help: use the right value directly: `body`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#op_ref
+    = note: `-D clippy::op-ref` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::op_ref)]`
+
+error: could not compile `tulle-heltec-v4-phy` (bin "tulle-heltec-v4-phy") due to 11 previous errors

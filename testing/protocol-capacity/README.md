@@ -105,3 +105,17 @@ load segments and linker stack bounds without executing or installing the ELF.
 It refuses an existing output path. ARM load segments must remain inside the
 current code region, clear of durable storage. Linker gaps are not measured
 stack high-water. Current output is cross-checked against GNU readelf sections.
+
+The [physical follow-up](../receipts/protocol-parity-memory/physical/README.md)
+uses `target_round::run` from a separate firmware task. The fixed-heap host bins
+accept `--target-rounds` to repeat that same fragmentation/refusal function sixteen
+times. Refusal calls the allocator directly because a global-shim allocation/free
+pair can be removed by LLVM. Named stack/supervisor checkpoints allocate nothing.
+
+`board_probe.py BOARD --port PORT --output NEW.json --rounds 16` requires an
+already installed, explicitly selected bench image and an exact known USB
+identity. For the second V4 use `--usb-serial 44:1B:F6:6A:FB:28`; the default is
+the FA:64 V4. Zero rounds performs read-only firmware/profile checks. Flashing,
+private backups and restoration are separate attended actions recorded in the
+physical receipt. This command does not transmit synthetic identities or alter
+persisted radio settings.

@@ -53,3 +53,12 @@ its client stream.
 
 The first on-device UI hardware acceptance is recorded in
 `design_docs/2026-07-28_v4_on_device_ui_acceptance.md`.
+
+The explicit `memory-bench` feature includes `resident-protocols` and adds the
+`protocol memory` text command. A separate executor task runs the synthetic
+combined-state fixture, exercises fragmented heap/refusal behavior, and reports
+allocator occupancy plus stack samples. Ordinary builds do not expose it.
+The [October 16 physical receipt](../../testing/receipts/protocol-parity-memory/physical/README.md)
+records the exact images, identified boards, failures and application/state
+restoration. The heap campaign passes on COM6; COM7's post-flash USB failure is
+separate. The tight main-stack sample is not accepted worst-case headroom.
