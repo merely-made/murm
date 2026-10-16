@@ -1,0 +1,12 @@
+{
+  "result": "failed",
+  "authority": "isolated Djinn wallet over real Keeper/custody route",
+  "host_sha256": "23886513fbad19a6903f50dd4d91897c672f67238e4ddd990efcb4d8dd1f4987",
+  "radio_result": "native-djinn/bench.json",
+  "private_wallet_tracked": false,
+  "public_key": "ab0bd0135352e3fd9736e2d0e38b3d660fe7b8cd6e2673b7930a885127486e07",
+  "card_sha256": "90199131E700E3CC87F6576A64AEB22701059C78A4E7B0E24801B357B9574E99",
+  "error": "Absolute acceptance deadline exceeded.",
+  "custodian_stopped": true,
+  "closed_utc": "2026-10-16T04:52:50.8997360Z"
+}

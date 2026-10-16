@@ -9,13 +9,14 @@ use crate::{
 use genet_probe::ProbeSnapshot;
 use layout_dom_api::LayoutDom;
 use signalman::comms_adapter::comms::{DeliveryStatus, Direction, ProtocolKind};
-use std::cell::Cell;
+use std::{cell::Cell, path::PathBuf};
 
 pub struct Product {
     sheet: String,
     tag: String,
     protocol: ProtocolKind,
     peer: String,
+    peer_receipt: Option<PathBuf>,
     condition: Option<Condition>,
     connected_seen: Cell<bool>,
     history: Option<serde_json::Value>,
@@ -25,6 +26,37 @@ enum Condition {
     Stopped,
     Acknowledged,
     Received,
+    PeerAcknowledged,
+}
+
+fn peer_confirmed(
+    receipt: &serde_json::Value,
+    protocol: ProtocolKind,
+    peer: &str,
+    tag: &str,
+) -> bool {
+    let protocol = match protocol {
+        ProtocolKind::MeshCore => "meshcore",
+        ProtocolKind::Meshtastic => "meshtastic",
+        _ => return false,
+    };
+    receipt["result"] == "passed"
+        && receipt["mode"] == "peer"
+        && receipt["protocol"] == protocol
+        && receipt["ui_peer"]["matched_protocol_ack"] == true
+        && receipt["ui_peer"]["received"]["message"]["body"]["PlainText"] == tag
+        && receipt["ui_peer"]["sent"]["message"]["body"]["PlainText"] == format!("{tag}-return")
+        && receipt["ui_peer"]["sent"]["message"]["author"]["address"] == peer
+        && receipt["ui_peer"]["sent"]["delivery"] == "ProtocolAcknowledged"
+}
+impl Product {
+    fn peer_acknowledged(&self) -> bool {
+        self.peer_receipt
+            .as_ref()
+            .and_then(|path| std::fs::read(path).ok())
+            .and_then(|bytes| serde_json::from_slice(&bytes).ok())
+            .is_some_and(|receipt| peer_confirmed(&receipt, self.protocol, &self.peer, &self.tag))
+    }
 }
 fn facts(
     state: &DesktopState,
@@ -102,6 +134,8 @@ pub fn from_env() -> Option<mesquite::Lane<Product>> {
                 tag,
                 protocol,
                 peer,
+                peer_receipt: std::env::var_os("SIGNALMAN_COMPANION_PEER_RECEIPT")
+                    .map(PathBuf::from),
                 condition: None,
                 connected_seen: Cell::new(false),
                 history: None,
@@ -135,6 +169,7 @@ impl mesquite::Product for Product {
             .with_field("connected", connected.to_string())
             .with_field("protocol_ack", ack.to_string())
             .with_field("incoming", rx.to_string())
+            .with_field("peer_protocol_ack", self.peer_acknowledged().to_string())
             .with_field("captures", captures.to_string())
             .with_field("port", ctx.runner.state().companion_port.text())
             .with_field("realm", ctx.runner.state().companion_realm.text())
@@ -200,11 +235,15 @@ impl mesquite::Product for Product {
             }
             return Err(format!("Tab never reached text field {target}"));
         }
+        if line == "await companion peer acknowledged" && self.peer_receipt.is_none() {
+            return Err("native peer acknowledgement requires its explicit receipt path".into());
+        }
         self.condition = Some(match line {
             "await companion connected" => Condition::Connected,
             "await companion stopped" => Condition::Stopped,
             "await companion acknowledged" => Condition::Acknowledged,
             "await companion received" => Condition::Received,
+            "await companion peer acknowledged" => Condition::PeerAcknowledged,
             _ => return Err(format!("unknown companion scenario verb: {line}")),
         });
         Ok(())
@@ -229,6 +268,7 @@ impl mesquite::Product for Product {
             }
             Some(Condition::Acknowledged) => ack == 0,
             Some(Condition::Received) => rx == 0,
+            Some(Condition::PeerAcknowledged) => !self.peer_acknowledged(),
             None => false,
         };
         if !waiting {
@@ -243,6 +283,7 @@ impl mesquite::Product for Product {
             || (self.protocol == ProtocolKind::MeshCore && ctx.runner.state().resident_connecting)
             || ack != 1
             || rx != 1
+            || (self.peer_receipt.is_some() && !self.peer_acknowledged())
             || ctx.runner.state().message_protocol != self.protocol
         {
             return Err(format!(
@@ -257,5 +298,58 @@ impl mesquite::Product for Product {
         } else {
             vec![]
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn peer_gate_requires_the_matching_return_and_observed_ack() {
+        let receipt = serde_json::json!({"mode":"peer","protocol":"meshcore","result":"passed",
+            "ui_peer":{"matched_protocol_ack":true,
+            "received":{"message":{"body":{"PlainText":"signalman-ui-check"}}},
+            "sent":{"message":{"body":{"PlainText":"signalman-ui-check-return"},"author":{"address":"peer"}},"delivery":"ProtocolAcknowledged"}}});
+        assert!(peer_confirmed(
+            &receipt,
+            ProtocolKind::MeshCore,
+            "peer",
+            "signalman-ui-check"
+        ));
+        assert!(!peer_confirmed(
+            &receipt,
+            ProtocolKind::MeshCore,
+            "peer",
+            "signalman-ui-stale"
+        ));
+        assert!(!peer_confirmed(
+            &receipt,
+            ProtocolKind::MeshCore,
+            "other",
+            "signalman-ui-check"
+        ));
+        let mut handed = receipt.clone();
+        handed["ui_peer"]["sent"]["delivery"] = "HandedToRadio".into();
+        assert!(!peer_confirmed(
+            &handed,
+            ProtocolKind::MeshCore,
+            "peer",
+            "signalman-ui-check"
+        ));
+        let mut incomplete = receipt;
+        incomplete["ui_peer"]["matched_protocol_ack"] = false.into();
+        assert!(!peer_confirmed(
+            &incomplete,
+            ProtocolKind::MeshCore,
+            "peer",
+            "signalman-ui-check"
+        ));
+        assert!(!peer_confirmed(
+            &serde_json::Value::Null,
+            ProtocolKind::MeshCore,
+            "peer",
+            "signalman-ui-check"
+        ));
     }
 }

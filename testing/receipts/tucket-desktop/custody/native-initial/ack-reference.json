@@ -1,0 +1,8 @@
+{
+  "source": "https://github.com/meshcore-dev/MeshCore/blob/d929643/src/helpers/BaseChatMesh.cpp#L382-L400",
+  "stock_expected_ack": 601058202,
+  "computed_ack": 601058202,
+  "computed_ack_hex": "9a6bd323",
+  "matches": true,
+  "tucket_ack_transmission_observed": false
+}
