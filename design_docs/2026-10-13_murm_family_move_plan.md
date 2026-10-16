@@ -2303,3 +2303,37 @@ wrapper/recovery receipt remains intact. Automatic approval review rejects
 deletion of this run's stopped synthetic custodian root with "blocked by
 policy"; it remains ignored, bringing the retained roots in this lane to 25.
 The shared Cargo cache remains co-owned; no new target/home/worktree is created.
+
+### Board names (2026-10-16, implementation in progress)
+
+The owner requested persistent, visible names because the two unmarked V4s
+cannot be identified physically by COM port or USB serial. The board owns a
+public local label of up to sixteen printable ASCII characters. It appears as
+the boot and default status title and in USB `status` / `name` replies. It is
+separate from radio addresses, relay keys, host identity and RF profile names.
+`name set SB1` saves through the existing verified A/B settings journal and
+reboots; `name clear` restores the unnamed presentation. Invalid commands and
+unchanged labels do not write flash. Leading/trailing whitespace, control
+characters and oversized labels are rejected rather than silently truncated.
+
+The settings body appends the name after the original 68-byte prefix. Old
+records remain readable with an empty name; malformed extensions do not discard
+the identity or region/channel. Both stores retain their existing addresses,
+sequences, checksums and write verification. A downgrade preserves the old
+prefix, although an older firmware rewriting settings will discard the label.
+The public flash inventory classifies the label explicitly.
+
+Done conditions: shared settings/parser and both display renderer tests pass;
+both normal firmware images link; application-only updates preserve existing
+identity and settings; SB1/SB2/T114 are provisioned through the command; names
+survive reboot and are reported consistently. Physical screen observation is
+recorded separately from software rendering and USB checks. This change does
+not close the protocol memory plan's stack/reserve gates.
+
+Software checkpoint: 20 radio-face tests (including both physical panel layouts)
+and 149 radio-hand tests pass. Shared strict Clippy and both normal release
+links pass; board Clippy passes with the pre-existing board lint allowances.
+Flash classification and unsafe audits pass with four classified settings
+fields and the same 61 approved unsafe tokens. The LOC check retains the same
+six pre-existing violations; this slice adds none. Hardware installation and
+provisioning are next, so no physical display observation is claimed here.

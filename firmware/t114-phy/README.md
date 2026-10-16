@@ -47,6 +47,13 @@ because a successful SPI transfer cannot detect whether the optional panel is
 populated. `bootloader\n` enters the board's serial-only DFU mode without a
 physical double-reset.
 
+`name` reports the public device label. `name set T114` saves a label of up to
+16 printable ASCII characters and reboots; `name clear` clears it. Names cannot
+start or end with a space. The label appears on the boot and default status
+screens and in `status`, independently of relay identity, host identity and
+radio profile. Setting the same name again does not write flash or reboot.
+Older settings upgrade without changing the identity, region or channel.
+
 `lxmf\n` and `lxmf stamp\n` are the board's own account of whether it can read
 LXMF, rather than an inference from the fact that outrider linked. Each decodes
 or scores a stock LXMF 0.9.6 artefact baked into flash and checks it against the

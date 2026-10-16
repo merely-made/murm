@@ -1,5 +1,7 @@
 # Murm Documentation Index
 
+Board names (2026-10-16): [the family-plan naming slice](2026-10-13_murm_family_move_plan.md#board-names-2026-10-16-implementation-in-progress) adds persistent public device labels, USB commissioning commands and boot/status display titles. Software and installation checks are in progress.
+
 Protocol parity work (2026-10-16): [the three-family plan](2026-10-16_protocol_parity_plan.md)
 separates pinned wire, device-role and firmware/product targets; ranks Tucket
 first, Retinue next and Sennet's full product surface last; records measured

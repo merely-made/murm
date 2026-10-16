@@ -218,7 +218,7 @@ async fn main(spawner: Spawner) {
     let status_led = Output::new(p.P1_03, Level::High, OutputDrive::Standard);
     let button_rev21 = Input::new(p.P1_11, Pull::Up);
     let button_variant = Input::new(p.P1_10, Pull::Up);
-    let mut local_status = board::initial_status();
+    let mut local_status = board::initial_status(settings);
     spawner.spawn(ui::button_task(button_rev21, button_variant).unwrap());
     let screen_hardware = ui::screen_hardware(
         display_spi,

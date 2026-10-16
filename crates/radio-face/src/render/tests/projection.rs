@@ -223,3 +223,26 @@ fn readable_lines_join_labels_and_mark_the_selection() {
         ]
     );
 }
+
+#[test]
+fn saved_names_are_fully_visible_on_boot_and_the_default_page_on_both_panels() {
+    let (mut local, _) = fixture();
+    for name in ["SB1", "SB2", "T114", "1234567890123456"] {
+        local.device_name = Text::try_from_str(name).unwrap();
+        for surface in [Surface::Oled128x64, Surface::Tft240x135] {
+            for screen in [Screen::Boot, Screen::Page(Page::Status)] {
+                let mut recorder = Recorder(Vec::new());
+                paint(&mut recorder, surface, theme(), screen, &local, None).unwrap();
+                assert!(
+                    recorder.0.iter().any(|op| matches!(op, Op::Text {
+                    role: TextRole::Title, visible, ..
+                } if visible == name)),
+                    "{surface:?} {screen:?} must show the complete name"
+                );
+                let mut canvas = Canvas::new(surface.size());
+                render(&mut canvas, surface, theme(), screen, &local, None).unwrap();
+                assert_eq!(canvas.out_of_bounds, 0);
+            }
+        }
+    }
+}

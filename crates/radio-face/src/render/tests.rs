@@ -88,6 +88,7 @@ fn theme() -> Theme<Rgb888> {
 
 fn fixture() -> (LocalStatus, HostSnapshot) {
     let local = LocalStatus {
+        device_name: Text::empty(),
         board: Text::from_truncated("HELTEC V4"),
         firmware: Text::from_truncated("PHY V10"),
         uptime_secs: 14_719,
