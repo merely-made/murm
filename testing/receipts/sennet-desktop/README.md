@@ -1,9 +1,11 @@
-# Sennet over Tulle desktop continuation, 2026-10-16
+# Sennet over Tulle desktop qualification, 2026-10-16
 
-R7 in the [family plan](../../../design_docs/2026-10-13_murm_family_move_plan.md#r7--sennet-channel-text-over-tulle-2026-10-16-in-progress)
+R7 in the [family plan](../../../design_docs/2026-10-13_murm_family_move_plan.md#r7--sennet-channel-text-over-tulle-2026-10-16-functional-pass)
 qualifies public LongFast channel text and reconnect separately from directed
 messages, protocol ACKs, private-channel provisioning and RF authentication.
-Desktop software is qualified; native/physical delivery remains pending.
+The [native reconnect gate](native-reconnect/README.md) passes four exact tagged
+texts across two connections, with exact history, disjoint outgoing packet IDs,
+zero protocol ACK claims, seven reviewed captures and verified restoration.
 
 The core passes 146 radio-hand and 66 Signalman library tests, 19 runtime
 integration tests, strict selected library/test Clippy and a bare runtime
@@ -17,8 +19,8 @@ it does not qualify deliberate rollback of all files or hardware power loss.
 
 The stock peer helper's opt-in `channel-peer` mode requires the exact tagged
 receive, returns a channel broadcast and records device acceptance. It does
-not invent a protocol ACK. The later native gate must independently match
-that returned body at the Sennet end. Public software logs are in `software/`.
+not invent a protocol ACK. The native gate independently matches that returned
+body at the Sennet end. Public software logs are in `software/`.
 
 The desktop passes 44 library tests (one existing ignored), strict all-target
 Clippy, native/station-exporter builds, formatting and script parsing. The
@@ -44,4 +46,13 @@ configuration before native launch; COM6 restoration passed and nonce state
 stayed unused. The retry explicitly watchdog-resets the stock image after
 flashing and captures filtered public diagnostics. The
 [setup readback](setup-readback/README.md) now passes after retaining the
-client connection for five seconds to drain writes. Native/RF remains open.
+client connection for five seconds to drain writes. A subsequent
+[USB transition refusal](native-usb-boundary/README.md) required a fresh
+read-only handshake after configuration. The successful native gate uses those
+setup checks without relaxing the production actor's reboot refusal.
+
+Existing targets were reused. The shared `C:\t\cargo-homes\mere-upstreams`
+cache remains co-owned by the family qualification lanes; the temporary Mere
+worktree and branch are removed. Ignored synthetic fixture wallets remain with
+helpers stopped after automatic approval review blocked recursive deletion.
+They are excluded from these public receipts.

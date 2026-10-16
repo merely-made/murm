@@ -1,0 +1,9 @@
+{
+  "mode": "status",
+  "result": "passed",
+  "port": "COM6",
+  "usb_serial": "44:1B:F6:6A:FB:28",
+  "status": "tulle/heltec-v4 phy online; version=0.0.1; sx1262 online; sync=2b reg=24b4; longfast=906875000; build=unidentified; image=v4-modem-usb\r\nidentity=loaded slot=A seq=10\r\n",
+  "region": "region=US915\r\n",
+  "channel": "channel=rnode\r\n"
+}

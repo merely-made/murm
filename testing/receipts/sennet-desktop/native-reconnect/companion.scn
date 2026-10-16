@@ -1,0 +1,86 @@
+# Filled by run_companion.ps1 after identifying both stock radios.
+log Signalman Sennet channel text over Tulle against stock meshtastic through production controls
+zoom 0.75
+settle 4
+click role:button Messages
+click role:button @data-message-protocol=Meshtastic
+key tab-until data-text-field=companion-port
+input-text COM7
+key tab-until data-text-field=companion-realm
+input-text bench-sennet-djinn
+key tab-until data-text-field=companion-journal
+input-text C:\Users\mark_\Code\repos\retinue\validation\results\sennet-desktop\native-djinn-settled\native\desktop-journal.json
+key tab-until data-text-field=companion-channel
+input-text 0
+assert snap port == COM7
+assert snap realm == bench-sennet-djinn
+assert snap journal == C:\Users\mark_\Code\repos\retinue\validation\results\sennet-desktop\native-djinn-settled\native\desktop-journal.json
+assert snap channel == 0
+capture form
+click role:button Connect Tulle
+await companion connected
+wait 1800
+assert snap connected == true
+assert snap protocol_selected == true
+capture connected
+key tab-until data-text-field=message-recipient
+input-text ffffffff
+key tab-until data-text-field=message-draft
+input-text signalman-ui-90b2309b4a30416787e25d90a0480aee
+click role:button Queue text
+await companion transmitted
+wait 1800
+assert snap physical_tx == 1
+assert snap protocol_ack == 0
+await companion received
+wait 1800
+assert snap incoming == 1
+await companion peer completed
+wait 600
+assert snap peer_channel_completed == true
+capture roundtrip
+remember companion history
+click role:button Disconnect companion
+await companion stopped
+wait 600
+assert snap connected == false
+assert snap physical_tx == 1
+assert snap protocol_ack == 0
+assert snap incoming == 1
+capture disconnected
+click role:button Connect Tulle
+await companion connected
+wait 1800
+assert snap connected == true
+assert snap physical_tx == 1
+assert snap protocol_ack == 0
+assert snap incoming == 1
+capture reconnected
+assert companion history
+begin companion reconnect exchange
+key tab-until data-text-field=message-recipient
+input-text ffffffff
+key tab-until data-text-field=message-draft
+input-text signalman-ui-90b2309b4a30416787e25d90a0480aee-reconnect
+click role:button Queue text
+await companion transmitted
+wait 1800
+assert snap physical_tx == 1
+assert snap protocol_ack == 0
+await companion received
+wait 1800
+assert snap incoming == 1
+await companion peer completed
+wait 600
+assert snap peer_channel_completed == true
+capture reconnect-roundtrip
+remember companion history
+click role:button Disconnect companion
+await companion stopped
+wait 600
+assert snap connected == false
+assert snap physical_tx == 1
+assert snap protocol_ack == 0
+assert snap incoming == 1
+capture stopped
+assert companion history

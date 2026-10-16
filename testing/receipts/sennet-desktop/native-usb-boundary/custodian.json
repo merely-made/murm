@@ -1,0 +1,11 @@
+{
+  "result": "failed",
+  "authority": "isolated Djinn wallet through real Keeper route",
+  "host_sha256": "25f41c90f231bbf88d573e5ad74e0bfa181523cd9e59f2fc1729f7f0316b2dcc",
+  "private_wallet_tracked": false,
+  "radio_result": "native-djinn-drained/bench.json",
+  "node_number": 4193831387,
+  "error": "Peer exited 1.",
+  "custodian_stopped": true,
+  "closed_utc": "2026-10-16T07:30:37.5423140Z"
+}

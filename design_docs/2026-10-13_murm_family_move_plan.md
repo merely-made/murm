@@ -2062,7 +2062,7 @@ earlier family qualifiers and this gate. Ignored synthetic broker wallets remain
 after automatic approval review blocked their recursive deletion; helpers are
 stopped, and private runtime files were excluded from the published receipts.
 
-### R7 — Sennet channel text over Tulle (2026-10-16, in progress)
+### R7 — Sennet channel text over Tulle (2026-10-16, functional pass)
 
 The owner approved the next stack leg after R6. Qualify bidirectional channel
 text, exact history, disconnect and fresh messages after reconnect against the
@@ -2106,10 +2106,41 @@ and Netrender `f4f9c0d8`; an initial dependency update's identity-pin regression
 was caught and repaired before these gates. The bounded native fixture uses
 new channel-peer receipts after reconnect and requires zero protocol ACKs.
 [Software receipts](../testing/receipts/sennet-desktop/README.md) retain the
-exact scopes. Physical/native delivery remains pending. Initial stock setup
+exact scopes. At this checkpoint physical/native delivery was pending. Initial stock setup
 failed before native launch; later client-success/readback-mismatch trials
 showed that post-process sleeps did not preserve queued writes. Restoring the
 public client's five-second connected wait passes independent CLI/SDK setup
 readback. The [setup receipts](../testing/receipts/sennet-desktop/setup-readback/README.md)
 retain a failed transaction experiment and the passing setup-only trial.
 Both boards are restored, custody stayed inactive and packet IDs stayed unused.
+
+**Native channel/reconnect gate (2026-10-16, passed).** At `bf3301caa58`,
+the attended Messages controls pass four exact tagged channel texts across two
+connections against identified stock Meshtastic 2.7.26.54e0d8d. The first exact
+history check precedes new work after reconnect, and all four records survive
+final disconnect. Both Sennet outgoing records carry physical completion and
+`HandedToRadio`; the stock peer independently matches them. Both stock return
+records have device acceptance and exact native reception. Zero protocol ACKs
+are observed or claimed. Helper service totals of 11468 ms and 888 ms are not
+per-message latency measurements.
+
+Sennet packet IDs 1 and 257 come from disjoint persisted intervals 1–256 and
+257–512; durable next state is 513. Seven reviewed captures show 530 presented
+frames, zero blank captures and seven distinct digests. All four final rows
+fit the selected viewport. The connecting notice stays stale after connection;
+UI polish remains open. COM7's same-boot profile/sync and COM6's pinned Tulle
+image with exact status/identity/region/channel are restored and verified.
+Both peers and desktop exit 0, and the isolated real Keeper custodian stops.
+The [qualification](../testing/receipts/sennet-desktop/native-reconnect/README.md)
+freezes reviewed evidence while preserving raw pending-review values.
+
+The stock-client-to-Signalman transition first refused a reboot during handshake.
+A read-only setup probe now requires a fresh successful handshake after stock
+configuration before launching native messaging. Only that bounded setup probe
+can retry the exact reboot refusal; production actor and uncertain-send rules
+are unchanged. Directed messages/ACKs, private-channel key custody, installed
+personal-daemon integration and broader platform D13 remain separate gates.
+Existing targets are reused, the temporary Mere integration worktree/branch
+is removed, and the shared upstream cache remains co-owned. Ignored synthetic
+wallet fixtures remain with helpers stopped after the recorded automatic
+approval-review deletion block; private runtime files are excluded.
