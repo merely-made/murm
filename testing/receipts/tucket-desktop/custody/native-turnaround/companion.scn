@@ -1,0 +1,64 @@
+# Filled by run_companion.ps1 after identifying both stock radios.
+log Signalman Tucket over Tulle against stock meshcore through production controls
+zoom 0.75
+settle 4
+click role:button Messages
+click role:button @data-message-protocol=MeshCore
+key tab-until data-text-field=companion-port
+input-text COM7
+key tab-until data-text-field=companion-realm
+input-text bench-tucket-djinn
+key tab-until data-text-field=companion-journal
+input-text C:\Users\mark_\Code\repos\retinue\validation\results\tucket-desktop-20261015\native-djinn-turnaround\native\desktop-journal.json
+key tab-until data-text-field=companion-channel
+input-text 0
+assert snap port == COM7
+assert snap realm == bench-tucket-djinn
+assert snap journal == C:\Users\mark_\Code\repos\retinue\validation\results\tucket-desktop-20261015\native-djinn-turnaround\native\desktop-journal.json
+assert snap channel == 0
+capture form
+click role:button Connect Tulle
+await companion connected
+wait 1800
+assert snap connected == true
+assert snap protocol_selected == true
+capture connected
+key tab-until data-text-field=message-recipient
+input-text a6300d0e2bd97bd6f9629199155d23e92b8dc1c50a4634c4135832a1c38d891d
+key tab-until data-text-field=message-draft
+input-text signalman-ui-da6f929de73a4ea49be55551d49a104b
+click role:button Queue text
+await companion acknowledged
+wait 1800
+assert snap protocol_ack == 1
+await companion received
+wait 1800
+assert snap incoming == 1
+await companion peer acknowledged
+wait 600
+assert snap peer_protocol_ack == true
+capture roundtrip
+remember companion history
+click role:button Disconnect companion
+await companion stopped
+wait 600
+assert snap connected == false
+assert snap protocol_ack == 1
+assert snap incoming == 1
+capture disconnected
+click role:button Connect Tulle
+await companion connected
+wait 1800
+assert snap connected == true
+assert snap protocol_ack == 1
+assert snap incoming == 1
+capture reconnected
+assert companion history
+click role:button Disconnect companion
+await companion stopped
+wait 600
+assert snap connected == false
+assert snap protocol_ack == 1
+assert snap incoming == 1
+capture stopped
+assert companion history

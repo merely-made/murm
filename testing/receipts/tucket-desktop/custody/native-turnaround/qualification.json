@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "result": "native_functional_passed",
+  "source": "cf06a1a9569bff0b73a138b84caf72f523d85358",
+  "authority": "Djinn scoped release through real isolated Keeper wallet",
+  "coverage": {
+    "new_sends_after_reconnect": 0,
+    "tagged_texts": 2,
+    "exact_history_across_disconnect_reconnect": true,
+    "matched_protocol_acks_both_directions": true,
+    "delivery_connections": 1,
+    "history_only_reconnects": 1
+  },
+  "reply_delay_ms": 200,
+  "visual_review": {
+    "result": "functional checks passed",
+    "cosmetic_note": "connecting notice remains stale after connected; UI cleanup separate",
+    "captures": 6,
+    "polish_qualified": false
+  },
+  "stock_peer_elapsed_ms": 4935,
+  "restoration": {
+    "dut_profile": "acknowledged_same_boot_and_sync",
+    "peer": "pinned_tulle_and_exact_status_region_channel"
+  },
+  "custodian_stopped": true,
+  "private_runtime_included": false,
+  "evidence_sha256": {
+    "bench.json": "f96cbb2a8841a788b036e901b7749c48e9bb0cd3a5dd12b99c606c31dfab17bd",
+    "companion.scn": "15475f285d6e0a9cd7d1bc00da9def5916c2ce75550e04c8361e0536e0760bf7",
+    "connected.png": "ad211b4c1a86392805accfea3c1293f743ab83a5df2f66b900218c039bcd885b",
+    "custodian.json": "c908937c4735bfe0f365109f599a9faff4e82eaba31069f37b6c9546d49c352f",
+    "desktop-journal.json": "931c610fce63675d53a1326137e770e2066387e2506b1edd72cee32cf2e7a847",
+    "desktop.stderr.log": "2f14fd666267cd17a36ed9a3e440c0f43aa7a05609cf71dec26c28c1b2e858b0",
+    "desktop.stdout.log": "21e43e5dc5e78285c8c515378e248a07355d98c3fff7293a53673e1b7a18102f",
+    "disconnected.png": "047632c01fb75e10f58806a72cbb6c6a15165d984b3aec193d81f518fde4ff7c",
+    "dut-before.json": "0b9981b32510aebbe698ff564d93bcb38cc75d3a901dc3de9fefea6d6edf2559",
+    "dut-profile.json": "a80342d20e40ddd490760746a6077abb0e1bd6c514e6610ad60d6e7740d548c7",
+    "dut-restored-profile.json": "75ef6bca945143962f7e6370ed42c7f35db3a0c8e99ad1a98147b823548a7e05",
+    "form.png": "fb6799557523bbdcf8d66993d072dcc25b27fdf3d571430b14c89cfb44dbfd6a",
+    "peer-before.json": "926d28fd936303d47e6b2b8c98aeae44d363d74187605c18c9317bad09d667c4",
+    "peer-restored.json": "926d28fd936303d47e6b2b8c98aeae44d363d74187605c18c9317bad09d667c4",
+    "peer.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "peer.stdout.log": "b5ce67f4663176dc25581a5a11b0ddc7d27c071b5d36b36cc6c76d35a04227e3",
+    "public-config.json": "557563cf6cb87e22d9668935598870876d76b03b116395e217025481bec2aed5",
+    "public-contact-card.json": "39b1b294cff9f8b35da1bae641dddf030d27513d49798f159a5324483cc13b56",
+    "reconnected.png": "f676faaacb18aeb00e204e340d03d98c4f17587f6fe8276bc236e4846c7f7e07",
+    "roundtrip.png": "bb1810d194915b74d687c41a15acc1c38b848d5bc9b94d107adef37fed5b0104",
+    "run.json": "f13496e5238318b33704c07de0510f6bb199e932f282384ff16e5fb8f00f47a4",
+    "scenario.done": "f673cdc92e0cd4da2630107ee3b7f241d1680b32833a614a043c5158cc81f279",
+    "stock-peer-journal.json": "eeb346b228280104d8221376c8d55332e040a4d54740fb0b86052e1f449e88e5",
+    "stock-peer-receipt.json": "3c537a4d7525d241cd9b6fbc721fed474a36bbcb19a53df9d1bb216c0db4f92c",
+    "stock-setup.json": "18fe0844b656403531a7b7ae1f78efb82c42e1d9525997c8c0b5ac73c28a4805",
+    "stopped.png": "ad39afe35fd1cdeb8127ff469e51b850b08cb61faf5e733659e498a7c14167d7"
+  }
+}
