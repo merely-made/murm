@@ -38,3 +38,8 @@ cases; its canonical evidence lives in Mere's `testing/receipts/sennet-custody/`
 Both selected custody policy tests and strict port/example Clippy also pass,
 published through Mere `b31363d2`. The temporary supplier integration worktree
 and branch are removed. The existing shared Cargo cache remains co-owned.
+
+The [first physical setup](setup-initial/README.md) failed in stock CLI
+configuration before native launch; COM6 restoration passed and nonce state
+stayed unused. The retry explicitly watchdog-resets the stock image after
+flashing and captures filtered public diagnostics. Native/RF remains open.
