@@ -1,0 +1,58 @@
+[
+  {
+    "depth": 0,
+    "instance": "USB\\VID_303A&PID_1001&MI_00\\7&2BB9A614&0&0000",
+    "class": "Ports",
+    "name": "USB Serial Device (COM7)",
+    "status": "OK"
+  },
+  {
+    "depth": 1,
+    "instance": "USB\\VID_303A&PID_1001\\44:1B:F6:6A:FA:64",
+    "class": "USB",
+    "name": "USB Composite Device",
+    "status": "OK"
+  },
+  {
+    "depth": 2,
+    "instance": "USB\\ROOT_HUB30\\5&34C0E95C&0&0",
+    "class": "USB",
+    "name": "USB Root Hub (USB 3.0)",
+    "status": "OK"
+  },
+  {
+    "depth": 3,
+    "instance": "PCI\\VEN_1022&DEV_15B9&SUBSYS_201F1043&REV_00\\4&98C338A&0&0341",
+    "class": "USB",
+    "name": "AMD USB 3.10 eXtensible Host Controller - 1.20 (Microsoft)",
+    "status": "OK"
+  },
+  {
+    "depth": 4,
+    "instance": "PCI\\VEN_1022&DEV_14EB&SUBSYS_14EB1022&REV_00\\3&11583659&0&41",
+    "class": "System",
+    "name": "PCI Express Root Port",
+    "status": "OK"
+  },
+  {
+    "depth": 5,
+    "instance": "ACPI\\PNP0A08\\0",
+    "class": "System",
+    "name": "PCI Express Root Complex",
+    "status": "OK"
+  },
+  {
+    "depth": 6,
+    "instance": "ACPI_HAL\\PNP0C08\\0",
+    "class": "System",
+    "name": "Microsoft ACPI-Compliant System",
+    "status": "OK"
+  },
+  {
+    "depth": 7,
+    "instance": "ROOT\\ACPI_HAL\\0000",
+    "class": "Computer",
+    "name": "ACPI x64-based PC",
+    "status": "OK"
+  }
+]

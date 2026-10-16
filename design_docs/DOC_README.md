@@ -1,6 +1,6 @@
 # Murm Documentation Index
 
-Board names (2026-10-16): [the family-plan naming slice](2026-10-13_murm_family_move_plan.md#board-names-2026-10-16) adds persistent public labels, USB naming commands and boot/status titles. Both normal images are installed and all three names saved. SB1, SB2 and T114 all pass post-reboot readback with their original radio settings; SB2 required physical reconnection after its USB endpoint stalled. The [naming receipt](../testing/receipts/device-names/README.md) keeps failed attempts and successful checks distinct.
+Board names (2026-10-16): [the family-plan naming slice](2026-10-13_murm_family_move_plan.md#board-names-2026-10-16) adds persistent public labels, USB naming commands and boot/status titles. Both normal images are installed and all three names saved. SB1, SB2 and T114 all pass post-reboot readback with their original radio settings; SB2 required physical reconnection after its USB endpoint stalled. The [naming receipt](../testing/receipts/device-names/README.md) keeps failed attempts and successful checks distinct. The [direct-PC USB reboot control](../testing/receipts/usb-reboot/direct-pc/README.md) reproduces the timeout on its first reset with the hub removed; the root cause remains open.
 
 Protocol parity work (2026-10-16): [the three-family plan](2026-10-16_protocol_parity_plan.md)
 separates pinned wire, device-role and firmware/product targets; ranks Tucket

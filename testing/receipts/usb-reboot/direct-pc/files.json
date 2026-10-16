@@ -1,0 +1,30 @@
+{
+  "qualification.json": {
+    "bytes": 734,
+    "sha256": "64e57a3217ccd23ddd92ae8ff764ed4fc8cb2f19a288d3998c37d0a4f512f7b1"
+  },
+  "README.md": {
+    "bytes": 2824,
+    "sha256": "af1264a0a426eb79823553827da3ec724d9e963adc84cf524a183d391087f226"
+  },
+  "recovery.json": {
+    "bytes": 2167,
+    "sha256": "eaed847b75f8f548a7892a25c5cdb0da74dadc61d587a6e680ece1a5626dc81a"
+  },
+  "recovery.log": {
+    "bytes": 2167,
+    "sha256": "eaed847b75f8f548a7892a25c5cdb0da74dadc61d587a6e680ece1a5626dc81a"
+  },
+  "run.json": {
+    "bytes": 3058,
+    "sha256": "acec8da4b20e8b820ef81778c67e60b954a22a62c27c2e763f6c707f0caf64e0"
+  },
+  "run.log": {
+    "bytes": 146,
+    "sha256": "d2acbe8f043a011b049ccdd542370325836a2f1a44e0004d0711976b8f3820cc"
+  },
+  "windows-parent-chain.json": {
+    "bytes": 1394,
+    "sha256": "1bfb892df2c0ada0bf485bbd38c6fdc300e71c864e82d51859ed929fb97632d7"
+  }
+}

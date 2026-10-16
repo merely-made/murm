@@ -23,3 +23,4 @@ testing/receipts/sennet-tucket-current/physical/*.log -text whitespace=cr-at-eol
 crates/retinue/tests/fixtures/rns_ifac_1_5_4.json -text whitespace=cr-at-eol
 testing/receipts/firmware-refresh/** -text whitespace=cr-at-eol,-blank-at-eof,-blank-at-eol
 testing/receipts/device-names/** -text whitespace=cr-at-eol,-blank-at-eof,-blank-at-eol
+testing/receipts/usb-reboot/** -text whitespace=cr-at-eol,-blank-at-eof,-blank-at-eol
