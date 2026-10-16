@@ -1,0 +1,108 @@
+{
+  "device": "SB2",
+  "expected_usb": [
+    12346,
+    4097,
+    "44:1B:F6:6A:FA:64"
+  ],
+  "connection_user_reported": "direct-pc",
+  "requested_rounds": 3,
+  "source_sha256": "2ef5e6d6197850fb5fc82a0241fab1b345cc505c63c36eb3a04ff0de68d712ba",
+  "sessions": [
+    {
+      "phase": "baseline",
+      "port": "COM7",
+      "responses": [
+        {
+          "command": "status",
+          "response": "tulle/heltec-v4 phy online; version=0.0.1; sx1262 online; sync=2b reg=24b4; longfast=906875000; build=cb042329232571cd3c50b2ef9b5e386fbe4f434a; image=v4-modem-usb\r\nidentity=loaded slot=B seq=7\r\nname=SB2\r\n",
+          "seconds": 1.661
+        },
+        {
+          "command": "name",
+          "response": "name=SB2\r\n",
+          "seconds": 1.673
+        },
+        {
+          "command": "region",
+          "response": "region=US915\r\n",
+          "seconds": 1.661
+        },
+        {
+          "command": "channel",
+          "response": "channel=modem\r\n",
+          "seconds": 1.661
+        },
+        {
+          "command": "ui",
+          "response": "ui=ok; display=on; screen=status; button=1; host=none\r\n",
+          "seconds": 1.688
+        }
+      ],
+      "attached": ""
+    },
+    {
+      "phase": "reboot-1",
+      "port": "COM7",
+      "responses": [
+        {
+          "command": "name",
+          "response": "name=SB2\r\n",
+          "seconds": 1.657
+        },
+        {
+          "command": "channel modem",
+          "response": "channel set; rebooting\r\n",
+          "seconds": 0.103
+        }
+      ],
+      "attached": ""
+    },
+    {
+      "phase": "readback-1",
+      "port": "COM7",
+      "responses": [
+        {
+          "command": "status",
+          "response": "",
+          "seconds": 1.655
+        },
+        {
+          "command": "name",
+          "response": "",
+          "seconds": 2.0
+        }
+      ],
+      "attached": ""
+    }
+  ],
+  "completed_rounds": 0,
+  "passed": false,
+  "reboot_method": "channel modem: verified settings save then software_reset",
+  "serial_lines": {
+    "dtr": false,
+    "rts": false
+  },
+  "reopen_delay_seconds": 6,
+  "baseline": {
+    "status": "tulle/heltec-v4 phy online; version=0.0.1; sx1262 online; sync=2b reg=24b4; longfast=906875000; build=cb042329232571cd3c50b2ef9b5e386fbe4f434a; image=v4-modem-usb\r\nidentity=loaded slot=B seq=7\r\nname=SB2\r\n",
+    "name": "name=SB2\r\n",
+    "region": "region=US915\r\n",
+    "channel": "channel=modem\r\n",
+    "ui": "ui=ok; display=on; screen=status; button=1; host=none\r\n",
+    "slot": "B",
+    "sequence": 7,
+    "firmware": "tulle/heltec-v4 phy online; version=0.0.1; sx1262 online; sync=2b reg=24b4; longfast=906875000; build=cb042329232571cd3c50b2ef9b5e386fbe4f434a; image=v4-modem-usb"
+  },
+  "error": "SerialTimeoutException('Write timeout')",
+  "enumerated_after_failure": [
+    {
+      "port": "COM7",
+      "usb": [
+        12346,
+        4097,
+        "44:1B:F6:6A:FA:64"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,2 @@
+round 1: save/reboot acknowledged; waiting for USB
+{"passed": false, "completed_rounds": 0, "error": "SerialTimeoutException('Write timeout')"}
