@@ -1,0 +1,18 @@
+{
+  "result": "stock_client_protocol_ack_observed",
+  "action": "send",
+  "node_number": 3925214732,
+  "peer_node": 4134206248,
+  "private_material_included": false,
+  "cli_exit": 0,
+  "public_diagnostics": [
+    "Connected to radio",
+    "Sending text message sennet-pki-1c775674145c4bd8b47b55cff3739a9d to !e9f6060c on channelIndex:0 ",
+    "Waiting for an acknowledgment from remote node (this could take a while)",
+    "Received an ACK.",
+    "Waiting 5 seconds before disconnecting"
+  ],
+  "text": "sennet-pki-1c775674145c4bd8b47b55cff3739a9d",
+  "matched_client_protocol_ack": true,
+  "authenticated_ack_proof": false
+}

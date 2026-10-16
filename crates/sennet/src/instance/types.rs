@@ -57,14 +57,42 @@ impl LossPermission {
 pub enum ReceiveOutcome {
     IgnoredChannel,
     IgnoredDestination,
-    Duplicate { identity: PacketIdentity },
+    Duplicate {
+        identity: PacketIdentity,
+    },
     Text(ReceivedText),
+    /// Text authenticated under the explicitly pinned peer's pairwise key.
+    PkiText(ReceivedText),
+    IgnoredPeer,
+    Routing {
+        operation_id: u32,
+        identity: PacketIdentity,
+        peer: u32,
+        code: u32,
+        authenticated: bool,
+    },
     NotText,
+}
+
+/// Public identity/key binding. Secret pairwise material is never projected.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct DirectedBinding {
+    pub peer: u32,
+    pub local_public: [u8; 32],
+    pub peer_public: [u8; 32],
 }
 
 /// One lifecycle-relevant protocol event.
 #[derive(Debug, PartialEq, Eq)]
 pub enum InstanceEvent {
+    AckExpired {
+        operation_id: u32,
+        identity: PacketIdentity,
+    },
+    AckLost {
+        operation_id: u32,
+        identity: PacketIdentity,
+    },
     PendingExpired {
         operation_id: u32,
         identity: PacketIdentity,

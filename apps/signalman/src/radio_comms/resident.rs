@@ -43,6 +43,28 @@ impl RadioComms {
                 "resident public identity does not match journal realm",
             ));
         }
+        let binding = runtime
+            .installed_sennet()
+            .and_then(|s| s.directed_binding());
+        for record in &inner.book.records {
+            for fact in &record.facts {
+                if let RadioFact::MeshtasticPkiBinding {
+                    peer,
+                    local_public,
+                    peer_public,
+                } = fact
+                    && binding.is_none_or(|b| {
+                        b.peer != *peer
+                            || b.local_public != *local_public
+                            || b.peer_public != *peer_public
+                    })
+                {
+                    return Err(backend(
+                        "Meshtastic history is bound to another pinned PKI identity; select its original configuration or a new realm/journal",
+                    ));
+                }
+            }
+        }
         inner.attached = true;
         Ok(ResidentSession {
             owner: self.clone(),
@@ -106,6 +128,9 @@ impl ResidentSession<'_> {
             TUCKET => ProtocolKind::MeshCore,
             _ => return Ok(None),
         };
+        if protocol == ProtocolKind::Meshtastic && !self.runtime.sennet().ready_for_text() {
+            return Ok(None);
+        }
         let scope = self.owner.scope()?;
         let mut next = None;
         for record in self.owner.records()?.into_iter().filter(|r| {
@@ -137,6 +162,19 @@ impl ResidentSession<'_> {
             vec![RadioFact::MeshCoreOperation {
                 timestamp: unix_seconds,
             }]
+        } else if protocol == ProtocolKind::Meshtastic && peer != "ffffffff" {
+            self.runtime
+                .sennet()
+                .directed_binding()
+                .filter(|b| u32::from_str_radix(&peer, 16).ok() == Some(b.peer))
+                .map(|b| {
+                    vec![RadioFact::MeshtasticPkiBinding {
+                        peer: b.peer,
+                        local_public: b.local_public,
+                        peer_public: b.peer_public,
+                    }]
+                })
+                .unwrap_or_default()
         } else {
             vec![]
         };
@@ -150,17 +188,27 @@ impl ResidentSession<'_> {
                         source: 0,
                         packet_id: 0,
                         hop_limit: 3,
-                        want_ack: false,
+                        want_ack: destination != u32::MAX,
                         via_mqtt: false,
                         hop_start: 3,
                         channel_hash: 0,
                         next_hop: 0,
                         relay_node: 0,
                     };
-                    let report = self
-                        .runtime
-                        .send_sennet(now, header, record.message.body.text())
-                        .map_err(|e| backend(format!("{e:?}")))?;
+                    let report = if destination == u32::MAX {
+                        self.runtime
+                            .send_sennet(now, header, record.message.body.text())
+                    } else {
+                        let mut extra = [0; 4];
+                        getrandom::fill(&mut extra).map_err(backend)?;
+                        self.runtime.send_sennet_directed(
+                            now,
+                            header,
+                            record.message.body.text(),
+                            extra,
+                        )
+                    }
+                    .map_err(|e| backend(format!("{e:?}")))?;
                     // A successful runtime call can still report queue loss.
                     let identity = self.runtime.sennet().pending_identity();
                     let operation = self.runtime.sennet().pending_operation_id();
@@ -173,7 +221,11 @@ impl ResidentSession<'_> {
                                 source: identity.source,
                                 destination,
                                 packet_id: identity.packet_id,
-                                channel_hash: scope.meshtastic_channel,
+                                channel_hash: if destination == u32::MAX {
+                                    scope.meshtastic_channel
+                                } else {
+                                    0
+                                },
                             }],
                         )?;
                     } else {
@@ -362,6 +414,63 @@ impl ResidentSession<'_> {
             .collect();
         for event in report.events {
             match event {
+                Event::SennetReceived(sennet::instance::ReceiveOutcome::PkiText(text)) => {
+                    let h = text.header;
+                    let b = self
+                        .runtime
+                        .sennet()
+                        .directed_binding()
+                        .ok_or_else(|| backend("PKI receive lost its peer binding"))?;
+                    self.received_facts(
+                        scope.meshtastic(h.source),
+                        format!("rx-mt-{:08x}-{:08x}", h.source, h.packet_id),
+                        format!("{:08x}", h.source),
+                        text.text,
+                        None,
+                        vec![
+                            RadioFact::MeshtasticPacket {
+                                source: h.source,
+                                destination: h.destination,
+                                packet_id: h.packet_id,
+                                channel_hash: h.channel_hash,
+                            },
+                            RadioFact::MeshtasticPkiBinding {
+                                peer: b.peer,
+                                local_public: b.local_public,
+                                peer_public: b.peer_public,
+                            },
+                        ],
+                    )?;
+                }
+                Event::SennetReceived(sennet::instance::ReceiveOutcome::Routing {
+                    operation_id,
+                    identity,
+                    peer,
+                    code,
+                    authenticated,
+                }) => {
+                    if let Some(id) = self.bindings.remove(&(SENNET.0, operation_id)) {
+                        self.owner.update(
+                            &id,
+                            if code == 0 {
+                                DeliveryStatus::ProtocolAcknowledged
+                            } else {
+                                DeliveryStatus::HandedToRadio
+                            },
+                            vec![RadioFact::MeshtasticRouting {
+                                peer,
+                                request_id: identity.packet_id,
+                                code,
+                                authenticated,
+                            }],
+                        )?;
+                        if code != 0 {
+                            self.owner.notice(format!(
+                                "Meshtastic routing response code {code}; no success ACK observed."
+                            ))?;
+                        }
+                    }
+                }
                 Event::SennetReceived(sennet::instance::ReceiveOutcome::Text(text)) => {
                     let header = text.header;
                     if header.source == scope.meshtastic_node {
@@ -423,6 +532,14 @@ impl ResidentSession<'_> {
                     )?;
                 }
                 Event::Sennet(event) => {
+                    if let sennet::instance::InstanceEvent::AckExpired { operation_id, .. }
+                    | sennet::instance::InstanceEvent::AckLost { operation_id, .. } = event
+                    {
+                        if self.bindings.remove(&(SENNET.0, operation_id)).is_some() {
+                            self.owner.notice("Meshtastic acknowledgement window ended without a matching response; physical completion remains recorded.".into())?;
+                        }
+                        continue;
+                    }
                     let (op, status) = match event {
                         sennet::instance::InstanceEvent::TxCompleted { operation_id, .. } => {
                             (operation_id, DeliveryStatus::HandedToRadio)
@@ -441,8 +558,18 @@ impl ResidentSession<'_> {
                                 detail: "Meshtastic operation lost".into(),
                             },
                         ),
+                        sennet::instance::InstanceEvent::AckExpired { .. }
+                        | sennet::instance::InstanceEvent::AckLost { .. } => {
+                            unreachable!("handled above")
+                        }
                     };
-                    if let Some(id) = self.bindings.remove(&(SENNET.0, op)) {
+                    let keep = self.runtime.sennet().awaiting_ack_operation_id() == Some(op);
+                    let id = if keep {
+                        self.bindings.get(&(SENNET.0, op)).cloned()
+                    } else {
+                        self.bindings.remove(&(SENNET.0, op))
+                    };
+                    if let Some(id) = id {
                         self.owner.update(&id, status, vec![])?;
                     }
                 }
@@ -509,6 +636,17 @@ impl ResidentSession<'_> {
         timestamp_ms: Option<u64>,
         fact: RadioFact,
     ) -> Result<(), AdapterError> {
+        self.received_facts(conversation, id, author, text, timestamp_ms, vec![fact])
+    }
+    fn received_facts(
+        &self,
+        conversation: ConversationId,
+        id: String,
+        author: String,
+        text: String,
+        timestamp_ms: Option<u64>,
+        facts: Vec<RadioFact>,
+    ) -> Result<(), AdapterError> {
         self.owner.receive(RadioRecord {
             message: Message {
                 id: MessageId(id),
@@ -520,7 +658,7 @@ impl ResidentSession<'_> {
             },
             conversation,
             delivery: DeliveryStatus::ReceivedByRadio,
-            facts: vec![fact],
+            facts,
         })
     }
     fn fault<T>(&self, detail: String) -> Result<T, AdapterError> {
@@ -530,7 +668,13 @@ impl ResidentSession<'_> {
 }
 impl Drop for ResidentSession<'_> {
     fn drop(&mut self) {
-        for id in self.bindings.values() {
+        for ((instance, operation), id) in &self.bindings {
+            if *instance == SENNET.0
+                && self.runtime.sennet().awaiting_ack_operation_id() == Some(*operation)
+            {
+                let _=self.owner.notice("Meshtastic session ended without a matched protocol ACK; physical completion remains recorded.".into());
+                continue;
+            }
             if let Err(error) = self.owner.update(
                 id,
                 DeliveryStatus::Failed {

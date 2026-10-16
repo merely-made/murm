@@ -37,6 +37,23 @@ Sennet PKI reply and the stock channel response with port 5, request field 6 and
 code zero. The peer-bound packet codec and strict routing profile pass 60 tests;
 protocol instance state and native directed/ACK delivery remain pending.
 
+**Retained runtime checkpoint.** The [two-way ACK wire experiment](ack-wire/README.md)
+matches stock CLI ACK completion and a separately correlated Sennet reply ACK.
+The directed instance now binds one explicit public peer, shares the durable
+packet-ID lease with channel/control traffic, starts its response window only
+after physical completion, re-ACKs duplicate authenticated texts without duplicate
+delivery, and refuses directed channel-text downgrade. Comms journals the pinned
+public identities and refuses reopening that history with a replacement key.
+Timeout/disconnect preserves observed physical completion without replay.
+
+The receiving cohort passes 64 Sennet, 146 radio-hand, 69 Signalman and 19 runtime
+integration tests, the bare runtime check, and strict selected core Clippy.
+Desktop passes 45 library tests (one existing ignored), strict library/bin/example
+Clippy and current desktop/station-exporter builds. The opt-in directed native
+fixture requires actual protocol ACKs and exact reopened history before fresh
+messages. [Runtime software receipts](runtime-software/) freeze these gates;
+the full native directed/reconnect gate remains pending at this checkpoint.
+
 The qualified Mere worktree's checkout and registration have been removed.
 Windows first retained the empty directory because removal ran from inside it;
 automatic approval review then blocked empty-directory/ref cleanup with

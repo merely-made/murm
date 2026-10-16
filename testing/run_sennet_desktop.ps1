@@ -13,16 +13,19 @@ param(
     [switch]$PkiCapture,
     [switch]$PkiReplyCapture,
     [switch]$PkiAcknowledgeCapture,
+    [switch]$DirectedNative,
+    [ValidateRange(1000,60000)][int]$AckTimeoutMs=15000,
+    [ValidateRange(1,4096)][int]$SeenCapacity=64,
     [ValidateRange(1,20)][int]$StockPowerDbm=1
 )
 $ErrorActionPreference='Stop'
-if($SetupOnly -and $PkiCapture){throw 'Choose setup-only or receive-only PKI capture'}
+if(([int][bool]$SetupOnly + [int][bool]$PkiCapture + [int][bool]$DirectedNative) -gt 1){throw 'Choose one setup, PKI capture, or directed native mode'}
 if($PkiReplyCapture -and !$PkiCapture){throw 'Reply capture requires PKI capture mode'}
 if($PkiAcknowledgeCapture -and !$PkiReplyCapture){throw 'ACK capture requires reply capture mode'}
 $repo=(Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $config=Get-Content -LiteralPath $SennetConfig -Raw|ConvertFrom-Json
 $card=Get-Content -LiteralPath $PublicStation -Raw|ConvertFrom-Json
-if($PkiCapture -and $card.pki_public_key -notmatch '^[0-9a-f]{64}$'){throw 'PKI capture requires a current exporter and its full public key before touching hardware'}
+if(($PkiCapture -or $DirectedNative) -and $card.pki_public_key -notmatch '^[0-9a-f]{64}$'){throw 'PKI mode requires a current exporter and its full public key before touching hardware'}
 $output=[IO.Path]::GetFullPath($OutputDirectory)
 if((Test-Path -LiteralPath $output) -or $config.realm -notlike 'bench-*' -or $config.public_channel -ne 'LongFast' -or $card.authority -ne 'djinn' -or $card.realm -ne $config.realm -or $card.device_id -ne $config.device_id -or $card.node_number -eq $config.peer_node -or $config.port -eq $PeerPort -or $DutUsbSerial -eq $PeerUsbSerial){throw 'Require a fresh, explicit public-channel bench with distinct identified boards and scoped Djinn station.'}
 $Python=(Resolve-Path -LiteralPath $Python).Path
@@ -48,7 +51,7 @@ New-Item -ItemType Directory -Path $output|Out-Null
 $report=[ordered]@{schema=1;source=(git -C $repo rev-parse HEAD).Trim();result='not_completed';authority='djinn';public_channel='LongFast';dut_port=$config.port;peer_port=$PeerPort;dut_usb_serial=$DutUsbSerial;peer_usb_serial=$PeerUsbSerial;node_number=$card.node_number;peer_node=$config.peer_node;helper_sha256=$tullePin.helper_sha256;stock_image_sha256=(Get-FileHash $stockImage).Hash.ToLowerInvariant();tulle_image_sha256=$tullePin.image_sha256;source_sha256=@{};restoration=@{};opened_utc=[DateTime]::UtcNow.ToString('o')}
 foreach($path in @('Cargo.toml','Cargo.lock','apps/signalman-desktop/Cargo.toml','apps/signalman-desktop/Cargo.lock','apps/signalman/src/radio_comms/sennet_ids.rs','apps/signalman/src/radio_comms/resident.rs','apps/signalman/src/radio_comms/carriage.rs','apps/signalman/examples/stock_companion_pair.rs','crates/radio-hand/src/instances.rs','crates/radio-hand/src/instances/switching.rs','crates/radio-hand/src/instances/traffic.rs','apps/signalman-desktop/src/resident.rs','apps/signalman-desktop/src/resident/sennet_station.rs','apps/signalman-desktop/src/state/messages.rs','apps/signalman-desktop/src/views/messages.rs','apps/signalman-desktop/src/companion_scenario.rs','apps/signalman-desktop/scenarios/run_companion.ps1','apps/signalman-desktop/scenarios/companion.scn.in','testing/setup_sennet_stock.py','testing/run_sennet_desktop.ps1')){$report.source_sha256[$path]=(Get-FileHash (Join-Path $repo $path)).Hash.ToLowerInvariant()}
 $report.config_sha256=(Get-FileHash $SennetConfig).Hash.ToLowerInvariant()
-if($PkiCapture){foreach($path in @('crates/sennet/src/pki.rs','crates/sennet/src/routing.rs','crates/sennet/Cargo.toml','apps/signalman-desktop/examples/sennet_pki_capture.rs','testing/sennet_pki_stock.py','testing/receipts/sennet-desktop/run-djinn-native.ps1')){$report.source_sha256[$path]=(Get-FileHash (Join-Path $repo $path)).Hash.ToLowerInvariant()}}
+if($PkiCapture -or $DirectedNative){foreach($path in @('crates/sennet/src/pki.rs','crates/sennet/src/routing.rs','crates/sennet/src/instance.rs','crates/sennet/src/instance/directed.rs','crates/sennet/src/instance/state.rs','crates/sennet/src/instance/types.rs','crates/sennet/src/instance/error.rs','crates/sennet/Cargo.toml','apps/signalman/src/radio_comms.rs','apps/signalman-desktop/examples/sennet_pki_capture.rs','testing/sennet_pki_stock.py','testing/receipts/sennet-desktop/run-djinn-native.ps1')){$report.source_sha256[$path]=(Get-FileHash (Join-Path $repo $path)).Hash.ToLowerInvariant()}}
 $probe=Join-Path $repo 'testing/stock_tucket_bench.py'
 function Invoke-Probe([string[]]$Arguments){ & $Python -B $probe @Arguments; if($LASTEXITCODE -ne 0){throw "Tulle probe failed: $($Arguments[0])"} }
 $peerTouched=$false; $dutStarted=$false; $failure=$null
@@ -97,7 +100,7 @@ try {
         $stockProbe=Get-Content $probePath -Raw|ConvertFrom-Json
     }
     if($LASTEXITCODE -ne 0 -or $stockProbe.result -ne 'passed' -or $stockProbe.left.identity -ne ('{0:x8}' -f [uint32]$config.peer_node)){throw 'Configured stock peer did not pass its independent handshake'}
-    if($PkiCapture){
+    if($PkiCapture -or $DirectedNative){
         $oracle=Join-Path $PSScriptRoot 'sennet_pki_stock.py'
         $stockSetup=Join-Path $output 'stock-setup.json'
         $stock=Get-Content $stockSetup -Raw|ConvertFrom-Json
@@ -108,6 +111,32 @@ try {
         # passes to the Rust capture. Any subsequent startup rejection still
         # fails the entire trial; no RF command is replayed.
         Invoke-Probe @('snapshot','--port',$config.port,'--usb-serial',$DutUsbSerial,'--baseline',$DutBaseline,'--output',(Join-Path $output 'dut-before-capture.json'))
+        if($DirectedNative){
+            if($stock.pki_public_key -notmatch '^[0-9a-f]{64}$'){throw 'Stock readback omitted its public PKI key'}
+            if($config.directed){
+                if($config.directed.peer_public_key -ne $stock.pki_public_key){throw 'Pinned stock peer key changed; select the original identity or a new realm/journal'}
+            }else{
+                $config | Add-Member -NotePropertyName directed -NotePropertyValue ([ordered]@{peer_public_key=$stock.pki_public_key;ack_timeout_ms=$AckTimeoutMs;seen_capacity=$SeenCapacity})
+            }
+            $SennetConfig=Join-Path $output 'directed-activation-config.json'
+            $config | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $SennetConfig
+            $report.activation_config_sha256=(Get-FileHash $SennetConfig).Hash.ToLowerInvariant()
+            # The contact importer was the last Python serial owner. Settle
+            # this exact boundary before either actor can submit a message.
+            Start-Sleep -Seconds 2
+            & $peerBinary probe meshtastic $PeerPort $config.realm (Join-Path $output 'contact-stock-probe') 0 *> (Join-Path $output 'contact-stock-probe.log')
+            $probePath=Join-Path $output 'contact-stock-probe/receipt.json'
+            $stockProbe=Get-Content $probePath -Raw|ConvertFrom-Json
+            if($LASTEXITCODE -ne 0 -and $stockProbe.error -eq 'Meshtastic rebooted during handshake'){
+                Start-Sleep -Seconds 5
+                & $peerBinary probe meshtastic $PeerPort $config.realm (Join-Path $output 'contact-stock-probe-settled') 0 *> (Join-Path $output 'contact-stock-probe-settled.log')
+                $probePath=Join-Path $output 'contact-stock-probe-settled/receipt.json'
+                $stockProbe=Get-Content $probePath -Raw|ConvertFrom-Json
+            }
+            if($LASTEXITCODE -ne 0 -or $stockProbe.result -ne 'passed' -or $stockProbe.left.identity -ne ('{0:x8}' -f [uint32]$config.peer_node)){throw 'Contact-configured stock peer did not pass its independent handshake'}
+        }
+    }
+    if($PkiCapture){
         $capture=Join-Path $repo 'apps/signalman-desktop/target/debug/examples/sennet_pki_capture.exe'
         $report.capture_sha256=(Get-FileHash $capture).Hash.ToLowerInvariant()
         $captureOutput=Join-Path $output 'stock-pki-capture.json'
@@ -133,7 +162,7 @@ try {
         $report.result=$(if($PkiAcknowledgeCapture){'stock_protocol_ack_exchange_observed_not_native_gate'}elseif($PkiReplyCapture){'stock_routing_candidate_observed_no_ack_or_native_gate'}else{'stock_pki_receive_observed_no_ack_or_native_gate'})
     }elseif($SetupOnly){$report.result='stock_setup_passed_native_not_run'}else{
         $dutStarted=$true
-        & (Join-Path $repo 'apps/signalman-desktop/scenarios/run_companion.ps1') -Protocol meshtastic -Port $config.port -PeerPort $PeerPort -SelfAddress $card.address -PeerAddress ('{0:x8}' -f [uint32]$config.peer_node) -Realm $config.realm -OutputDirectory (Join-Path $output 'native') -Zoom 0.75 -BenchPython $Python -PeerUsbSerial $PeerUsbSerial -SennetConfig $SennetConfig -ExchangeAfterReconnect
+        & (Join-Path $repo 'apps/signalman-desktop/scenarios/run_companion.ps1') -Protocol meshtastic -Port $config.port -PeerPort $PeerPort -SelfAddress $card.address -PeerAddress ('{0:x8}' -f [uint32]$config.peer_node) -Realm $config.realm -OutputDirectory (Join-Path $output 'native') -Zoom 0.75 -BenchPython $Python -PeerUsbSerial $PeerUsbSerial -SennetConfig $SennetConfig -SennetDirected:$DirectedNative -ExchangeAfterReconnect
         $report.result='native_completed_pending_visual_review'
     }
 } catch {$failure=$_; $report.result='failed'; $report.error=$_.Exception.Message}

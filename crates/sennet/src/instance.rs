@@ -5,6 +5,7 @@
 //! queue. Packet IDs arrive in a caller-reserved exclusive interval because a
 //! reset must never reuse an AES-CTR nonce identity.
 
+mod directed;
 mod error;
 mod lease;
 mod state;
@@ -16,5 +17,6 @@ pub use error::InstanceError;
 pub use lease::{LeaseError, PacketIdLease, PacketIdReservation, ReservationProof};
 pub use state::SennetInstance;
 pub use types::{
-    InstanceEvent, LossPermission, OutboundText, PauseOutcome, ReceiveOutcome, SennetInstanceConfig,
+    DirectedBinding, InstanceEvent, LossPermission, OutboundText, PauseOutcome, ReceiveOutcome,
+    SennetInstanceConfig,
 };

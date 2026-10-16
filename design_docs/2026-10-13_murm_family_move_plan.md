@@ -2212,3 +2212,22 @@ The completed supplier worktree's checkout/registration were removed, but
 Windows retained its empty directory and automatic approval review blocked
 further empty-directory/ref cleanup. The empty approved-path directory and
 published branch remain; primary Mere and unrelated worktrees stay untouched.
+
+**Retained directed runtime checkpoint.** The wire experiment now completes an
+ACK to the stock sender (the stock client independently reports its ACK), then a
+distinct Sennet PKI reply whose stock channel response matches request ID 2 and
+code zero. Both boards restore and the custodian stops. The retained instance
+uses one pinned peer, one logical response obligation and the existing physical
+slot/packet-ID lease; its window starts after physical completion. Authenticated
+duplicate texts get fresh control IDs but no duplicate delivery. Private dedup
+is separate from public flood traffic, and channel-directed downgrade is refused.
+Comms persists both public identities and refuses historical key replacement.
+Missing ACKs and disconnect retain physical truth without replay.
+
+All 64 Sennet, 146 radio-hand, 69 Signalman, 19 integration and 45 desktop tests
+pass (one existing desktop custody test ignored), as do the bare runtime check,
+selected strict core/desktop Clippy and desktop/station/stock-peer builds. The
+directed native runner selects its pinned key from identified USB readback and
+uses protocol-ACK expectations on both connections. Full native directed,
+reconnect and visual qualification remain pending; software/wire success does
+not complete R8. See the [updated receipts](../testing/receipts/sennet-directed/README.md).

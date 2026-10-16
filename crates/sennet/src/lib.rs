@@ -28,7 +28,7 @@ pub mod node;
 pub mod node_info;
 pub mod packet_id;
 pub mod pki;
-pub mod routing;
 pub mod protobuf;
+pub mod routing;
 pub mod stream;
 pub mod transport;
