@@ -72,6 +72,7 @@ name = "tucket_bench_identity"
 required-features = ["comms"]
 
 [dev-dependencies]
+tokio = { version = "1.53.1", features = ["test-util"] }
 serial2-tokio = "0.1.24"
 selvage = { path = "../../crates/selvage" }
 tempfile = "3"

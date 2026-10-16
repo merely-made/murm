@@ -2,7 +2,7 @@ use super::*;
 use crate::comms_adapter::comms::{DeliveryStatus, Draft};
 use crate::radio_comms::{
     FileJournal, RadioComms, RadioFact,
-    tests::{owner, runtime, scope},
+    tests::{owner, runtime, runtime_with_reply_delay, scope},
 };
 use radio_hand::instances::TUCKET;
 use std::sync::{Arc, Mutex};
@@ -112,13 +112,13 @@ async fn custody_lost_during_receive_stops_before_ingress_or_transmit() {
     assert!(!carriage.knows_peer(&remote_key));
     assert!(owner.records().unwrap().is_empty());
 }
-#[tokio::test]
+#[tokio::test(start_paused = true)]
 async fn physical_driver_carries_real_text_ack_and_full_key_contact() {
     let dir = tempfile::tempdir().unwrap();
     let a = scope(7, 3);
     let b = scope(8, 4);
     let owner = owner(a.clone(), dir.path(), "radio.json");
-    let mut rt = runtime(&a, 3, TUCKET, 10);
+    let mut rt = runtime_with_reply_delay(&a, 3, TUCKET, 10, 200);
     let mut io = radio(false);
     let remote = io.remote.clone();
     let emitted = io.emitted.clone();
@@ -170,7 +170,34 @@ async fn physical_driver_carries_real_text_ack_and_full_key_contact() {
             snr_db: 8.0,
         })
         .unwrap();
+    let before = emitted.lock().unwrap().len();
     carriage.poll().await.unwrap();
+    assert_eq!(
+        emitted.lock().unwrap().len(),
+        before,
+        "no reply during the sender's RX turnaround"
+    );
+    assert!(
+        !carriage
+            .radio
+            .seen_acks
+            .lock()
+            .unwrap()
+            .contains(&return_ack)
+    );
+    tokio::time::advance(Duration::from_millis(200)).await;
+    for _ in 0..4 {
+        carriage.poll().await.unwrap();
+        if carriage
+            .radio
+            .seen_acks
+            .lock()
+            .unwrap()
+            .contains(&return_ack)
+        {
+            break;
+        }
+    }
     assert!(
         carriage
             .radio

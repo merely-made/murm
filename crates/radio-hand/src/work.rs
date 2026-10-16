@@ -26,6 +26,11 @@ pub struct Transmission {
     pub frame: Vec<u8, { selvage::MAX_RADIO_FRAME_LEN }>,
 }
 
+struct Queued {
+    ready_at: u64,
+    tx: Transmission,
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum WorkError {
     Inactive,
@@ -45,7 +50,7 @@ pub struct WorkQueue<const N: usize> {
     next_generation: u64,
     next_sequence: u64,
     last_now: u64,
-    queued: Deque<Transmission, N>,
+    queued: Deque<Queued, N>,
     inflight: Option<WorkId>,
 }
 
@@ -76,7 +81,17 @@ impl<const N: usize> WorkQueue<N> {
         self.inflight
     }
     pub fn next_deadline(&self) -> Option<u64> {
-        self.queued.iter().map(|w| w.deadline).min()
+        self.queued
+            .iter()
+            .flat_map(|w| {
+                [
+                    Some(w.tx.deadline),
+                    (w.ready_at > self.last_now).then_some(w.ready_at),
+                ]
+                .into_iter()
+                .flatten()
+            })
+            .min()
     }
 
     fn time(&self, now: u64) -> Result<(), WorkError> {
@@ -90,10 +105,10 @@ impl<const N: usize> WorkQueue<N> {
     pub fn contains_operation(&self, operation: u64) -> bool {
         self.queued
             .iter()
-            .any(|w| w.id.operation == Some(operation))
+            .any(|w| w.tx.id.operation == Some(operation))
     }
     pub fn first_deadline(&self) -> Option<u64> {
-        self.queued.front().map(|w| w.deadline)
+        self.queued.front().map(|w| w.tx.deadline)
     }
     /// ACK/expiry may cancel a queued retry, never physical in-flight custody.
     pub fn cancel_operation(
@@ -105,8 +120,8 @@ impl<const N: usize> WorkQueue<N> {
         let mut cancelled = Vec::new();
         for _ in 0..self.queued.len() {
             let work = self.queued.pop_front().expect("original count");
-            if work.id.operation == Some(operation) && self.inflight != Some(work.id) {
-                let _ = cancelled.push(work.id);
+            if work.tx.id.operation == Some(operation) && self.inflight != Some(work.tx.id) {
+                let _ = cancelled.push(work.tx.id);
             } else {
                 let _ = self.queued.push_back(work);
             }
@@ -143,11 +158,25 @@ impl<const N: usize> WorkQueue<N> {
         deadline: u64,
         frame: &[u8],
     ) -> Result<WorkId, WorkError> {
+        self.enqueue_at(now, token, operation, now, deadline, frame)
+    }
+
+    /// Queue physical work that cannot begin before a protocol-selected time.
+    /// The activation, capacity, expiry and completion fences are unchanged.
+    pub fn enqueue_at(
+        &mut self,
+        now: u64,
+        token: Activation,
+        operation: Option<u64>,
+        ready_at: u64,
+        deadline: u64,
+        frame: &[u8],
+    ) -> Result<WorkId, WorkError> {
         self.time(now)?;
         if self.active != Some(token) {
             return Err(WorkError::StaleActivation);
         }
-        if now >= deadline {
+        if now >= deadline || ready_at >= deadline {
             return Err(WorkError::Expired);
         }
         if self.queued.is_full() {
@@ -163,10 +192,13 @@ impl<const N: usize> WorkQueue<N> {
             sequence: self.next_sequence,
             operation,
         };
-        let _ = self.queued.push_back(Transmission {
-            id,
-            deadline,
-            frame: bytes,
+        let _ = self.queued.push_back(Queued {
+            ready_at: ready_at.max(now),
+            tx: Transmission {
+                id,
+                deadline,
+                frame: bytes,
+            },
         });
         self.next_sequence = next;
         self.last_now = now;
@@ -190,10 +222,14 @@ impl<const N: usize> WorkQueue<N> {
         let Some(work) = self.queued.front() else {
             return Ok(None);
         };
-        if now >= work.deadline {
+        if now >= work.tx.deadline {
             return Err(WorkError::Expired);
         }
-        let work = work.clone();
+        if now < work.ready_at {
+            self.last_now = now;
+            return Ok(None);
+        }
+        let work = work.tx.clone();
         self.inflight = Some(work.id);
         self.last_now = now;
         Ok(Some(work))
@@ -220,8 +256,8 @@ impl<const N: usize> WorkQueue<N> {
         let count = self.queued.len();
         for _ in 0..count {
             let work = self.queued.pop_front().expect("bounded original count");
-            if now >= work.deadline && self.inflight != Some(work.id) {
-                let _ = lost.push(work.id);
+            if now >= work.tx.deadline && self.inflight != Some(work.tx.id) {
+                let _ = lost.push(work.tx.id);
             } else {
                 let _ = self.queued.push_back(work);
             }
@@ -242,7 +278,7 @@ impl<const N: usize> WorkQueue<N> {
         }
         let mut lost = Vec::new();
         while let Some(work) = self.queued.pop_front() {
-            let _ = lost.push(work.id);
+            let _ = lost.push(work.tx.id);
         }
         self.active = None;
         self.last_now = now;
@@ -253,6 +289,36 @@ impl<const N: usize> WorkQueue<N> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn scheduled_work_waits_for_readiness_and_keeps_its_completion_fence() {
+        let mut q = WorkQueue::<2>::new(0);
+        let token = q.activate(0, PersonalityId(2)).unwrap();
+        let id = q.enqueue_at(0, token, None, 200, 1_000, b"ack").unwrap();
+        assert_eq!(q.next_deadline(), Some(200));
+        assert_eq!(q.begin(199, token).unwrap(), None);
+        assert_eq!(q.next_deadline(), Some(200));
+        assert_eq!(q.begin(200, token).unwrap().unwrap().id, id);
+        assert_eq!(q.deactivate(200, true), Err(WorkError::Busy));
+        q.complete(201, id).unwrap();
+        assert_eq!(q.next_deadline(), None);
+    }
+
+    #[test]
+    fn delayed_work_cannot_outlive_its_deadline_or_activation() {
+        let mut q = WorkQueue::<2>::new(0);
+        let old = q.activate(0, PersonalityId(2)).unwrap();
+        assert_eq!(
+            q.enqueue_at(0, old, None, 200, 200, b"late"),
+            Err(WorkError::Expired)
+        );
+        let id = q.enqueue_at(0, old, None, 200, 1_000, b"ack").unwrap();
+        assert_eq!(q.deactivate(100, false), Err(WorkError::LossNotPermitted));
+        assert_eq!(q.deactivate(100, true).unwrap().as_slice(), &[id]);
+        let new = q.activate(100, PersonalityId(2)).unwrap();
+        assert_eq!(q.begin(200, new).unwrap(), None);
+        assert_eq!(q.complete(200, id), Err(WorkError::WrongCompletion));
+    }
+
     #[test]
     fn a_previous_activation_cannot_submit_or_complete_work() {
         let mut q = WorkQueue::<2>::new(0);

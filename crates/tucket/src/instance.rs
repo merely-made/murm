@@ -13,6 +13,10 @@ use crate::node::{CapacityError, Event, Node, PendingText, TextAttempt, TextRetr
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct OperationId(pub u32);
 
+/// MeshCore's default response turnaround. The sender needs time to return
+/// from TX to RX before a text ACK or path response reaches it.
+pub const DEFAULT_REPLY_DELAY_MS: u64 = 200;
+
 /// Bounds selected for one retained Tucket instance.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct InstanceConfig {
@@ -20,6 +24,8 @@ pub struct InstanceConfig {
     pub pending: usize,
     /// Minimum monotonic milliseconds between attempts.
     pub retry_after: u64,
+    /// Minimum turnaround before frames produced by an inbound packet.
+    pub reply_delay_ms: u64,
 }
 
 /// Caller-selected wire timestamp and monotonic operation deadlines.
@@ -38,8 +44,15 @@ impl InstanceConfig {
             Some(Self {
                 pending,
                 retry_after,
+                reply_delay_ms: DEFAULT_REPLY_DELAY_MS,
             })
         }
+    }
+
+    /// Override response turnaround for a selected radio/bench configuration.
+    pub const fn with_reply_delay_ms(mut self, delay: u64) -> Self {
+        self.reply_delay_ms = delay;
+        self
     }
 }
 
@@ -141,6 +154,9 @@ impl Instance {
 
     pub fn node(&self) -> &Node {
         &self.node
+    }
+    pub fn reply_delay_ms(&self) -> u64 {
+        self.config.reply_delay_ms
     }
     /// Mutable protocol access only while this instance is active. It is for
     /// application composition such as adverts, never for physical queue work.
