@@ -1,0 +1,28 @@
+RESULT ok
+Signalman Sennet directed text over Tulle against stock meshtastic through production controls
+captured form
+waited 15 frames
+captured connected
+waited 40 frames
+waited 14 frames
+waited 5 frames
+captured roundtrip
+waited 0 frames
+captured disconnected
+waited 14 frames
+captured reconnected
+waited 35 frames
+waited 13 frames
+waited 4 frames
+captured reconnect-roundtrip
+waited 0 frames
+captured stopped
+capture form 2400x1504 digest=9a167e78a9f34bd1 file=C:\Users\mark_\Code\repos\retinue\validation\results\sennet-desktop\native-directed\native\form.png
+capture connected 2400x1504 digest=887fb64c85ae38e3 file=C:\Users\mark_\Code\repos\retinue\validation\results\sennet-desktop\native-directed\native\connected.png
+capture roundtrip 2400x1504 digest=6e2bae4d6296299e file=C:\Users\mark_\Code\repos\retinue\validation\results\sennet-desktop\native-directed\native\roundtrip.png
+capture disconnected 2400x1504 digest=3d51be16f143904b file=C:\Users\mark_\Code\repos\retinue\validation\results\sennet-desktop\native-directed\native\disconnected.png
+capture reconnected 2400x1504 digest=2f53eec7a3c08e71 file=C:\Users\mark_\Code\repos\retinue\validation\results\sennet-desktop\native-directed\native\reconnected.png
+capture reconnect-roundtrip 2400x1504 digest=04d8d0992c28d921 file=C:\Users\mark_\Code\repos\retinue\validation\results\sennet-desktop\native-directed\native\reconnect-roundtrip.png
+capture stopped 2400x1504 digest=da43928a5e189bc1 file=C:\Users\mark_\Code\repos\retinue\validation\results\sennet-desktop\native-directed\native\stopped.png
+frames: 7 captured, 0 blank, 7 distinct digests
+presentation: 226 frames, 226 redraws, 0 unpresented redraws
