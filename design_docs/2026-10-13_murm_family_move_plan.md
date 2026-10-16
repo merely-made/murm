@@ -2263,3 +2263,15 @@ not a new end-to-end hardware receipt. Private-channel provisioning, broader
 mesh routing, 2.8 signing/ACK proofs, personal-daemon integration and UI polish
 remain open. The recorded cleanup-review block and retained resources above
 are unchanged; existing targets and the co-owned Cargo cache were reused.
+
+**Cleanup follow-up (2026-10-16).** The owner explicitly overruled the earlier
+refusal. Separate empty-directory removal and deletion of the exact published
+local `codex/sennet-direct-custody` ref succeeded; the directory and branch no
+longer remain. The primary Mere checkout and unrelated worktrees are unchanged.
+Preflight identifies 24 stopped, ignored synthetic fixture roots, each marked
+`isolated synthetic Djinn fixture`, with no live owner or reparse point.
+Automatic approval review rejects their guarded recursive deletion before
+execution with "blocked by policy". Those roots remain despite explicit owner
+authorization. Public receipts, durable nonce state and the shared Cargo cache
+are preserved. The [cleanup receipt](../testing/receipts/sennet-directed/cleanup/result.json)
+records the completed removals and remaining tool refusal.
