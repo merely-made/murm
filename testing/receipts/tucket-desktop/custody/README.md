@@ -12,17 +12,23 @@ activation, carriage ingress, dispatch and physical transmission. Public
 configuration rejects private-material fields. An absent Djinn test stops
 before serial or journal access, leaving its temporary directory empty.
 
-The desktop and public contact-card exporter build. The custody checkpoint's 40 desktop library
-tests and 63 core Signalman tests pass; one existing desktop test stays ignored.
+The desktop and public contact-card exporter build. The initial custody
+checkpoint's 40 desktop tests remain a historical ledger. The current suite
+passes 41 desktop library tests and 300 core executions (146 radio-hand,
+63 Signalman, 73 Tucket and 18 instance integration); one existing desktop test
+stays ignored. Bare radio-hand/Tucket `no_std` checks also pass.
 Formatting and strict desktop all-target Clippy pass. The source inventory has one canonical source each for Mere, Genet,
 Dramatis and Netrender. The legacy Comms source declaration was updated after
 verifying its package source is byte-identical to the qualified Mere revision.
 
-The physical/native gate remains open. Public-only configuration is retained
-here; the live Djinn wallet, runtime and journals remain in ignored local
-validation results. The guarded runner restores the saved DUT profile and
-pinned Tulle peer image even when the test fails. Software checks do not imply
-successful Tulle-to-stock RF delivery.
+The [third physical/native trial](native-turnaround/README.md) passes two tagged
+texts and both protocol ACKs, followed by a history-only reconnect. Six captures
+are visually reviewed. The saved DUT profile and pinned Tulle peer image are
+restored and verified, and owned helpers stopped. Public configuration and
+journals are retained here; private wallet/runtime files stay ignored. This
+uses an isolated real Keeper wallet through the scoped production authority
+route, rather than qualifying the installed personal daemon. New sends after
+reconnect and UI polish remain open.
 
 The [first Djinn native trial](native-initial/README.md) delivers both texts and
 the desktop's outbound ACK, but fails waiting for the stock return ACK. Both
@@ -32,4 +38,5 @@ suite to 41 passed (one existing ignored), with build and strict all-target
 Clippy passing. Its [physical retry](native-peer-gate/README.md) still misses
 the return ACK while connected. A configurable 200 ms reply turnaround is
 now software-qualified (300 core executions, 41 desktop tests, strict Clippy,
-bare `no_std` checks); its physical trial remains separate.
+bare `no_std` checks). Its subsequent physical trial is the first complete
+functional pass. Both earlier failures retain their original evidence.

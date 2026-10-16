@@ -1,0 +1,2 @@
+# Preserve frozen evidence bytes so recorded SHA-256 values survive checkout.
+* -text whitespace=cr-at-eol

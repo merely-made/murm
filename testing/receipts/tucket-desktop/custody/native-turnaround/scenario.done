@@ -1,0 +1,23 @@
+RESULT ok
+Signalman Tucket over Tulle against stock meshcore through production controls
+captured form
+waited 33 frames
+captured connected
+waited 137 frames
+waited 0 frames
+waited 0 frames
+captured roundtrip
+waited 0 frames
+captured disconnected
+waited 35 frames
+captured reconnected
+waited 0 frames
+captured stopped
+capture form 2400x1504 digest=0c407b4959d61421 file=C:\Users\mark_\Code\repos\retinue\validation\results\tucket-desktop-20261015\native-djinn-turnaround\native\form.png
+capture connected 2400x1504 digest=20e6ae2c98e6423a file=C:\Users\mark_\Code\repos\retinue\validation\results\tucket-desktop-20261015\native-djinn-turnaround\native\connected.png
+capture roundtrip 2400x1504 digest=24f171ea9d68be2e file=C:\Users\mark_\Code\repos\retinue\validation\results\tucket-desktop-20261015\native-djinn-turnaround\native\roundtrip.png
+capture disconnected 2400x1504 digest=4a2404705c4fca76 file=C:\Users\mark_\Code\repos\retinue\validation\results\tucket-desktop-20261015\native-djinn-turnaround\native\disconnected.png
+capture reconnected 2400x1504 digest=eabeb24d714255c8 file=C:\Users\mark_\Code\repos\retinue\validation\results\tucket-desktop-20261015\native-djinn-turnaround\native\reconnected.png
+capture stopped 2400x1504 digest=ed88294da408aef0 file=C:\Users\mark_\Code\repos\retinue\validation\results\tucket-desktop-20261015\native-djinn-turnaround\native\stopped.png
+frames: 6 captured, 0 blank, 6 distinct digests
+presentation: 273 frames, 273 redraws, 0 unpresented redraws

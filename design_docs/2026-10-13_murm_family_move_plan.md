@@ -1,7 +1,7 @@
 # Murm family and repository move
 
 **Date:** 2026-10-13
-**Status:** In progress (2026-10-15). The native implementation import and named
+**Status:** In progress (2026-10-16). The native implementation import and named
 MOVE3 consumer adoption are published. MOVE4 renamed the continuing Retinue
 repository to Murm with the same repository identity and refs; canonical URL
 validation passed and the canonical URLs are published on main. Crate names and history remain
@@ -15,10 +15,11 @@ recorded-delivery diagnostics; R3 supplies resident radio Comms and R4 adds
 stock Meshtastic/MeshCore companion actors and attended desktop controls.
 R5 records Windows Meshtastic/MeshCore stock-pair and native functional
 acceptance, with a 500 ms MeshCore pair reconnect fixture and verified Tulle
-restoration. R6's Tucket carriage bridge, isolated bench authority and desktop
-worker pass software checks; physical/native qualification remains open after
-failed Tulle-to-stock transmissions. Immediate
-MeshCore reopen, UI cleanup and host-personality stack legs retain their gates below.
+restoration. R6 passes a bounded Djinn-backed Tucket-over-Tulle native functional
+run against stock MeshCore: two tagged texts with protocol ACKs, followed by
+reconnect with exact history retained. Both boards are restored. New sends after
+that reconnect, immediate stock MeshCore reopen, UI cleanup and the Sennet
+stack leg retain their gates below.
 
 **Canonical home:** this repository owns the migration. Mere and Genet should
 cite this plan rather than keep another migration specification. The canonical
@@ -1845,6 +1846,14 @@ companion receipts do not qualify the host personalities over Tulle.
 
 ### R6 — Tucket over Tulle through Signalman (2026-10-15, in progress)
 
+**Current checkpoint (2026-10-16): bounded native functional pass.** The
+[Djinn-backed trial](../testing/receipts/tucket-desktop/custody/native-turnaround/README.md)
+passes two tagged texts and both protocol ACKs on one delivery connection,
+then disconnect/reconnect with exact history. Six captures are visually reviewed;
+both boards are restored and owned helpers stopped. This trial sends no new
+message after reconnect. Cosmetic cleanup and the Sennet stack leg remain open.
+Earlier failed trials below retain their original results.
+
 The owner approved the next stack leg: reuse `RadioComms::ResidentSession`,
 drive its retained runtime over actual Tulle carriage, and repeat the desktop
 exchange against one stock MeshCore peer. Tucket comes first; Sennet channel
@@ -1860,14 +1869,15 @@ An uncertain send stops the driver without inventing a failed physical
 completion or automatically replaying the intent. Identity construction,
 profile admission and operator authority remain with the host.
 
-Inspection found an additional production boundary: the desktop's existing
+Initial inspection found an additional production boundary: the desktop's existing
 Djinn station release and Djinn's current default release policy cover
-Reticulum namespaces, not a Tucket identity. Physical qualification follows
+Reticulum namespaces, not a Tucket identity. Initial physical qualification followed
 the repository's explicit isolated bench convention (`resident_probe`) without
 expanding production custody as a prerequisite to measuring carriage. The
 desktop never generates or falls back to a seed: its explicit bench config
 requires a `bench-` realm and a separately generated private material file.
-Proper Djinn Tucket release remains a production gate. Each guarded physical
+The owner subsequently selected scoped Djinn release first; the continuation
+below supersedes this seed-file route for further trials. Each guarded physical
 attempt restores the pinned Tulle peer image and the DUT's saved profile;
 restoration failures remain explicit in the public receipt.
 
@@ -1878,7 +1888,7 @@ reviewed, and radio/native resources are released with board profiles restored.
 Tests must also refuse absent identity before serial I/O, and must prove that a
 lost physical completion cannot create a false completion or hidden resend.
 
-**Software checkpoint (2026-10-15, uncommitted).** The PacketRadio bridge
+**Historical software checkpoint (2026-10-15, committed in `0a392cddcf7`).** The PacketRadio bridge
 passes the complete Signalman library suite (62 tests) and strict Clippy for
 the library and tests, locked and offline. New carriage tests exchange real
 Tucket wire text in both directions, verify the remote protocol ACK and exact
@@ -1891,11 +1901,13 @@ These are in-process protocol tests, not physical or native acceptance.
 The desktop worker accepts caller-supplied scoped authority and radio settings,
 checks authority before serial access, verifies physical online/config before
 constructing the runtime, and shuts down its serial owner on errors and stop.
-Its connection binding exposes only MeshCore to Comms even though the retained
+At that checkpoint its connection binding exposed only MeshCore to Comms even though the retained
 runtime contains the other dormant personalities. Stock/resident owners share
 port, journal and protocol exclusion checks. `Connect Tulle` currently refuses
 without configured authority. The isolated bench authority loads only the
-explicit file and binds its realm; production custody remains unavailable.
+explicit file and binds its realm; production custody was unavailable at that
+checkpoint. The Tucket-only runtime and scoped Djinn path below supersede this
+initial runtime/authority arrangement.
 Desktop compilation and strict all-target Clippy pass, with 39 library tests
 and two DOM control tests passing; the existing isolated-daemon custody case
 remains ignored. The stock Connect action initially missed its pointer target;
@@ -1904,7 +1916,7 @@ COM7 stays in its existing modem channel and COM6 serves as the stock peer.
 Private material and public run receipts are separate under
 `validation/results/tucket-desktop-20261015/`.
 
-**Physical findings (2026-10-15, qualification still open).** `native-baseline`
+**Historical physical findings (2026-10-15, qualification then open).** `native-baseline`
 and `native-verified-card` connected to Tulle and recorded four physical TX
 completions per intent, but the stock peer recorded no recipient text or ACK;
 the intents expired as failed. Importing a signed public business card and
@@ -1926,8 +1938,9 @@ Tucket instance did not ACK direct incoming text, although the standalone
 Node pump does. A real-wire carriage assertion first failed with the missing
 ACK, then passed after the instance emitted the reply through its ordinary
 outbound queue. The library suites now pass 144 radio-hand, 73 Tucket and 62
-Signalman tests. The updated desktop compiles and passes strict Clippy. First
-send, full bidirectional native exchange and reconnect acceptance remain open.
+Signalman tests. The updated desktop compiled and passed strict Clippy. First
+send, full bidirectional native exchange and reconnect acceptance were still
+open at that checkpoint; the custody continuation below records their outcome.
 
 `raw-radio-stats` adds a physical discriminator: stock's radio counters show
 zero valid received packets and one receive error before the 22-byte direct
@@ -1954,7 +1967,7 @@ working tree. Private bench material stays under ignored validation results.
 The existing repository targets were reused; no isolated target, Cargo home
 or worktree was created.
 
-**Custody continuation (2026-10-16, software-qualified; native/RF open).** The owner's delayed reply
+**Custody continuation (2026-10-16, bounded native functional pass).** The owner's delayed reply
 selected **extend Djinn custody first**, superseding the isolated seed-file
 choice for further physical runs. COM7's physical USB reconnect recovered its
 endpoint. Exact Tulle status, identity slot B sequence 5, US915 and modem
@@ -1976,18 +1989,42 @@ diagnostics remain separate. Mere owns custody; Dramatis owns the derivation.
 
 Murm's `88a82726e0a` adds the Tucket-only runtime, avoiding dormant Reticulum
 identities and synthetic Sennet packet-id reservations, and carriage guards
-at ingress and physical transmit boundaries. All 298 core test executions pass,
+at ingress and physical transmit boundaries. After the reply-turnaround repair,
+all 300 core test executions pass (146 radio-hand, 63 Signalman, 73 Tucket and
+18 instance integration),
 including direct wire ACK, uninstalled-personality refusal, and custody loss
 during receive with no ingress, journal mutation or physical transmit. The
 desktop adopts Mere `6d1908f4` in its standalone lock. Its Djinn-backed worker
-and public contact-card exporter build; all 40 desktop library tests pass (one
+and public contact-card exporter build; all 41 desktop library tests pass (one
 existing case ignored), including absence before any serial/journal access.
 The canonical Comms source passes all 63 Signalman tests; its package source
 was verified byte-identical to the prior pin. Strict desktop all-target Clippy
 and formatting pass. The source audit has one canonical source per first-party
 supplier. [Consumer receipts](../testing/receipts/tucket-desktop/custody/README.md)
-retain these exact scopes. Native/RF remains open; further physical runs use
-Djinn custody and public configuration only.
+retain these exact scopes. Bare `no_std` radio-hand/Tucket checks and strict
+core library/test Clippy also pass. Further physical runs use Djinn custody and
+public configuration only.
+
+The first Djinn trial delivered both texts but missed the stock return ACK.
+A stronger scenario kept the app connected until the peer confirmed its ACK;
+that retry still failed. Both failures remain frozen in the consumer receipts.
+`cf06a1a9569` adds configurable reply turnaround, defaulting to 200 ms, with
+readiness/deadline and physical-driver timing tests. The third trial with that
+configuration is the first full functional pass: two tagged texts and two
+matched protocol ACKs, followed by a history-only reconnect. The stock helper's
+complete exchange elapsed 4935 ms, not a per-message latency measurement. The
+273-frame native run produced six distinct nonblank captures, all reviewed.
+COM7's saved same-boot profile/sync and COM6's pinned Tulle image with exact
+status/identity/region/channel were restored and verified.
+
+This run uses an isolated real Djinn Keeper wallet through the production
+scoped authority route. It does not qualify an installed personal daemon or
+close broader platform D13 revocation work. No messages were sent after
+reconnect. The lower connecting notice stays stale after connection, so the
+result qualifies function rather than visual polish. The curated
+[qualification](../testing/receipts/tucket-desktop/custody/native-turnaround/qualification.json)
+records the completed visual review; raw runner results retain their original
+pending-review values.
 
 One approved Mere integration worktree was needed to publish this supplier
 without unrelated unpublished main commits or rewriting active build inputs;

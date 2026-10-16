@@ -1,0 +1,11 @@
+{
+  "result": "native_completed_pending_visual_review",
+  "authority": "isolated Djinn wallet over real Keeper/custody route",
+  "host_sha256": "23886513fbad19a6903f50dd4d91897c672f67238e4ddd990efcb4d8dd1f4987",
+  "radio_result": "native-djinn-turnaround/bench.json",
+  "private_wallet_tracked": false,
+  "public_key": "2841a3db65f68f580a0235a1768e76095e688c9a4de4ae466615fe67abb23926",
+  "card_sha256": "39B1B294CFF9F8B35DA1BAE641DDDF030D27513D49798F159A5324483CC13B56",
+  "custodian_stopped": true,
+  "closed_utc": "2026-10-16T05:21:58.7455592Z"
+}
