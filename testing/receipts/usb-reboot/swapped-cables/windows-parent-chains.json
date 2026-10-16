@@ -1,0 +1,58 @@
+[
+  {
+    "port": "COM6",
+    "depth": 0,
+    "instance": "USB\\VID_303A&PID_1001&MI_00\\7&11E27544&0&0000",
+    "name": "USB Serial Device (COM6)",
+    "class": "Ports"
+  },
+  {
+    "port": "COM6",
+    "depth": 1,
+    "instance": "USB\\VID_303A&PID_1001\\44:1B:F6:6A:FB:28",
+    "name": "USB Composite Device",
+    "class": "USB"
+  },
+  {
+    "port": "COM6",
+    "depth": 2,
+    "instance": "USB\\ROOT_HUB30\\5&34C0E95C&0&0",
+    "name": "USB Root Hub (USB 3.0)",
+    "class": "USB"
+  },
+  {
+    "port": "COM6",
+    "depth": 3,
+    "instance": "PCI\\VEN_1022&DEV_15B9&SUBSYS_201F1043&REV_00\\4&98C338A&0&0341",
+    "name": "AMD USB 3.10 eXtensible Host Controller - 1.20 (Microsoft)",
+    "class": "USB"
+  },
+  {
+    "port": "COM7",
+    "depth": 0,
+    "instance": "USB\\VID_303A&PID_1001&MI_00\\7&2BB9A614&0&0000",
+    "name": "USB Serial Device (COM7)",
+    "class": "Ports"
+  },
+  {
+    "port": "COM7",
+    "depth": 1,
+    "instance": "USB\\VID_303A&PID_1001\\44:1B:F6:6A:FA:64",
+    "name": "USB Composite Device",
+    "class": "USB"
+  },
+  {
+    "port": "COM7",
+    "depth": 2,
+    "instance": "USB\\ROOT_HUB30\\5&34C0E95C&0&0",
+    "name": "USB Root Hub (USB 3.0)",
+    "class": "USB"
+  },
+  {
+    "port": "COM7",
+    "depth": 3,
+    "instance": "PCI\\VEN_1022&DEV_15B9&SUBSYS_201F1043&REV_00\\4&98C338A&0&0341",
+    "name": "AMD USB 3.10 eXtensible Host Controller - 1.20 (Microsoft)",
+    "class": "USB"
+  }
+]

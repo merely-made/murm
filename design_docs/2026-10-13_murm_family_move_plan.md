@@ -2364,3 +2364,29 @@ additional resets run. The [direct-PC receipt](../testing/receipts/usb-reboot/di
 retains the failure and exact probe sequence. The failure can occur without
 the external hub; cable/connector, firmware, board and Windows USB state remain
 unresolved. The owner physically reconnected SB2; a separate read-only recovery passes across two USB sessions at loaded slot B sequence 7, with SB2/modem/US915 unchanged. No further reset is issued. The failed reboot result remains a failure.
+
+
+USB cable-swap control (2026-10-16): after the owner exchanges SB1/SB2's cables,
+Windows parent chains place both devices directly below the PC USB root hub.
+The unchanged SB2 modem/US915 firmware at `cb042329232` passes baseline probes
+at slot B sequence 7, then reproduces the same timeout on the first save/reset.
+Zero of three requested cycles complete; the runner stops. The
+[cable-swap receipt](../testing/receipts/usb-reboot/swapped-cables/README.md)
+preserves the failed run, topology and separate recovery boundary. A fault
+confined to the original SB2 cable is less likely; cause remains unassigned.
+
+The owner reports a probably steady red light inside SB2 and confirms batteries
+are connected. Heltec's V4.2 schematic wires red LED2 to the CN3165 CHRG output,
+separate from the white firmware LED. Charging is a plausible interpretation,
+not a measured charge state or diagnosis of the USB failure. Connected batteries
+mean USB removal need not power the board off; USB-replug recoveries are not
+cold-boot or power-cut evidence. The owner reports that the timer kept ticking during USB removal: human-
+observed CPU/UI progress on battery, with no full power cycle. This does not
+prove that every firmware task remained healthy during the USB failure.
+
+The subsequent read-only USB check passes after reattachment, with the same
+firmware, SB2/modem/US915 and loaded slot A sequence 8 across two sessions.
+The single expected journal increment confirms only one save/reset attempt.
+The battery-backed UI timer continued while USB was out, so this recovery
+required USB reattachment rather than a full board power cycle. No further
+reset or firmware change is performed in this control.
