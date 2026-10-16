@@ -1,0 +1,39 @@
+warning: patch `mere-p2panda-net v0.7.5 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `mere-proofs v0.1.0 (https://github.com/merely-made/mere.git?branch=main#71405bc6)` was not used in the crate graph
+warning: patch `muniment v0.1.2 (https://github.com/merely-made/mere.git?branch=main#71405bc6)` was not used in the crate graph
+warning: patch `p2panda-auth v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-core v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-discovery v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-encryption v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-store v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-stream v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-sync v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+help: Check that the patched package version and available features are compatible
+      with the dependency requirements. If the patch has a different version from
+      what is locked in the Cargo.lock file, run `cargo update` to use the new
+      version. This may also occur with an optional dependency that is not enabled.
+   Compiling memchr v2.8.3
+   Compiling windows-sys v0.61.2
+   Compiling serde_json v1.0.151
+   Compiling mio v1.2.2
+   Compiling socket2 v0.6.5
+   Compiling serial2 v0.2.37
+   Compiling tokio v1.53.1
+   Compiling serial2-tokio v0.1.24
+   Compiling tulle v0.2.0 (C:\Users\mark_\Code\repos\retinue\crates\tulle)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 17.51s
+     Running unittests src\lib.rs (target\build\debug\deps\tulle-b3539b9e895b8c65.exe)
+
+running 9 tests
+test direct_phy_serial::tests::charge_duration_ms_preserves_exact_milliseconds_and_rounds_up_fractions ... ok
+test direct_phy_serial::tests::announce_cap_spaces_direct_phy_egress_from_the_modeled_airtime ... ok
+test direct_phy_serial::tests::truncated_snapshot_timeout_resynchronizes_following_transmit ... ok
+test direct_phy_serial::tests::live_reconfiguration_updates_the_profile_without_reopening_the_link ... ok
+test direct_phy_serial::tests::usb_configuration_sends_no_wake_prefix ... ok
+test direct_phy_serial::tests::wake_preamble_precedes_every_command ... ok
+test direct_phy_serial::tests::fragmented_firmware_events_reassemble ... ok
+test direct_phy_serial::tests::pump_sends_and_receives_complete_frames ... ok
+test direct_phy_serial::tests::pump_retries_status_and_profile_during_startup ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 75 filtered out; finished in 1.54s
+

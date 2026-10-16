@@ -1,0 +1,116 @@
+{
+  "date": "2026-10-16",
+  "result": "PASS: five SB2 software reboots without physical USB reattachment",
+  "firmware_source": "c8e5eb9309e12237d149d6bd1d8eb89ea6ec4a8f",
+  "quiet_only_source": "a7c4f67da39ffb43940588914dfb4b18839a08fa",
+  "device": {
+    "name": "SB2",
+    "port": "COM7",
+    "vid": "303a",
+    "pid": "1001",
+    "serial": "44:1B:F6:6A:FA:64",
+    "channel": "modem",
+    "region": "US915",
+    "connection": "direct-PC",
+    "batteries_connected": true
+  },
+  "images": {
+    "v4-quiet-boot.bin": {
+      "bytes": 407296,
+      "sha256": "28d0eadc7745480bcfb8da168c2812c55218e4a30e5f03dae46e4b8832708242"
+    },
+    "v4-boot-routing.bin": {
+      "bytes": 407952,
+      "sha256": "e1030e309190af84c036ae0de851e1debaa955a0c5aff35c6ae8f2dbb85cfc99"
+    }
+  },
+  "source_files": {
+    "firmware/heltec-v4-phy/src/main.rs": {
+      "bytes": 51823,
+      "sha256": "be69eb93b9969f4831e5be99646f8387d33f581392632679d77500e941bfa9ac"
+    },
+    "firmware/heltec-v4-phy/src/host.rs": {
+      "bytes": 12639,
+      "sha256": "acf1643b195cf5b58fd38b0bf4d88744e30324ad2fd69c668b2b3878f588f119"
+    },
+    "firmware/heltec-v4-phy/src/host/boot_rx.rs": {
+      "bytes": 2154,
+      "sha256": "54affe094f425b6900f3d7095f923861a444fa45ca8212f6732051cfc91dc665"
+    },
+    "firmware/heltec-v4-phy/src/control_boot.rs": {
+      "bytes": 36486,
+      "sha256": "d38d2bfa9da0f1202d0084bc488af958a02ce93b5aaa0c78479c7c288d8c0a18"
+    },
+    "firmware/heltec-v4-phy/src/control_boot/gate.rs": {
+      "bytes": 706,
+      "sha256": "4d441d80d364cdfda39d694d92629c692aeab3e74b5aa88a73a70036fc0d6a75"
+    },
+    "firmware/heltec-v4-phy/src/physical_presence.rs": {
+      "bytes": 5003,
+      "sha256": "02aaca9528587a5ff67b3a8ff496e72a6ea80a20fc7d8c7d033450995452a0b5"
+    },
+    "crates/tulle/tests/v4_boot_rx.rs": {
+      "bytes": 3859,
+      "sha256": "5e610d0060674bed8167313ac65c85cf66650a101888278c92a4ccf609e651cc"
+    },
+    "testing/usb_reboot.py": {
+      "bytes": 5375,
+      "sha256": "2ef5e6d6197850fb5fc82a0241fab1b345cc505c63c36eb3a04ff0de68d712ba"
+    },
+    "testing/device_names.py": {
+      "bytes": 4675,
+      "sha256": "b88f74468c53f7c924a6754e8f0e236b9e4a3878425d3d94609e3a2372d572e4"
+    },
+    "Cargo.lock": {
+      "bytes": 83544,
+      "sha256": "118823b9d0fb871522a6e02fe7c7170f0a0b677fabb46059a5a0273b331f9045"
+    }
+  },
+  "tools": {
+    "validation/results/sennet-tucket-radios/artifacts/espflash.exe": {
+      "bytes": 17014272,
+      "sha256": "0cc03364c70a86325236f18ad1aaed17eedf267d89312c0cdabe4964f5cb758e"
+    }
+  },
+  "build_environment": {
+    "CARGO_HOME": "C:/t/cargo-homes/mere-upstreams",
+    "CARGO_TARGET_DIR": "C:/Users/mark_/Code/repos/retinue/target",
+    "CARGO_BUILD_BUILD_DIR": "C:/Users/mark_/Code/repos/retinue/target/build",
+    "RETINUE_FIRMWARE_REVISION": "c8e5eb9309e12237d149d6bd1d8eb89ea6ec4a8f"
+  },
+  "commands": [
+    "cargo +esp build -p tulle-heltec-v4-phy --release --target xtensa-esp32s3-none-elf --ignore-rust-version -Zbuild-std=core --offline",
+    "espflash save-image --chip esp32s3 --flash-size 16mb --skip-update-check target/xtensa-esp32s3-none-elf/release/tulle-heltec-v4-phy validation/results/usb-recovery/v4-boot-routing.bin",
+    "espflash write-bin --port COM7 --chip esp32s3 --before usb-reset --after watchdog-reset --baud 921600 --non-interactive --skip-update-check 65536 validation/results/usb-recovery/v4-boot-routing.bin",
+    "espflash read-flash --port COM7 --chip esp32s3 --before usb-reset --after watchdog-reset --baud 921600 --block-size 1024 --max-in-flight 1 --non-interactive --skip-update-check 4128768 65536 validation/results/usb-recovery/sb2-final-private-tail.bin",
+    "python testing/usb_reboot.py --connection direct-pc --rounds 5 --output validation/results/usb-recovery/sb2-boot-routing-reboots.json",
+    "python testing/device_names.py SB2 --name SB2 --output validation/results/usb-recovery/sb2-final-readonly.json"
+  ],
+  "boundaries": [
+    "Application-only programming at 0x10000; bootloader, partition table and protected tail not written by the installer.",
+    "Five normal software resets, plus final ROM/watchdog read and two read-only host sessions. No manual replug in this run.",
+    "No new RF, headed UI, physical first-owner commissioning, power-cut or stack-high-water qualification.",
+    "SB1 and T114 were not flashed.",
+    "Initial quiet-only candidate failed early baseline, before any test reset; later read passed without manual replug.",
+    "Initial immediate ROM state read failed during enumeration; retry passed and verified unchanged protected state."
+  ],
+  "software": {
+    "tulle_tests": 115,
+    "radio_hand_control_tests": 37,
+    "first_owner_contract_tests": 26,
+    "host_handshake_tests": 9,
+    "board_clippy": "pass with existing lint allowances",
+    "host_boot_rx_clippy": "pass -D warnings",
+    "uart": "compile check only",
+    "format": "pass",
+    "unsafe": "61 approved tokens in 16 files; 22 first-party roots",
+    "flash_classification": "pass",
+    "validation_registry": "pass",
+    "loc": "FAIL: five pre-existing violations; main/control_boot within existing baselines"
+  },
+  "retained_artifacts": {
+    "owner": "USB recovery receipt and firmware rollback/state comparison",
+    "path": "validation\\results\\usb-recovery",
+    "new_isolated_target_home_or_worktree": false
+  }
+}

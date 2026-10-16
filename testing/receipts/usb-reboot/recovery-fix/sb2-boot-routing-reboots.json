@@ -1,0 +1,318 @@
+{
+  "device": "SB2",
+  "expected_usb": [
+    12346,
+    4097,
+    "44:1B:F6:6A:FA:64"
+  ],
+  "connection_user_reported": "direct-pc",
+  "requested_rounds": 5,
+  "source_sha256": "2ef5e6d6197850fb5fc82a0241fab1b345cc505c63c36eb3a04ff0de68d712ba",
+  "sessions": [
+    {
+      "phase": "baseline",
+      "port": "COM7",
+      "responses": [
+        {
+          "command": "status",
+          "response": "tulle/heltec-v4 phy online; version=0.0.1; sx1262 online; sync=2b reg=24b4; longfast=906875000; build=c8e5eb9309e12237d149d6bd1d8eb89ea6ec4a8f; image=v4-modem-usb\r\nidentity=loaded slot=A seq=8\r\nname=SB2\r\n",
+          "seconds": 1.608
+        },
+        {
+          "command": "name",
+          "response": "name=SB2\r\n",
+          "seconds": 1.662
+        },
+        {
+          "command": "region",
+          "response": "region=US915\r\n",
+          "seconds": 1.681
+        },
+        {
+          "command": "channel",
+          "response": "channel=modem\r\n",
+          "seconds": 1.691
+        },
+        {
+          "command": "ui",
+          "response": "ui=ok; display=on; screen=status; button=0; host=none\r\n",
+          "seconds": 1.672
+        }
+      ],
+      "attached": ""
+    },
+    {
+      "phase": "reboot-1",
+      "port": "COM7",
+      "responses": [
+        {
+          "command": "name",
+          "response": "name=SB2\r\n",
+          "seconds": 1.677
+        },
+        {
+          "command": "channel modem",
+          "response": "channel set; rebooting\r\n",
+          "seconds": 0.108
+        }
+      ],
+      "attached": ""
+    },
+    {
+      "phase": "readback-1",
+      "port": "COM7",
+      "responses": [
+        {
+          "command": "status",
+          "response": "tulle/heltec-v4 phy online; version=0.0.1; sx1262 online; sync=2b reg=24b4; longfast=906875000; build=c8e5eb9309e12237d149d6bd1d8eb89ea6ec4a8f; image=v4-modem-usb\r\nidentity=loaded slot=B seq=9\r\nname=SB2\r\n",
+          "seconds": 1.673
+        },
+        {
+          "command": "name",
+          "response": "name=SB2\r\n",
+          "seconds": 1.667
+        },
+        {
+          "command": "region",
+          "response": "region=US915\r\n",
+          "seconds": 1.688
+        },
+        {
+          "command": "channel",
+          "response": "channel=modem\r\n",
+          "seconds": 1.699
+        },
+        {
+          "command": "ui",
+          "response": "ui=ok; display=on; screen=status; button=0; host=none\r\n",
+          "seconds": 1.701
+        }
+      ],
+      "attached": ""
+    },
+    {
+      "phase": "reboot-2",
+      "port": "COM7",
+      "responses": [
+        {
+          "command": "name",
+          "response": "name=SB2\r\n",
+          "seconds": 1.701
+        },
+        {
+          "command": "channel modem",
+          "response": "channel set; rebooting\r\n",
+          "seconds": 0.106
+        }
+      ],
+      "attached": ""
+    },
+    {
+      "phase": "readback-2",
+      "port": "COM7",
+      "responses": [
+        {
+          "command": "status",
+          "response": "tulle/heltec-v4 phy online; version=0.0.1; sx1262 online; sync=2b reg=24b4; longfast=906875000; build=c8e5eb9309e12237d149d6bd1d8eb89ea6ec4a8f; image=v4-modem-usb\r\nidentity=loaded slot=A seq=10\r\nname=SB2\r\n",
+          "seconds": 1.701
+        },
+        {
+          "command": "name",
+          "response": "name=SB2\r\n",
+          "seconds": 1.682
+        },
+        {
+          "command": "region",
+          "response": "region=US915\r\n",
+          "seconds": 1.679
+        },
+        {
+          "command": "channel",
+          "response": "channel=modem\r\n",
+          "seconds": 1.682
+        },
+        {
+          "command": "ui",
+          "response": "ui=ok; display=on; screen=status; button=0; host=none\r\n",
+          "seconds": 1.691
+        }
+      ],
+      "attached": ""
+    },
+    {
+      "phase": "reboot-3",
+      "port": "COM7",
+      "responses": [
+        {
+          "command": "name",
+          "response": "name=SB2\r\n",
+          "seconds": 1.682
+        },
+        {
+          "command": "channel modem",
+          "response": "channel set; rebooting\r\n",
+          "seconds": 0.109
+        }
+      ],
+      "attached": ""
+    },
+    {
+      "phase": "readback-3",
+      "port": "COM7",
+      "responses": [
+        {
+          "command": "status",
+          "response": "tulle/heltec-v4 phy online; version=0.0.1; sx1262 online; sync=2b reg=24b4; longfast=906875000; build=c8e5eb9309e12237d149d6bd1d8eb89ea6ec4a8f; image=v4-modem-usb\r\nidentity=loaded slot=B seq=11\r\nname=SB2\r\n",
+          "seconds": 1.646
+        },
+        {
+          "command": "name",
+          "response": "name=SB2\r\n",
+          "seconds": 1.678
+        },
+        {
+          "command": "region",
+          "response": "region=US915\r\n",
+          "seconds": 1.687
+        },
+        {
+          "command": "channel",
+          "response": "channel=modem\r\n",
+          "seconds": 1.667
+        },
+        {
+          "command": "ui",
+          "response": "ui=ok; display=on; screen=status; button=0; host=none\r\n",
+          "seconds": 1.691
+        }
+      ],
+      "attached": ""
+    },
+    {
+      "phase": "reboot-4",
+      "port": "COM7",
+      "responses": [
+        {
+          "command": "name",
+          "response": "name=SB2\r\n",
+          "seconds": 1.689
+        },
+        {
+          "command": "channel modem",
+          "response": "channel set; rebooting\r\n",
+          "seconds": 0.105
+        }
+      ],
+      "attached": ""
+    },
+    {
+      "phase": "readback-4",
+      "port": "COM7",
+      "responses": [
+        {
+          "command": "status",
+          "response": "tulle/heltec-v4 phy online; version=0.0.1; sx1262 online; sync=2b reg=24b4; longfast=906875000; build=c8e5eb9309e12237d149d6bd1d8eb89ea6ec4a8f; image=v4-modem-usb\r\nidentity=loaded slot=A seq=12\r\nname=SB2\r\n",
+          "seconds": 1.673
+        },
+        {
+          "command": "name",
+          "response": "name=SB2\r\n",
+          "seconds": 1.671
+        },
+        {
+          "command": "region",
+          "response": "region=US915\r\n",
+          "seconds": 1.704
+        },
+        {
+          "command": "channel",
+          "response": "channel=modem\r\n",
+          "seconds": 1.674
+        },
+        {
+          "command": "ui",
+          "response": "ui=ok; display=on; screen=status; button=0; host=none\r\n",
+          "seconds": 1.675
+        }
+      ],
+      "attached": ""
+    },
+    {
+      "phase": "reboot-5",
+      "port": "COM7",
+      "responses": [
+        {
+          "command": "name",
+          "response": "name=SB2\r\n",
+          "seconds": 1.69
+        },
+        {
+          "command": "channel modem",
+          "response": "channel set; rebooting\r\n",
+          "seconds": 0.102
+        }
+      ],
+      "attached": ""
+    },
+    {
+      "phase": "readback-5",
+      "port": "COM7",
+      "responses": [
+        {
+          "command": "status",
+          "response": "tulle/heltec-v4 phy online; version=0.0.1; sx1262 online; sync=2b reg=24b4; longfast=906875000; build=c8e5eb9309e12237d149d6bd1d8eb89ea6ec4a8f; image=v4-modem-usb\r\nidentity=loaded slot=B seq=13\r\nname=SB2\r\n",
+          "seconds": 1.673
+        },
+        {
+          "command": "name",
+          "response": "name=SB2\r\n",
+          "seconds": 1.693
+        },
+        {
+          "command": "region",
+          "response": "region=US915\r\n",
+          "seconds": 1.684
+        },
+        {
+          "command": "channel",
+          "response": "channel=modem\r\n",
+          "seconds": 1.684
+        },
+        {
+          "command": "ui",
+          "response": "ui=ok; display=on; screen=status; button=0; host=none\r\n",
+          "seconds": 1.673
+        }
+      ],
+      "attached": ""
+    }
+  ],
+  "completed_rounds": 5,
+  "passed": true,
+  "reboot_method": "channel modem: verified settings save then software_reset",
+  "serial_lines": {
+    "dtr": false,
+    "rts": false
+  },
+  "reopen_delay_seconds": 6,
+  "baseline": {
+    "status": "tulle/heltec-v4 phy online; version=0.0.1; sx1262 online; sync=2b reg=24b4; longfast=906875000; build=c8e5eb9309e12237d149d6bd1d8eb89ea6ec4a8f; image=v4-modem-usb\r\nidentity=loaded slot=A seq=8\r\nname=SB2\r\n",
+    "name": "name=SB2\r\n",
+    "region": "region=US915\r\n",
+    "channel": "channel=modem\r\n",
+    "ui": "ui=ok; display=on; screen=status; button=0; host=none\r\n",
+    "slot": "A",
+    "sequence": 8,
+    "firmware": "tulle/heltec-v4 phy online; version=0.0.1; sx1262 online; sync=2b reg=24b4; longfast=906875000; build=c8e5eb9309e12237d149d6bd1d8eb89ea6ec4a8f; image=v4-modem-usb"
+  },
+  "last_verified": {
+    "status": "tulle/heltec-v4 phy online; version=0.0.1; sx1262 online; sync=2b reg=24b4; longfast=906875000; build=c8e5eb9309e12237d149d6bd1d8eb89ea6ec4a8f; image=v4-modem-usb\r\nidentity=loaded slot=B seq=13\r\nname=SB2\r\n",
+    "name": "name=SB2\r\n",
+    "region": "region=US915\r\n",
+    "channel": "channel=modem\r\n",
+    "ui": "ui=ok; display=on; screen=status; button=0; host=none\r\n",
+    "slot": "B",
+    "sequence": 13,
+    "firmware": "tulle/heltec-v4 phy online; version=0.0.1; sx1262 online; sync=2b reg=24b4; longfast=906875000; build=c8e5eb9309e12237d149d6bd1d8eb89ea6ec4a8f; image=v4-modem-usb"
+  }
+}

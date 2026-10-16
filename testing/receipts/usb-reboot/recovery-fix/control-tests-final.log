@@ -1,0 +1,58 @@
+warning: patch `mere-p2panda-net v0.7.5 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `mere-proofs v0.1.0 (https://github.com/merely-made/mere.git?branch=main#71405bc6)` was not used in the crate graph
+warning: patch `muniment v0.1.2 (https://github.com/merely-made/mere.git?branch=main#71405bc6)` was not used in the crate graph
+warning: patch `p2panda-auth v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-core v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-discovery v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-encryption v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-store v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-stream v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-sync v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+help: Check that the patched package version and available features are compatible
+      with the dependency requirements. If the patch has a different version from
+      what is locked in the Cargo.lock file, run `cargo update` to use the new
+      version. This may also occur with an optional dependency that is not enabled.
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.96s
+     Running unittests src\lib.rs (target\build\debug\deps\radio_hand-387cb3eac9741c62.exe)
+
+running 37 tests
+test control::position_disclosure::tests::capacity_refuses_and_never_evicts ... ok
+test control::position_disclosure::tests::decode_rejects_every_non_canonical_form ... ok
+test control::position_disclosure::tests::duplicate_hashes_are_refused_at_construction ... ok
+test control::position_disclosure::tests::no_table_resolves_everything_to_broadcast_and_never_fails ... ok
+test control::position_disclosure::tests::absent_identity_gets_broadcast_by_default_and_fixed_when_set ... ok
+test control::position_disclosure::tests::pd2_sequence_is_monotonic_and_replay_is_refused_and_counted ... ok
+test control::position_disclosure::tests::round_trips_canonically_and_sorts_on_construction ... ok
+test control::position_disclosure::tests::stored_form_holds_no_plaintext_hash ... ok
+test control::position_disclosure::tests::pd2_revocation_holds_and_a_lockout_table_is_still_correctable ... ok
+test control::runtime::tests::basic::blank_and_short_scratch_fail_closed ... ok
+test control::runtime::tests::authority::hash_mismatched_grant_journal_poisons_before_any_apply ... ok
+test control::runtime::tests::basic::boot_is_one_shot_and_new_runtime_acknowledges_simulated_reset ... ok
+test control::runtime::tests::basic::clean_boot_foreign_and_apply_failure ... ok
+test control::runtime::tests::basic::dropped_pre_radio_boot_cannot_admit_live_work ... ok
+test control::runtime::tests::commit::changed_refused_persists_counter_without_candidate_apply ... ok
+test control::admission::tests::admission_debug_redacts_arguments ... ok
+test control::runtime::tests::commit::candidate_apply_failure_restores_and_persists_known_good ... ok
+test control::runtime::tests::commit::arm_counter_persists_before_apply_and_replay ... ok
+test control::runtime::tests::commit::nonmonotonic_counter_poisons_before_persist ... ok
+test control::runtime::tests::provisional_reboot_applies_known_good_before_rollback_persist ... ok
+test control::runtime::tests::commit::produced_flash_reboots_and_commit_failure_poisons ... ok
+test control::runtime::tests::quiet::apply_failure_recovery_reuses_the_entered_window ... ok
+test control::runtime::tests::quiet::dropped_live_apply_aborts_quiet_and_blocks_the_runtime ... ok
+test control::runtime::tests::expire_and_revert_apply_before_persist ... ok
+test control::runtime::tests::quiet::dropped_quiet_entry_latches_reset_before_any_durable_or_apply_work ... ok
+test control::runtime::tests::quiet::dropped_finish_aborts_quiet_and_leaves_the_runtime_blocked ... ok
+test control::runtime::tests::recovery::incompatible_board_facts_poison_boot_before_apply ... ok
+test control::runtime::tests::commit::commit_success_persists_and_readback_selects_candidate ... ok
+test control::runtime::tests::quiet::operation_error_wins_finish_error_but_still_poisons ... ok
+test control::runtime::tests::commit::erase_program_and_readback_failures_poison_before_candidate_apply ... ok
+test control::runtime::tests::quiet::live_storage_and_apply_are_inside_one_quiet_window ... ok
+test control::runtime::tests::recovery::unsafe_recovery_arm_journals_counter_and_refusal_without_apply ... ok
+test control::runtime::tests::quiet::expire_and_revert_keep_every_operation_inside_quiet_bounds ... ok
+test control::runtime::tests::quiet::reset_required_blocks_live_work_until_new_runtime ... ok
+test control::runtime::tests::recovery_apply_and_recovery_persistence_failures_poison ... ok
+test control::runtime::tests::quiet::quiet_entry_errors_are_retryable_but_finish_errors_poison ... ok
+test control::admission::tests::idempotence_is_scoped_by_verified_controller_and_read_only_requests_ignore_cas ... ok
+
+test result: ok. 37 passed; 0 failed; 0 ignored; 0 measured; 112 filtered out; finished in 0.11s
+
