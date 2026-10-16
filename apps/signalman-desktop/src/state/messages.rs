@@ -90,8 +90,8 @@ impl DesktopState {
             ),
             None => signalman::comms_adapter::comms::Comms::new(),
         };
-        for owner in &self.companion_comms {
-            owner.add_to(&mut model);
+        for (protocol, owner) in &self.companion_comms {
+            owner.add_protocol_to(&mut model, *protocol);
         }
         if let Some(owner) = &self.radio_comms {
             for protocol in [
@@ -101,7 +101,7 @@ impl DesktopState {
                 if !self
                     .companion_comms
                     .iter()
-                    .any(|companion| companion.supports(protocol))
+                    .any(|(kind, _)| *kind == protocol)
                 {
                     owner.add_protocol_to(&mut model, protocol);
                 }
@@ -124,7 +124,8 @@ impl DesktopState {
     ) -> Option<&signalman::radio_comms::RadioComms> {
         self.companion_comms
             .iter()
-            .find(|owner| owner.supports(protocol))
+            .find(|(kind, _)| *kind == protocol)
+            .map(|(_, owner)| owner)
             .or_else(|| {
                 self.radio_comms
                     .as_ref()
@@ -139,18 +140,20 @@ impl DesktopState {
                 owner,
                 stop,
                 port,
+                source,
             } => {
-                self.companion_comms.retain(|o| !o.supports(protocol));
-                self.companion_comms.push(owner);
+                self.companion_comms.retain(|(kind, _)| *kind != protocol);
+                self.companion_comms.push((protocol, owner));
                 self.companion_stops.retain(|(p, _)| *p != protocol);
                 self.companion_stops.push((protocol, stop));
                 self.companion_notices.retain(|(p, _)| *p != protocol);
-                self.companion_notices.push((
-                    protocol,
-                    format!("Connected on {port}. Device firmware owns keys and radio execution."),
-                ));
+                self.companion_notices
+                    .push((protocol, format!("Connected on {port}. {source}")));
             }
             CompanionEvent::Stopped { protocol, detail } => {
+                if protocol == signalman::comms_adapter::comms::ProtocolKind::MeshCore {
+                    self.resident_connecting = false;
+                }
                 self.companion_settings
                     .retain(|s| s.protocol.kind() != protocol);
                 self.companion_stops.retain(|(p, _)| *p != protocol);
@@ -164,6 +167,9 @@ impl DesktopState {
         use signalman::comms_adapter::comms::ProtocolKind;
         use signalman::radio_comms::companion::CompanionProtocol;
         let result = (|| {
+            if self.install_running {
+                return Err("Finish the active installation before connecting a radio".to_owned());
+            }
             if self.observation_collecting {
                 return Err(
                     "Stop the serial observation collector before connecting a companion"
@@ -202,6 +208,16 @@ impl DesktopState {
                 journal: self.companion_journal.text().trim().into(),
             };
             let mut active = self.companion_settings.clone();
+            if self.resident_connecting
+                && let Some(resident) = &self.resident_settings
+            {
+                active.push(crate::companion::CompanionSettings {
+                    protocol: CompanionProtocol::MeshCore,
+                    port: resident.port.clone(),
+                    realm: resident.realm.clone(),
+                    journal: resident.journal.clone(),
+                });
+            }
             active.push(settings.clone());
             let station = std::env::var_os("SIGNALMAN_STATION_PORT").map(std::path::PathBuf::from);
             crate::companion::validate_settings(&active, station.as_deref())?;
@@ -212,7 +228,7 @@ impl DesktopState {
                 // Retire the previous inactive handle so the replacement can
                 // acquire the same journal's exclusive file lock on reconnect.
                 self.companion_comms
-                    .retain(|owner| !owner.supports(self.message_protocol));
+                    .retain(|(kind, _)| *kind != self.message_protocol);
                 self.companion_settings.push(settings.clone());
                 self.pending_companion = Some(settings);
                 self.message_notice =
@@ -225,6 +241,57 @@ impl DesktopState {
     }
     pub fn take_companion_request(&mut self) -> Option<crate::companion::CompanionSettings> {
         self.pending_companion.take()
+    }
+    pub fn request_resident_connection(&mut self) {
+        use signalman::comms_adapter::comms::ProtocolKind;
+        let result = (|| {
+            if self.message_protocol != ProtocolKind::MeshCore {
+                return Err("Select MeshCore for the Tucket connection".to_owned());
+            }
+            if self.install_running || self.observation_collecting || self.resident_connecting {
+                return Err("Stop the active radio owner before connecting Tucket".into());
+            }
+            let mut settings = self.resident_settings.clone().ok_or_else(|| {
+                "A scoped Tucket authority and radio profile must be configured first".to_owned()
+            })?;
+            settings.port = self.companion_port.text().trim().into();
+            settings.realm = self.companion_realm.text().trim().into();
+            settings.journal = self.companion_journal.text().trim().into();
+            crate::resident::validate(&settings)?;
+            let mut active = self.companion_settings.clone();
+            active.push(crate::companion::CompanionSettings {
+                protocol: signalman::radio_comms::companion::CompanionProtocol::MeshCore,
+                port: settings.port.clone(),
+                realm: settings.realm.clone(),
+                journal: settings.journal.clone(),
+            });
+            crate::companion::validate_settings(
+                &active,
+                std::env::var_os("SIGNALMAN_STATION_PORT")
+                    .as_deref()
+                    .map(std::path::Path::new),
+            )?;
+            Ok(settings)
+        })();
+        match result {
+            Ok(settings) => {
+                self.companion_comms
+                    .retain(|(kind, _)| *kind != ProtocolKind::MeshCore);
+                self.resident_settings = Some(settings);
+                self.resident_connecting = true;
+                self.pending_resident = true;
+                self.message_notice =
+                    Some("Connecting Tucket through Tulle; checking scoped identity first.".into());
+            }
+            Err(error) => self.message_notice = Some(format!("Tucket connection refused: {error}")),
+        }
+    }
+    pub fn take_resident_request(&mut self) -> Option<crate::resident::ResidentSettings> {
+        if std::mem::take(&mut self.pending_resident) {
+            self.resident_settings.clone()
+        } else {
+            None
+        }
     }
     pub fn disconnect_companion(&mut self) {
         for (protocol, stop) in &self.companion_stops {

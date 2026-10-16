@@ -86,6 +86,13 @@ thiserror = "2"
 # consumes. Djinn releases station-scoped keys and signs grants; Pandect
 # supplies the public device id and lease records.
 postilion = { version = "0.3.0", path = "../../crates/postilion" }
+radio-hand = { version = "0.0.1", path = "../../crates/radio-hand", features = ["instances"] }
+retinue = { version = "0.3.0", path = "../../crates/retinue" }
+sennet = { version = "0.0.2", path = "../../crates/sennet" }
+tucket = { version = "0.0.2", path = "../../crates/tucket" }
+selvage = { version = "0.1.0", path = "../../crates/selvage" }
+serde = { version = "1", features = ["derive"] }
+zeroize = "1"
 personae = { git = "https://github.com/merely-made/dramatis.git", rev = "0234e7eea6f2ddf2330a71b9425da01b06ae0391" }
 pandect = { git = "https://www.github.com/merely-made/mere.git", rev = "864757da78214bdd810e17355df5b2309721d651" }
 # Application choice and authoring use the existing shared stack.

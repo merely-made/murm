@@ -103,10 +103,17 @@ pub fn validate_settings(
     Ok(())
 }
 fn port_key(path: &std::path::Path) -> String {
-    std::fs::canonicalize(path)
+    let key = std::fs::canonicalize(path)
         .unwrap_or_else(|_| path.to_owned())
         .to_string_lossy()
-        .replace("/dev/cu.", "/dev/tty.")
+        .replace("/dev/cu.", "/dev/tty.");
+    #[cfg(windows)]
+    let key = key
+        .strip_prefix(r"\\.\")
+        .or_else(|| key.strip_prefix(r"\\?\"))
+        .unwrap_or(&key)
+        .to_ascii_lowercase();
+    key
 }
 pub enum CompanionEvent {
     Connected {
@@ -114,6 +121,7 @@ pub enum CompanionEvent {
         owner: RadioComms,
         stop: Arc<AtomicBool>,
         port: String,
+        source: &'static str,
     },
     Progress,
     Stopped {
@@ -156,7 +164,7 @@ impl CompanionWorker {
                         result = connection => result.map_err(|e| e.to_string())?,
                         _ = async { while !actor_stop.load(Ordering::Relaxed) { tokio::time::sleep(std::time::Duration::from_millis(100)).await; } } => return Err("Companion connection cancelled".into()),
                     };
-                    tx.try_send(CompanionEvent::Connected { protocol, owner: session.owner(), stop: actor_stop.clone(), port: settings.port.display().to_string() }).map_err(|e| e.to_string())?;
+                    tx.try_send(CompanionEvent::Connected { protocol, owner: session.owner(), stop: actor_stop.clone(), port: settings.port.display().to_string(), source: "Device firmware owns keys and radio execution." }).map_err(|e| e.to_string())?;
                     wake();
                     while !actor_stop.load(Ordering::Relaxed) {
                         if session.poll().await.map_err(|e| e.to_string())? {

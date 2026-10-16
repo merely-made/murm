@@ -5,6 +5,7 @@
 //! packet-ID reservations. Stock companion hosts supply an exclusive byte link;
 //! firmware owns keys and RF execution. Both paths use a host-owned realm name.
 //! The companion client cannot attach its journal to a resident PHY runtime.
+pub mod carriage;
 pub mod companion;
 mod journal;
 mod resident;

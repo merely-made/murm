@@ -18,6 +18,7 @@ pub struct Product {
     peer: String,
     condition: Option<Condition>,
     connected_seen: Cell<bool>,
+    history: Option<serde_json::Value>,
 }
 enum Condition {
     Connected,
@@ -37,7 +38,7 @@ fn facts(
         }) && state
             .companion_comms
             .iter()
-            .any(|owner| owner.supports(protocol));
+            .any(|(kind, _)| *kind == protocol);
     let owner = state.radio_owner(protocol);
     let conversation = owner.and_then(|owner| owner.conversation(protocol, peer).ok());
     let records = owner
@@ -103,6 +104,7 @@ pub fn from_env() -> Option<mesquite::Lane<Product>> {
                 peer,
                 condition: None,
                 connected_seen: Cell::new(false),
+                history: None,
             },
             cambium_genet_winit_host::read_file,
         )
@@ -149,6 +151,29 @@ impl mesquite::Product for Product {
         _: mesquite::Checkpoints<'_>,
         line: &str,
     ) -> Result<(), String> {
+        if matches!(
+            line,
+            "remember companion history" | "assert companion history"
+        ) {
+            let records = ctx
+                .runner
+                .state()
+                .radio_owner(self.protocol)
+                .ok_or("history has no commissioned owner")?
+                .records()
+                .map_err(|e| e.to_string())?;
+            let value = serde_json::to_value(records).map_err(|e| e.to_string())?;
+            if line == "remember companion history" {
+                let (_, ack, rx) = facts(ctx.runner.state(), &self.tag, self.protocol, &self.peer);
+                if ack != 1 || rx != 1 {
+                    return Err("history checkpoint requires the matched round trip".into());
+                }
+                self.history = Some(value);
+            } else if self.history.as_ref() != Some(&value) {
+                return Err("identity-bound message history changed across reconnect".into());
+            }
+            return Ok(());
+        }
         if let Some(target) = line.strip_prefix("key tab-until data-text-field=") {
             for _ in 0..200 {
                 let matched = ctx.runner.focus().is_some_and(|node| {
@@ -193,6 +218,8 @@ impl mesquite::Product for Product {
             Some(Condition::Connected) => !connected,
             Some(Condition::Stopped) => {
                 connected
+                    || (self.protocol == ProtocolKind::MeshCore
+                        && ctx.runner.state().resident_connecting)
                     || ctx
                         .runner
                         .state()
@@ -213,6 +240,7 @@ impl mesquite::Product for Product {
         let (connected, ack, rx) = facts(ctx.runner.state(), &self.tag, self.protocol, &self.peer);
         if !self.connected_seen.get()
             || connected
+            || (self.protocol == ProtocolKind::MeshCore && ctx.runner.state().resident_connecting)
             || ack != 1
             || rx != 1
             || ctx.runner.state().message_protocol != self.protocol

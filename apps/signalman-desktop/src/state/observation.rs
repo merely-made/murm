@@ -14,6 +14,11 @@ impl DesktopState {
     }
 
     pub fn request_observation_start(&mut self) {
+        if self.resident_connecting || !self.companion_settings.is_empty() {
+            self.observation_notice =
+                Some("Disconnect the active radio before collecting serial observations.".into());
+            return;
+        }
         if self.observation_collecting {
             self.observation_notice = Some("Observation collection is already running.".into());
             return;

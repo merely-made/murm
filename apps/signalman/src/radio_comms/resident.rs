@@ -50,6 +50,34 @@ impl RadioComms {
     }
 }
 impl ResidentSession<'_> {
+    /// Advertise through the retained runtime and its ordinary physical work queue.
+    pub fn advertise_tucket(
+        &mut self,
+        now: u64,
+        unix_seconds: u32,
+        name: &str,
+    ) -> Result<(), AdapterError> {
+        self.healthy()?;
+        let data = tucket::advert::AdvertData::try_chat(name)
+            .and_then(|d| d.encode())
+            .ok_or_else(|| backend("resident advert name exceeds MeshCore bounds"))?;
+        let report = self
+            .runtime
+            .advertise_tucket(now, unix_seconds, &data)
+            .map_err(|e| backend(format!("{e:?}")))?;
+        self.observe(now, report)
+    }
+    /// Full-key contact match, after the protocol has verified its advert.
+    pub fn knows_tucket_peer(&self, key: &[u8; 32]) -> bool {
+        self.runtime
+            .tucket()
+            .node()
+            .contact(key[0])
+            .is_some_and(|c| c.pub_key == *key)
+    }
+    pub fn transmit_budget_ms(&self) -> u64 {
+        self.runtime.tx_budget_ms()
+    }
     fn healthy(&self) -> Result<(), AdapterError> {
         let inner = self.owner.lock()?;
         if let Some(fault) = &inner.fault {
@@ -75,14 +103,30 @@ impl ResidentSession<'_> {
             TUCKET => ProtocolKind::MeshCore,
             _ => return Ok(None),
         };
-        let Some(record) = self.owner.records()?.into_iter().find(|r| {
+        let scope = self.owner.scope()?;
+        let mut next = None;
+        for record in self.owner.records()?.into_iter().filter(|r| {
             r.conversation.protocol == protocol
                 && r.delivery == DeliveryStatus::Queued(DeliveryQueueReason::Offline)
-        }) else {
+        }) {
+            let peer = scope.peer(&record.conversation)?;
+            if protocol == ProtocolKind::MeshCore {
+                let key: [u8; 32] = hex::decode(&peer)
+                    .map_err(backend)?
+                    .try_into()
+                    .map_err(|_| backend("invalid MeshCore key"))?;
+                // Discovery does not block other recipients whose full keys
+                // are already verified by the protocol.
+                if !self.knows_tucket_peer(&key) {
+                    continue;
+                }
+            }
+            next = Some((record, peer));
+            break;
+        }
+        let Some((record, peer)) = next else {
             return Ok(None);
         };
-        let scope = self.owner.scope()?;
-        let peer = scope.peer(&record.conversation)?;
         let id = record.message.id;
         // Persist the ambiguous boundary before touching protocol state. A crash
         // here cannot silently replay an operation whose carriage was possible.
@@ -208,9 +252,18 @@ impl ResidentSession<'_> {
         Ok(Some(id))
     }
     pub fn poll(&mut self, now: u64) -> Result<(), AdapterError> {
+        self.poll_changed(now).map(|_| ())
+    }
+    /// Protocol events include timer-only delivery expiry. Hosts use this
+    /// result to wake projections even when no radio frame arrived.
+    pub fn poll_changed(&mut self, now: u64) -> Result<bool, AdapterError> {
         self.healthy()?;
         let result = self.runtime.poll(now, None);
-        self.finish(now, result)
+        let changed = result
+            .as_ref()
+            .is_ok_and(|r| !r.events.is_empty() || r.overflowed != 0);
+        self.finish(now, result)?;
+        Ok(changed)
     }
     pub fn ingest(&mut self, now: u64, frame: &[u8]) -> Result<(), AdapterError> {
         self.healthy()?;

@@ -35,6 +35,7 @@ await companion received
 wait 1800
 assert snap incoming == 1
 capture roundtrip
+remember companion history
 click role:button Disconnect companion
 await companion stopped
 wait 600
@@ -49,6 +50,7 @@ assert snap connected == true
 assert snap protocol_ack == 1
 assert snap incoming == 1
 capture reconnected
+assert companion history
 click role:button Disconnect companion
 await companion stopped
 wait 600
@@ -56,3 +58,4 @@ assert snap connected == false
 assert snap protocol_ack == 1
 assert snap incoming == 1
 capture stopped
+assert companion history

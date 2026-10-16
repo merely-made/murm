@@ -67,6 +67,10 @@ zeroize = "1"
 name = "stock_companion_pair"
 required-features = ["comms"]
 
+[[example]]
+name = "tucket_bench_identity"
+required-features = ["comms"]
+
 [dev-dependencies]
 serial2-tokio = "0.1.24"
 selvage = { path = "../../crates/selvage" }

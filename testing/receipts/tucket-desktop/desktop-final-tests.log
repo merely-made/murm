@@ -1,0 +1,62 @@
+warning: patch `p2panda-auth v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-stream v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+help: Check that the patched package version and available features are compatible
+      with the dependency requirements. If the patch has a different version from
+      what is locked in the Cargo.lock file, run `cargo update` to use the new
+      version. This may also occur with an optional dependency that is not enabled.
+   Compiling signalman-desktop v0.0.1 (C:\Users\mark_\Code\repos\retinue\apps\signalman-desktop)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 56.97s
+     Running unittests src\lib.rs (apps\signalman-desktop/target/build\debug\deps\signalman_desktop-40d491a32c0f440a.exe)
+
+running 40 tests
+test audio::pcm::tests::upsample_retains_duration_and_endpoints ... ok
+test audio::pcm::tests::downmix_uses_every_channel_and_refuses_partial_frames ... ok
+test comms::tests::companion_settings_refuse_port_aliases_and_separate_scope_paths ... ok
+test device_mere::tests::identical_source_is_a_true_noop_and_selection_survives_refresh ... ok
+test device_mere::tests::absent_identity_waits_for_threshold_and_stales_only_once ... ok
+test device_mere::tests::projection_has_one_typed_relation_with_present_endpoints_and_retains_stale_nodes ... ok
+test messages::tests::duplicate_event_does_not_grow_journal ... ok
+test comms::tests::subject_refusal_does_not_write_the_durable_journal ... ok
+test collector::tests::stop_reaches_the_actor_and_terminal_event_is_retained_until_drain ... ok
+test messages::tests::unknown_authenticated_sender_remains_outside_gaz_until_owner_saves_it ... ok
+test comms::tests::concurrent_clones_serialize_queue_intents_without_id_aliasing ... ok
+test network::tests::stale_epochs_are_ignored_and_pin_unpin_use_the_same_actor ... ok
+test network::tests::physics_change_is_an_explicit_new_epoch ... ok
+test comms::tests::invalid_companion_configuration_is_rejected_before_opening_serial_io ... ok
+test audio::pcm::tests::stereo_48k_downmixes_and_resamples_to_exact_8k_duration ... ok
+test resident::tests::locked_or_absent_identity_stops_before_serial_or_journal_access ... ok
+test state::tests::changing_selected_device_clears_its_observation_association ... ok
+test state::tests::reselecting_the_same_device_keeps_its_observation_association ... ok
+test station::custody_receipts::desktop_station_pending_leaves_local_state_untouched ... ignored, run with the isolated DR-C absent/Locked keeper
+test station::messages::tests::handoff_is_bounded_deduplicated_and_waits_for_persisted_acknowledgement ... ok
+test resident::bench::tests::explicit_bench_material_is_required_and_identity_survives_reconnect ... ok
+test state::tests::survey_that_loses_selected_device_clears_its_observation_association ... ok
+test station::tests::a_durable_device_id_survives_reload ... ok
+test survey::tests::attached_station_port_is_not_opened_by_the_installer_survey ... ok
+test survey::tests::comma_separated_ports_ignore_whitespace_and_empty_entries ... ok
+test station::tests::an_existing_wallet_is_not_silently_replaced ... ok
+test station::tests::corrupt_public_scope_is_refused_instead_of_reminted ... ok
+test network::tests::actor_runs_off_thread_and_keeps_only_the_latest_snapshot ... ok
+test messages::tests::voice_reopens_from_the_same_journal_as_text ... ok
+test messages::tests::redb_reopen_replays_the_exact_journal_material ... ok
+test comms::tests::real_lxmf_delivery_reaches_the_shared_comms_journal_and_reopens_without_duplicates ... ok
+test resident::tests::active_radio_blocks_observation_and_installer_serial_borrowing ... ok
+test resident::tests::desktop_requires_configured_authority_before_scheduling_a_connection ... ok
+test comms::tests::face_queue_uses_comms_and_releases_handoff_only_after_a_valid_journal_outcome ... ok
+test resident::tests::tucket_connection_exposes_only_its_commissioned_message_protocol ... ok
+test comms::tests::companion_connection_controls_validate_before_dispatch_and_allow_explicit_reconnect ... ok
+test comms::tests::companion_identity_events_use_one_adapter_per_protocol_and_disconnect_preserves_history ... ok
+test comms::tests::messages_face_registers_both_radio_protocols_and_queues_in_the_owner_journal ... ok
+test comms::tests::reopened_history_supplies_offline_authoring_but_never_selects_between_station_identities ... ok
+test resident::tests::connecting_tucket_reserves_its_port_protocol_and_journal ... ok
+
+test result: ok. 39 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 2.11s
+
+     Running tests\companion_face.rs (apps\signalman-desktop/target/build\debug\deps\companion_face-0c5c39340b0b67b9.exe)
+
+running 2 tests
+test stock_history_and_queue_button_share_the_actual_companion_journal ... ok
+test stock_connection_controls_work_before_any_identity_has_been_opened ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.89s
+

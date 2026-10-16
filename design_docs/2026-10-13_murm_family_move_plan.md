@@ -15,8 +15,10 @@ recorded-delivery diagnostics; R3 supplies resident radio Comms and R4 adds
 stock Meshtastic/MeshCore companion actors and attended desktop controls.
 R5 records Windows Meshtastic/MeshCore stock-pair and native functional
 acceptance, with a 500 ms MeshCore pair reconnect fixture and verified Tulle
-restoration. Immediate MeshCore reopen, UI cleanup and host-personality stack
-legs retain their gates below.
+restoration. R6's Tucket carriage bridge, isolated bench authority and desktop
+worker pass software checks; physical/native qualification remains open after
+failed Tulle-to-stock transmissions. Immediate
+MeshCore reopen, UI cleanup and host-personality stack legs retain their gates below.
 
 **Canonical home:** this repository owns the migration. Mere and Genet should
 cite this plan rather than keep another migration specification. The canonical
@@ -1840,3 +1842,114 @@ Cargo home or worktree was created.
 Remaining gates: MeshCore immediate reconnect; duplicate diagnostics/stale
 compose notice and broader UI appearance; Sennet/Tucket stack legs. These stock
 companion receipts do not qualify the host personalities over Tulle.
+
+### R6 — Tucket over Tulle through Signalman (2026-10-15, in progress)
+
+The owner approved the next stack leg: reuse `RadioComms::ResidentSession`,
+drive its retained runtime over actual Tulle carriage, and repeat the desktop
+exchange against one stock MeshCore peer. Tucket comes first; Sennet channel
+text and directed/ACK work remain separate. R5's immediate stock reopen and UI
+cleanup findings do not block this distinct carriage lane.
+
+The reusable bridge consumes a caller-commissioned runtime and the existing
+`tulle::radio_io::PacketRadio` boundary. The runtime retains protocol contacts,
+retry operations and physical work tokens; Tulle retains serial framing,
+airtime admission and RX buffering. Each driver turn advances the runtime,
+dispatches a durable intent and performs at most one bounded physical TX.
+An uncertain send stops the driver without inventing a failed physical
+completion or automatically replaying the intent. Identity construction,
+profile admission and operator authority remain with the host.
+
+Inspection found an additional production boundary: the desktop's existing
+Djinn station release and Djinn's current default release policy cover
+Reticulum namespaces, not a Tucket identity. Physical qualification follows
+the repository's explicit isolated bench convention (`resident_probe`) without
+expanding production custody as a prerequisite to measuring carriage. The
+desktop never generates or falls back to a seed: its explicit bench config
+requires a `bench-` realm and a separately generated private material file.
+Proper Djinn Tucket release remains a production gate. Each guarded physical
+attempt restores the pinned Tulle peer image and the DUT's saved profile;
+restoration failures remain explicit in the public receipt.
+
+Done when the real Messages controls drive Tucket over Tulle against stock
+MeshCore, both directions match tagged text and protocol ACK facts, exact
+identity-bound history survives disconnect/reconnect, native captures are
+reviewed, and radio/native resources are released with board profiles restored.
+Tests must also refuse absent identity before serial I/O, and must prove that a
+lost physical completion cannot create a false completion or hidden resend.
+
+**Software checkpoint (2026-10-15, uncommitted).** The PacketRadio bridge
+passes the complete Signalman library suite (62 tests) and strict Clippy for
+the library and tests, locked and offline. New carriage tests exchange real
+Tucket wire text in both directions, verify the remote protocol ACK and exact
+reopened journal contents, leave undiscovered recipients queued without
+blocking verified contacts, and stop an ambiguous physical send without a
+completion fact or second send. Logs remain under
+`validation/results/stock-baseline-20261014/resident-radio-{tests,clippy}.log`.
+These are in-process protocol tests, not physical or native acceptance.
+
+The desktop worker accepts caller-supplied scoped authority and radio settings,
+checks authority before serial access, verifies physical online/config before
+constructing the runtime, and shuts down its serial owner on errors and stop.
+Its connection binding exposes only MeshCore to Comms even though the retained
+runtime contains the other dormant personalities. Stock/resident owners share
+port, journal and protocol exclusion checks. `Connect Tulle` currently refuses
+without configured authority. The isolated bench authority loads only the
+explicit file and binds its realm; production custody remains unavailable.
+Desktop compilation and strict all-target Clippy pass, with 39 library tests
+and two DOM control tests passing; the existing isolated-daemon custody case
+remains ignored. The stock Connect action initially missed its pointer target;
+the existing block button styling repairs the connection actions' click areas.
+COM7 stays in its existing modem channel and COM6 serves as the stock peer.
+Private material and public run receipts are separate under
+`validation/results/tucket-desktop-20261015/`.
+
+**Physical findings (2026-10-15, qualification still open).** `native-baseline`
+and `native-verified-card` connected to Tulle and recorded four physical TX
+completions per intent, but the stock peer recorded no recipient text or ACK;
+the intents expired as failed. Importing a signed public business card and
+resetting the stock path did not resolve it. The 17 dBm `native-pa` fixture
+also failed. `native-public-card` was refused by the preflight's single-profile
+assumption before a firmware transfer; later trials explicitly reuse the
+same-boot saved descriptor instead of guessing among retained profiles.
+
+The standalone `raw-traced` probe received stock text and observed a stock
+send-confirmation, then timed out waiting for reciprocal route discovery.
+`raw-short-flood` and `raw-minimal-flood` sent 38- and 22-byte packets without
+text reaching the stock offline queue; `raw-minimal-direct` did the same with
+an explicit zero-hop route. These are retained failures, not native acceptance.
+Each completed trial verifies restored COM6 Tulle status/region/channel exactly
+and acknowledges COM7's saved profile with the same boot and sync word.
+
+An independent software defect was found while tracing this: the retained
+Tucket instance did not ACK direct incoming text, although the standalone
+Node pump does. A real-wire carriage assertion first failed with the missing
+ACK, then passed after the instance emitted the reply through its ordinary
+outbound queue. The library suites now pass 144 radio-hand, 73 Tucket and 62
+Signalman tests. The updated desktop compiles and passes strict Clippy. First
+send, full bidirectional native exchange and reconnect acceptance remain open.
+
+`raw-radio-stats` adds a physical discriminator: stock's radio counters show
+zero valid received packets and one receive error before the 22-byte direct
+text, with the same values afterward. This does not identify a driver defect,
+but gives no evidence that the stock parser received the text packet. The
+current V4 source leaves listen-before-talk disabled, so disabling CAD is not
+an available explanation or useful next experiment.
+
+The independent `stock-recheck` flashed both identified V4s to the pinned
+stock MeshCore image again. All four recipient-text/protocol-ACK exchanges,
+including reconnect with the existing 500 ms fixture, passed. COM6 then
+returned to the pinned Tulle image with exact status, identity, region and
+channel readback. COM7's pinned Tulle transfer completed, but its USB data
+endpoint timed out afterward. Repeating the status probe and both watchdog
+and hard software reset methods did not recover it. A physical USB reconnect
+was requested; COM7 restoration remains **unverified**, rather than inferred
+from the flasher exit code. The earlier same-boot COM7 profile receipt cannot
+be reused after this reflash. Take a fresh profile snapshot after recovery.
+
+[R6 checkpoint evidence](../testing/receipts/tucket-desktop/qualification.json)
+separates software checks, failed native/raw trials, the passing stock recheck
+and pending USB recovery. Source and public evidence hashes identify this
+working tree. Private bench material stays under ignored validation results.
+The existing repository targets were reused; no isolated target, Cargo home
+or worktree was created.

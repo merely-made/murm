@@ -177,6 +177,11 @@ fn main() {
     let wake_companions = companions.clone();
     let dispatch_companions = companions.clone();
     let init_companions = companions.clone();
+    let resident = Rc::new(RefCell::new(
+        None::<signalman_desktop::resident::ResidentWorker>,
+    ));
+    let wake_resident = resident.clone();
+    let dispatch_resident = resident.clone();
     let station = Rc::new(RefCell::new(None::<StationWorker>));
     let wake_station = station.clone();
     let init_station = station.clone();
@@ -236,11 +241,14 @@ fn main() {
                 .as_ref()
                 .map(AudioWorker::drain)
                 .unwrap_or_default();
-            let companion_events: Vec<_> = wake_companions
+            let mut companion_events: Vec<_> = wake_companions
                 .borrow()
                 .iter()
                 .flat_map(|worker| worker.drain())
                 .collect();
+            if let Some(worker) = wake_resident.borrow().as_ref() {
+                companion_events.extend(worker.drain());
+            }
             let station_events = wake_station
                 .borrow()
                 .as_ref()
@@ -391,6 +399,7 @@ fn main() {
             let mut audio_request = None;
             let mut observation_request = None;
             let mut companion_request = None;
+            let mut resident_request = None;
             ctx.runner.update(|state| {
                 if let Some(request) = state.take_request() {
                     flow::perform(state, request, &mut worker, wake.clone());
@@ -399,8 +408,24 @@ fn main() {
                 audio_request = state.take_audio_request();
                 observation_request = state.take_observation_request();
                 companion_request = state.take_companion_request();
+                resident_request = state.take_resident_request();
             });
             drop(worker);
+            if let Some(settings) = resident_request {
+                // Drop the retired worker before the replacement acquires its
+                // serial port and journal. The stop event gates reconnect.
+                dispatch_resident.borrow_mut().take();
+                let actor =
+                    signalman_desktop::resident::ResidentWorker::spawn(settings, wake.clone());
+                let stop = actor.stop_handle();
+                ctx.runner.update(|state| {
+                    state.companion_stops.push((
+                        signalman::comms_adapter::comms::ProtocolKind::MeshCore,
+                        stop,
+                    ));
+                });
+                *dispatch_resident.borrow_mut() = Some(actor);
+            }
             if let Some(settings) = companion_request {
                 let mut companions = dispatch_companions.borrow_mut();
                 companions.retain(|worker| worker.protocol != settings.protocol.kind());
@@ -543,6 +568,13 @@ fn main() {
                 }
             }
             if !offline_appearance_receipt {
+                match signalman_desktop::resident::bench::settings_from_env() {
+                    Ok(settings) => state.resident_settings = settings,
+                    Err(error) => {
+                        state.message_notice =
+                            Some(format!("Tucket bench configuration refused: {error}"))
+                    }
+                }
                 match signalman_desktop::companion::settings_from_env() {
                     Ok(settings) => {
                         state.companion_settings = settings.clone();

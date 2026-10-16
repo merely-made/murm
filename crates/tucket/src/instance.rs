@@ -291,7 +291,18 @@ impl Instance {
             return Err(InstanceError::Paused);
         }
         let expired = self.advance(now)?;
-        let (events, outbound) = self.node.on_frame(frame);
+        let direct = crate::packet::PacketRef::decode(frame).is_some_and(|p| !p.is_flood());
+        let (events, mut outbound) = self.node.on_frame(frame);
+        if direct {
+            // Flood text already carries its ACK in a PATH return. Direct
+            // text leaves ACK carriage to the caller of the sans-io Node.
+            // This retained instance is that caller, just like the RF pump.
+            for event in &events {
+                if let Event::Message { from, ack, .. } = event {
+                    outbound.push(self.node.ack_frame_to(*from, *ack));
+                }
+            }
+        }
         let mut acknowledged = Vec::with_capacity(self.operations.len());
         for event in &events {
             if let Event::Ack(ack) = event {

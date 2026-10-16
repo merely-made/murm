@@ -1,0 +1,190 @@
+{
+  "schema": 1,
+  "date": "2026-10-15",
+  "result": "software_checkpoint_physical_open",
+  "source_base": "68569c09ce1cbd46c105f3be01cc9192a0943dd0",
+  "source_sha256": {
+    "apps/signalman-desktop/Cargo.lock": "2c8bca111b0d5fffef68bcd0d4d5020adc5d0becf33415099e5b80af5be8f7b9",
+    "apps/signalman-desktop/Cargo.toml": "73763a01db1f071d5e7cabc3acd091c8e262ca9e743325840720ac1a0c228c97",
+    "apps/signalman-desktop/scenarios/companion.scn.in": "a50fe548240f6e728e3cc125ae1a58f34c126cf59884ab039bb673be0feb5ae9",
+    "apps/signalman-desktop/scenarios/run_companion.ps1": "2d082927d698da08a518871dd30a9758653427f4f5d9bf79d1230695107c8c97",
+    "apps/signalman-desktop/src/comms/tests.rs": "0041f99ade068614e5fa64f88436aefb598c606d7625efc3f479bf6d2b6e6a80",
+    "apps/signalman-desktop/src/companion.rs": "9eae992a29ea36e3837bd43a814dd5888761ea22cf566f472da7335c4e54931d",
+    "apps/signalman-desktop/src/companion_scenario.rs": "ba0e6efe39864006a7b685804cce4ac661134c038cfd3ee9b7fd17bd050c712a",
+    "apps/signalman-desktop/src/flow.rs": "cc6cd5d17fb32081ca532de50f49e7fb1d7bd3b1706a6537dc0a6225a7da28df",
+    "apps/signalman-desktop/src/lib.rs": "33a154121f599c9967afd991e9007a0612763b66d7058523e57a61bf2167040d",
+    "apps/signalman-desktop/src/main.rs": "8b930b4e385675de3fe692abbf740a000054a67cf9cf0f27e8e56f774130579c",
+    "apps/signalman-desktop/src/resident.rs": "a86a79ca8e4c9d9a882c5620528456f85fa93b29a099026ba25ff1a0d2f74cbc",
+    "apps/signalman-desktop/src/resident/bench.rs": "7156ce331b5bda20baeb4f435accbacbb80ccf9283fa54664595ae7f0e66452d",
+    "apps/signalman-desktop/src/resident/tests.rs": "0b5a20f721cbc77846d1566d9bff3fbaa03bab48f672ecb2e65ca136d2de5cd2",
+    "apps/signalman-desktop/src/state.rs": "8d5d768b0d93660b06dcaafd0cd4ea63fb8365150104e2fb5399e3ae3a374e2d",
+    "apps/signalman-desktop/src/state/messages.rs": "c37b48dae98c6648720590867840dcaf3a92d7d5d04078d9fe4a43e7d47ea2bc",
+    "apps/signalman-desktop/src/state/observation.rs": "848d660e88a3770505c628e5ea665cf1ed656408b3e05ffe9ea4393102dbd153",
+    "apps/signalman-desktop/src/views/messages.rs": "b45e6afc1f401d978c55f1fde03c9f9f726b26f29dfb255ad723ec2e77de6d25",
+    "apps/signalman-desktop/tests/companion_face.rs": "c0ce7080739b08110d6ba8ae6c98652415d4de16f379a226bd721464bc1e9d1e",
+    "apps/signalman/Cargo.toml": "66e6c371578bfcdb75ce6580f721d2ad5c2ed9b3deb54a5ce50454fa14f665ec",
+    "apps/signalman/examples/tucket_bench_identity.rs": "cad89cf59172364ce1b2cb98a83bbb5efd08bf7788e1e382c84ed3c7915ca03a",
+    "apps/signalman/src/radio_comms.rs": "83bbdd43f6dc2aff7b2b125b761d6d3053430d91233cfc2baa5cf08f93e41ff3",
+    "apps/signalman/src/radio_comms/carriage.rs": "2f568f813fa5913b1e72e0d1a65be1651ba488a78310f97fdd92445a8cf966e6",
+    "apps/signalman/src/radio_comms/carriage/tests.rs": "921c5e03e37086351bc2cfa982a8c6eef082c59c575564ed489033388c56e6c6",
+    "apps/signalman/src/radio_comms/resident.rs": "df4d51ffa39cf67a36436437b1d50446925a9c43bef31f653badc3fc447b7023",
+    "apps/signalman/src/radio_comms/tests.rs": "ea359e4fbfd1aaa0d79d00624c4f0f7eba4eab310f9919491b7f0feda219ac6c",
+    "crates/tucket/examples/meshcore_headed/companion.rs": "c9c61d3858917879843a61a652a3fc6b9fc4a733f78a439f00d33c742c4dfb6a",
+    "crates/tucket/examples/meshcore_headed/main.rs": "04b5d03dac71bd07d976c5abbc2a98624a6cb1e6251b6afa570729742369c10c",
+    "crates/tucket/src/instance.rs": "d5474d9f341994d944448f97b3e60f8e3370d2054d520d0a0b7cf272fb0eb403",
+    "crates/tucket/src/instance/tests.rs": "72221cc69a49342d21da4dc653d544755d351ac04b0fdb4af76ce1b4b9966b6d",
+    "design_docs/2026-10-13_murm_family_move_plan.md": "e3eba4e51861335e7b406922a208871aba7ade031559fffc1569a9300564bc84",
+    "design_docs/DOC_README.md": "203de248fb7b1d34f4a89509c53902a71df9bb7c1c3b4f0c20b2b1cbcc4ad69a",
+    "testing/run_tucket_desktop.ps1": "d8d50df1801f2761afb478ccfd6a945fa39545b3e0bae13225c4181d5a912de2",
+    "testing/stock_tucket_bench.py": "bce7929bf6aa944f87748881b2589dc53b2badf9d7b19b3c49295840e830c2c4"
+  },
+  "software": {
+    "radio_hand_tests_passed": 144,
+    "tucket_tests_passed": 73,
+    "signalman_tests_passed": 62,
+    "desktop_library_tests_passed": 39,
+    "desktop_library_tests_ignored": 1,
+    "desktop_dom_tests_passed": 2,
+    "negative_control": "direct wire ACK assertion failed before repair",
+    "strict_clippy": "desktop all targets and standalone hardware probe passed",
+    "format_and_script_syntax": "passed",
+    "public_log_sha256": {
+      "direct-ack-tests.log": "31b5521aebdb12a91f44d921b35d310c4471f55fe02833c8f1bf7ea1ffdc7f9d",
+      "direct-ack-negative.log": "655d1e4fdf94b3d225c903421a2f222ddf173dd263aa0b3711f63710190cc199",
+      "desktop-final-tests.log": "d6a4d0a532f2284d3692dfa5fdb9bea8c86f0657a807fc707ace771ac7d265cf",
+      "desktop-direct-ack-clippy.log": "f01a6da0296a11134e001789b9b041e4b3937dcb1eb9d82f98f8eff992648b05",
+      "desktop-direct-ack-build.log": "43cbdf126918066179de1eaab41e2c9aa1e5a7a14d6908b183950ea9d840682f",
+      "raw-final-clippy-hardware.log": "0f6f40c035ca2d3ea798403d682f10b9c37dfaeff407d7c369df77ff30e55a1b",
+      "root-format.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "desktop-format.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "powershell-parse.log": "20b49019918a5f1577029331c84d85151fa11d5fc2ee9ac4dbebc86773239c88",
+      "python-parse.log": "90046173eefc8e49a5b66f2d2ac40735e112151df1479d5c560017cfd5c25654"
+    }
+  },
+  "physical": {
+    "native_tucket_acceptance": "failed; no matched recipient text or ACK",
+    "local_evidence_root": "validation/results/tucket-desktop-20261015",
+    "trials": {
+      "native-baseline": {
+        "result": "failed",
+        "bench_json_sha256": "4b6314151f527292ed2e237f55d6998ccc78ed9621ef20524258ecf6a16e88c9",
+        "restoration": {
+          "peer": "pinned_tulle_and_exact_status_region_channel",
+          "dut_profile": "acknowledged_same_boot_and_sync"
+        }
+      },
+      "native-public-card": {
+        "result": "failed",
+        "bench_json_sha256": "0543a9fa4ad5198f3a3bc871cf686e29167d3b176198d0e0bbfdd6542d9b168b",
+        "restoration": {}
+      },
+      "native-verified-card": {
+        "result": "failed",
+        "bench_json_sha256": "70b4856ef9c2ccd3cd6babf481d18c11c7606c25353b331604ec104d4d2d725c",
+        "restoration": {
+          "peer": "pinned_tulle_and_exact_status_region_channel",
+          "dut_profile": "acknowledged_same_boot_and_sync"
+        }
+      },
+      "native-pa": {
+        "result": "failed",
+        "bench_json_sha256": "157c4732a996620d31f77c936af218194d6a7e24e34361ccb4c4dfb1baee0c68",
+        "restoration": {
+          "dut_profile": "acknowledged_same_boot_and_sync",
+          "peer": "pinned_tulle_and_exact_status_region_channel"
+        }
+      },
+      "raw-pa": {
+        "result": "failed",
+        "bench_json_sha256": "2f3aad7857b06a710b2d0c7e6c7100f2ce97899d7c9699e2d1b9c786c6291655",
+        "restoration": {
+          "peer": "pinned_tulle_and_exact_status_region_channel",
+          "dut_profile": "acknowledged_same_boot_and_sync"
+        },
+        "raw.stdout.log_sha256": "cb703eed39858a3be5de24fe8c46458c4158f1d71406c1d6894d4c3ab8dd1ccd",
+        "raw.stderr.log_sha256": "98ee1bde39bea09bf9818a340b1eb834f80e5ca3f3cc3a550bc44be81677e37c"
+      },
+      "raw-traced": {
+        "result": "failed",
+        "bench_json_sha256": "9bdeff6b7c404fc1d2c0647538049034c0bcf06e7c625313b053b8a86861119b",
+        "restoration": {
+          "dut_profile": "acknowledged_same_boot_and_sync",
+          "peer": "pinned_tulle_and_exact_status_region_channel"
+        },
+        "raw.stdout.log_sha256": "03b9899c347f5c548a825070f744529b53925110a9544cac53a56485290dfe0a",
+        "raw.stderr.log_sha256": "6e3e05067b7ce51aa39e7da20af49395b259b32bb60d2eb3f1390d179ddf9e9e"
+      },
+      "raw-short-flood": {
+        "result": "failed",
+        "bench_json_sha256": "bd7b274dc718f9b12da907d00daf5af112a31b7d51daf70965545710a7413b49",
+        "restoration": {
+          "dut_profile": "acknowledged_same_boot_and_sync",
+          "peer": "pinned_tulle_and_exact_status_region_channel"
+        },
+        "raw.stdout.log_sha256": "d139bc2f9020cb3c6e2a1048d8dabd1db4037ee88898265d876a55d61edc5e98",
+        "raw.stderr.log_sha256": "25e09ce2d98667bfbf25834b02fff801d0df913763cf5d4cb301d02e3a0a23dd"
+      },
+      "raw-minimal-flood": {
+        "result": "failed",
+        "bench_json_sha256": "bf795ea95a5b0c0923f10ddd2eb3fe5b2b6b05ccc11443bf1f48d6e2a63e9cdb",
+        "restoration": {
+          "dut_profile": "acknowledged_same_boot_and_sync",
+          "peer": "pinned_tulle_and_exact_status_region_channel"
+        },
+        "raw.stdout.log_sha256": "fc8d9bfb8b4b436951b8f5de9f8b48b0e2469ad15fe10810c1ace0ee1ff30fbf",
+        "raw.stderr.log_sha256": "25e09ce2d98667bfbf25834b02fff801d0df913763cf5d4cb301d02e3a0a23dd"
+      },
+      "raw-minimal-direct": {
+        "result": "failed",
+        "bench_json_sha256": "fdb953642fc06215f33d0db57f3ba09c232db9d29daefc19e3893ddff98f161e",
+        "restoration": {
+          "dut_profile": "acknowledged_same_boot_and_sync",
+          "peer": "pinned_tulle_and_exact_status_region_channel"
+        },
+        "raw.stdout.log_sha256": "716de8aada5c2046ec19f8a2209bb1560439787c7ce73585ecbe87ceb84365d0",
+        "raw.stderr.log_sha256": "25e09ce2d98667bfbf25834b02fff801d0df913763cf5d4cb301d02e3a0a23dd"
+      },
+      "raw-radio-stats": {
+        "result": "failed",
+        "bench_json_sha256": "422cc5ebeff2e8b312477111e94c684042f4aa05bb6b6c1622c90497dbaec1f1",
+        "restoration": {
+          "dut_profile": "acknowledged_same_boot_and_sync",
+          "peer": "pinned_tulle_and_exact_status_region_channel"
+        },
+        "raw.stdout.log_sha256": "890e421e22bd56c5a30541ab8bf3a536d6962788a4ae860b765b95296183bdac",
+        "raw.stderr.log_sha256": "25e09ce2d98667bfbf25834b02fff801d0df913763cf5d4cb301d02e3a0a23dd"
+      }
+    },
+    "raw_stats": {
+      "stock_radio_recv_before": 0,
+      "stock_radio_recv_after": 0,
+      "stock_receive_errors_before": 1,
+      "stock_receive_errors_after": 1,
+      "diagnostic_wire_bytes": 22,
+      "route": "zero-hop direct"
+    },
+    "stock_recheck": {
+      "result": "passed",
+      "exchanges": 4,
+      "elapsed_ms": [
+        1428,
+        1376,
+        1200,
+        1183
+      ],
+      "reconnect_delay_ms": 500,
+      "history_preserved": true,
+      "public_receipt": "stock-recheck.json",
+      "receipt_sha256": "4118ef330347f9d4759b681b20755b7f72e1653edb4bddc9a7d8b82ded2b08b7"
+    },
+    "restoration": {
+      "COM6": "pinned Tulle; exact status, identity, region and channel verified",
+      "COM7": "pinned Tulle transfer completed; status unverified after USB write timeouts; physical reconnect requested",
+      "COM10": "untouched"
+    },
+    "old_COM7_baseline": "invalid after stock recheck firmware reset; capture fresh after USB recovery"
+  },
+  "private_material": "isolated bench material retained in ignored validation results; excluded from receipt",
+  "production_custody": "Djinn Tucket release remains gated; no seed fallback in desktop",
+  "resources": "existing repository targets reused; no isolated target, Cargo home or worktree created"
+}
