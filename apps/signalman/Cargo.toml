@@ -34,6 +34,7 @@ name = "signalman-control-configure"
 path = "src/bin/signalman-control-configure.rs"
 
 [features]
+portable-scenes = ["dep:sceno", "dep:scenomise"]
 # Comms presentation and queue adapter over the application's message journal.
 # Radio execution remains in the attended station owner.
 comms = ["dep:comms", "dep:async-trait", "dep:sennet", "dep:tucket", "radio-hand/instances", "dep:tempfile", "dep:getrandom", "dep:serial2-tokio"]
@@ -57,6 +58,8 @@ radio-hand = { version = "0.0.1", path = "../../crates/radio-hand" }
 retinue = { version = "0.3.0", path = "../../crates/retinue", features = ["tulle-radio"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+sceno = { git = "https://github.com/merely-made/mere.git", branch = "main", optional = true }
+scenomise = { git = "https://github.com/merely-made/mere.git", branch = "main", optional = true }
 sha2 = "0.11"
 thiserror = "2"
 tokio = { version = "1.53.1", features = ["macros", "rt", "signal", "sync", "time"] }
@@ -79,3 +82,8 @@ tempfile = "3"
 
 [target.'cfg(unix)'.dev-dependencies]
 rustix = { version = "1", features = ["termios"] }
+
+[[bin]]
+name = "signalman-survey-scene"
+path = "src/bin/signalman-survey-scene.rs"
+required-features = ["portable-scenes"]

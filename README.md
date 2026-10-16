@@ -139,6 +139,39 @@ cargo build -p tulle-t114-phy --release --target thumbv7em-none-eabihf
 cargo build --manifest-path apps/signalman-desktop/Cargo.toml
 ```
 
+## Portable survey scenes
+
+`signalman::survey::scene::survey_scene` revalidates an admitted `Survey` and
+exports a shared terrain/coverage recipe. GPX tracks become source guide paths,
+with separate paths for separate segments; their endpoints are explicitly
+labelled track samples. Radio identities from captures remain unplaced. No
+observer/track association, RF time join, terrain inference or propagation
+model is invented. The plane is marked unmeasured and has no coverage tiers.
+The local equirectangular frame uses metres with north up and a 10 m margin;
+its reference latitude and northwest corner are disclosed in the title.
+Polar, antimeridian and over-budget extents are refused.
+
+The exporter accepts a revalidated survey archive or bounded original files,
+without opening a radio or obtaining credentials:
+
+```sh
+cargo run --features portable-scenes -p signalman --bin signalman-survey-scene -- \
+  survey.json terrain.scene.json
+cargo run --features portable-scenes -p signalman --bin signalman-survey-scene -- \
+  --gpx track.gpx terrain.scene.json capture.json
+```
+
+The optional capture uses the existing survey-capture JSON schema. The direct
+GPX form supplies no clock mappings; its join settings are unused. Both forms
+refuse an existing output file. Graphshell's Portable scenes imports the result
+with the shared renderer and inspection controls. These are application model
+and file-export paths, not a new native survey panel or a radio qualification.
+
+This branch requires Mere's portable-backdrop implementation. Before integration,
+qualify its local scene cohort with
+`python3 /path/to/mere/support/design-studies/backdrops/with_local_scene_source.py /path/to/mere test -p signalman --features portable-scenes --lib survey::`.
+The helper supplies temporary source patches, not tracked local paths.
+
 ## License
 
 Mozilla Public License 2.0 ([LICENSE](LICENSE)) for the workspace, except

@@ -7,6 +7,8 @@ mod archive;
 mod capture;
 mod gpx;
 mod model;
+#[cfg(feature = "portable-scenes")]
+pub mod scene;
 #[cfg(test)]
 mod tests;
 

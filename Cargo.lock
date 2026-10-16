@@ -1714,6 +1714,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "68ab91017fe16c622486840e4c83c9a37afeff978bd239b5293d61ece587de66"
 
 [[package]]
+name = "libm"
+version = "0.2.16"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b6d2cec3eae94f9f509c767b45932f1ada8350c4bdb85af2fcab4a3c14807981"
+
+[[package]]
 name = "linkboy"
 version = "0.1.0"
 dependencies = [
@@ -1807,9 +1813,17 @@ dependencies = [
 [[package]]
 name = "mere-comms"
 version = "0.0.1"
-source = "git+https://github.com/merely-made/mere.git?branch=main#e12788bce367178f430ee173d61f8301ffaf634d"
+source = "git+https://github.com/merely-made/mere.git?branch=main#9b6da81db661ebbb36377f5123010e18c9199820"
 dependencies = [
  "async-trait",
+ "serde",
+]
+
+[[package]]
+name = "mere-curation"
+version = "0.1.1"
+source = "git+https://github.com/merely-made/mere.git?branch=main#9b6da81db661ebbb36377f5123010e18c9199820"
+dependencies = [
  "serde",
 ]
 
@@ -2308,6 +2322,38 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9774ba4a74de5f7b1c1451ed6cd5285a32eddb5cccb8cc655a4e50009e06477f"
 
 [[package]]
+name = "sceno"
+version = "0.0.5"
+source = "git+https://github.com/merely-made/mere.git?branch=main#9b6da81db661ebbb36377f5123010e18c9199820"
+dependencies = [
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "scenograph"
+version = "0.0.4"
+source = "git+https://github.com/merely-made/mere.git?branch=main#9b6da81db661ebbb36377f5123010e18c9199820"
+dependencies = [
+ "mere-curation",
+ "sceno",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "scenomise"
+version = "0.0.5"
+source = "git+https://github.com/merely-made/mere.git?branch=main#9b6da81db661ebbb36377f5123010e18c9199820"
+dependencies = [
+ "libm",
+ "sceno",
+ "scenograph",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "scoped-tls"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2517,6 +2563,8 @@ dependencies = [
  "radio-hand",
  "retinue",
  "rustix",
+ "sceno",
+ "scenomise",
  "selvage",
  "sennet",
  "serde",
