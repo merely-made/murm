@@ -42,4 +42,6 @@ and branch are removed. The existing shared Cargo cache remains co-owned.
 The [first physical setup](setup-initial/README.md) failed in stock CLI
 configuration before native launch; COM6 restoration passed and nonce state
 stayed unused. The retry explicitly watchdog-resets the stock image after
-flashing and captures filtered public diagnostics. Native/RF remains open.
+flashing and captures filtered public diagnostics. The
+[setup readback](setup-readback/README.md) now passes after retaining the
+client connection for five seconds to drain writes. Native/RF remains open.

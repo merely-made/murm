@@ -8,7 +8,9 @@ param(
     [Parameter(Mandatory)][string]$PeerUsbSerial,
     [Parameter(Mandatory)][string]$OutputDirectory,
     [Parameter(Mandatory)][string]$Python,
-    [Parameter(Mandatory)][string]$DutBaseline
+    [Parameter(Mandatory)][string]$DutBaseline,
+    [switch]$SetupOnly,
+    [ValidateRange(1,20)][int]$StockPowerDbm=1
 )
 $ErrorActionPreference='Stop'
 $repo=(Resolve-Path (Join-Path $PSScriptRoot '..')).Path
@@ -42,6 +44,7 @@ $report.config_sha256=(Get-FileHash $SennetConfig).Hash.ToLowerInvariant()
 $probe=Join-Path $repo 'testing/stock_tucket_bench.py'
 function Invoke-Probe([string[]]$Arguments){ & $Python -B $probe @Arguments; if($LASTEXITCODE -ne 0){throw "Tulle probe failed: $($Arguments[0])"} }
 $peerTouched=$false; $dutStarted=$false; $failure=$null
+$report.authority=$(if($SetupOnly){'not_activated_setup_only'}else{'djinn'})
 try {
     Invoke-Probe @('status','--port',$config.port,'--usb-serial',$DutUsbSerial,'--output',(Join-Path $output 'dut-before.json'))
     Invoke-Probe @('status','--port',$PeerPort,'--usb-serial',$PeerUsbSerial,'--output',(Join-Path $output 'peer-before.json'))
@@ -52,11 +55,30 @@ try {
     & $helper write-bin --port $PeerPort --chip esp32s3 --before usb-reset --after watchdog-reset --baud 921600 --non-interactive --skip-update-check 0 $stockImage *> (Join-Path $output 'stock-flash.log')
     if($LASTEXITCODE -ne 0){throw 'Stock Meshtastic firmware transfer failed'}
     Start-Sleep -Seconds 4
-    & $Python -B (Join-Path $PSScriptRoot 'setup_sennet_stock.py') --port $PeerPort --usb-serial $PeerUsbSerial --expected-node ('{0:x8}' -f [uint32]$config.peer_node) --configure --output (Join-Path $output 'stock-setup.json') *> (Join-Path $output 'stock-setup.log')
+    $peerBinary=Join-Path $repo 'target/debug/examples/stock_companion_pair.exe'
+    $report.stock_probe_sha256=(Get-FileHash $peerBinary).Hash.ToLowerInvariant()
+    & $peerBinary probe meshtastic $PeerPort $config.realm (Join-Path $output 'stock-probe') 0 *> (Join-Path $output 'stock-probe.log')
+    $probePath=Join-Path $output 'stock-probe/receipt.json'
+    $stockProbe=Get-Content $probePath -Raw|ConvertFrom-Json
+    if($LASTEXITCODE -ne 0 -and $stockProbe.error -eq 'Meshtastic rebooted during handshake'){
+        # Cold stock boot can interrupt the first read-only handshake. End that
+        # owner, settle, then require a fresh nonce/identity handshake. No RF
+        # command or production actor refusal is replayed/relaxed.
+        Start-Sleep -Seconds 5
+        & $peerBinary probe meshtastic $PeerPort $config.realm (Join-Path $output 'stock-probe-settled') 0 *> (Join-Path $output 'stock-probe-settled.log')
+        $probePath=Join-Path $output 'stock-probe-settled/receipt.json'
+        $stockProbe=Get-Content $probePath -Raw|ConvertFrom-Json
+    }
+    if($LASTEXITCODE -ne 0){throw 'Independent stock companion handshake failed before configuration'}
+    if($stockProbe.result -ne 'passed' -or $stockProbe.left.identity -ne ('{0:x8}' -f [uint32]$config.peer_node)){throw 'Independent stock identity readback failed'}
+    Start-Sleep -Seconds 2
+    & $Python -B (Join-Path $PSScriptRoot 'setup_sennet_stock.py') --port $PeerPort --usb-serial $PeerUsbSerial --expected-node ('{0:x8}' -f [uint32]$config.peer_node) --power-dbm $StockPowerDbm --configure --output (Join-Path $output 'stock-setup.json') *> (Join-Path $output 'stock-setup.log')
     if($LASTEXITCODE -ne 0){throw 'Stock public LongFast setup/readback failed'}
-    $dutStarted=$true
-    & (Join-Path $repo 'apps/signalman-desktop/scenarios/run_companion.ps1') -Protocol meshtastic -Port $config.port -PeerPort $PeerPort -SelfAddress $card.address -PeerAddress ('{0:x8}' -f [uint32]$config.peer_node) -Realm $config.realm -OutputDirectory (Join-Path $output 'native') -Zoom 0.75 -BenchPython $Python -PeerUsbSerial $PeerUsbSerial -SennetConfig $SennetConfig -ExchangeAfterReconnect
-    $report.result='native_completed_pending_visual_review'
+    if($SetupOnly){$report.result='stock_setup_passed_native_not_run'}else{
+        $dutStarted=$true
+        & (Join-Path $repo 'apps/signalman-desktop/scenarios/run_companion.ps1') -Protocol meshtastic -Port $config.port -PeerPort $PeerPort -SelfAddress $card.address -PeerAddress ('{0:x8}' -f [uint32]$config.peer_node) -Realm $config.realm -OutputDirectory (Join-Path $output 'native') -Zoom 0.75 -BenchPython $Python -PeerUsbSerial $PeerUsbSerial -SennetConfig $SennetConfig -ExchangeAfterReconnect
+        $report.result='native_completed_pending_visual_review'
+    }
 } catch {$failure=$_; $report.result='failed'; $report.error=$_.Exception.Message}
 finally {
     Start-Sleep -Milliseconds 700
