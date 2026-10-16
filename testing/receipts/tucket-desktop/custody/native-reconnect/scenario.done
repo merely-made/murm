@@ -1,0 +1,28 @@
+RESULT ok
+Signalman Tucket over Tulle against stock meshcore through production controls
+captured form
+waited 32 frames
+captured connected
+waited 44 frames
+waited 0 frames
+waited 0 frames
+captured roundtrip
+waited 0 frames
+captured disconnected
+waited 30 frames
+captured reconnected
+waited 39 frames
+waited 0 frames
+waited 0 frames
+captured reconnect-roundtrip
+waited 0 frames
+captured stopped
+capture form 2400x1504 digest=3892fd8e76805414 file=C:\Users\mark_\Code\repos\retinue\validation\results\tucket-desktop-20261015\native-djinn-reconnect\native\form.png
+capture connected 2400x1504 digest=aadbfa910b92ea42 file=C:\Users\mark_\Code\repos\retinue\validation\results\tucket-desktop-20261015\native-djinn-reconnect\native\connected.png
+capture roundtrip 2400x1504 digest=970fe1291790b818 file=C:\Users\mark_\Code\repos\retinue\validation\results\tucket-desktop-20261015\native-djinn-reconnect\native\roundtrip.png
+capture disconnected 2400x1504 digest=1f621f31809fa9c0 file=C:\Users\mark_\Code\repos\retinue\validation\results\tucket-desktop-20261015\native-djinn-reconnect\native\disconnected.png
+capture reconnected 2400x1504 digest=5aeea5c33d9fed86 file=C:\Users\mark_\Code\repos\retinue\validation\results\tucket-desktop-20261015\native-djinn-reconnect\native\reconnected.png
+capture reconnect-roundtrip 2400x1504 digest=736ca12f9f434699 file=C:\Users\mark_\Code\repos\retinue\validation\results\tucket-desktop-20261015\native-djinn-reconnect\native\reconnect-roundtrip.png
+capture stopped 2400x1504 digest=27a98b7354d1fb91 file=C:\Users\mark_\Code\repos\retinue\validation\results\tucket-desktop-20261015\native-djinn-reconnect\native\stopped.png
+frames: 7 captured, 0 blank, 7 distinct digests
+presentation: 230 frames, 230 redraws, 0 unpresented redraws

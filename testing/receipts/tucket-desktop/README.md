@@ -1,10 +1,13 @@
 # Tucket over Tulle desktop checkpoint
 
-The [Djinn-backed native functional trial](custody/native-turnaround/README.md)
-passes two tagged texts and both protocol ACKs against stock MeshCore, then
-disconnect/reconnect with exact history retained. All six captures are reviewed;
-both boards are restored and owned helpers stopped. This is one delivery
-connection and one history-only reconnect, with no new sends after reconnect.
+The [Djinn-backed reconnect-send trial](custody/native-reconnect/README.md)
+passes four tagged texts and all four protocol ACKs against stock MeshCore
+across two delivery connections. Exact history is checked before fresh work
+after reconnect; all four records remain after final disconnect. All seven
+captures are reviewed, both boards restored and owned helpers stopped. The
+fixture explicitly advertises the stock peer after each commissioning;
+automatic contact restoration remains open. The earlier
+[history-only pass](custody/native-turnaround/README.md) retains its original scope.
 The [custody continuation](custody/README.md) records the published scoped
 authority path, 300 core test executions and 41 desktop tests. UI polish and
 the Sennet stack leg remain open.

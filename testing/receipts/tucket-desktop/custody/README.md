@@ -1,5 +1,13 @@
 # Djinn-backed Tucket consumer, 2026-10-16
 
+The current [reconnect-send trial](native-reconnect/README.md) passes four
+tagged texts and all four protocol ACKs over two delivery connections, checking
+exact old history before new sends and retaining all four records after final
+disconnect. Seven captures are reviewed; both boards restored and owned helpers
+stopped. Explicit stock advertisements after each commissioning qualify
+rediscovery with this fixture. Automatic contact restoration and UI polish
+remain open.
+
 The owner selected Djinn custody before further RF trials. Personae derivation
 is published at Dramatis `5c89001a`; Mere's custody API and receiving checks are
 published through `6d1908f4`. The actual broker's positive/refusal/watch tests
@@ -21,14 +29,14 @@ Formatting and strict desktop all-target Clippy pass. The source inventory has o
 Dramatis and Netrender. The legacy Comms source declaration was updated after
 verifying its package source is byte-identical to the qualified Mere revision.
 
-The [third physical/native trial](native-turnaround/README.md) passes two tagged
+The earlier [third physical/native trial](native-turnaround/README.md) passes two tagged
 texts and both protocol ACKs, followed by a history-only reconnect. Six captures
 are visually reviewed. The saved DUT profile and pinned Tulle peer image are
 restored and verified, and owned helpers stopped. Public configuration and
 journals are retained here; private wallet/runtime files stay ignored. This
 uses an isolated real Keeper wallet through the scoped production authority
-route, rather than qualifying the installed personal daemon. New sends after
-reconnect and UI polish remain open.
+route, rather than qualifying the installed personal daemon. That trial's
+history-only reconnect is now extended by the separate current receipt above.
 
 The [first Djinn native trial](native-initial/README.md) delivers both texts and
 the desktop's outbound ACK, but fails waiting for the stock return ACK. Both
@@ -46,5 +54,5 @@ same 41 desktop tests, strict all-target Clippy and native/exporter builds.
 It keeps separate tags and peer receipts for each delivery connection, checks
 the old history before starting fresh work, and requires seven captures.
 `run-djinn-reconnect.ps1` supplies the guarded real-Keeper bench recipe; its
-physical receipt is pending. The `reconnect-desktop-*.log` files record these
-software checks.
+[physical receipt](native-reconnect/README.md) passes. The
+`reconnect-desktop-*.log` files record these software checks.
