@@ -2337,3 +2337,5 @@ Flash classification and unsafe audits pass with four classified settings
 fields and the same 61 approved unsafe tokens. The LOC check retains the same
 six pre-existing violations; this slice adds none. Hardware installation and
 provisioning are next, so no physical display observation is claimed here.
+
+First physical install refused settings reads because the appended 85-byte body made derived flash-read buffers unaligned. No provisioning write ran. The body now pads to 88 bytes, preserving the original prefix and name offsets; a settings regression asserts word alignment. The failed SB1 receipt is retained separately from the corrected image qualification.
