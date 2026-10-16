@@ -191,14 +191,14 @@ async fn main(spawner: Spawner) {
     // The host link. Both personalities implement `embedded_io_async::{Read, Write}`, so
     // everything below is written once and built twice.
     #[cfg(all(feature = "host-usb", not(feature = "host-uart-low-power")))]
-    let (mut usb_rx, mut usb_tx) = UsbSerialJtag::new(peripherals.USB_DEVICE)
+    let (usb_rx, mut usb_tx) = UsbSerialJtag::new(peripherals.USB_DEVICE)
         .into_async()
         .split();
 
     // UART0 on the exposed header: GPIO44 RX, GPIO43 TX. Unlike USB Serial/JTAG this survives
     // Light-sleep and can wake the chip, which is what the low-power personality needs.
     #[cfg(feature = "host-uart-low-power")]
-    let (mut usb_rx, mut usb_tx) = {
+    let (usb_rx, mut usb_tx) = {
         let uart = Uart::new(
             peripherals.UART0,
             UartConfig::default().with_baudrate(HOST_UART_BAUD),
@@ -243,6 +243,7 @@ async fn main(spawner: Spawner) {
         standby: Output::new(peripherals.GPIO40, Level::High, OutputConfig::default()),
     };
     spawner.spawn(gnss::gnss_task(gnss_rx, gnss_pins).unwrap());
+    let mut usb_rx = host::BootRx::new(usb_rx);
     let mut local_status = board::initial_status(settings);
     spawner.spawn(ui::screen_task(i2c, oled_reset, vext, led, local_status).unwrap());
 

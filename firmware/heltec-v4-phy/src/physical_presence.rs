@@ -60,13 +60,26 @@ impl WitnessState {
 
 /// Wait for one entire release, press, and hold sequence while retaining GPIO
 /// custody for ordinary UI if the observation window expires.
-pub(crate) async fn observe(
+pub(crate) async fn observe<R: embedded_io_async::Read>(
     mut button: Input<'static>,
+    rx: &mut crate::host::BootRx<R>,
+    ordinary_eligible: bool,
 ) -> (Input<'static>, Option<PhysicalPresence>) {
-    let observed = with_timeout(PRESENCE_OBSERVATION_WINDOW, observe_gesture(&mut button)).await;
-    let token = match observed {
-        Ok(()) => Some(PhysicalPresence { _private: () }),
-        Err(_) => None,
+    let witnessed = {
+        let observed = with_timeout(PRESENCE_OBSERVATION_WINDOW, observe_gesture(&mut button));
+        let mut observed = core::pin::pin!(observed);
+        match select(observed.as_mut(), rx.prefetch_query(ordinary_eligible)).await {
+            Either::First(result) => result.is_ok(),
+            // Only already-permitted ordinary service can leave the claim window
+            // early. No physical-presence token is created by host bytes.
+            Either::Second(Ok(true)) => false,
+            Either::Second(_) => observed.await.is_ok(),
+        }
+    };
+    let token = if witnessed {
+        Some(PhysicalPresence { _private: () })
+    } else {
+        None
     };
     (button, token)
 }

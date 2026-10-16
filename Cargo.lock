@@ -2987,6 +2987,7 @@ dependencies = [
 name = "tulle"
 version = "0.2.0"
 dependencies = [
+ "embedded-io-async 0.7.0",
  "selvage",
  "serde_json",
  "serial2-tokio",

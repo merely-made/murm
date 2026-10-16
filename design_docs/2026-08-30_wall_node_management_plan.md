@@ -578,7 +578,13 @@ ordinary modem/RNode compatibility. Only pending, corrupt, unsafe, read, or
 runtime-failure outcomes are status-only. The control runtime is dropped after
 boot. The physical USB claim-only session is offered only after GPIO0 has been
 released, newly pressed, and held for three seconds within a 20-second
-post-boot window. It is literal ESP32-S3 USB Serial/JTAG, not UART. It permits
+post-boot window. On a fully blank board, a read-only ordinary USB query may
+select already-permitted ordinary service early. Its buffered bytes are
+replayed to the ordinary parser; they mint no presence or owner authority.
+First-owner/binary frames remain buffered for the existing physical gesture,
+and pending/corrupt control state cannot take this shortcut. Commissioning
+therefore uses the first-owner client before an ordinary modem client probes
+that boot. It is literal ESP32-S3 USB Serial/JTAG, not UART. It permits
 at most 45 seconds, eight complete KISS requests, and three parse failures;
 wall-time is checked before reads and responses, while read errors or zero
 length end safely. Terminal resume or abandon replies precede software reset.

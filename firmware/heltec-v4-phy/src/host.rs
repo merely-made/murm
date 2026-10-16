@@ -28,6 +28,9 @@
 use embedded_io_async::{Read, Write};
 use radio_hand::link::{HostLink, LinkFault};
 
+mod boot_rx;
+pub use boot_rx::BootRx;
+
 #[cfg(feature = "host-usb")]
 const DIAGNOSTIC_WRITE_DEADLINE: embassy_time::Duration = embassy_time::Duration::from_millis(250);
 #[cfg(feature = "host-usb")]
