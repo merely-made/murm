@@ -167,10 +167,10 @@ refuse an existing output file. Graphshell's Portable scenes imports the result
 with the shared renderer and inspection controls. These are application model
 and file-export paths, not a new native survey panel or a radio qualification.
 
-This branch requires Mere's portable-backdrop implementation. Before integration,
-qualify its local scene cohort with
-`python3 /path/to/mere/support/design-studies/backdrops/with_local_scene_source.py /path/to/mere test -p signalman --features portable-scenes --lib survey::`.
-The helper supplies temporary source patches, not tracked local paths.
+The portable-scene API is integrated in Mere's canonical `main` source.
+The committed lockfile pins the shared scene cohort, so the commands above
+need no temporary local source patches. Earlier local-cohort receipts remain
+historical evidence; ordinary checks use `--locked` and `portable-scenes`.
 
 ## License
 
