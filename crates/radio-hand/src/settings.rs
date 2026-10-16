@@ -26,7 +26,9 @@ pub use name::DeviceName;
 pub const IDENTITY_LEN: usize = 64;
 
 /// Bytes this module writes. Room for the identity and the fields after it.
-pub const ENCODED_LEN: usize = IDENTITY_LEN + 4 + 1 + name::MAX_NAME_LEN;
+// Board stores also derive their read buffers from this length. Both flash
+// adapters require word-aligned reads, including the otherwise unused tail.
+pub const ENCODED_LEN: usize = (IDENTITY_LEN + 4 + 1 + name::MAX_NAME_LEN + 3) & !3;
 
 /// Which personality the board boots into.
 ///
@@ -293,6 +295,11 @@ mod tests {
 
     #[test]
     fn names_extend_old_settings_without_changing_identity_or_preferences() {
+        assert_eq!(
+            ENCODED_LEN % 4,
+            0,
+            "board flash reads require word alignment"
+        );
         let mut settings = Settings::new(identity());
         settings.channel = Channel::Rnode;
         settings.region = crate::region::Region::Us915;
