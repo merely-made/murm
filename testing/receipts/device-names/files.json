@@ -1,0 +1,182 @@
+{
+  "alignment-tests.log": {
+    "bytes": 3472,
+    "sha256": "31442af60a17acea90216c95cc54e57f87252eba31dc3511f7b1b325a0a05da8"
+  },
+  "arm-aligned-build.log": {
+    "bytes": 2864,
+    "sha256": "ea9cfead498de57b1cf8ca28344af989b343f938fa8d28cceb38299ed3a488a3"
+  },
+  "arm-build.log": {
+    "bytes": 2778,
+    "sha256": "7ecf79ced8873a00490fb89c9f3317331297d09059a55e09e90a0a11086246dc"
+  },
+  "arm-clippy-final.log": {
+    "bytes": 2182,
+    "sha256": "0d96daad4bb387eee82b5f1968c3e27c3328a4cf7496df443c18008d874167e1"
+  },
+  "commands.json": {
+    "bytes": 3473,
+    "sha256": "ec89c2e1d06cfaee69097eae0acb726cde6f788d15d7ac37ee6b978d2a8ff050"
+  },
+  "device-names-arm-clippy.log": {
+    "bytes": 2594,
+    "sha256": "2881c680c2ad483b6e0bc189103896dd5e31e5feee0000894178340880295f43"
+  },
+  "device-names-v4-clippy-final.log": {
+    "bytes": 2522,
+    "sha256": "f07e2a8bfefad4ac52b483613d7548585ca1e31581b48a6152ded3b35098ed02"
+  },
+  "device-names-v4-clippy.log": {
+    "bytes": 7126,
+    "sha256": "0d7fc93d6faccbe209d367474a2b335d9bd380b488febd9c3c44e702d83a7b2b"
+  },
+  "dfu-aligned-boundaries.json": {
+    "bytes": 792,
+    "sha256": "2f8c43639ec2b2a4aa179fb3d879c3d9850647cc28e566c1b804d1981edf5ce0"
+  },
+  "dfu-aligned-package.log": {
+    "bytes": 65,
+    "sha256": "2c75af7e1550a12af3237ab23ffa3709b7d651b03e94e7d8c330f563a4b8d4f4"
+  },
+  "dfu-boundaries.json": {
+    "bytes": 969,
+    "sha256": "073d5ebc299b8da17dbeea724d9bba6f7e3a44e7024db2c7812ea376ef619bcb"
+  },
+  "dfu-package.log": {
+    "bytes": 57,
+    "sha256": "3d8f1789e62af325a43f6c0dd4ac2057358055ad20a0c3fac152e2e36b213449"
+  },
+  "flash-policy.log": {
+    "bytes": 258,
+    "sha256": "136b91388117fe91efe980c491b721006961fe7dcb24bf5dbac6bcf23d6b5600"
+  },
+  "format.log": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "host-clippy-final.log": {
+    "bytes": 2090,
+    "sha256": "e05ce72fa58d740c80d240c7a6957f58d3f975b8efd101889ed4996697fe46af"
+  },
+  "host-final.log": {
+    "bytes": 15133,
+    "sha256": "a8cb6df88681f6d1e0046db5fea782de078b863ea5654ad42b0f186a83382f65"
+  },
+  "host-initial.log": {
+    "bytes": 17296,
+    "sha256": "8dd8a8b281940da1fc22fc858404baa71e3121001ebddb50afae46242f3d53e6"
+  },
+  "loc.log": {
+    "bytes": 613,
+    "sha256": "bf2b790a166a745ce351137fa910fc43c7dd273b921c33d34048964ae4d001af"
+  },
+  "preinstall.json": {
+    "bytes": 1897,
+    "sha256": "11142bda059f2f206312fd286e9371cc17eb9215f793fafa0b788a49ed63a9be"
+  },
+  "qualification.json": {
+    "bytes": 5972,
+    "sha256": "ccbe811ba42c842e864cef0990215731d2e75ef5ad9efcac1d0f79bc35655567"
+  },
+  "README.md": {
+    "bytes": 4513,
+    "sha256": "1292941076c8d13c030b85433f74b3b611d85842a9fea2a276a3ba3fe707ca1a"
+  },
+  "registry.log": {
+    "bytes": 120,
+    "sha256": "46cde9b3278123a66d22c8c3f1550ccf7bf91cd805d04cc42f19c1b240f5e501"
+  },
+  "sb1-aligned-install.log": {
+    "bytes": 392,
+    "sha256": "e22fc7a299b29734d0b35b65f6586e0f3d8b6fc180dcaf1bca9f70a7ffbc6df1"
+  },
+  "sb1-aligned-provision.json": {
+    "bytes": 2608,
+    "sha256": "657bbe419761c8b62ab15c6c13c9a0154092d0505dd9542933becad012086006"
+  },
+  "sb1-aligned-provision.log": {
+    "bytes": 2608,
+    "sha256": "657bbe419761c8b62ab15c6c13c9a0154092d0505dd9542933becad012086006"
+  },
+  "sb1-install.log": {
+    "bytes": 392,
+    "sha256": "767dd062f31d9a457407959cc7d0693005ffc374b160d8e04810c9a02d81a867"
+  },
+  "sb1-provision.json": {
+    "bytes": 1184,
+    "sha256": "256d15a5fe4a9cdd29bdcc4ebe3071f29bfa03cc12b536e20fa8b1de7f3227ad"
+  },
+  "sb1-provision.log": {
+    "bytes": 1184,
+    "sha256": "256d15a5fe4a9cdd29bdcc4ebe3071f29bfa03cc12b536e20fa8b1de7f3227ad"
+  },
+  "sb1-refusal-state-read.log": {
+    "bytes": 265,
+    "sha256": "ab39ed3c30934a8f025f3522c75ff8a2a6a74f0830d51adf84bf54e38290c3b1"
+  },
+  "sb2-install.log": {
+    "bytes": 392,
+    "sha256": "c2d836cb832e8e71c3eb3d2b7b3ed475f7ee9d7a1c82fac76e9b1ecb32c430a0"
+  },
+  "sb2-provision.json": {
+    "bytes": 576,
+    "sha256": "44f399dd1b9bfcd9ef902b2198470d8a8137bdd0ed6161ef02213c60dd324e88"
+  },
+  "sb2-provision.log": {
+    "bytes": 576,
+    "sha256": "44f399dd1b9bfcd9ef902b2198470d8a8137bdd0ed6161ef02213c60dd324e88"
+  },
+  "sb2-readonly-verified.json": {
+    "bytes": 2167,
+    "sha256": "24a1717292d5725266f131d63dbfe8f7b29e65493ad4653871703fbdfb2cddfc"
+  },
+  "sb2-readonly-verified.log": {
+    "bytes": 2167,
+    "sha256": "24a1717292d5725266f131d63dbfe8f7b29e65493ad4653871703fbdfb2cddfc"
+  },
+  "sb2-reconnected-provision.json": {
+    "bytes": 1719,
+    "sha256": "85c2dc231b9b56fbec04fe770bca61b41288bb0bf6f24c865c5cf9331e2c3170"
+  },
+  "sb2-reconnected-provision.log": {
+    "bytes": 1719,
+    "sha256": "85c2dc231b9b56fbec04fe770bca61b41288bb0bf6f24c865c5cf9331e2c3170"
+  },
+  "t114-handoff-install.log": {
+    "bytes": 241,
+    "sha256": "1cc5f8d75af964803a58f20839817163b44bdfea60cee54de3c2c9ff405270bc"
+  },
+  "t114-install.log": {
+    "bytes": 974,
+    "sha256": "537ce22bdbaa5423fb7281aea271acf193539b842adc038eb84f920aaa4997c6"
+  },
+  "t114-provision.json": {
+    "bytes": 3055,
+    "sha256": "5adc1bdc704fc8b95d49a5590e37a84fe7b63620a2460a457772d012576f5570"
+  },
+  "t114-provision.log": {
+    "bytes": 3055,
+    "sha256": "5adc1bdc704fc8b95d49a5590e37a84fe7b63620a2460a457772d012576f5570"
+  },
+  "unsafe.log": {
+    "bytes": 82,
+    "sha256": "eaaefb0b8d3f00298984585f158d8405bac07830a5e6a183742fa77c409cb263"
+  },
+  "v4-aligned-build.log": {
+    "bytes": 4316,
+    "sha256": "302d6eb9714ca135dcc0fa34591a6c5d9023007419687a2d68cf2d753622ce43"
+  },
+  "v4-aligned-image.log": {
+    "bytes": 132,
+    "sha256": "38527767512961c869dcc5f0c14346e73859a68c0ce0ba32cc52f81c83398d10"
+  },
+  "v4-build.log": {
+    "bytes": 4230,
+    "sha256": "297479d10d16330aa9707f0098c25ebefc6f10fb4f420ef5c6172ea379677d48"
+  },
+  "v4-clippy-final.log": {
+    "bytes": 2192,
+    "sha256": "1e95a18037580dca35eff1cab8759e59cb098c57d9624103e33ed19a4d3a3f59"
+  }
+}
