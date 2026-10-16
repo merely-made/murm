@@ -68,6 +68,13 @@ fn info(number: u8) -> Vec<u8> {
 /// malformed/refused inputs, and coexisting logical ACK and physical work.
 /// Temporary synthetic peers count toward the peak, and no radio is used.
 pub fn workload() -> Residents {
+    workload_with_checkpoint(|| {})
+}
+
+/// Same workload with a bounded supervisor checkpoint between private frames.
+/// This does not poll USB/radio tasks or qualify service scheduling under load.
+pub fn workload_with_checkpoint(checkpoint: fn()) -> Residents {
+    checkpoint();
     let super::Residents {
         retinue,
         channel,
@@ -76,7 +83,8 @@ pub fn workload() -> Residents {
         flood,
         directory,
         pending,
-    } = super::workload();
+    } = super::workload_with_checkpoint(checkpoint);
+    checkpoint();
     drop((ids, flood, directory, pending));
     let mut tucket = Instance::new(tucket, InstanceConfig::new(2, 1000).unwrap());
     let peers: Vec<_> = (0..=u8::MAX)
@@ -135,6 +143,7 @@ pub fn workload() -> Residents {
     assert_eq!(plain.len(), sennet::pki::MAX_PLAINTEXT);
     let mut last = Vec::new();
     for n in 0..(PRIVATE_SEEN * 4) {
+        checkpoint();
         let now = n as u64 * 10;
         last = peer
             .seal_packet(header(22, 11, 1000 + n as u32), [n as u8; 4], &plain)
@@ -157,6 +166,7 @@ pub fn workload() -> Residents {
             .unwrap();
     }
     let now = PRIVATE_SEEN as u64 * 40;
+    checkpoint();
     let id = sennet
         .queue_directed_text(now, header(0, 22, 0), &text, [0xa5; 4])
         .unwrap();

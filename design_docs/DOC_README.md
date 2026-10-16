@@ -6,8 +6,14 @@ first, Retinue next and Sennet's full product surface last; records measured
 V4/T114 memory scopes and requires a current combined-image memory refresh
 before wider firmware claims. The [current host/target memory checkpoint](../testing/receipts/protocol-parity-memory/README.md)
 passes maximum-PKI retained workloads, fragmented 48/64 KiB host allocator
-campaigns and both target capacity links. On-device peak/stack/fault and reserve
-acceptance remain open; no firmware was installed for this checkpoint.
+campaigns and both target capacity links. That build-only checkpoint supplies no
+on-device peak/stack/fault or reserve acceptance and installs no firmware.
+The subsequent [physical memory continuation](../testing/receipts/protocol-parity-memory/physical/README.md)
+passes sixteen fragmented allocator rounds on T114 and V4, both peaking at
+18452 occupied bytes with complete release and exact refusal counts. The
+separate-task diagnostic avoids a verified T114 stack overrun. V4's 97344-byte
+main-stack sample leaves only 10616 bytes in its linker region, so actual
+high-water and explicit reserve acceptance remain open.
 
 Sennet directed carriage (2026-10-16):
 [R8](2026-10-13_murm_family_move_plan.md#r8--sennet-directed-text-and-delivery-acks-2026-10-16-functional-pass)

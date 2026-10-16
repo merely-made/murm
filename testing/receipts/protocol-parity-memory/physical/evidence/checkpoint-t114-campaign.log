@@ -1,0 +1,40 @@
+{
+  "board": "t114",
+  "usb": [
+    6421,
+    21023,
+    "TULLE-T114-01"
+  ],
+  "port": "COM10",
+  "requested_rounds": 16,
+  "responses": [
+    {
+      "command": "status",
+      "response": "tulle/t114 phy online; version=0.0.1; sx1262 online; spi=software; irq=poll; sync=2b reg=24b4; region=US915 freq=906875000 reset=watchdog crash=2 timebase=inactive; build=280e40dd34c-memory-bench-checkpoint; image=t114-native\r\n",
+      "seconds": 1.585
+    },
+    {
+      "command": "region",
+      "response": "region=US915\r\n",
+      "seconds": 1.569
+    },
+    {
+      "command": "channel",
+      "response": "channel=modem\r\n",
+      "seconds": 1.573
+    },
+    {
+      "command": "sync",
+      "response": "2b 24b4\r\n",
+      "seconds": 1.576
+    },
+    {
+      "command": "protocol memory",
+      "response": ""
+    }
+  ],
+  "passed": false,
+  "stack_scope": "point-in-time samples only; no high-water claim",
+  "attached": "tulle/t114 phy online; version=0.0.1; sx1262 online; spi=software; irq=poll; sync=2b reg=24b4; region=US915 freq=906875000 reset=watchdog crash=2 timebase=inactive; build=280e40dd34c-memory-bench-checkpoint; image=t114-native\r\nidentity=loaded slot=B seq=93\r\nnode=599997c8 heap=0/49152 highwater=24\r\n",
+  "error": "SerialException(\"ClearCommError failed (PermissionError(13, 'The device does not recognize the command.', None, 22))\")"
+}

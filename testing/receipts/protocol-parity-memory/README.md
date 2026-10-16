@@ -114,3 +114,8 @@ Next: select reviewed board reserve margins and run current-image on-device
 heap/fragmentation and real task/interrupt stack measurements, then queue/driver
 pressure and restart/fault cases. Full parity, unattended firmware acceptance
 and phase 2 completion are not claimed by this checkpoint.
+
+The later [on-device continuation](physical/README.md) installs explicit bench
+images, records sixteen allocator rounds on both board models, and preserves
+the failed attempts and restoration scopes separately. Its stack samples and
+remaining reserve gate do not amend this original build-only receipt.

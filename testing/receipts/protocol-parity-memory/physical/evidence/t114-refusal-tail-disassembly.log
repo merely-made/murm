@@ -1,0 +1,111 @@
+
+validation/results/protocol-parity-memory/t114-physical.elf:	file format elf32-littlearm
+
+Disassembly of section .text:
+
+0005b262 <protocol_capacity_probe::target_round::run>:
+   5c530: 9c07         	ldr	r4, [sp, #0x1c]
+   5c532: 2204         	movs	r2, #0x4
+   5c534: 2308         	movs	r3, #0x8
+   5c536: e9d4 013e    	ldrd	r0, r1, [r4, #248]
+   5c53a: f017 f817    	bl	0x7356c <<alloc::raw_vec::RawVecInner>::deallocate> @ imm = #0x1702e
+   5c53e: f242 5090    	movw	r0, #0x2590
+   5c542: 4428         	add	r0, r5
+   5c544: f008 fba3    	bl	0x64c8e <<alloc::collections::btree::map::BTreeMap<u32, sennet::node_info::OwnedUser> as core::ops::drop::Drop>::drop> @ imm = #0x8746
+   5c548: f8d4 00a8    	ldr.w	r0, [r4, #0xa8]
+   5c54c: b930         	cbnz	r0, 0x5c55c <protocol_capacity_probe::target_round::run+0x12fa> @ imm = #0xc
+   5c54e: 9807         	ldr	r0, [sp, #0x1c]
+   5c550: 2201         	movs	r2, #0x1
+   5c552: 2301         	movs	r3, #0x1
+   5c554: e9d0 012c    	ldrd	r0, r1, [r0, #176]
+   5c558: f02b fbcb    	bl	0x87cf2 <<alloc::raw_vec::RawVecInner>::deallocate> @ imm = #0x2b796
+   5c55c: 9807         	ldr	r0, [sp, #0x1c]
+   5c55e: e9d0 0100    	ldrd	r0, r1, [r0]
+   5c562: 4008         	ands	r0, r1
+   5c564: 3001         	adds	r0, #0x1
+   5c566: d010         	beq	0x5c58a <protocol_capacity_probe::target_round::run+0x1328> @ imm = #0x20
+   5c568: f242 4078    	movw	r0, #0x2478
+   5c56c: 2100         	movs	r1, #0x0
+   5c56e: 4428         	add	r0, r5
+   5c570: 2200         	movs	r2, #0x0
+   5c572: 5481         	strb	r1, [r0, r2]
+   5c574: 1883         	adds	r3, r0, r2
+   5c576: 3201         	adds	r2, #0x1
+   5c578: 2a20         	cmp	r2, #0x20
+   5c57a: d1fa         	bne	0x5c572 <protocol_capacity_probe::target_round::run+0x1310> @ imm = #-0xc
+   5c57c: 9807         	ldr	r0, [sp, #0x1c]
+   5c57e: 2204         	movs	r2, #0x4
+   5c580: 2304         	movs	r3, #0x4
+   5c582: e9d0 0108    	ldrd	r0, r1, [r0, #32]
+   5c586: f016 fff1    	bl	0x7356c <<alloc::raw_vec::RawVecInner>::deallocate> @ imm = #0x16fe2
+   5c58a: f242 50d8    	movw	r0, #0x25d8
+   5c58e: 4428         	add	r0, r5
+   5c590: f7fd fd8e    	bl	0x5a0b0 <core::ptr::drop_glue::<tucket::node::state::Node>> @ imm = #-0x24e4
+   5c594: 9807         	ldr	r0, [sp, #0x1c]
+   5c596: e9d0 14bd    	ldrd	r1, r4, [r0, #756]
+   5c59a: b164         	cbz	r4, 0x5c5b6 <protocol_capacity_probe::target_round::run+0x1354> @ imm = #0x18
+   5c59c: 1d0d         	adds	r5, r1, #0x4
+   5c59e: e955 0101    	ldrd	r0, r1, [r5, #-4]
+   5c5a2: 2201         	movs	r2, #0x1
+   5c5a4: 2301         	movs	r3, #0x1
+   5c5a6: f02b fba4    	bl	0x87cf2 <<alloc::raw_vec::RawVecInner>::deallocate> @ imm = #0x2b748
+   5c5aa: 3548         	adds	r5, #0x48
+   5c5ac: 3c01         	subs	r4, #0x1
+   5c5ae: d1f6         	bne	0x5c59e <protocol_capacity_probe::target_round::run+0x133c> @ imm = #-0x14
+   5c5b0: 9807         	ldr	r0, [sp, #0x1c]
+   5c5b2: f8d0 12f4    	ldr.w	r1, [r0, #0x2f4]
+   5c5b6: 9807         	ldr	r0, [sp, #0x1c]
+   5c5b8: 2208         	movs	r2, #0x8
+   5c5ba: 2348         	movs	r3, #0x48
+   5c5bc: f8d0 02f0    	ldr.w	r0, [r0, #0x2f0]
+   5c5c0: f02b fb97    	bl	0x87cf2 <<alloc::raw_vec::RawVecInner>::deallocate> @ imm = #0x2b72e
+   5c5c4: f7f9 fbb6    	bl	0x55d34 <<embedded_alloc::llff::Heap>::used> @ imm = #-0x6894
+   5c5c8: 9906         	ldr	r1, [sp, #0x18]
+   5c5ca: f8cb 0000    	str.w	r0, [r11]
+   5c5ce: 4288         	cmp	r0, r1
+   5c5d0: d141         	bne	0x5c656 <protocol_capacity_probe::target_round::run+0x13f4> @ imm = #0x82
+   5c5d2: f64a 40b8    	movw	r0, #0xacb8
+   5c5d6: f64a 42dc    	movw	r2, #0xacdc
+   5c5da: f2c0 0009    	movt	r0, #0x9
+   5c5de: f2c0 0209    	movt	r2, #0x9
+   5c5e2: 2147         	movs	r1, #0x47
+   5c5e4: f7ef ff32    	bl	0x4c44c <core::panicking::panic_fmt> @ imm = #-0x1019c
+   5c5e8: f64a 7004    	movw	r0, #0xaf04
+   5c5ec: f64a 7270    	movw	r2, #0xaf70
+   5c5f0: f2c0 0009    	movt	r0, #0x9
+   5c5f4: f2c0 0209    	movt	r2, #0x9
+   5c5f8: 2169         	movs	r1, #0x69
+   5c5fa: f7f0 fe68    	bl	0x4d2ce <core::panicking::panic> @ imm = #-0xf330
+   5c5fe: f64a 50f0    	movw	r0, #0xadf0
+   5c602: f64a 6228    	movw	r2, #0xae28
+   5c606: f2c0 0009    	movt	r0, #0x9
+   5c60a: f2c0 0209    	movt	r2, #0x9
+   5c60e: 2135         	movs	r1, #0x35
+   5c610: f7f0 fe5d    	bl	0x4d2ce <core::panicking::panic> @ imm = #-0xf346
+   5c614: 990c         	ldr	r1, [sp, #0x30]
+   5c616: f64a 6238    	movw	r2, #0xae38
+   5c61a: f2c0 0209    	movt	r2, #0x9
+   5c61e: 2010         	movs	r0, #0x10
+   5c620: f7f0 ff14    	bl	0x4d44c <core::panicking::panic_bounds_check> @ imm = #-0xf1d8
+   5c624: a810         	add	r0, sp, #0x40
+   5c626: f000 f825    	bl	0x5c674 <core::ptr::drop_glue::<core::result::Result<sennet::instance::types::ReceiveOutcome, sennet::instance::error::InstanceError>>> @ imm = #0x4a
+   5c62a: f64a 6048    	movw	r0, #0xae48
+   5c62e: f64a 6284    	movw	r2, #0xae84
+   5c632: f2c0 0009    	movt	r0, #0x9
+   5c636: f2c0 0209    	movt	r2, #0x9
+   5c63a: 213c         	movs	r1, #0x3c
+   5c63c: f7f0 fe47    	bl	0x4d2ce <core::panicking::panic> @ imm = #-0xf372
+   5c640: f64a 6094    	movw	r0, #0xae94
+   5c644: f64a 62f4    	movw	r2, #0xaef4
+   5c648: f2c0 0009    	movt	r0, #0x9
+   5c64c: f2c0 0209    	movt	r2, #0x9
+   5c650: 2160         	movs	r1, #0x60
+   5c652: f7f0 fe3c    	bl	0x4d2ce <core::panicking::panic> @ imm = #-0xf388
+   5c656: f10d 0e10    	add.w	lr, sp, #0x10
+   5c65a: f64a 4284    	movw	r2, #0xac84
+   5c65e: f64a 43a8    	movw	r3, #0xaca8
+   5c662: f50e 501e    	add.w	r0, lr, #0x2780
+   5c666: a90f         	add	r1, sp, #0x3c
+   5c668: f2c0 0209    	movt	r2, #0x9
+   5c66c: f2c0 0309    	movt	r3, #0x9
+   5c670: f7f0 fade    	bl	0x4cc30 <core::panicking::assert_failed::<usize, usize>> @ imm = #-0xfa44

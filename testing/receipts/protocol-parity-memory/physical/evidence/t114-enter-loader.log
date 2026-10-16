@@ -1,0 +1,14 @@
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+    import serial,time,json; from serial.tools.list_ports import comports; p=next(p for p in comports() if p.device=='COM10'); assert (p.vid,p.pid,p.serial_number)==(0x1915,0x521f,'TULLE-T114-01'); s=serial.Serial('COM10',115200,timeout=.2,write_timeout=2); s.dtr=True; time.sleep(.3); print(s.read(4096).decode(errors='replace')); s.write(b'bootloader\n'); s.flush(); time.sleep(.3); print(s.read(4096).decode(errors='replace')); s.close(); time.sleep(2); print(json.dumps([(p.device,p.vid,p.pid,p.serial_number,p.location) for p in comports()]))
+                                                                                                                                                                                                                                                                                                                                                                                                       ~~~~~~^^^^^^
+tulle/t114 phy online; version=0.0.1; sx1262 online; spi=software; irq=poll; sync=2b reg=24b4; region=US915 freq=906875000 reset=soft crash=0 timebase=inactive; build=711816a8124bd58cd8cc314ec4de5009be7df166; image=t114-native
+
+identity=loaded slot=B seq=93
+
+node=599997c8 heap=0/49152 highwater=24
+
+
+  File "C:\Users\mark_\Code\repos\retinue\validation\results\sennet-tucket-radios\stock-cli\Lib\site-packages\serial\serialwin32.py", line 275, in read
+    raise SerialException("ClearCommError failed ({!r})".format(ctypes.WinError()))
+serial.serialutil.SerialException: ClearCommError failed (PermissionError(13, 'The device does not recognize the command.', None, 22))

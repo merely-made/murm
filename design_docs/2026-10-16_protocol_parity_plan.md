@@ -1,7 +1,7 @@
 # Protocol and firmware feature parity
 
-**Date:** 2026-10-16. **Status:** in progress; current host/target memory build
-checkpoint passed, with physical peak/stack/reserve acceptance open. The owner
+**Date:** 2026-10-16. **Status:** in progress; host/target builds and on-device
+heap campaigns passed, with actual stack high-water/reserve acceptance open. The owner
 approved proceeding after the proposal. The owner asked about parity for Sennet/Meshtastic,
 Tucket/MeshCore and Retinue/Reticulum, relative difficulty, firmware and board
 memory. This plan proposes ordering and measurable completion conditions.
@@ -95,6 +95,18 @@ fixture's October 2 receipt records a different host workload peak of 18380
 requested bytes and an Xtensa inline resident layout of 3744 bytes; neither is
 a target allocator/stack measurement. Preserve those distinct scopes.
 
+The [on-device continuation](../testing/receipts/protocol-parity-memory/physical/README.md)
+now measures the named combined diagnostic profile on T114 and the COM6 V4.
+Both complete sixteen fragmented rounds with an occupied peak of 18452 bytes,
+zero occupancy after each round, sixteen deliberate oversize refusals and no
+unexpected refusals. T114's heap is 49152 bytes; V4's is 65536. The diagnostic
+runs from a separate executor task after a nested-stack version overflowed
+T114's stack. These are synthetic retained states inside real firmware, not
+simultaneous three-network traffic or the live full radio-hand Runtime.
+V4's main-handler stack sample is 97344/107960 bytes, leaving only 10616;
+T114's lowest worker checkpoint samples 61344/84932. Neither is true high-water.
+Heap fit therefore does not close the whole-image memory or reserve gate.
+
 PSRAM is not credited to the current firmware heap budget: its allocator is an
 internal static array and no external-memory allocation path is qualified.
 Physical flash is likewise not all freely usable application space. Keep
@@ -172,3 +184,15 @@ even while only one protocol is using the SX1262.
   for exact artifacts, source hashes, compiler exception, workload and limits.
   No image is installed and no serial port opened. This closes the fresh
   host/build slice, not phase 2's on-device peak, stack, faults or reserve gate.
+- 2026-10-16: the separate physical continuation passes the sixteen-round
+  allocation/fragmentation/refusal campaign on T114 and COM6 V4. Their common
+  occupied peak is 18452 bytes; allocations return to zero every round.
+  A direct allocator call avoids LLVM eliding the refusal test, and a separate
+  executor task avoids nesting the fixture on the large normal poll stack.
+  Failed attempts, target crash/disassembly evidence, the attended T114 DFU
+  watchdog bridge, exact V4 application/state comparisons and T114 live
+  identity/profile restoration checks remain individually recorded. COM7's
+  post-flash USB problem is tracked separately and supplies no successful
+  memory result. Phase 2 still requires real task/interrupt stack high-water,
+  pressure/restart/fault coverage and selected reserve margins. See the
+  [physical receipt](../testing/receipts/protocol-parity-memory/physical/README.md).

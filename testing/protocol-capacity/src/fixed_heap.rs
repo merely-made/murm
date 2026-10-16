@@ -44,10 +44,22 @@ unsafe impl GlobalAlloc for Tracked {
 }
 
 fn main() {
+    let target_rounds = std::env::args_os().any(|arg| arg == "--target-rounds");
     // SAFETY: exclusive single initialization before any LLFF allocation. The
     // aligned static buffer outlives all of them and ACTIVE is never reset.
     unsafe { HEAP.init(core::ptr::addr_of_mut!(STORAGE).cast::<u8>() as usize, HEAP_BYTES) };
     ACTIVE.store(true, Relaxed);
+    if target_rounds {
+        let mut last = [0; 4];
+        for _ in 0..16 {
+            last = protocol_capacity_probe::target_round::run(|| HEAP.used(), direct_refusal, || {});
+        }
+        assert_eq!(FAILURES.load(Relaxed), 16);
+        assert_eq!(HEAP.used(), 0);
+        let peak = PEAK.load(Relaxed);
+        println!("{{\"scope\":\"host_shared_target_round_not_target_runtime\",\"heap_capacity\":{HEAP_BYTES},\"rounds\":16,\"occupied_peak\":{peak},\"expected_refusals\":16,\"last\":{last:?}}}");
+        return;
+    }
     let mut holes: Vec<Option<Vec<u8>>> = (0..32).map(|_| Some(vec![0x5a; 257])).collect();
     for slot in holes.iter_mut().step_by(2) { *slot = None; }
     let baseline = HEAP.used();
@@ -64,8 +76,8 @@ fn main() {
     // SAFETY: deliberately oversized valid layout. A non-null result would be
     // released with the same allocator/layout before asserting the test failure.
     let layout = Layout::from_size_align(HEAP_BYTES * 2, 16).unwrap();
-    let denied = unsafe { std::alloc::alloc(layout) };
-    if !denied.is_null() { unsafe { std::alloc::dealloc(denied, layout) }; }
+    let denied = unsafe { ALLOCATOR.alloc(layout) };
+    if !denied.is_null() { unsafe { ALLOCATOR.dealloc(denied, layout) }; }
     assert!(denied.is_null());
     assert_eq!(HEAP.used(), before_refusal);
     assert_eq!(FAILURES.load(Relaxed), 1);
@@ -73,4 +85,13 @@ fn main() {
     assert_eq!(HEAP.used(), 0);
     let peak = PEAK.load(Relaxed);
     println!("{{\"scope\":\"host_LLFF_simulation_not_target_runtime\",\"heap_capacity\":{HEAP_BYTES},\"rounds\":16,\"fragmented_baseline_occupied\":{baseline},\"retained_workload_occupied\":{retained},\"occupied_peak\":{peak},\"expected_allocation_refusals\":1,\"unexpected_allocation_refusals\":0,\"after_drop_occupied\":0}}");
+}
+
+fn direct_refusal() -> bool {
+    let layout = Layout::from_size_align(HEAP_BYTES * 2, 16).unwrap();
+    // SAFETY: direct initialized allocator call, valid layout, and any unexpected
+    // success is released immediately using its exact original layout.
+    let ptr = unsafe { ALLOCATOR.alloc(layout) };
+    if !ptr.is_null() { unsafe { ALLOCATOR.dealloc(ptr, layout) }; }
+    ptr.is_null()
 }

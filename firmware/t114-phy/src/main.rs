@@ -108,7 +108,7 @@ async fn main(spawner: Spawner) {
     control_fixture::verify();
     // First statement: everything after this may allocate.
     // SAFETY: called once, before any allocation.
-    unsafe { heap::init() };
+    unsafe { heap::init(spawner) };
 
     // Crash residue first: reset reason, crash count, and whether to distrust the channel.
     let boot_crash = crash::on_boot();

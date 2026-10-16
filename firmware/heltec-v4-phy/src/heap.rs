@@ -7,6 +7,9 @@ use core::alloc::{GlobalAlloc, Layout};
 use core::sync::atomic::{AtomicUsize, Ordering};
 use embedded_alloc::LlffHeap;
 
+#[cfg(feature = "memory-bench")]
+pub mod memory_bench;
+
 pub const HEAP_BYTES: usize = 64 * 1024;
 
 #[cfg_attr(not(test), global_allocator)]
@@ -99,12 +102,16 @@ unsafe impl GlobalAlloc for TrackingHeap {
 }
 
 /// Initialize the fixed heap exactly once before resident state or tasks are constructed.
-pub unsafe fn init() {
+pub unsafe fn init(spawner: embassy_executor::Spawner) {
     // SAFETY: this region is exclusively owned by HEAP and this is the sole startup caller.
     unsafe {
         HEAP.inner
             .init(core::ptr::addr_of_mut!(HEAP_STORAGE) as usize, HEAP_BYTES);
     }
+    #[cfg(feature = "memory-bench")]
+    spawner.spawn(memory_bench::worker().expect("one memory worker"));
+    #[cfg(not(feature = "memory-bench"))]
+    let _ = spawner;
 }
 
 pub fn capacity() -> usize {
@@ -124,6 +131,21 @@ pub fn allocator_used_peak() -> usize {
 }
 pub fn allocation_failures() -> usize {
     HEAP.allocation_failures.load(Ordering::Relaxed)
+}
+
+/// Direct bench-only refusal, bypassing the optimizer's global allocation shim.
+#[cfg(feature = "memory-bench")]
+#[inline(never)]
+pub fn bench_refuse_oversize() -> bool {
+    let layout = Layout::from_size_align(HEAP_BYTES * 2, 16).unwrap();
+    // SAFETY: initialized allocator, valid layout. A successful allocation is
+    // released with the exact same layout before reporting the failed test.
+    let pointer = unsafe { HEAP.alloc(layout) };
+    if !pointer.is_null() {
+        // SAFETY: this is the live allocation returned immediately above.
+        unsafe { HEAP.dealloc(pointer, layout) };
+    }
+    pointer.is_null()
 }
 
 /// Current stack pointer, used with the linker-provided CPU0 main-task bounds below.

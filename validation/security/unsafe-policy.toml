@@ -20,9 +20,9 @@ review_by = "2027-10-16"
 
 [[exception]]
 path = "firmware/t114-phy/src/heap.rs"
-expected_unsafe = 9
-reason = "One-time fixed-allocator initialization, plus the TrackingHeap high-water wrapper: an unsafe GlobalAlloc impl whose alloc/dealloc/init forward to the wrapped LlffHeap under the caller's contract."
-review_by = "2027-08-26"
+expected_unsafe = 11
+reason = "One-time fixed-allocator initialization and TrackingHeap forwarding. Bench-only direct oversize allocation/refusal avoids global-shim allocation elision; any unexpected success is released with its exact layout."
+review_by = "2027-10-16"
 
 [[exception]]
 path = "firmware/t114-phy/src/crash.rs"
@@ -98,9 +98,9 @@ review_by = "2027-09-13"
 
 [[exception]]
 path = "firmware/heltec-v4-phy/src/heap.rs"
-expected_unsafe = 19
-reason = "The optional resident-protocols image owns one fixed LLFF heap and a narrowly scoped GlobalAlloc accounting wrapper; Xtensa sampled-SP diagnostics use linker-provided CPU0 bounds, while focused tests exercise the real local allocator and pointer operations."
-review_by = "2027-09-13"
+expected_unsafe = 21
+reason = "Fixed LLFF heap, GlobalAlloc accounting, and linker-bounded sampled SP. Bench-only direct oversize allocation/refusal avoids global-shim elision; an unexpected success is released with its exact layout. Focused tests exercise the local allocator."
+review_by = "2027-10-16"
 
 [[exception]]
 path = "firmware/heltec-v4-phy/examples/protocol_capacity.rs"
