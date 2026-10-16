@@ -47,7 +47,12 @@ fn render_status<P>(
 where
     P: Painter,
 {
-    header(target, layout, theme, "STATUS", radio_label(local.radio))?;
+    let title = if local.device_name.is_empty() {
+        "STATUS"
+    } else {
+        local.device_name.as_str()
+    };
+    header(target, layout, theme, title, radio_label(local.radio))?;
     field(
         target,
         layout,

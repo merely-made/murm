@@ -214,6 +214,8 @@ pub enum GnssState {
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct LocalStatus {
+    /// Public board-local label, supplied by firmware settings rather than the host.
+    pub device_name: Text<16>,
     pub board: Text<16>,
     pub firmware: Text<12>,
     pub uptime_secs: u32,

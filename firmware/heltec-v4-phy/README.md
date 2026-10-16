@@ -14,6 +14,13 @@ cargo +esp build -p tulle-heltec-v4-phy --release --target xtensa-esp32s3-none-e
 
 ## On-device status face
 
+`name` reports the public device label. `name set SB1` saves up to 16 printable
+ASCII characters and reboots; `name clear` clears the label. Leading/trailing
+spaces are refused. The boot and default status titles show the saved name,
+and USB `status` includes it. Setting the same name again does not write flash
+or reboot. The name is separate from relay identity and RF profile; older
+settings upgrade without changing the identity, region or channel.
+
 The default USB image drives the fitted 128×64 OLED through `radio-face`:
 
 - GPIO17: OLED SDA

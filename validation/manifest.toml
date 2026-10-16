@@ -283,6 +283,11 @@ reason = "Attended target memory campaign; exact USB identities and separately i
 expires = "2026-11-01"
 
 [[asset_exemption]]
+path = "testing/device_names.py"
+reason = "Attended device-label provisioning; requires identified hardware and separately qualified named firmware. Physical receipt owns execution."
+expires = "2027-01-16"
+
+[[asset_exemption]]
 path = "testing/receipts/protocol-parity-memory/physical/source/board_probe_t114.py"
 reason = "Frozen attended physical-memory evidence source; not an automatic hardware test."
 expires = "2027-01-16"

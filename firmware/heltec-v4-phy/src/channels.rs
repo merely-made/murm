@@ -24,6 +24,8 @@ use radio_hand::settings::{Channel as BootChannel, Settings};
 
 use crate::{power, radio_owner::V4RadioOwner, store, ui};
 
+mod name;
+
 /// What a `region` line asked for: report, or set-and-reboot.
 pub fn region_probe(packet: &[u8]) -> Option<Option<Region>> {
     let line = packet
@@ -248,6 +250,10 @@ pub async fn probe<L: HostLink>(
     store: &mut store::SettingsStore,
     host: &mut L,
 ) -> Outcome {
+    if let Some(command) = radio_hand::settings::name::NameCommand::parse(packet) {
+        name::serve(command, settings, store, host).await;
+        return Outcome::Served;
+    }
     #[cfg(feature = "memory-bench")]
     if packet == b"protocol memory\n" || packet == b"protocol memory\r\n" {
         use core::fmt::Write as _;
@@ -275,6 +281,13 @@ pub async fn probe<L: HostLink>(
     if packet == b"status\n" || packet == b"status\r\n" {
         let _ = host.write_all(online).await;
         let _ = host.write_all(identity_line).await;
+        let _ = host
+            .write_all(
+                radio_hand::settings::name::report(settings)
+                    .as_str()
+                    .as_bytes(),
+            )
+            .await;
         return Outcome::Served;
     }
     if packet == b"sync\n" || packet == b"sync\r\n" {
