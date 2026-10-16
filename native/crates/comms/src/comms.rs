@@ -14,7 +14,7 @@
 
 use crate::adapter::{AdapterError, ProtocolAdapter};
 use crate::model::{
-    Conversation, ConversationId, Draft, Identity, Message, MessageId, ProtocolKind,
+    Conversation, ConversationId, DeliveryStatus, Draft, Identity, Message, MessageId, ProtocolKind,
 };
 
 /// A backend that failed during [`Comms::inbox`], paired with its protocol so the
@@ -110,6 +110,17 @@ impl Comms {
             AdapterError::Unsupported("draft has no target conversation".to_string())
         })?;
         self.adapter_for(conversation.protocol)?.send(draft).await
+    }
+
+    /// Read the owning backend's delivery observation for one message.
+    pub async fn delivery_status(
+        &self,
+        conversation: &ConversationId,
+        message: &MessageId,
+    ) -> Result<DeliveryStatus, AdapterError> {
+        self.adapter_for(conversation.protocol)?
+            .delivery_status(conversation, message)
+            .await
     }
 
     /// The adapter serving `protocol`, or `Unsupported` if none is registered.

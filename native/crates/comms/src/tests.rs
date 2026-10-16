@@ -21,6 +21,36 @@ fn identity(protocol: ProtocolKind, address: &str) -> Identity {
     Identity::new(protocol, address)
 }
 
+#[tokio::test]
+async fn untracked_delivery_is_unknown_only_for_an_existing_message() {
+    let model = two_backends();
+    let inbox = model.inbox().await;
+    let conversation = &inbox.conversations[0].id;
+    let messages = model.messages(conversation).await.unwrap();
+    assert_eq!(
+        model
+            .delivery_status(conversation, &messages[0].id)
+            .await
+            .unwrap(),
+        DeliveryStatus::Unknown
+    );
+    assert_eq!(
+        model
+            .delivery_status(conversation, &MessageId("absent".into()))
+            .await,
+        Err(AdapterError::NotFound)
+    );
+    assert!(matches!(
+        model
+            .delivery_status(
+                &ConversationId::new(ProtocolKind::Lxmf, "unregistered"),
+                &MessageId("absent".into())
+            )
+            .await,
+        Err(AdapterError::Unsupported(_))
+    ));
+}
+
 #[test]
 fn delivery_statuses_serialize_and_preserve_failure_detail() {
     let status = DeliveryStatus::Failed {
@@ -66,6 +96,8 @@ fn delivery_status_labels_cover_each_delivery_fact() {
             "fetched from propagation node",
         ),
         (DeliveryStatus::ReceivedDirect, "received directly"),
+        (DeliveryStatus::ReceivedByRadio, "received by radio"),
+        (DeliveryStatus::ProtocolAcknowledged, "protocol acknowledgment observed"),
         (DeliveryStatus::Cancelled, "cancelled"),
         (
             DeliveryStatus::Failed {

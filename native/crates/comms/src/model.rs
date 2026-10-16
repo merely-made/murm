@@ -20,11 +20,17 @@ pub enum ProtocolKind {
     /// Misfin (gemini-style mail). The default for a fresh new-message form.
     #[default]
     Misfin,
-    /// Murm (Cable bilateral / small-group cabals).
+    /// Murm's invited conversations (murmurs).
     Murm,
     /// Commons' retained encrypted chat, projected under Moot authority.
     /// This names the record grammar, independently of its carriage.
     CommonsChat,
+    /// LXMF correspondence, with application-owned history and delivery facts.
+    Lxmf,
+    /// Meshtastic channel text, addressed by node number within a local realm.
+    Meshtastic,
+    /// MeshCore private text, addressed by full public key within a local realm.
+    MeshCore,
 }
 
 /// A party in a conversation — you or a peer. `address` is the backend-native
@@ -130,6 +136,12 @@ pub enum DeliveryStatus {
     Cancelled,
     /// Delivery failed with the preserved backend detail.
     Failed { detail: String },
+    /// A text packet was received by the local radio protocol owner. This does
+    /// not establish a direct route or authenticate the displayed sender.
+    ReceivedByRadio,
+    /// A backend matched a protocol acknowledgment. Its owner retains the
+    /// exact ACK and integrity limitations; this is not a read receipt.
+    ProtocolAcknowledged,
 }
 
 impl DeliveryStatus {
@@ -146,6 +158,8 @@ impl DeliveryStatus {
             Self::ReceivedDirect => "received directly",
             Self::Cancelled => "cancelled",
             Self::Failed { .. } => "failed",
+            Self::ReceivedByRadio => "received by radio",
+            Self::ProtocolAcknowledged => "protocol acknowledgment observed",
         }
     }
 }
