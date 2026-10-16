@@ -1,5 +1,11 @@
 # Murm Documentation Index
 
+Protocol parity proposal (2026-10-16): [the three-family plan](2026-10-16_protocol_parity_plan.md)
+separates pinned wire, device-role and firmware/product targets; ranks Tucket
+first, Retinue next and Sennet's full product surface last; records measured
+V4/T114 memory scopes and requires a current combined-image memory refresh
+before wider firmware claims. It is proposed work, not a new qualification.
+
 Sennet directed carriage (2026-10-16):
 [R8](2026-10-13_murm_family_move_plan.md#r8--sennet-directed-text-and-delivery-acks-2026-10-16-functional-pass)
 records a [native PKI directed reconnect and automated restoration pass](../testing/receipts/sennet-directed/native-restoration/README.md):
