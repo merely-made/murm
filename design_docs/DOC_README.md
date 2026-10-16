@@ -1,9 +1,11 @@
 # Murm Documentation Index
 
-Sennet carriage (2026-10-16, in progress): [R7](2026-10-13_murm_family_move_plan.md#r7--sennet-channel-text-over-tulle-2026-10-16-in-progress)
-tracks scoped Djinn custody, a Sennet-only runtime and exclusive durable packet-ID
-intervals before the public LongFast channel/reconnect bench. Directed text,
-protocol ACKs and private-channel provisioning remain separate gates.
+Sennet carriage (2026-10-16): [R7](2026-10-13_murm_family_move_plan.md#r7--sennet-channel-text-over-tulle-2026-10-16-functional-pass)
+records a [Djinn-backed public LongFast reconnect pass](../testing/receipts/sennet-desktop/native-reconnect/README.md):
+four tagged texts across two connections, exact history, disjoint packet IDs,
+zero protocol ACK claims, seven reviewed captures and both boards restored.
+The Sennet-only runtime and scoped custody pass their software gates. Directed
+text, protocol ACKs, private-channel provisioning and UI polish remain separate.
 
 Tucket carriage (2026-10-16): [R6 in the family plan](2026-10-13_murm_family_move_plan.md#r6--tucket-over-tulle-through-signalman-2026-10-15-in-progress) records a [Djinn-backed reconnect-send functional pass](../testing/receipts/tucket-desktop/custody/native-reconnect/README.md): four tagged texts with all four protocol ACKs against stock MeshCore across two connections, with exact history checked before fresh work after reconnect. Seven captures are reviewed, both boards restored, and owned helpers stopped. Scoped custody passes real-broker, policy and restored-fallback controls; the 300-execution core gate is unchanged, and 41 desktop tests plus strict Clippy/builds pass again. The fixture explicitly advertises after each commissioning; automatic contact restoration, UI polish and Sennet remain separate gates.
 

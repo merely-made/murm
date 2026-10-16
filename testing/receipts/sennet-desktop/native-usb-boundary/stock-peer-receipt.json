@@ -1,0 +1,15 @@
+{
+  "channel": 0,
+  "error": "Meshtastic rebooted during handshake",
+  "exchanges": [],
+  "firmware_or_configuration_mutated": false,
+  "mode": "channel-peer",
+  "ports": [
+    "COM6"
+  ],
+  "protocol": "meshtastic",
+  "realm": "bench-sennet-djinn",
+  "reconnect_delay_ms": 0,
+  "result": "failed",
+  "schema": 1
+}

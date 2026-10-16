@@ -1,0 +1,22 @@
+{
+  "device_id": "cbdb40d6-d433-4679-a355-86aea5aabb61",
+  "port": "COM7",
+  "realm": "bench-sennet-djinn",
+  "journal": "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\sennet-desktop\\native-djinn-settled\\native\\desktop-journal.json",
+  "packet_ids": "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\sennet-desktop\\native-djinn-settled-packet-ids.json",
+  "name": "Signalman Sennet bench",
+  "public_channel": "LongFast",
+  "peer_node": 4134206248,
+  "frequency_hz": 906875000,
+  "tx_power_dbm": 0,
+  "tx_budget_ms": 2000,
+  "frame_ttl_ms": 15000,
+  "reservation_size": 256,
+  "airtime_window_ms": 60000,
+  "airtime_allowance_ms": 12000,
+  "receive_wait_ms": 50,
+  "open_settle_ms": 800,
+  "online_timeout_ms": 3000,
+  "transmit_timeout_ms": 3000,
+  "dtr": false
+}
