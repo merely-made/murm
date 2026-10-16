@@ -1,0 +1,25 @@
+{
+  "channel": 0,
+  "exchanges": [],
+  "firmware_or_configuration_mutated": false,
+  "left": {
+    "bench_records": [],
+    "diagnostics": [
+      "Meshtastic channel senders are unauthenticated; MeshCore private text uses a 16-bit pairwise MAC; ACKs are unencrypted 32-bit matches.",
+      "Stock companion observations are device-reported. Signalman does not verify PKI proofs or treat protocol ACKs as authenticated/read receipts.",
+      "Meshtastic firmware 2.7.26.54e0d8d",
+      "Connected stock Meshtastic companion; public identity read from device. Device acceptance and protocol ACKs are not authenticated/read receipts."
+    ],
+    "identity": "f66afb28",
+    "total_record_count": 0
+  },
+  "mode": "probe",
+  "ports": [
+    "COM6"
+  ],
+  "protocol": "meshtastic",
+  "realm": "bench-sennet-djinn",
+  "reconnect_delay_ms": 0,
+  "result": "passed",
+  "schema": 1
+}

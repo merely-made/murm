@@ -1,0 +1,194 @@
+{
+  "channel": 0,
+  "exchanges": [],
+  "firmware_or_configuration_mutated": false,
+  "left": {
+    "bench_records": [
+      {
+        "conversation": {
+          "key": "bench-sennet-djinn/f66afb28/00/9c562939",
+          "protocol": "Meshtastic"
+        },
+        "delivery": "ReceivedByRadio",
+        "facts": [
+          {
+            "CompanionPacket": {
+              "channel_index": 0,
+              "destination": 4134206248,
+              "packet_id": 1,
+              "pki_reported": true,
+              "source": 2622892345
+            }
+          },
+          {
+            "CompanionReceived": {
+              "protocol": "Meshtastic",
+              "source": "9c562939",
+              "timestamp": 1792153658
+            }
+          }
+        ],
+        "message": {
+          "author": {
+            "address": "9c562939",
+            "display_name": null,
+            "protocol": "Meshtastic"
+          },
+          "body": {
+            "PlainText": "signalman-ui-73e3628ae24541a4958df632a9ad0352"
+          },
+          "direction": "Incoming",
+          "id": "mt-9c562939-00000001",
+          "subject": null,
+          "timestamp_ms": 1792153658000
+        }
+      },
+      {
+        "conversation": {
+          "key": "bench-sennet-djinn/f66afb28/00/9c562939",
+          "protocol": "Meshtastic"
+        },
+        "delivery": "ProtocolAcknowledged",
+        "facts": [
+          {
+            "CompanionRequest": {
+              "packet_id": 1322167436
+            }
+          },
+          {
+            "CompanionAccepted": {
+              "correlation": 1322167436
+            }
+          },
+          {
+            "CompanionPacket": {
+              "channel_index": 0,
+              "destination": 4134206248,
+              "packet_id": 2,
+              "pki_reported": false,
+              "source": 2622892345
+            }
+          }
+        ],
+        "message": {
+          "author": {
+            "address": "f66afb28",
+            "display_name": null,
+            "protocol": "Meshtastic"
+          },
+          "body": {
+            "PlainText": "signalman-ui-73e3628ae24541a4958df632a9ad0352-return"
+          },
+          "direction": "Outgoing",
+          "id": "out-1",
+          "subject": null,
+          "timestamp_ms": 1792153659360
+        }
+      }
+    ],
+    "diagnostics": [
+      "Meshtastic channel senders are unauthenticated; MeshCore private text uses a 16-bit pairwise MAC; ACKs are unencrypted 32-bit matches.",
+      "Stock companion observations are device-reported. Signalman does not verify PKI proofs or treat protocol ACKs as authenticated/read receipts.",
+      "Meshtastic firmware 2.7.26.54e0d8d",
+      "Connected stock Meshtastic companion; public identity read from device. Device acceptance and protocol ACKs are not authenticated/read receipts."
+    ],
+    "identity": "f66afb28",
+    "total_record_count": 2
+  },
+  "mode": "peer",
+  "ports": [
+    "COM6"
+  ],
+  "protocol": "meshtastic",
+  "realm": "bench-sennet-djinn",
+  "reconnect_delay_ms": 0,
+  "result": "passed",
+  "schema": 1,
+  "ui_peer": {
+    "broadcast_only": false,
+    "elapsed_ms": 15010,
+    "matched_protocol_ack": true,
+    "received": {
+      "conversation": {
+        "key": "bench-sennet-djinn/f66afb28/00/9c562939",
+        "protocol": "Meshtastic"
+      },
+      "delivery": "ReceivedByRadio",
+      "facts": [
+        {
+          "CompanionPacket": {
+            "channel_index": 0,
+            "destination": 4134206248,
+            "packet_id": 1,
+            "pki_reported": true,
+            "source": 2622892345
+          }
+        },
+        {
+          "CompanionReceived": {
+            "protocol": "Meshtastic",
+            "source": "9c562939",
+            "timestamp": 1792153658
+          }
+        }
+      ],
+      "message": {
+        "author": {
+          "address": "9c562939",
+          "display_name": null,
+          "protocol": "Meshtastic"
+        },
+        "body": {
+          "PlainText": "signalman-ui-73e3628ae24541a4958df632a9ad0352"
+        },
+        "direction": "Incoming",
+        "id": "mt-9c562939-00000001",
+        "subject": null,
+        "timestamp_ms": 1792153658000
+      }
+    },
+    "sent": {
+      "conversation": {
+        "key": "bench-sennet-djinn/f66afb28/00/9c562939",
+        "protocol": "Meshtastic"
+      },
+      "delivery": "ProtocolAcknowledged",
+      "facts": [
+        {
+          "CompanionRequest": {
+            "packet_id": 1322167436
+          }
+        },
+        {
+          "CompanionAccepted": {
+            "correlation": 1322167436
+          }
+        },
+        {
+          "CompanionPacket": {
+            "channel_index": 0,
+            "destination": 4134206248,
+            "packet_id": 2,
+            "pki_reported": false,
+            "source": 2622892345
+          }
+        }
+      ],
+      "message": {
+        "author": {
+          "address": "f66afb28",
+          "display_name": null,
+          "protocol": "Meshtastic"
+        },
+        "body": {
+          "PlainText": "signalman-ui-73e3628ae24541a4958df632a9ad0352-return"
+        },
+        "direction": "Outgoing",
+        "id": "out-1",
+        "subject": null,
+        "timestamp_ms": 1792153659360
+      }
+    },
+    "stock_device_accepted": false
+  }
+}

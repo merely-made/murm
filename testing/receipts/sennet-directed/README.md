@@ -1,8 +1,9 @@
 # Directed Sennet continuation, 2026-10-16
 
 R8 in the [family plan](../../../design_docs/2026-10-13_murm_family_move_plan.md#r8--sennet-directed-text-and-delivery-acks-2026-10-16-functional-pass)
-now has a [native directed reconnect pass](native-reconnect/README.md), with a
-separate verified restoration recovery. The [R7 channel pass](../sennet-desktop/native-reconnect/README.md)
+now has a [native directed reconnect and automated restoration pass](native-restoration/README.md).
+The [earlier restoration recovery](native-reconnect/README.md) and
+[R7 channel pass](../sennet-desktop/native-reconnect/README.md)
 remains frozen. The earlier software/wire checkpoints below retain their scopes.
 
 Dramatis `2f27f1a` supplies transient zeroizing material from the existing
@@ -70,3 +71,12 @@ Automatic approval review still rejected their narrowly guarded recursive
 deletion with "blocked by policy" before execution. All 24 roots remain;
 public receipts, nonce state and the co-owned Cargo cache are preserved.
 The [cleanup receipt](cleanup/result.json) records the exact disposition.
+
+**Automated restoration continuation.** The complete fixture at `feab8c3f29b`
+passes four exact directed texts/four ACKs across reconnect, exact history,
+disjoint text/control IDs and automatic restoration of both boards. Seven
+reviewed captures show 403 presented frames. The unchanged qualified binaries
+are verified by hash; this is physical/native evidence, with no new Rust test
+or build claim. [The new receipt](native-restoration/README.md) preserves 51
+evidence files. This run's stopped synthetic wallet also remains ignored after
+automatic approval review rejects its deletion; 25 roots are now retained.

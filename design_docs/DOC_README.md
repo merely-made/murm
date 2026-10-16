@@ -2,10 +2,11 @@
 
 Sennet directed carriage (2026-10-16):
 [R8](2026-10-13_murm_family_move_plan.md#r8--sennet-directed-text-and-delivery-acks-2026-10-16-functional-pass)
-records a [native PKI directed reconnect pass](../testing/receipts/sennet-directed/native-reconnect/README.md):
+records a [native PKI directed reconnect and automated restoration pass](../testing/receipts/sennet-directed/native-restoration/README.md):
 four exact texts and four correlated ACKs against pinned 2.7.26, exact history,
-disjoint text/control IDs and seven reviewed captures. Both boards restore,
-with the failed initial DUT readback and separate strict recovery preserved.
+disjoint text/control IDs and seven reviewed captures. Both boards restore in
+the same automated run; the earlier failed DUT readback and separate recovery
+remain preserved in their original receipt.
 Scoped custody and software gates pass. ACK proofs for 2.8, private-channel
 custody, personal-daemon integration and UI polish remain open. R7 stays frozen.
 
@@ -17,7 +18,7 @@ The Sennet-only runtime and scoped custody pass their software gates. Directed
 text and protocol ACKs are qualified separately in R8; private-channel
 provisioning and UI polish remain open.
 
-Tucket carriage (2026-10-16): [R6 in the family plan](2026-10-13_murm_family_move_plan.md#r6--tucket-over-tulle-through-signalman-2026-10-15-in-progress) records a [Djinn-backed reconnect-send functional pass](../testing/receipts/tucket-desktop/custody/native-reconnect/README.md): four tagged texts with all four protocol ACKs against stock MeshCore across two connections, with exact history checked before fresh work after reconnect. Seven captures are reviewed, both boards restored, and owned helpers stopped. Scoped custody passes real-broker, policy and restored-fallback controls; the 300-execution core gate is unchanged, and 41 desktop tests plus strict Clippy/builds pass again. The fixture explicitly advertises after each commissioning; automatic contact restoration, UI polish and Sennet remain separate gates.
+Tucket carriage (2026-10-16): [R6 in the family plan](2026-10-13_murm_family_move_plan.md#r6--tucket-over-tulle-through-signalman-2026-10-15-in-progress) records a [Djinn-backed reconnect-send functional pass](../testing/receipts/tucket-desktop/custody/native-reconnect/README.md): four tagged texts with all four protocol ACKs against stock MeshCore across two connections, with exact history checked before fresh work after reconnect. Seven captures are reviewed, both boards restored, and owned helpers stopped. Scoped custody passes real-broker, policy and restored-fallback controls; the 300-execution core gate is unchanged, and 41 desktop tests plus strict Clippy/builds pass again. The fixture explicitly advertises after each commissioning; automatic contact restoration and UI polish remain open. Sennet has its separate R7/R8 receipts above.
 
 Radio-to-Comms integration (2026-10-15): [R1-R5 in the family plan](2026-10-13_murm_family_move_plan.md#6-post-cutover-application-integration) records Signalman LXMF, resident radio Comms and stock companion actors with separate identity/delivery scopes. R5 now records passing Meshtastic and MeshCore Windows native functional runs, six reviewed captures each, and stock-pair reconnect/history results. MeshCore passes the pair fixture with an explicit 500 ms reconnect delay; immediate reconnect remains unqualified. Both V4s were restored to verified Tulle and all owned processes closed. The [stock companion receipts](../testing/receipts/stock-companions/README.md) freeze software and Windows source/binary/evidence ledgers. UI cleanup and Sennet/Tucket stack legs remain separate gates.
 
