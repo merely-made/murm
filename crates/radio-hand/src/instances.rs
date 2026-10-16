@@ -32,7 +32,7 @@ pub struct Runtime {
     carrier_rejected_rx: u64,
     carrier_rejected_tx: u64,
     sennet: Option<sennet::instance::SennetInstance>,
-    tucket: tucket::instance::Instance,
+    tucket: Option<tucket::instance::Instance>,
     work: WorkQueue<8>,
     report: Report,
 }
@@ -95,7 +95,7 @@ impl Runtime {
             last_now: now,
             retinue: Some(retinue::instance::Instance::new(node, now)),
             sennet: Some(sennet),
-            tucket,
+            tucket: Some(tucket),
             work: WorkQueue::new(now),
             report: Report::default(),
         };
@@ -136,7 +136,41 @@ impl Runtime {
             carrier_rejected_rx: 0,
             carrier_rejected_tx: 0,
             sennet: None,
-            tucket,
+            tucket: Some(tucket),
+            work,
+            report: Report::default(),
+        })
+    }
+    /// Retain only Sennet with an externally durable packet-ID lease, without
+    /// constructing Retinue or Tucket identities.
+    pub fn sennet_only(
+        now: u64,
+        config: Config,
+        sennet: sennet::instance::SennetInstance,
+    ) -> Result<Self, Error> {
+        if config.controller.home != SENNET
+            || config.controller.pin != Some(SENNET)
+            || config.controller.installed != InstalledPersonalitySet::new(&[SENNET]).unwrap()
+            || config.tx_budget_ms == 0
+            || config.frame_ttl_ms <= config.tx_budget_ms
+            || sennet.is_paused()
+        {
+            return Err(Error::Configuration);
+        }
+        let controller =
+            Controller::new(config.controller, now).map_err(|_| Error::Configuration)?;
+        let mut work = WorkQueue::new(now);
+        work.activate(now, SENNET)?;
+        Ok(Self {
+            config,
+            controller,
+            last_now: now,
+            retinue: None,
+            carrier: Default::default(),
+            carrier_rejected_rx: 0,
+            carrier_rejected_tx: 0,
+            sennet: Some(sennet),
+            tucket: None,
             work,
             report: Report::default(),
         })
@@ -182,8 +216,14 @@ impl Runtime {
     pub fn installed_retinue(&self) -> Option<&retinue::instance::Instance> {
         self.retinue.as_ref()
     }
+    /// Installed Tucket. Panics when absent; inspect `installed_tucket` first
+    /// when accepting a single-protocol runtime.
     pub fn tucket(&self) -> &tucket::instance::Instance {
-        &self.tucket
+        self.tucket.as_ref().expect("Tucket must be installed")
+    }
+    /// Tucket, when installed in this runtime.
+    pub fn installed_tucket(&self) -> Option<&tucket::instance::Instance> {
+        self.tucket.as_ref()
     }
     /// Refused commands retain accumulated events until explicitly drained.
     pub fn take_report(&mut self) -> Report {
@@ -246,7 +286,7 @@ impl Runtime {
             controller,
             self.work.next_deadline(),
             self.sennet.as_ref().and_then(|s| s.next_deadline()),
-            self.tucket.next_deadline(),
+            self.tucket.as_ref().and_then(|t| t.next_deadline()),
             self.retinue
                 .as_ref()
                 .and_then(|r| r.node().pause_assessment().earliest_link_expiry),
@@ -325,8 +365,10 @@ impl Runtime {
         {
             self.event(Event::Sennet(e));
         }
-        let t = self.tucket.advance(now)?;
-        self.tucket_lost(now, t)?;
+        if let Some(tucket) = self.tucket.as_mut() {
+            let t = tucket.advance(now)?;
+            self.tucket_lost(now, t)?;
+        }
         if let Some(retinue) = self.retinue.as_mut() {
             let r = retinue.advance(now)?;
             self.retinue_expired(r);

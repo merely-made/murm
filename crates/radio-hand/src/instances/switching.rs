@@ -55,7 +55,12 @@ impl Runtime {
                     }
                 }
             },
-            TUCKET => match self.tucket.assess_pause(now, return_by)? {
+            TUCKET => match self
+                .tucket
+                .as_ref()
+                .ok_or(Error::WrongInstance)?
+                .assess_pause(now, return_by)?
+            {
                 tucket::instance::PauseAssessment::Ready => PauseOutcome::Ready,
                 tucket::instance::PauseAssessment::Busy { retry_at } => PauseOutcome::Busy {
                     retry_at: retry_at.max(now),
@@ -130,15 +135,24 @@ impl Runtime {
             }
             TUCKET => {
                 if allow
-                    && self.tucket.assess_pause(now, return_by)?
+                    && self
+                        .tucket
+                        .as_ref()
+                        .ok_or(Error::WrongInstance)?
+                        .assess_pause(now, return_by)?
                         != tucket::instance::PauseAssessment::Ready
                 {
                     let r = self
                         .tucket
+                        .as_mut()
+                        .ok_or(Error::WrongInstance)?
                         .interrupt(tucket::instance::LossPermission::Allow)?;
                     self.tucket_lost(now, r)?;
                 }
-                self.tucket.pause(now, return_by)?;
+                self.tucket
+                    .as_mut()
+                    .ok_or(Error::WrongInstance)?
+                    .pause(now, return_by)?;
             }
             _ => return Err(Error::WrongInstance),
         }
@@ -301,7 +315,11 @@ impl Runtime {
                 }
             }
             TUCKET => {
-                let r = self.tucket.resume(now)?;
+                let r = self
+                    .tucket
+                    .as_mut()
+                    .ok_or(Error::WrongInstance)?
+                    .resume(now)?;
                 self.tucket_lost(now, r)?;
             }
             _ => return Err(Error::WrongInstance),

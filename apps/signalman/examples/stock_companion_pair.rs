@@ -119,6 +119,7 @@ async fn serve_peer(
     protocol: CompanionProtocol,
     tag: &str,
     expected_sender: &str,
+    channel_only: bool,
 ) -> Result<serde_json::Value, Box<dyn Error>> {
     let owner = radio.session.owner();
     let started = Instant::now();
@@ -141,8 +142,14 @@ async fn serve_peer(
             }
             if let Some(received) = incoming.first() {
                 observed = Some((*received).clone());
-                let mut draft =
-                    Draft::reply_to(owner.conversation(protocol.kind(), expected_sender)?);
+                let mut draft = Draft::reply_to(owner.conversation(
+                    protocol.kind(),
+                    if channel_only {
+                        "ffffffff"
+                    } else {
+                        expected_sender
+                    },
+                )?);
                 draft.body = format!("{tag}-return");
                 response = Some(owner.model().send(&draft).await?);
                 println!("UI tagged receive matched; queued return");
@@ -154,9 +161,15 @@ async fn serve_peer(
                 if let DeliveryStatus::Failed { detail } = &sent.delivery {
                     return Err(format!("UI return send failed: {detail}").into());
                 }
-                if sent.delivery == DeliveryStatus::ProtocolAcknowledged {
+                if sent.delivery
+                    == (if channel_only {
+                        DeliveryStatus::HandedToRadio
+                    } else {
+                        DeliveryStatus::ProtocolAcknowledged
+                    })
+                {
                     return Ok(
-                        serde_json::json!({"received":observed,"sent":sent,"elapsed_ms":started.elapsed().as_millis(),"matched_protocol_ack":true}),
+                        serde_json::json!({"received":observed,"sent":sent,"elapsed_ms":started.elapsed().as_millis(),"matched_protocol_ack":!channel_only,"broadcast_only":channel_only,"stock_device_accepted":channel_only}),
                     );
                 }
             }
@@ -214,10 +227,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let mode = args
         .first()
         .ok_or("supply probe, pair or peer; no default ports are opened")?;
-    let peer_mode = mode == "peer";
+    let channel_only = mode == "channel-peer";
+    let peer_mode = mode == "peer" || channel_only;
     let pair = match mode.as_str() {
         "pair" => true,
-        "probe" | "peer" => false,
+        "probe" | "peer" | "channel-peer" => false,
         _ => return Err("mode must be probe, pair or peer".into()),
     };
     let required = if peer_mode {
@@ -252,6 +266,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
         _ => return Err("protocol must be meshtastic or meshcore".into()),
     };
     let left_port = &args[2];
+    if channel_only && !matches!(protocol, CompanionProtocol::Meshtastic { .. }) {
+        return Err("channel-peer requires Meshtastic".into());
+    }
     let right_port = if pair { Some(args[3].as_str()) } else { None };
     if right_port.is_some_and(|right| left_port.eq_ignore_ascii_case(right)) {
         return Err("pair ports must differ".into());
@@ -295,7 +312,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         let mut left = connect(left_port, protocol, realm, left_path.clone()).await?;
         receipt["left"] = snapshot(&left, None)?;
         if peer_mode {
-            receipt["ui_peer"] = serve_peer(&mut left, protocol, &args[5], &args[6]).await?;
+            receipt["ui_peer"] = serve_peer(&mut left, protocol, &args[5], &args[6], channel_only).await?;
             receipt["left"] = snapshot(&left, Some(&args[5]))?;
             return Ok::<(),Box<dyn Error>>(());
         }

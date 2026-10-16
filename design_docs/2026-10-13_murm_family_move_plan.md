@@ -2061,3 +2061,28 @@ The existing shared `C:\t\cargo-homes\mere-upstreams` cache remains co-owned by
 earlier family qualifiers and this gate. Ignored synthetic broker wallets remain
 after automatic approval review blocked their recursive deletion; helpers are
 stopped, and private runtime files were excluded from the published receipts.
+
+### R7 — Sennet channel text over Tulle (2026-10-16, in progress)
+
+The owner approved the next stack leg after R6. Qualify bidirectional channel
+text, exact history, disconnect and fresh messages after reconnect against the
+identified stock Meshtastic 2.7.26 bench peer. Directed text and protocol ACKs
+remain separate; channel broadcasts must not acquire invented ACK facts.
+
+Ownership: Dramatis derives one device/realm's public node number; Mere/Djinn
+releases only that scoped child to Signalman with the existing sticky lock/loss
+watch. Murm commissions a Sennet-only runtime and durably reserves exclusive
+packet-ID intervals before RF. Losing or corrupting that state refuses use;
+reconnect cannot reset the AES-CTR nonce allocator. Known peer/node collisions
+are refused. The first bench uses its explicitly selected public LongFast
+channel. This does not qualify private-channel key custody or authenticated
+Meshtastic senders. Sennet remains independently authored from permitted public
+documentation/captures; stock firmware and CLI are black-box peers.
+
+Reuse the attended Messages controls and bounded restoration wrapper. Done when
+both directions' exact tagged texts match on two connections, outgoing status
+reflects physical completion only, incoming/stock receipts support delivery,
+identity-bound history stays exact before new sends, packet IDs do not overlap,
+all native captures are reviewed, both boards restore/read back, and owned
+serial/native/helper processes stop. First finish derivation/refusal, custody,
+nonce-state and software gates; compilation alone does not qualify RF.

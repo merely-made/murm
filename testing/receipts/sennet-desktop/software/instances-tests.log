@@ -1,0 +1,41 @@
+warning: patch `mere-p2panda-net v0.7.5 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `mere-proofs v0.1.0 (https://github.com/merely-made/mere.git?branch=main#6d1908f4)` was not used in the crate graph
+warning: patch `muniment v0.1.2 (https://github.com/merely-made/mere.git?branch=main#6d1908f4)` was not used in the crate graph
+warning: patch `p2panda-auth v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-core v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-discovery v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-encryption v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-store v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-stream v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-sync v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+help: Check that the patched package version and available features are compatible
+      with the dependency requirements. If the patch has a different version from
+      what is locked in the Cargo.lock file, run `cargo update` to use the new
+      version. This may also occur with an optional dependency that is not enabled.
+   Compiling radio-hand v0.0.1 (C:\Users\mark_\Code\repos\retinue\crates\radio-hand)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.40s
+     Running tests\instances\main.rs (target/build\debug\deps\instances-2e22814de3e6ea8f.exe)
+
+running 19 tests
+test links::bounded_usb_report_keeps_complete_events_and_accounts_for_omissions ... ok
+test inflight_custody_defers_allow_loss_and_unknown_transition_ack_recovers ... ok
+test an_exact_tx_deadline_is_not_physical_tx_budget ... ok
+test sennet_only::sennet_only_uses_its_lease_and_no_other_identity_and_reports_physical_completion ... ok
+test carrier::carrier_refuses_envelope_flag_as_logical_packet ... ok
+test sennet_dedup_and_packet_ids_survive_a_real_return_home ... ok
+test malformed_input_preserves_before_deadline_and_reports_loss_once_at_deadline ... ok
+test carrier::carrier_checks_exact_physical_limit_and_relay_growth ... ok
+test stale_work_completion_is_refused_without_releasing_current_work ... ok
+test carrier::startup_carrier_preserves_stricter_node_budget ... ok
+test links::the_retinue_profile_sets_the_first_hop_allowance ... ok
+test carrier::protected_startup_refuses_existing_pending_link_at_identical_mtu ... ok
+test links::an_unanswered_request_is_reported_as_timed_out ... ok
+test carrier::protected_retinue_runtime_authenticates_before_protocol_ingress ... ok
+test delayed_tucket_ack_cancels_queued_retry_and_retains_contact ... ok
+test tucket_only::one_protocol_runtime_needs_no_other_identity_or_packet_id_lease ... ok
+test links::an_idle_link_is_still_reported_as_expired ... ok
+test links::retinue_link_and_freshness_survive_an_admitted_home_absence ... ok
+test links::forced_retinue_resource_loss_reports_link_resource_and_unsent_close ... ok
+
+test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
