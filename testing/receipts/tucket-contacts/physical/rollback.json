@@ -1,0 +1,41 @@
+{
+  "prefix_md5": "8f35078ba63ad63096e58a0c19f724ad",
+  "tail_md5": "9cbf6be73c185f95d9948f5596b2b25c",
+  "data_md5": "c6790cb9e00494fdb03ba5ebaed198c8",
+  "partitions": [
+    {
+      "kind": 1,
+      "subtype": 2,
+      "offset": 36864,
+      "size": 24576,
+      "label": "nvs"
+    },
+    {
+      "kind": 1,
+      "subtype": 1,
+      "offset": 61440,
+      "size": 4096,
+      "label": "phy_init"
+    },
+    {
+      "kind": 0,
+      "subtype": 0,
+      "offset": 65536,
+      "size": 16384000,
+      "label": "factory"
+    }
+  ],
+  "stock_app_sha256": "c97c949663e594563a0f4725bdc573c0c2e28927e1f70e90cec68ec3d47277be",
+  "write_range": [
+    65536,
+    707264
+  ],
+  "restore_app_range": [
+    65536,
+    1048576
+  ],
+  "protected_tail": [
+    4128768,
+    4194304
+  ]
+}

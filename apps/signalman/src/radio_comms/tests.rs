@@ -1,4 +1,5 @@
 use super::*;
+mod contacts;
 use radio_hand::instances::{Config, RETINUE, Runtime, SENNET, TUCKET};
 use selvage::{
     PhyProfile,

@@ -2067,6 +2067,25 @@ earlier family qualifiers and this gate. Ignored synthetic broker wallets remain
 after automatic approval review blocked their recursive deletion; helpers are
 stopped, and private runtime files were excluded from the published receipts.
 
+**Persistent-contact continuation (2026-10-17).** The
+[contact receipt](../testing/receipts/tucket-contacts/README.md) closes R6's
+scoped host contact-restoration gap. Verified/selected full public keys share
+Signalman's identity/realm journal; version-2 writes prevent older writers
+from silently discarding them. Restore validates the whole cache before
+mutation and preserves capacity, existing routes and paused-personality state
+on refusal. New contacts have fresh route discovery; pending operations,
+deduplication and private custody material are not restored. Atomic-save
+failure preserves the last snapshot and stops carriage.
+
+A cold empty-runtime file reload can send and receive a matching protocol ACK
+without another injected peer advert. The native Djinn-backed continuation
+passes four texts/four protocol ACKs, exact history and two connections with
+the fixture's reconnect advert omitted. Seven captures are reviewed. The
+stock reference runs application-only under SB1's unchanged factory partition
+table; this does not qualify stock filesystem persistence or stock reboot.
+Standalone MCU contact persistence, power-cut, multiple-hop/scoped routing,
+broader commands/roles and existing UI polish remain separate work.
+
 ### R7 — Sennet channel text over Tulle (2026-10-16, functional pass)
 
 The owner approved the next stack leg after R6. Qualify bidirectional channel

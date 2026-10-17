@@ -16,6 +16,7 @@ param(
     [switch]$RawDirectFirst,
     [switch]$DjinnCustody,
     [switch]$ExchangeAfterReconnect,
+    [switch]$RequireCachedContacts,
     [ValidateRange(0.5,2.0)][double]$Zoom = 0.75
 )
 $ErrorActionPreference = 'Stop'
@@ -107,6 +108,7 @@ try {
         $nativeArgs = @{Protocol='meshcore';Port=$config.port;PeerPort=$PeerPort;SelfAddress=$SelfAddress;PeerAddress=$stock.after.key;Realm=$config.realm;OutputDirectory=(Join-Path $output 'native');Zoom=$Zoom;BenchPython=$Python;PeerUsbSerial=$PeerUsbSerial}
         if ($DjinnCustody) { $nativeArgs.TucketConfig = $BenchConfig } else { $nativeArgs.TucketBenchConfig = $BenchConfig }
         $nativeArgs.ExchangeAfterReconnect = $ExchangeAfterReconnect
+        $nativeArgs.RequireCachedContacts = $RequireCachedContacts
         & (Join-Path $repo 'apps/signalman-desktop/scenarios/run_companion.ps1') @nativeArgs
         $report.result = 'native_completed_pending_visual_review'
     }

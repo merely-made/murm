@@ -7,8 +7,10 @@
 //! The companion client cannot attach its journal to a resident PHY runtime.
 pub mod carriage;
 pub mod companion;
+mod contacts;
 mod journal;
 mod resident;
+mod scope;
 pub mod sennet_ids;
 #[cfg(test)]
 mod tests;
@@ -29,182 +31,8 @@ use std::{
 
 const MAX_RECORDS: usize = 2048;
 
-/// A caller-owned realm binds channel configuration and public device identities.
-/// The 8-bit Meshtastic channel hash alone is not a realm identifier.
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
-pub struct RadioScope {
-    pub realm: String,
-    pub meshtastic_node: u32,
-    pub meshtastic_channel: u8,
-    pub meshcore_key: [u8; 32],
-}
-impl RadioScope {
-    fn local(&self, protocol: ProtocolKind) -> String {
-        match protocol {
-            ProtocolKind::Meshtastic => format!("{:08x}", self.meshtastic_node),
-            ProtocolKind::MeshCore => hex::encode(self.meshcore_key),
-            _ => unreachable!("radio adapter protocol"),
-        }
-    }
-    pub fn meshtastic(&self, peer: u32) -> ConversationId {
-        ConversationId::new(
-            ProtocolKind::Meshtastic,
-            format!(
-                "{}/{:08x}/{:02x}/{peer:08x}",
-                self.realm, self.meshtastic_node, self.meshtastic_channel
-            ),
-        )
-    }
-    pub fn meshcore(&self, peer: [u8; 32]) -> ConversationId {
-        ConversationId::new(
-            ProtocolKind::MeshCore,
-            format!(
-                "{}/{}/{}",
-                self.realm,
-                hex::encode(self.meshcore_key),
-                hex::encode(peer)
-            ),
-        )
-    }
-    fn peer(&self, id: &ConversationId) -> Result<String, AdapterError> {
-        if !matches!(
-            id.protocol,
-            ProtocolKind::Meshtastic | ProtocolKind::MeshCore
-        ) {
-            return Err(AdapterError::NotFound);
-        }
-        let local = self.local(id.protocol);
-        let prefix = match id.protocol {
-            ProtocolKind::Meshtastic => {
-                format!("{}/{local}/{:02x}/", self.realm, self.meshtastic_channel)
-            }
-            ProtocolKind::MeshCore => format!("{}/{local}/", self.realm),
-            _ => return Err(AdapterError::NotFound),
-        };
-        let peer = id.key.strip_prefix(&prefix).ok_or(AdapterError::NotFound)?;
-        let length = if id.protocol == ProtocolKind::Meshtastic {
-            8
-        } else {
-            64
-        };
-        if peer.len() != length
-            || !peer
-                .bytes()
-                .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
-        {
-            return Err(AdapterError::NotFound);
-        }
-        Ok(peer.to_owned())
-    }
-}
-
-/// Public identity returned by one stock companion. No synthetic identity is
-/// created for the other protocol. Realm names remain host-owned configuration.
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(tag = "companion", deny_unknown_fields)]
-pub enum CompanionScope {
-    Meshtastic {
-        realm: String,
-        node: u32,
-        channel: u8,
-    },
-    MeshCore {
-        realm: String,
-        key: [u8; 32],
-    },
-}
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(untagged)]
-enum Scope {
-    Resident(RadioScope),
-    Companion(CompanionScope),
-}
-impl Scope {
-    fn protocols(&self) -> Vec<ProtocolKind> {
-        match self {
-            Self::Resident(_) => vec![ProtocolKind::Meshtastic, ProtocolKind::MeshCore],
-            Self::Companion(CompanionScope::Meshtastic { .. }) => vec![ProtocolKind::Meshtastic],
-            Self::Companion(CompanionScope::MeshCore { .. }) => vec![ProtocolKind::MeshCore],
-        }
-    }
-    fn realm(&self) -> &str {
-        match self {
-            Self::Resident(s) => &s.realm,
-            Self::Companion(
-                CompanionScope::Meshtastic { realm, .. } | CompanionScope::MeshCore { realm, .. },
-            ) => realm,
-        }
-    }
-    fn valid(&self) -> bool {
-        let realm = self.realm();
-        !realm.is_empty()
-            && realm.len() <= 128
-            && realm
-                .bytes()
-                .all(|b| b.is_ascii_alphanumeric() || b == b'-' || b == b'_')
-    }
-    fn local(&self, protocol: ProtocolKind) -> String {
-        match self {
-            Self::Resident(s) => s.local(protocol),
-            Self::Companion(CompanionScope::Meshtastic { node, .. }) => format!("{node:08x}"),
-            Self::Companion(CompanionScope::MeshCore { key, .. }) => hex::encode(key),
-        }
-    }
-    fn conversation(
-        &self,
-        protocol: ProtocolKind,
-        peer: &str,
-    ) -> Result<ConversationId, AdapterError> {
-        if !self.protocols().contains(&protocol) {
-            return Err(AdapterError::NotFound);
-        }
-        let channel = match self {
-            Self::Resident(s) => s.meshtastic_channel,
-            Self::Companion(CompanionScope::Meshtastic { channel, .. }) => *channel,
-            _ => 0,
-        };
-        let local = self.local(protocol);
-        let key = if protocol == ProtocolKind::Meshtastic {
-            format!("{}/{local}/{channel:02x}/{peer}", self.realm())
-        } else {
-            format!("{}/{local}/{peer}", self.realm())
-        };
-        let id = ConversationId::new(protocol, key);
-        self.peer(&id)?;
-        Ok(id)
-    }
-    fn peer(&self, id: &ConversationId) -> Result<String, AdapterError> {
-        if !self.protocols().contains(&id.protocol) {
-            return Err(AdapterError::NotFound);
-        }
-        let local = self.local(id.protocol);
-        let channel = match self {
-            Self::Resident(s) => s.meshtastic_channel,
-            Self::Companion(CompanionScope::Meshtastic { channel, .. }) => *channel,
-            _ => 0,
-        };
-        let prefix = if id.protocol == ProtocolKind::Meshtastic {
-            format!("{}/{local}/{channel:02x}/", self.realm())
-        } else {
-            format!("{}/{local}/", self.realm())
-        };
-        let peer = id.key.strip_prefix(&prefix).ok_or(AdapterError::NotFound)?;
-        let length = if id.protocol == ProtocolKind::Meshtastic {
-            8
-        } else {
-            64
-        };
-        if peer.len() != length
-            || !peer
-                .bytes()
-                .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
-        {
-            return Err(AdapterError::NotFound);
-        }
-        Ok(peer.to_owned())
-    }
-}
+use scope::Scope;
+pub use scope::{CompanionScope, RadioScope};
 
 /// Native protocol facts remain available alongside the portable projection.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -284,6 +112,8 @@ struct Book {
     records: Vec<RadioRecord>,
     #[serde(default)]
     notices: Vec<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    meshcore_contacts: Vec<[u8; 32]>,
 }
 struct Inner {
     book: Book,
@@ -335,14 +165,23 @@ impl RadioComms {
                 next_id: 1,
                 records: Vec::new(),
                 notices: Vec::new(),
+                meshcore_contacts: Vec::new(),
             },
         };
-        if book.version != 1
+        if !matches!(book.version, 1 | 2)
             || book.scope != scope
             || book.records.len() > MAX_RECORDS
             || book.next_id == 0
         {
             return Err(backend("radio journal scope/version/bounds mismatch"));
+        }
+        contacts::validate_book(&scope, &book.meshcore_contacts)?;
+        if (book.version == 1 && !book.meshcore_contacts.is_empty())
+            || (book.version == 2 && !matches!(scope, Scope::Resident(_)))
+        {
+            return Err(backend(
+                "contact cache requires a version-2 resident journal",
+            ));
         }
         let mut ids = std::collections::HashSet::new();
         for record in &mut book.records {

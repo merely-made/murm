@@ -141,6 +141,15 @@ pub struct Instance {
 }
 
 impl Instance {
+    /// Restore owner-scoped public contacts without changing pause, clocks,
+    /// dedup, queued operations or creating physical work.
+    pub fn restore_contacts(
+        &mut self,
+        keys: &[[u8; 32]],
+    ) -> Result<(), crate::node::ContactRestoreError> {
+        self.node.restore_contacts(keys)
+    }
+
     pub fn new(node: Node, config: InstanceConfig) -> Self {
         Self {
             node,

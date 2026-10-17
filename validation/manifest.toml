@@ -293,6 +293,16 @@ reason = "Frozen attended memory/app-only restoration evidence; requires exact i
 expires = "2027-01-17"
 
 [[asset_exemption]]
+path = "testing/receipts/tucket-contacts/source/stock_app_trial.py"
+reason = "Frozen attended application-only stock excursion; requires exact SB1 hardware and fresh ignored recovery inputs. Contact receipt owns execution."
+expires = "2027-01-17"
+
+[[asset_exemption]]
+path = "testing/receipts/tucket-contacts/source/freeze_contacts.py"
+reason = "Frozen contact receipt assembly source; consumes its historical private-input layout after attended native/restoration qualification."
+expires = "2027-01-17"
+
+[[asset_exemption]]
 path = "testing/device_names.py"
 reason = "Attended device-label provisioning; requires identified hardware and separately qualified named firmware. Physical receipt owns execution."
 expires = "2027-01-16"
