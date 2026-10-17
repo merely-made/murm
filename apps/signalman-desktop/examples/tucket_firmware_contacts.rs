@@ -122,7 +122,7 @@ async fn run(args: &[String]) -> Result<()> {
     random.zeroize();
     // The V4's diagnostic carrier retires on an undrained reply. Keep a read
     // outstanding while setup finishes rather than sleeping through readiness.
-    transcript.push(collect(&mut port, Duration::from_millis(2500)).await?);
+    transcript.push(collect(&mut port, Duration::from_secs(8)).await?);
     command(&mut port, Command::Status).await?;
     let status = collect(&mut port, Duration::from_millis(900)).await?;
     if !status.contains("state=Home")

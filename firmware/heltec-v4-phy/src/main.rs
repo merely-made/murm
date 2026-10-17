@@ -886,6 +886,8 @@ async fn main(spawner: Spawner) {
                                 ) {
                                     esp_hal::system::software_reset();
                                 }
+                                #[cfg(feature = "memory-bench")]
+                                resident::setup_progress(&mut host, "building").await;
                                 let mut state = match owner
                                     .build_resident(Instant::now().as_millis(), setup)
                                     .await
@@ -895,12 +897,12 @@ async fn main(spawner: Spawner) {
                                         // Profile already changed; construction can have made
                                         // durable reservations. Reset instead of pretending the
                                         // prior direct-PHY profile still owns this radio.
-                                        if let resident::BuildError::Storage(cause) = error {
+                                        {
                                             let mut line = heapless::String::<192>::new();
                                             let _ = core::fmt::write(
                                                 &mut line,
                                                 format_args!(
-                                                    "resident storage refused: {cause:?}\r\n"
+                                                    "resident build refused: {error:?}\r\n"
                                                 ),
                                             );
                                             let _ = embassy_time::with_timeout(
@@ -912,6 +914,8 @@ async fn main(spawner: Spawner) {
                                         esp_hal::system::software_reset();
                                     }
                                 };
+                                #[cfg(feature = "memory-bench")]
+                                resident::setup_progress(&mut host, "built").await;
                                 let _ = embassy_time::with_timeout(
                                     Duration::from_millis(20),
                                     host.write_diagnostic(b"resident ready\r\n"),
