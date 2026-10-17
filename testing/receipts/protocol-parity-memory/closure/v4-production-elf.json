@@ -1,0 +1,119 @@
+{
+  "path": "C:\\Users\\mark_\\Code\\repos\\retinue\\target\\xtensa-esp32s3-none-elf\\release\\tulle-heltec-v4-phy",
+  "sha256": "4dcd9feb9b4277351173408ce44e0e98e4d7b376583238d0d5811d82bd087623",
+  "elf_bytes": 12508792,
+  "machine": 94,
+  "entry": 1077380612,
+  "allocated_sections": [
+    {
+      "name": ".rwtext",
+      "address": 1077380096,
+      "bytes": 8216,
+      "type": 1
+    },
+    {
+      "name": ".rwdata_dummy",
+      "address": 1070104576,
+      "bytes": 9240,
+      "type": 8
+    },
+    {
+      "name": ".data",
+      "address": 1070113816,
+      "bytes": 5316,
+      "type": 1
+    },
+    {
+      "name": ".bss",
+      "address": 1070119136,
+      "bytes": 199160,
+      "type": 8
+    },
+    {
+      "name": ".flash.appdesc",
+      "address": 1006632992,
+      "bytes": 256,
+      "type": 1
+    },
+    {
+      "name": ".rodata",
+      "address": 1006633248,
+      "bytes": 58096,
+      "type": 1
+    },
+    {
+      "name": ".defmt.end",
+      "address": 1006691344,
+      "bytes": 2,
+      "type": 1
+    },
+    {
+      "name": ".vectors",
+      "address": 1077379072,
+      "bytes": 1024,
+      "type": 1
+    },
+    {
+      "name": ".rotext_dummy",
+      "address": 1107296288,
+      "bytes": 65536,
+      "type": 8
+    },
+    {
+      "name": ".text",
+      "address": 1107361824,
+      "bytes": 647285,
+      "type": 1
+    },
+    {
+      "name": ".stack",
+      "address": 1070318296,
+      "bytes": 128040,
+      "type": 8
+    }
+  ],
+  "load_segments": [
+    {
+      "virtual_address": 1006632992,
+      "physical_address": 1006632992,
+      "file_bytes": 58354,
+      "memory_bytes": 58354,
+      "flags": 4
+    },
+    {
+      "virtual_address": 1070104576,
+      "physical_address": 1070104576,
+      "file_bytes": 14556,
+      "memory_bytes": 341760,
+      "flags": 6
+    },
+    {
+      "virtual_address": 1077379072,
+      "physical_address": 1077379072,
+      "file_bytes": 1024,
+      "memory_bytes": 1024,
+      "flags": 5
+    },
+    {
+      "virtual_address": 1077380096,
+      "physical_address": 1077380096,
+      "file_bytes": 8216,
+      "memory_bytes": 8216,
+      "flags": 5
+    },
+    {
+      "virtual_address": 1107296288,
+      "physical_address": 1107296288,
+      "file_bytes": 712821,
+      "memory_bytes": 712821,
+      "flags": 7
+    }
+  ],
+  "target_layouts": {},
+  "linker_symbols": {
+    "_stack_end_cpu0": 1070318296,
+    "_stack_start": 1070446336,
+    "_stack_start_cpu0": 1070446336
+  },
+  "stack_region_bytes": 128040
+}

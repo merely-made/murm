@@ -1,0 +1,26 @@
+[
+  {
+    "case": "quiet-hook build",
+    "result": "link wrapper removed by LTO; unused hook detected before install"
+  },
+  {
+    "case": "V4 first painted pilot",
+    "result": "2432 stack bytes free; below selected reserve"
+  },
+  {
+    "case": "T114 first painted pilot",
+    "result": "2660 stack bytes free; below selected reserve"
+  },
+  {
+    "case": "T114 in-place pilot",
+    "result": "8716 stack bytes free; below selected reserve"
+  },
+  {
+    "case": "V4 reused pilot counter",
+    "result": "runner expected zero prior refusals; counted an existing deliberate pilot refusal as unexpected; final acceptance starts from fresh boot"
+  },
+  {
+    "case": "bulk restored-prefix reads",
+    "result": "espflash short/corrupt bulk responses; failed reads retained; ROM prefix checksum matches fresh backup and final protected tail compares byte for byte"
+  }
+]

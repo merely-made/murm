@@ -283,6 +283,16 @@ reason = "Attended target memory campaign; exact USB identities and separately i
 expires = "2026-11-01"
 
 [[asset_exemption]]
+path = "testing/receipts/protocol-parity-memory/closure/source/t114_pinned_campaign.py"
+reason = "Frozen attended memory/DFU/restoration evidence; requires exact identified hardware and receipt-owned private recovery inputs."
+expires = "2027-01-17"
+
+[[asset_exemption]]
+path = "testing/receipts/protocol-parity-memory/closure/source/v4_pinned_campaign.py"
+reason = "Frozen attended memory/app-only restoration evidence; requires exact identified hardware and receipt-owned private recovery inputs."
+expires = "2027-01-17"
+
+[[asset_exemption]]
 path = "testing/device_names.py"
 reason = "Attended device-label provisioning; requires identified hardware and separately qualified named firmware. Physical receipt owns execution."
 expires = "2027-01-16"

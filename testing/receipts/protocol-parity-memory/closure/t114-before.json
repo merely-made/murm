@@ -1,0 +1,70 @@
+{
+  "device": "T114",
+  "name": "T114",
+  "expected_usb": [
+    6421,
+    21023,
+    "TULLE-T114-01"
+  ],
+  "source_sha256": "b88f74468c53f7c924a6754e8f0e236b9e4a3878425d3d94609e3a2372d572e4",
+  "provision": false,
+  "sessions": [
+    {
+      "port": "COM10",
+      "attached": "tulle/t114 phy online; version=0.0.1; sx1262 online; spi=software; irq=poll; sync=2b reg=24b4; region=US915 freq=906875000 reset=soft crash=1 timebase=inactive; build=cb042329232571cd3c50b2ef9b5e386fbe4f434a; image=t114-native\r\nidentity=loaded slot=A seq=94\r\nnode=599997c8 heap=0/49152 highwater=24\r\n",
+      "responses": [
+        {
+          "command": "status",
+          "response": "tulle/t114 phy online; version=0.0.1; sx1262 online; spi=software; irq=poll; sync=2b reg=24b4; region=US915 freq=906875000 reset=soft crash=1 timebase=inactive; build=cb042329232571cd3c50b2ef9b5e386fbe4f434a; image=t114-native\r\nname=T114\r\n"
+        },
+        {
+          "command": "name",
+          "response": "name=T114\r\n"
+        },
+        {
+          "command": "region",
+          "response": "region=US915\r\n"
+        },
+        {
+          "command": "channel",
+          "response": "channel=modem\r\n"
+        },
+        {
+          "command": "ui",
+          "response": "ui=ok; display=on; screen=status; button=none; host=none; tft=write-only\r\n"
+        }
+      ]
+    },
+    {
+      "port": "COM10",
+      "attached": "tulle/t114 phy online; version=0.0.1; sx1262 online; spi=software; irq=poll; sync=2b reg=24b4; region=US915 freq=906875000 reset=soft crash=1 timebase=inactive; build=cb042329232571cd3c50b2ef9b5e386fbe4f434a; image=t114-native\r\nidentity=loaded slot=A seq=94\r\nnode=599997c8 heap=0/49152 highwater=24\r\n",
+      "responses": [
+        {
+          "command": "status",
+          "response": "tulle/t114 phy online; version=0.0.1; sx1262 online; spi=software; irq=poll; sync=2b reg=24b4; region=US915 freq=906875000 reset=soft crash=1 timebase=inactive; build=cb042329232571cd3c50b2ef9b5e386fbe4f434a; image=t114-native\r\nname=T114\r\n"
+        },
+        {
+          "command": "name",
+          "response": "name=T114\r\n"
+        },
+        {
+          "command": "region",
+          "response": "region=US915\r\n"
+        },
+        {
+          "command": "channel",
+          "response": "channel=modem\r\n"
+        },
+        {
+          "command": "ui",
+          "response": "ui=ok; display=on; screen=status; button=none; host=none; tft=write-only\r\n"
+        },
+        {
+          "command": "status",
+          "response": "tulle/t114 phy online; version=0.0.1; sx1262 online; spi=software; irq=poll; sync=2b reg=24b4; region=US915 freq=906875000 reset=soft crash=1 timebase=inactive; build=cb042329232571cd3c50b2ef9b5e386fbe4f434a; image=t114-native\r\nname=T114\r\n"
+        }
+      ]
+    }
+  ],
+  "passed": true
+}
