@@ -162,6 +162,8 @@ async fn main(spawner: Spawner) {
     unsafe {
         heap::init(spawner);
     }
+    #[cfg(feature = "resident-protocols")]
+    resident::start_builder(spawner);
     let peripherals = esp_hal::init(Config::default());
     #[cfg(feature = "rf-sleep-proof")]
     let proof_reset_reason = esp_hal::system::reset_reason()
@@ -901,9 +903,7 @@ async fn main(spawner: Spawner) {
                                             let mut line = heapless::String::<192>::new();
                                             let _ = core::fmt::write(
                                                 &mut line,
-                                                format_args!(
-                                                    "resident build refused: {error:?}\r\n"
-                                                ),
+                                                format_args!("resident build refused: {error}\r\n"),
                                             );
                                             let _ = embassy_time::with_timeout(
                                                 Duration::from_millis(20),

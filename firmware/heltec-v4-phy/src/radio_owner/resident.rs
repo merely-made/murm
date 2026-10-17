@@ -1,5 +1,7 @@
 //! Resident construction and contact flash retain the cancel-safe quiet owner.
 use super::*;
+extern crate alloc;
+use alloc::boxed::Box;
 #[cfg(feature = "resident-contact-store")]
 use radio_hand::tucket_contacts::{self, Commit, Snapshot};
 impl<RK: RadioKind, DLY: DelayNs> V4RadioOwner<RK, DLY> {
@@ -9,16 +11,22 @@ impl<RK: RadioKind, DLY: DelayNs> V4RadioOwner<RK, DLY> {
         &mut self,
         now: u64,
         setup: radio_hand::resident_wire::ResidentSetup,
-    ) -> Result<crate::resident::ResidentState, crate::resident::BuildError> {
+    ) -> Result<Box<crate::resident::ResidentState>, crate::resident::BuildError> {
         let mut guard = QuietWindow::enter(self)
             .await
             .map_err(|_| crate::resident::BuildError::Quiet)?;
-        let result = crate::resident::build(
+        let prepared = crate::resident::prepare(
             now,
             setup,
             guard.owner.settings.map(|s| s.identity),
             &mut guard.owner.store,
         );
+        // Only owned RAM data crosses this await. The worker cannot access the
+        // store or radio, and cancellation still resets through this guard.
+        let result = match prepared {
+            Ok(prepared) => crate::resident::construct(prepared).await,
+            Err(error) => Err(error),
+        };
         guard
             .finish()
             .await
