@@ -10,6 +10,7 @@ mod build;
 #[cfg(feature = "resident-contact-store")]
 mod contacts;
 pub(crate) use build::BuildError;
+pub(crate) use build::report_refusal as setup_refused;
 mod worker;
 pub(crate) use build::prepare;
 pub(crate) use worker::{construct, start_builder};
