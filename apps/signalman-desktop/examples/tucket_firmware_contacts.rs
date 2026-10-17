@@ -120,7 +120,9 @@ async fn run(args: &[String]) -> Result<()> {
     wire.as_mut_slice().zeroize();
     setup.tucket_identity_seed.zeroize();
     random.zeroize();
-    tokio::time::sleep(Duration::from_millis(1500)).await;
+    // The V4's diagnostic carrier retires on an undrained reply. Keep a read
+    // outstanding while setup finishes rather than sleeping through readiness.
+    transcript.push(collect(&mut port, Duration::from_millis(2500)).await?);
     command(&mut port, Command::Status).await?;
     let status = collect(&mut port, Duration::from_millis(900)).await?;
     if !status.contains("state=Home")
