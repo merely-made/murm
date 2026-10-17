@@ -37,6 +37,16 @@ pub struct Runtime {
     report: Report,
 }
 impl Runtime {
+    /// Restore public contact knowledge only; never switch/unpause a protocol
+    /// or replay pending transmissions from an earlier runtime.
+    pub fn restore_tucket_contacts(&mut self, keys: &[[u8; 32]]) -> Result<(), Error> {
+        self.tucket
+            .as_mut()
+            .ok_or(Error::WrongInstance)?
+            .restore_contacts(keys)
+            .map_err(Error::TucketContactRestore)
+    }
+
     /// Inputs are fresh active instances; profiles use the three public IDs.
     pub fn new(
         now: u64,

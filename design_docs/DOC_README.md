@@ -1,5 +1,15 @@
 # Murm Documentation Index
 
+Tucket persistent contacts (2026-10-17): the [scoped host journal slice](../testing/receipts/tucket-contacts/README.md)
+passes cold restore, save/refusal controls and a native Djinn-backed reconnect
+without the fixture's fresh peer advert. Four texts/four protocol ACKs and exact
+history pass across two connections; seven captures are reviewed. Public keys
+share the existing identity/realm journal, with version-2 downgrade refusal and
+no replay of routes or pending work. This supersedes R6's host contact-restore
+gap below. Standalone MCU contact persistence and broader endpoint/role parity
+remain open; the [parity plan](2026-10-16_protocol_parity_plan.md) keeps those
+owners separate.
+
 Board names (2026-10-16): [the family-plan naming slice](2026-10-13_murm_family_move_plan.md#board-names-2026-10-16) adds persistent public labels, USB naming commands and boot/status titles. Both normal images are installed and all three names saved. SB1, SB2 and T114 all pass post-reboot readback with their original radio settings; SB2 required physical reconnection after its USB endpoint stalled. The [naming receipt](../testing/receipts/device-names/README.md) keeps failed attempts and successful checks distinct. The [direct-PC](../testing/receipts/usb-reboot/direct-pc/README.md) and [swapped-cable](../testing/receipts/usb-reboot/swapped-cables/README.md) controls each reproduce the timeout on their first reset; the later trace below resolves the startup cause. Batteries are connected, so USB-replug recovery does not establish a full power cycle. Tracing found a 20-second physical-claim wait on uncommissioned SB2. The firmware now preserves and replays a read-only USB query to select already-permitted ordinary service early; claim authority and pending/corrupt gates remain enforced. Software checks pass. The [recovery receipt](../testing/receipts/usb-reboot/recovery-fix/README.md) records five consecutive SB2 software reboots without a replug, followed by a final ROM read and two read-only sessions. Names, identity and preferences survive; bytes outside the settings pair are unchanged. SB2 now runs fixed firmware `c8e5eb9309e`; SB1/T114 retain `cb042329232`.
 
 Protocol parity work (2026-10-16): [the three-family plan](2026-10-16_protocol_parity_plan.md)

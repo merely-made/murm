@@ -19,6 +19,7 @@
 //! Ported from upstream MeshCore (MIT, <https://github.com/ripplebiz/MeshCore>).
 
 mod capacity;
+mod contacts;
 mod pending;
 mod receive;
 mod route;
@@ -28,6 +29,7 @@ mod state;
 mod tests;
 
 pub use capacity::{CapacityError, NodeCapacity};
+pub use contacts::{ContactRestoreError, validate_contact_keys};
 pub use pending::{PendingText, PendingTexts, TextAttempt, TextRetryPolicy};
 pub use route::DirectRoute;
 pub use state::{Event, Node};

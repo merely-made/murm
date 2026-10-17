@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "result": "passed_bounded_host_contacts",
+  "native_base_revision": "ceed6ec82356ac2629563c3e1d355dcd10c83304",
+  "source_binding": "base revision plus exact tested source hashes; native run used a dirty source tree, not a clean-source receipt",
+  "source_manifest": "source-sha256.json",
+  "authority": "isolated real Djinn Keeper wallet and scoped production custody route",
+  "custodian_sha256": "25F41C90F231BBF88D573E5AD74E0BFA181523CD9E59F2FC1729F7F0316B2DCC",
+  "supplier_qualification": "testing/receipts/sennet-desktop/custody-supplier.json",
+  "software": {
+    "tucket": 83,
+    "signalman": 75,
+    "radio_hand": 168,
+    "format": true,
+    "core_clippy": true,
+    "desktop_clippy": true,
+    "desktop_build": true,
+    "thumb_no_std": true,
+    "xtensa_no_std": true,
+    "unsafe_audit": true,
+    "loc": "three existing unrelated failures retained in software/extracted-loc.log"
+  },
+  "native": {
+    "texts": 4,
+    "matched_protocol_acks": 4,
+    "connections": 2,
+    "explicit_initial_peer_advert": true,
+    "explicit_reconnect_peer_advert": false,
+    "exact_history": true,
+    "final_public_contacts": 1,
+    "visual_review": "visual-review.json"
+  },
+  "restoration": {
+    "sb1": "fresh 1 MiB prefix and protected 64 KiB tail match ROM MD5; exact named firmware/status/settings readback",
+    "sb2": "same-boot profile restoration acknowledged; original named firmware/status/settings exact",
+    "t114": "untouched in contact continuation",
+    "owned_helpers_stopped": true
+  },
+  "limits": [
+    "host-owned public-key cache, not standalone MCU flash persistence",
+    "unit cold reload proves absence of fresh advert; native fixture omits its reconnect advert, not an RF-wide claim of zero adverts",
+    "stock application-only reference under original factory table has no SPIFFS partition; stock reboot/filesystem persistence not qualified",
+    "no power-cut, personal installed Djinn daemon, broader routing/roles or UI polish acceptance"
+  ],
+  "retained_inputs": {
+    "contact_bytes_before_freeze": 10678609,
+    "memory_input_bytes": 13322670,
+    "memory_closure_public_bytes": 207259,
+    "total_cap_bytes": 100000000,
+    "private_recovery": "ignored validation/results/tucket-contacts; fresh flash backups and stopped synthetic Keeper wallet",
+    "isolated_targets_homes_worktrees_created": false
+  }
+}

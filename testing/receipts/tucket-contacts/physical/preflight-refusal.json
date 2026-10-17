@@ -1,0 +1,8 @@
+{
+  "expected_old_sha256": "23886513fbad19a6903f50dd4d91897c672f67238e4ddd990efcb4d8dd1f4987",
+  "actual_sha256": "25f41c90f231bbf88d573e5ad74e0bfa181523cd9e59f2fc1729f7f0316b2dcc",
+  "reason": "older Tucket-only supplier hash differs from qualified current shared Tucket/Sennet custodian",
+  "result": "preflight_refused",
+  "custodian_started": false,
+  "firmware_mutated": false
+}

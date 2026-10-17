@@ -39,7 +39,7 @@ into every constrained radio image.
 
 | Family | Verified starting point | Remaining parity work to inventory/complete | Relative judgment |
 | --- | --- | --- | --- |
-| Tucket / MeshCore | Identified 1.17.1 adverts, private text/ACKs, learned paths, retry/flood fallback and one-repeater routes at all three prefix widths; native Djinn-backed two-connection text/history pass | Persistent contacts/restart, multiple repeaters, scoped routing, full companion commands, repeater/room-server/management/sensor roles and current-release differences | Easiest overall; compact role structure and MIT upstream reuse within existing provenance rules |
+| Tucket / MeshCore | Identified 1.17.1 adverts, private text/ACKs, learned paths, retry/flood fallback and one-repeater routes at all three prefix widths; native Djinn-backed two-connection text/history pass; scoped host contact reload and reconnect without the fixture's fresh peer advert | Standalone firmware contact persistence/restart, multiple repeaters, scoped routing, full companion commands, repeater/room-server/management/sensor roles and current-release differences | Easiest overall; compact role structure and MIT upstream reuse within existing provenance rules |
 | Retinue / Reticulum | Extensive RNS 1.5.7 black-box qualification and subsequent core comparative repairs; embedded Retinue and bounded routing receipts | Reconcile current-main interface coverage with the integration review; finish remaining host services/interfaces and platform acceptance; embedded capacity, persistence and hostile-traffic qualification | Deepest transport/reliability and host-interface problem; much of the core already exists |
 | Sennet / Meshtastic | 2.7.26.54e0d8d channel and PKI directed text, correlated ACKs, duplicate handling, retained native history and automatic board restoration | Broader roles/routing and channels, discovery/configuration, current security modes, stock-client-facing device behavior, position/telemetry and module/product coverage | Hardest whole-product catch-up; broad firmware surface and independently authored wire implementation |
 
@@ -256,3 +256,21 @@ physical radio-failure recovery or unattended/power-cut product acceptance.
   identity/realm-scoped Signalman atomic journal, then prove cold restoration
   and acknowledged traffic without another peer advert. Private identity
   custody and pending-operation restart semantics retain their existing owners.
+
+- 2026-10-17: phase 3's first [persistent-contact slice](../testing/receipts/tucket-contacts/README.md)
+  passes cold file-journal reload into an empty runtime, acknowledged text
+  without any injected new peer advert, exact history, atomic-save failure,
+  malformed/scope/collision/capacity refusals and paused-personality restoration.
+  Signalman's existing identity/realm-scoped journal owns public peer keys;
+  new contacts have no saved route, dedup or pending work. Contact writes use
+  version 2 so older writers refuse before dropping the cache; empty-cache
+  version-1 books still load. Node restoration uses already reserved capacity.
+  The native Djinn-backed run exchanges four texts and four protocol ACKs
+  across two connections with the reconnect re-advert suppressed. Seven
+  captures are reviewed. Full suites pass 83 Tucket, 75 Signalman and 168
+  radio-hand tests; formatting, strict core/desktop Clippy and both bare-target
+  checks pass. The three unrelated existing LOC failures remain explicit.
+  This closes scoped host contact restoration, not MCU flash persistence,
+  stock-peer reboot persistence, power-cut or whole-role parity. Next endpoint
+  work is bounded multiple-hop/scoped routing and companion/management cases,
+  with standalone firmware persistence separately owned and qualified.

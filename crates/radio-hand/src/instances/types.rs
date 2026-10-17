@@ -26,6 +26,7 @@ pub enum Error {
     Retinue(retinue::instance::InstanceError),
     Sennet(sennet::instance::InstanceError),
     Tucket(tucket::instance::InstanceError),
+    TucketContactRestore(tucket::node::ContactRestoreError),
 }
 impl From<ControllerError> for Error {
     fn from(e: ControllerError) -> Self {

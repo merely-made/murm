@@ -22,7 +22,8 @@ param(
     [switch]$SennetDirected,
     [string]$BenchPython,
     [string]$PeerUsbSerial,
-    [switch]$ExchangeAfterReconnect
+    [switch]$ExchangeAfterReconnect,
+    [switch]$RequireCachedContacts
 )
 $ErrorActionPreference = 'Stop'
 $repo = (Resolve-Path (Join-Path $PSScriptRoot '../../..')).Path
@@ -32,6 +33,7 @@ $DesktopBinary = (Resolve-Path -LiteralPath $DesktopBinary).Path
 $PeerBinary = (Resolve-Path -LiteralPath $PeerBinary).Path
 if ($TucketBenchConfig -and $TucketConfig) { throw 'Choose one Tucket authority.' }
 $hasTucket = [bool]($TucketBenchConfig -or $TucketConfig)
+if ($RequireCachedContacts -and (!$hasTucket -or !$ExchangeAfterReconnect)) { throw 'Cached-contact acceptance requires a Tucket reconnect exchange.' }
 $hasSennet = [bool]$SennetConfig
 if ($SennetDirected -and !$hasSennet) { throw 'Directed Sennet requires its explicit configuration.' }
 $channelSennet = $hasSennet -and !$SennetDirected
@@ -125,6 +127,7 @@ $receipt = [ordered]@{
     scenario_sha256=(Get-FileHash $fixture -Algorithm SHA256).Hash
     deadline_seconds=$DeadlineSeconds; firmware_or_configuration_mutated=$false; result='not_completed'
     exchange_after_reconnect=[bool]$ExchangeAfterReconnect
+    require_cached_contacts=[bool]$RequireCachedContacts
     carriage=$(if ($SennetDirected) { 'djinn_sennet_pki_over_tulle' } elseif ($SennetConfig) { 'djinn_sennet_over_tulle' } elseif ($TucketConfig) { 'djinn_tucket_over_tulle' } elseif ($TucketBenchConfig) { 'isolated_bench_tucket_over_tulle' } else { 'stock_companion' })
 }
 $desktop = $null
@@ -183,7 +186,7 @@ try {
         if ($ExchangeAfterReconnect -and !$reconnectPeer -and $peer.HasExited -and (Test-Path -LiteralPath $env:SIGNALMAN_COMPANION_RECONNECT_READY)) {
             $first = Get-Content -LiteralPath (Join-Path $output 'peer/receipt.json') -Raw | ConvertFrom-Json
             if ($first.result -ne 'passed') { throw 'First peer receipt did not pass before reconnect.' }
-            if ($hasTucket) {
+            if ($hasTucket -and !$RequireCachedContacts) {
                 & $BenchPython -B (Join-Path $repo 'testing/stock_tucket_bench.py') advertise --port $PeerPort --usb-serial $PeerUsbSerial --output (Join-Path $output 'stock-reconnect-advertise.json')
                 if ($LASTEXITCODE -ne 0) { throw 'Stock reconnect advertisement failed.' }
                 Start-Sleep -Milliseconds 500

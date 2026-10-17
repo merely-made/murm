@@ -18,88 +18,10 @@ pub struct ResidentSession<'a> {
     timestamp: HashMap<u32, u32>,
     transmissions: HashMap<(u8, u64, u64, Option<u64>), MessageId>,
 }
-impl RadioComms {
-    pub fn attach<'a>(
-        &self,
-        runtime: &'a mut Runtime,
-    ) -> Result<ResidentSession<'a>, AdapterError> {
-        let mut inner = self.lock()?;
-        if inner.attached {
-            return Err(backend("resident journal already attached"));
-        }
-        let Scope::Resident(scope) = &inner.book.scope else {
-            return Err(backend(
-                "stock companion journals cannot attach to a resident runtime",
-            ));
-        };
-        if runtime
-            .installed_sennet()
-            .is_some_and(|s| s.address() != (scope.meshtastic_node, scope.meshtastic_channel))
-            || runtime
-                .installed_tucket()
-                .is_some_and(|t| t.node().identity().pub_key != scope.meshcore_key)
-        {
-            return Err(backend(
-                "resident public identity does not match journal realm",
-            ));
-        }
-        let binding = runtime
-            .installed_sennet()
-            .and_then(|s| s.directed_binding());
-        for record in &inner.book.records {
-            for fact in &record.facts {
-                if let RadioFact::MeshtasticPkiBinding {
-                    peer,
-                    local_public,
-                    peer_public,
-                } = fact
-                    && binding.is_none_or(|b| {
-                        b.peer != *peer
-                            || b.local_public != *local_public
-                            || b.peer_public != *peer_public
-                    })
-                {
-                    return Err(backend(
-                        "Meshtastic history is bound to another pinned PKI identity; select its original configuration or a new realm/journal",
-                    ));
-                }
-            }
-        }
-        inner.attached = true;
-        Ok(ResidentSession {
-            owner: self.clone(),
-            runtime,
-            bindings: HashMap::new(),
-            timestamp: HashMap::new(),
-            transmissions: HashMap::new(),
-        })
-    }
-}
+mod messages;
+mod session;
+
 impl ResidentSession<'_> {
-    /// Advertise through the retained runtime and its ordinary physical work queue.
-    pub fn advertise_tucket(
-        &mut self,
-        now: u64,
-        unix_seconds: u32,
-        name: &str,
-    ) -> Result<(), AdapterError> {
-        self.healthy()?;
-        let data = tucket::advert::AdvertData::try_chat(name)
-            .and_then(|d| d.encode())
-            .ok_or_else(|| backend("resident advert name exceeds MeshCore bounds"))?;
-        let report = self
-            .runtime
-            .advertise_tucket(now, unix_seconds, &data)
-            .map_err(|e| backend(format!("{e:?}")))?;
-        self.observe(now, report)
-    }
-    /// Full-key contact match, after the protocol has verified its advert.
-    pub fn knows_tucket_peer(&self, key: &[u8; 32]) -> bool {
-        self.runtime
-            .installed_tucket()
-            .and_then(|t| t.node().contact(key[0]))
-            .is_some_and(|c| c.pub_key == *key)
-    }
     pub fn transmit_budget_ms(&self) -> u64 {
         self.runtime.tx_budget_ms()
     }
@@ -388,7 +310,10 @@ impl ResidentSession<'_> {
         self.observe(now, report)
     }
     fn observe(&mut self, now: u64, report: Report) -> Result<(), AdapterError> {
-        let result = self.observe_report(now, report);
+        let result = self
+            .owner
+            .persist_tucket_contacts(self.runtime)
+            .and_then(|()| self.observe_report(now, report));
         if let Err(error) = &result {
             self.owner.lock()?.fault = Some(format!(
                 "resident observation could not be persisted; stop carriage: {error}"
@@ -626,44 +551,6 @@ impl ResidentSession<'_> {
             }
         }
         Ok(())
-    }
-    fn received(
-        &self,
-        conversation: ConversationId,
-        id: String,
-        author: String,
-        text: String,
-        timestamp_ms: Option<u64>,
-        fact: RadioFact,
-    ) -> Result<(), AdapterError> {
-        self.received_facts(conversation, id, author, text, timestamp_ms, vec![fact])
-    }
-    fn received_facts(
-        &self,
-        conversation: ConversationId,
-        id: String,
-        author: String,
-        text: String,
-        timestamp_ms: Option<u64>,
-        facts: Vec<RadioFact>,
-    ) -> Result<(), AdapterError> {
-        self.owner.receive(RadioRecord {
-            message: Message {
-                id: MessageId(id),
-                author: Identity::new(conversation.protocol, author),
-                body: MessageBody::PlainText(text),
-                subject: None,
-                timestamp_ms,
-                direction: Direction::Incoming,
-            },
-            conversation,
-            delivery: DeliveryStatus::ReceivedByRadio,
-            facts,
-        })
-    }
-    fn fault<T>(&self, detail: String) -> Result<T, AdapterError> {
-        self.owner.lock()?.fault = Some(detail.clone());
-        Err(backend(detail))
     }
 }
 impl Drop for ResidentSession<'_> {

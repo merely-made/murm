@@ -1,0 +1,8 @@
+{
+  "advert_hex": "11005b685cfeeadda8cb2211cf11fa0c3d2b52481bd5cd1bdf83529e518036a10cbb4202d36a4c07dbbddf717124a3bcb5482d7c891a1b35ac35c1e3a145a90f28d213bb6e7e52cac4c508f5a88276e8e68c2f16360e4232ecc7583791ce9aff1a953991a405815369676e616c6d616e205475636b65742062656e6368",
+  "authority": "djinn",
+  "device_id": "cbdb40d6-d433-4679-a355-86aea5aabb61",
+  "public_key": "5b685cfeeadda8cb2211cf11fa0c3d2b52481bd5cd1bdf83529e518036a10cbb",
+  "realm": "bench-tucket-cached-contacts",
+  "schema": 1
+}

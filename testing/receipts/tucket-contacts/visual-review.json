@@ -1,0 +1,25 @@
+{
+  "result": "functional_pass",
+  "reviewer": "Codex visual inspection",
+  "captures": [
+    "form",
+    "connected",
+    "roundtrip",
+    "disconnected",
+    "reconnected",
+    "reconnect-roundtrip",
+    "stopped"
+  ],
+  "dimensions": [
+    2400,
+    1504
+  ],
+  "blank": 0,
+  "distinct": 7,
+  "observations": [
+    "Commissioned COM7 and explicit realm are visible.",
+    "Incoming text and protocol-acknowledged outgoing text are visible before and after reconnect.",
+    "Disconnected/reconnected captures preserve old history; scenario asserts exact records.",
+    "Existing stale connecting notice, horizontally cropped fields and final four-record viewport clipping remain cosmetic open work."
+  ]
+}
