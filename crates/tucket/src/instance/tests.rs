@@ -16,6 +16,42 @@ fn introduce(a: &mut Instance, b: &mut Instance) {
 }
 
 #[test]
+fn radio_budget_leaves_a_delayed_reply_window_before_retry() {
+    assert!(InstanceConfig::for_radio(0, 2_000, 200).is_none());
+    assert!(InstanceConfig::for_radio(2, 0, 200).is_none());
+    assert!(InstanceConfig::for_radio(2, u64::MAX, 200).is_none());
+    assert!(InstanceConfig::for_radio(2, 1, u64::MAX).is_none());
+    let config = InstanceConfig::for_radio(2, 2_000, 200).unwrap();
+    let mut a = Instance::new(Node::new(LocalIdentity::from_seed([1; 32]), false), config);
+    let mut b = instance(2);
+    introduce(&mut a, &mut b);
+    let id = a
+        .begin_send(
+            1,
+            b.node().my_hash(),
+            "slow PHY",
+            TextRetryPolicy::default(),
+            SendTiming {
+                timestamp: 3,
+                expires_at: 15_001,
+                allowed_until: 15_001,
+            },
+        )
+        .unwrap();
+    let attempt = a.next_retry(1, id, 2_001).unwrap().unwrap();
+    assert!(a.next_retry(1_001, id, 3_001).unwrap().is_none());
+    assert_eq!(a.operations().next().unwrap().retry_at, 4_201);
+    let received = b.on_frame(2_001, &attempt.frame).unwrap();
+    let ack = match received.events.as_slice() {
+        [Event::Message { ack, .. }] => *ack,
+        _ => panic!("text"),
+    };
+    let frame = b.active_node_mut().unwrap().ack_frame(ack);
+    assert_eq!(a.on_frame(2_401, &frame).unwrap().acknowledged, [id]);
+    assert_eq!(a.pending_len(), 0);
+}
+
+#[test]
 fn direct_text_returns_a_wire_ack_without_a_separate_application_pump() {
     let mut a = instance(1);
     let mut b = instance(2);

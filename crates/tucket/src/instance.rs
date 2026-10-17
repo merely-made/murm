@@ -49,6 +49,26 @@ impl InstanceConfig {
         }
     }
 
+    /// Reserve one bounded transmission, turnaround, and bounded reply before
+    /// retrying. The caller selects both bounds for its actual PHY; queue wait
+    /// is still the scheduler's responsibility. `new` keeps explicit intervals.
+    pub const fn for_radio(pending: usize, tx_budget_ms: u64, reply_delay_ms: u64) -> Option<Self> {
+        if pending == 0 || tx_budget_ms == 0 {
+            return None;
+        }
+        let Some(round_trip) = tx_budget_ms.checked_mul(2) else {
+            return None;
+        };
+        let Some(retry_after) = round_trip.checked_add(reply_delay_ms) else {
+            return None;
+        };
+        Some(Self {
+            pending,
+            retry_after,
+            reply_delay_ms,
+        })
+    }
+
     /// Override response turnaround for a selected radio/bench configuration.
     pub const fn with_reply_delay_ms(mut self, delay: u64) -> Self {
         self.reply_delay_ms = delay;

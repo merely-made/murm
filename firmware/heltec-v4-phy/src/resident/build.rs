@@ -55,6 +55,7 @@ pub(crate) struct Prepared {
     now: u64,
     setup: ResidentSetup,
     identity: [u8; 64],
+    tucket_config: InstanceConfig,
     packet: radio_hand::packet_reservation::Lease,
     announce: radio_hand::announce_reservation::ActiveLease,
     #[cfg(feature = "resident-contact-store")]
@@ -71,6 +72,12 @@ pub(crate) fn prepare(
     store: &mut SettingsStore,
 ) -> Result<Prepared, BuildError> {
     let identity = stored_identity.ok_or(BuildError::MissingIdentity)?;
+    let tucket_config = InstanceConfig::for_radio(
+        2,
+        setup.tx_budget_ms,
+        tucket::instance::DEFAULT_REPLY_DELAY_MS,
+    )
+    .ok_or(BuildError::Configuration)?;
     #[cfg(feature = "resident-contact-store")]
     let cache = {
         use radio_hand::tucket_contacts::{self, Scope, Snapshot};
@@ -93,6 +100,7 @@ pub(crate) fn prepare(
         now,
         setup,
         identity,
+        tucket_config,
         packet,
         announce,
         #[cfg(feature = "resident-contact-store")]
@@ -107,6 +115,7 @@ pub(super) fn build(prepared: Prepared) -> Result<ResidentState, BuildError> {
         now,
         setup,
         identity,
+        tucket_config,
         packet,
         announce,
         #[cfg(feature = "resident-contact-store")]
@@ -120,7 +129,7 @@ pub(super) fn build(prepared: Prepared) -> Result<ResidentState, BuildError> {
             NodeCapacity::new(8, 32).map_err(|_| BuildError::Configuration)?,
         )
         .map_err(|_| BuildError::Configuration)?,
-        InstanceConfig::new(2, 1_000).ok_or(BuildError::Configuration)?,
+        tucket_config,
     );
     #[cfg(feature = "resident-contact-store")]
     tucket
