@@ -53,8 +53,8 @@ async fn command(port: &mut serial2_tokio::SerialPort, value: Command) -> Result
     Ok(())
 }
 async fn run(args: &[String]) -> Result<()> {
-    if args.len() != 5 {
-        return Err("usage: tucket_firmware_contacts <public-config> <fresh-output> <peer-full-key> <signalman-ui-tag> <expected-cache-count>".into());
+    if args.len() != 7 {
+        return Err("usage: tucket_firmware_contacts <public-config> <fresh-output> <peer-full-key> <signalman-ui-tag> <expected-cache-count> <min-stack-bytes> <min-free-heap-percent>".into());
     }
     let config_path = Path::new(&args[0]);
     let output = Path::new(&args[1]);
@@ -70,6 +70,11 @@ async fn run(args: &[String]) -> Result<()> {
         .try_into()
         .map_err(|_| "full peer key required")?;
     let expected: usize = args[4].parse()?;
+    let min_stack: usize = args[5].parse()?;
+    let min_heap: usize = args[6].parse()?;
+    if min_heap > 100 {
+        return Err("invalid heap acceptance percentage".into());
+    }
     let released = DjinnStationAuthority::default().open_tucket(config.device_id, &config.realm)?;
     let public = tucket::identity::LocalIdentity::from_seed(*released.material.seed_bytes())
         .identity()
@@ -158,17 +163,35 @@ async fn run(args: &[String]) -> Result<()> {
     )
     .await?;
     transcript.push(collect(&mut port, Duration::from_secs(16)).await?);
+    command(&mut port, Command::Status).await?;
+    let final_status = collect(&mut port, Duration::from_millis(900)).await?;
+    let number = |field: &str| -> Result<usize> {
+        Ok(final_status
+            .split_whitespace()
+            .find_map(|word| word.strip_prefix(field))
+            .ok_or_else(|| format!("missing firmware measurement {field}"))?
+            .parse()?)
+    };
+    let stack_free = number("free=")?;
+    let heap_capacity = number("heap_capacity=")?;
+    let heap_peak = number("heap_allocator_used_peak=")?;
+    let reserves = stack_free >= min_stack
+        && heap_peak <= heap_capacity
+        && (heap_capacity - heap_peak) * 100 >= heap_capacity * min_heap;
+    transcript.push(final_status);
     released.lease.check()?;
     let combined = transcript.join("\n");
     let matched = combined.contains("TucketAcknowledged");
     let received = combined.contains(&format!("{}-return", args[3]));
     save(
         &output.join("receipt.json"),
-        &serde_json::json!({"passed":matched&&received,"authority":"isolated Djinn wallet, volatile USB firmware setup",
+        &serde_json::json!({"passed":matched&&received&&reserves,"authority":"isolated Djinn wallet, volatile USB firmware setup",
         "public_key":hex::encode(public),"peer_key":hex::encode(peer),"expected_cache_before_peer_work":expected,
-        "protocol_acknowledged":matched,"received_exact_return_text":received,"transcript":transcript}),
+        "protocol_acknowledged":matched,"received_exact_return_text":received,
+        "memory":{"stack_free":stack_free,"heap_capacity":heap_capacity,"heap_peak":heap_peak,
+        "min_stack_bytes":min_stack,"min_free_heap_percent":min_heap,"passed":reserves},"transcript":transcript}),
     )?;
-    if !matched || !received {
+    if !matched || !received || !reserves {
         return Err("standalone firmware text/ACK exchange failed".into());
     }
     Ok(())
