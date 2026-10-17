@@ -1,0 +1,8 @@
+{
+  "advert_hex": "1100d1e721efd7faa048f7de03e61e91bd6cace536c08f0369bc040a37db527836da8817d36ab8e812cd7344515068621208bae7bb062340fde196464539e6ba900b0fff14e0d906ebedb6dbf4493586951458b72cfa2c0cc6982db8a84717773af69e5ad201815369676e616c6d616e205475636b65742062656e6368",
+  "authority": "djinn",
+  "device_id": "cbdb40d6-d433-4679-a355-86aea5aabb61",
+  "public_key": "d1e721efd7faa048f7de03e61e91bd6cace536c08f0369bc040a37db527836da",
+  "realm": "bench-tucket-firmware-contacts",
+  "schema": 1
+}

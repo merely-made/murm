@@ -1,0 +1,73 @@
+
+C:\Users\mark_\Code\repos\retinue\target\xtensa-esp32s3-none-elf\release\tulle-heltec-v4-phy:     file format elf32-xtensa-le
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .rwtext       00002018  40378400  40378400  00014400  2**2
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  1 .rwtext.wifi  00000000  4037a418  4037a418  000d2b2d  2**0
+                  CONTENTS
+  2 .rwdata_dummy 00002418  3fc88000  3fc88000  00010000  2**2
+                  ALLOC
+  3 .data         0000184c  3fc8a418  3fc8a418  00012418  2**3
+                  CONTENTS, ALLOC, LOAD, DATA
+  4 .data.wifi    00000000  3fc8bc64  3fc8bc64  000d2b2d  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  5 .bss          00026c40  3fc8bc70  3fc8bc70  00013c64  2**4
+                  ALLOC
+  6 .noinit       00000000  3fcb28b0  3fcb28b0  00000000  2**2
+                  ALLOC
+  7 .flash.appdesc 00000100  3c000020  3c000020  00001020  2**2
+                  CONTENTS, ALLOC, LOAD, READONLY, DATA
+  8 .rodata_merge 00000000  3c000120  3c000120  000d2b30  2**2
+                  CONTENTS
+  9 .rodata       0000ebc0  3c000120  3c000120  00001120  2**4
+                  CONTENTS, ALLOC, LOAD, READONLY, DATA
+ 10 .defmt.end    00000002  3c00ece0  3c00ece0  0000fce0  2**0
+                  CONTENTS, ALLOC, LOAD, READONLY, DATA
+ 11 .rodata.wifi  00000000  3c00ece4  3c00ece4  000d2b30  2**2
+                  CONTENTS, ALLOC, LOAD, DATA
+ 12 .vectors      00000400  40378000  40378000  00014000  2**2
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+ 13 .rotext_dummy 00010000  42000020  42000020  00017020  2**0
+                  ALLOC
+ 14 .text         000abb0d  42010020  42010020  00027020  2**2
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+ 15 .rtc_fast.text 00000000  600fe000  600fe000  000d2b30  2**0
+                  CONTENTS
+ 16 .rtc_fast.data 00000000  600fe000  600fe000  000d2b30  2**0
+                  CONTENTS
+ 17 .rtc_fast.bss 00000000  600fe000  600fe000  000d2b30  2**0
+                  CONTENTS
+ 18 .rtc_fast.persistent 00000000  600fe000  600fe000  000d2b30  2**0
+                  CONTENTS
+ 19 .rtc_slow.text 00000000  50000000  50000000  000d2b30  2**0
+                  CONTENTS
+ 20 .rtc_slow.data 00000000  50000000  50000000  000d2b30  2**0
+                  CONTENTS
+ 21 .rtc_slow.bss 00000000  50000000  50000000  000d2b30  2**0
+                  CONTENTS
+ 22 .rtc_slow.persistent 00000000  50000000  50000000  000d2b30  2**0
+                  CONTENTS
+ 23 .stack        00028e50  3fcb28b0  3fcb28b0  00013c64  2**2
+                  ALLOC
+ 24 .espressif.metadata 00000015  00000000  00000000  000d2b30  2**0
+                  CONTENTS, READONLY
+ 25 .debug_loc    0024308e  00000000  00000000  000d2b45  2**0
+                  CONTENTS, READONLY, DEBUGGING, OCTETS
+ 26 .debug_abbrev 00001af0  00000000  00000000  00315bd3  2**0
+                  CONTENTS, READONLY, DEBUGGING, OCTETS
+ 27 .debug_info   003ed04a  00000000  00000000  003176c3  2**0
+                  CONTENTS, READONLY, DEBUGGING, OCTETS
+ 28 .debug_aranges 00004de8  00000000  00000000  0070470d  2**0
+                  CONTENTS, READONLY, DEBUGGING, OCTETS
+ 29 .debug_ranges 00095718  00000000  00000000  007094f5  2**0
+                  CONTENTS, READONLY, DEBUGGING, OCTETS
+ 30 .debug_str    0043a629  00000000  00000000  0079ec0d  2**0
+                  CONTENTS, READONLY, DEBUGGING, OCTETS
+ 31 .comment      0000003f  00000000  00000000  00bd9236  2**0
+                  CONTENTS, READONLY
+ 32 .debug_frame  00009dc8  00000000  00000000  00bd9278  2**2
+                  CONTENTS, READONLY, DEBUGGING, OCTETS
+ 33 .debug_line   000be607  00000000  00000000  00be3040  2**0
+                  CONTENTS, READONLY, DEBUGGING, OCTETS

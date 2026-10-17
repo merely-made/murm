@@ -100,6 +100,108 @@ id = "host-workspace"
 tier = "pr"
 command = ["cargo", "test"]
 
+# The default relay keeps host-only contacts. Exercise the explicit standalone
+# journal feature so its interruption/refusal cases cannot disappear from PRs.
+[[suite]]
+id = "tucket-firmware-contact-store"
+tier = "pr"
+command = ["cargo", "test", "-p", "radio-hand", "--features", "instances,tucket-contact-store-bench", "--lib", "--test", "tucket_contacts", "--test", "instances"]
+
+[[asset_exemption]]
+path = "testing/receipts/tucket-firmware-contacts/source/prepare_boards.py"
+reason = "Frozen attended preflight evidence; exact USB identities and private recovery layout required."
+expires = "2027-01-17"
+
+[[asset_exemption]]
+path = "testing/receipts/tucket-firmware-contacts/source/prepare_corrected.py"
+reason = "Frozen attended preflight evidence; exact USB identities and private recovery layout required."
+expires = "2027-01-17"
+
+[[asset_exemption]]
+path = "testing/receipts/tucket-firmware-contacts/source/v4_storage_campaign.py"
+reason = "Frozen attended application-only flash/restoration campaign; standalone contact receipt owns execution."
+expires = "2027-01-17"
+
+[[asset_exemption]]
+path = "testing/receipts/tucket-firmware-contacts/source/v4_storage_retry.py"
+reason = "Frozen attended exact-identity memory/reset/restoration campaign; standalone contact receipt owns execution."
+expires = "2027-01-17"
+
+[[asset_exemption]]
+path = "testing/receipts/tucket-firmware-contacts/source/t114_storage_campaign.py"
+reason = "Frozen attended T114 application-only DFU evidence; requires exact hardware and receipt-owned recovery inputs."
+expires = "2027-01-17"
+
+[[asset_exemption]]
+path = "testing/receipts/tucket-firmware-contacts/source/t114_storage_worker.py"
+reason = "Frozen attended T114 application-only DFU evidence; requires exact hardware and receipt-owned recovery inputs."
+expires = "2027-01-17"
+
+[[asset_exemption]]
+path = "testing/receipts/tucket-firmware-contacts/source/live_ops.py"
+reason = "Frozen attended application-only RF/restoration evidence; exact identified hardware and private recovery inputs required."
+expires = "2027-01-17"
+
+[[asset_exemption]]
+path = "testing/receipts/tucket-firmware-contacts/source/live_ops_framing.py"
+reason = "Frozen attended application-only RF/restoration evidence; exact identified hardware and private recovery inputs required."
+expires = "2027-01-17"
+
+[[asset_exemption]]
+path = "testing/receipts/tucket-firmware-contacts/source/freeze_firmware_contacts.py"
+reason = "Frozen receipt assembly source; consumes completed attended campaigns and their historical private-input layout."
+expires = "2027-01-17"
+
+[[asset_exemption]]
+path = "testing/receipts/tucket-firmware-contacts/source/live_ops_trace.py"
+reason = "Frozen attended application-only flash/RF/restoration evidence; exact identified hardware and receipt-owned recovery inputs required."
+expires = "2027-01-17"
+
+[[asset_exemption]]
+path = "testing/receipts/tucket-firmware-contacts/source/live_ops_worker.py"
+reason = "Frozen attended application-only flash/RF/restoration evidence; exact identified hardware and receipt-owned recovery inputs required."
+expires = "2027-01-17"
+
+[[asset_exemption]]
+path = "testing/receipts/tucket-firmware-contacts/source/live_ops_ingress.py"
+reason = "Frozen attended application-only flash/RF/restoration evidence; exact identified hardware and receipt-owned recovery inputs required."
+expires = "2027-01-17"
+
+[[asset_exemption]]
+path = "testing/receipts/tucket-firmware-contacts/source/live_ops_retry.py"
+reason = "Frozen attended application-only flash/RF/restoration evidence; exact identified hardware and receipt-owned recovery inputs required."
+expires = "2027-01-17"
+
+[[asset_exemption]]
+path = "testing/receipts/tucket-firmware-contacts/source/v4_storage_boxed.py"
+reason = "Frozen attended eight-key storage and boxed-memory/reset campaign; identified hardware and receipt-owned recovery inputs required."
+expires = "2027-01-17"
+
+[[asset_exemption]]
+path = "testing/receipts/tucket-firmware-contacts/source/reset_owned_bench_cache.py"
+reason = "Frozen attended ROM reset of only this lane's newly created synthetic cache pair; exact scope/preimage/prefix guards and retained evidence required."
+expires = "2027-01-17"
+
+[[asset_exemption]]
+path = "testing/receipts/tucket-firmware-contacts/source/reset_owned_ingress_cache.py"
+reason = "Frozen attended ROM reset of only this lane's newly created synthetic cache pair; exact scope/preimage/prefix guards and retained evidence required."
+expires = "2027-01-17"
+
+[[asset_exemption]]
+path = "testing/receipts/tucket-firmware-contacts/source/verify_owned_cache_reset.py"
+reason = "Frozen read-only verification of the synthetic-cache reset after a checksum-format parser refusal; no erase operation."
+expires = "2027-01-17"
+
+[[asset_exemption]]
+path = "testing/receipts/tucket-firmware-contacts/source/live_ops_final.py"
+reason = "Frozen attended final-source application-only RF/restoration evidence; exact hardware and receipt-owned recovery inputs required."
+expires = "2027-01-17"
+
+[[asset_exemption]]
+path = "testing/receipts/tucket-firmware-contacts/source/reset_owned_final_cache.py"
+reason = "Frozen attended reset of only the lane-owned synthetic cache before final-source requalification; exact preimage/scope guards and retained evidence required."
+expires = "2027-01-17"
+
 [[suite]]
 id = "protocol-capacity"
 tier = "local"

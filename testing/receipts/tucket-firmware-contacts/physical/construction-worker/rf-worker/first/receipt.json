@@ -1,0 +1,25 @@
+{
+  "authority": "isolated Djinn wallet, volatile USB firmware setup",
+  "expected_cache_before_peer_work": 0,
+  "memory": {
+    "heap_capacity": 65536,
+    "heap_peak": 21912,
+    "min_free_heap_percent": 25,
+    "min_stack_bytes": 16384,
+    "passed": true,
+    "stack_free": 52160
+  },
+  "passed": false,
+  "peer_key": "e46afa4b0803acd4b8f2b8335432e8e9f523a885811c384d4d9bb33980ce057b",
+  "protocol_acknowledged": true,
+  "public_key": "701e99971f7cf7c217b0cbaed01468a35874ea2a80883c452e34a9c0f66c1e4a",
+  "received_exact_return_text": false,
+  "transcript": [
+    "I (284) esp_image: segment 3: paddr=000cb330 vaddr=3fc8b834 sizetulle/heltec-v4 phy online; version=0.0.1; sx1262 online; sync=2b reg=24b4; longfast=906875000; build=096283afb940fbf45f129954bfaf3fe69c6f2f28; image=v4-resident-usb\r\nidentity=loaded slot=B seq=13\r\nname=SB2\r\n",
+    "resident setup stage=building ms=21795\nresident setup stage=built ms=21982\nresident ready\r\n",
+    "resident status now=29782 state=Home active=Some(Activation { instance: PersonalityId(2), generation: 1 }) deadline=None\nresident contacts persisted=0 installed=0 max=8\nresident memory now=29782 heap_capacity=65536 heap_allocator_used=21544 heap_allocator_used_peak=21544 heap_requested=21544 heap_requested_peak=21544 heap_alloc_failures=0 stack_measurement=sampled_sp_not_high_water stack_sp=0x3fcd4a50 stack_sampled_bytes=27824 stack_capacity=167536 stack_sample_valid=true\nresident watermark free=52160 total=167472\n",
+    "resident event Tucket(Advert { identity: Identity { pub_key: [228, 106, 250, 75, 8, 3, 172, 212, 184, 242, 184, 51, 84, 50, 232, 233, 245, 35, 168, 133, 129, 28, 56, 77, 77, 155, 179, 57, 128, 206, 5, 123] }, timestamp: 1792221655, app_data: [129, 83, 105, 103, 110, 97, 108, 109, 97, 110, 32, 115, 116, 111, 99, 107, 32, 112, 101, 101, 114] })\nresident report now=31929 events=1 dropped=0 omitted=0\n",
+    "resident event TucketAcknowledged(OperationId(1))\nresident event Tucket(Ack([106, 75, 9, 214]))\nresident report now=36088 events=2 dropped=0 omitted=0\n",
+    "resident status now=49138 state=Home active=Some(Activation { instance: PersonalityId(2), generation: 1 }) deadline=None\nresident contacts persisted=1 installed=1 max=8\nresident memory now=49138 heap_capacity=65536 heap_allocator_used=21544 heap_allocator_used_peak=21912 heap_requested=21544 heap_requested_peak=21905 heap_alloc_failures=0 stack_measurement=sampled_sp_not_high_water stack_sp=0x3fcd4a50 stack_sampled_bytes=27824 stack_capacity=167536 stack_sample_valid=true\nresident watermark free=52160 total=167472\n"
+  ]
+}

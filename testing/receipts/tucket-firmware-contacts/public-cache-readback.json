@@ -1,0 +1,11 @@
+{
+  "before_reset_and_final_md5": "886e6d160e2f8ac546df014a9dcacae7",
+  "unchanged_after_cold_traffic": true,
+  "slot": "A",
+  "sequence": 0,
+  "local_public": "0fc83f98b1db79b51303063dcec09c8ccad7c47ff8ee43d78ab91fe9c33a8da1",
+  "receive_profile_digest": "aa34baf22039d5abaa07da38ee54909cc425d1ac05a9d91f83a58c1d4e6d4c95",
+  "keys": [
+    "4d1e0b3e0ec65be19ccdb177b88016f46a048c3242ec6076bda51cc62465b003"
+  ]
+}

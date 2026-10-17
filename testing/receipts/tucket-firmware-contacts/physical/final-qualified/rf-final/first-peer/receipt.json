@@ -1,0 +1,178 @@
+{
+  "channel": 0,
+  "exchanges": [],
+  "firmware_or_configuration_mutated": false,
+  "left": {
+    "bench_records": [
+      {
+        "conversation": {
+          "key": "bench-tucket-firmware-contacts/4d1e0b3e0ec65be19ccdb177b88016f46a048c3242ec6076bda51cc62465b003/0fc83f98b1db79b51303063dcec09c8ccad7c47ff8ee43d78ab91fe9c33a8da1",
+          "protocol": "MeshCore"
+        },
+        "delivery": "ReceivedByRadio",
+        "facts": [
+          {
+            "CompanionReceived": {
+              "protocol": "MeshCore",
+              "source": "0fc83f98b1db79b51303063dcec09c8ccad7c47ff8ee43d78ab91fe9c33a8da1",
+              "timestamp": 1792223712
+            }
+          }
+        ],
+        "message": {
+          "author": {
+            "address": "0fc83f98b1db79b51303063dcec09c8ccad7c47ff8ee43d78ab91fe9c33a8da1",
+            "display_name": null,
+            "protocol": "MeshCore"
+          },
+          "body": {
+            "PlainText": "signalman-ui-fwcontacts-1de097576eab4bffa0d28fc027d4627a"
+          },
+          "direction": "Incoming",
+          "id": "mc-0fc83f98b1db79b51303063dcec09c8ccad7c47ff8ee43d78ab91fe9c33a8da1-1792223712-7403ecce3b1d085fc917a0239df233d9d9e46359ff48459a1a711a116e5c1e1f",
+          "subject": null,
+          "timestamp_ms": 1792223712000
+        }
+      },
+      {
+        "conversation": {
+          "key": "bench-tucket-firmware-contacts/4d1e0b3e0ec65be19ccdb177b88016f46a048c3242ec6076bda51cc62465b003/0fc83f98b1db79b51303063dcec09c8ccad7c47ff8ee43d78ab91fe9c33a8da1",
+          "protocol": "MeshCore"
+        },
+        "delivery": "ProtocolAcknowledged",
+        "facts": [
+          {
+            "MeshCoreOperation": {
+              "timestamp": 1792223713
+            }
+          },
+          {
+            "CompanionAccepted": {
+              "correlation": 2689938637
+            }
+          },
+          {
+            "MeshCoreAck": {
+              "value": [
+                205,
+                52,
+                85,
+                160
+              ]
+            }
+          }
+        ],
+        "message": {
+          "author": {
+            "address": "4d1e0b3e0ec65be19ccdb177b88016f46a048c3242ec6076bda51cc62465b003",
+            "display_name": null,
+            "protocol": "MeshCore"
+          },
+          "body": {
+            "PlainText": "signalman-ui-fwcontacts-1de097576eab4bffa0d28fc027d4627a-return"
+          },
+          "direction": "Outgoing",
+          "id": "out-1",
+          "subject": null,
+          "timestamp_ms": 1792223713320
+        }
+      }
+    ],
+    "diagnostics": [
+      "Meshtastic channel senders are unauthenticated; MeshCore private text uses a 16-bit pairwise MAC; ACKs are unencrypted 32-bit matches.",
+      "Stock companion observations are device-reported. Signalman does not verify PKI proofs or treat protocol ACKs as authenticated/read receipts.",
+      "MeshCore firmware v1.17.1-d929643, model Heltec V4.3 OLED, build 14-Aug-2026, companion API 13",
+      "Connected stock MeshCore companion; public identity read from device. Device acceptance and protocol ACKs are not authenticated/read receipts."
+    ],
+    "identity": "4d1e0b3e0ec65be19ccdb177b88016f46a048c3242ec6076bda51cc62465b003",
+    "total_record_count": 2
+  },
+  "mode": "peer",
+  "ports": [
+    "COM6"
+  ],
+  "protocol": "meshcore",
+  "realm": "bench-tucket-firmware-contacts",
+  "reconnect_delay_ms": 0,
+  "result": "passed",
+  "schema": 1,
+  "ui_peer": {
+    "broadcast_only": false,
+    "elapsed_ms": 3077,
+    "matched_protocol_ack": true,
+    "received": {
+      "conversation": {
+        "key": "bench-tucket-firmware-contacts/4d1e0b3e0ec65be19ccdb177b88016f46a048c3242ec6076bda51cc62465b003/0fc83f98b1db79b51303063dcec09c8ccad7c47ff8ee43d78ab91fe9c33a8da1",
+        "protocol": "MeshCore"
+      },
+      "delivery": "ReceivedByRadio",
+      "facts": [
+        {
+          "CompanionReceived": {
+            "protocol": "MeshCore",
+            "source": "0fc83f98b1db79b51303063dcec09c8ccad7c47ff8ee43d78ab91fe9c33a8da1",
+            "timestamp": 1792223712
+          }
+        }
+      ],
+      "message": {
+        "author": {
+          "address": "0fc83f98b1db79b51303063dcec09c8ccad7c47ff8ee43d78ab91fe9c33a8da1",
+          "display_name": null,
+          "protocol": "MeshCore"
+        },
+        "body": {
+          "PlainText": "signalman-ui-fwcontacts-1de097576eab4bffa0d28fc027d4627a"
+        },
+        "direction": "Incoming",
+        "id": "mc-0fc83f98b1db79b51303063dcec09c8ccad7c47ff8ee43d78ab91fe9c33a8da1-1792223712-7403ecce3b1d085fc917a0239df233d9d9e46359ff48459a1a711a116e5c1e1f",
+        "subject": null,
+        "timestamp_ms": 1792223712000
+      }
+    },
+    "sent": {
+      "conversation": {
+        "key": "bench-tucket-firmware-contacts/4d1e0b3e0ec65be19ccdb177b88016f46a048c3242ec6076bda51cc62465b003/0fc83f98b1db79b51303063dcec09c8ccad7c47ff8ee43d78ab91fe9c33a8da1",
+        "protocol": "MeshCore"
+      },
+      "delivery": "ProtocolAcknowledged",
+      "facts": [
+        {
+          "MeshCoreOperation": {
+            "timestamp": 1792223713
+          }
+        },
+        {
+          "CompanionAccepted": {
+            "correlation": 2689938637
+          }
+        },
+        {
+          "MeshCoreAck": {
+            "value": [
+              205,
+              52,
+              85,
+              160
+            ]
+          }
+        }
+      ],
+      "message": {
+        "author": {
+          "address": "4d1e0b3e0ec65be19ccdb177b88016f46a048c3242ec6076bda51cc62465b003",
+          "display_name": null,
+          "protocol": "MeshCore"
+        },
+        "body": {
+          "PlainText": "signalman-ui-fwcontacts-1de097576eab4bffa0d28fc027d4627a-return"
+        },
+        "direction": "Outgoing",
+        "id": "out-1",
+        "subject": null,
+        "timestamp_ms": 1792223713320
+      }
+    },
+    "stock_device_accepted": false
+  }
+}

@@ -1,0 +1,27 @@
+
+target/thumbv7em-none-eabihf/release/tulle-t114-phy:	file format elf32-littlearm
+
+Sections:
+Idx Name            Size     VMA      LMA      Type
+  0                 00000000 00000000 00000000 
+  1 .vector_table   00000100 00026000 00026000 DATA
+  2 .text           000482a8 00026100 00026100 TEXT
+  3 .rodata         00010b8c 0006e3a8 0006e3a8 DATA
+  4 .data           00000198 20006000 0007ef38 DATA
+  5 .gnu.sgstubs    00000000 0007f0e0 0007f0e0 DATA
+  6 .defmt.end      00000002 0007f0e0 0007f0e0 DATA
+  7 .bss            00025254 20006198 20006198 BSS
+  8 .uninit         00000070 2002b3ec 2002b3ec BSS
+  9 .debug_loc      0014e41d 00000000 00000000 DEBUG
+ 10 .debug_abbrev   0000235f 00000000 00000000 DEBUG
+ 11 .debug_info     00211641 00000000 00000000 DEBUG
+ 12 .debug_aranges  00002240 00000000 00000000 DEBUG
+ 13 .debug_ranges   00065188 00000000 00000000 DEBUG
+ 14 .debug_str      00287657 00000000 00000000 DEBUG
+ 15 .comment        00000099 00000000 00000000 
+ 16 .ARM.attributes 00000038 00000000 00000000 
+ 17 .debug_frame    00005cac 00000000 00000000 DEBUG
+ 18 .debug_line     0006075e 00000000 00000000 DEBUG
+ 19 .symtab         00009a70 00000000 00000000 
+ 20 .shstrtab       000000e1 00000000 00000000 
+ 21 .strtab         0001dcbc 00000000 00000000 

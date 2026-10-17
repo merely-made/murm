@@ -1,0 +1,3 @@
+loc ceiling: 928 files, 6 over 600 (baselined), 2 errors
+loc ceiling: apps/signalman/src/radio_comms/companion.rs: 781 lines, over the 600-line ceiling
+loc ceiling: apps/signalman-desktop/src/main.rs: 636 lines, over the 600-line ceiling

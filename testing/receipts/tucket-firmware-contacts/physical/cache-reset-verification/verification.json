@@ -1,0 +1,7 @@
+{
+  "passed": true,
+  "mutation": "none; read-only follow-up to completed bench-owned cache erase",
+  "prior_harness_failure": "ROM MD5 omits leading zero; first parser required 32 printed digits",
+  "tail_md5": "02c37aacdf784c349f8b75706c8ea179",
+  "prefix_md5": "e4c2ac46c8fcf03f3bacce169197e723"
+}

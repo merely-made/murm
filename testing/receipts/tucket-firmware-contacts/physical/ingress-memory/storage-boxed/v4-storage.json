@@ -1,0 +1,23 @@
+{
+  "passed": true,
+  "source": "2a4e654fbe673dd8692d21bd037a48cd4fcf14a6",
+  "app_sha256": "33bacd4dae2449c95d2874bd6e07a0fe00dc1cd9a2472fb64c2b243e1222e9e7",
+  "boots": [
+    "I (284) esp_image: segment 3: paddr=000cc08c vaddr=3fc8b704 sizecontacts bench ok initial_keys=8 keys=8 commits=0 sequence=1\r\n",
+    "I (284) esp_image: segment 3: paddr=000cc08c vaddr=3fc8b704 sizecontacts bench ok initial_keys=8 keys=8 commits=0 sequence=1\r\n",
+    "I (284) esp_image: segment 3: paddr=000cc08c vaddr=3fc8b704 sizecontacts bench ok initial_keys=8 keys=8 commits=0 sequence=1\r\n"
+  ],
+  "first_write_receipt": "../../corrected/v4-storage.json",
+  "touched": true,
+  "cache_md5": [
+    "b8329b9381b3d8dfc96d49ad9376436a",
+    "b8329b9381b3d8dfc96d49ad9376436a"
+  ],
+  "campaign_passed": true,
+  "prefix_md5": "8f35078ba63ad63096e58a0c19f724ad",
+  "protected_except_owned_cache": {
+    "0x3f0000": "4805ae92577b2c7adf4f8fbf1c37cd02",
+    "0x3fc000": "92ab673d915a94dcf187720e8ac0d608"
+  },
+  "restored": true
+}

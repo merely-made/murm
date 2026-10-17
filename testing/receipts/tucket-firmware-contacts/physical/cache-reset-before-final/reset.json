@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "scope": "only lane-owned synthetic contact pair; retained raw preimage, no nonce rollback",
+  "prior": "retry-budget/rf-retry",
+  "local_public": "7c98c7bbd3772d2123be8b52340c3d1af7fd318d66738806e93b10c7359172c8",
+  "peer_public": "b91586917fc8b20752949e80d815df01a497c7b90dea252b8636f14926e5aacc",
+  "erase_range": [
+    "0x3fa000",
+    "0x3fc000"
+  ],
+  "after_tail_md5": "cd459e6fc26785797ae227be68c6c89d"
+}

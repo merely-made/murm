@@ -1,0 +1,11 @@
+{
+  "passed": false,
+  "boards": {
+    "SB1": {
+      "port": "COM6",
+      "usb_serial": "44:1B:F6:6A:FB:28",
+      "prefix_md5": "8f35078ba63ad63096e58a0c19f724ad",
+      "tail_md5": "9cbf6be73c185f95d9948f5596b2b25c"
+    }
+  }
+}

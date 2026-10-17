@@ -73,6 +73,8 @@ rather than treated as cost-free public data. It contains no names, locations,
 trust decisions, routes, messages or private material. The ordinary field-relay
 build keeps the host-only rule above. `flash-policy.toml` explicitly enumerates
 every cache/scope field; the classification audit checks both record schemas.
+The [standalone contact receipt](../testing/receipts/tucket-firmware-contacts/README.md)
+records the bounded backends, live V4 reboot exchange and preservation checks.
 T114 has a separately qualified storage backend, not a standalone Tucket loop.
 
 ## The fleet-key liability is absent by posture, not mitigation

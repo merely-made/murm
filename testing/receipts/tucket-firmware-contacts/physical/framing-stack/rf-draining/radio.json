@@ -1,0 +1,17 @@
+{
+  "passed": false,
+  "source": "5f7295c1ac871da55c9c893fb0e0d5902e1fd271",
+  "authority": "isolated real Keeper wallet, volatile USB firmware setup",
+  "probe_source": "2367ae3735584eaa1a5493efc6887e9f7eb114fc",
+  "custodian_sha256": "25f41c90f231bbf88d573e5ad74e0bfa181523cd9e59f2fc1729f7f0316b2dcc",
+  "probe_sha256": "781D81E6F4783EA1287DB4108C80AB575C9A1BE75CE05AD2AA614666E5C4B900",
+  "peer_sha256": "EDFFBF9BC67C795E441B8B789A018A22A6F3432417F0E82FAC944D65FEF0F9DE",
+  "phases": [],
+  "self_public": "1b840378f40e0db9f7a6e9f56fe383bee0ff72a15d0bc947aac35200efadcc17",
+  "peer_public": "c992ec045dbe2643814b735c4f13e57e1bcb1ed738dd2a2a8c0a7f79dbba32f6",
+  "error": "Firmware first configuration failed",
+  "peer_restored": true,
+  "dut_restored": true,
+  "custodian_stopped": true,
+  "closed_utc": "2026-10-17T07:09:07.2663303Z"
+}

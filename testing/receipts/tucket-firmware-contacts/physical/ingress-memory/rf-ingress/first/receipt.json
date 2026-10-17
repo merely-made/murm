@@ -1,0 +1,25 @@
+{
+  "authority": "isolated Djinn wallet, volatile USB firmware setup",
+  "expected_cache_before_peer_work": 0,
+  "memory": {
+    "heap_capacity": 65536,
+    "heap_peak": 21912,
+    "min_free_heap_percent": 25,
+    "min_stack_bytes": 16384,
+    "passed": true,
+    "stack_free": 52160
+  },
+  "passed": false,
+  "peer_key": "9802c0aea6d7818c7b06e6c0a1d2cb48a650859a32b61b5f1925063ec70a1a27",
+  "protocol_acknowledged": true,
+  "public_key": "9658b344702977e372e19422cd49a8a06eca8294aed5193d8f85bf6b76565c9a",
+  "received_exact_return_text": false,
+  "transcript": [
+    "I (284) esp_image: segment 3: paddr=000cb7ec vaddr=3fc8b794 sizetulle/heltec-v4 phy online; version=0.0.1; sx1262 online; sync=2b reg=24b4; longfast=906875000; build=2a4e654fbe673dd8692d21bd037a48cd4fcf14a6; image=v4-resident-usb\r\nidentity=loaded slot=B seq=13\r\nname=SB2\r\n",
+    "resident setup stage=building ms=21658\nresident setup stage=built ms=21845\nresident ready\r\n",
+    "resident status now=29642 state=Home active=Some(Activation { instance: PersonalityId(2), generation: 1 }) deadline=None\nresident contacts persisted=0 installed=0 max=8\nresident memory now=29642 heap_capacity=65536 heap_allocator_used=21544 heap_allocator_used_peak=21544 heap_requested=21544 heap_requested_peak=21544 heap_alloc_failures=0 stack_measurement=sampled_sp_not_high_water stack_sp=0x3fcd4a50 stack_sampled_bytes=27824 stack_capacity=167536 stack_sample_valid=true\nresident watermark free=52160 total=167472\n",
+    "resident rx len=123 header=11 path_len=0 payload_type=4 dest=98 src=02\nresident event Tucket(Advert { identity: Identity { pub_key: [152, 2, 192, 174, 166, 215, 129, 140, 123, 6, 230, 192, 161, 210, 203, 72, 166, 80, 133, 154, 50, 182, 27, 95, 25, 37, 6, 62, 199, 10, 26, 39] }, timestamp: 1792222321, app_data: [129, 83, 105, 103, 110, 97, 108, 109, 97, 110, 32, 115, 116, 111, 99, 107, 32, 112, 101, 101, 114] })\nresident report now=31763 events=1 dropped=0 omitted=0\n",
+    "resident rx len=22 header=21 path_len=0 payload_type=8 dest=96 src=98\nresident event TucketAcknowledged(OperationId(1))\nresident event Tucket(Ack([251, 21, 201, 208]))\nresident report now=35880 events=2 dropped=0 omitted=0\n",
+    "resident status now=48927 state=Home active=Some(Activation { instance: PersonalityId(2), generation: 1 }) deadline=None\nresident contacts persisted=1 installed=1 max=8\nresident memory now=48927 heap_capacity=65536 heap_allocator_used=21544 heap_allocator_used_peak=21912 heap_requested=21544 heap_requested_peak=21905 heap_alloc_failures=0 stack_measurement=sampled_sp_not_high_water stack_sp=0x3fcd4a50 stack_sampled_bytes=27824 stack_capacity=167536 stack_sample_valid=true\nresident watermark free=52160 total=167472\n"
+  ]
+}

@@ -1,0 +1,380 @@
+{"round": 1, "measurement": {"initial": "0", "fragmented": "4544", "retained": "14476", "final": "0", "peak": "18452", "capacity": "49152", "failures": "1", "expected_refusals": "1", "msp_sample": "537072672", "worker_min_sp_sample": "537079992", "stack_free": "18836", "stack_total": "84740"}}
+{"round": 2, "measurement": {"initial": "0", "fragmented": "4544", "retained": "14476", "final": "0", "peak": "18452", "capacity": "49152", "failures": "2", "expected_refusals": "1", "msp_sample": "537072672", "worker_min_sp_sample": "537079992", "stack_free": "18836", "stack_total": "84740"}}
+{"round": 3, "measurement": {"initial": "0", "fragmented": "4544", "retained": "14476", "final": "0", "peak": "18452", "capacity": "49152", "failures": "3", "expected_refusals": "1", "msp_sample": "537072672", "worker_min_sp_sample": "537079992", "stack_free": "18836", "stack_total": "84740"}}
+{"round": 4, "measurement": {"initial": "0", "fragmented": "4544", "retained": "14476", "final": "0", "peak": "18452", "capacity": "49152", "failures": "4", "expected_refusals": "1", "msp_sample": "537072672", "worker_min_sp_sample": "537079992", "stack_free": "18836", "stack_total": "84740"}}
+{"round": 5, "measurement": {"initial": "0", "fragmented": "4544", "retained": "14476", "final": "0", "peak": "18452", "capacity": "49152", "failures": "5", "expected_refusals": "1", "msp_sample": "537072672", "worker_min_sp_sample": "537079992", "stack_free": "18836", "stack_total": "84740"}}
+{"round": 6, "measurement": {"initial": "0", "fragmented": "4544", "retained": "14476", "final": "0", "peak": "18452", "capacity": "49152", "failures": "6", "expected_refusals": "1", "msp_sample": "537072672", "worker_min_sp_sample": "537079992", "stack_free": "18836", "stack_total": "84740"}}
+{"round": 7, "measurement": {"initial": "0", "fragmented": "4544", "retained": "14476", "final": "0", "peak": "18452", "capacity": "49152", "failures": "7", "expected_refusals": "1", "msp_sample": "537072672", "worker_min_sp_sample": "537079992", "stack_free": "18836", "stack_total": "84740"}}
+{"round": 8, "measurement": {"initial": "0", "fragmented": "4544", "retained": "14476", "final": "0", "peak": "18452", "capacity": "49152", "failures": "8", "expected_refusals": "1", "msp_sample": "537072672", "worker_min_sp_sample": "537079992", "stack_free": "18836", "stack_total": "84740"}}
+{"round": 9, "measurement": {"initial": "0", "fragmented": "4544", "retained": "14476", "final": "0", "peak": "18452", "capacity": "49152", "failures": "9", "expected_refusals": "1", "msp_sample": "537072672", "worker_min_sp_sample": "537079992", "stack_free": "18836", "stack_total": "84740"}}
+{"round": 10, "measurement": {"initial": "0", "fragmented": "4544", "retained": "14476", "final": "0", "peak": "18452", "capacity": "49152", "failures": "10", "expected_refusals": "1", "msp_sample": "537072672", "worker_min_sp_sample": "537079992", "stack_free": "18836", "stack_total": "84740"}}
+{"round": 11, "measurement": {"initial": "0", "fragmented": "4544", "retained": "14476", "final": "0", "peak": "18452", "capacity": "49152", "failures": "11", "expected_refusals": "1", "msp_sample": "537072672", "worker_min_sp_sample": "537079992", "stack_free": "18836", "stack_total": "84740"}}
+{"round": 12, "measurement": {"initial": "0", "fragmented": "4544", "retained": "14476", "final": "0", "peak": "18452", "capacity": "49152", "failures": "12", "expected_refusals": "1", "msp_sample": "537072672", "worker_min_sp_sample": "537079992", "stack_free": "18836", "stack_total": "84740"}}
+{"round": 13, "measurement": {"initial": "0", "fragmented": "4544", "retained": "14476", "final": "0", "peak": "18452", "capacity": "49152", "failures": "13", "expected_refusals": "1", "msp_sample": "537072672", "worker_min_sp_sample": "537079992", "stack_free": "18836", "stack_total": "84740"}}
+{"round": 14, "measurement": {"initial": "0", "fragmented": "4544", "retained": "14476", "final": "0", "peak": "18452", "capacity": "49152", "failures": "14", "expected_refusals": "1", "msp_sample": "537072672", "worker_min_sp_sample": "537079992", "stack_free": "18836", "stack_total": "84740"}}
+{"round": 15, "measurement": {"initial": "0", "fragmented": "4544", "retained": "14476", "final": "0", "peak": "18452", "capacity": "49152", "failures": "15", "expected_refusals": "1", "msp_sample": "537072672", "worker_min_sp_sample": "537079992", "stack_free": "18836", "stack_total": "84740"}}
+{"round": 16, "measurement": {"initial": "0", "fragmented": "4544", "retained": "14476", "final": "0", "peak": "18452", "capacity": "49152", "failures": "16", "expected_refusals": "1", "msp_sample": "537072672", "worker_min_sp_sample": "537079992", "stack_free": "18836", "stack_total": "84740"}}
+{
+  "board": "t114",
+  "usb": [
+    6421,
+    21023,
+    "TULLE-T114-01"
+  ],
+  "port": "COM10",
+  "runner_sha256": "efc717f224f47831c3f61423041425827e7aa795d5726aa45a944174fcc20163",
+  "requested_rounds": 16,
+  "responses": [
+    {
+      "command": "status",
+      "response": "tulle/t114 phy online; version=0.0.1; sx1262 online; spi=software; irq=poll; sync=2b reg=24b4; region=US915 freq=906875000 reset=watchdog crash=1 timebase=inactive; build=5f7295c1ac871da55c9c893fb0e0d5902e1fd271; image=t114-native\r\nname=T114\r\n",
+      "seconds": 1.604
+    },
+    {
+      "command": "region",
+      "response": "region=US915\r\n",
+      "seconds": 1.599
+    },
+    {
+      "command": "channel",
+      "response": "channel=modem\r\n",
+      "seconds": 1.502
+    },
+    {
+      "command": "sync",
+      "response": "2b 24b4\r\n",
+      "seconds": 1.604
+    },
+    {
+      "command": "crash",
+      "response": "crash count=1 msg=WATCHDOG\r\n",
+      "seconds": 1.6
+    },
+    {
+      "command": "protocol memory",
+      "response": "memory initial=0 fragmented=4544 retained=14476 final=0 peak=18452 capacity=49152 failures=1 expected_refusals=1 msp_sample=537072672 worker_min_sp_sample=537079992 stack_free=18836 stack_total=84740\r\n",
+      "seconds": 6.317,
+      "measurement": {
+        "initial": "0",
+        "fragmented": "4544",
+        "retained": "14476",
+        "final": "0",
+        "peak": "18452",
+        "capacity": "49152",
+        "failures": "1",
+        "expected_refusals": "1",
+        "msp_sample": "537072672",
+        "worker_min_sp_sample": "537079992",
+        "stack_free": "18836",
+        "stack_total": "84740"
+      }
+    },
+    {
+      "command": "protocol memory",
+      "response": "memory initial=0 fragmented=4544 retained=14476 final=0 peak=18452 capacity=49152 failures=2 expected_refusals=1 msp_sample=537072672 worker_min_sp_sample=537079992 stack_free=18836 stack_total=84740\r\n",
+      "seconds": 6.317,
+      "measurement": {
+        "initial": "0",
+        "fragmented": "4544",
+        "retained": "14476",
+        "final": "0",
+        "peak": "18452",
+        "capacity": "49152",
+        "failures": "2",
+        "expected_refusals": "1",
+        "msp_sample": "537072672",
+        "worker_min_sp_sample": "537079992",
+        "stack_free": "18836",
+        "stack_total": "84740"
+      }
+    },
+    {
+      "command": "protocol memory",
+      "response": "memory initial=0 fragmented=4544 retained=14476 final=0 peak=18452 capacity=49152 failures=3 expected_refusals=1 msp_sample=537072672 worker_min_sp_sample=537079992 stack_free=18836 stack_total=84740\r\n",
+      "seconds": 6.317,
+      "measurement": {
+        "initial": "0",
+        "fragmented": "4544",
+        "retained": "14476",
+        "final": "0",
+        "peak": "18452",
+        "capacity": "49152",
+        "failures": "3",
+        "expected_refusals": "1",
+        "msp_sample": "537072672",
+        "worker_min_sp_sample": "537079992",
+        "stack_free": "18836",
+        "stack_total": "84740"
+      }
+    },
+    {
+      "command": "protocol memory",
+      "response": "memory initial=0 fragmented=4544 retained=14476 final=0 peak=18452 capacity=49152 failures=4 expected_refusals=1 msp_sample=537072672 worker_min_sp_sample=537079992 stack_free=18836 stack_total=84740\r\n",
+      "seconds": 6.315,
+      "measurement": {
+        "initial": "0",
+        "fragmented": "4544",
+        "retained": "14476",
+        "final": "0",
+        "peak": "18452",
+        "capacity": "49152",
+        "failures": "4",
+        "expected_refusals": "1",
+        "msp_sample": "537072672",
+        "worker_min_sp_sample": "537079992",
+        "stack_free": "18836",
+        "stack_total": "84740"
+      }
+    },
+    {
+      "command": "protocol memory",
+      "response": "memory initial=0 fragmented=4544 retained=14476 final=0 peak=18452 capacity=49152 failures=5 expected_refusals=1 msp_sample=537072672 worker_min_sp_sample=537079992 stack_free=18836 stack_total=84740\r\n",
+      "seconds": 6.316,
+      "measurement": {
+        "initial": "0",
+        "fragmented": "4544",
+        "retained": "14476",
+        "final": "0",
+        "peak": "18452",
+        "capacity": "49152",
+        "failures": "5",
+        "expected_refusals": "1",
+        "msp_sample": "537072672",
+        "worker_min_sp_sample": "537079992",
+        "stack_free": "18836",
+        "stack_total": "84740"
+      }
+    },
+    {
+      "command": "protocol memory",
+      "response": "memory initial=0 fragmented=4544 retained=14476 final=0 peak=18452 capacity=49152 failures=6 expected_refusals=1 msp_sample=537072672 worker_min_sp_sample=537079992 stack_free=18836 stack_total=84740\r\n",
+      "seconds": 6.3,
+      "measurement": {
+        "initial": "0",
+        "fragmented": "4544",
+        "retained": "14476",
+        "final": "0",
+        "peak": "18452",
+        "capacity": "49152",
+        "failures": "6",
+        "expected_refusals": "1",
+        "msp_sample": "537072672",
+        "worker_min_sp_sample": "537079992",
+        "stack_free": "18836",
+        "stack_total": "84740"
+      }
+    },
+    {
+      "command": "protocol memory",
+      "response": "memory initial=0 fragmented=4544 retained=14476 final=0 peak=18452 capacity=49152 failures=7 expected_refusals=1 msp_sample=537072672 worker_min_sp_sample=537079992 stack_free=18836 stack_total=84740\r\n",
+      "seconds": 6.311,
+      "measurement": {
+        "initial": "0",
+        "fragmented": "4544",
+        "retained": "14476",
+        "final": "0",
+        "peak": "18452",
+        "capacity": "49152",
+        "failures": "7",
+        "expected_refusals": "1",
+        "msp_sample": "537072672",
+        "worker_min_sp_sample": "537079992",
+        "stack_free": "18836",
+        "stack_total": "84740"
+      }
+    },
+    {
+      "command": "protocol memory",
+      "response": "memory initial=0 fragmented=4544 retained=14476 final=0 peak=18452 capacity=49152 failures=8 expected_refusals=1 msp_sample=537072672 worker_min_sp_sample=537079992 stack_free=18836 stack_total=84740\r\n",
+      "seconds": 6.302,
+      "measurement": {
+        "initial": "0",
+        "fragmented": "4544",
+        "retained": "14476",
+        "final": "0",
+        "peak": "18452",
+        "capacity": "49152",
+        "failures": "8",
+        "expected_refusals": "1",
+        "msp_sample": "537072672",
+        "worker_min_sp_sample": "537079992",
+        "stack_free": "18836",
+        "stack_total": "84740"
+      }
+    },
+    {
+      "command": "protocol memory",
+      "response": "memory initial=0 fragmented=4544 retained=14476 final=0 peak=18452 capacity=49152 failures=9 expected_refusals=1 msp_sample=537072672 worker_min_sp_sample=537079992 stack_free=18836 stack_total=84740\r\n",
+      "seconds": 6.296,
+      "measurement": {
+        "initial": "0",
+        "fragmented": "4544",
+        "retained": "14476",
+        "final": "0",
+        "peak": "18452",
+        "capacity": "49152",
+        "failures": "9",
+        "expected_refusals": "1",
+        "msp_sample": "537072672",
+        "worker_min_sp_sample": "537079992",
+        "stack_free": "18836",
+        "stack_total": "84740"
+      }
+    },
+    {
+      "command": "protocol memory",
+      "response": "memory initial=0 fragmented=4544 retained=14476 final=0 peak=18452 capacity=49152 failures=10 expected_refusals=1 msp_sample=537072672 worker_min_sp_sample=537079992 stack_free=18836 stack_total=84740\r\n",
+      "seconds": 6.302,
+      "measurement": {
+        "initial": "0",
+        "fragmented": "4544",
+        "retained": "14476",
+        "final": "0",
+        "peak": "18452",
+        "capacity": "49152",
+        "failures": "10",
+        "expected_refusals": "1",
+        "msp_sample": "537072672",
+        "worker_min_sp_sample": "537079992",
+        "stack_free": "18836",
+        "stack_total": "84740"
+      }
+    },
+    {
+      "command": "protocol memory",
+      "response": "memory initial=0 fragmented=4544 retained=14476 final=0 peak=18452 capacity=49152 failures=11 expected_refusals=1 msp_sample=537072672 worker_min_sp_sample=537079992 stack_free=18836 stack_total=84740\r\n",
+      "seconds": 6.301,
+      "measurement": {
+        "initial": "0",
+        "fragmented": "4544",
+        "retained": "14476",
+        "final": "0",
+        "peak": "18452",
+        "capacity": "49152",
+        "failures": "11",
+        "expected_refusals": "1",
+        "msp_sample": "537072672",
+        "worker_min_sp_sample": "537079992",
+        "stack_free": "18836",
+        "stack_total": "84740"
+      }
+    },
+    {
+      "command": "protocol memory",
+      "response": "memory initial=0 fragmented=4544 retained=14476 final=0 peak=18452 capacity=49152 failures=12 expected_refusals=1 msp_sample=537072672 worker_min_sp_sample=537079992 stack_free=18836 stack_total=84740\r\n",
+      "seconds": 6.313,
+      "measurement": {
+        "initial": "0",
+        "fragmented": "4544",
+        "retained": "14476",
+        "final": "0",
+        "peak": "18452",
+        "capacity": "49152",
+        "failures": "12",
+        "expected_refusals": "1",
+        "msp_sample": "537072672",
+        "worker_min_sp_sample": "537079992",
+        "stack_free": "18836",
+        "stack_total": "84740"
+      }
+    },
+    {
+      "command": "protocol memory",
+      "response": "memory initial=0 fragmented=4544 retained=14476 final=0 peak=18452 capacity=49152 failures=13 expected_refusals=1 msp_sample=537072672 worker_min_sp_sample=537079992 stack_free=18836 stack_total=84740\r\n",
+      "seconds": 6.319,
+      "measurement": {
+        "initial": "0",
+        "fragmented": "4544",
+        "retained": "14476",
+        "final": "0",
+        "peak": "18452",
+        "capacity": "49152",
+        "failures": "13",
+        "expected_refusals": "1",
+        "msp_sample": "537072672",
+        "worker_min_sp_sample": "537079992",
+        "stack_free": "18836",
+        "stack_total": "84740"
+      }
+    },
+    {
+      "command": "protocol memory",
+      "response": "memory initial=0 fragmented=4544 retained=14476 final=0 peak=18452 capacity=49152 failures=14 expected_refusals=1 msp_sample=537072672 worker_min_sp_sample=537079992 stack_free=18836 stack_total=84740\r\n",
+      "seconds": 6.306,
+      "measurement": {
+        "initial": "0",
+        "fragmented": "4544",
+        "retained": "14476",
+        "final": "0",
+        "peak": "18452",
+        "capacity": "49152",
+        "failures": "14",
+        "expected_refusals": "1",
+        "msp_sample": "537072672",
+        "worker_min_sp_sample": "537079992",
+        "stack_free": "18836",
+        "stack_total": "84740"
+      }
+    },
+    {
+      "command": "protocol memory",
+      "response": "memory initial=0 fragmented=4544 retained=14476 final=0 peak=18452 capacity=49152 failures=15 expected_refusals=1 msp_sample=537072672 worker_min_sp_sample=537079992 stack_free=18836 stack_total=84740\r\n",
+      "seconds": 6.304,
+      "measurement": {
+        "initial": "0",
+        "fragmented": "4544",
+        "retained": "14476",
+        "final": "0",
+        "peak": "18452",
+        "capacity": "49152",
+        "failures": "15",
+        "expected_refusals": "1",
+        "msp_sample": "537072672",
+        "worker_min_sp_sample": "537079992",
+        "stack_free": "18836",
+        "stack_total": "84740"
+      }
+    },
+    {
+      "command": "protocol memory",
+      "response": "memory initial=0 fragmented=4544 retained=14476 final=0 peak=18452 capacity=49152 failures=16 expected_refusals=1 msp_sample=537072672 worker_min_sp_sample=537079992 stack_free=18836 stack_total=84740\r\n",
+      "seconds": 6.298,
+      "measurement": {
+        "initial": "0",
+        "fragmented": "4544",
+        "retained": "14476",
+        "final": "0",
+        "peak": "18452",
+        "capacity": "49152",
+        "failures": "16",
+        "expected_refusals": "1",
+        "msp_sample": "537072672",
+        "worker_min_sp_sample": "537079992",
+        "stack_free": "18836",
+        "stack_total": "84740"
+      }
+    },
+    {
+      "command": "status",
+      "response": "tulle/t114 phy online; version=0.0.1; sx1262 online; spi=software; irq=poll; sync=2b reg=24b4; region=US915 freq=906875000 reset=watchdog crash=1 timebase=inactive; build=5f7295c1ac871da55c9c893fb0e0d5902e1fd271; image=t114-native\r\nname=T114\r\n",
+      "seconds": 1.604
+    },
+    {
+      "command": "air",
+      "response": "air region=US915 duty=0ms listen=off armed=1 armfail=0 rxok=0 rxerr=0 rxbad=0 txok=0 txerr=0 noregion=0 overduty=0 cadclear=0 cadbusy=0 cadgiveup=0 cadover=0 cadfault=0 beats=0 frames=0\r\nscan cad1=0/0 cad2=0/0 rx1=0/0 rx2=0/0 rx3=0/0\r\n",
+      "seconds": 1.601
+    },
+    {
+      "command": "crash",
+      "response": "crash count=0 msg=WATCHDOG\r\n",
+      "seconds": 1.603
+    }
+  ],
+  "passed": true,
+  "stack_scope": "boot paint when stack_free is present; otherwise point-in-time samples only",
+  "acceptance": {
+    "min_stack_bytes": 16384,
+    "min_free_heap_percent": 25
+  },
+  "attached": "tulle/t114 phy online; version=0.0.1; sx1262 online; spi=software; irq=poll; sync=2b reg=24b4; region=US915 freq=906875000 reset=watchdog crash=1 timebase=inactive; build=5f7295c1ac871da55c9c893fb0e0d5902e1fd271; image=t114-native\r\nidentity=loaded slot=A seq=94\r\nnode=599997c8 heap=0/49152 highwater=24\r\n"
+}

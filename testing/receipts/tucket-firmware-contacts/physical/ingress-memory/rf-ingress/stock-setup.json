@@ -1,0 +1,29 @@
+{
+  "mode": "stock-setup",
+  "result": "passed",
+  "port": "COM6",
+  "usb_serial": "44:1B:F6:6A:FB:28",
+  "before": {
+    "key": "9802c0aea6d7818c7b06e6c0a1d2cb48a650859a32b61b5f1925063ec70a1a27",
+    "power_dbm": 10,
+    "frequency_khz": 869618,
+    "bandwidth_hz": 62500,
+    "sf": 8,
+    "cr": 5,
+    "version": "v1.17.1-d929643"
+  },
+  "public_business_card": "11009658b344702977e372e19422cd49a8a06eca8294aed5193d8f85bf6b76565c9a4824d36ad642c095a6cbe2f4f7e8be874b621986337ca5cdaa14d790de64fbaed578149a38d064099d3f58164b8bebc7725b9fa13612446aa88dcafb207a31d45b9f800d815369676e616c6d616e205475636b65742062656e6368",
+  "after": {
+    "key": "9802c0aea6d7818c7b06e6c0a1d2cb48a650859a32b61b5f1925063ec70a1a27",
+    "power_dbm": 0,
+    "frequency_khz": 906875,
+    "bandwidth_hz": 250000,
+    "sf": 10,
+    "cr": 5,
+    "version": "v1.17.1-d929643"
+  },
+  "contact_key": "9658b344702977e372e19422cd49a8a06eca8294aed5193d8f85bf6b76565c9a",
+  "contacts_count": 1,
+  "contact_hash_matches": 1,
+  "contact_verified": true
+}

@@ -1,0 +1,5 @@
+{
+  "cached_before_peer_work": 0,
+  "public_key": "9658b344702977e372e19422cd49a8a06eca8294aed5193d8f85bf6b76565c9a",
+  "status": "resident status now=29642 state=Home active=Some(Activation { instance: PersonalityId(2), generation: 1 }) deadline=None\nresident contacts persisted=0 installed=0 max=8\nresident memory now=29642 heap_capacity=65536 heap_allocator_used=21544 heap_allocator_used_peak=21544 heap_requested=21544 heap_requested_peak=21544 heap_alloc_failures=0 stack_measurement=sampled_sp_not_high_water stack_sp=0x3fcd4a50 stack_sampled_bytes=27824 stack_capacity=167536 stack_sample_valid=true\nresident watermark free=52160 total=167472\n"
+}

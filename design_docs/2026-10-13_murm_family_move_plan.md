@@ -2083,8 +2083,27 @@ passes four texts/four protocol ACKs, exact history and two connections with
 the fixture's reconnect advert omitted. Seven captures are reviewed. The
 stock reference runs application-only under SB1's unchanged factory partition
 table; this does not qualify stock filesystem persistence or stock reboot.
-Standalone MCU contact persistence, power-cut, multiple-hop/scoped routing,
-broader commands/roles and existing UI polish remain separate work.
+The standalone continuation below qualifies MCU contact storage. Power-cut,
+multiple-hop/scoped routing, broader commands/roles and existing UI polish
+remain separate work.
+
+**Standalone firmware continuation (2026-10-17).** The
+[firmware contact receipt](../testing/receipts/tucket-firmware-contacts/README.md)
+qualifies eight-key A/B flash backends on V4 and T114. Final V4 source `fb7e0e6eacc`
+passes four texts/four protocol ACKs across reboot, with one cached key loaded
+before any fresh RX/TX and no reconnect peer advert. T114 qualifies storage
+and reinstall recovery only; its live Tucket loop remains absent. Identity
+setup remains volatile, and no private credential record is added.
+
+The live V4 constructor needed a separate executor turn and boxed result to
+avoid overflowing its stack. The pressure fixture now charges that box and
+passes the unchanged reserve limits. Firmware retry spacing derives from the
+configured radio budget, replacing a one-second interval that overlapped
+responses. Both boards pass sixteen pressure rounds; live V4 stack/heap also
+pass after traffic. Original firmware/profiles are restored and monotonic
+reservations retained. Failed attempts and guarded resets of only newly
+created bench-cache records are retained. The parity plan owns remaining
+T114 service, routing, command and role work.
 
 ### R7 — Sennet channel text over Tulle (2026-10-16, functional pass)
 

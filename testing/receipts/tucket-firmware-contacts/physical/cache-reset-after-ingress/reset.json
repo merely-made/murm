@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "scope": "only lane-owned synthetic contact pair; retained raw preimage, no nonce rollback",
+  "prior": "ingress-memory/rf-ingress",
+  "local_public": "9658b344702977e372e19422cd49a8a06eca8294aed5193d8f85bf6b76565c9a",
+  "peer_public": "9802c0aea6d7818c7b06e6c0a1d2cb48a650859a32b61b5f1925063ec70a1a27",
+  "erase_range": [
+    "0x3fa000",
+    "0x3fc000"
+  ],
+  "after_tail_md5": "df2d817a5f3f9ba844a754941132d039"
+}

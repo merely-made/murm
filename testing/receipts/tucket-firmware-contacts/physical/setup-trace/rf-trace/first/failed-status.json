@@ -1,0 +1,7 @@
+{
+  "before_setup": [
+    "I (282) esp_image: segment 3: paddr=000ca0d8 vaddr=3fc8b854 sizetulle/heltec-v4 phy online; version=0.0.1; sx1262 online; sync=2b reg=24b4; longfast=906875000; build=6d27e711a61fd4cce7501acea7ce700d0be5af87; image=v4-resident-usb\r\nidentity=loaded slot=B seq=13\r\nname=SB2\r\n",
+    "resident setup stage=building ms=21863\n"
+  ],
+  "status": ""
+}

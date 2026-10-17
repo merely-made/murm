@@ -1,0 +1,24 @@
+4202acc0 <tulle_heltec_v4_phy::__main_task::__main_task_inner_function::{closure#0}>:
+4202acc0:	004136        	entry	a1, 32
+4202acc3:	9d9881        	l32r	a8, 42012324 <idle_hook_fn+0x22dc> (bc40 <RESERVE_ICACHE+0x3c40>)
+4202acc6:	c08180        	sub	a8, a1, a8
+4202acc9:	001810        	movsp	a1, a8
+4202accc:	950d81        	l32r	a8, 42010100 <idle_hook_fn+0xb8> (c841 <RESERVE_ICACHE+0x4841>)
+4202accf:	828a      	add.n	a8, a2, a8
+4202acd1:	000882        	l8ui	a8, a8, 0
+42040348 <<tulle_heltec_v4_phy::store::SettingsStore>::reserve_announce_lease>:
+42040348:	018136        	entry	a1, 192
+4204034b:	03b8      	l32i.n	a11, a3, 0
+4204034d:	50c1a2        	addi	a10, a1, 80
+42040350:	48be81        	l32r	a8, 42012648 <idle_hook_fn+0x2600> (420405a8 <<tulle_heltec_v4_phy::store::SettingsStore>::read_reservation_snapshot>)
+42040353:	0008e0        	callx8	a8
+42040356:	180c      	movi.n	a8, 1
+42040358:	142192        	l32i	a9, a1, 80
+4206cb9c <<radio_hand::instances::Runtime>::new>:
+4206cb9c:	a30136        	entry	a1, 0x5180
+4206cb9f:	080c      	movi.n	a8, 0
+4206cba1:	216182        	s32i	a8, a1, 132
+4206cba4:	978091        	l32r	a9, 420529a4 <<curve25519_dalek::backend::serial::u32::scalar::Scalar29>::sub+0x99c> (21ac <VECTORS_SIZE+0x1dac>)
+4206cba7:	979a      	add.n	a9, a7, a9
+4206cba9:	09b8      	l32i.n	a11, a9, 0
+4206cbab:	ffa0e2        	movi	a14, 255

@@ -1,0 +1,30 @@
+4202ab20 <tulle_heltec_v4_phy::__main_task::__main_task_inner_function::{closure#0}>:
+4202ab20:	d80136        	entry	a1, 0x6c00
+4202ab23:	957781        	l32r	a8, 42010100 <idle_hook_fn+0xb8> (276d <VECTORS_SIZE+0x236d>)
+4202ab26:	828a      	add.n	a8, a2, a8
+4202ab28:	000882        	l8ui	a8, a8, 0
+4202ab2b:	993191        	l32r	a9, 42010ff0 <idle_hook_fn+0xfa8> (3c000968 <_rodata_start+0x848>)
+4202ab2e:	a08890        	addx4	a8, a8, a9
+4202ab31:	0888      	l32i.n	a8, a8, 0
+4202ab33:	190c      	movi.n	a9, 1
+...
+420467a0 <tulle_heltec_v4_phy::resident::build::build>:
+420467a0:	004136        	entry	a1, 32
+420467a3:	2fe181        	l32r	a8, 42012728 <idle_hook_fn+0x26e0> (11ba0 <RESERVE_ICACHE+0x9ba0>)
+420467a6:	c08180        	sub	a8, a1, a8
+420467a9:	001810        	movsp	a1, a8
+420467ac:	332382        	l32i	a8, a3, 204
+420467af:	1f6182        	s32i	a8, a1, 124
+420467b2:	322382        	l32i	a8, a3, 200
+420467b5:	1e6182        	s32i	a8, a1, 120
+...
+4206ddb0 <<radio_hand::instances::Runtime>::new>:
+4206ddb0:	a30136        	entry	a1, 0x5180
+4206ddb3:	080c      	movi.n	a8, 0
+4206ddb5:	216182        	s32i	a8, a1, 132
+4206ddb8:	928191        	l32r	a9, 420527bc <<&u32 as core::fmt::Debug>::fmt+0x954> (21ac <VECTORS_SIZE+0x1dac>)
+4206ddbb:	979a      	add.n	a9, a7, a9
+4206ddbd:	09b8      	l32i.n	a11, a9, 0
+4206ddbf:	ffa0e2        	movi	a14, 255
+4206ddc2:	639be0        	minu	a9, a11, a14
+...

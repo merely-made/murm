@@ -1,0 +1,27 @@
+{
+  "passed": false,
+  "source": "30bde0d1ab9991599ab9a22fdbf7b22c3abd991f",
+  "boots": [
+    "contacts bench ok initial_keys=0 keys=8 commits=2 sequence=1\r\n"
+  ],
+  "packages": {
+    "bench": {
+      "sha256": "8cc291cd12d78b47c5bd02062a04cb718a6d80608d85913749d3690d58c6d7d8",
+      "bytes": 503620,
+      "erase_end": "0xa1000"
+    },
+    "restore": {
+      "sha256": "4c56670f0cd51387b26802b29fe160439ce173a8c66e0538d6e97a3113d6605d",
+      "bytes": 364484,
+      "erase_end": "0x7f000"
+    },
+    "handoff": {
+      "sha256": "7ef7e6c2d50e8aa5e5536cdcda124cb2dda9636dcb40fa6dd9efb32feae41740",
+      "bytes": 1368,
+      "erase_end": "0x27000"
+    }
+  },
+  "scope": "application-only DFU and internal public-cache readback; no protected-flash dump",
+  "error": "AssertionError('t114-storage-memory')",
+  "restored": true
+}

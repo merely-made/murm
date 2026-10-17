@@ -1,0 +1,23 @@
+{
+  "port": "COM7",
+  "realm": "bench-tucket-firmware-contacts",
+  "journal": "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\tucket-firmware-contacts\\framing-stack\\rf-framing\\unused-journal.json",
+  "name": "Signalman Tucket bench",
+  "frequency_hz": 906875000,
+  "bandwidth_hz": 250000,
+  "spreading_factor": 10,
+  "coding_rate_denominator": 5,
+  "tx_power_dbm": 0,
+  "tx_budget_ms": 2000,
+  "frame_ttl_ms": 15000,
+  "retry_after_ms": 3000,
+  "airtime_window_ms": 60000,
+  "airtime_allowance_ms": 12000,
+  "receive_wait_ms": 50,
+  "open_settle_ms": 800,
+  "online_timeout_ms": 3000,
+  "transmit_timeout_ms": 3000,
+  "dtr": false,
+  "device_id": "cbdb40d6-d433-4679-a355-86aea5aabb61",
+  "reply_delay_ms": 200
+}
