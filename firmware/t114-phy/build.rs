@@ -9,6 +9,7 @@ fn main() {
     // all three kept clear of code. Deriving all of them from the same lines
     // means the pairs cannot drift into one another or application code.
     let (flash_origin, flash_length) = region(source, "FLASH");
+    let (contacts_origin, contacts_length) = region(source, "CONTACTS");
     let (control_origin, control_length) = region(source, "CONTROL");
     let (reservation_origin, reservation_length) = region(source, "RESERVATION");
     let (store_origin, store_length) = region(source, "STORE");
@@ -27,9 +28,15 @@ fn main() {
 
     assert_eq!(
         flash_origin + flash_length,
-        control_origin,
-        "FLASH must end exactly where CONTROL begins, or the linker can place code into durable state; adjust memory.x together"
+        contacts_origin,
+        "FLASH must end exactly where CONTACTS begins, or the linker can place code into durable state; adjust memory.x together"
     );
+    assert_eq!(contacts_origin + contacts_length, control_origin);
+    assert_eq!(contacts_origin % page, 0);
+    assert_eq!(contacts_length, 2 * page);
+    fs::write(out.join("contacts_region.rs"), format!(
+        "pub const CONTACTS_ORIGIN: u32 = {contacts_origin:#010X};\npub const CONTACTS_LENGTH: u32 = {contacts_length:#010X};\n"
+    )).expect("write contacts_region.rs");
     assert_eq!(
         control_origin + control_length,
         reservation_origin,

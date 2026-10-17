@@ -97,7 +97,35 @@ scan_globs = [
     "crates/seneschal/src/store.rs",
     "firmware/t114-phy/src/store.rs",
     "firmware/heltec-v4-phy/src/store.rs",
+    "crates/radio-hand/src/tucket_contacts.rs",
 ]
+
+# Owner-requested standalone Tucket storage, 2026-10-17. The ordinary field
+# relay retains the host-only contact rule. This explicit build option has a
+# bounded pseudonymous key cache, not an address book or fleet trust database.
+[[record]]
+schema_source = "crates/radio-hand/src/tucket_contacts.rs"
+schema_struct = "Scope"
+[[record.field]]
+name = "local_public"
+classification = "pseudonymous"
+reason = "The local Tucket public key binds the cache to the selected volatile identity; it is not a seed or root credential."
+[[record.field]]
+name = "profile_digest"
+classification = "public"
+reason = "Domain-separated digest of the selected receive modulation and frequency; excludes transmit power and private material."
+
+[[record]]
+schema_source = "crates/radio-hand/src/tucket_contacts.rs"
+schema_struct = "Snapshot"
+[[record.field]]
+name = "scope"
+classification = "pseudonymous"
+reason = "Explicit local-public-key and receive-profile binding described by the Scope record."
+[[record.field]]
+name = "keys"
+classification = "pseudonymous"
+reason = "At most eight public peer keys in the opt-in standalone Tucket image. A seized device reveals these peer associations; names, trust, locations, routes, messages and private keys are excluded. Owner explicitly requested this storage on 2026-10-17."
 
 # Things that are persisted but are not settings-record fields, enumerated so
 # the seizure inventory is complete rather than only convenient.

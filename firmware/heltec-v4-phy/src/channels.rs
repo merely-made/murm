@@ -254,6 +254,12 @@ pub async fn probe<L: HostLink>(
         name::serve(command, settings, store, host).await;
         return Outcome::Served;
     }
+    #[cfg(feature = "contact-store-bench")]
+    if packet == b"contacts bench\n" || packet == b"contacts bench\r\n" {
+        let reply = crate::contact_bench::report();
+        let _ = host.write_all(reply.as_str().as_bytes()).await;
+        return Outcome::Served;
+    }
     #[cfg(feature = "memory-bench")]
     if packet == b"protocol memory\n" || packet == b"protocol memory\r\n" {
         use core::fmt::Write as _;

@@ -94,6 +94,16 @@ where
         return name::serve(command, settings, exec, host).await;
     }
     #[cfg(feature = "memory-bench")]
+    #[cfg(feature = "contact-store-bench")]
+    if at_boundary && (packet == b"contacts bench\n" || packet == b"contacts bench\r\n") {
+        let reply = crate::contact_bench::report();
+        return if host.write_all(reply.as_str().as_bytes()).await.is_ok() {
+            Outcome::Served
+        } else {
+            Outcome::HostGone
+        };
+    }
+    #[cfg(feature = "memory-bench")]
     if at_boundary && (packet == b"protocol memory\n" || packet == b"protocol memory\r\n") {
         let values = heap::memory_bench::measure().await;
         let (stack_free, stack_total) = crate::stack_watermark::measure();

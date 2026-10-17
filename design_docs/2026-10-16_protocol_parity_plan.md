@@ -274,3 +274,40 @@ physical radio-failure recovery or unattended/power-cut product acceptance.
   stock-peer reboot persistence, power-cut or whole-role parity. Next endpoint
   work is bounded multiple-hop/scoped routing and companion/management cases,
   with standalone firmware persistence separately owned and qualified.
+
+### Standalone contact storage continuation, 2026-10-17
+
+The owner requested standalone firmware contact storage next. This lane retains
+at most 100 MB of inputs/receipts and preserves all earlier evidence. Required
+receipts are bounded codec/journal refusal and every-word interruption tests,
+target links, real flash cold reload, a V4 resident exchange after restart
+without a fresh peer advert, and explicit restoration/protected-state checks.
+T114 has no live Tucket loop: its adapter and pre-radio storage/reset campaign
+qualify storage only, not Tucket firmware service or RF interoperability.
+
+The opt-in V4 `resident-contact-store` profile uses its own 4 KiB A/B sectors
+at `0x3f8000..0x3fa000`, following pending control. T114 reserves its own pair
+at `0xe4000..0xe6000`, shortening application FLASH while preserving the
+existing control, reservation and identity addresses. The portable profile
+contains eight full public peer keys, local Tucket public identity and a
+domain-separated receive-profile digest. Transmit power does not select a new
+scope. Labels, trust, routes, pending operations and private identity material
+are excluded. The selected volatile identity/setup must still be supplied
+again after boot; this lane does not persist credentials or commissioning.
+
+Records use the existing CRC-protected outer format and a versioned `TKC0`
+body. The commit magic is programmed last. Torn inactive candidates leave the
+previous committed slot authoritative; an interrupted first write can retry
+when neither commit word was written. Committed unknown formats/versions,
+overflow, malformed keys, mismatched scope, conflicting equal sequences and
+sequence exhaustion fail before erasure. A readback error after a complete
+program is an uncertain commit, not a promise of rollback. Duplicate adverts
+do not write. V4 live writes pass through the exclusive cancel-safe radio
+quiet guard before protocol transmission resumes; its listening blackout is
+explicit rather than described as continuous coverage.
+
+This requested option narrowly extends the field-relay seizure inventory:
+public keys reveal peer associations and are classified pseudonymous. The
+default relay keeps host-only contacts. Both cache schemas are checked by the
+flash classification audit. The board storage fixture is an explicit separate
+feature, uses synthetic identities only in flash, and never emits them on RF.

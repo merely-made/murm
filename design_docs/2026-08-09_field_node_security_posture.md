@@ -65,6 +65,16 @@ network credentials, contact info: none of it belongs on the pole. It lives
 in signalman on the host. Standing rule: every settings-record field is
 classified public / pseudonymous / forbidden at the moment it is added.
 
+**Owner-requested standalone Tucket option (2026-10-17).** The separate
+`resident-contact-store` build may retain a bounded cache of eight public peer
+keys, bound to the local Tucket public identity and receive profile. Seizure
+reveals those peer associations, so the cache is classified pseudonymous,
+rather than treated as cost-free public data. It contains no names, locations,
+trust decisions, routes, messages or private material. The ordinary field-relay
+build keeps the host-only rule above. `flash-policy.toml` explicitly enumerates
+every cache/scope field; the classification audit checks both record schemas.
+T114 has a separately qualified storage backend, not a standalone Tucket loop.
+
 ## The fleet-key liability is absent by posture, not mitigation
 
 FCC v1 is stock hardware plus user-flash: there is no remote firmware

@@ -10,6 +10,8 @@ publish = false
 default = []
 ui-bench = []
 memory-bench = ["dep:protocol-capacity-probe", "cortex-m-rt/paint-stack"]
+tucket-contact-store = ["radio-hand/tucket-contact-store"]
+contact-store-bench = ["memory-bench", "tucket-contact-store", "radio-hand/tucket-contact-store-bench"]
 
 [dependencies]
 protocol-capacity-probe = { path = "../../testing/protocol-capacity", optional = true }

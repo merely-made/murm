@@ -65,6 +65,11 @@ use selvage::{
 mod board;
 mod channels;
 mod commissioning_store;
+#[cfg(feature = "contact-store-bench")]
+#[path = "../../contact_store_bench.rs"]
+mod contact_bench;
+#[cfg(feature = "resident-contact-store")]
+mod contact_store;
 mod control_boot;
 #[cfg(all(feature = "host-usb", not(feature = "host-uart-low-power")))]
 mod control_carrier;
@@ -166,6 +171,8 @@ async fn main(spawner: Spawner) {
     // holds the ADC entropy source for the life of the board — see `store.rs` for why the
     // obvious `Rng` would have minted a predictable identity key.
     let mut store = store::SettingsStore::new(peripherals.FLASH, peripherals.RNG, peripherals.ADC1);
+    #[cfg(feature = "contact-store-bench")]
+    contact_bench::run(&mut store);
     let mut identity_line = [0_u8; 48];
     let (settings, identity_line_len) = match store.load_or_create() {
         Ok((settings, outcome)) => (Some(settings), store::describe(outcome, &mut identity_line)),

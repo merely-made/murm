@@ -7,11 +7,15 @@ use lora_phy::{DelayNs, mod_traits::RadioKind};
 use radio_hand::{instances::Runtime, link::HostLink, resident_command};
 use selvage::personality::PersonalityId;
 mod build;
+#[cfg(feature = "resident-contact-store")]
+mod contacts;
 pub(crate) use build::{BuildError, build};
 
 pub(crate) struct ResidentState {
     pub runtime: Runtime,
     pub announce: retinue::announce::TimebaseGenerator,
+    #[cfg(feature = "resident-contact-store")]
+    pub cache: radio_hand::tucket_contacts::Snapshot,
 }
 
 const HOST_CHUNK: usize = 32;
@@ -154,6 +158,10 @@ where
         }
 
         drain_active_rx(state, owner, host, &mut radio_bytes).await;
+        #[cfg(feature = "resident-contact-store")]
+        if !contacts::commit(state, owner).await {
+            continue;
+        }
         let now = Instant::now().as_millis();
         let mut iv = [0_u8; 16];
         owner
@@ -195,6 +203,10 @@ where
         // A high edge after poll belongs to the current activation. Drain and
         // rearm it before asking Runtime whether a physical TX may begin.
         drain_active_rx(state, owner, host, &mut radio_bytes).await;
+        #[cfg(feature = "resident-contact-store")]
+        if !contacts::commit(state, owner).await {
+            continue;
+        }
         owner
             .ensure_rx()
             .await
@@ -462,6 +474,18 @@ async fn status_to_host<L: HostLink>(host: &mut L, state: &ResidentState, now: u
         diagnostic(host, &line, state.runtime.next_deadline()).await;
     }
     line.clear();
+    #[cfg(feature = "resident-contact-store")]
+    {
+        let _ = writeln!(
+            line,
+            "resident contacts persisted={} installed={} max={}",
+            state.cache.keys.len(),
+            state.runtime.tucket().node().contact_keys().count(),
+            radio_hand::tucket_contacts::MAX_KEYS
+        );
+        diagnostic(host, &line, state.runtime.next_deadline()).await;
+        line.clear();
+    }
     let formatted = writeln!(
         line,
         "resident memory now={} heap_capacity={} heap_allocator_used={} heap_allocator_used_peak={} heap_requested={} heap_requested_peak={} heap_alloc_failures={} stack_measurement=sampled_sp_not_high_water stack_sp=0x{:x} stack_sampled_bytes={} stack_capacity={} stack_sample_valid={}",
@@ -478,6 +502,13 @@ async fn status_to_host<L: HostLink>(host: &mut L, state: &ResidentState, now: u
         stack_sample_valid,
     );
     if formatted.is_ok() {
+        diagnostic(host, &line, state.runtime.next_deadline()).await;
+    }
+    #[cfg(feature = "memory-bench")]
+    {
+        line.clear();
+        let (free, total) = crate::stack_watermark::measure();
+        let _ = writeln!(line, "resident watermark free={} total={}", free, total);
         diagnostic(host, &line, state.runtime.next_deadline()).await;
     }
 }
