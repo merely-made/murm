@@ -73,7 +73,7 @@ default-members = [
 ]
 
 [workspace.package]
-# Shared family MSRV, independent of the Rust 1.99.0 working toolchain.
+# Shared family MSRV, independent of the Rust 1.99.1 working toolchain.
 # Native, browser and embedded configurations are qualified separately.
 rust-version = "1.97.1"
 

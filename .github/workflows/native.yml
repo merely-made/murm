@@ -11,7 +11,7 @@ jobs:
     timeout-minutes: 40
     strategy:
       matrix:
-        toolchain: ["1.97.1", "1.99.0"]
+        toolchain: ["1.97.1", "1.99.1"]
     defaults:
       run:
         working-directory: native
