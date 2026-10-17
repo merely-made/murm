@@ -1,4 +1,6 @@
 //! A separate poll boundary keeps fixture frames off the normal main-task stack.
+extern crate alloc;
+use alloc::boxed::Box;
 use core::sync::atomic::{AtomicUsize, Ordering};
 use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, signal::Signal};
 
@@ -28,13 +30,26 @@ pub async fn worker() {
     loop {
         REQUEST.wait().await;
         MIN_SP.store(usize::MAX, Ordering::Relaxed);
-        let values = protocol_capacity_probe::target_round::run(
+        let initial = super::allocator_used();
+        // The fixture owns the inline protocol cores. Production additionally
+        // boxes that storage, so charge its exact layout during every pressure
+        // phase without constructing a second set of protocol state.
+        let boxed_storage = Box::<crate::resident::ResidentState>::new_uninit();
+        let mut values = protocol_capacity_probe::target_round::run(
             super::allocator_used,
             super::bench_refuse_oversize,
             checkpoint,
         );
+        core::hint::black_box(&boxed_storage);
+        drop(boxed_storage);
+        values[0] = initial;
+        values[3] = super::allocator_used();
         RESULT.signal(values);
     }
+}
+
+pub const fn boxed_state_bytes() -> usize {
+    core::mem::size_of::<crate::resident::ResidentState>()
 }
 
 /// The sole command handler waits for completion before accepting another request.

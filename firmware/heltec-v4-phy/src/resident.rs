@@ -98,6 +98,8 @@ where
                 match owner.collect(&mut radio_bytes).await {
                     Ok(Some(frame)) => {
                         owner.note_radio_frame(&frame);
+                        #[cfg(feature = "memory-bench")]
+                        rx_progress(host, &radio_bytes[..frame.len]).await;
                         let now = Instant::now().as_millis();
                         // Malformed RF is a protocol report, not a radio-custody fault.
                         match state.runtime.ingest(now, &radio_bytes[..frame.len]) {
@@ -384,6 +386,8 @@ async fn drain_active_rx<RK: RadioKind, DLY: DelayNs, L: HostLink>(
         return;
     };
     owner.note_radio_frame(&frame);
+    #[cfg(feature = "memory-bench")]
+    rx_progress(host, &bytes[..frame.len]).await;
     let now = Instant::now().as_millis();
     match state.runtime.ingest(now, &bytes[..frame.len]) {
         Ok(report) => report_to_host(host, &report, now, state.runtime.next_deadline()).await,
@@ -397,6 +401,30 @@ async fn drain_active_rx<RK: RadioKind, DLY: DelayNs, L: HostLink>(
             diagnostic(host, "resident rf refused", state.runtime.next_deadline()).await
         }
     }
+}
+
+/// Public wire metadata only. No USB setup bytes or encrypted message body.
+#[cfg(feature = "memory-bench")]
+async fn rx_progress<L: HostLink>(host: &mut L, frame: &[u8]) {
+    let mut line = heapless::String::<128>::new();
+    let _ = write!(
+        line,
+        "resident rx len={} header={:02x}",
+        frame.len(),
+        frame.first().copied().unwrap_or(0)
+    );
+    if let Some(packet) = tucket::packet::PacketRef::decode(frame) {
+        let _ = write!(
+            line,
+            " path_len={} payload_type={} dest={:02x} src={:02x}",
+            packet.path_len,
+            packet.header >> 2 & 15,
+            packet.payload.first().copied().unwrap_or(0),
+            packet.payload.get(1).copied().unwrap_or(0)
+        );
+    }
+    line.push('\n').ok();
+    diagnostic(host, &line, None).await;
 }
 
 async fn apply_step<RK: RadioKind, DLY: DelayNs, L: HostLink>(

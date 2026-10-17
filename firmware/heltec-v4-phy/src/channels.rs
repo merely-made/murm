@@ -269,7 +269,7 @@ pub async fn probe<L: HostLink>(
         let mut reply = radio_face::Text::<400>::empty();
         let _ = write!(
             &mut reply,
-            "memory initial={} fragmented={} retained={} final={} peak={} capacity={} failures={} expected_refusals=1 stack_sample={} stack_region={} stack_valid={} worker_min_sp_sample={} stack_free={} stack_total={}\r\n",
+            "memory initial={} fragmented={} retained={} final={} peak={} capacity={} failures={} expected_refusals=1 stack_sample={} stack_region={} stack_valid={} worker_min_sp_sample={} stack_free={} stack_total={} boxed_state_bytes={}\r\n",
             values[0],
             values[1],
             values[2],
@@ -282,7 +282,8 @@ pub async fn probe<L: HostLink>(
             valid,
             crate::heap::memory_bench::sampled_min_sp(),
             stack_free,
-            stack_total
+            stack_total,
+            crate::heap::memory_bench::boxed_state_bytes()
         );
         let _ = host.write_all(reply.as_str().as_bytes()).await;
         return Outcome::Served;
