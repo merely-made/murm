@@ -131,7 +131,7 @@ async fn run(args: &[String]) -> Result<()> {
     {
         save(
             &output.join("failed-status.json"),
-            &serde_json::json!({"status":status}),
+            &serde_json::json!({"status":status,"before_setup":transcript}),
         )?;
         return Err("firmware contact scope/activation did not match before peer work".into());
     }

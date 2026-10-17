@@ -34,6 +34,8 @@ mod board;
 #[cfg(feature = "contact-store-bench")]
 #[path = "../../contact_store_bench.rs"]
 mod contact_bench;
+#[cfg(feature = "contact-store-bench")]
+mod contact_worker;
 mod control_fixture;
 mod crash;
 mod heap;
@@ -143,9 +145,11 @@ async fn main(spawner: Spawner) {
     // Settings first: a first boot erases and writes a flash page, stalling the CPU for
     // tens of milliseconds, which must stay clear of live traffic. The store lives for the
     // whole run because the executive owns its flash and entropy.
-    let mut store = store::SettingsStore::new(p.NVMC, p.RNG);
+    let store = store::SettingsStore::new(p.NVMC, p.RNG);
     #[cfg(feature = "contact-store-bench")]
-    contact_bench::run(&mut store);
+    let mut store = contact_worker::run(store, spawner).await;
+    #[cfg(not(feature = "contact-store-bench"))]
+    let mut store = store;
     let mut identity_line = [0_u8; 48];
     let (mut settings, identity_line_len) = match store.load_or_create() {
         Ok((settings, outcome)) => (Some(settings), store::describe(outcome, &mut identity_line)),
