@@ -153,6 +153,11 @@ where
                                 }
                                 Ok(None) => {
                                     status_to_host(host, state, now).await;
+                                    #[cfg(feature = "memory-bench")]
+                                    {
+                                        let air = owner.executive().diag();
+                                        air_to_host(host, air, state.runtime.next_deadline()).await;
+                                    }
                                 }
                                 Err(()) => {
                                     let report = state.runtime.take_report();
@@ -416,7 +421,7 @@ async fn rx_progress<L: HostLink>(host: &mut L, frame: &[u8]) {
     if let Some(packet) = tucket::packet::PacketRef::decode(frame) {
         let _ = write!(
             line,
-            " path_len={} payload_type={} dest={:02x} src={:02x}",
+            " path_len={} payload_type={} prefix0={:02x} prefix1={:02x}",
             packet.path_len,
             packet.header >> 2 & 15,
             packet.payload.first().copied().unwrap_or(0),
@@ -425,6 +430,21 @@ async fn rx_progress<L: HostLink>(host: &mut L, frame: &[u8]) {
     }
     line.push('\n').ok();
     diagnostic(host, &line, None).await;
+}
+
+#[cfg(feature = "memory-bench")]
+async fn air_to_host<L: HostLink>(
+    host: &mut L,
+    air: radio_hand::executive::AirDiag,
+    deadline: Option<u64>,
+) {
+    let mut line = heapless::String::<192>::new();
+    let _ = writeln!(
+        line,
+        "resident air rx_ok={} rx_damaged={} rx_err={} tx_ok={} tx_err={}",
+        air.rx_ok, air.rx_damaged, air.rx_err, air.tx_ok, air.tx_err
+    );
+    diagnostic(host, &line, deadline).await;
 }
 
 async fn apply_step<RK: RadioKind, DLY: DelayNs, L: HostLink>(
