@@ -1,12 +1,12 @@
-//! Opt-in public Tucket cache in its own two sectors, after pending control.
+//! Opt-in public Tucket cache in its own two sectors, after packet-ID leases.
 use crate::store::{SECTOR, SettingsStore};
 use embedded_storage::nor_flash::{NorFlash, ReadNorFlash};
 use radio_hand::{
     store::Slot,
     tucket_contacts::{SLOT_LEN, Storage},
 };
-pub(crate) const ORIGIN: u32 = 0x3f8000;
-const _: () = assert!(ORIGIN == crate::commissioning_store::PENDING_SLOT_B_ORIGIN + SECTOR);
+pub(crate) const ORIGIN: u32 = crate::store::PACKET_RESERVATION_ORIGIN + 2 * SECTOR;
+const _: () = assert!(ORIGIN == 0x3fa000);
 const _: () = assert!(ORIGIN + 2 * SECTOR <= 0x400000 && SLOT_LEN <= SECTOR as usize);
 fn offset(slot: Slot) -> u32 {
     ORIGIN + if slot == Slot::A { 0 } else { SECTOR }

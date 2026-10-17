@@ -286,7 +286,7 @@ T114 has no live Tucket loop: its adapter and pre-radio storage/reset campaign
 qualify storage only, not Tucket firmware service or RF interoperability.
 
 The opt-in V4 `resident-contact-store` profile uses its own 4 KiB A/B sectors
-at `0x3f8000..0x3fa000`, following pending control. T114 reserves its own pair
+at `0x3fa000..0x3fc000`, following the packet-ID lease pair. T114 reserves its own pair
 at `0xe4000..0xe6000`, shortening application FLASH while preserving the
 existing control, reservation and identity addresses. The portable profile
 contains eight full public peer keys, local Tucket public identity and a
