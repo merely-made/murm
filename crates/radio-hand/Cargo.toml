@@ -28,6 +28,8 @@ replay = ["dep:retinue", "retinue/alloc"]
 # `seneschal`'s; the runtime here still names Retinue's verified command directly.
 control-retinue = ["dep:retinue", "seneschal/retinue"]
 instances = ["dep:retinue", "retinue/alloc", "dep:sennet", "dep:tucket"]
+tucket-contact-store = ["dep:tucket"]
+tucket-contact-store-bench = ["tucket-contact-store"]
 
 [dependencies]
 heapless = "0.9"

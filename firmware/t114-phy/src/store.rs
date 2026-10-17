@@ -1,4 +1,4 @@
-//! Board glue for the `radio-hand` identity and announce-reservation stores.
+//! Board glue for the independent identity, reservation, control and peer stores.
 //!
 //! `radio-hand` owns the record format and the A/B decision. This module owns
 //! the two independent A/B flash pairs the records live in and the nRF52840
@@ -11,8 +11,7 @@
 //! third pressure point rules that writes must therefore not scatter through runtime, and
 //! that anything needing them stages in RAM and commits in a declared quiet window.
 //!
-//! That machinery has no caller, because there are exactly two write paths and both are
-//! quiet by construction:
+//! Existing writes are quiet by construction:
 //!
 //! 1. **[`SettingsStore::load_or_create`]**, on a boot that finds nothing valid. Before the
 //!    radio is configured, so nothing is listening to blank.
@@ -20,6 +19,9 @@
 //!    *resets the board* immediately afterwards, unconditionally, even if the host vanished
 //!    before the reply landed. The erase is followed by a reboot, so the window it blanks is
 //!    one the board was about to leave anyway.
+//! 3. Durable control and announce reservations are pre-radio operations. The
+//!    optional peer-cache adapter currently has only an explicit pre-radio
+//!    storage-fixture caller; T114 does not yet host a live Tucket loop.
 //!
 //! The invariant to keep, stated for whoever adds the third path: **a write is either before
 //! the radio starts, or immediately before a reset.** A caller that wants neither — a
@@ -39,6 +41,8 @@ use radio_hand::control::{
 use radio_hand::executive::{BoardStore, StoreFault};
 use radio_hand::settings::{self, Settings};
 use radio_hand::store::{self, HEADER_LEN, Slot, SlotError};
+#[cfg(feature = "tucket-contact-store")]
+mod contacts;
 
 // Count attempts immediately before each NVMC mutation, including failures.
 // These boot-local counters live outside the observation recorder and are never

@@ -1,5 +1,14 @@
 # Murm Documentation Index
 
+Standalone Tucket contacts (2026-10-17, in progress): the
+[firmware continuation](2026-10-16_protocol_parity_plan.md#standalone-contact-storage-continuation-2026-10-17)
+adds an opt-in eight-key public cache in dedicated A/B flash pairs. Seven
+journal tests cover cold restore, word-cut recovery, malformed/future/scope
+refusals and uncertain readback. V4 integrates through its existing live quiet
+owner; T114 has a storage adapter/fixture, with its Tucket service loop still
+absent. Target builds and strict host checks pass; attended physical reload,
+restart traffic and restoration remain pending at this implementation checkpoint.
+
 Tucket persistent contacts (2026-10-17): the [scoped host journal slice](../testing/receipts/tucket-contacts/README.md)
 passes cold restore, save/refusal controls and a native Djinn-backed reconnect
 without the fixture's fresh peer advert. Four texts/four protocol ACKs and exact

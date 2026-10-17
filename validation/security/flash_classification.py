@@ -168,6 +168,16 @@ def audit(root: Path) -> dict[str, Any]:
     fields = struct_fields(schema_path.read_text(encoding="utf-8"), policy["schema_struct"])
 
     inventory, diagnostics = classify(fields, policy, policy_path.name)
+    # Additional independently versioned records must classify every field too.
+    # Their presence is explicit, rather than hidden behind an adjacent label.
+    for record in policy.get("record", []):
+        record_path = root / record["schema_source"]
+        record_fields = struct_fields(record_path.read_text(encoding="utf-8"), record["schema_struct"])
+        record_inventory, record_diagnostics = classify(record_fields, record, policy_path.name)
+        for entry in record_inventory:
+            entry["record"] = record["schema_struct"]
+        inventory.extend(record_inventory)
+        diagnostics.extend(record_diagnostics)
 
     forbidden = policy.get("forbidden", {})
     diagnostics.extend(
@@ -293,7 +303,7 @@ def main() -> int:
             print(json.dumps(report, indent=2, sort_keys=True))
         else:
             print(
-                f"flash classification: {len(report['inventory'])} settings fields and "
+                f"flash classification: {len(report['inventory'])} persisted fields and "
                 f"{len(report['adjacent'])} adjacent records, all classified"
             )
             for item in report["inventory"] + report["adjacent"]:

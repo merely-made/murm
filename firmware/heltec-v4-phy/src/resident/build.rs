@@ -34,6 +34,8 @@ pub(crate) enum BuildError {
     Storage(ReservationError),
     Configuration,
     Quiet,
+    #[cfg(feature = "resident-contact-store")]
+    Contacts(radio_hand::tucket_contacts::Fault),
 }
 
 /// Construct the three cores only from a verified USB setup and already-durable
@@ -46,6 +48,29 @@ pub(crate) fn build(
     store: &mut SettingsStore,
 ) -> Result<ResidentState, BuildError> {
     let identity = stored_identity.ok_or(BuildError::MissingIdentity)?;
+    let tucket = Instance::new(
+        TucketNode::with_capacity(
+            LocalIdentity::from_seed(setup.tucket_identity_seed),
+            false,
+            NodeCapacity::new(8, 32).map_err(|_| BuildError::Configuration)?,
+        )
+        .map_err(|_| BuildError::Configuration)?,
+        InstanceConfig::new(2, 1_000).ok_or(BuildError::Configuration)?,
+    );
+    #[cfg(feature = "resident-contact-store")]
+    let (tucket, cache) = {
+        use radio_hand::tucket_contacts::{self, Scope, Snapshot};
+        let scope = Scope::new(tucket.node().identity().pub_key, setup.profiles[2]);
+        let cached = tucket_contacts::load(store, scope).map_err(BuildError::Contacts)?;
+        let cache = cached
+            .map(|c| c.snapshot)
+            .unwrap_or(Snapshot::new(scope, &[]).map_err(BuildError::Contacts)?);
+        let mut tucket = tucket;
+        tucket
+            .restore_contacts(&cache.keys)
+            .map_err(|_| BuildError::Configuration)?;
+        (tucket, cache)
+    };
     let packet = store
         .reserve_packet_ids(setup.packet_lease_count)
         .map_err(BuildError::Storage)?;
@@ -87,15 +112,6 @@ pub(crate) fn build(
         .map_err(|_| BuildError::Configuration)?,
     )
     .map_err(|_| BuildError::Configuration)?;
-    let tucket = Instance::new(
-        TucketNode::with_capacity(
-            LocalIdentity::from_seed(setup.tucket_identity_seed),
-            false,
-            NodeCapacity::new(8, 32).map_err(|_| BuildError::Configuration)?,
-        )
-        .map_err(|_| BuildError::Configuration)?,
-        InstanceConfig::new(2, 1_000).ok_or(BuildError::Configuration)?,
-    );
     let ids = [PersonalityId(0), PersonalityId(1), PersonalityId(2)];
     let controller = ControllerConfig {
         home: PersonalityId(setup.home),
@@ -146,5 +162,10 @@ pub(crate) fn build(
         announce.reserved_through(),
     )
     .map_err(|_| BuildError::Configuration)?;
-    Ok(ResidentState { runtime, announce })
+    Ok(ResidentState {
+        runtime,
+        announce,
+        #[cfg(feature = "resident-contact-store")]
+        cache,
+    })
 }

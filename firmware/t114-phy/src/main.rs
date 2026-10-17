@@ -31,6 +31,9 @@ use static_cell::StaticCell;
 use crate::radio::{Sx126xDiagnostics, T114Interface, T114Spi};
 
 mod board;
+#[cfg(feature = "contact-store-bench")]
+#[path = "../../contact_store_bench.rs"]
+mod contact_bench;
 mod control_fixture;
 mod crash;
 mod heap;
@@ -141,6 +144,8 @@ async fn main(spawner: Spawner) {
     // tens of milliseconds, which must stay clear of live traffic. The store lives for the
     // whole run because the executive owns its flash and entropy.
     let mut store = store::SettingsStore::new(p.NVMC, p.RNG);
+    #[cfg(feature = "contact-store-bench")]
+    contact_bench::run(&mut store);
     let mut identity_line = [0_u8; 48];
     let (mut settings, identity_line_len) = match store.load_or_create() {
         Ok((settings, outcome)) => (Some(settings), store::describe(outcome, &mut identity_line)),

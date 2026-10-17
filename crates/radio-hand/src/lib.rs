@@ -53,6 +53,8 @@ pub mod scheduler;
 #[cfg(feature = "radio")]
 pub mod service;
 pub mod settings;
+#[cfg(feature = "tucket-contact-store")]
+pub mod tucket_contacts;
 pub mod work;
 
 pub use seneschal::{region, store};

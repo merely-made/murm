@@ -23,6 +23,8 @@ host-usb = ["radio-hand/control-retinue"]
 # The resident protocol image is a USB-only commissioning build. The default direct-PHY
 # image remains allocation-free and does not link any retained protocol cores.
 resident-protocols = ["host-usb", "radio-hand/instances", "dep:embedded-alloc", "dep:retinue", "dep:sennet", "dep:tucket"]
+resident-contact-store = ["resident-protocols", "radio-hand/tucket-contact-store"]
+contact-store-bench = ["resident-contact-store", "memory-bench", "radio-hand/tucket-contact-store-bench"]
 host-uart-low-power = []
 ui-bench = []
 rf-sleep-proof = []

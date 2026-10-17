@@ -20,6 +20,9 @@ use radio_hand::settings::Settings;
 use radio_hand::store::Slot;
 
 use crate::{channels, control_store, power, store, wake_input};
+mod quiet_store;
+#[cfg(feature = "resident-protocols")]
+mod resident;
 
 /// The non-copy custody boundary for one V4 image.
 ///
@@ -248,38 +251,6 @@ pub struct V4QuietGuard<'a, RK: RadioKind, DLY: DelayNs> {
 }
 
 impl<RK: RadioKind, DLY: DelayNs> V4RadioOwner<RK, DLY> {
-    /// Build the optional retained cores while this owner retains exclusive
-    /// flash and entropy custody. The setup is volatile and callers retain the
-    /// resulting state only until reset.
-    #[cfg(feature = "resident-protocols")]
-    pub(crate) async fn build_resident(
-        &mut self,
-        now: u64,
-        setup: radio_hand::resident_wire::ResidentSetup,
-    ) -> Result<crate::resident::ResidentState, crate::resident::BuildError> {
-        let mut guard = QuietWindow::enter(self)
-            .await
-            .map_err(|_| crate::resident::BuildError::Quiet)?;
-        let result = crate::resident::build(
-            now,
-            setup,
-            guard.owner.settings.map(|settings| settings.identity),
-            &mut guard.owner.store,
-        );
-        guard
-            .finish()
-            .await
-            .map_err(|_| crate::resident::BuildError::Quiet)?;
-        result
-    }
-
-    #[cfg(feature = "resident-protocols")]
-    pub(crate) fn resident_random(
-        &mut self,
-        out: &mut [u8],
-    ) -> Result<(), radio_hand::executive::StoreFault> {
-        self.store.fill_true_random(out)
-    }
     /// The profile confirmed at construction or by a completed owner operation.
     pub fn profile(&self) -> selvage::PhyProfile {
         self.radio.profile
@@ -795,22 +766,6 @@ impl<RK: RadioKind, DLY: DelayNs> Drop for V4QuietGuard<'_, RK, DLY> {
             // let Light-sleep resume while a stopped radio/flash transition is uncertain.
             esp_hal::system::software_reset();
         }
-    }
-}
-
-impl<RK: RadioKind, DLY: DelayNs> AbSlotStore for V4QuietGuard<'_, RK, DLY> {
-    type Error = control_store::ControlError;
-
-    fn read_slot(&mut self, slot: Slot, out: &mut [u8]) -> Result<(), Self::Error> {
-        AbSlotStore::read_slot(&mut self.owner.store, slot, out)
-    }
-
-    fn erase_slot(&mut self, slot: Slot) -> Result<(), Self::Error> {
-        AbSlotStore::erase_slot(&mut self.owner.store, slot)
-    }
-
-    fn program_slot(&mut self, slot: Slot, record: &[u8]) -> Result<(), Self::Error> {
-        AbSlotStore::program_slot(&mut self.owner.store, slot, record)
     }
 }
 
