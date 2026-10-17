@@ -38,17 +38,82 @@ pub(crate) enum BuildError {
     Contacts(radio_hand::tucket_contacts::Fault),
 }
 
+impl core::fmt::Display for BuildError {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        match self {
+            Self::Storage(cause) => write!(f, "storage: {cause:?}"),
+            #[cfg(feature = "resident-contact-store")]
+            Self::Contacts(cause) => write!(f, "contacts: {cause:?}"),
+            other => write!(f, "{other:?}"),
+        }
+    }
+}
+
+/// Owned volatile setup and verified reservations. The worker never gets flash
+/// or radio access. Deliberately no Debug implementation for identity material.
+pub(crate) struct Prepared {
+    now: u64,
+    setup: ResidentSetup,
+    identity: [u8; 64],
+    packet: radio_hand::packet_reservation::Lease,
+    announce: radio_hand::announce_reservation::ActiveLease,
+    #[cfg(feature = "resident-contact-store")]
+    cache: radio_hand::tucket_contacts::Snapshot,
+}
+
 /// Construct the three cores only from a verified USB setup and already-durable
 /// reservations. Identity comes from stored board settings, never USB bytes.
 #[inline(never)]
-pub(crate) fn build(
+pub(crate) fn prepare(
     now: u64,
     setup: ResidentSetup,
     stored_identity: Option<[u8; 64]>,
     store: &mut SettingsStore,
-) -> Result<ResidentState, BuildError> {
+) -> Result<Prepared, BuildError> {
     let identity = stored_identity.ok_or(BuildError::MissingIdentity)?;
-    let tucket = Instance::new(
+    #[cfg(feature = "resident-contact-store")]
+    let cache = {
+        use radio_hand::tucket_contacts::{self, Scope, Snapshot};
+        let public = LocalIdentity::from_seed(setup.tucket_identity_seed)
+            .identity()
+            .pub_key;
+        let scope = Scope::new(public, setup.profiles[2]);
+        let cached = tucket_contacts::load(store, scope).map_err(BuildError::Contacts)?;
+        cached
+            .map(|c| c.snapshot)
+            .unwrap_or(Snapshot::new(scope, &[]).map_err(BuildError::Contacts)?)
+    };
+    let packet = store
+        .reserve_packet_ids(setup.packet_lease_count)
+        .map_err(BuildError::Storage)?;
+    let announce = store
+        .reserve_announce_lease(ANNOUNCE_LEASE)
+        .map_err(BuildError::Storage)?;
+    Ok(Prepared {
+        now,
+        setup,
+        identity,
+        packet,
+        announce,
+        #[cfg(feature = "resident-contact-store")]
+        cache,
+    })
+}
+
+/// Runs in the construction worker, after the large USB poll frame unwinds.
+#[inline(never)]
+pub(super) fn build(prepared: Prepared) -> Result<ResidentState, BuildError> {
+    let Prepared {
+        now,
+        setup,
+        identity,
+        packet,
+        announce,
+        #[cfg(feature = "resident-contact-store")]
+        cache,
+    } = prepared;
+    #[allow(unused_mut)]
+    let mut tucket = Instance::new(
         TucketNode::with_capacity(
             LocalIdentity::from_seed(setup.tucket_identity_seed),
             false,
@@ -58,25 +123,9 @@ pub(crate) fn build(
         InstanceConfig::new(2, 1_000).ok_or(BuildError::Configuration)?,
     );
     #[cfg(feature = "resident-contact-store")]
-    let (tucket, cache) = {
-        use radio_hand::tucket_contacts::{self, Scope, Snapshot};
-        let scope = Scope::new(tucket.node().identity().pub_key, setup.profiles[2]);
-        let cached = tucket_contacts::load(store, scope).map_err(BuildError::Contacts)?;
-        let cache = cached
-            .map(|c| c.snapshot)
-            .unwrap_or(Snapshot::new(scope, &[]).map_err(BuildError::Contacts)?);
-        let mut tucket = tucket;
-        tucket
-            .restore_contacts(&cache.keys)
-            .map_err(|_| BuildError::Configuration)?;
-        (tucket, cache)
-    };
-    let packet = store
-        .reserve_packet_ids(setup.packet_lease_count)
-        .map_err(BuildError::Storage)?;
-    let announce = store
-        .reserve_announce_lease(ANNOUNCE_LEASE)
-        .map_err(BuildError::Storage)?;
+    tucket
+        .restore_contacts(&cache.keys)
+        .map_err(|_| BuildError::Configuration)?;
 
     let key = match setup.sennet_key {
         SennetKey::Aes128(key) => ChannelKey::Aes128(key),

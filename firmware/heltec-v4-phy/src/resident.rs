@@ -9,7 +9,10 @@ use selvage::personality::PersonalityId;
 mod build;
 #[cfg(feature = "resident-contact-store")]
 mod contacts;
-pub(crate) use build::{BuildError, build};
+pub(crate) use build::BuildError;
+mod worker;
+pub(crate) use build::prepare;
+pub(crate) use worker::{construct, start_builder};
 
 pub(crate) struct ResidentState {
     pub runtime: Runtime,
