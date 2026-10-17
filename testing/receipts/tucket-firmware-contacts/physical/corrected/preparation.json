@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "boards": {
+    "SB1": {
+      "port": "COM6",
+      "usb_serial": "44:1B:F6:6A:FB:28",
+      "prefix_md5": "8f35078ba63ad63096e58a0c19f724ad",
+      "tail_md5": "9cbf6be73c185f95d9948f5596b2b25c"
+    },
+    "SB2": {
+      "port": "COM7",
+      "usb_serial": "44:1B:F6:6A:FA:64",
+      "prefix_md5": "e4c2ac46c8fcf03f3bacce169197e723",
+      "tail_md5": "be9f7a70c86bc5104ef6b9c1acb795c6"
+    }
+  }
+}

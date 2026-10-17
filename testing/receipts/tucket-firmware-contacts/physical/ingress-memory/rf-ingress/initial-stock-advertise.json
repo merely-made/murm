@@ -1,0 +1,16 @@
+{
+  "mode": "advertise",
+  "result": "passed",
+  "port": "COM6",
+  "usb_serial": "44:1B:F6:6A:FB:28",
+  "before": {
+    "key": "9802c0aea6d7818c7b06e6c0a1d2cb48a650859a32b61b5f1925063ec70a1a27",
+    "power_dbm": 0,
+    "frequency_khz": 906875,
+    "bandwidth_hz": 250000,
+    "sf": 10,
+    "cr": 5,
+    "version": "v1.17.1-d929643"
+  },
+  "advertisement_accepted": true
+}

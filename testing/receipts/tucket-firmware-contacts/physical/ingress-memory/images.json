@@ -1,0 +1,18 @@
+{
+  "v4-bench-app.bin": {
+    "bytes": 780848,
+    "sha256": "33bacd4dae2449c95d2874bd6e07a0fe00dc1cd9a2472fb64c2b243e1222e9e7"
+  },
+  "v4-bench-merged.bin": {
+    "bytes": 846384,
+    "sha256": "e3d771f37edd3162392590f943152325b29906702f98396e36ebae49aa857cdf"
+  },
+  "v4-live-app.bin": {
+    "bytes": 778480,
+    "sha256": "7cfa36a8a628f1a13c0f71de8d3ee4f01ab589931fcab30c2712d53a95e4a892"
+  },
+  "v4-live-merged.bin": {
+    "bytes": 844016,
+    "sha256": "c24d400f109897380e0a261103d91e5811a61e21adb3be47a4c341486ae803ca"
+  }
+}

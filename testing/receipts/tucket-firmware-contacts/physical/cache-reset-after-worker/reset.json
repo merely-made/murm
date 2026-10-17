@@ -1,0 +1,11 @@
+{
+  "passed": false,
+  "scope": "only lane-owned synthetic contact pair; retained raw preimage, no nonce rollback",
+  "prior": "construction-worker/rf-worker",
+  "local_public": "701e99971f7cf7c217b0cbaed01468a35874ea2a80883c452e34a9c0f66c1e4a",
+  "peer_public": "e46afa4b0803acd4b8f2b8335432e8e9f523a885811c384d4d9bb33980ce057b",
+  "erase_range": [
+    "0x3fa000",
+    "0x3fc000"
+  ]
+}

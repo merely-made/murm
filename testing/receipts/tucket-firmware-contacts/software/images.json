@@ -1,0 +1,38 @@
+{
+  "sb1-private-app.bin": {
+    "bytes": 983040,
+    "sha256": "867aeae9063c9646d3506798e8062b0ac30ebee15a6ae050203f8c86b5102cfe"
+  },
+  "sb1-private-prefix.bin": {
+    "bytes": 1048576,
+    "sha256": "9dc0590ef65dda3d2087e84e22a19378f40fc11ed1bfa681c2dc992b23149f13"
+  },
+  "sb1-private-tail.bin": {
+    "bytes": 65536,
+    "sha256": "5332892e5be2f5c30d7dc6c0d069d47098ef5d66c11ccdfa5d3f457874f96e9e"
+  },
+  "t114-aligned.bin": {
+    "bytes": 503620,
+    "sha256": "9b2bebf5e7ec256733f1d500d55e69b05752119cec21efbf9cfb1b9351d5ffdd"
+  },
+  "t114-raw.bin": {
+    "bytes": 503618,
+    "sha256": "f0b32dd482312a91eb060e193800b04ad690e15a1889f1fa2f0458296191c10c"
+  },
+  "v4-bench-app.bin": {
+    "bytes": 772496,
+    "sha256": "37dd376121d0e8d10ea584466f35f4fd5d733f985bea972f9b9199a28d7e58ae"
+  },
+  "v4-bench-merged.bin": {
+    "bytes": 838032,
+    "sha256": "9b67caf6c74adcbd731198d0d3a4d148d36264d19ac7e2b6483751f342d297c9"
+  },
+  "v4-live-app.bin": {
+    "bytes": 769984,
+    "sha256": "4f37951991396d965e5b7711437a2641a7d53a1f666082034c769226f0f31874"
+  },
+  "v4-live-merged.bin": {
+    "bytes": 835520,
+    "sha256": "e857671af7cd9f4043e8ea2c933901b1175a651d60ff8590e2167e8b7a6c7971"
+  }
+}

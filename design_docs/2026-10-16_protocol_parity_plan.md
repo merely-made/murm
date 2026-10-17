@@ -39,7 +39,7 @@ into every constrained radio image.
 
 | Family | Verified starting point | Remaining parity work to inventory/complete | Relative judgment |
 | --- | --- | --- | --- |
-| Tucket / MeshCore | Identified 1.17.1 adverts, private text/ACKs, learned paths, retry/flood fallback and one-repeater routes at all three prefix widths; native Djinn-backed two-connection text/history pass; scoped host contact reload and reconnect without the fixture's fresh peer advert | Standalone firmware contact persistence/restart, multiple repeaters, scoped routing, full companion commands, repeater/room-server/management/sensor roles and current-release differences | Easiest overall; compact role structure and MIT upstream reuse within existing provenance rules |
+| Tucket / MeshCore | Identified 1.17.1 adverts, private text/ACKs, learned paths, retry/flood fallback and one-repeater routes at all three prefix widths; native Djinn-backed two-connection text/history pass; scoped host contact reload; V4 standalone contact storage/reboot exchange and T114 storage backend | T114 live service, multiple repeaters, scoped routing, full companion commands, repeater/room-server/management/sensor roles and current-release differences | Easiest overall; compact role structure and MIT upstream reuse within existing provenance rules |
 | Retinue / Reticulum | Extensive RNS 1.5.7 black-box qualification and subsequent core comparative repairs; embedded Retinue and bounded routing receipts | Reconcile current-main interface coverage with the integration review; finish remaining host services/interfaces and platform acceptance; embedded capacity, persistence and hostile-traffic qualification | Deepest transport/reliability and host-interface problem; much of the core already exists |
 | Sennet / Meshtastic | 2.7.26.54e0d8d channel and PKI directed text, correlated ACKs, duplicate handling, retained native history and automatic board restoration | Broader roles/routing and channels, discovery/configuration, current security modes, stock-client-facing device behavior, position/telemetry and module/product coverage | Hardest whole-product catch-up; broad firmware surface and independently authored wire implementation |
 
@@ -134,9 +134,10 @@ even while only one protocol is using the SX1262.
    Done when both profiles fit with an explicitly selected reserve margin and
    preserve state under pressure. No numerical reserve margin is silently
    adopted by this proposal; it belongs in each reviewed board profile.
-3. **Finish Tucket endpoint, then repeater and server roles.** Start with durable
-   contact restoration so the existing reconnect fixture needs no fresh peer
-   advert solely to rebuild known contact state. Follow with multiple-hop and
+3. **Finish Tucket endpoint, then repeater and server roles.** Scoped host and
+   bounded standalone contact restoration are now qualified below; the V4 reboot
+   fixture needs no fresh peer advert to rebuild known contact state. Continue
+   with the T114 live service, multiple-hop and
    scoped routing, companion/management coverage and 1.18 upgrade cases. Track
    room-server persistence and sensors as distinct feature rows. Done per role
    when stock peers complete normal/retry/restart/failure paths with bounded
@@ -311,3 +312,44 @@ public keys reveal peer associations and are classified pseudonymous. The
 default relay keeps host-only contacts. Both cache schemas are checked by the
 flash classification audit. The board storage fixture is an explicit separate
 feature, uses synthetic identities only in flash, and never emits them on RF.
+
+The [completed receipt](../testing/receipts/tucket-firmware-contacts/README.md)
+records V4 full-capacity reload across two resets and T114 reload across an
+application-only reinstall, with unchanged snapshots producing zero commits.
+Both pass sixteen full pressure rounds at the selected 16384-byte untouched
+stack / 25% free-heap limits. T114 retains 18836 stack bytes and peaks at
+18452/49152 heap bytes. The V4 pressure image explicitly charges the new
+20600-byte boxed resident state: peak 39052/65536, zero final occupancy, and
+101812 untouched stack bytes. This is a V4 storage charge, not qualification
+of a boxed three-core T114 service that does not yet exist.
+
+The first real V4 constructor exposed a path the earlier fixture did not
+exercise: roughly 48 KiB USB poll + 73 KiB constructor + 20 KiB runtime frames
+exceeded its roughly 127 KiB stack region. A separate executor turn and boxed
+result remove that nesting and duplicate inline copies. The flash/radio owner
+retains its quiet guard; the worker receives only volatile setup, verified
+leases and validated public keys. Scope validation still precedes reservations.
+The live image's minimum untouched stack is 51792 bytes, and heap peaks at
+21980/65536 after actual traffic. Production V4/T114 storage profiles also link.
+
+The final live source `fb7e0e6eacc` repeats the passing `21ac0176a22` exchange:
+four texts/four protocol ACKs across
+two V4 boots. Before new peer work on the second boot, one contact is installed
+with RX/TX counters both zero; no reconnect peer advert is issued. A fixed
+one-second retry interval had overlapped responses. Firmware now derives that
+interval from the caller's TX budget plus turnaround (4200 ms in this profile),
+with a delayed-ACK regression. Eighty-four Tucket and 176 radio-hand tests,
+strict core/host-probe Clippy, formatting and schema/unsafe checks pass. Two
+existing application LOC failures remain separate.
+
+Original named firmware and radio settings are restored. V4 prefix comparisons
+are exact, immutable tail ranges are exact, and packet/announce ceilings advance
+without rollback. Generated test contacts occupy only this lane's new pairs.
+Independent bench identities were cleared only after exact scope/preimage
+checks, retaining their raw before-images and comparing every other tail byte;
+neither clear occurs between the passing reboot exchanges. T114 restoration
+checks live identity/profile, without claiming a protected-flash dump. The
+initial allocation guard, USB fragmentation failure, constructor stall, retry
+failures and a checksum-format parser refusal remain individually retained.
+Physical power-cut, stock filesystem persistence, unattended/driver-deadline,
+broader routing/roles and the T114 Tucket loop remain open.

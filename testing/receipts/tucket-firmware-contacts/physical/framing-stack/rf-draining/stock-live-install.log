@@ -1,0 +1,6 @@
+[2026-10-17T07:06:23Z WARN ] Monitor options were provided, but `--monitor/-M` flag isn't set. These options will be ignored.
+Chip type:         esp32s3 (revision v0.2)
+Crystal frequency: 40 MHz
+Flash size:        16MB
+Features:          WiFi, BLE, Embedded Flash
+MAC address:       44:1b:f6:6a:fb:28

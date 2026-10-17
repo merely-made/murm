@@ -1,0 +1,124 @@
+warning: patch `mere-p2panda-net v0.7.5 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `mere-proofs v0.1.0 (https://github.com/merely-made/mere.git?branch=main#71405bc6)` was not used in the crate graph
+warning: patch `muniment v0.1.2 (https://github.com/merely-made/mere.git?branch=main#71405bc6)` was not used in the crate graph
+warning: patch `p2panda-auth v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-core v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-discovery v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-encryption v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-store v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-stream v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+warning: patch `p2panda-sync v0.7.1 (https://github.com/mark-ik/p2panda.git?tag=mere-p2panda-net-0.7.5-upstream-20261013#1f69c9bc)` was not used in the crate graph
+help: Check that the patched package version and available features are compatible
+      with the dependency requirements. If the patch has a different version from
+      what is locked in the Cargo.lock file, run `cargo update` to use the new
+      version. This may also occur with an optional dependency that is not enabled.
+   Compiling tucket v0.0.2 (C:\Users\mark_\Code\repos\retinue\crates\tucket)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 9.80s
+     Running unittests src\lib.rs (target\build\debug\deps\tucket-bf4a3855b2e9277f.exe)
+
+running 74 tests
+test advert::tests::advert_data_round_trips_optional_fields ... ok
+test advert::tests::borrowed_chat_name_is_checked_before_copying ... ok
+test advert::tests::current_chat_advert_data_round_trips ... ok
+test cipher::tests::a_flipped_ciphertext_byte_fails_the_mac ... ok
+test cipher::tests::bounded_encrypt_refuses_before_buffering ... ok
+test cipher::tests::empty_plaintext_yields_an_undecryptable_blob ... ok
+test cipher::tests::too_short_blob_is_rejected ... ok
+test cipher::tests::roundtrip_padded_and_unpadded ... ok
+test cipher::tests::wrong_key_is_rejected_by_mac ... ok
+test companion::tests::incomplete_wrong_and_empty_responses_do_not_qualify_a_release ... ok
+test companion::tests::official_build_suffix_matches_release_but_other_versions_do_not ... ok
+test companion::tests::release_is_distinct_from_api_version_and_pin_is_not_retained ... ok
+test advert::tests::oversize_app_data_refused_on_encode ... ok
+test advert::tests::truncated_rejected ... ok
+test advert::tests::timestamp_is_little_endian ... ok
+test cipher::tests::ecdh_is_symmetric ... ok
+test cipher::tests::ecdh_secret_actually_encrypts ... ok
+test identity::tests::bad_sig_len_rejected ... ok
+test identity::tests::hash_is_pub_key_prefix ... ok
+test mesh::tests::a_leaf_never_forwards ... ok
+test advert::tests::tampered_app_data_rejected ... ok
+test advert::tests::tampered_timestamp_rejected ... ok
+test mesh::tests::a_consumed_packet_is_not_reflooded ... ok
+test mesh::tests::configured_seen_capacity_is_an_exact_ring ... ok
+test advert::tests::empty_app_data_ok ... ok
+test mesh::tests::seen_table_evicts_after_capacity ... ok
+test mesh::tests::seen_table_is_check_and_insert ... ok
+test mesh::tests::direct_forwards_only_at_the_next_hop ... ok
+test mesh::tests::direct_zero_hop_is_neighbour_only ... ok
+test message::tests::bounded_text_encode_refuses_before_ciphertext_allocation ... ok
+test message::tests::bounded_group_encode_refuses_before_ciphertext_allocation ... ok
+test message::tests::attempt_and_type_survive_the_ctrl_byte ... ok
+test message::tests::standalone_decoders_refuse_oversize_payloads ... ok
+test identity::tests::sign_verify_roundtrip ... ok
+test advert::tests::roundtrip ... ok
+test mesh::tests::flood_appends_our_hash_to_the_path ... ok
+test mesh::tests::flood_drops_when_the_path_is_full ... ok
+test message::tests::group_text_rejects_a_foreign_channel ... ok
+test message::tests::group_text_round_trips_over_the_psk ... ok
+test message::tests::wrong_secret_fails_the_mac ... ok
+test message::tests::ack_crc_matches_on_both_sides ... ok
+test message::tests::text_message_round_trips_over_the_pairwise_secret ... ok
+test instance::tests::delayed_ack_from_prior_attempt_matches ... ok
+test node::tests::a_same_identity_refresh_keeps_the_learned_route ... ok
+test instance::tests::denial_is_pure_and_time_regression_refuses ... ok
+test node::tests::a_hash_collision_refuses_to_replace_contact_or_route ... ok
+test instance::tests::final_attempt_waits_for_ack_but_expiry_wins_at_its_exact_boundary ... ok
+test instance::tests::direct_text_returns_a_wire_ack_without_a_separate_application_pump ... ok
+test instance::tests::pause_requires_loss_then_resume_expires_without_sending ... ok
+test packet::tests::borrowed_codec_refuses_bad_input_before_allocating_and_writes_exactly ... ok
+test packet::tests::empty_payload_rejected ... ok
+test packet::tests::hash_distinguishes_type_not_route ... ok
+test packet::tests::reserved_hash_size_rejected ... ok
+test instance::tests::two_nodes_ack_a_retained_send ... ok
+test node::tests::a_duplicate_flood_is_dropped ... ok
+test packet::tests::roundtrip_direct_no_transport ... ok
+test packet::tests::roundtrip_transport_codes ... ok
+test packet::tests::truncated_transport_codes_rejected ... ok
+test instance::tests::pending_capacity_invalid_return_and_retry_overflow_refuse_before_mutation ... ok
+test packet::tests::two_byte_path_hashes ... ok
+test path::tests::standalone_decode_refuses_oversize_payload ... ok
+test path::tests::authenticated_path_round_trips ... ok
+test path::tests::malformed_path_is_rejected ... ok
+test instance::tests::radio_budget_leaves_a_delayed_reply_window_before_retry ... ok
+test node::tests::a_repeater_forwards_a_flood_it_is_not_the_target_of ... ok
+test node::tests::a_leaf_does_not_forward ... ok
+test node::tests::delayed_ack_from_any_attempt_completes_the_send ... ok
+test node::tests::operator_can_set_a_validated_route_for_a_known_contact ... ok
+test node::tests::configured_contact_and_pending_bounds_refuse_without_eviction ... ok
+test node::tests::a_message_for_someone_else_is_not_decrypted ... ok
+test node::tests::two_nodes_advert_then_message_and_ack ... ok
+test node::tests::direct_retries_clear_the_path_and_flood_the_last_attempt ... ok
+test node::tests::flood_message_establishes_reciprocal_direct_routes ... ok
+test node::tests::flood_fallback_can_be_disabled ... ok
+
+test result: ok. 74 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.26s
+
+     Running tests\current_paths.rs (target\build\debug\deps\current_paths-8850e97c3cbee911.exe)
+
+running 6 tests
+test malformed_public_packet_fields_do_not_panic_or_create_a_frame ... ok
+test every_supported_width_appends_and_consumes_a_complete_hop ... ok
+test trace_hash_matches_an_external_sha256_calculation ... ok
+test wider_flood_paths_stop_at_the_last_encodable_hop ... ok
+test unsupported_version_and_scope_do_not_poison_later_plain_advert ... ok
+test two_repeaters_deliver_wider_direct_text_without_intermediate_app_delivery ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.31s
+
+     Running tests\persistent_contacts.rs (target\build\debug\deps\persistent_contacts-c54c6c85a8984cb0.exe)
+
+running 4 tests
+test cache_shape_is_bounded_and_repeat_import_preserves_known_routes ... ok
+test refused_capacity_and_bad_key_leave_contacts_and_routes_unchanged ... ok
+test cold_restore_can_send_and_match_an_ack_without_another_peer_advert ... ok
+test collision_in_cache_or_against_live_state_never_partially_imports ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.33s
+
+   Doc-tests tucket
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

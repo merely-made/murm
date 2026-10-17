@@ -1,0 +1,87 @@
+42014c78 <core::ptr::drop_glue::<<tulle_heltec_v4_phy::radio_owner::V4RadioOwner<lora_phy::sx126x::Sx126x<embedded_hal_bus::spi::exclusive::ExclusiveDevice<esp_hal::spi::master::Spi<esp_hal::Async>, esp_hal::gpio::Output, embassy_time::delay::Delay>, lora_phy::iv::GenericSx126xInterfaceVariant<esp_hal::gpio::Output, tulle_heltec_v4_phy::wake_input::V4Input>, lora_phy::sx126x::variant::Sx1262>, embassy_time::delay::Delay>>::build_resident::{closure#0}>>:
+42014c78:	004136        	entry	a1, 32
+42014c7b:	a4a182        	movi	a8, 0x1a4
+42014c7e:	828a      	add.n	a8, a2, a8
+42014c80:	000882        	l8ui	a8, a8, 0
+42014c83:	3c3826        	beqi	a8, 3, 42014cc3 <core::ptr::drop_glue::<<tulle_heltec_v4_phy::radio_owner::V4RadioOwner<lora_phy::sx126x::Sx126x<embedded_hal_bus::spi::exclusive::ExclusiveDevice<esp_hal::spi::master::Spi<esp_hal::Async>, esp_hal::gpio::Output, embassy_time::delay::Delay>, lora_phy::iv::GenericSx126xInterfaceVariant<esp_hal::gpio::Output, tulle_heltec_v4_phy::wake_input::V4Input>, lora_phy::sx126x::variant::Sx1262>, embassy_time::delay::Delay>>::build_resident::{closure#0}>+0x4b>
+42014c86:	374866        	bnei	a8, 4, 42014cc1 <core::ptr::drop_glue::<<tulle_heltec_v4_phy::radio_owner::V4RadioOwner<lora_phy::sx126x::Sx126x<embedded_hal_bus::spi::exclusive::ExclusiveDevice<esp_hal::spi::master::Spi<esp_hal::Async>, esp_hal::gpio::Output, embassy_time::delay::Delay>, lora_phy::iv::GenericSx126xInterfaceVariant<esp_hal::gpio::Output, tulle_heltec_v4_phy::wake_input::V4Input>, lora_phy::sx126x::variant::Sx1262>, embassy_time::delay::Delay>>::build_resident::{closure#0}>+0x49>
+42014c89:	ed9481        	l32r	a8, 420102dc <idle_hook_fn+0x294> (5228 <VECTORS_SIZE+0x4e28>)
+42014c8c:	a28a      	add.n	a10, a2, a8
+42014c8e:	ed6481        	l32r	a8, 42010220 <idle_hook_fn+0x1d8> (42015700 <core::ptr::drop_glue::<<tulle_heltec_v4_phy::radio_owner::V4QuietGuard<lora_phy::sx126x::Sx126x<embedded_hal_bus::spi::exclusive::ExclusiveDevice<esp_hal::spi::master::Spi<esp_hal::Async>, esp_hal::gpio::Output, embassy_time::delay::Delay>, lora_phy::iv::GenericSx126xInterfaceVariant<esp_hal::gpio::Output, tulle_heltec_v4_phy::wake_input::V4Input>, lora_phy::sx126x::variant::Sx1262>, embassy_time::delay::Delay> as radio_hand::control::runtime::quiet::QuietGuard>::finish::{closure#0}>>)
+42014c91:	0008e0        	callx8	a8
+42014c94:	6d2282        	l32i	a8, a2, 0x1b4
+42014c97:	6c2292        	l32i	a9, a2, 0x1b0
+42014c9a:	108980        	and	a8, a9, a8
+42014c9d:	0a0826        	beqi	a8, -1, 42014cab <core::ptr::drop_glue::<<tulle_heltec_v4_phy::radio_owner::V4RadioOwner<lora_phy::sx126x::Sx126x<embedded_hal_bus::spi::exclusive::ExclusiveDevice<esp_hal::spi::master::Spi<esp_hal::Async>, esp_hal::gpio::Output, embassy_time::delay::Delay>, lora_phy::iv::GenericSx126xInterfaceVariant<esp_hal::gpio::Output, tulle_heltec_v4_phy::wake_input::V4Input>, lora_phy::sx126x::variant::Sx1262>, embassy_time::delay::Delay>>::build_resident::{closure#0}>+0x33>
+42014ca0:	b0a182        	movi	a8, 0x1b0
+42014ca3:	a28a      	add.n	a10, a2, a8
+42014ca5:	ed8e81        	l32r	a8, 420102e0 <idle_hook_fn+0x298> (42015810 <core::ptr::drop_glue::<radio_hand::instances::Runtime>>)
+42014ca8:	0008e0        	callx8	a8
+42014cab:	ada182        	movi	a8, 0x1ad
+42014cae:	828a      	add.n	a8, a2, a8
+42014cb0:	000882        	l8ui	a8, a8, 0
+42014cb3:	019816        	beqz	a8, 42014cd0 <core::ptr::drop_glue::<<tulle_heltec_v4_phy::radio_owner::V4RadioOwner<lora_phy::sx126x::Sx126x<embedded_hal_bus::spi::exclusive::ExclusiveDevice<esp_hal::spi::master::Spi<esp_hal::Async>, esp_hal::gpio::Output, embassy_time::delay::Delay>, lora_phy::iv::GenericSx126xInterfaceVariant<esp_hal::gpio::Output, tulle_heltec_v4_phy::wake_input::V4Input>, lora_phy::sx126x::variant::Sx1262>, embassy_time::delay::Delay>>::build_resident::{closure#0}>+0x58>
+42014cb6:	aca182        	movi	a8, 0x1ac
+42014cb9:	828a      	add.n	a8, a2, a8
+42014cbb:	000882        	l8ui	a8, a8, 0
+42014cbe:	141826        	beqi	a8, 1, 42014cd6 <core::ptr::drop_glue::<<tulle_heltec_v4_phy::radio_owner::V4RadioOwner<lora_phy::sx126x::Sx126x<embedded_hal_bus::spi::exclusive::ExclusiveDevice<esp_hal::spi::master::Spi<esp_hal::Async>, esp_hal::gpio::Output, embassy_time::delay::Delay>, lora_phy::iv::GenericSx126xInterfaceVariant<esp_hal::gpio::Output, tulle_heltec_v4_phy::wake_input::V4Input>, lora_phy::sx126x::variant::Sx1262>, embassy_time::delay::Delay>>::build_resident::{closure#0}>+0x5e>
+42014cc1:	f01d      	retw.n
+...
+42045790 <tulle_heltec_v4_phy::resident::build::build>:
+42045790:	004136        	entry	a1, 32
+42045793:	345e81        	l32r	a8, 4201290c <idle_hook_fn+0x28c4> (11f00 <RESERVE_ICACHE+0x9f00>)
+42045796:	c08180        	sub	a8, a1, a8
+42045799:	001810        	movsp	a1, a8
+4204579c:	000782        	l8ui	a8, a7, 0
+4204579f:	53f816        	beqz	a8, 42045ce2 <tulle_heltec_v4_phy::resident::build::build+0x552>
+420457a2:	1a6142        	s32i	a4, a1, 104
+420457a5:	1b6152        	s32i	a5, a1, 108
+420457a8:	226122        	s32i	a2, a1, 136
+420457ab:	070782        	l8ui	a8, a7, 7
+420457ae:	964182        	s8i	a8, a1, 150
+420457b1:	050782        	l8ui	a8, a7, 5
+420457b4:	060792        	l8ui	a9, a7, 6
+420457b7:	119980        	slli	a9, a9, 8
+420457ba:	208980        	or	a8, a9, a8
+420457bd:	4a5182        	s16i	a8, a1, 148
+420457c0:	010782        	l8ui	a8, a7, 1
+420457c3:	020792        	l8ui	a9, a7, 2
+420457c6:	119980        	slli	a9, a9, 8
+420457c9:	208980        	or	a8, a9, a8
+420457cc:	030792        	l8ui	a9, a7, 3
+420457cf:	119900        	slli	a9, a9, 16
+420457d2:	0407a2        	l8ui	a10, a7, 4
+420457d5:	01aa80        	slli	a10, a10, 24
+420457d8:	209a90        	or	a9, a10, a9
+420457db:	208980        	or	a8, a9, a8
+420457de:	246182        	s32i	a8, a1, 144
+...
+42046b70 <<tulle_heltec_v4_phy::resident::build::BuildError as core::fmt::Debug>::fmt>:
+42046b70:	006136        	entry	a1, 48
+42046b73:	0298      	l32i.n	a9, a2, 0
+42046b75:	0a0c      	movi.n	a10, 0
+42046b77:	180c      	movi.n	a8, 1
+42046b79:	ec0c      	movi.n	a12, 14
+42046b7b:	08bd      	mov.n	a11, a8
+42046b7d:	013c97        	bltu	a12, a9, 42046b82 <<tulle_heltec_v4_phy::resident::build::BuildError as core::fmt::Debug>::fmt+0x12>
+42046b80:	0abd      	mov.n	a11, a10
+42046b82:	12c8      	l32i.n	a12, a2, 4
+42046b84:	08dd      	mov.n	a13, a8
+42046b86:	232ac7        	blt	a10, a12, 42046bad <<tulle_heltec_v4_phy::resident::build::BuildError as core::fmt::Debug>::fmt+0x3d>
+42046b89:	0add      	mov.n	a13, a10
+42046b8b:	219ca7        	bne	a12, a10, 42046bb0 <<tulle_heltec_v4_phy::resident::build::BuildError as core::fmt::Debug>::fmt+0x40>
+42046b8e:	021ba7        	beq	a11, a10, 42046b94 <<tulle_heltec_v4_phy::resident::build::BuildError as core::fmt::Debug>::fmt+0x24>
+42046b91:	f1c982        	addi	a8, a9, -15
+42046b94:	2f8691        	l32r	a9, 420129ac <idle_hook_fn+0x2964> (3c0011a4 <_rodata_start+0x1084>)
+42046b97:	a08890        	addx4	a8, a8, a9
+42046b9a:	0888      	l32i.n	a8, a8, 0
+42046b9c:	0008a0        	jx	a8
+42046b9f:	03a8      	l32i.n	a10, a3, 0
+42046ba1:	1388      	l32i.n	a8, a3, 4
+42046ba3:	3888      	l32i.n	a8, a8, 12
+42046ba5:	2f89b1        	l32r	a11, 420129cc <idle_hook_fn+0x2984> (3c0031ea <_rodata_start+0x30ca>)
+42046ba8:	fc0c      	movi.n	a12, 15
+42046baa:	000e06        	j	42046be6 <<tulle_heltec_v4_phy::resident::build::BuildError as core::fmt::Debug>::fmt+0x76>
+42046bad:	dd1ca7        	beq	a12, a10, 42046b8e <<tulle_heltec_v4_phy::resident::build::BuildError as core::fmt::Debug>::fmt+0x1e>
+42046bb0:	0dbd      	mov.n	a11, a13
+...

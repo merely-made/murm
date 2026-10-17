@@ -1,0 +1,70 @@
+{
+  "device": "SB2",
+  "name": "SB2",
+  "expected_usb": [
+    12346,
+    4097,
+    "44:1B:F6:6A:FA:64"
+  ],
+  "source_sha256": "b88f74468c53f7c924a6754e8f0e236b9e4a3878425d3d94609e3a2372d572e4",
+  "provision": false,
+  "sessions": [
+    {
+      "port": "COM7",
+      "attached": "",
+      "responses": [
+        {
+          "command": "status",
+          "response": "tulle/heltec-v4 phy online; version=0.0.1; sx1262 online; sync=2b reg=24b4; longfast=906875000; build=c8e5eb9309e12237d149d6bd1d8eb89ea6ec4a8f; image=v4-modem-usb\r\nidentity=loaded slot=B seq=13\r\nname=SB2\r\n"
+        },
+        {
+          "command": "name",
+          "response": "name=SB2\r\n"
+        },
+        {
+          "command": "region",
+          "response": "region=US915\r\n"
+        },
+        {
+          "command": "channel",
+          "response": "channel=modem\r\n"
+        },
+        {
+          "command": "ui",
+          "response": "ui=ok; display=on; screen=status; button=0; host=none\r\n"
+        }
+      ]
+    },
+    {
+      "port": "COM7",
+      "attached": "",
+      "responses": [
+        {
+          "command": "status",
+          "response": "tulle/heltec-v4 phy online; version=0.0.1; sx1262 online; sync=2b reg=24b4; longfast=906875000; build=c8e5eb9309e12237d149d6bd1d8eb89ea6ec4a8f; image=v4-modem-usb\r\nidentity=loaded slot=B seq=13\r\nname=SB2\r\n"
+        },
+        {
+          "command": "name",
+          "response": "name=SB2\r\n"
+        },
+        {
+          "command": "region",
+          "response": "region=US915\r\n"
+        },
+        {
+          "command": "channel",
+          "response": "channel=modem\r\n"
+        },
+        {
+          "command": "ui",
+          "response": "ui=ok; display=on; screen=status; button=0; host=none\r\n"
+        },
+        {
+          "command": "status",
+          "response": "tulle/heltec-v4 phy online; version=0.0.1; sx1262 online; sync=2b reg=24b4; longfast=906875000; build=c8e5eb9309e12237d149d6bd1d8eb89ea6ec4a8f; image=v4-modem-usb\r\nidentity=loaded slot=B seq=13\r\nname=SB2\r\n"
+        }
+      ]
+    }
+  ],
+  "passed": true
+}

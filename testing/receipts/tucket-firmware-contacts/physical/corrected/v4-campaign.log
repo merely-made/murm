@@ -1,0 +1,16 @@
+{
+  "passed": false,
+  "source": "30bde0d1ab9991599ab9a22fdbf7b22c3abd991f",
+  "app_sha256": "962bd75f42d6a804a3ba2a1f4e2932c62f7c1dc4265d0579215a5366ebfa70bc",
+  "boots": [
+    "I (283) esp_image: segment 3: paddr=000ca4e0 vaddr=3fc8b904 sizecontacts bench ok initial_keys=0 keys=8 commits=2 sequence=1\r\n"
+  ],
+  "touched": true,
+  "error": "AssertionError('v4-storage-memory')",
+  "prefix_md5": "8f35078ba63ad63096e58a0c19f724ad",
+  "protected_except_owned_cache": {
+    "0x3f0000": "4805ae92577b2c7adf4f8fbf1c37cd02",
+    "0x3fc000": "92ab673d915a94dcf187720e8ac0d608"
+  },
+  "restored": true
+}

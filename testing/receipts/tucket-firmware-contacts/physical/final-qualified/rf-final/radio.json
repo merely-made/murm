@@ -1,0 +1,28 @@
+{
+  "passed": true,
+  "source": "fb7e0e6eacc3c60d1788672e4d15468b3b3be35c",
+  "authority": "isolated real Keeper wallet, volatile USB firmware setup",
+  "probe_source": "6d27e711a61fd4cce7501acea7ce700d0be5af87",
+  "custodian_sha256": "25f41c90f231bbf88d573e5ad74e0bfa181523cd9e59f2fc1729f7f0316b2dcc",
+  "probe_sha256": "273A47E9C5E5773B425085D21D02F8A4F49454162D0BC5793053868BE8D48EDD",
+  "peer_sha256": "EDFFBF9BC67C795E441B8B789A018A22A6F3432417F0E82FAC944D65FEF0F9DE",
+  "phases": [
+    {
+      "name": "first",
+      "cached_before_peer_work": 0,
+      "passed": true
+    },
+    {
+      "name": "cold",
+      "cached_before_peer_work": 1,
+      "passed": true
+    }
+  ],
+  "self_public": "0fc83f98b1db79b51303063dcec09c8ccad7c47ff8ee43d78ab91fe9c33a8da1",
+  "peer_public": "4d1e0b3e0ec65be19ccdb177b88016f46a048c3242ec6076bda51cc62465b003",
+  "radio_passed": true,
+  "peer_restored": true,
+  "dut_restored": true,
+  "custodian_stopped": true,
+  "closed_utc": "2026-10-17T07:58:23.6754747Z"
+}

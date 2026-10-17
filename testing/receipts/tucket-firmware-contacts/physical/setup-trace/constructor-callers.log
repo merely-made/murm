@@ -1,0 +1,300 @@
+42041444 <<embassy_executor::raw::TaskStorage<tulle_heltec_v4_phy::__main_task::__main_task_inner_function::{closure#0}>>::poll>:
+42041444:	008136        	entry	a1, 64
+42041447:	448e81        	l32r	a8, 42012680 <idle_hook_fn+0x2638> (3c00d838 <embassy_executor::raw::waker::VTABLE>)
+4204144a:	0189      	s32i.n	a8, a1, 0
+4204144c:	1129      	s32i.n	a2, a1, 4
+4204144e:	060c      	movi.n	a6, 0
+42041450:	4169      	s32i.n	a6, a1, 16
+42041452:	00c182        	addi	a8, a1, 0
+42041455:	3189      	s32i.n	a8, a1, 12
+42041457:	2189      	s32i.n	a8, a1, 8
+42041459:	28c2a2        	addi	a10, a2, 40
+4204145c:	08c1b2        	addi	a11, a1, 8
+4204145f:	448981        	l32r	a8, 42012684 <idle_hook_fn+0x263c> (4202acc0 <tulle_heltec_v4_phy::__main_task::__main_task_inner_function::{closure#0}>)
+42041462:	0008e0        	callx8	a8
+42041465:	4f3a56        	bnez	a10, 4204195c <<embassy_executor::raw::TaskStorage<tulle_heltec_v4_phy::__main_task::__main_task_inner_function::{closure#0}>>::poll+0x518>
+42041468:	448881        	l32r	a8, 42012688 <idle_hook_fn+0x2640> (c869 <RESERVE_ICACHE+0x4869>)
+4204146b:	828a      	add.n	a8, a2, a8
+4204146d:	000882        	l8ui	a8, a8, 0
+42045793:	345e81        	l32r	a8, 4201290c <idle_hook_fn+0x28c4> (11f00 <RESERVE_ICACHE+0x9f00>)
+4204581a:	2a0d81        	l32r	a8, 42010050 <idle_hook_fn+0x8> (400011f4 <memcpy>)
+42045820:	0008e0        	callx8	a8
+4204582e:	2a0881        	l32r	a8, 42010050 <idle_hook_fn+0x8> (400011f4 <memcpy>)
+42045831:	0008e0        	callx8	a8
+42045865:	29fa81        	l32r	a8, 42010050 <idle_hook_fn+0x8> (400011f4 <memcpy>)
+4204586e:	0008e0        	callx8	a8
+4204587c:	340b81        	l32r	a8, 420128a8 <idle_hook_fn+0x2860> (420b7570 <<tucket::identity::LocalIdentity>::from_seed>)
+42045883:	0008e0        	callx8	a8
+42045886:	342281        	l32r	a8, 42012910 <idle_hook_fn+0x28c8> (cdd0 <RESERVE_ICACHE+0x4dd0>)
+42045890:	340781        	l32r	a8, 420128ac <idle_hook_fn+0x2864> (420b586c <<tucket::node::state::Node>::with_capacity>)
+42045899:	0008e0        	callx8	a8
+4204589c:	341d81        	l32r	a8, 42012910 <idle_hook_fn+0x28c8> (cdd0 <RESERVE_ICACHE+0x4dd0>)
+420458ac:	342081        	l32r	a8, 4201292c <idle_hook_fn+0x28e4> (cdd4 <RESERVE_ICACHE+0x4dd4>)
+420458b6:	341c81        	l32r	a8, 42012928 <idle_hook_fn+0x28e0> (cdd8 <RESERVE_ICACHE+0x4dd8>)
+420458bd:	341981        	l32r	a8, 42012924 <idle_hook_fn+0x28dc> (cddc <RESERVE_ICACHE+0x4ddc>)
+420458c4:	341381        	l32r	a8, 42012910 <idle_hook_fn+0x28c8> (cdd0 <RESERVE_ICACHE+0x4dd0>)
+420458dd:	29dc81        	l32r	a8, 42010050 <idle_hook_fn+0x8> (400011f4 <memcpy>)
+420458e2:	0008e0        	callx8	a8
+42045938:	33f681        	l32r	a8, 42012910 <idle_hook_fn+0x28c8> (cdd0 <RESERVE_ICACHE+0x4dd0>)
+42045943:	29c381        	l32r	a8, 42010050 <idle_hook_fn+0x8> (400011f4 <memcpy>)
+4204594a:	0008e0        	callx8	a8
+42045986:	29b281        	l32r	a8, 42010050 <idle_hook_fn+0x8> (400011f4 <memcpy>)
+4204598d:	0008e0        	callx8	a8
+420459bc:	33bd81        	l32r	a8, 420128b0 <idle_hook_fn+0x2868> (420b6df0 <<tucket::instance::Instance>::new>)
+420459c4:	0008e0        	callx8	a8
+420459d5:	3397b1        	l32r	a11, 42012834 <idle_hook_fn+0x27ec> (3fc8adf0 <_data_start+0x9d8>)
+420459da:	299d81        	l32r	a8, 42010050 <idle_hook_fn+0x8> (400011f4 <memcpy>)
+420459df:	0008e0        	callx8	a8
+420459f4:	33b0b1        	l32r	a11, 420128b4 <idle_hook_fn+0x286c> (3c0021e6 <_rodata_start+0x20c6>)
+420459f9:	299581        	l32r	a8, 42010050 <idle_hook_fn+0x8> (400011f4 <memcpy>)
+420459fe:	0008e0        	callx8	a8
+42045a96:	339e81        	l32r	a8, 42012910 <idle_hook_fn+0x28c8> (cdd0 <RESERVE_ICACHE+0x4dd0>)
+42045aa1:	296b81        	l32r	a8, 42010050 <idle_hook_fn+0x8> (400011f4 <memcpy>)
+42045aa8:	0008e0        	callx8	a8
+42045aab:	339d81        	l32r	a8, 42012920 <idle_hook_fn+0x28d8> (11d78 <RESERVE_ICACHE+0x9d78>)
+42045ab3:	29af81        	l32r	a8, 42010170 <idle_hook_fn+0x128> (400011e8 <memset>)
+42045aba:	0008e0        	callx8	a8
+42045ac5:	29aa81        	l32r	a8, 42010170 <idle_hook_fn+0x128> (400011e8 <memset>)
+42045acc:	0008e0        	callx8	a8
+42045acf:	339381        	l32r	a8, 4201291c <idle_hook_fn+0x28d4> (ce0f <RESERVE_ICACHE+0x4e0f>)
+42045ad9:	338f91        	l32r	a9, 42012918 <idle_hook_fn+0x28d0> (ce34 <RESERVE_ICACHE+0x4e34>)
+42045ae0:	338d91        	l32r	a9, 42012914 <idle_hook_fn+0x28cc> (ce30 <RESERVE_ICACHE+0x4e30>)
+42045af4:	299f81        	l32r	a8, 42010170 <idle_hook_fn+0x128> (400011e8 <memset>)
+42045afb:	0008e0        	callx8	a8
+42045b09:	2980a1        	l32r	a10, 4201010c <idle_hook_fn+0xc4> (ff00 <RESERVE_ICACHE+0x7f00>)
+42045b5e:	336c81        	l32r	a8, 42012910 <idle_hook_fn+0x28c8> (cdd0 <RESERVE_ICACHE+0x4dd0>)
+42045b6b:	293981        	l32r	a8, 42010050 <idle_hook_fn+0x8> (400011f4 <memcpy>)
+42045b72:	0008e0        	callx8	a8
+42045b77:	333081        	l32r	a8, 42012838 <idle_hook_fn+0x27f0> (42099180 <sha2::sha256::compress256>)
+42045b7e:	0008e0        	callx8	a8
+42045b85:	297a81        	l32r	a8, 42010170 <idle_hook_fn+0x128> (400011e8 <memset>)
+42045b8a:	0008e0        	callx8	a8
+42045b90:	336a81        	l32r	a8, 42012938 <idle_hook_fn+0x28f0> (11f20 <RESERVE_ICACHE+0x9f20>)
+42045bae:	336181        	l32r	a8, 42012934 <idle_hook_fn+0x28ec> (ce08 <RESERVE_ICACHE+0x4e08>)
+42045bb5:	335e81        	l32r	a8, 42012930 <idle_hook_fn+0x28e8> (ce0c <RESERVE_ICACHE+0x4e0c>)
+42045bc7:	335281        	l32r	a8, 42012910 <idle_hook_fn+0x28c8> (cdd0 <RESERVE_ICACHE+0x4dd0>)
+42045bd1:	291f81        	l32r	a8, 42010050 <idle_hook_fn+0x8> (400011f4 <memcpy>)
+42045bd9:	0008e0        	callx8	a8
+42045bde:	331681        	l32r	a8, 42012838 <idle_hook_fn+0x27f0> (42099180 <sha2::sha256::compress256>)
+42045be5:	0008e0        	callx8	a8
+42045be8:	334a81        	l32r	a8, 42012910 <idle_hook_fn+0x28c8> (cdd0 <RESERVE_ICACHE+0x4dd0>)
+42045bf8:	2945a1        	l32r	a10, 4201010c <idle_hook_fn+0xc4> (ff00 <RESERVE_ICACHE+0x7f00>)
+42045c37:	333a81        	l32r	a8, 42012920 <idle_hook_fn+0x28d8> (11d78 <RESERVE_ICACHE+0x9d78>)
+42045c49:	290181        	l32r	a8, 42010050 <idle_hook_fn+0x8> (400011f4 <memcpy>)
+42045c50:	0008e0        	callx8	a8
+42045c61:	28fb81        	l32r	a8, 42010050 <idle_hook_fn+0x8> (400011f4 <memcpy>)
+42045c68:	0008e0        	callx8	a8
+42045c6b:	28f981        	l32r	a8, 42010050 <idle_hook_fn+0x8> (400011f4 <memcpy>)
+42045c74:	0008e0        	callx8	a8
+42045c7c:	332581        	l32r	a8, 42012910 <idle_hook_fn+0x28c8> (cdd0 <RESERVE_ICACHE+0x4dd0>)
+42045c84:	2c3a81        	l32r	a8, 42010d6c <idle_hook_fn+0xd24> (42013e50 <radio_hand::tucket_contacts::load::<tulle_heltec_v4_phy::store::SettingsStore>>)
+42045c8d:	0008e0        	callx8	a8
+42045c9e:	332281        	l32r	a8, 42012928 <idle_hook_fn+0x28e0> (cdd8 <RESERVE_ICACHE+0x4dd8>)
+42045ca5:	332181        	l32r	a8, 4201292c <idle_hook_fn+0x28e4> (cdd4 <RESERVE_ICACHE+0x4dd4>)
+42045caf:	331d81        	l32r	a8, 42012924 <idle_hook_fn+0x28dc> (cddc <RESERVE_ICACHE+0x4ddc>)
+42045cba:	331581        	l32r	a8, 42012910 <idle_hook_fn+0x28c8> (cdd0 <RESERVE_ICACHE+0x4dd0>)
+42045cc1:	331381        	l32r	a8, 42012910 <idle_hook_fn+0x28c8> (cdd0 <RESERVE_ICACHE+0x4dd0>)
+42045cd6:	28de81        	l32r	a8, 42010050 <idle_hook_fn+0x8> (400011f4 <memcpy>)
+42045cd9:	0008e0        	callx8	a8
+42045d05:	330281        	l32r	a8, 42012910 <idle_hook_fn+0x28c8> (cdd0 <RESERVE_ICACHE+0x4dd0>)
+42045d24:	28cb81        	l32r	a8, 42010050 <idle_hook_fn+0x8> (400011f4 <memcpy>)
+42045d27:	0008e0        	callx8	a8
+42045d2a:	32f981        	l32r	a8, 42012910 <idle_hook_fn+0x28c8> (cdd0 <RESERVE_ICACHE+0x4dd0>)
+42045d41:	2c0981        	l32r	a8, 42010d68 <idle_hook_fn+0xd20> (4207dadc <<radio_hand::tucket_contacts::Snapshot>::new>)
+42045d49:	0008e0        	callx8	a8
+42045d4c:	32f181        	l32r	a8, 42012910 <idle_hook_fn+0x28c8> (cdd0 <RESERVE_ICACHE+0x4dd0>)
+42045d57:	32f981        	l32r	a8, 4201293c <idle_hook_fn+0x28f4> (cdd1 <RESERVE_ICACHE+0x4dd1>)
+42045d73:	298c81        	l32r	a8, 420103a4 <idle_hook_fn+0x35c> (420158f4 <core::ptr::drop_glue::<tucket::node::state::Node>>)
+42045d79:	0008e0        	callx8	a8
+42045d82:	298b81        	l32r	a8, 420103b0 <idle_hook_fn+0x368> (4206bef4 <<alloc::vec::Vec<tucket::instance::Operation> as core::ops::drop::Drop>::drop>)
+42045d85:	0008e0        	callx8	a8
+42045d92:	28b581        	l32r	a8, 42010068 <idle_hook_fn+0x20> (4204c050 <<alloc::raw_vec::RawVecInner>::deallocate>)
+42045d95:	0008e0        	callx8	a8
+42045da5:	32e181        	l32r	a8, 4201292c <idle_hook_fn+0x28e4> (cdd4 <RESERVE_ICACHE+0x4dd4>)
+42045daf:	32e481        	l32r	a8, 42012940 <idle_hook_fn+0x28f8> (cde0 <RESERVE_ICACHE+0x4de0>)
+42045dba:	32db81        	l32r	a8, 42012928 <idle_hook_fn+0x28e0> (cdd8 <RESERVE_ICACHE+0x4dd8>)
+42045dc4:	32d881        	l32r	a8, 42012924 <idle_hook_fn+0x28dc> (cddc <RESERVE_ICACHE+0x4ddc>)
+42045dcb:	32d181        	l32r	a8, 42012910 <idle_hook_fn+0x28c8> (cdd0 <RESERVE_ICACHE+0x4dd0>)
+42045de1:	289b81        	l32r	a8, 42010050 <idle_hook_fn+0x8> (400011f4 <memcpy>)
+42045de8:	0008e0        	callx8	a8
+42045e0b:	289181        	l32r	a8, 42010050 <idle_hook_fn+0x8> (400011f4 <memcpy>)
+42045e12:	0008e0        	callx8	a8
+42045e66:	32aa81        	l32r	a8, 42012910 <idle_hook_fn+0x28c8> (cdd0 <RESERVE_ICACHE+0x4dd0>)
+42045e79:	287581        	l32r	a8, 42010050 <idle_hook_fn+0x8> (400011f4 <memcpy>)
+42045e7c:	0008e0        	callx8	a8
+42045e8c:	328b81        	l32r	a8, 420128b8 <idle_hook_fn+0x2870> (420b6888 <tucket::node::contacts::validate_contact_keys>)
+42045e93:	0008e0        	callx8	a8
+42045eae:	329881        	l32r	a8, 42012910 <idle_hook_fn+0x28c8> (cdd0 <RESERVE_ICACHE+0x4dd0>)
+42045eb6:	328281        	l32r	a8, 420128c0 <idle_hook_fn+0x2878> (420158c8 <core::ptr::drop_glue::<tucket::instance::Instance>>)
+42045ec6:	32a091        	l32r	a9, 42012948 <idle_hook_fn+0x2900> (cdf8 <RESERVE_ICACHE+0x4df8>)
+42045ed6:	329b81        	l32r	a8, 42012944 <idle_hook_fn+0x28fc> (cdf4 <RESERVE_ICACHE+0x4df4>)
+42045f0e:	289c81        	l32r	a8, 42010180 <idle_hook_fn+0x138> (4000120c <memcmp>)
+42045f14:	0008e0        	callx8	a8
+42045f2b:	328881        	l32r	a8, 4201294c <idle_hook_fn+0x2904> (cf1c <RESERVE_ICACHE+0x4f1c>)
+42045f38:	327681        	l32r	a8, 42012910 <idle_hook_fn+0x28c8> (cdd0 <RESERVE_ICACHE+0x4dd0>)
+42045f63:	283b81        	l32r	a8, 42010050 <idle_hook_fn+0x8> (400011f4 <memcpy>)
+42045f69:	325481        	l32r	a8, 420128bc <idle_hook_fn+0x2874> (420b5a28 <<alloc::raw_vec::RawVec<(u8, tucket::node::state::Contact)>>::grow_one>)
+42045fa9:	0008e0        	callx8	a8
+42045fac:	326981        	l32r	a8, 42012950 <idle_hook_fn+0x2908> (cdf0 <RESERVE_ICACHE+0x4df0>)
+42045fbe:	0008e0        	callx8	a8
+42045fc1:	326081        	l32r	a8, 42012944 <idle_hook_fn+0x28fc> (cdf4 <RESERVE_ICACHE+0x4df4>)
+42045fe1:	281b81        	l32r	a8, 42010050 <idle_hook_fn+0x8> (400011f4 <memcpy>)
+42045fe4:	0008e0        	callx8	a8
+42045fec:	325781        	l32r	a8, 42012948 <idle_hook_fn+0x2900> (cdf8 <RESERVE_ICACHE+0x4df8>)
+4204600f:	324081        	l32r	a8, 42012910 <idle_hook_fn+0x28c8> (cdd0 <RESERVE_ICACHE+0x4dd0>)
+4204601a:	280d81        	l32r	a8, 42010050 <idle_hook_fn+0x8> (400011f4 <memcpy>)
+4204601d:	0008e0        	callx8	a8
+42046036:	280681        	l32r	a8, 42010050 <idle_hook_fn+0x8> (400011f4 <memcpy>)
+42046039:	0008e0        	callx8	a8
+4204604f:	2bce41        	l32r	a4, 42010f88 <idle_hook_fn+0xf40> (1000 <VECTORS_SIZE+0xc00>)
+42046052:	284781        	l32r	a8, 42010170 <idle_hook_fn+0x128> (400011e8 <memset>)
+4204605b:	0008e0        	callx8	a8
+4204605e:	322c81        	l32r	a8, 42012910 <idle_hook_fn+0x28c8> (cdd0 <RESERVE_ICACHE+0x4dd0>)
+42046066:	284281        	l32r	a8, 42010170 <idle_hook_fn+0x128> (400011e8 <memset>)
+4204606d:	0008e0        	callx8	a8
+42046070:	3215b1        	l32r	a11, 420128c4 <idle_hook_fn+0x287c> (3f8000 <PS_WOE+0x3b8000>)
+42046073:	282981        	l32r	a8, 42010118 <idle_hook_fn+0xd0> (4205fbc8 <<esp_storage::common::FlashStorage as embedded_storage::nor_flash::ReadNorFlash>::read>)
+4204607f:	0008e0        	callx8	a8
+42046087:	3210b1        	l32r	a11, 420128c8 <idle_hook_fn+0x2880> (3f9000 <PS_WOE+0x3b9000>)
+4204608a:	322181        	l32r	a8, 42012910 <idle_hook_fn+0x28c8> (cdd0 <RESERVE_ICACHE+0x4dd0>)
+42046092:	2bbdd1        	l32r	a13, 42010f88 <idle_hook_fn+0xf40> (1000 <VECTORS_SIZE+0xc00>)
+42046095:	282081        	l32r	a8, 42010118 <idle_hook_fn+0xd0> (4205fbc8 <<esp_storage::common::FlashStorage as embedded_storage::nor_flash::ReadNorFlash>::read>)
+4204609a:	0008e0        	callx8	a8
+420460b7:	320281        	l32r	a8, 420128c0 <idle_hook_fn+0x2878> (420158c8 <core::ptr::drop_glue::<tucket::instance::Instance>>)
+420460ba:	0008e0        	callx8	a8
+420460d5:	320e81        	l32r	a8, 42012910 <idle_hook_fn+0x28c8> (cdd0 <RESERVE_ICACHE+0x4dd0>)
+420460dd:	31fb81        	l32r	a8, 420128cc <idle_hook_fn+0x2884> (4207de70 <radio_hand::packet_reservation::snapshot>)
+420460e0:	0008e0        	callx8	a8
+42046157:	31de81        	l32r	a8, 420128d0 <idle_hook_fn+0x2888> (31504e53 <PS_WOE+0x314c4e53>)
+42046174:	27ff81        	l32r	a8, 42010170 <idle_hook_fn+0x128> (400011e8 <memset>)
+4204617b:	0008e0        	callx8	a8
+42046193:	2af881        	l32r	a8, 42010d74 <idle_hook_fn+0xd2c> (4208f22c <seneschal::store::encode>)
+420461a3:	0008e0        	callx8	a8
+420461b1:	31c421        	l32r	a2, 420128c4 <idle_hook_fn+0x287c> (3f8000 <PS_WOE+0x3b8000>)
+420461b7:	31c421        	l32r	a2, 420128c8 <idle_hook_fn+0x2880> (3f9000 <PS_WOE+0x3b9000>)
+420461dd:	27d181        	l32r	a8, 42010124 <idle_hook_fn+0xdc> (4205fc70 <<esp_storage::common::FlashStorage as embedded_storage::nor_flash::NorFlash>::erase>)
+420461e5:	0008e0        	callx8	a8
+42046206:	289581        	l32r	a8, 4201045c <idle_hook_fn+0x414> (4205ff18 <<esp_storage::common::FlashStorage as embedded_storage::nor_flash::NorFlash>::write>)
+42046211:	0008e0        	callx8	a8
+4204621c:	31aab1        	l32r	a11, 420128c4 <idle_hook_fn+0x287c> (3f8000 <PS_WOE+0x3b8000>)
+4204622a:	2b57d1        	l32r	a13, 42010f88 <idle_hook_fn+0xf40> (1000 <VECTORS_SIZE+0xc00>)
+4204622d:	27ba81        	l32r	a8, 42010118 <idle_hook_fn+0xd0> (4205fbc8 <<esp_storage::common::FlashStorage as embedded_storage::nor_flash::ReadNorFlash>::read>)
+42046232:	0008e0        	callx8	a8
+42046243:	31a1b1        	l32r	a11, 420128c8 <idle_hook_fn+0x2880> (3f9000 <PS_WOE+0x3b9000>)
+42046246:	31b281        	l32r	a8, 42012910 <idle_hook_fn+0x28c8> (cdd0 <RESERVE_ICACHE+0x4dd0>)
+4204624e:	2b4ed1        	l32r	a13, 42010f88 <idle_hook_fn+0xf40> (1000 <VECTORS_SIZE+0xc00>)
+42046251:	27b181        	l32r	a8, 42010118 <idle_hook_fn+0xd0> (4205fbc8 <<esp_storage::common::FlashStorage as embedded_storage::nor_flash::ReadNorFlash>::read>)
+42046256:	0008e0        	callx8	a8
+4204627a:	31a581        	l32r	a8, 42012910 <idle_hook_fn+0x28c8> (cdd0 <RESERVE_ICACHE+0x4dd0>)
+42046282:	319481        	l32r	a8, 420128d4 <idle_hook_fn+0x288c> (4207dde4 <radio_hand::packet_reservation::verify_pair>)
+4204628d:	0008e0        	callx8	a8
+420462c8:	319281        	l32r	a8, 42012910 <idle_hook_fn+0x28c8> (cdd0 <RESERVE_ICACHE+0x4dd0>)
+420462d0:	291ac1        	l32r	a12, 42010738 <idle_hook_fn+0x6f0> (10000 <RESERVE_ICACHE+0x8000>)
+420462d5:	293281        	l32r	a8, 420107a0 <idle_hook_fn+0x758> (42040348 <<tulle_heltec_v4_phy::store::SettingsStore>::reserve_announce_lease>)
+420462dd:	0008e0        	callx8	a8
+420462e2:	319281        	l32r	a8, 4201292c <idle_hook_fn+0x28e4> (cdd4 <RESERVE_ICACHE+0x4dd4>)
+420462f1:	318791        	l32r	a9, 42012910 <idle_hook_fn+0x28c8> (cdd0 <RESERVE_ICACHE+0x4dd0>)
+420462fe:	3195b1        	l32r	a11, 42012954 <idle_hook_fn+0x290c> (cde4 <RESERVE_ICACHE+0x4de4>)
+42046308:	318eb1        	l32r	a11, 42012940 <idle_hook_fn+0x28f8> (cde0 <RESERVE_ICACHE+0x4de0>)
+42046312:	3184b1        	l32r	a11, 42012924 <idle_hook_fn+0x28dc> (cddc <RESERVE_ICACHE+0x4ddc>)
+4204631c:	3183b1        	l32r	a11, 42012928 <idle_hook_fn+0x28e0> (cdd8 <RESERVE_ICACHE+0x4dd8>)
+42046341:	274381        	l32r	a8, 42010050 <idle_hook_fn+0x8> (400011f4 <memcpy>)
+42046344:	0008e0        	callx8	a8
+42046457:	26fe81        	l32r	a8, 42010050 <idle_hook_fn+0x8> (400011f4 <memcpy>)
+4204645e:	0008e0        	callx8	a8
+42046533:	30f781        	l32r	a8, 42012910 <idle_hook_fn+0x28c8> (cdd0 <RESERVE_ICACHE+0x4dd0>)
+42046551:	30e181        	l32r	a8, 420128d8 <idle_hook_fn+0x2890> (4209802c <<sennet::instance::state::SennetInstance>::new>)
+42046554:	0008e0        	callx8	a8
+42046557:	30f581        	l32r	a8, 4201292c <idle_hook_fn+0x28e4> (cdd4 <RESERVE_ICACHE+0x4dd4>)
+4204655e:	30ec81        	l32r	a8, 42012910 <idle_hook_fn+0x28c8> (cdd0 <RESERVE_ICACHE+0x4dd0>)
+4204656e:	30ee81        	l32r	a8, 42012928 <idle_hook_fn+0x28e0> (cdd8 <RESERVE_ICACHE+0x4dd8>)
+42046575:	30eb81        	l32r	a8, 42012924 <idle_hook_fn+0x28dc> (cddc <RESERVE_ICACHE+0x4ddc>)
+4204657c:	30e581        	l32r	a8, 42012910 <idle_hook_fn+0x28c8> (cdd0 <RESERVE_ICACHE+0x4dd0>)
+42046595:	26ae81        	l32r	a8, 42010050 <idle_hook_fn+0x8> (400011f4 <memcpy>)
+4204659a:	0008e0        	callx8	a8
+420465f2:	269781        	l32r	a8, 42010050 <idle_hook_fn+0x8> (400011f4 <memcpy>)
+420465f5:	0008e0        	callx8	a8
+42046651:	30af81        	l32r	a8, 42012910 <idle_hook_fn+0x28c8> (cdd0 <RESERVE_ICACHE+0x4dd0>)
+42046666:	2ff281        	l32r	a8, 42012630 <idle_hook_fn+0x25e8> (4208b8e0 <<selvage::personality::types::InstalledPersonalitySet>::new>)
+42046669:	0008e0        	callx8	a8
+4204666c:	30a981        	l32r	a8, 42012910 <idle_hook_fn+0x28c8> (cdd0 <RESERVE_ICACHE+0x4dd0>)
+4204667a:	30b181        	l32r	a8, 42012940 <idle_hook_fn+0x28f8> (cde0 <RESERVE_ICACHE+0x4de0>)
+42046684:	30a881        	l32r	a8, 42012924 <idle_hook_fn+0x28dc> (cddc <RESERVE_ICACHE+0x4ddc>)
+4204668e:	30a681        	l32r	a8, 42012928 <idle_hook_fn+0x28e0> (cdd8 <RESERVE_ICACHE+0x4dd8>)
+42046697:	30a581        	l32r	a8, 4201292c <idle_hook_fn+0x28e4> (cdd4 <RESERVE_ICACHE+0x4dd4>)
+420466a1:	309b81        	l32r	a8, 42012910 <idle_hook_fn+0x28c8> (cdd0 <RESERVE_ICACHE+0x4dd0>)
+420466e5:	307d81        	l32r	a8, 420128dc <idle_hook_fn+0x2894> (4208632c <<retinue::identity::PrivateIdentity>::from_secret_bytes>)
+420466ea:	0008e0        	callx8	a8
+420466f2:	308781        	l32r	a8, 42012910 <idle_hook_fn+0x28c8> (cdd0 <RESERVE_ICACHE+0x4dd0>)
+420466fa:	307981        	l32r	a8, 420128e0 <idle_hook_fn+0x2898> (420602f0 <<retinue::node::Node<8, 4, 1, 4>>::new>)
+42046701:	0008e0        	callx8	a8
+42046704:	2ff281        	l32r	a8, 420126cc <idle_hook_fn+0x2684> (21a8 <VECTORS_SIZE+0x1da8>)
+4204670e:	307581        	l32r	a8, 420128e4 <idle_hook_fn+0x289c> (21a4 <VECTORS_SIZE+0x1da4>)
+42046718:	307481        	l32r	a8, 420128e8 <idle_hook_fn+0x28a0> (21a0 <VECTORS_SIZE+0x1da0>)
+42046722:	307281        	l32r	a8, 420128ec <idle_hook_fn+0x28a4> (219c <VECTORS_SIZE+0x1d9c>)
+4204672b:	307181        	l32r	a8, 420128f0 <idle_hook_fn+0x28a8> (2198 <VECTORS_SIZE+0x1d98>)
+4204673d:	306d81        	l32r	a8, 420128f4 <idle_hook_fn+0x28ac> (42040ff4 <<retinue::node::Node<8, 4, 1, 4>>::with_freshness_policy>)
+42046742:	0008e0        	callx8	a8
+42046791:	3059c1        	l32r	a12, 420128f8 <idle_hook_fn+0x28b0> (2428 <VECTORS_SIZE+0x2028>)
+42046794:	262f81        	l32r	a8, 42010050 <idle_hook_fn+0x8> (400011f4 <memcpy>)
+42046799:	0008e0        	callx8	a8
+42046800:	303fc1        	l32r	a12, 420128fc <idle_hook_fn+0x28b4> (2418 <VECTORS_SIZE+0x2018>)
+42046803:	261381        	l32r	a8, 42010050 <idle_hook_fn+0x8> (400011f4 <memcpy>)
+42046806:	0008e0        	callx8	a8
+42046833:	305c81        	l32r	a8, 420129a4 <idle_hook_fn+0x295c> (11cf0 <RESERVE_ICACHE+0x9cf0>)
+42046840:	260481        	l32r	a8, 42010050 <idle_hook_fn+0x8> (400011f4 <memcpy>)
+42046846:	0008e0        	callx8	a8
+42046851:	3055b1        	l32r	a11, 420129a8 <idle_hook_fn+0x2960> (11d20 <RESERVE_ICACHE+0x9d20>)
+42046858:	3053a1        	l32r	a10, 420129a4 <idle_hook_fn+0x295c> (11cf0 <RESERVE_ICACHE+0x9cf0>)
+42046862:	304f91        	l32r	a9, 420129a0 <idle_hook_fn+0x2958> (11cf4 <RESERVE_ICACHE+0x9cf4>)
+4204686b:	304c91        	l32r	a9, 4201299c <idle_hook_fn+0x2954> (11d00 <RESERVE_ICACHE+0x9d00>)
+42046874:	304991        	l32r	a9, 42012998 <idle_hook_fn+0x2950> (11d04 <RESERVE_ICACHE+0x9d04>)
+4204687e:	304591        	l32r	a9, 42012994 <idle_hook_fn+0x294c> (11cf8 <RESERVE_ICACHE+0x9cf8>)
+42046888:	304291        	l32r	a9, 42012990 <idle_hook_fn+0x2948> (11cfc <RESERVE_ICACHE+0x9cfc>)
+42046891:	303e91        	l32r	a9, 4201298c <idle_hook_fn+0x2944> (11d08 <RESERVE_ICACHE+0x9d08>)
+4204689a:	303b91        	l32r	a9, 42012988 <idle_hook_fn+0x2940> (11d0c <RESERVE_ICACHE+0x9d0c>)
+420468a3:	303891        	l32r	a9, 42012984 <idle_hook_fn+0x293c> (11d10 <RESERVE_ICACHE+0x9d10>)
+420468ac:	303591        	l32r	a9, 42012980 <idle_hook_fn+0x2938> (11d14 <RESERVE_ICACHE+0x9d14>)
+420468b5:	303191        	l32r	a9, 4201297c <idle_hook_fn+0x2934> (11d18 <RESERVE_ICACHE+0x9d18>)
+420468be:	302e91        	l32r	a9, 42012978 <idle_hook_fn+0x2930> (11d1c <RESERVE_ICACHE+0x9d1c>)
+420468c7:	302b91        	l32r	a9, 42012974 <idle_hook_fn+0x292c> (11d28 <RESERVE_ICACHE+0x9d28>)
+420468d1:	302791        	l32r	a9, 42012970 <idle_hook_fn+0x2928> (11d24 <RESERVE_ICACHE+0x9d24>)
+420468db:	302491        	l32r	a9, 4201296c <idle_hook_fn+0x2924> (11d30 <RESERVE_ICACHE+0x9d30>)
+420468e5:	302091        	l32r	a9, 42012968 <idle_hook_fn+0x2920> (11d2c <RESERVE_ICACHE+0x9d2c>)
+420468ee:	301d91        	l32r	a9, 42012964 <idle_hook_fn+0x291c> (11d37 <RESERVE_ICACHE+0x9d37>)
+420468f9:	301991        	l32r	a9, 42012960 <idle_hook_fn+0x2918> (11d36 <RESERVE_ICACHE+0x9d36>)
+42046904:	301691        	l32r	a9, 4201295c <idle_hook_fn+0x2914> (11d35 <RESERVE_ICACHE+0x9d35>)
+4204690f:	301291        	l32r	a9, 42012958 <idle_hook_fn+0x2910> (11d34 <RESERVE_ICACHE+0x9d34>)
+4204692d:	25c881        	l32r	a8, 42010050 <idle_hook_fn+0x8> (400011f4 <memcpy>)
+42046932:	0008e0        	callx8	a8
+42046935:	2ffa81        	l32r	a8, 42012920 <idle_hook_fn+0x28d8> (11d78 <RESERVE_ICACHE+0x9d78>)
+42046948:	25c281        	l32r	a8, 42010050 <idle_hook_fn+0x8> (400011f4 <memcpy>)
+4204694d:	0008e0        	callx8	a8
+42046954:	2fef81        	l32r	a8, 42012910 <idle_hook_fn+0x28c8> (cdd0 <RESERVE_ICACHE+0x4dd0>)
+4204695c:	2fe981        	l32r	a8, 42012900 <idle_hook_fn+0x28b8> (4206cb9c <<radio_hand::instances::Runtime>::new>)
+4204696a:	0008e0        	callx8	a8
+4204696d:	2fef81        	l32r	a8, 4201292c <idle_hook_fn+0x28e4> (cdd4 <RESERVE_ICACHE+0x4dd4>)
+42046974:	2fe781        	l32r	a8, 42012910 <idle_hook_fn+0x28c8> (cdd0 <RESERVE_ICACHE+0x4dd0>)
+42046984:	2fe981        	l32r	a8, 42012928 <idle_hook_fn+0x28e0> (cdd8 <RESERVE_ICACHE+0x4dd8>)
+4204698e:	2fe581        	l32r	a8, 42012924 <idle_hook_fn+0x28dc> (cddc <RESERVE_ICACHE+0x4ddc>)
+42046995:	2fde81        	l32r	a8, 42012910 <idle_hook_fn+0x28c8> (cdd0 <RESERVE_ICACHE+0x4dd0>)
+420469ab:	2fd6c1        	l32r	a12, 42012904 <idle_hook_fn+0x28bc> (4f10 <VECTORS_SIZE+0x4b10>)
+420469ae:	25a881        	l32r	a8, 42010050 <idle_hook_fn+0x8> (400011f4 <memcpy>)
+420469b3:	0008e0        	callx8	a8
+42046a17:	2fbcc1        	l32r	a12, 42012908 <idle_hook_fn+0x28c0> (4f00 <VECTORS_SIZE+0x4b00>)
+42046a1a:	258d81        	l32r	a8, 42010050 <idle_hook_fn+0x8> (400011f4 <memcpy>)
+42046a1d:	0008e0        	callx8	a8
+42046a8e:	2d7271        	l32r	a7, 42012058 <idle_hook_fn+0x2010> (4f20 <VECTORS_SIZE+0x4b20>)
+42046a91:	256f81        	l32r	a8, 42010050 <idle_hook_fn+0x8> (400011f4 <memcpy>)
+42046a9b:	0008e0        	callx8	a8
+42046a9e:	28b181        	l32r	a8, 42010d64 <idle_hook_fn+0xd1c> (4f30 <VECTORS_SIZE+0x4b30>)
+42046aae:	256881        	l32r	a8, 42010050 <idle_hook_fn+0x8> (400011f4 <memcpy>)
+42046ab1:	0008e0        	callx8	a8
+42046ab4:	2d6a81        	l32r	a8, 4201205c <idle_hook_fn+0x2014> (4f2c <VECTORS_SIZE+0x4b2c>)
+42046abe:	2d6881        	l32r	a8, 42012060 <idle_hook_fn+0x2018> (4f28 <VECTORS_SIZE+0x4b28>)
+42046ac8:	2d6381        	l32r	a8, 42012054 <idle_hook_fn+0x200c> (4f24 <VECTORS_SIZE+0x4b24>)
+42046b18:	262181        	l32r	a8, 4201039c <idle_hook_fn+0x354> (42015938 <core::ptr::drop_glue::<sennet::instance::state::SennetInstance>>)
+42046b1b:	0008e0        	callx8	a8
+42046b3a:	254781        	l32r	a8, 42010058 <idle_hook_fn+0x10> (4204ce50 <core::slice::index::slice_index_fail>)
+42046b40:	0008e0        	callx8	a8
+42046b69:	25dd81        	l32r	a8, 420102e0 <idle_hook_fn+0x298> (42015810 <core::ptr::drop_glue::<radio_hand::instances::Runtime>>)

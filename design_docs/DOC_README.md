@@ -1,13 +1,16 @@
 # Murm Documentation Index
 
-Standalone Tucket contacts (2026-10-17, in progress): the
-[firmware continuation](2026-10-16_protocol_parity_plan.md#standalone-contact-storage-continuation-2026-10-17)
-adds an opt-in eight-key public cache in dedicated A/B flash pairs. Seven
-journal tests cover cold restore, word-cut recovery, malformed/future/scope
-refusals and uncertain readback. V4 integrates through its existing live quiet
-owner; T114 has a storage adapter/fixture, with its Tucket service loop still
-absent. Target builds and strict host checks pass; attended physical reload,
-restart traffic and restoration remain pending at this implementation checkpoint.
+Standalone Tucket contacts (2026-10-17): the
+[firmware receipt](../testing/receipts/tucket-firmware-contacts/README.md)
+qualifies an opt-in eight-key public cache in dedicated A/B flash pairs.
+Both storage backends recover eight keys without rewriting them; V4 exchanges
+four texts/four protocol ACKs across a reboot without a fresh peer advert.
+The live constructor now runs on a separate executor turn with boxed state;
+the full pressure profile charges that storage and retains the selected memory
+reserves. Radio-budget-derived retries replace a one-second interval that
+overlapped responses. T114's backend is qualified, with its Tucket service loop
+still absent. Original named firmware/profiles are restored, and failed trials
+remain recorded. Power-cut and broader endpoint/role acceptance remain open.
 
 Tucket persistent contacts (2026-10-17): the [scoped host journal slice](../testing/receipts/tucket-contacts/README.md)
 passes cold restore, save/refusal controls and a native Djinn-backed reconnect
@@ -15,9 +18,8 @@ without the fixture's fresh peer advert. Four texts/four protocol ACKs and exact
 history pass across two connections; seven captures are reviewed. Public keys
 share the existing identity/realm journal, with version-2 downgrade refusal and
 no replay of routes or pending work. This supersedes R6's host contact-restore
-gap below. Standalone MCU contact persistence and broader endpoint/role parity
-remain open; the [parity plan](2026-10-16_protocol_parity_plan.md) keeps those
-owners separate.
+gap below. The standalone slice above adds bounded MCU storage; broader
+endpoint/role parity remains open in the [parity plan](2026-10-16_protocol_parity_plan.md).
 
 Board names (2026-10-16): [the family-plan naming slice](2026-10-13_murm_family_move_plan.md#board-names-2026-10-16) adds persistent public labels, USB naming commands and boot/status titles. Both normal images are installed and all three names saved. SB1, SB2 and T114 all pass post-reboot readback with their original radio settings; SB2 required physical reconnection after its USB endpoint stalled. The [naming receipt](../testing/receipts/device-names/README.md) keeps failed attempts and successful checks distinct. The [direct-PC](../testing/receipts/usb-reboot/direct-pc/README.md) and [swapped-cable](../testing/receipts/usb-reboot/swapped-cables/README.md) controls each reproduce the timeout on their first reset; the later trace below resolves the startup cause. Batteries are connected, so USB-replug recovery does not establish a full power cycle. Tracing found a 20-second physical-claim wait on uncommissioned SB2. The firmware now preserves and replays a read-only USB query to select already-permitted ordinary service early; claim authority and pending/corrupt gates remain enforced. Software checks pass. The [recovery receipt](../testing/receipts/usb-reboot/recovery-fix/README.md) records five consecutive SB2 software reboots without a replug, followed by a final ROM read and two read-only sessions. Names, identity and preferences survive; bytes outside the settings pair are unchanged. SB2 now runs fixed firmware `c8e5eb9309e`; SB1/T114 retain `cb042329232`.
 

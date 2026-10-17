@@ -1,0 +1,50 @@
+{
+  "sb1-private-app.bin": {
+    "bytes": 983040,
+    "sha256": "867aeae9063c9646d3506798e8062b0ac30ebee15a6ae050203f8c86b5102cfe"
+  },
+  "sb1-private-prefix.bin": {
+    "bytes": 1048576,
+    "sha256": "9dc0590ef65dda3d2087e84e22a19378f40fc11ed1bfa681c2dc992b23149f13"
+  },
+  "sb1-private-tail.bin": {
+    "bytes": 65536,
+    "sha256": "5332892e5be2f5c30d7dc6c0d069d47098ef5d66c11ccdfa5d3f457874f96e9e"
+  },
+  "sb2-private-app.bin": {
+    "bytes": 983040,
+    "sha256": "9d7947bd61ba1ee02ce243725abd7fbddfa6526e8575fee236ac4e46e52b868d"
+  },
+  "sb2-private-prefix.bin": {
+    "bytes": 1048576,
+    "sha256": "ebe88f05ef60b1913d1a28ede8fbca2ce672fa767740c183a38e7a58877dab32"
+  },
+  "sb2-private-tail.bin": {
+    "bytes": 65536,
+    "sha256": "e64bad0345508759ebbfc8bdc397f49ba0a54b6aaadaa83902dec7e3b6c64d04"
+  },
+  "t114-aligned.bin": {
+    "bytes": 503620,
+    "sha256": "f02be876f7bf48468a6a8d74888b0be6d6d39aad6085e00930c9368738cfa8fd"
+  },
+  "t114-raw.bin": {
+    "bytes": 503618,
+    "sha256": "1916c8396a2ceee84ccdbe683894a3847a63324d7de968dc7dcdb4d1b51a5b00"
+  },
+  "v4-bench-app.bin": {
+    "bytes": 772496,
+    "sha256": "962bd75f42d6a804a3ba2a1f4e2932c62f7c1dc4265d0579215a5366ebfa70bc"
+  },
+  "v4-bench-merged.bin": {
+    "bytes": 838032,
+    "sha256": "f8cc2f5774efca6ae4972f4354b57f8443cbe2a2894437bcb9f39b6e6266cc06"
+  },
+  "v4-live-app.bin": {
+    "bytes": 769984,
+    "sha256": "f299fc56a2e2b043a1d4bcf14947a080f570f59f55a60689b0b087ef8e3d7a57"
+  },
+  "v4-live-merged.bin": {
+    "bytes": 835520,
+    "sha256": "b2fb699254729eb959bb0fec48f2d8b07cb953f79f611a9d0c033dffa5637606"
+  }
+}

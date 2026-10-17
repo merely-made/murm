@@ -1,0 +1,10 @@
+{
+  "v4-live-app.bin": {
+    "bytes": 771728,
+    "sha256": "73d334f89684dfd55b35134276c789a7b28f6a2c2a0737ecb5efa60ab76b7d4f"
+  },
+  "v4-live-merged.bin": {
+    "bytes": 837264,
+    "sha256": "288c3e083e25988178ad636761e35d6d0e664cb7b74f49d535a5e6e81e908141"
+  }
+}

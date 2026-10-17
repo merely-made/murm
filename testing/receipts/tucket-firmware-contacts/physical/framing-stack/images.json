@@ -1,0 +1,18 @@
+{
+  "t114-aligned.bin": {
+    "bytes": 504356,
+    "sha256": "c51c2f8de2c549d9d78ce4859016ef53b682d882d1e9d64f843ba1a01af84596"
+  },
+  "t114-raw.bin": {
+    "bytes": 504354,
+    "sha256": "e6e3908a47d5672b8ec303fd58a27fcb1f5d1b740d354c0e2539d68876c9077f"
+  },
+  "v4-live-app.bin": {
+    "bytes": 770624,
+    "sha256": "8539eba99a14441f0008eb1c55dcdcba874078c13098d52f278e7fbb094a0638"
+  },
+  "v4-live-merged.bin": {
+    "bytes": 836160,
+    "sha256": "27c63fa75842777d888de8bc81f7238c350b24687d11595667d8395ad9dae063"
+  }
+}

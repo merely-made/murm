@@ -1,0 +1,4 @@
+Chip type:         esp32s3
+Merge:             true
+Skip padding:      true
+App/part. size:    778,480/16,384,000 bytes, 4.75%

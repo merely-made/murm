@@ -1,0 +1,27 @@
+{
+  "passed": true,
+  "prefix_md5": "e4c2ac46c8fcf03f3bacce169197e723",
+  "tail_md5": "3d0994773e7095b43b97b6a8f4630456",
+  "immutable_tail_ranges_exact": [
+    [
+      "0x3f0000",
+      "0x3f2000"
+    ],
+    [
+      "0x3f4000",
+      "0x3f8000"
+    ],
+    [
+      "0x3fc000",
+      "0x400000"
+    ]
+  ],
+  "packet_ceiling": {
+    "before": 577,
+    "after": 593
+  },
+  "announce_ceiling": {
+    "before": 589824,
+    "after": 655360
+  }
+}
