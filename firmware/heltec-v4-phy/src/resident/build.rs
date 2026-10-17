@@ -49,6 +49,20 @@ impl core::fmt::Display for BuildError {
     }
 }
 
+/// Public failure codes only; callers reset because profile/leases may differ.
+pub(crate) async fn report_refusal(host: &mut impl radio_hand::link::HostLink, error: &BuildError) {
+    let mut line = heapless::String::<192>::new();
+    let _ = core::fmt::write(
+        &mut line,
+        format_args!("resident build refused: {error}\r\n"),
+    );
+    let _ = embassy_time::with_timeout(
+        embassy_time::Duration::from_millis(20),
+        host.write_diagnostic(line.as_bytes()),
+    )
+    .await;
+}
+
 /// Owned volatile setup and verified reservations. The worker never gets flash
 /// or radio access. Deliberately no Debug implementation for identity material.
 pub(crate) struct Prepared {

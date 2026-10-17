@@ -896,21 +896,9 @@ async fn main(spawner: Spawner) {
                                 {
                                     Ok(state) => state,
                                     Err(error) => {
-                                        // Profile already changed; construction can have made
-                                        // durable reservations. Reset instead of pretending the
-                                        // prior direct-PHY profile still owns this radio.
-                                        {
-                                            let mut line = heapless::String::<192>::new();
-                                            let _ = core::fmt::write(
-                                                &mut line,
-                                                format_args!("resident build refused: {error}\r\n"),
-                                            );
-                                            let _ = embassy_time::with_timeout(
-                                                Duration::from_millis(20),
-                                                host.write_diagnostic(line.as_bytes()),
-                                            )
-                                            .await;
-                                        }
+                                        // Profile and durable reservations may have changed.
+                                        // Report only the public error, then reset custody.
+                                        resident::setup_refused(&mut host, &error).await;
                                         esp_hal::system::software_reset();
                                     }
                                 };
