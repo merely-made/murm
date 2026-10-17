@@ -108,6 +108,10 @@ async fn run(args: &[String]) -> Result<()> {
     let mut port = signalman::radio_comms::companion::open_port(&config.port).await?;
     port.set_rts(false)?;
     port.set_dtr(false)?;
+    // Select already-permitted ordinary service on an uncommissioned board
+    // before the volatile setup frame. This does not mint owner authority.
+    port.write_all(b"status\n").await?;
+    port.flush().await?;
     let mut transcript = vec![collect(&mut port, Duration::from_millis(800)).await?];
     let mut wire = setup.encode();
     released.lease.check()?;
