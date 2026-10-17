@@ -57,9 +57,11 @@ use lora_phy::sx126x::{Config as Sx126xConfig, Sx126x, Sx1262, TcxoCtrlVoltage};
 use radio_hand::dispatch;
 use radio_hand::executive::{ChipDiagnostics, Face, RadioState};
 use radio_hand::link::HostLink;
+#[cfg(not(feature = "resident-protocols"))]
+use selvage::WAKE_BYTE;
 use selvage::{
     CommandStream, EVENT_DIAGNOSTIC, EVENT_EXCURSION, EVENT_RX, ExcursionByte, ExcursionStream,
-    MAX_COMMAND_LEN, MESHTASTIC_SYNC_WORD, WAKE_BYTE, decode_excursion_command,
+    MAX_COMMAND_LEN, MESHTASTIC_SYNC_WORD, decode_excursion_command,
 };
 
 mod board;
@@ -809,11 +811,18 @@ async fn main(spawner: Spawner) {
                     && !excursion_stream.pending()
                     && !control_stream.in_frame()
                 {
-                    let skip = packet
-                        .iter()
-                        .position(|byte| *byte != WAKE_BYTE)
-                        .unwrap_or(packet.len());
-                    packet = &packet[skip..];
+                    #[cfg(feature = "resident-protocols")]
+                    {
+                        packet = resident_stream.strip_wake_prefix(true, packet);
+                    }
+                    #[cfg(not(feature = "resident-protocols"))]
+                    {
+                        let skip = packet
+                            .iter()
+                            .position(|byte| *byte != WAKE_BYTE)
+                            .unwrap_or(packet.len());
+                        packet = &packet[skip..];
+                    }
                     if packet.is_empty() {
                         continue;
                     }
@@ -919,8 +928,13 @@ async fn main(spawner: Spawner) {
                                 )
                                 .await;
                             }
-                            radio_hand::resident_wire::ResidentSetupByte::Rejected(_) => {
-                                let _ = host.write_all(b"resident refused\r\n").await;
+                            radio_hand::resident_wire::ResidentSetupByte::Rejected(reason) => {
+                                let mut line = heapless::String::<192>::new();
+                                let _ = core::fmt::write(
+                                    &mut line,
+                                    format_args!("resident setup refused: {reason:?}\r\n"),
+                                );
+                                let _ = host.write_all(line.as_bytes()).await;
                                 continue;
                             }
                         }

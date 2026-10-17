@@ -287,6 +287,17 @@ impl ResidentSetupStream {
     pub const fn at_boundary(&self) -> bool {
         self.len == 0
     }
+    /// Strip host wake padding only outside every active frame parser.
+    pub fn strip_wake_prefix<'a>(&self, ordinary_boundary: bool, packet: &'a [u8]) -> &'a [u8] {
+        if !ordinary_boundary || self.pending() {
+            return packet;
+        }
+        let skip = packet
+            .iter()
+            .position(|b| *b != selvage::WAKE_BYTE)
+            .unwrap_or(packet.len());
+        &packet[skip..]
+    }
     pub fn push(&mut self, at_boundary: bool, byte: u8) -> ResidentSetupByte {
         if self.len == 0 {
             if !at_boundary || byte != CMD_RESIDENT_SETUP {
@@ -419,6 +430,32 @@ mod tests {
         let wire = value.encode();
         assert_eq!(wire.len(), RESIDENT_SETUP_LEN);
         assert_eq!(ResidentSetup::decode(&wire), Ok(value));
+    }
+    #[test]
+    fn wake_padding_preserves_setup_at_every_usb_chunk_width() {
+        let expected = setup();
+        let wire = expected.encode();
+        for width in 1..=64 {
+            let mut stream = ResidentSetupStream::new();
+            assert!(
+                stream
+                    .strip_wake_prefix(true, &[selvage::WAKE_BYTE; 3])
+                    .is_empty()
+            );
+            let mut completed = None;
+            for chunk in wire.chunks(width) {
+                for &byte in stream.strip_wake_prefix(true, chunk) {
+                    match stream.push(true, byte) {
+                        ResidentSetupByte::Complete(value) => completed = Some(value),
+                        ResidentSetupByte::Rejected(error) => {
+                            panic!("setup rejected at width {width}: {error:?}")
+                        }
+                        _ => {}
+                    }
+                }
+            }
+            assert_eq!(completed, Some(expected), "USB chunk width {width}");
+        }
     }
     #[test]
     fn malformed_profile_and_zero_lease_are_refused() {
