@@ -21,6 +21,8 @@ def main():
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--rounds", type=int, choices=range(17), default=0)
     parser.add_argument("--usb-serial", choices=["44:1B:F6:6A:FA:64", "44:1B:F6:6A:FB:28"])
+    parser.add_argument("--min-stack-bytes", type=int, default=0)
+    parser.add_argument("--min-free-heap-percent", type=int, choices=range(101), default=0)
     args = parser.parse_args()
     if args.output.exists():
         parser.error("preserve earlier receipts")
@@ -34,11 +36,17 @@ def main():
     report = {"board": args.board, "usb": expected, "port": args.port,
               "runner_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
               "requested_rounds": args.rounds, "responses": [], "passed": False,
-              "stack_scope": "point-in-time samples only; no high-water claim"}
+              "stack_scope": "boot paint when stack_free is present; otherwise point-in-time samples only",
+              "acceptance": {"min_stack_bytes": args.min_stack_bytes,
+                             "min_free_heap_percent": args.min_free_heap_percent}}
     try:
         link = serial.Serial(port=None, baudrate=115200, timeout=.1, write_timeout=2)
-        link.port, link.rts, link.dtr = args.port, False, args.board == "t114"
+        link.port, link.rts, link.dtr = args.port, False, False
         with link:
+            if args.board == "t114":
+                # Let firmware observe a real detach before a new CDC session.
+                time.sleep(.3)
+                link.dtr = True
             time.sleep(.4)
             report["attached"] = link.read(4096).decode(errors="replace")
             commands = ["status", "region", "channel", "sync"]
@@ -71,6 +79,9 @@ def main():
                     assert int(values["expected_refusals"]) == 1
                     assert int(values["failures"]) == count, "unexpected allocation refusal"
                     assert int(values["peak"]) < int(values["capacity"]), "heap exhausted"
+                    if args.min_stack_bytes:
+                        assert int(values["stack_free"]) >= args.min_stack_bytes, "stack reserve below profile limit"
+                    assert (int(values["capacity"])-int(values["peak"]))*100 >= int(values["capacity"])*args.min_free_heap_percent, "heap reserve below profile limit"
                     print(json.dumps({"round": count, "measurement": values}), flush=True)
             statuses = [r["response"] for r in report["responses"] if r["command"] == "status"]
             assert all("phy online" in s for s in statuses), "firmware status absent"

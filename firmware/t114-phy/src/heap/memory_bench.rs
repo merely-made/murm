@@ -21,6 +21,12 @@ pub async fn worker() {
             super::bench_refuse_oversize,
             checkpoint,
         );
+        protocol_capacity_probe::runtime_pressure::run(checkpoint);
+        assert_eq!(
+            super::used(),
+            values[3],
+            "runtime pressure leaked allocations"
+        );
         RESULT.signal(values);
     }
 }

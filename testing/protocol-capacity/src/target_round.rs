@@ -16,6 +16,17 @@ pub fn run(used: fn() -> usize, refuse_oversize: fn() -> bool, checkpoint: fn())
     let retained = used();
     drop(residents);
     assert_eq!(used(), fragmented, "workload did not release allocations");
+    // ARM's worker runs queue pressure after this frame returns. The protocol
+    // fixture has already dropped its state; stacking both large temporary
+    // constructor frames would measure artificial nesting rather than coexisting
+    // retained state. Other targets keep the stronger nested campaign.
+    #[cfg(not(target_arch = "arm"))]
+    crate::runtime_pressure::run(checkpoint);
+    assert_eq!(
+        used(),
+        fragmented,
+        "runtime failure/restart leaked allocations"
+    );
     // Use a direct allocator operation, not the global allocation shim: LLVM
     // may elide an unused alloc/free pair even when its null result is inspected.
     assert!(refuse_oversize(), "oversize allocation was not refused");

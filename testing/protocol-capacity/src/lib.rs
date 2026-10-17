@@ -4,6 +4,7 @@
 
 extern crate alloc;
 pub mod current;
+pub mod runtime_pressure;
 pub mod target_round;
 use alloc::{vec, vec::Vec};
 
@@ -21,16 +22,17 @@ pub const RETINUE_LIMITS: PayloadLimits = PayloadLimits {
 };
 
 pub fn retinue_node(seed: u8) -> RetinueNode {
-    RetinueNode::new_with_payload_limits(
+    let mut node = RetinueNode::new_with_payload_limits(
         retinue::identity::PrivateIdentity::from_secret_bytes(&[seed; 64]),
         retinue::destination::DestinationName::new("retinue", ["capacity"]).name_hash(),
         RETINUE_LIMITS,
-    )
-    .with_freshness_policy(FreshnessPolicy {
+    );
+    node.set_freshness_policy(FreshnessPolicy {
         max_destinations: 8,
         max_blobs_per_destination: 2,
     })
-    .expect("nonzero fixture capacities")
+    .expect("nonzero fixture capacities");
+    node
 }
 
 // A stable symbol that can be read from target LLVM IR without executing target
@@ -199,7 +201,8 @@ pub fn workload_with_checkpoint(checkpoint: fn()) -> Residents {
 
     // Fill Retinue peer/freshness rows, then retain a real link and resource.
     for seed in 2..=9 {
-        let peer = retinue_node(seed).with_app_data(&[b'x'; 32]);
+        let mut peer = retinue_node(seed);
+        peer.try_set_app_data(&[b'x'; 32]).unwrap();
         for timebase in 1..=2 {
             let blob = retinue::announce::AnnounceBlob::mint([seed; 5], timebase).unwrap();
             state

@@ -5,5 +5,4 @@
 "firmware/heltec-v4-phy/src/control_boot.rs" = 848
 "firmware/heltec-v4-phy/src/main.rs" = 1113
 "firmware/heltec-v4-phy/src/radio_owner.rs" = 881
-"firmware/heltec-v4-phy/src/resident.rs" = 651
 "firmware/heltec-v4-phy/src/store.rs" = 601

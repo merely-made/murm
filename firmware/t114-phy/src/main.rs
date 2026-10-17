@@ -39,6 +39,9 @@ mod le3;
 mod lxmf;
 mod probes;
 mod radio;
+#[cfg(feature = "memory-bench")]
+#[path = "../../stack_watermark.rs"]
+mod stack_watermark;
 mod store;
 mod ui;
 
