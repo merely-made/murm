@@ -6,6 +6,19 @@ static REQUEST: Signal<CriticalSectionRawMutex, ()> = Signal::new();
 static RESULT: Signal<CriticalSectionRawMutex, [usize; 4]> = Signal::new();
 static MIN_SP: AtomicUsize = AtomicUsize::new(usize::MAX);
 
+// Same thread-mode executor as esp_rtos::main, with one early paint hook.
+#[esp_hal::main]
+fn bench_entry() -> ! {
+    crate::stack_watermark::paint_before_executor();
+    static EXECUTOR: static_cell::StaticCell<esp_rtos::embassy::Executor> =
+        static_cell::StaticCell::new();
+    EXECUTOR
+        .init(esp_rtos::embassy::Executor::new())
+        .run(|spawner| {
+            spawner.spawn(crate::main(spawner).expect("one main task"));
+        })
+}
+
 fn checkpoint() {
     MIN_SP.fetch_min(super::sampled_stack_pointer(), Ordering::Relaxed);
 }

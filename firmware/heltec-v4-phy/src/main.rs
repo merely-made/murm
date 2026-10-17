@@ -82,6 +82,9 @@ mod radio_owner;
 mod resident;
 #[cfg(feature = "rf-sleep-proof")]
 mod sleep_proof;
+#[cfg(feature = "memory-bench")]
+#[path = "../../stack_watermark.rs"]
+mod stack_watermark;
 mod store;
 mod ui;
 mod wake_input;
@@ -142,7 +145,8 @@ async fn ignore_host<R: embedded_io_async::Read>(
     core::future::pending().await
 }
 
-#[esp_rtos::main]
+#[cfg_attr(not(feature = "memory-bench"), esp_rtos::main)]
+#[cfg_attr(feature = "memory-bench", embassy_executor::task)]
 async fn main(spawner: Spawner) {
     control_fixture::verify();
     #[cfg(feature = "resident-protocols")]
@@ -866,7 +870,7 @@ async fn main(spawner: Spawner) {
                                 ) {
                                     esp_hal::system::software_reset();
                                 }
-                                let state = match owner
+                                let mut state = match owner
                                     .build_resident(Instant::now().as_millis(), setup)
                                     .await
                                 {
@@ -901,7 +905,7 @@ async fn main(spawner: Spawner) {
                                 // `serve` owns every later host byte, deadline, RX collection,
                                 // profile transition, and physical transmit through Runtime.
                                 resident::serve(
-                                    state,
+                                    &mut state,
                                     &mut owner,
                                     &mut host,
                                     &packet[_resident_byte_index + 1..],

@@ -259,10 +259,11 @@ pub async fn probe<L: HostLink>(
         use core::fmt::Write as _;
         let values = crate::heap::memory_bench::measure().await;
         let (stack, stack_region, valid) = crate::heap::sampled_stack_usage();
-        let mut reply = radio_face::Text::<320>::empty();
+        let (stack_free, stack_total) = crate::stack_watermark::measure();
+        let mut reply = radio_face::Text::<400>::empty();
         let _ = write!(
             &mut reply,
-            "memory initial={} fragmented={} retained={} final={} peak={} capacity={} failures={} expected_refusals=1 stack_sample={} stack_region={} stack_valid={} worker_min_sp_sample={}\r\n",
+            "memory initial={} fragmented={} retained={} final={} peak={} capacity={} failures={} expected_refusals=1 stack_sample={} stack_region={} stack_valid={} worker_min_sp_sample={} stack_free={} stack_total={}\r\n",
             values[0],
             values[1],
             values[2],
@@ -273,7 +274,9 @@ pub async fn probe<L: HostLink>(
             stack,
             stack_region,
             valid,
-            crate::heap::memory_bench::sampled_min_sp()
+            crate::heap::memory_bench::sampled_min_sp(),
+            stack_free,
+            stack_total
         );
         let _ = host.write_all(reply.as_str().as_bytes()).await;
         return Outcome::Served;

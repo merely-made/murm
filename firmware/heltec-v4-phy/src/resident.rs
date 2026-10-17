@@ -1,46 +1,13 @@
-//! Construction boundary for the optional retained resident protocols.
-//!
-//! Flash reservations happen before this function returns a runtime.  A bad
-//! command therefore cannot leave partially constructed protocol state alive.
-
-use core::{fmt::Write, time::Duration};
-
+//! Radio service for the optional retained resident protocols.
+use crate::radio_owner::{V4QuietPreflight, V4RadioOwner};
+use core::fmt::Write;
 use embassy_futures::select::{Either3, select3};
 use embassy_time::{Duration as EmbassyDuration, Instant, Timer, with_timeout};
 use lora_phy::{DelayNs, mod_traits::RadioKind};
-use radio_hand::{link::HostLink, resident_command};
-
-use radio_hand::{
-    instances::{Config, Runtime},
-    resident_wire::{ResidentSetup, SennetKey},
-};
-use retinue::{
-    hash::NameHash,
-    identity::PrivateIdentity,
-    node::{FreshnessPolicy, Node, PayloadLimits},
-};
-use selvage::personality::{
-    ControllerConfig, CoveragePolicy, InstalledPersonalitySet, PersonalityId,
-};
-use sennet::{
-    flood::{ManagedFloodConfig, RelayDelayWindow},
-    instance::{PacketIdLease, SennetInstance, SennetInstanceConfig},
-    node::Channel,
-    node_info::NodeDirectoryConfig,
-    transport::ChannelKey,
-};
-use tucket::{
-    identity::LocalIdentity,
-    instance::{Instance, InstanceConfig},
-    node::{Node as TucketNode, NodeCapacity},
-};
-
-use crate::{
-    radio_owner::{V4QuietPreflight, V4RadioOwner},
-    store::{ReservationError, SettingsStore},
-};
-
-const ANNOUNCE_LEASE: u64 = 65_536;
+use radio_hand::{instances::Runtime, link::HostLink, resident_command};
+use selvage::personality::PersonalityId;
+mod build;
+pub(crate) use build::{BuildError, build};
 
 pub(crate) struct ResidentState {
     pub runtime: Runtime,
@@ -55,7 +22,7 @@ const HOST_CHUNK: usize = 32;
 /// runtime's next deadline.  Collection happens after the IRQ wins and before
 /// any profile transition, so no command can discard a completed RF frame.
 pub(crate) async fn serve<RK, DLY, L>(
-    mut state: ResidentState,
+    state: &mut ResidentState,
     owner: &mut V4RadioOwner<RK, DLY>,
     host: &mut L,
     initial_host_bytes: &[u8],
@@ -147,19 +114,19 @@ where
                                 .await;
                         }
                         resident_command::Event::Complete(command) => {
-                            drain_active_rx(&mut state, owner, host, &mut radio_bytes).await;
+                            drain_active_rx(state, owner, host, &mut radio_bytes).await;
                             let now = Instant::now().as_millis();
                             let mut iv = [0_u8; 16];
                             owner
                                 .resident_random(&mut iv)
                                 .unwrap_or_else(|_| esp_hal::system::software_reset());
-                            let result = command_into_runtime(&mut state, now, command, iv);
+                            let result = command_into_runtime(state, now, command, iv);
                             match result {
                                 Ok(Some(step)) => {
-                                    apply_step(&mut state, owner, host, step, now).await;
+                                    apply_step(state, owner, host, step, now).await;
                                 }
                                 Ok(None) => {
-                                    status_to_host(host, &state, now).await;
+                                    status_to_host(host, state, now).await;
                                 }
                                 Err(()) => {
                                     let report = state.runtime.take_report();
@@ -186,7 +153,7 @@ where
             Either3::Third(()) => {}
         }
 
-        drain_active_rx(&mut state, owner, host, &mut radio_bytes).await;
+        drain_active_rx(state, owner, host, &mut radio_bytes).await;
         let now = Instant::now().as_millis();
         let mut iv = [0_u8; 16];
         owner
@@ -196,7 +163,7 @@ where
             .runtime
             .tick(now, || iv)
             .unwrap_or_else(|_| esp_hal::system::software_reset());
-        apply_step(&mut state, owner, host, step, now).await;
+        apply_step(state, owner, host, step, now).await;
 
         let now = Instant::now().as_millis();
         let announce = if state
@@ -227,7 +194,7 @@ where
         report_to_host(host, &report, now, state.runtime.next_deadline()).await;
         // A high edge after poll belongs to the current activation. Drain and
         // rearm it before asking Runtime whether a physical TX may begin.
-        drain_active_rx(&mut state, owner, host, &mut radio_bytes).await;
+        drain_active_rx(state, owner, host, &mut radio_bytes).await;
         owner
             .ensure_rx()
             .await
@@ -528,124 +495,4 @@ async fn diagnostic<L: HostLink>(host: &mut L, line: &str, deadline: Option<u64>
         )
         .await;
     }
-}
-
-#[derive(Debug)]
-pub(crate) enum BuildError {
-    MissingIdentity,
-    Storage(ReservationError),
-    Configuration,
-    Quiet,
-}
-
-/// Construct the three cores only from a verified USB setup and already-durable
-/// reservations. Identity comes from stored board settings, never USB bytes.
-pub(crate) fn build(
-    now: u64,
-    setup: ResidentSetup,
-    stored_identity: Option<[u8; 64]>,
-    store: &mut SettingsStore,
-) -> Result<ResidentState, BuildError> {
-    let identity = stored_identity.ok_or(BuildError::MissingIdentity)?;
-    let packet = store
-        .reserve_packet_ids(setup.packet_lease_count)
-        .map_err(BuildError::Storage)?;
-    let announce = store
-        .reserve_announce_lease(ANNOUNCE_LEASE)
-        .map_err(BuildError::Storage)?;
-
-    let key = match setup.sennet_key {
-        SennetKey::Aes128(key) => ChannelKey::Aes128(key),
-        SennetKey::Aes256(key) => ChannelKey::Aes256(key),
-    };
-    let sennet = SennetInstance::new(
-        SennetInstanceConfig {
-            channel: Channel {
-                hash: setup.sennet_channel,
-                key,
-            },
-            flood: ManagedFloodConfig {
-                channel_hash: setup.sennet_channel,
-                relay_node: (setup.sennet_source & 0xff) as u8,
-                seen_capacity: 16,
-                delay: RelayDelayWindow::new(Duration::ZERO, Duration::ZERO)
-                    .map_err(|_| BuildError::Configuration)?,
-            },
-            directory: NodeDirectoryConfig {
-                capacity: 8,
-                id_limit: 32,
-                long_name_limit: 64,
-                short_name_limit: 16,
-            },
-            pending_ttl: setup.frame_ttl_ms,
-        },
-        PacketIdLease::new(
-            setup.sennet_source,
-            packet.start(),
-            packet.end(),
-            packet.start(),
-        )
-        .map_err(|_| BuildError::Configuration)?,
-    )
-    .map_err(|_| BuildError::Configuration)?;
-    let tucket = Instance::new(
-        TucketNode::with_capacity(
-            LocalIdentity::from_seed(setup.tucket_identity_seed),
-            false,
-            NodeCapacity::new(8, 32).map_err(|_| BuildError::Configuration)?,
-        )
-        .map_err(|_| BuildError::Configuration)?,
-        InstanceConfig::new(2, 1_000).ok_or(BuildError::Configuration)?,
-    );
-    let ids = [PersonalityId(0), PersonalityId(1), PersonalityId(2)];
-    let controller = ControllerConfig {
-        home: PersonalityId(setup.home),
-        pin: setup.pin.map(PersonalityId),
-        installed: InstalledPersonalitySet::new(&ids).map_err(|_| BuildError::Configuration)?,
-        coverage: if setup.require_coverage {
-            CoveragePolicy::RequireCoverage
-        } else {
-            CoveragePolicy::AllowGap
-        },
-        max_excursion_ms: setup.max_excursion_ms,
-        return_budget_ms: setup.return_budget_ms,
-        max_defer_ms: setup.max_defer_ms,
-        transition_timeout_ms: setup.transition_timeout_ms,
-    };
-    let name = NameHash::from_bytes(setup.retinue_name_hash);
-    let retinue = Node::<8, 4, 1, 4>::new_with_payload_limits(
-        PrivateIdentity::from_secret_bytes(&identity),
-        name,
-        PayloadLimits {
-            max_ingress_bytes: 255,
-            max_app_data: 32,
-            max_link_payload: 160,
-            max_outbound_resource: 1_024,
-            max_resource_parts: 8,
-        },
-    )
-    .with_freshness_policy(FreshnessPolicy {
-        max_destinations: 8,
-        max_blobs_per_destination: 2,
-    })
-    .map_err(|_| BuildError::Configuration)?;
-    let runtime = Runtime::new(
-        now,
-        Config {
-            controller,
-            profiles: setup.profiles,
-            tx_budget_ms: setup.tx_budget_ms,
-            frame_ttl_ms: setup.frame_ttl_ms,
-        },
-        retinue,
-        sennet,
-        tucket,
-    )
-    .map_err(|_| BuildError::Configuration)?;
-    let announce = retinue::announce::TimebaseGenerator::firmware_lease(
-        announce.floor(),
-        announce.reserved_through(),
-    )
-    .map_err(|_| BuildError::Configuration)?;
-    Ok(ResidentState { runtime, announce })
 }

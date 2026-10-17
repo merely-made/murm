@@ -13,6 +13,12 @@ exception_crate_lint = "#![deny(unsafe_op_in_unsafe_fn)]"
 # These files are the complete first-party unsafe surface at this baseline.
 # Counts are deliberate drift detection: a new unsafe token needs a new reviewed entry.
 [[exception]]
+path = "firmware/stack_watermark.rs"
+expected_unsafe = 4
+reason = "Bench-only linker-bounded stack painting and volatile watermark scans. Cortex-m-rt paints ARM before main; Xtensa paints once at synchronous app entry before executor construction, below live SP with interrupts disabled, excluding guard and spill regions. No live-stack repaint."
+review_by = "2027-10-16"
+
+[[exception]]
 path = "firmware/t114-phy/examples/protocol_capacity.rs"
 expected_unsafe = 1
 reason = "Build-only synthetic capacity image initializes its exclusively owned fixed static heap once before the protocol workload. No radio, USB or installation workflow is executed by the example build."

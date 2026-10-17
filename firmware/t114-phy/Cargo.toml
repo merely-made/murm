@@ -9,7 +9,7 @@ publish = false
 [features]
 default = []
 ui-bench = []
-memory-bench = ["dep:protocol-capacity-probe"]
+memory-bench = ["dep:protocol-capacity-probe", "cortex-m-rt/paint-stack"]
 
 [dependencies]
 protocol-capacity-probe = { path = "../../testing/protocol-capacity", optional = true }

@@ -163,6 +163,41 @@ even while only one protocol is using the SX1262.
 
 ## Progress
 
+### Memory closure and persistent-contact continuation, 2026-10-16
+
+Owner-authorized sequence: finish the bounded firmware memory gate, then
+Tucket persistent contacts. Total retained receipt/input budget for this
+continuation is 100 MB across repositories. Required evidence is a compact
+source/image/tool manifest, target memory layout, boot-painted stack high-water,
+heap/queue/driver-pressure and restart/refusal outcomes, protected-state
+restoration, and bounded contact-save/reload/failure tests. Prior cited evidence
+is immutable. Full logs are retained only for these acceptance cases.
+
+Selected acceptance reserves are 16 KiB untouched stack and 25% free heap,
+supplied explicitly to the runner rather than imposed as firmware defaults.
+The owner authorized justified limits. Stack reserve is an engineering cushion
+greater than three of the roughly 5.2 KiB crypto-leaf frames seen in the target
+disassembly; full protocol/runtime construction frames are exercised, rather
+than charged to that reserve. It covers additional interrupt/callee variation
+within this bounded profile, not arbitrary unexecuted paths. Heap reserve is
+12 KiB on T114 and 16 KiB on V4, each larger than the measured 9932-byte retained
+protocol allocation above fragmentation guards. Construction/reallocation
+overlap and full queues are exercised before applying this separate cushion.
+These are conservative workload acceptance limits, not formal worst-case
+proofs or permission to expand capacities without a fresh qualification.
+
+The measured profile is the existing 8-peer/4-action/1-link/4-route Retinue,
+8-contact/32-dedup/2-pending Tucket, and 8-directory/64-private-seen Sennet
+diagnostic, plus four real Tucket-only runtime reconstructions per round.
+Each reconstruction fills eight work slots, refuses the ninth and oversized
+ingress, rejects stale completions, accounts for eight failed transmissions
+and drops all state. Synthetic identities never reach RF. All executor tasks
+and IRQ activity share the measured MSP on T114 or CPU0 stack on V4; this
+V4 configuration starts neither CPU1 nor an independent radio-stack thread.
+The RTOS idle path reuses the main stack. This qualifies the bounded memory
+profile, not simultaneous three-network reception, scheduling deadlines,
+physical radio-failure recovery or unattended/power-cut product acceptance.
+
 - 2026-10-16: inventory and proposal recorded. Existing receipts and source were
   read, and official feature/device documentation checked. No new target build,
   firmware flash, physical test, selected capacity or acceptance claim follows.
