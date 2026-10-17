@@ -1,0 +1,137 @@
+{
+  "passed": true,
+  "actions": [
+    {
+      "name": "pinned-t114-stage",
+      "command": [
+        "C:\\Users\\mark_\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts\\adafruit-nrfutil.exe",
+        "dfu",
+        "serial",
+        "--package",
+        "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\firmware-memory\\t114-handoff.zip",
+        "--port",
+        "COM4",
+        "--baudrate",
+        "115200",
+        "--singlebank"
+      ],
+      "exit_code": 0,
+      "seconds": 3.817
+    },
+    {
+      "name": "pinned-t114-install",
+      "command": [
+        "C:\\Users\\mark_\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts\\adafruit-nrfutil.exe",
+        "dfu",
+        "serial",
+        "--package",
+        "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\firmware-memory\\t114-pinned.zip",
+        "--port",
+        "COM4",
+        "--baudrate",
+        "115200",
+        "--singlebank"
+      ],
+      "exit_code": 0,
+      "seconds": 30.818
+    },
+    {
+      "name": "pinned-t114-campaign",
+      "command": [
+        "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\sennet-tucket-radios\\stock-cli\\Scripts\\python.exe",
+        "-B",
+        "testing/protocol-capacity/board_probe.py",
+        "t114",
+        "--port",
+        "COM10",
+        "--rounds",
+        "16",
+        "--min-stack-bytes",
+        "16384",
+        "--min-free-heap-percent",
+        "25",
+        "--output",
+        "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\firmware-memory\\t114-pinned-campaign.json"
+      ],
+      "exit_code": 0,
+      "seconds": 114.992
+    },
+    {
+      "name": "pinned-t114-restore-stage",
+      "command": [
+        "C:\\Users\\mark_\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts\\adafruit-nrfutil.exe",
+        "dfu",
+        "serial",
+        "--package",
+        "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\firmware-memory\\t114-handoff.zip",
+        "--port",
+        "COM4",
+        "--baudrate",
+        "115200",
+        "--singlebank"
+      ],
+      "exit_code": 0,
+      "seconds": 3.087
+    },
+    {
+      "name": "pinned-t114-restore",
+      "command": [
+        "C:\\Users\\mark_\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts\\adafruit-nrfutil.exe",
+        "dfu",
+        "serial",
+        "--package",
+        "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\firmware-memory\\t114-restore.zip",
+        "--port",
+        "COM4",
+        "--baudrate",
+        "115200",
+        "--singlebank"
+      ],
+      "exit_code": 0,
+      "seconds": 23.504
+    },
+    {
+      "name": "pinned-t114-restored-status",
+      "command": [
+        "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\sennet-tucket-radios\\stock-cli\\Scripts\\python.exe",
+        "-B",
+        "testing/protocol-capacity/board_probe.py",
+        "t114",
+        "--port",
+        "COM10",
+        "--output",
+        "C:\\Users\\mark_\\Code\\repos\\retinue\\validation\\results\\firmware-memory\\t114-pinned-restored.json"
+      ],
+      "exit_code": 0,
+      "seconds": 14.309
+    }
+  ],
+  "inputs": {
+    "t114-pinned.zip": {
+      "sha256": "ad7bd51b4970f9ead92beaccb42a90a7ad9330b7fbfc6e7ec21ae0a311011b5f",
+      "payload_bytes": 498724,
+      "payload_sha256": "0623dacb316baf453207c6782e038eb206de74b248c0b6c623c27b482f60e9e4",
+      "start": 155648,
+      "erase_end": 655360
+    },
+    "t114-restore.zip": {
+      "sha256": "4c56670f0cd51387b26802b29fe160439ce173a8c66e0538d6e97a3113d6605d",
+      "payload_bytes": 364484,
+      "payload_sha256": "72d969aee4405a20a6e60ada8455854ab8d1b8b292a11601bcc108859e91221e",
+      "start": 155648,
+      "erase_end": 520192
+    },
+    "t114-handoff.zip": {
+      "sha256": "7ef7e6c2d50e8aa5e5536cdcda124cb2dda9636dcb40fa6dd9efb32feae41740",
+      "payload_bytes": 1368,
+      "payload_sha256": "4f3f12328fd1f28391dba2aac2b4a8a456e7b9decb4d97ba57cb9e64c293a44e",
+      "start": 155648,
+      "erase_end": 159744
+    }
+  },
+  "state_scope": "application-only DFU, live identity/sequence/profile; no protected-flash readback",
+  "campaign_passed": true,
+  "original_status_profile_exact": true,
+  "reset_comparison_scope": "Intentional watchdog bridge changes boot cause/crash residue; only those two fields normalized. Campaign itself requires identical before/after status.",
+  "original_identity_sequence_node": true
+}

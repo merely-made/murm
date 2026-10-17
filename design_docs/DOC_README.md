@@ -14,8 +14,13 @@ The subsequent [physical memory continuation](../testing/receipts/protocol-parit
 passes sixteen fragmented allocator rounds on T114 and V4, both peaking at
 18452 occupied bytes with complete release and exact refusal counts. The
 separate-task diagnostic avoids a verified T114 stack overrun. V4's 97344-byte
-main-stack sample leaves only 10616 bytes in its linker region, so actual
-high-water and explicit reserve acceptance remain open.
+main-stack sample left only 10616 bytes in its linker region. The later
+[bounded gate closure](../testing/receipts/protocol-parity-memory/closure/README.md)
+measures boot-painted high-water after removing duplicate construction frames:
+62140 untouched stack bytes on V4 and 18916 on T114, with sixteen passing
+rounds each, explicit 16 KiB stack / 25% heap reserves, runtime queue/failure
+pressure and restoration. This closes the named memory profile; physical
+radio-failure, power-cut, deadline and unattended product acceptance remain open.
 
 Sennet directed carriage (2026-10-16):
 [R8](2026-10-13_murm_family_move_plan.md#r8--sennet-directed-text-and-delivery-acks-2026-10-16-functional-pass)

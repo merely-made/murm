@@ -1,7 +1,9 @@
 # Protocol and firmware feature parity
 
-**Date:** 2026-10-16. **Status:** in progress; host/target builds and on-device
-heap campaigns passed, with actual stack high-water/reserve acceptance open. The owner
+**Date:** 2026-10-16. **Status:** in progress; the named bounded firmware memory
+profile passed on 2026-10-17, including boot-painted stack high-water, heap,
+queue/failure/reconstruction campaigns and selected reserves. Broader firmware
+product acceptance remains open. The owner
 approved proceeding after the proposal. The owner asked about parity for Sennet/Meshtastic,
 Tucket/MeshCore and Retinue/Reticulum, relative difficulty, firmware and board
 memory. This plan proposes ordering and measurable completion conditions.
@@ -231,3 +233,26 @@ physical radio-failure recovery or unattended/power-cut product acceptance.
   memory result. Phase 2 still requires real task/interrupt stack high-water,
   pressure/restart/fault coverage and selected reserve margins. See the
   [physical receipt](../testing/receipts/protocol-parity-memory/physical/README.md).
+
+- 2026-10-17: the [bounded firmware memory gate](../testing/receipts/protocol-parity-memory/closure/README.md)
+  closes for source `a7107a7266f` and the named capacities above. Both boards
+  pass sixteen rounds with a heap peak of 18452 bytes, no unexpected allocator
+  refusals or leaks, and sixty-four runtime reconstructions each. Minimum
+  untouched stack is 62140 bytes on V4 and 18916 on T114, above the explicitly
+  selected 16384-byte reserve; both retain at least 25% free heap. V4 state
+  borrowing removes its large duplicate runtime frame; in-place fixture
+  construction and sequential ARM pressure stages preserve capacities while
+  removing artificial temporary nesting. Production images also link:
+  V4 data+BSS 204476 / stack region 128040; T114 allocated SRAM 152668 / linker
+  gap 84900. Linker gaps remain distinct from measured high-water.
+  Both tested boards return to their original named firmware and profiles;
+  SB2 protected state is byte-identical and its prefix ROM MD5 matches the
+  fresh backup. T114 identity/sequence/profile and application-only DFU pass
+  without claiming protected-flash readback. SB1 is untouched. The separate
+  final hardened clean-source campaigns preserve all earlier failed attempts.
+  This closes phase 2's named memory profile, not physical radio-driver,
+  power-cut, deadline, unattended or whole-product acceptance. Continue with
+  phase 3: persist Tucket's verified public contacts through the existing
+  identity/realm-scoped Signalman atomic journal, then prove cold restoration
+  and acknowledged traffic without another peer advert. Private identity
+  custody and pending-operation restart semantics retain their existing owners.
