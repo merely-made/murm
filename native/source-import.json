@@ -28,7 +28,7 @@
     "Package-local allocator test fixture path",
     "Cross-repository doc references"
   ],
-  "working_toolchain": "1.99.0",
+  "working_toolchain": "1.99.1",
   "msrv": "1.97.1",
   "formatting_policy": {
     "source": "rustfmt.toml",

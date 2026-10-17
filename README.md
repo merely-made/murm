@@ -10,7 +10,7 @@ receiving-build and consumer-cutover status.
 The radio workspace stays at the root. The separate `native/` workspace contains
 `murm`, `mere-transport`, and `mere-webrtc-carrier`. The independent `wire/`
 workspace provides `murm-wire`, the reusable one-hop HTTP/1-2-3 and raw
-WebSocket engines. All use Rust 1.99.0 for development and declare a shared
+WebSocket engines. All use Rust 1.99.1 for development and declare a shared
 MSRV of 1.97.1. Build the native libraries with
 `cargo test --manifest-path native/Cargo.toml --lib` and the wire engine with
 `cargo test --manifest-path wire/Cargo.toml`.
