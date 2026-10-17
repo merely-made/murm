@@ -20,6 +20,23 @@ pub(crate) struct ResidentState {
 
 const HOST_CHUNK: usize = 32;
 
+/// Public boot-stage timing for the explicit bench image; never setup material.
+#[cfg(feature = "memory-bench")]
+pub(crate) async fn setup_progress<L: HostLink>(host: &mut L, stage: &str) {
+    let mut line = heapless::String::<96>::new();
+    let _ = writeln!(
+        line,
+        "resident setup stage={} ms={}",
+        stage,
+        Instant::now().as_millis()
+    );
+    let _ = with_timeout(
+        EmbassyDuration::from_millis(250),
+        host.write_all(line.as_bytes()),
+    )
+    .await;
+}
+
 /// Serve the retained runtime as the only post-setup radio loop.
 ///
 /// The select races only an armed IRQ waiter, a small host read, and the
