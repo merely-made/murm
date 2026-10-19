@@ -2464,3 +2464,25 @@ keeps the failed quiet-only baseline and late no-replug pass separate. SB2 now
 runs this fixed modem/US915 image; SB1 and T114 retain `cb042329232`. V4 main and control_boot fit their existing LOC baselines;
 five pre-existing violations elsewhere remain. No new unsafe surface or durable
 field is added.
+
+## 2026-10-19: foundation supplier promotion
+
+The native conversation, peer transport and WebRTC crates now consume
+Muniment, Stickleback, `mere-proofs` and Luggage from the independent Eidetic
+family at `de6b1dce75dd6725d72c79b829e4878c7903a381`. This supersedes the
+first-move placement of the shared replication supplier in Mere; crate names,
+APIs and domain authority are unchanged. The four packages resolve one canonical
+Eidetic source. The canonical cross-family migration is
+`mere/design_docs/mere_docs/implementation_strategy/2026-10-19_family_promotion_plan.md`.
+
+The native consumer sweep passes 169 tests, with one existing child fixture
+ignored and the killed-peer shutdown test explicitly filtered after an unbounded
+run. That first run passed the other transport cases but did not complete
+`a_killed_peer_off_the_overlay_reads_not_connected_when_its_connection_closes`.
+The filtered follow-up does not close that test's gate. Compact receipts live in
+Mere's `support/family-promotion/murm-consumer.json` and
+`murm-bounded-unit-sweep.json`. This is software source-adoption evidence;
+physical and live-network acceptance retain their existing boundaries.
+
+The native libraries no longer consume Mere foundation packages. Signalman's
+separate application workspace continues to consume Mere UI and host contracts.

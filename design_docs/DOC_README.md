@@ -733,3 +733,7 @@ Not yet done: `PROJECT_DESCRIPTION.md` (core §7, maintainer-reserved) and the
 FLK5 audit of the remaining documents that quote bare gate counts. The first
 `archive_docs/` checkpoint was created 2026-08-30 when the pre-decision
 Bluetooth capability brief was superseded by the wall-node plan.
+
+The [foundation supplier promotion (2026-10-19)](2026-10-13_murm_family_move_plan.md#2026-10-19-foundation-supplier-promotion) records the canonical Eidetic dependency cutover, native library tests and the separately open killed-peer gate.
+
+Foundation source adoption (2026-10-19): canonical promoted-family revisions and consumer source validation are recorded in `mere/design_docs/mere_docs/implementation_strategy/2026-10-19_family_promotion_plan.md`. Existing application and domain authority remain with their owning components.
