@@ -134,7 +134,6 @@ pub fn high_water() -> usize {
 }
 
 /// Failed allocation calls since boot, including a failed realloc's new allocation.
-#[cfg(feature = "memory-bench")]
 pub fn allocation_failures() -> usize {
     HEAP.allocation_failures.load(Ordering::Relaxed)
 }
