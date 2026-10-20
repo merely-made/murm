@@ -333,6 +333,7 @@ impl PostLift {
 
 fn status() -> LocalStatus {
     LocalStatus {
+        device_name: Text::empty(),
         board: Text::from_truncated("HELTEC V4"),
         firmware: Text::from_truncated("PHY V10"),
         radio: RadioState::Online,

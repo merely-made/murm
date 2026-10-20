@@ -84,7 +84,7 @@ fn action(host: &mut Host, key: &str) {
     click(host, Selector::role("button").with_attr("data-action", key));
 }
 fn background(host: &Host) -> String {
-    let node = host.with_dom(|dom| genet_probe::matching(dom, &Selector::class("app-shell"))[0]);
+    let node = host.with_dom(|dom| genet_probe::matching_classes(dom, &Selector::class("app-shell"))[0]);
     host.computed_value(node, "background-color")
         .unwrap()
         .to_ascii_lowercase()

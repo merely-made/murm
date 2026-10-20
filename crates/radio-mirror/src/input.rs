@@ -245,6 +245,8 @@ struct LocalDocument {
     #[serde(deserialize_with = "local_schema")]
     schema: (),
     #[serde(default, deserialize_with = "text")]
+    device_name: Text<16>,
+    #[serde(default, deserialize_with = "text")]
     board: Text<16>,
     #[serde(default, deserialize_with = "text")]
     firmware: Text<12>,
@@ -286,6 +288,7 @@ impl From<LocalDocument> for LocalStatus {
     fn from(document: LocalDocument) -> Self {
         let LocalDocument {
             schema: (),
+            device_name,
             board,
             firmware,
             uptime_secs,
@@ -306,6 +309,7 @@ impl From<LocalDocument> for LocalStatus {
             gnss,
         } = document;
         Self {
+            device_name,
             board,
             firmware,
             uptime_secs,
@@ -488,6 +492,10 @@ mod tests {
             Err(InputError::Json(_))
         ));
         assert!(matches!(
+            local_from_json(&local(r#","device_name":"A DEVICE NAME TOO LONG""#)),
+            Err(InputError::Json(_))
+        ));
+        assert!(matches!(
             host_from_json(&host(r#","peers":[{},{},{},{}]"#)),
             Err(InputError::Json(_))
         ));
@@ -504,6 +512,15 @@ mod tests {
             host_from_json(&host(r#","valid_for_secs":0"#)),
             Err(InputError::Wire(WireError::InvalidValidity(0)))
         );
+    }
+
+    #[test]
+    fn the_public_device_name_reaches_the_status() {
+        let status =
+            local_from_json(&local(r#","device_name":"HERALD","board":"HELTEC V4""#)).unwrap();
+        assert_eq!(status.device_name.as_str(), "HERALD");
+        assert_eq!(status.board.as_str(), "HELTEC V4");
+        assert!(local_from_json(&local("")).unwrap().device_name.is_empty());
     }
 
     #[test]
