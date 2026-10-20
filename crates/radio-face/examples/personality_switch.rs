@@ -166,6 +166,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 /// the frames sees only what the personality actually changes.
 fn frame(citizenship: &Citizenship) -> (LocalStatus, HostSnapshot) {
     let local = LocalStatus {
+        device_name: Text::empty(),
         board: Text::from_truncated("HELTEC V4"),
         firmware: Text::from_truncated(citizenship.firmware),
         uptime_secs: 14_719,

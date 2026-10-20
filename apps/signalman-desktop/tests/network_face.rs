@@ -127,16 +127,17 @@ fn mixed_realization_uses_one_scene_focus_and_action_model() {
         "the retained leaf consumed its paint dirtiness"
     );
 
+    let projection = harness.a11y_projection();
     let (mark_node, control_node, scene_present) = harness.with_dom(|dom| {
-        let mark_node = genet_probe::matching(dom, &mark)
+        let mark_node = genet_probe::matching_with_projection(dom, &mark, &projection)
             .into_iter()
             .next()
             .expect("probe resolves a painted node's semantic target");
-        let control_node = genet_probe::matching(dom, &control)
+        let control_node = genet_probe::matching_with_projection(dom, &control, &projection)
             .into_iter()
             .next()
             .expect("probe resolves an ordinary DOM control");
-        let scene_present = genet_probe::matching(dom, &Selector::class("graph-canvas-swatch"))
+        let scene_present = genet_probe::matching_classes(dom, &Selector::class("graph-canvas-swatch"))
             .into_iter()
             .next()
             .is_some();
