@@ -408,3 +408,11 @@ contact remains in its dedicated pair. USB identity setup remains volatile.
 Battery-connected software reset, one-hop endpoint traffic and selected pressure
 are the acceptance scope. Power cuts, installed personal-daemon/UI integration,
 physical deadline/fault trials and broader routing/repeater/server roles stay open.
+
+Post-qualification integration (2026-10-20): remote supplier updates merged
+without rewriting the physical `9de106432ad` checkpoint. The entire resolved
+package table and firmware source directories match that checkpoint; only
+unused lock patch entries were removed. The merged ARM target check now passes
+with Cargo/Rust 1.97.1, and all 180 radio-hand tests pass again. The
+[integration supplement](../testing/receipts/tucket-t114/integration/qualification.json)
+keeps newer desktop supplier changes separate from the captured RF tool cohort.
