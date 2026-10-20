@@ -28,21 +28,21 @@ luggage = { package = "luggage", version = "0.1.0", default-features = false, gi
 [patch.crates-io]
 # Promoted sources shared with immutable older Mere suppliers.
 armillary = { git = "https://github.com/merely-made/armillary.git", rev = "6827559937f07f78a6a830dfbfcaa54210dd093c" }
-commons-spine = { git = "https://github.com/merely-made/gemot.git", rev = "6a5023a9ca478ebcc342dd9b7c9e418ccacfc6b5" }
+commons-spine = { git = "https://github.com/merely-made/gemot.git", rev = "67ce0ac3e2b48be951a677a9eca245eaabd56d63" }
 dict-protocol = { git = "https://github.com/merely-made/errand.git", rev = "dce1f08546b8475e42a5a01ca1ea18794c6e9b97" }
 errand = { git = "https://github.com/merely-made/errand.git", rev = "dce1f08546b8475e42a5a01ca1ea18794c6e9b97" }
-esp = { git = "https://github.com/merely-made/esp.git", rev = "a2561b0b9766a4ad4d9924c02194bb414667b9ef" }
+esp = { git = "https://github.com/merely-made/esp.git", rev = "af5597c670da111713dd306f4feba8db892a86d2" }
 finger-protocol = { git = "https://github.com/merely-made/errand.git", rev = "dce1f08546b8475e42a5a01ca1ea18794c6e9b97" }
 fsp-protocol = { git = "https://github.com/merely-made/errand.git", rev = "dce1f08546b8475e42a5a01ca1ea18794c6e9b97" }
 gemini-protocol = { git = "https://github.com/merely-made/errand.git", rev = "dce1f08546b8475e42a5a01ca1ea18794c6e9b97" }
-gemot = { git = "https://github.com/merely-made/gemot.git", rev = "6a5023a9ca478ebcc342dd9b7c9e418ccacfc6b5" }
+gemot = { git = "https://github.com/merely-made/gemot.git", rev = "67ce0ac3e2b48be951a677a9eca245eaabd56d63" }
 gopher-protocol = { git = "https://github.com/merely-made/errand.git", rev = "dce1f08546b8475e42a5a01ca1ea18794c6e9b97" }
 guppy-protocol = { git = "https://github.com/merely-made/errand.git", rev = "dce1f08546b8475e42a5a01ca1ea18794c6e9b97" }
 kepler-protocol = { git = "https://github.com/merely-made/errand.git", rev = "dce1f08546b8475e42a5a01ca1ea18794c6e9b97" }
-mien = { git = "https://github.com/merely-made/gemot.git", rev = "6a5023a9ca478ebcc342dd9b7c9e418ccacfc6b5" }
+mien = { git = "https://github.com/merely-made/gemot.git", rev = "67ce0ac3e2b48be951a677a9eca245eaabd56d63" }
 misfin = { git = "https://github.com/merely-made/errand.git", rev = "dce1f08546b8475e42a5a01ca1ea18794c6e9b97" }
-moothold = { git = "https://github.com/merely-made/gemot.git", rev = "6a5023a9ca478ebcc342dd9b7c9e418ccacfc6b5" }
-mooting = { git = "https://github.com/merely-made/gemot.git", rev = "6a5023a9ca478ebcc342dd9b7c9e418ccacfc6b5" }
+moothold = { git = "https://github.com/merely-made/gemot.git", rev = "67ce0ac3e2b48be951a677a9eca245eaabd56d63" }
+mooting = { git = "https://github.com/merely-made/gemot.git", rev = "67ce0ac3e2b48be951a677a9eca245eaabd56d63" }
 nex-protocol = { git = "https://github.com/merely-made/errand.git", rev = "dce1f08546b8475e42a5a01ca1ea18794c6e9b97" }
 scorpion-protocol = { git = "https://github.com/merely-made/errand.git", rev = "dce1f08546b8475e42a5a01ca1ea18794c6e9b97" }
 scroll-protocol = { git = "https://github.com/merely-made/errand.git", rev = "dce1f08546b8475e42a5a01ca1ea18794c6e9b97" }
@@ -69,17 +69,17 @@ mere-proofs = { git = "https://github.com/merely-made/eidetic.git", rev = "543f5
 [patch."https://github.com/merely-made/mere.git"]
 armillary = { git = "https://github.com/merely-made/armillary.git", rev = "6827559937f07f78a6a830dfbfcaa54210dd093c" }
 chartulary = { git = "https://github.com/merely-made/eidetic.git", rev = "543f5ff38f87a09afc04dbc59f57c2dfbc6a9943" }
-commons-spine = { git = "https://github.com/merely-made/gemot.git", rev = "6a5023a9ca478ebcc342dd9b7c9e418ccacfc6b5" }
+commons-spine = { git = "https://github.com/merely-made/gemot.git", rev = "67ce0ac3e2b48be951a677a9eca245eaabd56d63" }
 eidetic = { git = "https://github.com/merely-made/eidetic.git", rev = "543f5ff38f87a09afc04dbc59f57c2dfbc6a9943" }
 errand = { git = "https://github.com/merely-made/errand.git", rev = "dce1f08546b8475e42a5a01ca1ea18794c6e9b97" }
-esp = { git = "https://github.com/merely-made/esp.git", rev = "a2561b0b9766a4ad4d9924c02194bb414667b9ef" }
-gemot = { git = "https://github.com/merely-made/gemot.git", rev = "6a5023a9ca478ebcc342dd9b7c9e418ccacfc6b5" }
+esp = { git = "https://github.com/merely-made/esp.git", rev = "af5597c670da111713dd306f4feba8db892a86d2" }
+gemot = { git = "https://github.com/merely-made/gemot.git", rev = "67ce0ac3e2b48be951a677a9eca245eaabd56d63" }
 hagiograph = { git = "https://github.com/merely-made/eidetic.git", rev = "543f5ff38f87a09afc04dbc59f57c2dfbc6a9943" }
 luggage = { git = "https://github.com/merely-made/eidetic.git", rev = "543f5ff38f87a09afc04dbc59f57c2dfbc6a9943" }
 mere-proofs = { git = "https://github.com/merely-made/eidetic.git", rev = "543f5ff38f87a09afc04dbc59f57c2dfbc6a9943" }
-mien = { git = "https://github.com/merely-made/gemot.git", rev = "6a5023a9ca478ebcc342dd9b7c9e418ccacfc6b5" }
-moothold = { git = "https://github.com/merely-made/gemot.git", rev = "6a5023a9ca478ebcc342dd9b7c9e418ccacfc6b5" }
-mooting = { git = "https://github.com/merely-made/gemot.git", rev = "6a5023a9ca478ebcc342dd9b7c9e418ccacfc6b5" }
+mien = { git = "https://github.com/merely-made/gemot.git", rev = "67ce0ac3e2b48be951a677a9eca245eaabd56d63" }
+moothold = { git = "https://github.com/merely-made/gemot.git", rev = "67ce0ac3e2b48be951a677a9eca245eaabd56d63" }
+mooting = { git = "https://github.com/merely-made/gemot.git", rev = "67ce0ac3e2b48be951a677a9eca245eaabd56d63" }
 muniment = { git = "https://github.com/merely-made/eidetic.git", rev = "543f5ff38f87a09afc04dbc59f57c2dfbc6a9943" }
 servitor = { git = "https://github.com/merely-made/eidetic.git", rev = "543f5ff38f87a09afc04dbc59f57c2dfbc6a9943" }
 stickleback = { git = "https://github.com/merely-made/eidetic.git", rev = "543f5ff38f87a09afc04dbc59f57c2dfbc6a9943" }
@@ -87,17 +87,17 @@ stickleback = { git = "https://github.com/merely-made/eidetic.git", rev = "543f5
 [patch."https://www.github.com/merely-made/mere.git"]
 armillary = { git = "https://github.com/merely-made/armillary.git", rev = "6827559937f07f78a6a830dfbfcaa54210dd093c" }
 chartulary = { git = "https://github.com/merely-made/eidetic.git", rev = "543f5ff38f87a09afc04dbc59f57c2dfbc6a9943" }
-commons-spine = { git = "https://github.com/merely-made/gemot.git", rev = "6a5023a9ca478ebcc342dd9b7c9e418ccacfc6b5" }
+commons-spine = { git = "https://github.com/merely-made/gemot.git", rev = "67ce0ac3e2b48be951a677a9eca245eaabd56d63" }
 eidetic = { git = "https://github.com/merely-made/eidetic.git", rev = "543f5ff38f87a09afc04dbc59f57c2dfbc6a9943" }
 errand = { git = "https://github.com/merely-made/errand.git", rev = "dce1f08546b8475e42a5a01ca1ea18794c6e9b97" }
-esp = { git = "https://github.com/merely-made/esp.git", rev = "a2561b0b9766a4ad4d9924c02194bb414667b9ef" }
-gemot = { git = "https://github.com/merely-made/gemot.git", rev = "6a5023a9ca478ebcc342dd9b7c9e418ccacfc6b5" }
+esp = { git = "https://github.com/merely-made/esp.git", rev = "af5597c670da111713dd306f4feba8db892a86d2" }
+gemot = { git = "https://github.com/merely-made/gemot.git", rev = "67ce0ac3e2b48be951a677a9eca245eaabd56d63" }
 hagiograph = { git = "https://github.com/merely-made/eidetic.git", rev = "543f5ff38f87a09afc04dbc59f57c2dfbc6a9943" }
 luggage = { git = "https://github.com/merely-made/eidetic.git", rev = "543f5ff38f87a09afc04dbc59f57c2dfbc6a9943" }
 mere-proofs = { git = "https://github.com/merely-made/eidetic.git", rev = "543f5ff38f87a09afc04dbc59f57c2dfbc6a9943" }
-mien = { git = "https://github.com/merely-made/gemot.git", rev = "6a5023a9ca478ebcc342dd9b7c9e418ccacfc6b5" }
-moothold = { git = "https://github.com/merely-made/gemot.git", rev = "6a5023a9ca478ebcc342dd9b7c9e418ccacfc6b5" }
-mooting = { git = "https://github.com/merely-made/gemot.git", rev = "6a5023a9ca478ebcc342dd9b7c9e418ccacfc6b5" }
+mien = { git = "https://github.com/merely-made/gemot.git", rev = "67ce0ac3e2b48be951a677a9eca245eaabd56d63" }
+moothold = { git = "https://github.com/merely-made/gemot.git", rev = "67ce0ac3e2b48be951a677a9eca245eaabd56d63" }
+mooting = { git = "https://github.com/merely-made/gemot.git", rev = "67ce0ac3e2b48be951a677a9eca245eaabd56d63" }
 muniment = { git = "https://github.com/merely-made/eidetic.git", rev = "543f5ff38f87a09afc04dbc59f57c2dfbc6a9943" }
 servitor = { git = "https://github.com/merely-made/eidetic.git", rev = "543f5ff38f87a09afc04dbc59f57c2dfbc6a9943" }
 stickleback = { git = "https://github.com/merely-made/eidetic.git", rev = "543f5ff38f87a09afc04dbc59f57c2dfbc6a9943" }

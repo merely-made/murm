@@ -339,6 +339,11 @@ pub fn swatch_from_projection(
         .filter_map(|relation| {
             Some(GraphCanvasRelation {
                 id: relation.id.as_str().to_owned(),
+                // These management relations are observed geometry, not
+                // disclosed source links with opening authority.
+                link_key: None,
+                marks: Default::default(),
+                strength: 1.0,
                 from: ids_by_key.get(&relation.from)?.clone(),
                 to: ids_by_key.get(&relation.to)?.clone(),
                 kind: relation.fact.kind.vocabulary().to_owned(),
