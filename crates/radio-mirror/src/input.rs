@@ -306,6 +306,7 @@ impl From<LocalDocument> for LocalStatus {
             gnss,
         } = document;
         Self {
+            device_name: Text::empty(),
             board,
             firmware,
             uptime_secs,
