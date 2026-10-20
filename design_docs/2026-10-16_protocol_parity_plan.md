@@ -136,8 +136,8 @@ even while only one protocol is using the SX1262.
    adopted by this proposal; it belongs in each reviewed board profile.
 3. **Finish Tucket endpoint, then repeater and server roles.** Scoped host and
    bounded standalone contact restoration are now qualified below; the V4 reboot
-   fixture needs no fresh peer advert to rebuild known contact state. Continue
-   with the T114 live service, multiple-hop and
+   fixture needs no fresh peer advert to rebuild known contact state. The T114
+   live endpoint is now qualified below. Continue with multiple-hop and
    scoped routing, companion/management coverage and 1.18 upgrade cases. Track
    room-server persistence and sensors as distinct feature rows. Done per role
    when stock peers complete normal/retry/restart/failure paths with bounded
@@ -283,7 +283,7 @@ at most 100 MB of inputs/receipts and preserves all earlier evidence. Required
 receipts are bounded codec/journal refusal and every-word interruption tests,
 target links, real flash cold reload, a V4 resident exchange after restart
 without a fresh peer advert, and explicit restoration/protected-state checks.
-T114 has no live Tucket loop: its adapter and pre-radio storage/reset campaign
+At this 2026-10-17 checkpoint, T114 had no live Tucket loop: its adapter and pre-radio storage/reset campaign
 qualify storage only, not Tucket firmware service or RF interoperability.
 
 The opt-in V4 `resident-contact-store` profile uses its own 4 KiB A/B sectors
@@ -352,11 +352,12 @@ checks live identity/profile, without claiming a protected-flash dump. The
 initial allocation guard, USB fragmentation failure, constructor stall, retry
 failures and a checksum-format parser refusal remain individually retained.
 Physical power-cut, stock filesystem persistence, unattended/driver-deadline,
-broader routing/roles and the T114 Tucket loop remain open.
+broader routing/roles and the T114 Tucket loop remained open at that checkpoint. The later T114 continuation below qualifies its bounded live endpoint.
 
 ### T114 live Tucket continuation, 2026-10-20
 
-**Status: in progress.** Add an opt-in Tucket-only service on the existing
+**Status: physically qualified for the bounded endpoint profile.** The opt-in
+Tucket-only service uses the existing
 T114 radio/USB owner. Keep eight contacts, 32 dedup entries, two pending text
 operations and eight queued frames, with radio-budget-derived retry timing.
 Retain the explicit 16384-byte untouched-stack and 25% free-heap limits.
@@ -379,3 +380,31 @@ snapshot at sequence 1, touching only `0xe4000..0xe6000`. Other scopes, keys,
 sequences and corruption refuse. This is separate from product commissioning
 and is never run between the accepted first/reboot exchanges. Private identity
 setup remains volatile, released through scoped Djinn custody after each boot.
+
+The `30733812192` instrumented image passes sixteen physical pressure rounds
+on USB `TULLE-T114-01`: minimum boot-painted untouched stack 75820/139420
+bytes, maximum occupied heap 21860/49152 bytes (55.5% free), zero final heap
+occupancy, and exactly one deliberate oversize refusal per round. Every round
+also exercises the new endpoint's eight-frame overflow/stale-completion/driver-
+failure/reconstruction path, alongside the prior full protocol workload and an
+exact 3408-byte live-state storage charge. Production, fixture-handoff and
+instrumented application-only images link below `0xe4000`. The original named
+firmware, identity and profile are restored and verified after this campaign.
+The [final receipt](../testing/receipts/tucket-t114/README.md) repeats all sixteen
+rounds on final source `9de106432ad`, with identical figures after suppressing
+empty idle USB reports. Four exact texts and four protocol ACKs pass against
+stock MeshCore 1.17.1 across two boots. Before new peer work after reset, the
+saved contact is already installed; the full second transcript contains no
+fresh advert. Live construction/RF retain at least 120308 stack bytes, with a
+6404/49152 maximum heap peak and zero allocation failures. The production role
+also links, without constructing Retinue/Sennet instances or their nonce leases.
+
+Scoped real-Keeper custody controls repeat using the exact previously qualified
+Tucket-only supplier; the current host probe honors the public DTR setting.
+Both original named firmware/profile states restore, SB1's prefix and full tail
+compare exactly, and owned helpers stop. T114 restoration checks live identity,
+settings sequence, profile and application only. The generated public bench
+contact remains in its dedicated pair. USB identity setup remains volatile.
+Battery-connected software reset, one-hop endpoint traffic and selected pressure
+are the acceptance scope. Power cuts, installed personal-daemon/UI integration,
+physical deadline/fault trials and broader routing/repeater/server roles stay open.

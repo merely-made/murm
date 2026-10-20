@@ -1,0 +1,25 @@
+{
+  "authority": "isolated Djinn wallet, volatile USB firmware setup",
+  "expected_cache_before_peer_work": 1,
+  "memory": {
+    "heap_capacity": 49152,
+    "heap_peak": 6404,
+    "min_free_heap_percent": 25,
+    "min_stack_bytes": 16384,
+    "passed": true,
+    "stack_free": 124620
+  },
+  "passed": true,
+  "peer_key": "11c1d78f658ee195e0b51defdd01e1953432b951175edd6cd38f5f59161678c2",
+  "protocol_acknowledged": true,
+  "public_key": "c34476131046b52c41299304a8d6db81b473ceffa0c9d07a1928c96c397c3213",
+  "received_exact_return_text": true,
+  "transcript": [
+    "tulle/t114 phy online; version=0.0.1; sx1262 online; spi=software; irq=poll; sync=2b reg=24b4; region=US915 freq=906875000 reset=soft crash=0 timebase=inactive; build=9de106432ad30a3ce4457866c8720f856d34f470; image=t114-native\r\nidentity=loaded slot=A seq=94\r\nnode=unavailable\r\ntulle/t114 phy online; version=0.0.1; sx1262 online; spi=software; irq=poll; sync=2b reg=24b4; region=US915 freq=906875000 reset=soft crash=0 timebase=inactive; build=9de106432ad30a3ce4457866c8720f856d34f470; image=t114-native\r\nname=T114\r\n",
+    "",
+    "resident status state=Home active=Some(Activation { instance: PersonalityId(2) }) role=TucketEndpoint\nresident contacts persisted=1 installed=1 max=8\nresident memory heap_capacity=49152 heap_allocator_used=4224 heap_allocator_used_peak=4224 heap_alloc_failures=0\nresident watermark free=125276 total=139420\n",
+    "",
+    "resident event Tucket(Message { from: 17, message: TextMessage { timestamp: 1792535847, attempt: 0, txt_type: 0, text: \"signalman-ui-t114-dda096a9c0dc427c810632f041c5afc8-reconnect-return\" }, ack: [162, 70, 119, 254] })\nresident report events=1 dropped=0 omitted=0\nresident event TucketAcknowledged(OperationId(1))\nresident event Tucket(Ack([113, 42, 49, 121]))\nresident report events=2 dropped=0 omitted=0\n",
+    "resident status state=Home active=Some(Activation { instance: PersonalityId(2) }) role=TucketEndpoint\nresident contacts persisted=1 installed=1 max=8\nresident memory heap_capacity=49152 heap_allocator_used=4224 heap_allocator_used_peak=6404 heap_alloc_failures=0\nresident watermark free=124620 total=139420\n"
+  ]
+}

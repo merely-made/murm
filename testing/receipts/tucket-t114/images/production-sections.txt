@@ -1,0 +1,23 @@
+target/thumbv7em-none-eabihf/release/tulle-t114-phy  :
+section                size        addr
+.vector_table           256      155648
+.text                258988      155904
+.rodata               66236      414896
+.data                   936   536895488
+.gnu.sgstubs              0      482080
+.defmt.end                2      482080
+.bss                  97020   536896424
+.uninit                 112   536993444
+.debug_loc          1442305           0
+.debug_abbrev          6912           0
+.debug_info         1647704           0
+.debug_aranges         7592           0
+.debug_ranges        390120           0
+.debug_str          1685639           0
+.comment                153           0
+.ARM.attributes          56           0
+.debug_frame          18444           0
+.debug_line          348679           0
+Total               5971154
+
+

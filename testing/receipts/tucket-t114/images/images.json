@@ -1,0 +1,42 @@
+{
+  "t114-fixture-handoff-raw.bin": {
+    "bytes": 503938,
+    "sha256": "2add9d82cf8517e305ac0c8db163414d28a986f86010e2cd9870aae397343a55"
+  },
+  "t114-fixture-handoff.bin": {
+    "bytes": 503940,
+    "sha256": "cff84b53be2fc8fd125918ec8e49f856f95670c6b3948e61b3e7d8cdbbde71e7"
+  },
+  "t114-fixture-handoff.zip": {
+    "bytes": 504825,
+    "sha256": "8fe82fea4bb716a79c97fdfbea841b85f51a8c1a08bed4dddbe97ae7583212b8"
+  },
+  "t114-live-raw.bin": {
+    "bytes": 471586,
+    "sha256": "53131d93e01e6fabe8afe976150ee4afd741340824aa13a1c51d9689eb34a1c2"
+  },
+  "t114-live.bin": {
+    "bytes": 471588,
+    "sha256": "90900d8eff7bb3e4e1b8560b8f9b3e56ff05be24daba5c5addf4fbd64447f831"
+  },
+  "t114-live.elf": {
+    "bytes": 10047452,
+    "sha256": "2da1f2624e0a260eb009a923caf3575e0c050f0204959e2ebf110e16e5e8a1f6"
+  },
+  "t114-live.zip": {
+    "bytes": 472407,
+    "sha256": "722c2ce4ba0ce28429cb9060dde8d1a2eca8ad74020ae81fa4bc88755d3bf902"
+  },
+  "t114-production-raw.bin": {
+    "bytes": 326434,
+    "sha256": "97845a518e172765f5c44c35f7442f2cc38eb0b47de47c06a3e74b31da5f9730"
+  },
+  "t114-production.bin": {
+    "bytes": 326436,
+    "sha256": "ab590b250f37deb0ee60c80bfbb496915729d1917ffd440fbee0026dfd6cc84f"
+  },
+  "t114-production.zip": {
+    "bytes": 327291,
+    "sha256": "4117e82e915b8e87128840a1edeb35929ad67302e4c94bac1b155bd15df05fc1"
+  }
+}

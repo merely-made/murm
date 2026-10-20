@@ -2486,3 +2486,14 @@ physical and live-network acceptance retain their existing boundaries.
 
 The native libraries no longer consume Mere foundation packages. Signalman's
 separate application workspace continues to consume Mere UI and host contracts.
+
+
+T114 endpoint continuation (2026-10-20): [the live Tucket receipt](../testing/receipts/tucket-t114/README.md)
+qualifies four texts/four protocol ACKs against stock MeshCore across software
+reset, with the saved contact installed before peer work and no fresh advert in
+the second transcript. The single-profile loop preserves 8/32/2/8 capacity bounds
+and the 16 KiB stack / 25% free-heap limits. Sixteen pressure rounds peak at
+21860/49152 heap bytes and retain 75820 untouched stack bytes; actual traffic
+peaks at 6404 bytes. Both original named firmware/profiles restore and helpers
+stop. Volatile setup, installed personal-daemon/UI integration, power cuts and
+broader routing/roles remain open in the parity plan.

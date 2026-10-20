@@ -10,6 +10,16 @@ path = "testing/tucket_t114_ops.py"
 reason = "Attended exact-USB T114 application-only Tucket campaign; verifies package bounds and original live identity/profile restoration. Never an automatic hardware test."
 expires = "2027-01-20"
 
+[[asset_exemption]]
+path = "testing/receipts/tucket-t114/source/v4_ops.py"
+reason = "Frozen exact-USB SB1 peer application-only actions and before/after preservation checks for the attended T114 receipt."
+expires = "2027-01-20"
+
+[[asset_exemption]]
+path = "testing/receipts/tucket-t114/source/freeze_receipt.py"
+reason = "Frozen public evidence sealer; requires passing hardware, custody, memory and restoration results and excludes wallets and raw flash."
+expires = "2027-01-20"
+
 # This is an inventory and evidence registry, not a second assertion suite.
 # Assertions remain in the Rust tests, oracle scripts, and hardware procedures
 # that own them.  Discovery is deliberately derived from Git so that adding a

@@ -1,0 +1,11 @@
+flash classification: 8 persisted fields and 2 adjacent records, all classified
+   pseudonymous  identity
+         public  channel
+         public  region
+         public  device_name
+   pseudonymous  local_public
+         public  profile_digest
+   pseudonymous  scope
+   pseudonymous  keys
+         public  store record header
+         public  crash residue

@@ -75,7 +75,11 @@ build keeps the host-only rule above. `flash-policy.toml` explicitly enumerates
 every cache/scope field; the classification audit checks both record schemas.
 The [standalone contact receipt](../testing/receipts/tucket-firmware-contacts/README.md)
 records the bounded backends, live V4 reboot exchange and preservation checks.
-T114 has a separately qualified storage backend, not a standalone Tucket loop.
+That receipt qualified T114 storage only. The later opt-in T114
+`tucket-endpoint` profile has its own [live receipt](../testing/receipts/tucket-t114/README.md):
+scoped volatile USB setup, bounded public contacts, quiet owner-mediated writes
+and reboot recovery. It does not persist private setup or qualify the installed
+personal daemon. The default relay's host-only contact policy remains unchanged.
 
 ## The fleet-key liability is absent by posture, not mitigation
 

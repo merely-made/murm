@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "action": "live",
+  "usb": [
+    "COM10",
+    6421,
+    21023,
+    "TULLE-T114-01"
+  ]
+}

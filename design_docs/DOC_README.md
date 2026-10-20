@@ -1,9 +1,13 @@
 # Murm Documentation Index
 
-T114 live Tucket (2026-10-20, in progress): the
-[parity continuation](2026-10-16_protocol_parity_plan.md#t114-live-tucket-continuation-2026-10-20)
-adds a Tucket-only endpoint while retaining the explicit 16 KiB stack / 25%
-free-heap limits. Software checks precede physical memory, RF and restoration.
+T114 live Tucket (2026-10-20): the [qualified endpoint receipt](../testing/receipts/tucket-t114/README.md)
+records four texts/four protocol ACKs against stock MeshCore across reboot,
+restoring the contact before peer work with no decoded fresh advert. The
+Tucket-only image keeps the 8-contact/32-dedup/2-pending/8-frame bounds and passes
+sixteen pressure rounds: 75820 untouched stack bytes, 21860/49152 heap peak,
+zero final occupancy and exact refusals. Actual RF peaks at 6404 heap bytes.
+Original named firmware/profiles are restored and helpers stopped. Volatile
+setup, installed-daemon/UI, power-cut and wider role qualification remain open.
 
 Standalone Tucket contacts (2026-10-17): the
 [firmware receipt](../testing/receipts/tucket-firmware-contacts/README.md)
@@ -13,8 +17,8 @@ four texts/four protocol ACKs across a reboot without a fresh peer advert.
 The live constructor now runs on a separate executor turn with boxed state;
 the full pressure profile charges that storage and retains the selected memory
 reserves. Radio-budget-derived retries replace a one-second interval that
-overlapped responses. T114's backend is qualified, with its Tucket service loop
-still absent. Original named firmware/profiles are restored, and failed trials
+overlapped responses. That checkpoint qualified T114's backend only; the live loop is
+qualified separately above. Original named firmware/profiles are restored, and failed trials
 remain recorded. Power-cut and broader endpoint/role acceptance remain open.
 
 Tucket persistent contacts (2026-10-17): the [scoped host journal slice](../testing/receipts/tucket-contacts/README.md)

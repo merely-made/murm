@@ -1,0 +1,12 @@
+{
+  "cap": 100000000,
+  "owned_receipt_input_bytes": {
+    "validation\\results\\tucket-t114": 17464370,
+    "validation\\results\\tucket-firmware-contacts": 35223785,
+    "validation\\results\\firmware-memory": 13322670,
+    "validation\\results\\tucket-contacts": 10678969,
+    "testing\\receipts\\tucket-t114": 241754
+  },
+  "total": 76931548,
+  "note": "borrowed installed tools and reusable Cargo caches are not copied into the receipt"
+}
