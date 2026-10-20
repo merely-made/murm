@@ -428,6 +428,7 @@ mod tests {
         pane.set_inbox(Inbox {
             conversations: Vec::new(),
             failures: vec![AdapterFailure {
+                account_id: crate::AccountId::new("test-account"),
                 protocol: ProtocolKind::Misfin,
                 error: crate::AdapterError::Backend("down".to_string()),
             }],
@@ -477,6 +478,22 @@ mod tests {
         pane.clear_identity();
         pane.select(a);
         assert!(pane.draft.is_empty());
+    }
+
+    #[test]
+    fn account_qualified_conversations_keep_same_native_key_drafts_separate() {
+        let mut pane = CommsPane::new();
+        let first = ConversationId::for_account(ProtocolKind::Murm, "account-a", "shared-key");
+        let second = ConversationId::for_account(ProtocolKind::Murm, "account-b", "shared-key");
+        pane.select(first.clone());
+        pane.set_draft_body("first account draft");
+        pane.select(second.clone());
+        pane.set_draft_body("second account draft");
+
+        pane.select(first);
+        assert_eq!(pane.draft.body, "first account draft");
+        pane.select(second);
+        assert_eq!(pane.draft.body, "second account draft");
     }
 
     #[test]

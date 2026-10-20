@@ -13,8 +13,8 @@
 
 use serde::{Deserialize, Serialize};
 
-/// Which backend a conversation, identity, or message belongs to. Routing keys
-/// off this; new protocols (the mooting family) add variants here.
+/// Which protocol a conversation, identity, or message belongs to. Conversation
+/// routing also uses the local account qualifier carried by [`ConversationId`].
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ProtocolKind {
     /// Misfin (gemini-style mail). The default for a fresh new-message form.
@@ -31,6 +31,31 @@ pub enum ProtocolKind {
     Meshtastic,
     /// MeshCore private text, addressed by full public key within a local realm.
     MeshCore,
+}
+
+/// Stable identity for one local account/store served by a protocol adapter.
+/// This is routing metadata; it never replaces a backend's native conversation key.
+#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(transparent)]
+pub struct AccountId(pub String);
+
+impl AccountId {
+    /// Construct a stable account identifier.
+    pub fn new(value: impl Into<String>) -> Self {
+        Self(value.into())
+    }
+}
+
+impl From<String> for AccountId {
+    fn from(value: String) -> Self {
+        Self(value)
+    }
+}
+
+impl From<&str> for AccountId {
+    fn from(value: &str) -> Self {
+        Self(value.to_owned())
+    }
 }
 
 /// A party in a conversation — you or a peer. `address` is the backend-native
@@ -65,13 +90,19 @@ impl Identity {
     }
 }
 
-/// A stable, protocol-qualified conversation identifier. `key` is the backend's
-/// own handle for the thread: a misfin correspondent addr-spec or an exact
-/// murm cabal/channel address. Routing uses `protocol`; the adapter owns `key`.
+/// A stable, protocol and optionally account-qualified conversation identifier.
+/// `key` is the backend's own handle for the thread: a misfin correspondent
+/// addr-spec or an exact murm cabal/channel address. Account scope is routing
+/// metadata and never changes that backend-native key.
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct ConversationId {
     pub protocol: ProtocolKind,
     pub key: String,
+    /// The local adapter account that owns this conversation. Missing IDs are
+    /// legacy/unqualified IDs and may only route when exactly one adapter serves
+    /// `protocol`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub account_id: Option<AccountId>,
 }
 
 impl ConversationId {
@@ -80,6 +111,35 @@ impl ConversationId {
         Self {
             protocol,
             key: key.into(),
+            account_id: None,
+        }
+    }
+
+    /// Construct a conversation ID qualified for one local account.
+    pub fn for_account(
+        protocol: ProtocolKind,
+        account_id: impl Into<AccountId>,
+        key: impl Into<String>,
+    ) -> Self {
+        Self {
+            protocol,
+            key: key.into(),
+            account_id: Some(account_id.into()),
+        }
+    }
+
+    /// Attach the owning account while preserving the backend-native key.
+    pub fn with_account_id(mut self, account_id: impl Into<AccountId>) -> Self {
+        self.account_id = Some(account_id.into());
+        self
+    }
+
+    /// Remove routing metadata before passing the native ID to an adapter.
+    pub(crate) fn unqualified(&self) -> Self {
+        Self {
+            protocol: self.protocol,
+            key: self.key.clone(),
+            account_id: None,
         }
     }
 }

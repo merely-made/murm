@@ -9,8 +9,8 @@
 //! A [`ProtocolAdapter`] presents one backend (a misfin mailbox, a murm cabal
 //! set) as conversations, messages, and an identity, and accepts a [`Draft`] to
 //! send. [`Comms`](crate::Comms) holds a set of adapters and merges them into one
-//! unified view, routing per-conversation operations to the owning adapter by
-//! [`ProtocolKind`].
+//! unified view, routing per-conversation operations by protocol and registered
+//! account identity while passing backend-native conversation IDs to adapters.
 //!
 //! The trait is `async` and object-safe (via `async_trait`) so the host can hold
 //! a heterogeneous `Vec<Box<dyn ProtocolAdapter>>` and light each protocol up as
@@ -32,6 +32,10 @@ pub enum AdapterError {
     /// The operation is not supported by this backend (e.g. sending on a
     /// receive-only protocol surface).
     Unsupported(String),
+    /// A conversation names an account that is not registered for its protocol.
+    UnknownAccount(String),
+    /// A legacy, unqualified conversation cannot select one of several accounts.
+    AmbiguousAccount(ProtocolKind),
 }
 
 impl std::fmt::Display for AdapterError {
@@ -42,6 +46,13 @@ impl std::fmt::Display for AdapterError {
             AdapterError::Unsupported(message) => {
                 write!(formatter, "comms operation unsupported: {message}")
             },
+            AdapterError::UnknownAccount(account) => {
+                write!(formatter, "comms account not registered: {account}")
+            },
+            AdapterError::AmbiguousAccount(protocol) => write!(
+                formatter,
+                "comms conversation for {protocol:?} does not identify one registered account"
+            ),
         }
     }
 }
@@ -55,7 +66,8 @@ impl std::error::Error for AdapterError {}
 /// disk are `async`.
 #[async_trait]
 pub trait ProtocolAdapter: Send + Sync {
-    /// Which protocol this adapter serves. [`Comms`](crate::Comms) routes by it.
+    /// Which protocol this adapter serves. [`Comms`](crate::Comms) combines it
+    /// with the registered account identity when routing conversations.
     fn protocol(&self) -> ProtocolKind;
 
     /// This user's identity on this protocol (the "me" the pane shows).

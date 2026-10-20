@@ -48,10 +48,10 @@ pub mod murm_adapter;
 pub mod misfin_adapter;
 
 pub use adapter::{AdapterError, ProtocolAdapter};
-pub use comms::{AdapterFailure, Comms, Inbox};
+pub use comms::{AccountIdentity, AdapterFailure, Comms, Inbox};
 pub use model::{
-    Conversation, ConversationId, DeliveryQueueReason, DeliveryStatus, Direction, Draft, Identity,
-    Message, MessageBody, MessageId, ProtocolKind,
+    AccountId, Conversation, ConversationId, DeliveryQueueReason, DeliveryStatus, Direction, Draft,
+    Identity, Message, MessageBody, MessageId, ProtocolKind,
 };
 pub use pane::{CommsPane, DockSide, DockState, NewMessageForm, ThreadRequest};
 

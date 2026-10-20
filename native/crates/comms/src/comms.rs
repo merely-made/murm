@@ -10,17 +10,31 @@
 //! [`inbox`](Comms::inbox) merges every adapter's conversations (recency-sorted)
 //! and surfaces, rather than hides, any backend that failed;
 //! [`messages`](Comms::messages) and [`send`](Comms::send) route to the owning
-//! adapter by [`ProtocolKind`].
+//! account using the protocol and account qualifier carried by each conversation.
 
 use crate::adapter::{AdapterError, ProtocolAdapter};
 use crate::model::{
-    Conversation, ConversationId, DeliveryStatus, Draft, Identity, Message, MessageId, ProtocolKind,
+    AccountId, Conversation, ConversationId, DeliveryStatus, Draft, Identity, Message, MessageId,
+    ProtocolKind,
 };
 
-/// A backend that failed during [`Comms::inbox`], paired with its protocol so the
-/// pane can show which one is down without dropping the conversations that loaded.
+struct RegisteredAdapter {
+    account_id: AccountId,
+    adapter: Box<dyn ProtocolAdapter>,
+}
+
+/// One account's identity as exposed by a registered adapter.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct AccountIdentity {
+    pub account_id: AccountId,
+    pub identity: Identity,
+}
+
+/// A backend that failed during [`Comms::inbox`], paired with its account and
+/// protocol so the pane can identify the failure without dropping other rows.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct AdapterFailure {
+    pub account_id: AccountId,
     pub protocol: ProtocolKind,
     pub error: AdapterError,
 }
@@ -38,7 +52,7 @@ pub struct Inbox {
 /// [`with_adapter`](Comms::with_adapter) / [`add_adapter`](Comms::add_adapter).
 #[derive(Default)]
 pub struct Comms {
-    adapters: Vec<Box<dyn ProtocolAdapter>>,
+    adapters: Vec<RegisteredAdapter>,
 }
 
 impl Comms {
@@ -51,34 +65,92 @@ impl Comms {
 
     /// Add a backend adapter (builder style).
     pub fn with_adapter(mut self, adapter: Box<dyn ProtocolAdapter>) -> Self {
-        self.adapters.push(adapter);
+        let account_id = AccountId::new(adapter.identity().address);
+        self.add_account(account_id, adapter);
         self
     }
 
     /// Add a backend adapter.
     pub fn add_adapter(&mut self, adapter: Box<dyn ProtocolAdapter>) {
-        self.adapters.push(adapter);
+        let account_id = AccountId::new(adapter.identity().address);
+        self.add_account(account_id, adapter);
     }
 
-    /// This user's identity on each backend (one per adapter, in add order) — the
-    /// "who am I" the pane shows per protocol.
+    /// Add a backend with a caller-stable account identifier. Use this when an
+    /// account's identity address is not unique among its local stores.
+    pub fn with_account(
+        mut self,
+        account_id: impl Into<AccountId>,
+        adapter: Box<dyn ProtocolAdapter>,
+    ) -> Self {
+        self.add_account(account_id, adapter);
+        self
+    }
+
+    /// Add a backend with a caller-stable account identifier.
+    pub fn add_account(
+        &mut self,
+        account_id: impl Into<AccountId>,
+        adapter: Box<dyn ProtocolAdapter>,
+    ) {
+        self.adapters.push(RegisteredAdapter {
+            account_id: account_id.into(),
+            adapter,
+        });
+    }
+
+    /// This user's backend identity on each adapter, in registration order.
     pub fn identities(&self) -> Vec<Identity> {
         self.adapters
             .iter()
-            .map(|adapter| adapter.identity())
+            .map(|registered| registered.adapter.identity())
             .collect()
     }
 
-    /// The merged inbox: every backend's conversations, sorted most-recent first
+    /// Account-scoped identities for new-message account selection.
+    pub fn account_identities(&self) -> Vec<AccountIdentity> {
+        self.adapters
+            .iter()
+            .map(|registered| AccountIdentity {
+                account_id: registered.account_id.clone(),
+                identity: registered.adapter.identity(),
+            })
+            .collect()
+    }
+
+    /// The merged inbox: every backend's account-qualified conversations, sorted most-recent first
     /// (conversations with no timestamp sort last). A backend that errors
     /// contributes an [`AdapterFailure`] instead of its conversations.
     pub async fn inbox(&self) -> Inbox {
         let mut conversations = Vec::new();
         let mut failures = Vec::new();
-        for adapter in &self.adapters {
+        for registered in &self.adapters {
+            let adapter = registered.adapter.as_ref();
             match adapter.conversations().await {
-                Ok(mut found) => conversations.append(&mut found),
+                Ok(mut found) => {
+                    let expected_protocol = adapter.protocol();
+                    // Keep valid rows from a mixed response, but make malformed
+                    // rows visible as an account-scoped failure and discard them.
+                    if found
+                        .iter()
+                        .any(|conversation| conversation.id.protocol != expected_protocol)
+                    {
+                        failures.push(AdapterFailure {
+                            account_id: registered.account_id.clone(),
+                            protocol: expected_protocol,
+                            error: AdapterError::Backend(
+                                "adapter returned a conversation for a different protocol".into(),
+                            ),
+                        });
+                        found.retain(|conversation| conversation.id.protocol == expected_protocol);
+                    }
+                    for conversation in &mut found {
+                        conversation.id.account_id = Some(registered.account_id.clone());
+                    }
+                    conversations.append(&mut found);
+                },
                 Err(error) => failures.push(AdapterFailure {
+                    account_id: registered.account_id.clone(),
                     protocol: adapter.protocol(),
                     error,
                 }),
@@ -93,13 +165,16 @@ impl Comms {
     }
 
     /// The messages in one conversation, routed to the backend that owns it.
-    /// `Unsupported` if no adapter serves the conversation's protocol.
+    /// Qualified IDs route to their account; legacy IDs route only when one
+    /// adapter serves the protocol.
     pub async fn messages(
         &self,
         conversation: &ConversationId,
     ) -> Result<Vec<Message>, AdapterError> {
-        self.adapter_for(conversation.protocol)?
-            .messages(conversation)
+        let registered = self.adapter_for(conversation)?;
+        registered
+            .adapter
+            .messages(&conversation.unqualified())
             .await
     }
 
@@ -109,7 +184,10 @@ impl Comms {
         let conversation = draft.conversation.as_ref().ok_or_else(|| {
             AdapterError::Unsupported("draft has no target conversation".to_string())
         })?;
-        self.adapter_for(conversation.protocol)?.send(draft).await
+        let registered = self.adapter_for(conversation)?;
+        let mut native_draft = draft.clone();
+        native_draft.conversation = Some(conversation.unqualified());
+        registered.adapter.send(&native_draft).await
     }
 
     /// Read the owning backend's delivery observation for one message.
@@ -118,19 +196,46 @@ impl Comms {
         conversation: &ConversationId,
         message: &MessageId,
     ) -> Result<DeliveryStatus, AdapterError> {
-        self.adapter_for(conversation.protocol)?
-            .delivery_status(conversation, message)
+        let registered = self.adapter_for(conversation)?;
+        registered
+            .adapter
+            .delivery_status(&conversation.unqualified(), message)
             .await
     }
 
-    /// The adapter serving `protocol`, or `Unsupported` if none is registered.
-    fn adapter_for(&self, protocol: ProtocolKind) -> Result<&dyn ProtocolAdapter, AdapterError> {
-        self.adapters
+    /// Resolve a qualified account exactly, or a legacy ID only when unambiguous.
+    fn adapter_for(
+        &self,
+        conversation: &ConversationId,
+    ) -> Result<&RegisteredAdapter, AdapterError> {
+        let matches = self
+            .adapters
             .iter()
-            .find(|adapter| adapter.protocol() == protocol)
-            .map(|adapter| adapter.as_ref())
-            .ok_or_else(|| {
-                AdapterError::Unsupported(format!("no adapter registered for {protocol:?}"))
-            })
+            .filter(|registered| registered.adapter.protocol() == conversation.protocol);
+        match &conversation.account_id {
+            Some(account_id) => {
+                let mut owned = matches.filter(|registered| &registered.account_id == account_id);
+                match (owned.next(), owned.next()) {
+                    (None, _) => Err(AdapterError::UnknownAccount(account_id.0.clone())),
+                    (Some(only), None) => Ok(only),
+                    (Some(_), Some(_)) => {
+                        Err(AdapterError::AmbiguousAccount(conversation.protocol))
+                    },
+                }
+            },
+            None => {
+                let mut matches = matches;
+                match (matches.next(), matches.next()) {
+                    (None, _) => Err(AdapterError::Unsupported(format!(
+                        "no adapter registered for {:?}",
+                        conversation.protocol
+                    ))),
+                    (Some(only), None) => Ok(only),
+                    (Some(_), Some(_)) => {
+                        Err(AdapterError::AmbiguousAccount(conversation.protocol))
+                    },
+                }
+            },
+        }
     }
 }
