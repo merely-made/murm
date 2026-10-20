@@ -132,6 +132,7 @@ async fn main(spawner: Spawner) {
     let mut native_guard_fault = false;
     if let Some(current) = settings
         && current.channel == BootChannel::LegacyNode
+        && !cfg!(feature = "tucket-endpoint")
     {
         let guarded = radio_hand::settings::Settings {
             channel: BootChannel::Node,

@@ -110,7 +110,7 @@ command = ["cargo", "test"]
 [[suite]]
 id = "tucket-firmware-contact-store"
 tier = "pr"
-command = ["cargo", "test", "-p", "radio-hand", "--features", "instances,tucket-contact-store-bench", "--lib", "--test", "tucket_contacts", "--test", "instances"]
+command = ["cargo", "test", "-p", "radio-hand", "--features", "instances,tucket-endpoint,tucket-contact-store-bench", "--lib", "--test", "tucket_contacts", "--test", "instances"]
 
 [[asset_exemption]]
 path = "testing/receipts/tucket-firmware-contacts/source/prepare_boards.py"
