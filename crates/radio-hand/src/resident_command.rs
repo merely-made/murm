@@ -156,6 +156,9 @@ impl Default for Stream {
     }
 }
 impl Stream {
+    pub const fn at_boundary(&self) -> bool {
+        self.phase == 0
+    }
     pub const fn new() -> Self {
         Self {
             body: [0; MAX_BODY],

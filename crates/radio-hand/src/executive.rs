@@ -23,6 +23,8 @@ use crate::observation::{RefusalReason, RequestKind};
 use crate::region::Region;
 
 mod air;
+#[cfg(feature = "tucket-contact-store")]
+mod contacts;
 mod types;
 
 pub use types::{

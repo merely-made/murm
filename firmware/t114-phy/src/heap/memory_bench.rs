@@ -1,4 +1,5 @@
 //! A separate poll boundary keeps fixture frames off the normal main-task stack.
+extern crate alloc;
 use core::sync::atomic::{AtomicUsize, Ordering};
 use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, signal::Signal};
 
@@ -16,17 +17,31 @@ pub async fn worker() {
     loop {
         REQUEST.wait().await;
         MIN_SP.store(usize::MAX, Ordering::Relaxed);
-        let values = protocol_capacity_probe::target_round::run(
+        let initial = super::used();
+        // Charge live boxed storage alongside the full bounded workload.
+        #[cfg(feature = "tucket-endpoint")]
+        let state_storage = alloc::boxed::Box::<crate::tucket_service::State>::new_uninit();
+        let mut values = protocol_capacity_probe::target_round::run(
             super::used,
             super::bench_refuse_oversize,
             checkpoint,
         );
         protocol_capacity_probe::runtime_pressure::run(checkpoint);
+        #[cfg(feature = "tucket-endpoint")]
+        protocol_capacity_probe::endpoint_pressure::run(checkpoint);
         assert_eq!(
             super::used(),
             values[3],
             "runtime pressure leaked allocations"
         );
+        #[cfg(feature = "tucket-endpoint")]
+        {
+            core::hint::black_box(&state_storage);
+            drop(state_storage);
+        }
+        values[0] = initial;
+        values[3] = super::used();
+        assert_eq!(values[0], values[3], "boxed storage leaked");
         RESULT.signal(values);
     }
 }

@@ -353,3 +353,29 @@ initial allocation guard, USB fragmentation failure, constructor stall, retry
 failures and a checksum-format parser refusal remain individually retained.
 Physical power-cut, stock filesystem persistence, unattended/driver-deadline,
 broader routing/roles and the T114 Tucket loop remain open.
+
+### T114 live Tucket continuation, 2026-10-20
+
+**Status: in progress.** Add an opt-in Tucket-only service on the existing
+T114 radio/USB owner. Keep eight contacts, 32 dedup entries, two pending text
+operations and eight queued frames, with radio-budget-derived retry timing.
+Retain the explicit 16384-byte untouched-stack and 25% free-heap limits.
+The pressure image charges the exact live state's boxed storage alongside the
+existing fragmented protocol workload. Construction and actual RF traffic
+also need boot-painted stack/allocator measurements.
+
+Required receipts: endpoint queue/expiry/ACK/refusal tests; production and
+instrumented target links; sixteen bounded pressure rounds; scoped Djinn
+commissioning, bidirectional exact text/ACK and cache restoration across reboot
+without a fresh peer advert; original firmware/identity/profile restoration.
+Keep new inputs under `validation/results/tucket-t114`, with public evidence
+under `testing/receipts/tucket-t114`. Total retained input/receipt cap is
+100 MB across this lane and its retained prior radio/memory inputs. Preserve
+failed trials. No private setup or flash dump is published.
+
+The prior T114 cache contains the exact eight-key synthetic non-RF fixture.
+An explicit bench-only pre-radio handoff image may clear only that exact
+snapshot at sequence 1, touching only `0xe4000..0xe6000`. Other scopes, keys,
+sequences and corruption refuse. This is separate from product commissioning
+and is never run between the accepted first/reboot exchanges. Private identity
+setup remains volatile, released through scoped Djinn custody after each boot.
