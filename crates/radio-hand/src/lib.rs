@@ -55,6 +55,8 @@ pub mod service;
 pub mod settings;
 #[cfg(feature = "tucket-contact-store")]
 pub mod tucket_contacts;
+#[cfg(feature = "tucket-endpoint")]
+pub mod tucket_endpoint;
 pub mod work;
 
 pub use seneschal::{region, store};

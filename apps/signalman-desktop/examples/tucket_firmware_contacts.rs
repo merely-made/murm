@@ -19,6 +19,8 @@ struct PublicConfig {
     device_id: pandect::DeviceId,
     realm: String,
     port: PathBuf,
+    #[serde(default)]
+    usb_dtr: bool,
 }
 fn save(path: &Path, value: &serde_json::Value) -> Result<()> {
     use std::io::Write;
@@ -107,7 +109,7 @@ async fn run(args: &[String]) -> Result<()> {
     std::fs::create_dir(output)?;
     let mut port = signalman::radio_comms::companion::open_port(&config.port).await?;
     port.set_rts(false)?;
-    port.set_dtr(false)?;
+    port.set_dtr(config.usb_dtr)?;
     // Select already-permitted ordinary service on an uncommissioned board
     // before the volatile setup frame. This does not mint owner authority.
     port.write_all(b"status\n").await?;

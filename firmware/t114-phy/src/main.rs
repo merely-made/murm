@@ -18,10 +18,14 @@ use embassy_usb::{Builder, Config, UsbDevice};
 use embedded_hal_bus::spi::ExclusiveDevice;
 use lora_phy::LoRa;
 use lora_phy::sx126x::{Config as Sx126xConfig, Sx126x, Sx1262, TcxoCtrlVoltage};
+#[cfg(not(feature = "tucket-endpoint"))]
+use radio_hand::channel::Personality;
 use radio_hand::channel::modem::ModemChannel;
+#[cfg(not(feature = "tucket-endpoint"))]
 use radio_hand::channel::node::NodeChannel;
+#[cfg(not(feature = "tucket-endpoint"))]
 use radio_hand::channel::rnode::RNodeChannel;
-use radio_hand::channel::{Channel, ChannelInfo, Event, Personality};
+use radio_hand::channel::{Channel, ChannelInfo, Event};
 use radio_hand::executive::{Executive, Face, Heartbeat, RadioState};
 use radio_hand::link::{Flow, HostLink};
 use radio_hand::settings::Channel as BootChannel;
@@ -29,8 +33,10 @@ use selvage::{MESHTASTIC_SYNC_WORD, PhyProfile};
 use static_cell::StaticCell;
 
 use crate::radio::{Sx126xDiagnostics, T114Interface, T114Spi};
+use boot_report::{publish_fault, publish_online};
 
 mod board;
+mod boot_report;
 #[cfg(feature = "contact-store-bench")]
 #[path = "../../contact_store_bench.rs"]
 mod contact_bench;
@@ -48,6 +54,8 @@ mod radio;
 #[path = "../../stack_watermark.rs"]
 mod stack_watermark;
 mod store;
+#[cfg(feature = "tucket-endpoint")]
+mod tucket_service;
 mod ui;
 
 bind_interrupts!(struct Irqs {
@@ -62,50 +70,6 @@ const TX_POWER_DBM: i32 = board::DEFAULT_TX_POWER_DBM as i32;
 const MAX_RADIO_FRAME: usize = 255;
 const USB_PACKET: usize = 64;
 
-/// Boot line naming the node and its heap cost. Shows only the public destination.
-fn describe_node(node: Option<&retinue::node::Node<32, 8, 4>>, out: &mut [u8; 64]) -> usize {
-    let mut text = radio_face::Text::<64>::empty();
-    match node {
-        Some(node) => {
-            let dest = node.destination();
-            let bytes = dest.as_slice();
-            let _ = write!(
-                &mut text,
-                "node={:02x}{:02x}{:02x}{:02x} heap={}/{} highwater={}\r\n",
-                bytes[0],
-                bytes[1],
-                bytes[2],
-                bytes[3],
-                heap::used(),
-                heap::HEAP_SIZE,
-                heap::high_water(),
-            );
-        }
-        None => {
-            let _ = write!(&mut text, "node=unavailable\r\n");
-        }
-    }
-    let source = text.as_str().as_bytes();
-    let len = source.len().min(out.len());
-    out[..len].copy_from_slice(&source[..len]);
-    len
-}
-
-fn publish_fault(status: &mut radio_face::LocalStatus, code: u8, message: &'static str) {
-    status.radio = radio_face::RadioState::Fault;
-    status.fault = Some(radio_face::Fault {
-        code,
-        message: radio_face::Text::from_truncated(message),
-    });
-    ui::publish(*status, radio_face::LedSignal::Idle);
-}
-
-fn publish_online(status: &mut radio_face::LocalStatus) {
-    status.radio = radio_face::RadioState::Online;
-    status.fault = None;
-    ui::publish(*status, radio_face::LedSignal::Idle);
-}
-
 #[embassy_executor::task]
 async fn usb_task(mut device: UsbDevice<'static, UsbDriver>) {
     device.run().await;
@@ -117,6 +81,8 @@ async fn main(spawner: Spawner) {
     // First statement: everything after this may allocate.
     // SAFETY: called once, before any allocation.
     unsafe { heap::init(spawner) };
+    #[cfg(feature = "tucket-endpoint")]
+    tucket_service::start_builder(spawner);
 
     // Crash residue first: reset reason, crash count, and whether to distrust the channel.
     let boot_crash = crash::on_boot();
@@ -177,6 +143,9 @@ async fn main(spawner: Spawner) {
         }
     }
 
+    #[cfg(feature = "tucket-endpoint")]
+    let node: Option<retinue::node::Node<32, 8, 4>> = None;
+    #[cfg(not(feature = "tucket-endpoint"))]
     let node = settings
         .map(|settings| {
             retinue::node::Node::<32, 8, 4>::new(
@@ -199,7 +168,7 @@ async fn main(spawner: Spawner) {
             node
         });
     let mut node_line = [0_u8; 64];
-    let node_line_len = describe_node(node.as_ref(), &mut node_line);
+    let node_line_len = boot_report::describe_node(node.as_ref(), &mut node_line);
 
     // One durable announce lease per boot, before radio init. It lives apart from the
     // identity: a damaged lease selects the recovery modem without replacing the identity.
@@ -211,9 +180,11 @@ async fn main(spawner: Spawner) {
     let lease = (native_node_requested && !native_guard_fault)
         .then(|| store.reserve_announce_timebase())
         .transpose();
+    #[allow(unused_mut)] // The native constructor can latch a fault in other profiles.
     let mut timebase_fault = native_node_requested && (native_guard_fault || lease.is_err());
-    let lease = lease.ok().flatten();
-    let native_channel = node.zip(lease).and_then(|(node, lease)| {
+    let _lease = lease.ok().flatten();
+    #[cfg(not(feature = "tucket-endpoint"))]
+    let native_channel = node.zip(_lease).and_then(|(node, lease)| {
         NodeChannel::new(node, lease)
             .map_err(|_| timebase_fault = true)
             .ok()
@@ -417,7 +388,7 @@ async fn main(spawner: Spawner) {
         publish_host: ui::publish_host,
     };
     // Declared before `exec`, which borrows it for the rest of `main`.
-    let mut observations = None;
+    let mut observations;
     // The executive owns `lora`, the flash and the RNG for the rest of `main`.
     let mut exec = Executive::new(
         &mut lora,
@@ -443,6 +414,9 @@ async fn main(spawner: Spawner) {
     // plan supersedes structural decision 4, but is not wired into this loop yet.
     // No readable identity, or three consecutive crash boots, selects the modem: it needs
     // only a radio and a host. The crash count clears after a clean minute.
+    #[cfg(feature = "tucket-endpoint")]
+    let mut channel = ModemChannel::new(Sx126xDiagnostics);
+    #[cfg(not(feature = "tucket-endpoint"))]
     let mut channel = match (
         settings.map(|s| s.channel),
         native_channel,
@@ -458,6 +432,8 @@ async fn main(spawner: Spawner) {
 
     // Outside the session loop so announce cadence survives attach and detach.
     let mut heartbeat = Heartbeat::new(channel.heartbeat());
+    #[cfg(feature = "tucket-endpoint")]
+    let mut setup_stream = radio_hand::resident_wire::ResidentSetupStream::new();
 
     loop {
         radio_hand::channel::await_host_with_listening(
@@ -561,6 +537,20 @@ async fn main(spawner: Spawner) {
                     status.last_wake = radio_face::WakeSource::Host;
                     exec.publish(radio_face::LedSignal::Idle);
                     let packet = &usb_packet[..length];
+                    #[cfg(feature = "tucket-endpoint")]
+                    let packet = setup_stream.strip_wake_prefix(channel.at_boundary(), packet);
+                    #[cfg(feature = "tucket-endpoint")]
+                    if tucket_service::accept_setup(
+                        &mut setup_stream,
+                        channel.at_boundary(),
+                        packet,
+                        &mut exec,
+                        &mut host,
+                    )
+                    .await
+                    {
+                        continue;
+                    }
                     let at_boundary = channel.at_boundary();
                     match probes::handle(
                         packet,
@@ -587,6 +577,10 @@ async fn main(spawner: Spawner) {
             }
         }
         channel.stop(&mut exec, &mut host).await;
+        #[cfg(feature = "tucket-endpoint")]
+        {
+            setup_stream = radio_hand::resident_wire::ResidentSetupStream::new();
+        }
         // DTR drops slightly after the failed I/O that ended the session. Require that edge
         // before the next attach, or a latched DTR can hang the banner write on a vanished
         // host. The unattached loop keeps servicing the radio meanwhile; never block here.

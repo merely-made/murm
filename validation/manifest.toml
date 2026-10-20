@@ -5,6 +5,11 @@
 
 version = 1
 
+[[asset_exemption]]
+path = "testing/tucket_t114_ops.py"
+reason = "Attended exact-USB T114 application-only Tucket campaign; verifies package bounds and original live identity/profile restoration. Never an automatic hardware test."
+expires = "2027-01-20"
+
 # This is an inventory and evidence registry, not a second assertion suite.
 # Assertions remain in the Rust tests, oracle scripts, and hardware procedures
 # that own them.  Discovery is deliberately derived from Git so that adding a

@@ -4,6 +4,7 @@
 
 extern crate alloc;
 pub mod current;
+pub mod endpoint_pressure;
 pub mod runtime_pressure;
 pub mod target_round;
 use alloc::{vec, vec::Vec};

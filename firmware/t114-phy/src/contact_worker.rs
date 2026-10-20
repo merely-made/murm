@@ -9,7 +9,10 @@ static RESULT: Signal<CriticalSectionRawMutex, SettingsStore<'static>> = Signal:
 #[embassy_executor::task]
 async fn worker() {
     let mut store = REQUEST.wait().await;
+    #[cfg(not(feature = "contact-fixture-handoff"))]
     crate::contact_bench::run(&mut store);
+    #[cfg(feature = "contact-fixture-handoff")]
+    crate::contact_bench::handoff(&mut store);
     RESULT.signal(store);
 }
 pub async fn run(store: SettingsStore<'static>, spawner: Spawner) -> SettingsStore<'static> {

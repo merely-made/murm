@@ -29,6 +29,7 @@ replay = ["dep:retinue", "retinue/alloc"]
 control-retinue = ["dep:retinue", "seneschal/retinue"]
 instances = ["dep:retinue", "retinue/alloc", "dep:sennet", "dep:tucket"]
 tucket-contact-store = ["dep:tucket"]
+tucket-endpoint = ["dep:tucket"]
 tucket-contact-store-bench = ["tucket-contact-store"]
 
 [dependencies]

@@ -19,14 +19,15 @@
 //!    *resets the board* immediately afterwards, unconditionally, even if the host vanished
 //!    before the reply landed. The erase is followed by a reboot, so the window it blanks is
 //!    one the board was about to leave anyway.
-//! 3. Durable control and announce reservations are pre-radio operations. The
-//!    optional peer-cache adapter currently has only an explicit pre-radio
-//!    storage-fixture caller; T114 does not yet host a live Tucket loop.
+//! 3. Durable control and announce reservations are pre-radio operations.
+//! 4. The optional Tucket endpoint saves its dedicated public cache through
+//!    Executive's exclusive standby/IRQ-settlement window, after completed RX
+//!    is drained and before protocol TX. RX is restored before it returns.
+//!    Uncertain cancellation or driver failure requires a board reset.
 //!
-//! The invariant to keep, stated for whoever adds the third path: **a write is either before
-//! the radio starts, or immediately before a reset.** A caller that wants neither — a
-//! runtime-persisted peer table, a crash record written where it happened — is the one that
-//! must build the staged-commit window, and it should re-read pressure point 3 first.
+//! Flash stalls are explicit listening blackouts; this profile claims no
+//! continuous coverage across a contact save. Other callers remain pre-radio
+//! or immediately followed by reset.
 
 use core::sync::atomic::{AtomicU32, Ordering};
 use embassy_nrf::Peri;
@@ -514,6 +515,21 @@ impl AbSlotStore for SettingsStore<'_> {
 /// through this. Bundling them is not a convenience: they are one object here, because the
 /// same struct holds the NVMC pages and the hardware RNG.
 impl BoardStore for SettingsStore<'_> {
+    #[cfg(feature = "tucket-contact-store")]
+    fn load_tucket_contacts(
+        &mut self,
+        scope: radio_hand::tucket_contacts::Scope,
+    ) -> Result<Option<radio_hand::tucket_contacts::Snapshot>, radio_hand::tucket_contacts::Fault>
+    {
+        radio_hand::tucket_contacts::load(self, scope).map(|s| s.map(|s| s.snapshot))
+    }
+    #[cfg(feature = "tucket-contact-store")]
+    fn save_tucket_contacts(
+        &mut self,
+        snapshot: &radio_hand::tucket_contacts::Snapshot,
+    ) -> Result<(), radio_hand::tucket_contacts::Fault> {
+        radio_hand::tucket_contacts::save(self, snapshot).map(|_| ())
+    }
     /// The nRF52840's physical noise source, bias-corrected — see [`SettingsStore::new`].
     /// Infallible on this board: the peripheral is always present, so the only reason this
     /// returns a `Result` is that other boards have no such thing.

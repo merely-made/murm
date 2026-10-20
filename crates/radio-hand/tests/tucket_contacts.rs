@@ -75,6 +75,51 @@ fn snapshot(keys: &[[u8; 32]]) -> Snapshot {
     Snapshot::new(scope(), keys).unwrap()
 }
 
+#[cfg(feature = "tucket-contact-store-bench")]
+#[test]
+fn fixture_handoff_refuses_other_keys_scopes_sequences_and_corruption() {
+    let mut flash = Flash::default();
+    assert!(fixture::clear_fixture(&mut flash).is_err());
+    assert_eq!(flash.mutations, 0);
+    fixture::run(&mut flash).unwrap();
+    let good = flash.clone();
+    let before = flash.mutations;
+    fixture::clear_fixture(&mut flash).unwrap();
+    assert_eq!(flash.mutations, before + 2);
+    assert!(flash.pages.iter().flatten().all(|b| *b == 255));
+    let expected = fixture::snapshot().unwrap();
+    for scenario in 0..4 {
+        let mut flash = good.clone();
+        match scenario {
+            0 => {
+                let mut s = expected.clone();
+                s.keys.pop();
+                save(&mut flash, &s).unwrap();
+            }
+            1 => {
+                let mut s = expected.clone();
+                s.keys.clear();
+                save(&mut flash, &s).unwrap();
+                save(&mut flash, &expected).unwrap();
+            }
+            2 => {
+                flash.pages[1][40] ^= 1;
+            }
+            _ => {
+                flash = Flash::default();
+                let mut s = expected.clone();
+                s.scope.local_public = key(90);
+                save(&mut flash, &s).unwrap();
+            }
+        }
+        let before = flash.pages;
+        let writes = flash.mutations;
+        assert!(fixture::clear_fixture(&mut flash).is_err());
+        assert_eq!(flash.pages, before);
+        assert_eq!(flash.mutations, writes);
+    }
+}
+
 #[test]
 fn blank_save_cold_reload_and_repeated_adverts_are_bounded() {
     let mut flash = Flash::default();

@@ -51,6 +51,20 @@ pub trait ChipDiagnostics<RK: RadioKind, DLY: DelayNs> {
 /// One trait because one object holds both on the T114 (NVMC pages and hardware RNG). It
 /// lives on the executive per structural decision 4, so a channel cannot reach the store.
 pub trait BoardStore {
+    #[cfg(feature = "tucket-contact-store")]
+    fn load_tucket_contacts(
+        &mut self,
+        _scope: crate::tucket_contacts::Scope,
+    ) -> Result<Option<crate::tucket_contacts::Snapshot>, crate::tucket_contacts::Fault> {
+        Err(crate::tucket_contacts::Fault::Io)
+    }
+    #[cfg(feature = "tucket-contact-store")]
+    fn save_tucket_contacts(
+        &mut self,
+        _snapshot: &crate::tucket_contacts::Snapshot,
+    ) -> Result<(), crate::tucket_contacts::Fault> {
+        Err(crate::tucket_contacts::Fault::Io)
+    }
     /// Fill `out` with random bytes.
     ///
     /// Fallible on purpose: a board may have no entropy source, and filling with zeros would

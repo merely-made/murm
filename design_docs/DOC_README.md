@@ -1,5 +1,10 @@
 # Murm Documentation Index
 
+T114 live Tucket (2026-10-20, in progress): the
+[parity continuation](2026-10-16_protocol_parity_plan.md#t114-live-tucket-continuation-2026-10-20)
+adds a Tucket-only endpoint while retaining the explicit 16 KiB stack / 25%
+free-heap limits. Software checks precede physical memory, RF and restoration.
+
 Standalone Tucket contacts (2026-10-17): the
 [firmware receipt](../testing/receipts/tucket-firmware-contacts/README.md)
 qualifies an opt-in eight-key public cache in dedicated A/B flash pairs.

@@ -5,6 +5,14 @@ use core::{
 };
 use radio_hand::tucket_contacts::{self, Storage};
 static RESULT: AtomicU32 = AtomicU32::new(u32::MAX);
+#[allow(dead_code)] // Used only by the explicit T114 fixture-handoff image.
+pub fn handoff(store: &mut impl Storage) {
+    let value = match tucket_contacts::fixture::clear_fixture(store) {
+        Ok(()) => 0,
+        Err(fault) => 0xf0000000 | fault as u32,
+    };
+    RESULT.store(value, Ordering::Relaxed);
+}
 pub fn run(store: &mut impl Storage) {
     let value = match tucket_contacts::fixture::run(store) {
         Ok(r) if r.sequence < 65536 => {
