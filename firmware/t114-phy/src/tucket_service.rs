@@ -151,12 +151,12 @@ fn reset() -> ! {
 // Format before constructing the future: retaining Report in every await slot
 // would waste several KiB of the main task's static SRAM reservation.
 fn report(host: &mut impl HostLink, out: Report) -> impl Future<Output = ()> + '_ {
-    let mut line = Box::new(out.format());
+    let line = (host.is_attached() && (!out.events.is_empty() || out.overflowed != 0))
+        .then(|| Box::new(out.format()));
     async move {
-        if host.is_attached() {
+        if let Some(line) = line {
             let _ = host.write_all(line.as_bytes()).await;
         }
-        line.clear();
     }
 }
 async fn status(state: &State, host: &mut impl HostLink) {
