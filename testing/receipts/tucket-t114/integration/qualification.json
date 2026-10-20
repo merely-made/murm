@@ -1,0 +1,13 @@
+{
+  "physical_firmware_source": "9de106432ad30a3ce4457866c8720f856d34f470",
+  "merged_source": "129b5566af266337ca906a93237bf14d78681f5e",
+  "physical_source_history_preserved": true,
+  "firmware_sources_unchanged": true,
+  "resolved_package_records_identical": true,
+  "lock_resolution": "kept upstream removal of unused patches and retained T114 heapless/Tucket dependencies",
+  "merged_checks": {
+    "cargo_1_97_1_locked_offline_arm_check": "passed",
+    "radio_hand_tests": 180
+  },
+  "desktop_supplier_updates_are_separate_from_the_recorded_radio_tool_cohort": true
+}
