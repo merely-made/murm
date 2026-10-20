@@ -1,0 +1,27 @@
+{
+  "passed": true,
+  "firmware_source": "9de106432ad30a3ce4457866c8720f856d34f470",
+  "probe_source_sha256": "B19D31FA91A37F824DF3B25EBF5375CD9BDC162DBBC2D927F8175B1F4FAC0707",
+  "probe_sha256": "1324EFD61824810BC5E6052CE263C28FF0E046D97E5C07C237B13CAD919ADAEE",
+  "peer_sha256": "EDFFBF9BC67C795E441B8B789A018A22A6F3432417F0E82FAC944D65FEF0F9DE",
+  "custodian_sha256": "23886513fbad19a6903f50dd4d91897c672f67238e4ddd990efcb4d8dd1f4987",
+  "phases": [
+    {
+      "name": "first",
+      "passed": true,
+      "cached_before_peer_work": 0
+    },
+    {
+      "name": "cold",
+      "passed": true,
+      "cached_before_peer_work": 1
+    }
+  ],
+  "self_public": "c34476131046b52c41299304a8d6db81b473ceffa0c9d07a1928c96c397c3213",
+  "memory_gate": "quiet-pressure/board.json",
+  "peer_public": "11c1d78f658ee195e0b51defdd01e1953432b951175edd6cd38f5f59161678c2",
+  "radio_passed": true,
+  "peer_restored": true,
+  "dut_restored": true,
+  "custodian_retained_for_owned_retry": false
+}

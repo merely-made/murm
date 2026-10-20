@@ -1,0 +1,26 @@
+{
+  "t114-live-raw.bin": {
+    "bytes": 472002,
+    "sha256": "432164a00dffd2a9d4a4ea0c91b81244077d1b687ec14983fd732eb1d5699e8c"
+  },
+  "t114-live.bin": {
+    "bytes": 472004,
+    "sha256": "5f432885ba0f667be467dd8e15362f5ac8b271d9e5b2a49ba61dcd0aedef5531"
+  },
+  "t114-live.zip": {
+    "bytes": 472823,
+    "sha256": "d11db0b60a408b4bf11e51f57f1a3e204d547740a7f1a06d48c1e2ec7fef2f9b"
+  },
+  "t114-production-raw.bin": {
+    "bytes": 326626,
+    "sha256": "67d71a0b95821e16d879a86e6d6afac768e445130240e128b50f34e21683da06"
+  },
+  "t114-production.bin": {
+    "bytes": 326628,
+    "sha256": "2cf91ebc10a2a21a027219f32b691408981fd7fd89bc8e0c8b6e16c1bec263e1"
+  },
+  "t114-production.zip": {
+    "bytes": 327483,
+    "sha256": "83223c9720004e9b391dcea099f55861cce0e7eb0481c5f5dc45bcd62415e068"
+  }
+}

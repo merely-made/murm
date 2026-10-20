@@ -1,0 +1,56 @@
+{
+  "passed": true,
+  "firmware_source": "9de106432ad30a3ce4457866c8720f856d34f470",
+  "host_probe_source_sha256": "B19D31FA91A37F824DF3B25EBF5375CD9BDC162DBBC2D927F8175B1F4FAC0707",
+  "instrumented_only": true,
+  "board": "TULLE-T114-01",
+  "peer": "SB1 / MeshCore 1.17.1 d929643",
+  "min_stack_bytes": 16384,
+  "min_free_heap_percent": 25,
+  "rounds": 16,
+  "min_untouched_stack": 75820,
+  "max_heap": 21860,
+  "heap_capacity": 49152,
+  "zero_final_heap": true,
+  "expected_refusals": 16,
+  "phases": [
+    {
+      "phase": "first",
+      "cached_before_peer_work": 0,
+      "texts": 2,
+      "protocol_acks": 2,
+      "memory": {
+        "heap_capacity": 49152,
+        "heap_peak": 6388,
+        "min_free_heap_percent": 25,
+        "min_stack_bytes": 16384,
+        "passed": true,
+        "stack_free": 120308
+      }
+    },
+    {
+      "phase": "cold",
+      "cached_before_peer_work": 1,
+      "texts": 2,
+      "protocol_acks": 2,
+      "memory": {
+        "heap_capacity": 49152,
+        "heap_peak": 6404,
+        "min_free_heap_percent": 25,
+        "min_stack_bytes": 16384,
+        "passed": true,
+        "stack_free": 124620
+      }
+    }
+  ],
+  "texts": 4,
+  "protocol_acks": 4,
+  "original_firmware_identity_profiles_restored": true,
+  "scope": "one-hop Tucket endpoint after volatile scoped USB commissioning; contacts survive software reset without fresh peer advert",
+  "limits": [
+    "private setup remains volatile",
+    "battery-connected software reset; no power-cut qualification",
+    "no installed personal daemon, UI, repeater/server or broader routing claim"
+  ],
+  "target_policy": "existing shared repository targets and Cargo homes reused; no isolated target/home/worktree created"
+}

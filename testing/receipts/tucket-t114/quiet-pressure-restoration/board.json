@@ -1,0 +1,60 @@
+{
+  "board": "t114",
+  "usb": [
+    6421,
+    21023,
+    "TULLE-T114-01"
+  ],
+  "port": "COM10",
+  "runner_sha256": "efc717f224f47831c3f61423041425827e7aa795d5726aa45a944174fcc20163",
+  "requested_rounds": 0,
+  "responses": [
+    {
+      "command": "status",
+      "response": "tulle/t114 phy online; version=0.0.1; sx1262 online; spi=software; irq=poll; sync=2b reg=24b4; region=US915 freq=906875000 reset=watchdog crash=1 timebase=inactive; build=cb042329232571cd3c50b2ef9b5e386fbe4f434a; image=t114-native\r\nname=T114\r\n",
+      "seconds": 1.549
+    },
+    {
+      "command": "region",
+      "response": "region=US915\r\n",
+      "seconds": 1.564
+    },
+    {
+      "command": "channel",
+      "response": "channel=modem\r\n",
+      "seconds": 1.556
+    },
+    {
+      "command": "sync",
+      "response": "2b 24b4\r\n",
+      "seconds": 1.595
+    },
+    {
+      "command": "crash",
+      "response": "crash count=1 msg=WATCHDOG\r\n",
+      "seconds": 1.572
+    },
+    {
+      "command": "status",
+      "response": "tulle/t114 phy online; version=0.0.1; sx1262 online; spi=software; irq=poll; sync=2b reg=24b4; region=US915 freq=906875000 reset=watchdog crash=1 timebase=inactive; build=cb042329232571cd3c50b2ef9b5e386fbe4f434a; image=t114-native\r\nname=T114\r\n",
+      "seconds": 1.551
+    },
+    {
+      "command": "air",
+      "response": "air region=US915 duty=0ms listen=off armed=1 armfail=0 rxok=0 rxerr=0 rxbad=0 txok=0 txerr=0 noregion=0 overduty=0 cadclear=0 cadbusy=0 cadgiveup=0 cadover=0 cadfault=0 beats=0 frames=0\r\nscan cad1=0/0 cad2=0/0 rx1=0/0 rx2=0/0 rx3=0/0\r\n",
+      "seconds": 1.558
+    },
+    {
+      "command": "crash",
+      "response": "crash count=1 msg=WATCHDOG\r\n",
+      "seconds": 1.587
+    }
+  ],
+  "passed": true,
+  "stack_scope": "boot paint when stack_free is present; otherwise point-in-time samples only",
+  "acceptance": {
+    "min_stack_bytes": 0,
+    "min_free_heap_percent": 0
+  },
+  "attached": "tulle/t114 phy online; version=0.0.1; sx1262 online; spi=software; irq=poll; sync=2b reg=24b4; region=US915 freq=906875000 reset=watchdog crash=1 timebase=inactive; build=cb042329232571cd3c50b2ef9b5e386fbe4f434a; image=t114-native\r\nidentity=loaded slot=A seq=94\r\nnode=599997c8 heap=0/49152 highwater=24\r\n"
+}

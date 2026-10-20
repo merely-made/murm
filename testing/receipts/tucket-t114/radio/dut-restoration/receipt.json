@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "action": "restore",
+  "usb": [
+    "COM10",
+    6421,
+    21023,
+    "TULLE-T114-01"
+  ],
+  "scope": "live original identity/profile/application; no protected-flash dump"
+}

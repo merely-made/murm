@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "result": "passed",
+  "device_id": "6ab07f3a-ba13-42d2-aa18-c47613330f86",
+  "realm": "bench-tucket-custody",
+  "source": "4d744b8347dce72f695eab05815a4a472aed8355",
+  "host_sha256": "23886513fbad19a6903f50dd4d91897c672f67238e4ddd990efcb4d8dd1f4987",
+  "probe_sha256": "69159ce2b88f8e0041bebb5b02dc8110e84f86713086aa2d6577573134bac400",
+  "expected_fallback_failure": false,
+  "cases": [
+    {
+      "name": "absent",
+      "exit_code": 0,
+      "result": "refused",
+      "receipt_sha256": "9490fe2eaa8e6eb5c558d29cf85712fb53b35a49b8dfbeccea70e0ea35fa0a3a"
+    },
+    {
+      "name": "locked",
+      "exit_code": 0,
+      "result": "refused",
+      "receipt_sha256": "0329b8fd675c5892f9ab49d666f36b033f73acea50f931eee2282361cbed020d"
+    },
+    {
+      "name": "no-wallet",
+      "exit_code": 0,
+      "result": "refused",
+      "receipt_sha256": "4e09da4fcd038aa32d5132f7ee410e280faf04648d0524af6f40234e56e25ec5"
+    },
+    {
+      "name": "unlocked",
+      "exit_code": 0,
+      "result": "same_identity_on_reopen",
+      "receipt_sha256": "d0c9eb1735fb44bf73ef468342203cdc6f8895dadb13b4ec6d51085156748d60"
+    },
+    {
+      "name": "lock-watch",
+      "result": "custody_closed",
+      "receipt_sha256": "ff0d4550b5ef769849f5a0cec902c20f13179dd8fef756fd97e44a6546ec4cf5"
+    },
+    {
+      "name": "resident-loss",
+      "result": "custody_closed",
+      "receipt_sha256": "b519c19c3c28d30cceefbc126bebf6e4fe41a1e4a592622d129c6414908ce1d6"
+    }
+  ],
+  "private_runtime_excluded": true,
+  "source_sha256": {
+    "ports/djinn/src/bin/tucket_custody_receipt_host.rs": "4f4855e09fda2e8939e827952a91f7053fc8df397397fd80536d765b474edd09",
+    "ports/signalman/src/authority/tucket.rs": "082a3c434d615b3c4c702d29170adacd5c8c080f049076736049808eea55eb6c",
+    "ports/signalman/src/authority.rs": "50579ba3b4b363cff78f28e69ff65929539a34e3f5930d360d05e73b5e5cfa1a",
+    "Cargo.lock": "a934b1ed8016926db82217cb20131fc4b374a84d3d522ef4ce4d952a152ffeca",
+    "ports/signalman/examples/tucket_custody_receipt.rs": "12a6689a8fcf0f931300b62fceb005a97e22fb5436c4fce81725bd049ab34548",
+    "ports/djinn/src/custody.rs": "d2d140a28b73074a3c35c546881b472cf8828b5df2fc4c405b21660a19ae5d54",
+    "testing/run_tucket_custody.ps1": "7599bb85ada28cb6a6d346915af067ff3e4c2a704702ba4a6ea56a169552511b"
+  },
+  "supplier_basis": "previously qualified Tucket-only host and clean probe, byte-identical pinned binaries",
+  "generated_wallets_removed": false,
+  "private_runtime": "runtime/ (generated synthetic wallets; ignored by Git)",
+  "closed_utc": "2026-10-20T22:11:04.0635089Z"
+}

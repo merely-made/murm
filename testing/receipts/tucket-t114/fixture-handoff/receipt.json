@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "action": "fixture-handoff",
+  "usb": [
+    "COM10",
+    6421,
+    21023,
+    "TULLE-T114-01"
+  ],
+  "handoff": "contacts bench ok initial_keys=0 keys=0 commits=0 sequence=0\r\n",
+  "flash": "flashcounts erases=2 writes=0\r\n"
+}
