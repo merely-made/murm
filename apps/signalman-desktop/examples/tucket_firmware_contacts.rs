@@ -19,7 +19,7 @@ struct PublicConfig {
     device_id: pandect::DeviceId,
     realm: String,
     port: PathBuf,
-    #[serde(default)]
+    #[serde(default, rename = "dtr")]
     usb_dtr: bool,
 }
 fn save(path: &Path, value: &serde_json::Value) -> Result<()> {
