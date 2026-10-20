@@ -62,8 +62,9 @@ def package(kind):
         expected = {'restore': '4c56670f0cd51387b26802b29fe160439ce173a8c66e0538d6e97a3113d6605d',
                     'bridge': '7ef7e6c2d50e8aa5e5536cdcda124cb2dda9636dcb40fa6dd9efb32feae41740'}[kind]
     else:
-        path = BASE / 'images' / f't114-{kind}.zip'
-        expected = json.loads((BASE / 'images/images.json').read_text())[path.name]['sha256']
+        images = BASE / ('quiet-images' if kind == 'live' else 'images')
+        path = images / f't114-{kind}.zip'
+        expected = json.loads((images / 'images.json').read_text())[path.name]['sha256']
     assert hashlib.sha256(path.read_bytes()).hexdigest() == expected
     with ZipFile(path) as archive:
         manifest = json.loads(archive.read('manifest.json'))['manifest']
