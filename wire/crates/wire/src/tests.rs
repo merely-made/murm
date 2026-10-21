@@ -140,6 +140,82 @@ async fn explicit_tls_pools_are_separate_and_http2_exchange_has_no_cookie_author
         .unwrap()
         .unwrap();
 }
+// A server that closes TLS without `close_notify` ends a close-delimited body
+// cleanly, but cannot truncate a body that declared its length.
+#[tokio::test]
+async fn tls_close_without_close_notify_ends_only_a_close_delimited_body() {
+    use rustls::pki_types::{PrivateKeyDer, PrivatePkcs8KeyDer};
+    use tokio::io::{AsyncReadExt, AsyncWriteExt};
+    let certified = rcgen::generate_simple_self_signed(vec!["localhost".into()]).unwrap();
+    let certificate = certified.cert.der().clone();
+    let _ = rustls::crypto::ring::default_provider().install_default();
+    let key = PrivateKeyDer::Pkcs8(PrivatePkcs8KeyDer::from(
+        certified.signing_key.serialize_der(),
+    ));
+    let mut server_config = rustls::ServerConfig::builder()
+        .with_no_client_auth()
+        .with_single_cert(vec![certificate.clone()], key)
+        .unwrap();
+    server_config.alpn_protocols = vec![b"http/1.1".to_vec()];
+    let acceptor = tokio_rustls::TlsAcceptor::from(Arc::new(server_config));
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let port = listener.local_addr().unwrap().port();
+    let task = tokio::spawn(async move {
+        loop {
+            let (tcp, _) = listener.accept().await.unwrap();
+            let acceptor = acceptor.clone();
+            tokio::spawn(async move {
+                let Ok(mut tls) = acceptor.accept(tcp).await else { return };
+                let mut head = [0u8; 1024];
+                let n = tls.read(&mut head).await.unwrap();
+                let first = String::from_utf8_lossy(&head[..n]).to_string();
+                let response: &[u8] = if first.starts_with("GET /close ") {
+                    b"HTTP/1.1 200 OK
+connection: close
+
+close-delimited"
+                } else {
+                    b"HTTP/1.1 200 OK
+content-length: 20
+
+short"
+                };
+                tls.write_all(response).await.unwrap();
+                tls.flush().await.unwrap();
+                // Drop the stream without `shutdown()`: no `close_notify`.
+                drop(tls);
+            });
+        }
+    });
+    let mut roots = rustls::RootCertStore::empty();
+    roots.add(certificate).unwrap();
+    let tls = rustls::ClientConfig::builder()
+        .with_root_certificates(roots)
+        .with_no_client_auth();
+    let engine = hyper::HttpTransport::new(tls, false);
+    let mut response = engine
+        .send(request(&format!("https://localhost:{port}/close")))
+        .await
+        .unwrap();
+    let mut body = Vec::new();
+    while let Some(chunk) = response.body.next().await {
+        body.extend_from_slice(&chunk.unwrap());
+    }
+    assert_eq!(body, b"close-delimited");
+    let mut response = engine
+        .send(request(&format!("https://localhost:{port}/short")))
+        .await
+        .unwrap();
+    let mut failed = false;
+    while let Some(chunk) = response.body.next().await {
+        if chunk.is_err() {
+            failed = true;
+            break;
+        }
+    }
+    assert!(failed, "a body shorter than its Content-Length is still an error");
+    task.abort();
+}
 // Tungstenite fixes the callback error type to its complete HTTP response.
 #[allow(clippy::result_large_err)]
 #[tokio::test]
