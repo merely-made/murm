@@ -43,3 +43,6 @@ design_docs/private/
 # cargo-home-*/ directories, 10,403 files, one -A away from a commit.
 target-*/
 cargo-home-*/
+
+# Standalone native consumer build output.
+/native/target/
