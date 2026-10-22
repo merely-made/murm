@@ -40,6 +40,7 @@ pub struct ResourceReceiver {
     max_decompressed: usize,
     /// The largest advertised data size accepted, if bounded.
     max_data_size: Option<usize>,
+    max_transfer_size: Option<usize>,
     accept: Option<AcceptHook>,
     /// Why this receiver gave up, once it has. A failed receiver answers nothing more.
     failure: Option<Error>,
@@ -87,6 +88,7 @@ impl ResourceReceiver {
             max_parts: max_parts.max(1),
             max_decompressed: DEFAULT_MAX_DECOMPRESSED_SIZE,
             max_data_size: None,
+            max_transfer_size: None,
             accept: None,
             failure: None,
             outstanding: 0,
@@ -121,6 +123,13 @@ impl ResourceReceiver {
     pub fn with_max_data_size(mut self, max_data_size: usize) -> Self {
         self.max_data_size = Some(max_data_size);
         self.max_decompressed = self.max_decompressed.min(max_data_size);
+        self
+    }
+
+    /// Refuse a sealed segment token larger than this before allocating its
+    /// part tables or token buffer. Decoded/decompressed size is independent.
+    pub fn with_max_transfer_size(mut self, max_transfer_size: usize) -> Self {
+        self.max_transfer_size = Some(max_transfer_size);
         self
     }
 
@@ -323,6 +332,12 @@ impl ResourceReceiver {
     /// receiving it. Every error but [`Error::BadRequest`] is a refusal to answer with a
     /// receiver cancel.
     fn admit(&self, adv: &Advertisement) -> Result<Incoming, Error> {
+        if self
+            .max_transfer_size
+            .is_some_and(|max| adv.transfer_size > max as u64)
+        {
+            return Err(Error::CapacityExceeded);
+        }
         // A resource past RNS's segment size arrives as `l` advertisements, one per
         // segment. Alone, this receiver would hand back the first segment's data as if it
         // were the whole resource.

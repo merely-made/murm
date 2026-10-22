@@ -13,8 +13,8 @@ use std::time::Duration;
 
 use crate::destination::DestinationName;
 use crate::endpoint::{
-    AcceptedResource, Endpoint, PayloadMode, ReceivedRequest, ResourceSession,
-    ResourceTransferConfig,
+    AcceptedResource, Endpoint, PayloadMode, ReceivedRequest, ResourceReceiveLimits,
+    ResourceSession, ResourceTransferConfig,
 };
 use crate::hash::AddressHash;
 use crate::identity::Identity;
@@ -41,9 +41,10 @@ pub struct StaticPageConfig {
     pub transfer: ResourceTransferConfig,
 }
 
-/// Client policy for one page fetch. `max_page_bytes` is checked after the
-/// existing Resource receiver has reassembled and verified the response; it
-/// is not a wire-level allocation ceiling.
+/// Client policy for one page fetch. `max_page_bytes` bounds the exact data
+/// before its envelope is copied. Independent encoded/decoded receive budgets
+/// are supplied to [`fetch_page_with_limits`]. Transfer timeout is a silence
+/// limit; the caller owns a whole-operation deadline and endpoint shutdown.
 #[derive(Clone, Copy, Debug)]
 pub struct FetchPageConfig {
     pub max_page_bytes: usize,
@@ -236,7 +237,8 @@ pub async fn fetch_page(
     .await
 }
 
-/// Fetch one page with an explicit transfer policy and post-reassembly body cap.
+/// Fetch one page with an explicit transfer policy and exact body cap, using
+/// the finite global receive ceilings from [`ResourceReceiveLimits::default`].
 pub async fn fetch_page_with_config(
     endpoint: &Endpoint,
     destination: AddressHash,
@@ -244,22 +246,48 @@ pub async fn fetch_page_with_config(
     path: &[u8],
     config: FetchPageConfig,
 ) -> io::Result<Vec<u8>> {
+    fetch_page_with_limits(
+        endpoint,
+        destination,
+        peer,
+        path,
+        config,
+        ResourceReceiveLimits::default(),
+    )
+    .await
+}
+
+/// Fetch a native byte page with independent encoded-transfer, decoded-envelope
+/// and exact body budgets. The envelope budget includes metadata and accepted
+/// MessagePack framing, so it must exceed the body budget to admit an exact-fit
+/// page. No truncation or grammar rewriting is performed.
+pub async fn fetch_page_with_limits(
+    endpoint: &Endpoint,
+    destination: AddressHash,
+    peer: Identity,
+    path: &[u8],
+    config: FetchPageConfig,
+    limits: ResourceReceiveLimits,
+) -> io::Result<Vec<u8>> {
     validate_path(path).map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
     // A stock node sends msgpack nil, not an empty byte string, for no request data.
     let packed = Request::pack_without_data(path, 0.0);
     let mut session = endpoint.open_resource(destination, peer).await?;
     session.set_config(config.transfer);
-    let raw = session.request_raw(&packed).await?;
-    let data = Response::unpack(&raw.packed)
-        .map_err(|_| io::Error::new(io::ErrorKind::InvalidData, "invalid byte response payload"))?
-        .data;
-    if data.len() > config.max_page_bytes {
-        return Err(io::Error::new(
-            io::ErrorKind::InvalidData,
-            format!("page response exceeds {} byte cap", config.max_page_bytes),
-        ));
-    }
-    Ok(data)
+    let raw = session.request_raw_with_limits(&packed, limits).await?;
+    Response::unpack_with_limit(&raw.packed, config.max_page_bytes)
+        .map(|response| response.data)
+        .map_err(|error| {
+            io::Error::new(
+                io::ErrorKind::InvalidData,
+                match error {
+                    crate::Error::CapacityExceeded => {
+                        format!("page response exceeds {} byte cap", config.max_page_bytes)
+                    }
+                    _ => "invalid byte response payload".into(),
+                },
+            )
+        })
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -287,6 +315,10 @@ fn validate_path(path: &[u8]) -> Result<(), PageError> {
     }
     Ok(())
 }
+
+#[cfg(test)]
+#[path = "nomadnet_limits_tests.rs"]
+mod limits_tests;
 
 #[cfg(test)]
 mod tests {

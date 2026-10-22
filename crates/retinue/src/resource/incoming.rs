@@ -370,6 +370,9 @@ impl Incoming {
         let data = if self.compressed {
             self.inflate(body, max_decompressed)?
         } else {
+            if body.len() > max_decompressed {
+                return Err(Error::ResourceCorrupt);
+            }
             body.to_vec()
         };
         self.verified(data)
@@ -385,7 +388,9 @@ impl Incoming {
         let data = if self.compressed {
             self.inflate(data_from_content(&decrypted)?, max_decompressed)?
         } else {
-            data_from_content(&decrypted)?;
+            if data_from_content(&decrypted)?.len() > max_decompressed {
+                return Err(Error::ResourceCorrupt);
+            }
             decrypted.drain(..RANDOM_HASH_LEN);
             decrypted
         };
