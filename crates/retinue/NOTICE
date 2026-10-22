@@ -469,8 +469,9 @@ From the interface batch 2 (2026-10-14), same source:
 
 From the I2P batch (2026-10-22), read from RNS **1.5.6**, the oracle venv's installed
 package (`Interfaces/I2PInterface.py`, SHA-256
-47bc0fe460e60ca0e9660816441323bcb507e681bc7946866c192b38bd74fb25). Its diff
-against 1.5.7 is still owed (`design_docs/2026-10-21_i2p_sam_seam_plan.md`, I2P0).
+47bc0fe460e60ca0e9660816441323bcb507e681bc7946866c192b38bd74fb25). The file and
+the vendored i2plib are byte-identical in RNS 1.5.7 (the wheel above), checked
+2026-10-22.
 The SAM traffic follows the public SAMv3 specification through `truchman`, not
 RNS's vendored i2plib:
 

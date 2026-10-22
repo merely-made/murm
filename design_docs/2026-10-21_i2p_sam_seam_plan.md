@@ -1,8 +1,9 @@
 # I2P over SAMv3: retinue's I2P interface and the embedded router
 
 **Date:** 2026-10-21. **Status:** in progress (2026-10-22). I2P1 is landed
-on `main` (`cb0c91e`) and `truchman` 0.1.0 is published. I2P0's venv re-sync
-remains, and I2P2-I2P4 have not started.
+on `main` (`cb0c91e`) and `truchman` 0.1.0 is published. I2P0 is done (the
+venv is at 1.5.7, and `I2PInterface.py` is unchanged since 1.5.6). I2P2-I2P4
+have not started.
 
 Related: Mere's reachability rungs and privacy lanes,
 `mere/design_docs/mere_docs/implementation_strategy/2026-08-03_reachability_rungs_and_privacy_lanes_plan.md`
@@ -69,6 +70,25 @@ workspace naming ledger.
 - **Locations, proposed and not yet confirmed:** `crates/truchman` in the radio
   workspace (retinue takes it behind feature `i2p`), and
   `native/crates/murm-i2p` beside murm and mere-transport.
+I2P2 round, 2026-10-22, after I2P0. The CI fact behind the location answer:
+murm's CI runs `cargo deny check licenses` only (`.github/workflows/ci.yml`
+125-127), on the root workspace. Advisories are not gated, and `native/` is
+not license-checked. (An earlier statement in this session that the advisory
+would fail `cargo deny` was wrong.)
+
+- **`rsa` 0.9 advisory (RUSTSEC-2023-0071):** "Accept, recorded".
+  emissary-util uses `rsa` only to verify su3 reseed signatures and parse
+  reseed certificates (`su3.rs` 265, `certificates.rs` 19). Those are
+  public-key operations the timing attack does not reach. Revisit when
+  emissary moves past rsa 0.9.
+- **Location:** "native/, add license gate". The crate is
+  `native/crates/murm-i2p`, and CI gains a license check for `native/` with
+  the root allow list.
+- **Publish for the receipt run:** "Off, client-only". No ports opened, no
+  UPnP, transit off.
+- **Router storage:** "Persistent testing dir". `Code/testing/retinue/emissary/`
+  is kept between runs (one reseed, a stable router ID) and deleted when the
+  I2P phases close.
 - **Claiming `truchman`:** with a real 0.1.0 publish once I2P1's SAM client
   passes its fake-bridge tests, the mora precedent, not a stub now. This
   makes the publish an I2P1 done-condition, and it needs the owner's go at
@@ -363,3 +383,13 @@ F1, F2 and F4 were answered on 2026-10-21, and F3's names on 2026-10-22
   verify-built. The release shows on the sparse index (cksum `2ed91932…`)
   and the API (created 2026-10-22T19:14:12Z). This completes I2P1; I2P0's
   venv re-sync and I2P2-I2P4 remain.
+- 2026-10-22: **I2P0 done.**
+  - **Venv:** before touching the oracle venv, I confirmed no running
+    process used it. `rns-1.5.7-py3-none-any.whl` (644,289 bytes) came from
+    PyPI into its own scratch directory, with sha256 `0e4aaf8c…41faddf`. That
+    is the same wheel retinue's `NOTICE` records for the 1.5.7 review. The
+    venv was installed from that file, then `requirements.txt`. It now
+    reports RNS 1.5.7 and LXMF 1.2.0, and `pip check` is clean.
+  - **Diff:** `Interfaces/I2PInterface.py` and the vendored `i2plib` are
+    byte-identical between 1.5.6 and 1.5.7 (sha256 `47bc0fe4…` both), so
+    I2P1's parity holds at the current pin. `NOTICE` is updated.
