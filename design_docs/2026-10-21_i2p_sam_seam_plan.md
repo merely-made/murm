@@ -1,9 +1,8 @@
 # I2P over SAMv3: retinue's I2P interface and the embedded router
 
-**Date:** 2026-10-21. **Status:** in progress (2026-10-22). I2P1 is
-implemented and software-qualified on branch `i2p-sam`, not merged. The
-`truchman` 0.1.0 publish and I2P0's venv re-sync remain. I2P2-I2P4 have not
-started.
+**Date:** 2026-10-21. **Status:** in progress (2026-10-22). I2P1 is landed
+on `main` (`cb0c91e`) and `truchman` 0.1.0 is published. I2P0's venv re-sync
+remains, and I2P2-I2P4 have not started.
 
 Related: Mere's reachability rungs and privacy lanes,
 `mere/design_docs/mere_docs/implementation_strategy/2026-08-03_reachability_rungs_and_privacy_lanes_plan.md`
@@ -355,3 +354,12 @@ F1, F2 and F4 were answered on 2026-10-21, and F3's names on 2026-10-22
     today, it fails every run.
   - **Not done in I2P1:** the `truchman` 0.1.0 publish, which needs the
     owner's go; any live router.
+- 2026-10-22: I2P1 merged into `main` as `cb0c91e` (not pushed). The merged
+  tree is identical to the tested branch tree (`37fcc77`). `native/` and
+  `apps/signalman-desktop/` still resolve with `--locked`. The lane's
+  worktree, build output and branch were removed.
+- 2026-10-22: **`truchman` 0.1.0 published** to crates.io from `cb0c91e`, on
+  the owner's authorization. The dry run packaged 17 files (80.0 KiB) and
+  verify-built. The release shows on the sparse index (cksum `2ed91932…`)
+  and the API (created 2026-10-22T19:14:12Z). This completes I2P1; I2P0's
+  venv re-sync and I2P2-I2P4 remain.
