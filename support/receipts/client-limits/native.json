@@ -1,0 +1,65 @@
+{
+  "schema": "client-limits-qualification-v1",
+  "owner": "retinue",
+  "date": "2026-10-22",
+  "qualified_source": "5f32366fc0e84eb4580a282188264f40a643cffc",
+  "qualified_retinue_tree": "5a74882d340b3a4ceb82b399eb1602fe0f20a57e",
+  "upstream": "ada9d0e2dadf6af8ef9f9ccbb4f93c2b2ec55dce",
+  "unchanged_manifests_and_lock": true,
+  "native_lock_sha256": "5e45d5021edadf038a4d35892a8bf3e6db99a0d2ddc3193557ee1324b598cbd3",
+  "target": "C:\\t\\cargo-targets\\retinue",
+  "build_dir": "C:\\t\\cargo-targets\\retinue\\build",
+  "commands": [
+    {
+      "command": "cargo test -p retinue --lib limits --locked --offline --quiet",
+      "exit_code": 0,
+      "passed": 19,
+      "failed": 0
+    },
+    {
+      "command": "cargo test -p retinue --no-default-features --features tokio --lib limits --locked --offline --quiet",
+      "exit_code": 0,
+      "passed": 19,
+      "failed": 0,
+      "existing_warning": "unused alloc::vec::Vec in resource_transfer/tests/refusal.rs"
+    },
+    {
+      "command": "cargo clippy -p retinue --lib --locked --offline --quiet --no-deps -- -D warnings",
+      "exit_code": 0
+    }
+  ],
+  "preliminary_primary_source": "96edc9f6bc1",
+  "preliminary_gates": [
+    "resource_transfer unit filter:46 pass",
+    "request::tests filter:7 pass",
+    "nomadnet filter:8 pass",
+    "endpoint_resource integration:25 pass",
+    "resource_decompression_bomb integration:1 pass",
+    "alloc-only check pass"
+  ],
+  "preliminary_scope": "Primary checkout additionally contains foreign I2P work; exact shipping source is qualified separately by the three commands above. Counts overlap.",
+  "qualified": [
+    "encoded token and part geometry admission before allocation",
+    "decoded and metadata budget across segmented receive",
+    "compressed and uncompressed recovery caps",
+    "checked accumulated length before append and exact reserve",
+    "packet decryption reuses admitted buffer and preserves destination guard",
+    "MessagePack body cap before owned copy including accepted nil/string/trailing forms",
+    "packet/Resource exactfit and overflow controls",
+    "refusal followed by fresh successful read"
+  ],
+  "compatibility": [
+    "page4MiB default retained",
+    "legacy generic raw request wrappers retain semantics",
+    "existing default native-page helpers use finite64MiB encoded/decoded ceilings",
+    "no wire or snapshot format change"
+  ],
+  "unqualified": [
+    "whole operation deadline remains caller owned; transfer timeout means silence",
+    "total allocator/decoder workspace",
+    "headed UI",
+    "physical radio",
+    "independent readers"
+  ],
+  "receipt_byte_convention": "UTF-8 JSON, -text attribute; Git and native receipt bytes identical"
+}

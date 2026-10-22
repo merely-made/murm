@@ -1,7 +1,7 @@
 # Resource client receive limits
 
-**Status (2026-10-22):** implemented; primary native gates pass, clean
-publication and consumer qualification in progress. Native receive allocation
+**Status (2026-10-22):** implemented; clean publication-tree gates pass,
+consumer qualification in progress. Native receive allocation
 and Micron page decoding only; wire format and serving authority are retained.
 
 ## Scope and ownership
@@ -63,3 +63,9 @@ existing Retinue target/build directory; create no isolated Cargo home.
   supported assertions are preserved. Existing unrelated no-compression test
   import warning is recorded separately. Publication uses clean upstream to
   keep the primary checkout's foreign I2P work out of this supplier slice.
+- 2026-10-22: clean upstream source `5f32366fc0e` passes all 19 focused limit
+  cases with and without compression and strict production Clippy. Manifests
+  and lock stay unchanged. The [native receipt](../support/receipts/client-limits/native.json)
+  separates these exact-source gates from the broader preliminary primary
+  matrix and preserves the existing no-compression import warning. No I2P
+  source is introduced into the receiving cohort.
