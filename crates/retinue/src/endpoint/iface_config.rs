@@ -26,6 +26,8 @@ use crate::ifac::ConfigError;
 use super::local::{SharedInstance, SharedInstanceKind};
 
 pub use carriers::{Carrier, IdBeacon, RnsAttached, UdpCarrier};
+#[cfg(feature = "i2p")]
+pub use carriers::{I2pAttached, I2pCarrier};
 pub use settings::InterfaceSettings;
 
 /// A parsed RNS config: the shared instance and each interface section, in file order.

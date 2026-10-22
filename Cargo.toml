@@ -16,6 +16,7 @@ members = [
     "crates/radio-hand",
     "crates/radio-mirror",
     "crates/retinue-sim",
+    "crates/truchman",
     "firmware/heltec-v4-phy",
     "firmware/t114-phy",
     "testing/protocol-capacity",
@@ -70,6 +71,7 @@ default-members = [
     "crates/radio-hand",
     "crates/radio-mirror",
     "crates/retinue-sim",
+    "crates/truchman",
 ]
 
 [workspace.package]

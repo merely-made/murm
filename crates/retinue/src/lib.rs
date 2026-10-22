@@ -92,6 +92,9 @@ pub mod command;
 pub mod destination;
 #[cfg(feature = "tokio")]
 pub mod endpoint;
+/// The SAMv3 client the I2P interface speaks, re-exported so hosts name the same types.
+#[cfg(feature = "i2p")]
+pub use truchman;
 pub mod hash;
 pub mod identity;
 #[cfg(feature = "alloc")]

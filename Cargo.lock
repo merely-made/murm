@@ -2221,6 +2221,7 @@ dependencies = [
  "sha2 0.11.0",
  "socket2",
  "tokio",
+ "truchman",
  "tucket",
  "tulle",
  "x25519-dalek 3.0.0",
@@ -2966,6 +2967,14 @@ dependencies = [
  "tracing",
  "tracing-core",
  "tracing-log",
+]
+
+[[package]]
+name = "truchman"
+version = "0.1.0"
+dependencies = [
+ "sha2 0.11.0",
+ "tokio",
 ]
 
 [[package]]
