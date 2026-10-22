@@ -467,6 +467,35 @@ From the interface batch 2 (2026-10-14), same source:
   `Interfaces/RNodeInterface.py` 150-195; `Interfaces/PipeInterface.py` 67-68.
   Target: `src/endpoint/iface_config/`.
 
+From the I2P batch (2026-10-22), read from RNS **1.5.6**, the oracle venv's installed
+package (`Interfaces/I2PInterface.py`, SHA-256
+47bc0fe460e60ca0e9660816441323bcb507e681bc7946866c192b38bd74fb25). Its diff
+against 1.5.7 is still owed (`design_docs/2026-10-21_i2p_sam_seam_plan.md`, I2P0).
+The SAM traffic follows the public SAMv3 specification through `truchman`, not
+RNS's vendored i2plib:
+
+- The I2P interface: HDLC over a SAM STREAM, a 1064-byte hardware MTU at the
+  protocol link MTU, a 256 kbit/s bitrate guess and 16-byte default access
+  codes; an empty-frame keepalive after 10 s without a write, the stream ended
+  after 110 s without a read, redials every 15 s and session retries every 8 s
+  (peer) or 15 s (listener); tunnel synthesis by the initiator only, under
+  `I2PInterfacePeer[<name> to <peer>]`; peers that keep full mode and default
+  policy while accepted streams inherit the section's settings. Unlike RNS,
+  there is no "stale" state at 20 s (RNS only logs it), SAM is spoken directly
+  rather than through forwarded local ports, and a failed write redials rather
+  than tearing the interface down. RNS `Interfaces/I2PInterface.py` 323-331,
+  337-441, 503, 507-533, 539-603, 719-720, 737, 805, 812-870.
+  Targets: `src/endpoint/i2p.rs`, `src/endpoint/pump.rs`.
+- The destination keyfile: `storagepath/i2p/<hex(H(H(name) + H(transport)))>.i2p`,
+  the old `H(H(name))` file preferred when present, holding SAM's base64
+  private key, generated with signature type 7 on first use. Unlike RNS, the
+  file is created owner-only on unix. RNS `Interfaces/I2PInterface.py`
+  229-252.
+  Target: `src/endpoint/i2p.rs`.
+- The `[[I2PInterface]]` section keys `peers` (a comma list) and
+  `connectable`. RNS `Interfaces/I2PInterface.py` 728-735.
+  Target: `src/endpoint/iface_config/carriers.rs`.
+
 ## Prns
 
 Reference withdrawn September 26 over unresolved provenance concerns. Existing
