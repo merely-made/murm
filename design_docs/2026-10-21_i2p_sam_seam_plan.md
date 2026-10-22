@@ -1,9 +1,9 @@
 # I2P over SAMv3: retinue's I2P interface and the embedded router
 
-**Date:** 2026-10-21. **Status:** in progress (2026-10-22). I2P1 is landed
-on `main` (`cb0c91e`) and `truchman` 0.1.0 is published. I2P0 is done (the
-venv is at 1.5.7, and `I2PInterface.py` is unchanged since 1.5.6). I2P2-I2P4
-have not started.
+**Date:** 2026-10-21. **Status:** in progress (2026-10-22). I2P0 and I2P1 are
+done; I2P1 landed on `main` (`cb0c91e`) and `truchman` 0.1.0 is published.
+I2P2 passed its live receipt twice on branch `i2p-host`, not yet merged.
+I2P3 and I2P4 have not started.
 
 Related: Mere's reachability rungs and privacy lanes,
 `mere/design_docs/mere_docs/implementation_strategy/2026-08-03_reachability_rungs_and_privacy_lanes_plan.md`
@@ -393,3 +393,49 @@ F1, F2 and F4 were answered on 2026-10-21, and F3's names on 2026-10-22
   - **Diff:** `Interfaces/I2PInterface.py` and the vendored `i2plib` are
     byte-identical between 1.5.6 and 1.5.7 (sha256 `47bc0fe4…` both), so
     I2P1's parity holds at the current pin. `NOTICE` is updated.
+- 2026-10-22: **I2P2 passed** on branch `i2p-host` (worktree
+  `Code/worktrees/murm-i2p-host`). Details follow.
+  - **`murm-i2p`** (`native/crates/murm-i2p`, `publish = false`) embeds
+    `emissary-core` / `emissary-util` 0.4.0 from crates.io.
+    - `RouterConfig::new(storage, transit, publish)` takes transit and
+      publish as required arguments, with no defaults.
+    - Reseeding follows emissary-cli 0.4.0: below 25 stored routers, from
+      the built-in HTTPS servers, IPv4 only (`config.rs` 329-330, `main.rs`
+      137-153).
+    - `EmbeddedRouter::start` returns the loopback SAM `Bridge` and a
+      `StartReport`. `shutdown` is graceful, with ten seconds' grace.
+  - **Receipt:** `testing/receipts/i2p2-embedded-emissary/`, two live runs,
+    both passing.
+    - Two endpoints on one router exchanged announces, links and a 12 KB
+      Resource each way. A loopback TCP control, held at the protocol MTU,
+      did the same in the same run.
+    - Run 1 started from empty storage: it reseeded 137 routers, the router
+      started in 4.6 s, and the I2P exchange took 32.7 s in all.
+    - Run 2 was warm: no reseed, a 1.4 s start, 66.6 s in all.
+    - First contact dominates both runs (26 s, then 58 s). After it, each
+      link round-trip takes 1.2-1.7 s and each Resource 1.9-2.6 s.
+    - An earlier attempt failed in the control (the TCP link MTU made the
+      payload a single packet) before any network contact. It is kept in the
+      receipt.
+  - **Findings:**
+    - emissary binds NTCP2 on `0.0.0.0` and SSU2 likewise whenever IPv4 is
+      on, published or not (`transport/ntcp2/mod.rs` 225-227). "Client-only"
+      therefore means unadvertised listeners. The owner chose to run anyway
+      and cancel any firewall prompt.
+    - 0.4.0's `Ntcp2Config` has `publish`, where the online docs (master)
+      have `publish_ipv4`/`publish_ipv6`, and its reseeder is fixed to
+      reqwest `default-tls` (native-tls). Both are tracked as released, not
+      as master.
+    - emissary has no local-delivery path between destinations on one
+      router (`destination/mod.rs` 294-330). The receipt does not observe
+      tunnels directly.
+  - **License gate:** CI job `licenses-native` runs `cargo deny --all-features
+    --config deny.toml check licenses` on `native/`. Per the owner's choice,
+    `deny.toml` gains per-crate exceptions for the nine permissive crates the
+    native graph has outside the allow list: async_io_stream, pharos and
+    ws_stream_wasm (Unlicense), foldhash (Zlib), spez (BSD-2-Clause),
+    webpki-roots and webpki-root-certs (CDLA-Permissive-2.0), and tiny-keccak
+    (CC0-1.0, via emissary). Both gates pass locally with `--all-features`.
+  - **Locks:** `native/Cargo.lock` adds 68 packages and changes no existing
+    version.
+  - **Not done:** I2P3 (i2pd, and across routers) and I2P4 (stock RNS).

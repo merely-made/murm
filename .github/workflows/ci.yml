@@ -126,6 +126,20 @@ jobs:
         with:
           command: check licenses
 
+  # The same license policy for the separate native/ workspace (murm, mere-transport, the
+  # WebRTC carrier and the embedded I2P router), which the root check does not reach. Its
+  # permissive extras are per-crate exceptions in deny.toml, not allow-list entries.
+  licenses-native:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: EmbarkStudios/cargo-deny-action@v2
+        with:
+          manifest-path: native/Cargo.toml
+          # The action's default is --all-features; keep it, as the root job does.
+          arguments: --all-features --config deny.toml
+          command: check licenses
+
   # The registry's structural check: every validation asset belongs to a suite, no stale
   # selectors, no orphans. Cheap, and it is what stops a new capture script or fuzz corpus
   # entering the tree unaccounted for.
