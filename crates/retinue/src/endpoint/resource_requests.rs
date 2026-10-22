@@ -6,10 +6,11 @@ use std::io;
 
 use crate::hash::AddressHash;
 use crate::identity::Identity;
-use crate::link::Inbound;
+use crate::link::{Inbound, Link};
+use crate::packet::Packet;
 use crate::request::{Request, Response};
 use crate::resource::FLAG_REQUEST;
-use crate::resource_transfer::ResourceKind;
+use crate::resource_transfer::{ResourceKind, ResourceReceiveLimits};
 
 use super::entropy::next_iv;
 use super::resource_session::{Pace, PayloadMode, ResourceSession, resource_receive_ended};
@@ -261,6 +262,31 @@ impl ResourceSession {
         packed_request: &[u8],
         max_response_size: Option<usize>,
     ) -> io::Result<ReceivedRawResponse> {
+        self.request_raw_bounded(packed_request, max_response_size, None)
+            .await
+    }
+
+    /// Request with independent sealed-transfer and decoded-envelope budgets.
+    /// Resources are refused before part/token allocation or inflation beyond
+    /// those budgets; response packets are checked before envelope interpretation.
+    /// Transfer timeout is a silence limit. The caller owns any whole-operation
+    /// deadline and must drop the session on cancellation, then drain its endpoint
+    /// if queued cancellation/close packets need to reach the peer.
+    pub async fn request_raw_with_limits(
+        &mut self,
+        packed_request: &[u8],
+        limits: ResourceReceiveLimits,
+    ) -> io::Result<ReceivedRawResponse> {
+        self.request_raw_bounded(packed_request, None, Some(limits))
+            .await
+    }
+
+    async fn request_raw_bounded(
+        &mut self,
+        packed_request: &[u8],
+        max_response_size: Option<usize>,
+        limits: Option<ResourceReceiveLimits>,
+    ) -> io::Result<ReceivedRawResponse> {
         let mut pace = Pace::new(self.config.timeout);
         let (request_id, mut sending) =
             if packed_request.len() <= write_chunk_for_mtu(self.link.mtu()) {
@@ -277,7 +303,7 @@ impl ResourceSession {
                 (request_id, Some(sender))
             };
 
-        let response_receiver = self.receivers(max_response_size, false);
+        let response_receiver = self.receivers_with_limits(max_response_size, false, limits);
         let mut receiver = response_receiver();
         let mut kept = 0;
         loop {
@@ -288,7 +314,7 @@ impl ResourceSession {
                 .min();
             tokio::select! {
                 maybe = self.packets.recv() => {
-                    let packet = maybe.ok_or_else(|| {
+                    let mut packet = maybe.ok_or_else(|| {
                         io::Error::new(io::ErrorKind::BrokenPipe, "request link closed")
                     })?;
                     pace.heard();
@@ -303,8 +329,12 @@ impl ResourceSession {
                             ));
                         }
                     }
-                    match self.link.receive(&packet) {
+                    let inbound = receive_bounded_packet(&self.link, &mut packet, limits)?;
+                    match inbound {
                         Some(Inbound::Response(bytes)) => {
+                            if limits.is_some_and(|limit| bytes.len() > limit.max_decoded_bytes) {
+                                return Err(io::Error::new(io::ErrorKind::InvalidData, "response exceeds decoded byte limit"));
+                            }
                             let response_id = Response::request_id(&bytes).map_err(|_| {
                                 io::Error::new(io::ErrorKind::InvalidData, "invalid response envelope")
                             })?;
@@ -391,3 +421,32 @@ impl ResourceSession {
         }
     }
 }
+
+fn receive_bounded_packet(
+    link: &Link,
+    packet: &mut Packet,
+    limits: Option<ResourceReceiveLimits>,
+) -> io::Result<Option<Inbound>> {
+    if packet.destination != link.id()
+        || packet.context != crate::link::CTX_RESPONSE
+        || limits.is_none()
+    {
+        return Ok(link.receive(packet));
+    }
+    if limits.is_some_and(|limit| packet.payload.len() > limit.max_encoded_bytes) {
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidData,
+            "response exceeds encoded byte limit",
+        ));
+    }
+    // Reuse the admitted sealed buffer, retaining Link::receive's destination
+    // gate and ignoring invalid ciphertext in the same way as that method.
+    Ok(link
+        .open_owned(core::mem::take(&mut packet.payload))
+        .ok()
+        .map(Inbound::Response))
+}
+
+#[cfg(test)]
+#[path = "request_limits_tests.rs"]
+mod limits_tests;

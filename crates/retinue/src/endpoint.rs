@@ -55,6 +55,7 @@ mod transit;
 mod tunnel;
 mod watchdog;
 
+pub use crate::resource_transfer::ResourceReceiveLimits;
 pub use announces::AnnounceFreshnessPolicy;
 pub use dial::TcpClient;
 pub use facts::{

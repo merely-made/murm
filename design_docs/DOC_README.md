@@ -1,5 +1,7 @@
 # Murm Documentation Index
 
+- [Resource client receive limits](2026-10-22_resource_client_limits_plan.md): early encoded/decoded Resource budgets and bounded Micron page decoding, with Turnstone-owned policy and deadlines.
+
 T114 live Tucket (2026-10-20): the [qualified endpoint receipt](../testing/receipts/tucket-t114/README.md)
 records four texts/four protocol ACKs against stock MeshCore across reboot,
 restoring the contact before peer work with no decoded fresh advert. The

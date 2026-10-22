@@ -59,6 +59,26 @@ pub use sender::ResourceSender;
 pub use timing::{MAX_ADV_RETRIES, MAX_RETRIES, Timing};
 pub use window::WindowCarry;
 
+/// Independent receive budgets for one request response. Resource bytes include
+/// its MessagePack envelope and metadata. Encoded bytes count sealed segment
+/// tokens in total (or the sealed response packet), excluding carrier framing.
+/// Inflation uses one extra sentinel byte to distinguish an exact fit. These
+/// bound payload buffers, not crypto/decoder workspace or all endpoint state.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct ResourceReceiveLimits {
+    pub max_encoded_bytes: usize,
+    pub max_decoded_bytes: usize,
+}
+
+impl Default for ResourceReceiveLimits {
+    fn default() -> Self {
+        Self {
+            max_encoded_bytes: DEFAULT_MAX_RESOURCE_SIZE,
+            max_decoded_bytes: DEFAULT_MAX_RESOURCE_SIZE,
+        }
+    }
+}
+
 /// How many times a sender that has sent every part asks for its missing proof with a
 /// cache request. RNS resets `retries_left` to 3 on entering `AWAITING_PROOF`.
 pub const PROOF_CACHE_REQUESTS: u8 = 3;

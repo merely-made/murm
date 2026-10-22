@@ -121,13 +121,24 @@ impl Response {
 
     /// Parse msgpack `[request_id, data]`.
     pub fn unpack(bytes: &[u8]) -> Result<Self> {
+        Self::unpack_with_limit(bytes, usize::MAX)
+    }
+
+    /// Parse the existing byte profile, checking the borrowed data length before
+    /// copying it. Alternate accepted headers, nil/strings and trailing bytes keep
+    /// the same meaning as [`unpack`](Self::unpack).
+    pub fn unpack_with_limit(bytes: &[u8], max_data_bytes: usize) -> Result<Self> {
         let mut r = Reader::new(bytes);
         if r.array_header()? != 2 {
             return Err(Error::BadRequest);
         }
         let id = r.bin()?;
         let request_id = AddressHash::from_slice(id).ok_or(Error::BadRequest)?;
-        let data = r.bin()?.to_vec();
+        let data = r.bin()?;
+        if data.len() > max_data_bytes {
+            return Err(Error::CapacityExceeded);
+        }
+        let data = data.to_vec();
         Ok(Self { request_id, data })
     }
 
@@ -254,6 +265,51 @@ impl<'a> Reader<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn response_body_limit_precedes_copy_and_preserves_byte_profile() {
+        for length in [0, 1, 255, 256, 65_535, 65_536] {
+            let response = Response::new(AddressHash::from_bytes([7; 16]), vec![9; length]);
+            let packed = response.pack();
+            assert_eq!(
+                Response::unpack_with_limit(&packed, length).unwrap(),
+                response
+            );
+            if length > 0 {
+                assert_eq!(
+                    Response::unpack_with_limit(&packed, length - 1),
+                    Err(Error::CapacityExceeded)
+                );
+            }
+        }
+        // Noncanonical array/id headers, a string byte value, and tolerated
+        // trailing data still use the existing parser.
+        let mut alternate = vec![0xdc, 0, 2, 0xc6, 0, 0, 0, 16];
+        alternate.extend_from_slice(&[7; 16]);
+        alternate.extend_from_slice(b"\xa3abc\xff");
+        assert_eq!(
+            Response::unpack_with_limit(&alternate, 3).unwrap().data,
+            b"abc"
+        );
+        assert_eq!(
+            Response::unpack_with_limit(&alternate, 2),
+            Err(Error::CapacityExceeded)
+        );
+        alternate.truncate(24);
+        alternate.push(0xc0);
+        assert!(
+            Response::unpack_with_limit(&alternate, 0)
+                .unwrap()
+                .data
+                .is_empty()
+        );
+        alternate.pop();
+        alternate.extend_from_slice(&[0xc6, 0xff, 0xff, 0xff, 0xff]);
+        assert_eq!(
+            Response::unpack_with_limit(&alternate, 1),
+            Err(Error::BadRequest)
+        );
+    }
 
     #[test]
     fn request_round_trips() {

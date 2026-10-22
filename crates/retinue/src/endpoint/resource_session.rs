@@ -188,6 +188,15 @@ impl ResourceSession {
         max_data_size: Option<usize>,
         with_accept: bool,
     ) -> impl Fn() -> SegmentedReceiver + Send + Sync + 'static {
+        self.receivers_with_limits(max_data_size, with_accept, None)
+    }
+
+    pub(super) fn receivers_with_limits(
+        &self,
+        max_data_size: Option<usize>,
+        with_accept: bool,
+        limits: Option<crate::resource_transfer::ResourceReceiveLimits>,
+    ) -> impl Fn() -> SegmentedReceiver + Send + Sync + 'static {
         let link = self.link.clone();
         let window = self.config.request_window;
         let timing = self.timing();
@@ -198,7 +207,7 @@ impl ResourceSession {
         move || {
             let link = link.clone();
             let accept = accept.clone();
-            SegmentedReceiver::new(link.clone(), move || {
+            let receiver = SegmentedReceiver::new(link.clone(), move || {
                 let mut receiver =
                     ResourceReceiver::with_request_window(link.clone(), window).with_timing(timing);
                 if let Some(max) = max_data_size {
@@ -212,7 +221,11 @@ impl ResourceSession {
                     None => receiver,
                 }
             })
-            .with_max_size(max_size)
+            .with_max_size(max_size);
+            match limits {
+                Some(limits) => receiver.with_receive_limits(limits),
+                None => receiver,
+            }
         }
     }
 
