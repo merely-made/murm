@@ -8,6 +8,7 @@ use crate::link::{CTX_RESOURCE_PRF, Link, LinkMode, LinkTrailer, PendingLink, ac
 use crate::packet::Packet;
 use crate::token::IV_LEN;
 
+mod limits;
 mod pipe;
 mod proof;
 mod refusal;

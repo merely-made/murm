@@ -55,6 +55,8 @@ pub struct SegmentedReceiver {
     make: MakeReceiver,
     filter: Option<OfferFilter>,
     max_size: usize,
+    max_encoded_size: Option<usize>,
+    encoded_received: usize,
     offer: Option<Offer>,
     /// The receiver of the segment in progress; `None` between segments.
     current: Option<ResourceReceiver>,
@@ -84,6 +86,8 @@ impl SegmentedReceiver {
             make: Box::new(make),
             filter: None,
             max_size: DEFAULT_MAX_RESOURCE_SIZE,
+            max_encoded_size: None,
+            encoded_received: 0,
             offer: None,
             current: None,
             segment_hash: None,
@@ -105,6 +109,14 @@ impl SegmentedReceiver {
     /// A body larger than advertised fails too, and a compressed one stops inflating there.
     pub fn with_max_size(mut self, max_size: usize) -> Self {
         self.max_size = max_size;
+        self
+    }
+
+    /// Bound decoded data and metadata together, and the sum of sealed segment
+    /// token sizes. Each new segment is admitted against the remaining budgets.
+    pub fn with_receive_limits(mut self, limits: super::ResourceReceiveLimits) -> Self {
+        self.max_size = self.max_size.min(limits.max_decoded_bytes);
+        self.max_encoded_size = Some(limits.max_encoded_bytes);
         self
     }
 
@@ -210,23 +222,34 @@ impl SegmentedReceiver {
             }
         };
         let mut receiver = (self.make)();
+        if let Some(max) = self.max_encoded_size {
+            let remaining = max.saturating_sub(self.encoded_received);
+            if adv.transfer_size > remaining as u64 {
+                return self.fail(Error::CapacityExceeded, &adv, iv);
+            }
+            receiver = receiver.with_max_transfer_size(remaining);
+        }
         if let Some(carry) = self.carry {
             receiver = receiver.with_carry(carry);
         }
+        let remaining =
+            (adv.data_size.min(self.max_size as u64)).saturating_sub(self.received) as usize;
         receiver = if adv.l > 1 {
-            // A segment inflates to at most the segment size.
             receiver
                 .allow_segments()
-                .with_max_decompressed_size(MAX_SEGMENT_SIZE)
+                .cap_decompressed(remaining.min(MAX_SEGMENT_SIZE))
         } else {
-            // A whole resource inflates to at most its advertised size, already within
-            // `max_size`: an understated `d` cannot buy more memory.
-            receiver.cap_decompressed(adv.data_size as usize)
+            receiver.cap_decompressed(remaining)
         };
         let replies = receiver.on_packet(packet, now, &mut *iv);
         if let Some(error) = receiver.failure() {
             self.failure = Some(error);
         } else if !replies.is_empty() {
+            if self.max_encoded_size.is_some() {
+                // Admission checked this sum; retries of the same segment do not
+                // count twice because they return above.
+                self.encoded_received += adv.transfer_size as usize;
+            }
             self.offer.get_or_insert(Offer {
                 original_hash: adv.original_hash.clone(),
                 segments: adv.l as usize,
@@ -261,16 +284,33 @@ impl SegmentedReceiver {
         self.last_proof = current.proof_packet();
         self.carry = Some(current.carry());
         let framing = metadata.as_ref().map_or(0, |m| METADATA_FRAMING + m.len());
-        self.received += (data.len() + framing) as u64;
+        let Some(received) = data
+            .len()
+            .checked_add(framing)
+            .and_then(|length| self.received.checked_add(length as u64))
+        else {
+            self.failure = Some(Error::ResourceCorrupt);
+            self.data = Vec::new();
+            return;
+        };
+        let offer = self.offer.as_mut().expect("a segment implies an offer");
+        if received > offer.total_size || received > self.max_size as u64 {
+            self.failure = Some(Error::ResourceCorrupt);
+            self.data = Vec::new();
+            return;
+        }
+        self.received = received;
         if metadata.is_some() {
             self.metadata = metadata;
         }
         if self.data.is_empty() {
             self.data = data;
         } else {
+            // Avoid Vec's geometric growth exceeding the admitted decoded
+            // payload length when a small final segment crosses capacity.
+            self.data.reserve_exact(data.len());
             self.data.extend_from_slice(&data);
         }
-        let offer = self.offer.as_mut().expect("a segment implies an offer");
         let split = offer.segments > 1;
         if self.received > offer.total_size {
             self.failure = Some(Error::ResourceCorrupt);

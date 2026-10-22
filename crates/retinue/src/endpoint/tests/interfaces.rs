@@ -1,5 +1,6 @@
 //! Interface admission, link packet memory, and detaching.
 
+#[cfg(unix)]
 use std::string::String;
 use std::sync::atomic::{AtomicBool, AtomicU64};
 
@@ -218,20 +219,22 @@ async fn dead_port() -> u16 {
 async fn stream_sockets_take_the_rns_keepalive_profile() {
     let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
     let addr = listener.local_addr().unwrap();
-    for (i2p, idle, interval, probes, _user_timeout) in
+    for (i2p, _idle, _interval, probes, _user_timeout) in
         [(false, 5, 2, 12, 24), (true, 10, 9, 5, 45)]
     {
         let stream = TcpStream::connect(addr).await.unwrap();
         sockopt::tune(&stream, i2p).unwrap();
         let socket = SockRef::from(&stream);
         assert!(socket.keepalive().unwrap() && socket.tcp_nodelay().unwrap());
+        #[cfg(not(windows))]
         assert_eq!(
             socket.tcp_keepalive_time().unwrap(),
-            Duration::from_secs(idle)
+            Duration::from_secs(_idle)
         );
+        #[cfg(not(windows))]
         assert_eq!(
             socket.tcp_keepalive_interval().unwrap(),
-            Duration::from_secs(interval)
+            Duration::from_secs(_interval)
         );
         assert_eq!(socket.tcp_keepalive_retries().unwrap(), probes);
         #[cfg(any(target_os = "linux", target_os = "android"))]
