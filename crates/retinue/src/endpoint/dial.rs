@@ -88,7 +88,7 @@ impl TcpClient {
 
 /// Queue a tunnel synthesis on a client that has just connected (`TCPInterface.py` 169-180,
 /// 298-299). A KISS client sends none, as its peer is a TNC (178-179).
-fn synthesize(shared: &super::shared::Shared, id: InterfaceId, label: &str) {
+pub(super) fn synthesize(shared: &super::shared::Shared, id: InterfaceId, label: &str) {
     let pkt = synthesis(&shared.identity, label);
     if shared.push_to(id, pkt, TrafficClass::Control) == QueueAdmission::Queued {
         shared

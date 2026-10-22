@@ -16,6 +16,8 @@ mod dial;
 mod discovery;
 mod entropy;
 mod facts;
+#[cfg(feature = "i2p")]
+mod i2p;
 mod iface_config;
 mod iface_policy;
 mod iface_stats;
@@ -61,10 +63,17 @@ pub use facts::{
     AnnounceFact, EndpointFacts, LinkDirection, LinkFact, LinkFactKind, LinkRemoteFact,
     PeerAnnounce, RouteFact,
 };
+#[cfg(feature = "i2p")]
+pub use i2p::{
+    I2P_BITRATE_GUESS, I2P_HW_MTU, I2pListen, I2pListener, I2pPeer, I2pTimers, i2p_keyfile,
+    load_or_generate_i2p_key,
+};
 pub use iface_config::{
     Carrier, IdBeacon, InterfaceSettings, RnsAttached, RnsConfig, RnsConfigError, RnsInterface,
     UdpCarrier,
 };
+#[cfg(feature = "i2p")]
+pub use iface_config::{I2pAttached, I2pCarrier};
 pub use iface_policy::{AnnounceRate, IfacePolicy, PathRequestPolicy};
 pub use iface_stats::InterfaceCounters;
 pub use inbound::{Accepted, AcceptedResource, InboundLinkLimits};

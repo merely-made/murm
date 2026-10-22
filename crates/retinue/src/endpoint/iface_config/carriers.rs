@@ -112,6 +112,36 @@ pub enum Carrier {
     /// `PipeInterface`.
     #[cfg(feature = "pipe")]
     Pipe(super::super::pipe::PipeConfig),
+    /// `I2PInterface`, attached with [`Endpoint::attach_i2p_section`].
+    #[cfg(feature = "i2p")]
+    I2p(I2pCarrier),
+}
+
+/// An RNS I2PInterface section (`I2PInterface.py` 725-820).
+#[cfg(feature = "i2p")]
+#[derive(Clone, Debug, Default)]
+pub struct I2pCarrier {
+    /// `peers`: destinations to dial, each its own interface.
+    pub peers: alloc::vec::Vec<String>,
+    /// `connectable`: accept streams at this interface's stored destination.
+    pub connectable: bool,
+    /// Mode of each accepted stream's interface.
+    pub mode: crate::node::InterfaceMode,
+    /// Access code of every peer and accepted stream.
+    pub ifac: Option<crate::ifac::Ifac>,
+    /// Policy each accepted stream's interface inherits.
+    pub iface: super::super::iface_policy::IfacePolicy,
+}
+
+/// What [`Endpoint::attach_i2p_section`] attached.
+#[cfg(feature = "i2p")]
+#[derive(Debug)]
+#[non_exhaustive]
+pub struct I2pAttached {
+    /// One interface per `peers` entry, in order.
+    pub peers: alloc::vec::Vec<InterfaceId>,
+    /// The listener, for a `connectable` section.
+    pub listener: Option<super::super::i2p::I2pListener>,
 }
 
 /// Map one section's carrier keys, with the carrier's default IFAC size (A2).
@@ -135,6 +165,9 @@ pub(super) fn carrier(kind: &str, keys: &Keys<'_>) -> Result<(Carrier, usize), R
         "RNodeInterface" => return Ok((super::radio::rnode(keys)?, SERIAL_SIZE)),
         #[cfg(feature = "pipe")]
         "PipeInterface" => return Ok((pipe(keys)?, SERIAL_SIZE)),
+        // Its DEFAULT_IFAC_SIZE is 16, the stream carriers' (`I2PInterface.py` 720).
+        #[cfg(feature = "i2p")]
+        "I2PInterface" => i2p(keys)?,
         _ => {
             return Err(RnsConfigError::UnsupportedType {
                 interface: keys.name.to_string(),
@@ -309,6 +342,18 @@ fn pipe(keys: &Keys<'_>) -> Result<Carrier, RnsConfigError> {
     Ok(Carrier::Pipe(cfg))
 }
 
+#[cfg(feature = "i2p")]
+fn i2p(keys: &Keys<'_>) -> Result<Carrier, RnsConfigError> {
+    Ok(Carrier::I2p(I2pCarrier {
+        peers: keys
+            .str("peers")
+            .map(super::syntax::list)
+            .unwrap_or_default(),
+        connectable: keys.bool("connectable")?.unwrap_or(false),
+        ..I2pCarrier::default()
+    }))
+}
+
 impl Carrier {
     /// Fill in what the carrier config itself carries: IFAC, a configured bitrate's
     /// autoconfigured MTU (`Reticulum.py` 1038-1039), and for a listener or Auto parent the
@@ -337,6 +382,12 @@ impl Carrier {
             }
             #[cfg(feature = "pipe")]
             Self::Pipe(cfg) => cfg.ifac = settings.ifac.clone(),
+            #[cfg(feature = "i2p")]
+            Self::I2p(cfg) => {
+                cfg.ifac = settings.ifac.clone();
+                cfg.mode = settings.mode;
+                cfg.iface = settings.iface_policy();
+            }
             _ => {}
         }
         self
@@ -388,6 +439,44 @@ impl Endpoint {
         };
         self.apply_interface_settings(id, &section.settings);
         Ok(RnsAttached::Interface(id))
+    }
+
+    /// Attach an I2PInterface section through `bridge`, the router of the host's choice
+    /// ([`truchman::Bridge::from_env`] reads `I2P_SAM_ADDRESS` as RNS does). A `connectable`
+    /// section loads its destination from [`super::super::i2p_keyfile`] under `storage`, RNS's
+    /// `storagepath`, generating and storing one on first use.
+    ///
+    /// As in RNS, peers take the section's access code but keep full mode and default policy,
+    /// since RNS creates them before applying the section's settings; accepted streams
+    /// inherit those settings (`I2PInterface.py` 812-870).
+    #[cfg(feature = "i2p")]
+    pub async fn attach_i2p_section(
+        &self,
+        section: &RnsInterface,
+        bridge: truchman::Bridge,
+        storage: &std::path::Path,
+    ) -> io::Result<I2pAttached> {
+        use super::super::i2p::{I2pListen, I2pPeer, i2p_keyfile, load_or_generate_i2p_key};
+        let Carrier::I2p(cfg) = &section.carrier else {
+            return Err(io::ErrorKind::InvalidInput.into());
+        };
+        let listener = if cfg.connectable {
+            let path = i2p_keyfile(storage, &section.name, self.shared.identity.hash());
+            let mut listen = I2pListen::new(bridge, load_or_generate_i2p_key(bridge, &path).await?);
+            listen.mode = cfg.mode;
+            listen.ifac = cfg.ifac.clone();
+            listen.iface = cfg.iface;
+            Some(self.listen_i2p(listen)?)
+        } else {
+            None
+        };
+        let mut peers = alloc::vec::Vec::with_capacity(cfg.peers.len());
+        for target in &cfg.peers {
+            let mut peer = I2pPeer::new(bridge, &section.name, target.clone());
+            peer.ifac = cfg.ifac.clone();
+            peers.push(self.attach_i2p_peer(peer)?);
+        }
+        Ok(I2pAttached { peers, listener })
     }
 
     #[cfg(feature = "serial")]

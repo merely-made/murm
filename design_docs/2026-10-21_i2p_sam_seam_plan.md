@@ -1,7 +1,9 @@
 # I2P over SAMv3: retinue's I2P interface and the embedded router
 
-**Date:** 2026-10-21. **Status:** plan. Assessment done; four forks are open
-(see [Open forks](#open-forks)). No code has changed.
+**Date:** 2026-10-21. **Status:** in progress (2026-10-22). I2P1 is
+implemented and software-qualified on branch `i2p-sam`, not merged. The
+`truchman` 0.1.0 publish and I2P0's venv re-sync remain. I2P2-I2P4 have not
+started.
 
 Related: Mere's reachability rungs and privacy lanes,
 `mere/design_docs/mere_docs/implementation_strategy/2026-08-03_reachability_rungs_and_privacy_lanes_plan.md`
@@ -294,3 +296,62 @@ F1, F2 and F4 were answered on 2026-10-21, and F3's names on 2026-10-22
   `i2pd version 3.0.0 (0.9.71)`, Boost 1.92.0, OpenSSL 3.6.5. It has not been
   started as a router; no config or ports yet. The venv re-sync to 1.5.7 and
   the I2PInterface diff, the other half of I2P0, are not done.
+- 2026-10-22: I2P1 implemented on branch `i2p-sam` (worktree
+  `Code/worktrees/murm-i2p-sam`), not merged. Details follow.
+  - **`truchman` 0.1.0** (`crates/truchman`, MPL-2.0) has a sans-io core and
+    a tokio shell. The owner asked "Surprised not sans-io lol", and the crate
+    was restructured before its first build. The core is `proto`: typed
+    `Command`s produce validated lines, and `LineBuf` turns bytes into reply
+    lines and keeps whatever follows as stream data. Destinations and keys,
+    I2P base64/base32, and reply parsing are in the core too. The `tokio`
+    feature (default on) adds `Bridge`'s commands, `StreamSession` (which
+    answers PING with PONG and notices close) and the `Stream` that replays
+    any pre-read bytes.
+  - **Unlike yosemite:** any bridge host may be set, and every value written
+    onto a SAM line is checked, so a config value cannot inject a command.
+    Datagrams are not implemented; they need a phase of their own, scheduled
+    when a consumer needs them.
+  - **Tests:** 14 core unit tests and 7 against a scripted bridge. Coverage:
+    HELLO and NOVERSION, DEST GENERATE, NAMING LOOKUP, transient and
+    persistent SESSION CREATE, STREAM CONNECT and ACCEPT (with bytes arriving
+    in the same segment as the status line), refusals with their `RESULT`
+    and `MESSAGE`, PING/PONG and session close. The injection refusals have
+    a positive control in the same test. Clippy is clean with and without
+    `tokio`.
+  - **retinue, feature `i2p`:**
+    - `Endpoint::attach_i2p_peer` and `listen_i2p`, and
+      `attach_i2p_section(section, bridge, storage)` for `[[I2PInterface]]`.
+    - `i2p_keyfile` and `load_or_generate_i2p_key`, using the RNS layout (F4).
+    - The pump gained an opt-in `Liveness` (keepalive bytes after a quiet
+      spell, `ReadIdle` after a silent one). TCP, Pipe and Local pass none,
+      so their behaviour is unchanged.
+    - `NOTICE` records the batch at RNS 1.5.6.
+  - **`tests/i2p_interface.rs`, 5 tests** over a fake loopback router that
+    pairs CONNECT with ACCEPT:
+    - A connectable hub learns a leaf's announce, and a link echoes. The
+      leaf dials by b32, so lookup is exercised.
+    - A silent far end gets one `7E 7E` keepalive after the synthesis frame,
+      is dropped at the read deadline, and is redialed.
+    - An unreachable peer stays offline and retries on one session; with no
+      bridge at all, the endpoint is unharmed.
+    - Keyfile naming, old-format preference and generate-once.
+    - Section parsing, with 16-byte IFAC by default.
+  - **Mutation check:** with liveness disabled in the dialer, the keepalive
+    test fails at its assertion. With the code restored, all five pass.
+  - **Pre-existing, not caused here:** retinue's lib test target does not
+    compile on Windows. `endpoint/tests/interfaces.rs` 229, 233 call socket2's
+    `tcp_keepalive_time`/`tcp_keepalive_interval`, which Windows lacks, and
+    line 3 has an unused import. That file is identical to `main`, so the
+    pump's own unit tests could not run on this machine. The integration
+    suite stands in for them here. The family plan's MOVE notes already
+    record this.
+  - **Integration suite:** with `i2p,pipe,tulle-radio,serial`, every binary
+    passes except one test,
+    `reliable_stream::reliable_exchange_survives_loss_including_identify`,
+    which failed three of three runs at its 20 s read timeout. It runs over
+    the in-memory lossy interface, not the pump. Control: with `main`'s
+    `pump.rs` swapped back in and the feature off, it fails identically. The
+    family plan records it as flaky, failing at `HEAD`. On this machine,
+    today, it fails every run.
+  - **Not done in I2P1:** the `truchman` 0.1.0 publish, which needs the
+    owner's go; any live router.
