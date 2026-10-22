@@ -913,3 +913,18 @@ outgoing journal replay and duplicate incoming replay through the mapping.
 Mere's 16 Comms tests plus its doctest pass. The full desktop library also passes
 `cargo check --manifest-path apps/signalman-desktop/Cargo.toml --lib -j 2` with
 the committed dependency locks. This is a compile receipt, not a new headed run.
+
+## Shared pool cohort receiving, 2026-10-22
+
+The desktop lock receives Mere SDK `a07a375ed9f49d31bb757c4dd516a0fa7af33fde`,
+with Cambium 0.6 and Sprigging 0.3 compatibility constraints. Its graph has one
+Armillary `92d5b15` and one Genet family at `7d1d89d`; Netrender remains at
+`ec15eb26`. The existing Murm self-family path patches retain one local type
+family. ESP and Knot are outside this desktop dependency cone.
+
+The existing desktop library passes 45 tests with one isolated-keeper test
+ignored; `management_shell` passes six and `network_face` passes seven. These
+are CPU and headless receiving checks on the canonical Git SDK, without
+firmware, physical-device, native-window or audio-device qualification. Root,
+native and wire locks remain byte-identical. Exact sources, gates and limits
+are recorded in the [central Mere cohort receipt](https://github.com/merely-made/mere/blob/main/support/family-promotion/pool-cohort-rollout-20261022.json).
