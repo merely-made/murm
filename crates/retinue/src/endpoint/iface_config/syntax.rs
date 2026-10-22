@@ -102,8 +102,8 @@ pub(super) fn boolean(value: &str) -> Option<bool> {
     }
 }
 
-/// ConfigObj's comma list, as `as_list` reads `devices`.
-#[cfg(all(feature = "auto", unix))]
+/// ConfigObj's comma list, as `as_list` reads `devices` and `peers`.
+#[cfg(any(all(feature = "auto", unix), feature = "i2p"))]
 pub(super) fn list(value: &str) -> Vec<String> {
     value
         .split(',')

@@ -140,10 +140,25 @@ pub(super) enum PumpEnd {
     Eof,
     /// A write made no progress for [`DEAD_TIME`].
     WriteStall,
+    /// Nothing was read for the carrier's [`Liveness::read_idle`].
+    ReadIdle,
     /// The stream failed.
     Error,
     /// The endpoint closed the interface or stopped routing.
     Closed,
+}
+
+/// In-stream liveness for a carrier whose transport hides a dead peer, as an I2P tunnel does
+/// (`I2PInterface.py` 569-603): a keepalive written after a quiet spell, and an end when the
+/// peer has been silent too long.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(super) struct Liveness {
+    /// Write [`Self::keepalive`] when nothing has been written for this long.
+    pub(super) keepalive_after: core::time::Duration,
+    /// Bytes that carry no packet, such as an empty HDLC frame.
+    pub(super) keepalive: &'static [u8],
+    /// End the pump when nothing has been read for this long.
+    pub(super) read_idle: core::time::Duration,
 }
 
 /// Carry interface `id` over one byte stream until either direction ends, which ends both: a
@@ -157,6 +172,23 @@ pub(super) async fn run<R, W>(
     id: InterfaceId,
     out: &mut OutboundPackets,
     framing: Framing,
+    reader: R,
+    writer: W,
+) -> PumpEnd
+where
+    R: AsyncRead + Unpin,
+    W: AsyncWrite + Unpin,
+{
+    run_live(shared, id, out, framing, None, reader, writer).await
+}
+
+/// [`run`], with the carrier's in-stream [`Liveness`] if it has one.
+async fn run_live<R, W>(
+    shared: &Shared,
+    id: InterfaceId,
+    out: &mut OutboundPackets,
+    framing: Framing,
+    liveness: Option<Liveness>,
     mut reader: R,
     mut writer: W,
 ) -> PumpEnd
@@ -167,13 +199,27 @@ where
     let ifac = out.ifac.clone();
     let (frame_limit, stats) = (out.frame_limit.clone(), out.stats.clone());
     let write = async {
-        while let Some(pkt) = out.recv().await {
-            let Ok(wire) = out.encode(&pkt) else {
-                shared.with_iface(id, |iface| iface.unsendable.fetch_add(1, Ordering::Relaxed));
-                continue;
+        loop {
+            // `recv` only pops synchronously, so a timeout here never loses a packet.
+            let next = match liveness {
+                Some(live) => tokio::time::timeout(live.keepalive_after, out.recv()).await,
+                None => Ok(out.recv().await),
+            };
+            let wire = match next {
+                Ok(Some(pkt)) => match out.encode(&pkt) {
+                    Ok(wire) => framing.frame(&wire),
+                    Err(_) => {
+                        shared.with_iface(id, |iface| {
+                            iface.unsendable.fetch_add(1, Ordering::Relaxed)
+                        });
+                        continue;
+                    }
+                },
+                Ok(None) => return PumpEnd::Closed,
+                Err(_) => liveness.map_or_else(Vec::new, |live| live.keepalive.to_vec()),
             };
             let sent = async {
-                writer.write_all(&framing.frame(&wire)).await?;
+                writer.write_all(&wire).await?;
                 writer.flush().await
             };
             match tokio::time::timeout(DEAD_TIME, sent).await {
@@ -182,13 +228,21 @@ where
                 Err(_) => return PumpEnd::WriteStall,
             }
         }
-        PumpEnd::Closed
     };
     let read = async {
         let mut deframer = framing.deframer(frame_limit.load(Ordering::Acquire));
         let mut buf = [0u8; 4096];
         loop {
-            let n = match reader.read(&mut buf).await {
+            let read = match liveness {
+                Some(live) => {
+                    match tokio::time::timeout(live.read_idle, reader.read(&mut buf)).await {
+                        Ok(read) => read,
+                        Err(_) => return PumpEnd::ReadIdle,
+                    }
+                }
+                None => reader.read(&mut buf).await,
+            };
+            let n = match read {
                 Ok(0) => return PumpEnd::Eof,
                 Ok(n) => n,
                 Err(_) => return PumpEnd::Error,
@@ -241,10 +295,32 @@ where
     R: AsyncRead + Unpin,
     W: AsyncWrite + Unpin,
 {
+    carry_live(shared, id, online, out, framing, None, reader, writer).await
+}
+
+/// [`carry`], with the carrier's in-stream [`Liveness`] if it has one.
+#[allow(
+    clippy::too_many_arguments,
+    reason = "carry's arguments plus one; internal"
+)]
+pub(super) async fn carry_live<R, W>(
+    shared: &Shared,
+    id: InterfaceId,
+    online: &AtomicBool,
+    out: &mut OutboundPackets,
+    framing: Framing,
+    liveness: Option<Liveness>,
+    reader: R,
+    writer: W,
+) -> PumpEnd
+where
+    R: AsyncRead + Unpin,
+    W: AsyncWrite + Unpin,
+{
     if !online.swap(true, Ordering::AcqRel) {
         out.discard();
     }
-    let end = run(shared, id, out, framing, reader, writer).await;
+    let end = run_live(shared, id, out, framing, liveness, reader, writer).await;
     online.store(false, Ordering::Release);
     out.discard();
     end

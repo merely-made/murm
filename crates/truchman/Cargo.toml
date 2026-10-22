@@ -1,0 +1,29 @@
+[package]
+name = "truchman"
+version = "0.1.0"
+edition = "2024"
+
+rust-version = "1.97.1"
+license = "MPL-2.0"
+readme = "README.md"
+repository = "https://github.com/merely-made/murm"
+description = "SAMv3 client for I2P routers: a sans-io core with a tokio shell for destinations, naming and stream sessions."
+keywords = ["i2p", "sam", "samv3", "privacy", "sans-io"]
+categories = ["network-programming", "asynchronous"]
+
+[features]
+default = ["tokio"]
+# The I/O shell: Bridge commands, StreamSession and Stream. Off, the crate is the sans-io
+# core alone.
+tokio = ["dep:tokio"]
+
+[dependencies]
+sha2 = { version = "0.11", default-features = false }
+tokio = { version = "1", features = ["net", "io-util", "sync", "rt"], optional = true }
+
+[dev-dependencies]
+tokio = { version = "1", features = ["net", "io-util", "sync", "rt-multi-thread", "macros", "time"] }
+
+[[test]]
+name = "fake_bridge"
+required-features = ["tokio"]
