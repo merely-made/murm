@@ -1,7 +1,7 @@
 # Resource client receive limits
 
-**Status (2026-10-22):** implemented; clean publication-tree gates pass,
-consumer qualification in progress. Native receive allocation
+**Status (2026-10-22):** landed; clean supplier and Turnstone receiving gates
+pass and are published. Native receive allocation
 and Micron page decoding only; wire format and serving authority are retained.
 
 ## Scope and ownership
@@ -69,3 +69,15 @@ existing Retinue target/build directory; create no isolated Cargo home.
   separates these exact-source gates from the broader preliminary primary
   matrix and preserves the existing no-compression import warning. No I2P
   source is introduced into the receiving cohort.
+- 2026-10-22: Turnstone source `6737085d` and qualification `0283e312` are
+  published on the clean `36bad79bcc0` supplier cohort. Its native library build
+  and all 78 focused checks pass without a compatibility repair or registry
+  change. The eight Resource cases independently exercise Read/explicit Submit
+  exact-fit, encoded, packed-envelope and body refusal; exact fit also requires
+  the sender's successful proof. Invalid policy refuses before TCP contact and
+  the existing shutdown remains within the operation deadline. Product launch
+  knobs are positive and separate from the unchanged 4 MiB/30-second page
+  defaults. Exact evidence lives at
+  `turnstone/support/receipts/client-limits/consumer.json`. The existing
+  external-host/R3 tests remain ignored. No headed, installed, physical radio,
+  independent-reader, aggregate allocator or new cancellation claim is added.
