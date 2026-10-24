@@ -19,7 +19,7 @@ tokio = ["dep:tokio"]
 
 [dependencies]
 sha2 = { version = "0.11", default-features = false }
-tokio = { version = "1", features = ["net", "io-util", "sync", "rt"], optional = true }
+tokio = { version = "1", features = ["net", "io-util", "sync", "rt", "macros"], optional = true }
 
 [dev-dependencies]
 tokio = { version = "1", features = ["net", "io-util", "sync", "rt-multi-thread", "macros", "time"] }
