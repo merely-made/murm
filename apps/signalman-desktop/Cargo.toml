@@ -47,7 +47,7 @@ linkboy = { version = "0.1.0", path = "../linkboy" }
 # First-party family sources follow their canonical main branches. Cargo.lock
 # records the exact qualified cohort; keep one source per type-bearing family.
 cambium = { git = "https://github.com/merely-made/mere.git", branch = "main", version = "0.6.0" }
-cambium-genet-winit-host = { git = "https://github.com/merely-made/mere.git", branch = "main", version = "0.1.0" }
+cambium-desktop = { git = "https://github.com/merely-made/mere.git", branch = "main", version = "0.1.0" }
 sprigging = { git = "https://github.com/merely-made/mere.git", branch = "main", version = "0.3.0" }
 # Renamed `taproot` at genet 7baa554c; the alias keeps the `genet_probe` paths.
 genet-probe = { package = "taproot", version = "0.1.0", git = "https://github.com/merely-made/genet.git", branch = "main" }
@@ -59,9 +59,9 @@ cpal = "=0.18.2"
 # Signalman's management graph and sealed station authority share the same
 # Mere source as the desktop host.
 mere-signalman = { git = "https://github.com/merely-made/mere.git", branch = "main" }
-chartulary = { git = "https://github.com/merely-made/eidetic.git", rev = "34105d63ec17826e0a58a5b461b65150357dd000" }
+chartulary = { git = "https://github.com/merely-made/eidetic.git", rev = "aa94fe22eea29e9b54e01ed21e6991536ed4f208" }
 gaz = { git = "https://github.com/merely-made/dramatis.git", branch = "main" }
-muniment = { features = ["redb"], git = "https://github.com/merely-made/eidetic.git", rev = "34105d63ec17826e0a58a5b461b65150357dd000" }
+muniment = { features = ["redb"], git = "https://github.com/merely-made/eidetic.git", rev = "aa94fe22eea29e9b54e01ed21e6991536ed4f208" }
 sceno = { git = "https://github.com/merely-made/mere.git", branch = "main" }
 scenomise = { git = "https://github.com/merely-made/mere.git", branch = "main" }
 seiche = { git = "https://github.com/merely-made/mere.git", branch = "main" }
@@ -108,12 +108,17 @@ getrandom = "0.3"
 # taken from genet.git, at the same revision (the Stylo-rename adapter retired
 # with Stylo at genet 55c05d11; ipc-channel left this graph by genet 15713014).
 [patch.crates-io]
+# Registry Webcue and native Genet sessions share one canonical input vocabulary.
+document-session-api = { git = "https://github.com/merely-made/genet.git", branch = "main" }
+# Mere's patched AccessKit (support/patches/accesskit): its cambium hosts call
+# methods only the patched copy has, so the same copy, from mere at this lock.
+accesskit = { git = "https://github.com/merely-made/mere.git", branch = "main" }
 # Promoted sources shared with immutable older Mere suppliers.
 # Canonical promoted families; keep registry and Git consumers type-identical.
-chartulary = { git = "https://github.com/merely-made/eidetic.git", rev = "34105d63ec17826e0a58a5b461b65150357dd000" }
-eidetic = { git = "https://github.com/merely-made/eidetic.git", rev = "34105d63ec17826e0a58a5b461b65150357dd000" }
+chartulary = { git = "https://github.com/merely-made/eidetic.git", rev = "aa94fe22eea29e9b54e01ed21e6991536ed4f208" }
+eidetic = { git = "https://github.com/merely-made/eidetic.git", rev = "aa94fe22eea29e9b54e01ed21e6991536ed4f208" }
 # Gaz and Mere exchange one Muniment family.
-muniment = { git = "https://github.com/merely-made/eidetic.git", rev = "34105d63ec17826e0a58a5b461b65150357dd000" }
+muniment = { git = "https://github.com/merely-made/eidetic.git", rev = "aa94fe22eea29e9b54e01ed21e6991536ed4f208" }
 netrender_device = { git = "https://github.com/merely-made/netrender.git", branch = "main" }
 # Standalone roots must restate the qualified renderer patches.
 netrender-vello = { git = "https://github.com/mark-ik/vello", rev = "276b46648c08f3d2062e70559afa999842e1873c" }
@@ -155,11 +160,11 @@ rust-version = "1.99"
 rustix = { version = "1", features = ["termios"] }
 
 [patch."https://github.com/merely-made/mere.git"]
-chartulary = { git = "https://github.com/merely-made/eidetic.git", rev = "34105d63ec17826e0a58a5b461b65150357dd000" }
-eidetic = { git = "https://github.com/merely-made/eidetic.git", rev = "34105d63ec17826e0a58a5b461b65150357dd000" }
-muniment = { git = "https://github.com/merely-made/eidetic.git", rev = "34105d63ec17826e0a58a5b461b65150357dd000" }
+chartulary = { git = "https://github.com/merely-made/eidetic.git", rev = "aa94fe22eea29e9b54e01ed21e6991536ed4f208" }
+eidetic = { git = "https://github.com/merely-made/eidetic.git", rev = "aa94fe22eea29e9b54e01ed21e6991536ed4f208" }
+muniment = { git = "https://github.com/merely-made/eidetic.git", rev = "aa94fe22eea29e9b54e01ed21e6991536ed4f208" }
 
 [patch."https://www.github.com/merely-made/mere.git"]
-chartulary = { git = "https://github.com/merely-made/eidetic.git", rev = "34105d63ec17826e0a58a5b461b65150357dd000" }
-eidetic = { git = "https://github.com/merely-made/eidetic.git", rev = "34105d63ec17826e0a58a5b461b65150357dd000" }
-muniment = { git = "https://github.com/merely-made/eidetic.git", rev = "34105d63ec17826e0a58a5b461b65150357dd000" }
+chartulary = { git = "https://github.com/merely-made/eidetic.git", rev = "aa94fe22eea29e9b54e01ed21e6991536ed4f208" }
+eidetic = { git = "https://github.com/merely-made/eidetic.git", rev = "aa94fe22eea29e9b54e01ed21e6991536ed4f208" }
+muniment = { git = "https://github.com/merely-made/eidetic.git", rev = "aa94fe22eea29e9b54e01ed21e6991536ed4f208" }

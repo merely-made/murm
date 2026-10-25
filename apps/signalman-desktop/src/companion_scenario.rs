@@ -370,9 +370,10 @@ impl mesquite::Product for Product {
                     let dom = dom.borrow();
                     let mut cursor = Some(node);
                     while let Some(current) = cursor {
-                        if dom.attributes(current).any(|a| {
-                            a.name.local.as_ref() == "data-text-field" && a.value == target
-                        }) {
+                        if dom
+                            .attributes(current)
+                            .any(|a| &*a.name.local == "data-text-field" && a.value == target)
+                        {
                             return true;
                         }
                         cursor = dom.parent(current);

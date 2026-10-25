@@ -87,9 +87,10 @@ pub fn focused_revision_field(
     let field = {
         let dom = dom.borrow();
         // `text_field` renders a `div` with `role="textbox"` since mere 3ee4c0ae.
-        if !dom.attributes(node).any(|attribute| {
-            attribute.name.local.as_ref() == "role" && attribute.value == "textbox"
-        }) {
+        if !dom
+            .attributes(node)
+            .any(|attribute| &*attribute.name.local == "role" && attribute.value == "textbox")
+        {
             return None;
         }
         let mut cursor = Some(node);
@@ -97,7 +98,7 @@ pub fn focused_revision_field(
         while let Some(current) = cursor {
             field = dom
                 .attributes(current)
-                .find(|attribute| attribute.name.local.as_ref() == "data-text-field")
+                .find(|attribute| &*attribute.name.local == "data-text-field")
                 .map(|attribute| attribute.value.to_string())
                 .or(field);
             if field.is_some() {

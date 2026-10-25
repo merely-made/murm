@@ -2,7 +2,7 @@
 
 //! The window.
 //!
-//! Wiring only. `cambium-genet-winit-host` owns the winit lifecycle, the
+//! Wiring only. `cambium-desktop` owns the winit lifecycle, the
 //! surface, layout, paint, hit testing, input routing, and the accessibility
 //! tree; this supplies the state, the views, the sheet, and four small hooks.
 

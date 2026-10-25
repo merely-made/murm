@@ -244,7 +244,7 @@ fn keyboard_reaches_and_activates_all_six_sections_without_losing_devices() {
 
 #[test]
 fn accesskit_names_all_six_primary_sections() {
-    let mut harness = harness();
+    let harness = harness();
     let (tree, _) = harness.a11y_tree();
     let buttons = tree
         .nodes
