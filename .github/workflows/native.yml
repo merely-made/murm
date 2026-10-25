@@ -34,6 +34,6 @@ jobs:
       - name: Exercise authenticated session admission
         run: cargo test --locked -p murm --features session-lane --test session_lane
       - name: Exercise portable WebRTC core
-        run: cargo test --locked -p mere-webrtc-carrier --lib
+        run: cargo test --locked -p murm-webrtc --lib
       - name: Check browser WebRTC adapter and tests
-        run: cargo check --locked -p mere-webrtc-carrier --all-targets --features browser --target wasm32-unknown-unknown
+        run: cargo check --locked -p murm-webrtc --all-targets --features browser --target wasm32-unknown-unknown

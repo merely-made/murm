@@ -3201,23 +3201,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "mere-webrtc-carrier"
-version = "0.0.1"
-dependencies = [
- "blake3",
- "futures-channel",
- "js-sys",
- "luggage",
- "str0m",
- "thiserror 1.0.69",
- "tokio",
- "wasm-bindgen",
- "wasm-bindgen-futures",
- "wasm-bindgen-test",
- "web-sys",
-]
-
-[[package]]
 name = "minicov"
 version = "0.3.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3326,6 +3309,23 @@ dependencies = [
  "retinue",
  "tokio",
  "truchman",
+]
+
+[[package]]
+name = "murm-webrtc"
+version = "0.0.1"
+dependencies = [
+ "blake3",
+ "futures-channel",
+ "js-sys",
+ "luggage",
+ "str0m",
+ "thiserror 1.0.69",
+ "tokio",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "wasm-bindgen-test",
+ "web-sys",
 ]
 
 [[package]]

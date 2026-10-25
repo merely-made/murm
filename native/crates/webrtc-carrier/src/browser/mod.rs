@@ -6,7 +6,7 @@
 
 //! The browser half of C1: an initiator over the browser's own WebRTC.
 //!
-//! `mere-webrtc-carrier`'s default core (the crate root) computes over a
+//! `murm-webrtc`'s default core (the crate root) computes over a
 //! transcript and frames bytes; it opens no socket and creates no peer
 //! connection anywhere, on purpose (see the crate root doc). This module is
 //! the adapter that does: [`BrowserInitiator`] drives a real

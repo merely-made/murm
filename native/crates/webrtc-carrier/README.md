@@ -1,8 +1,8 @@
-# mere-webrtc-carrier
+# murm-webrtc
 
 The WebRTC carrier for the [mere](https://crates.io/crates/mere) workspace: a
 Wasm-clean default core, plus two off-by-default runtime adapters. Package
-name is `mere-webrtc-carrier`; the lib is `webrtc_carrier`, so consumers write
+name is `murm-webrtc`; the lib is `webrtc_carrier`, so consumers write
 `use webrtc_carrier::...`.
 
 The default core is the part a browser and a native host must agree on
@@ -194,10 +194,10 @@ different link or an error.
 Verified on both targets, default core and each feature:
 
 ```bash
-cargo test -p mere-webrtc-carrier
-cargo test -p mere-webrtc-carrier --features native
-cargo check -p mere-webrtc-carrier --target wasm32-unknown-unknown
-cargo check -p mere-webrtc-carrier --features browser --target wasm32-unknown-unknown
+cargo test -p murm-webrtc
+cargo test -p murm-webrtc --features native
+cargo check -p murm-webrtc --target wasm32-unknown-unknown
+cargo check -p murm-webrtc --features browser --target wasm32-unknown-unknown
 ```
 
 ## Features

@@ -8,7 +8,7 @@
 //!
 //! The Wasm-clean core of the browser WebRTC carrier: the part a browser and a
 //! native host must agree on byte-for-byte before either of them has opened a
-//! socket. Package name is `mere-webrtc-carrier`; the lib is `webrtc_carrier`,
+//! socket. Package name is `murm-webrtc`; the lib is `webrtc_carrier`,
 //! so consumers write `use webrtc_carrier::...`.
 //!
 //! It contains five things and deliberately nothing else:

@@ -1,6 +1,6 @@
 [package]
 rust-version = "1.97.1"
-name = "mere-webrtc-carrier"
+name = "murm-webrtc"
 readme = "README.md"
 version = "0.0.1"
 edition.workspace = true
