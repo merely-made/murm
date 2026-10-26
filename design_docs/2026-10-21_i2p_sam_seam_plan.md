@@ -1,9 +1,14 @@
 # I2P over SAMv3: retinue's I2P interface and the embedded router
 
-**Date:** 2026-10-21. **Status:** in progress (2026-10-22). I2P0 and I2P1 are
-done; I2P1 landed on `main` (`cb0c91e`) and `truchman` 0.1.0 is published.
-I2P2 passed its live receipt twice on branch `i2p-host`, not yet merged.
-I2P3 and I2P4 have not started.
+**Date:** 2026-10-21. **Status:** in progress. The refreshed source contains
+I2P4 implementation and pins `truchman` 0.1.1. The earlier I2P3/I2P4
+qualification receipts and expanded status notes remain reachable from the
+pre-refresh recovery ref; this refreshed tree does not claim those gates.
+
+Refresh note (2026-10-26): `truchman` 0.1.1 was published from `37f60c1`.
+Its standalone manifest now enables Tokio macros, which `serve_control` uses
+for `tokio::select!`; workspace feature unification had previously hidden
+that package-manifest omission. The native `murm-i2p` consumer pins 0.1.1.
 
 Related: Mere's reachability rungs and privacy lanes,
 `mere/design_docs/mere_docs/implementation_strategy/2026-08-03_reachability_rungs_and_privacy_lanes_plan.md`
