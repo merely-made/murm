@@ -59,9 +59,9 @@ cpal = "=0.18.2"
 # Signalman's management graph and sealed station authority share the same
 # Mere source as the desktop host.
 mere-signalman = { git = "https://github.com/merely-made/mere.git", branch = "main" }
-chartulary = { git = "https://github.com/merely-made/eidetic.git", rev = "8626888bf4f6af1147c9691f031c56197afef22b" }
+chartulary = { git = "https://github.com/merely-made/eidetic.git", rev = "f599ffe93298025bf6d65ae310a7cb4270ea52e3" }
 gaz = { git = "https://github.com/merely-made/dramatis.git", branch = "main" }
-muniment = { features = ["redb"], git = "https://github.com/merely-made/eidetic.git", rev = "8626888bf4f6af1147c9691f031c56197afef22b" }
+muniment = { features = ["redb"], git = "https://github.com/merely-made/eidetic.git", rev = "f599ffe93298025bf6d65ae310a7cb4270ea52e3" }
 sceno = { git = "https://github.com/merely-made/mere.git", branch = "main" }
 scenomise = { git = "https://github.com/merely-made/mere.git", branch = "main" }
 seiche = { git = "https://github.com/merely-made/mere.git", branch = "main" }
@@ -115,10 +115,10 @@ document-session-api = { git = "https://github.com/merely-made/genet.git", branc
 accesskit = { git = "https://github.com/merely-made/mere.git", branch = "main" }
 # Promoted sources shared with immutable older Mere suppliers.
 # Canonical promoted families; keep registry and Git consumers type-identical.
-chartulary = { git = "https://github.com/merely-made/eidetic.git", rev = "8626888bf4f6af1147c9691f031c56197afef22b" }
-eidetic = { git = "https://github.com/merely-made/eidetic.git", rev = "8626888bf4f6af1147c9691f031c56197afef22b" }
+chartulary = { git = "https://github.com/merely-made/eidetic.git", rev = "f599ffe93298025bf6d65ae310a7cb4270ea52e3" }
+eidetic = { git = "https://github.com/merely-made/eidetic.git", rev = "f599ffe93298025bf6d65ae310a7cb4270ea52e3" }
 # Gaz and Mere exchange one Muniment family.
-muniment = { git = "https://github.com/merely-made/eidetic.git", rev = "8626888bf4f6af1147c9691f031c56197afef22b" }
+muniment = { git = "https://github.com/merely-made/eidetic.git", rev = "f599ffe93298025bf6d65ae310a7cb4270ea52e3" }
 netrender_device = { git = "https://github.com/merely-made/netrender.git", branch = "main" }
 # Standalone roots must restate the qualified renderer patches.
 netrender-vello = { git = "https://github.com/mark-ik/vello", rev = "276b46648c08f3d2062e70559afa999842e1873c" }
@@ -160,22 +160,22 @@ rust-version = "1.99"
 rustix = { version = "1", features = ["termios"] }
 
 [patch."https://github.com/merely-made/mere.git"]
-chartulary = { git = "https://github.com/merely-made/eidetic.git", rev = "8626888bf4f6af1147c9691f031c56197afef22b" }
-eidetic = { git = "https://github.com/merely-made/eidetic.git", rev = "8626888bf4f6af1147c9691f031c56197afef22b" }
-muniment = { git = "https://github.com/merely-made/eidetic.git", rev = "8626888bf4f6af1147c9691f031c56197afef22b" }
+chartulary = { git = "https://github.com/merely-made/eidetic.git", rev = "f599ffe93298025bf6d65ae310a7cb4270ea52e3" }
+eidetic = { git = "https://github.com/merely-made/eidetic.git", rev = "f599ffe93298025bf6d65ae310a7cb4270ea52e3" }
+muniment = { git = "https://github.com/merely-made/eidetic.git", rev = "f599ffe93298025bf6d65ae310a7cb4270ea52e3" }
 
 [patch."https://www.github.com/merely-made/mere.git"]
-chartulary = { git = "https://github.com/merely-made/eidetic.git", rev = "8626888bf4f6af1147c9691f031c56197afef22b" }
-eidetic = { git = "https://github.com/merely-made/eidetic.git", rev = "8626888bf4f6af1147c9691f031c56197afef22b" }
-muniment = { git = "https://github.com/merely-made/eidetic.git", rev = "8626888bf4f6af1147c9691f031c56197afef22b" }
+chartulary = { git = "https://github.com/merely-made/eidetic.git", rev = "f599ffe93298025bf6d65ae310a7cb4270ea52e3" }
+eidetic = { git = "https://github.com/merely-made/eidetic.git", rev = "f599ffe93298025bf6d65ae310a7cb4270ea52e3" }
+muniment = { git = "https://github.com/merely-made/eidetic.git", rev = "f599ffe93298025bf6d65ae310a7cb4270ea52e3" }
 
 # Keep admitted store and graph types identical across the local native crates
 # and the current Mere Git consumer while the answer cohort advances.
 [patch."https://github.com/merely-made/eidetic.git"]
-chartulary = { git = "https://www.github.com/merely-made/eidetic.git", rev = "8626888bf4f6af1147c9691f031c56197afef22b" }
-eidetic = { git = "https://www.github.com/merely-made/eidetic.git", rev = "8626888bf4f6af1147c9691f031c56197afef22b" }
-luggage = { git = "https://www.github.com/merely-made/eidetic.git", rev = "8626888bf4f6af1147c9691f031c56197afef22b" }
-mere-proofs = { git = "https://www.github.com/merely-made/eidetic.git", rev = "8626888bf4f6af1147c9691f031c56197afef22b" }
-muniment = { git = "https://www.github.com/merely-made/eidetic.git", rev = "8626888bf4f6af1147c9691f031c56197afef22b" }
-servitor = { git = "https://www.github.com/merely-made/eidetic.git", rev = "8626888bf4f6af1147c9691f031c56197afef22b" }
-stickleback = { git = "https://www.github.com/merely-made/eidetic.git", rev = "8626888bf4f6af1147c9691f031c56197afef22b" }
+chartulary = { git = "https://www.github.com/merely-made/eidetic.git", rev = "f599ffe93298025bf6d65ae310a7cb4270ea52e3" }
+eidetic = { git = "https://www.github.com/merely-made/eidetic.git", rev = "f599ffe93298025bf6d65ae310a7cb4270ea52e3" }
+luggage = { git = "https://www.github.com/merely-made/eidetic.git", rev = "f599ffe93298025bf6d65ae310a7cb4270ea52e3" }
+mere-proofs = { git = "https://www.github.com/merely-made/eidetic.git", rev = "f599ffe93298025bf6d65ae310a7cb4270ea52e3" }
+muniment = { git = "https://www.github.com/merely-made/eidetic.git", rev = "f599ffe93298025bf6d65ae310a7cb4270ea52e3" }
+servitor = { git = "https://www.github.com/merely-made/eidetic.git", rev = "f599ffe93298025bf6d65ae310a7cb4270ea52e3" }
+stickleback = { git = "https://www.github.com/merely-made/eidetic.git", rev = "f599ffe93298025bf6d65ae310a7cb4270ea52e3" }
