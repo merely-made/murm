@@ -2440,7 +2440,7 @@ dependencies = [
 [[package]]
 name = "insigne"
 version = "0.0.2"
-source = "git+https://github.com/merely-made/dramatis.git?branch=main#5c89001a6ff1aac3f6105ed50b6ae5f09c9f27e2"
+source = "git+https://github.com/merely-made/dramatis.git?branch=main#4d8e514edde37f7fb56d2c61adc7f2a1071a5b49"
 dependencies = [
  "blake3",
  "ed25519-dalek",
@@ -3794,7 +3794,7 @@ dependencies = [
 [[package]]
 name = "notochord"
 version = "0.1.1"
-source = "git+https://github.com/merely-made/dramatis.git?branch=main#5c89001a6ff1aac3f6105ed50b6ae5f09c9f27e2"
+source = "git+https://github.com/merely-made/dramatis.git?branch=main#4d8e514edde37f7fb56d2c61adc7f2a1071a5b49"
 dependencies = [
  "blake3",
  "insigne",
@@ -4262,7 +4262,7 @@ checksum = "9b4f627cb1b25917193a259e49bdad08f671f8d9708acfd5fe0a8c1455d87220"
 [[package]]
 name = "personae"
 version = "0.3.0"
-source = "git+https://github.com/merely-made/dramatis.git?branch=main#5c89001a6ff1aac3f6105ed50b6ae5f09c9f27e2"
+source = "git+https://github.com/merely-made/dramatis.git?branch=main#4d8e514edde37f7fb56d2c61adc7f2a1071a5b49"
 dependencies = [
  "blake3",
  "chacha20poly1305 0.11.0",
