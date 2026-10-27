@@ -97,6 +97,13 @@ pub struct I2pPeer {
     pub session: SessionOptions,
     /// Liveness and retry timings.
     pub timers: I2pTimers,
+    /// Drop the session and the resolved destination after a stream ends or a connect is
+    /// refused, so the next redial starts from a fresh session and lookup. On by default:
+    /// a kept session holds the router's stale state for a peer that restarted, so on
+    /// emissary every connect is refused and on i2pd the stream opens but reaches nothing
+    /// (I2P4 receipt, runs 7-9). Off keeps one session for the interface's life, as RNS's
+    /// client tunnel does, saving a session build on each redial.
+    pub fresh_session_per_redial: bool,
 }
 
 impl I2pPeer {
@@ -110,6 +117,7 @@ impl I2pPeer {
             ifac: None,
             session: SessionOptions::default(),
             timers: I2pTimers::default(),
+            fresh_session_per_redial: true,
         }
     }
 
@@ -178,8 +186,10 @@ impl I2pListener {
 
 impl Endpoint {
     /// Dial an I2P peer. Returns at once, as RNS does: building tunnels can take minutes, so
-    /// the interface comes online when its first stream connects. A dead session is
-    /// recreated, and an ended stream redialed every `reconnect_wait` under the same id.
+    /// the interface comes online when its first stream connects. An ended stream or a
+    /// refused connect is redialed every `reconnect_wait` under the same id, from a fresh
+    /// session unless [`I2pPeer::fresh_session_per_redial`] is off; a dead session is
+    /// recreated either way.
     pub fn attach_i2p_peer(&self, peer: I2pPeer) -> io::Result<InterfaceId> {
         if !self.shared.is_running() {
             return Err(endpoint_closed());
@@ -211,8 +221,12 @@ impl Endpoint {
                             .await
                             .ok();
                 }
-                if target.is_none() {
-                    target = peer.bridge.resolve(&peer.peer).await.ok();
+                // Resolved through the session, since some routers (emissary) answer
+                // `.b32.i2p` lookups only inside one.
+                if target.is_none()
+                    && let Some(live) = &session
+                {
+                    target = live.resolve(&peer.peer).await.ok();
                 }
                 let (Some(live), Some(to)) = (&session, &target) else {
                     tokio::time::sleep(peer.timers.client_tunnel_retry).await;
@@ -239,6 +253,10 @@ impl Endpoint {
                     if end == PumpEnd::Closed {
                         return;
                     }
+                }
+                if peer.fresh_session_per_redial {
+                    session = None;
+                    target = None;
                 }
                 tokio::time::sleep(peer.timers.reconnect_wait).await;
             }

@@ -1,0 +1,183 @@
+RNS 1.5.7
+retinue example: C:\Users\mark_\Code\worktrees\murm-i2p-rns\native\target\debug\examples\rns_i2p_peer.exe
+
+=== tcp-control ===
+  [rns] TRANSPORT a6694fb22ba5aae8e63080c55672768f
+  [rns] DEST af4a17165c575e0e8ba3e1e3b5cc4b64
+  [retinue] READY b5143116e9bd1f0956a43df08b4d0881 623e27cf24435b47a1dd55002f313b84 9
+  [retinue] ONLINE true 9
+  [retinue] IFACES 1 10
+  [rns] HEARD i2p4.retinue b5143116e9bd1f0956a43df08b4d0881
+  [rns] HEARD i2p4.retinue-res 623e27cf24435b47a1dd55002f313b84
+  [retinue] HEARD af4a17165c575e0e8ba3e1e3b5cc4b64  73
+  [rns] RX hello-from-retinue
+  [retinue] ECHO_OK echo:hello-from-retinue 5080
+  [retinue] RX hello-from-rns 5118
+  [rns] ECHO echo:hello-from-rns
+  [retinue] PUBLISH_OK 12000 Resource d79e3a8f8742e32fbb2ab85fde665915946b0836877a43b2f1fac13ac6517d10 5228
+  [rns] RES_IN 12000 d79e3a8f8742e32fbb2ab85fde665915946b0836877a43b2f1fac13ac6517d10 COMPLETE
+  [retinue] RES_IN 12000 d79e3a8f8742e32fbb2ab85fde665915946b0836877a43b2f1fac13ac6517d10 5281
+  [rns] RES_OUT COMPLETE
+
+=== retinue-dials-rns ===
+  [rns] TRANSPORT a78054c3db92915538604aca50f0bc0c
+  [rns] DEST af4a17165c575e0e8ba3e1e3b5cc4b64
+  [rns] B32 f5oc4pt5o7sqto3jq2ih4xzkzdpzka27fbaqiwuacaqc7bs6hsna.b32.i2p
+  [retinue] ROUTER StartReport { stored_routers: 276, reseeded: None, sam: 127.0.0.1:64950 } 8057
+  [retinue] READY b5143116e9bd1f0956a43df08b4d0881 623e27cf24435b47a1dd55002f313b84 8058
+  [retinue] ONLINE false 8058
+  [retinue] IFACES 1 8058
+  [retinue] SAM_CMD SESSION CREATE 8061
+  [retinue] SAM_REPLY SESSION STATUS RESULT=OK 40973
+  [retinue] SAM_CMD STREAM CONNECT 43093
+  [retinue] SAM_REPLY STREAM STATUS RESULT=OK 44685
+  [retinue] ONLINE true 44800
+  [retinue] HEARD af4a17165c575e0e8ba3e1e3b5cc4b64  48614
+  [rns] HEARD i2p4.retinue b5143116e9bd1f0956a43df08b4d0881
+  [rns] HEARD i2p4.retinue-res 623e27cf24435b47a1dd55002f313b84
+  [rns] RX hello-from-retinue
+  [retinue] ECHO_OK echo:hello-from-retinue 55122
+  [retinue] RX hello-from-rns 56877
+  [rns] ECHO echo:hello-from-rns
+  [rns] RES_IN 12000 d79e3a8f8742e32fbb2ab85fde665915946b0836877a43b2f1fac13ac6517d10 COMPLETE
+  [retinue] PUBLISH_OK 12000 Resource d79e3a8f8742e32fbb2ab85fde665915946b0836877a43b2f1fac13ac6517d10 60968
+  [retinue] RES_IN 12000 d79e3a8f8742e32fbb2ab85fde665915946b0836877a43b2f1fac13ac6517d10 64230
+  [rns] RES_OUT COMPLETE
+  keyfile: KEYFILE C:\Users\mark_\AppData\Local\Temp\retinue-i2p4-retinue-dials-rns-ow_b6nzf\storage\i2p\0f6e3989d1f91c3ed3b57143eafb4a5c0723174a42a88933207d3a0577b1d29a.i2p f5oc4pt5o7sqto3jq2ih4xzkzdpzka27fbaqiwuacaqc7bs6hsna.b32.i2p vs RNS files ['0f6e3989d1f91c3ed3b57143eafb4a5c0723174a42a88933207d3a0577b1d29a.i2p'], RNS b32 f5oc4pt5o7sqto3jq2ih4xzkzdpzka27fbaqiwuacaqc7bs6hsna.b32.i2p
+  [retinue] ROUTE af4a17165c575e0e8ba3e1e3b5cc4b64 true 65032
+  [rns] [2026-10-23 18:50:47] [Debug]    Reticulum running in interpreted mode
+  [rns] [2026-10-23 18:50:47] [Verbose]  Bringing up system interfaces...
+  [rns] [2026-10-23 18:50:47] [Verbose]  System interfaces are ready
+  [rns] [2026-10-23 18:50:47] [Debug]    Utilising cryptography backend "openssl, PyCA 49.0.0"
+  [rns] [2026-10-23 18:50:47] [Verbose]  Configuration loaded from C:\Users\mark_\AppData\Local\Temp\retinue-i2p4-retinue-dials-rns-ow_b6nzf/config
+  [rns] [2026-10-23 18:50:47] [Verbose]  Destinations file does not exist, no known destinations loaded
+  [rns] [2026-10-23 18:50:47] [Debug]    Cleaning ratchets...
+  [rns] [2026-10-23 18:50:47] [Debug]    Processed 0 ratchets in 0s, not in use 0, removed 0
+  [rns] [2026-10-23 18:50:47] [Verbose]  Loaded Transport Identity from storage
+  [rns] TRANSPORT a78054c3db92915538604aca50f0bc0c
+  [rns] DEST af4a17165c575e0e8ba3e1e3b5cc4b64
+  [rns] [2026-10-23 18:50:48] [Info]     I2PInterface[I2P] Bringing up I2P endpoint, this may take a while...
+  [rns] [2026-10-23 18:50:48] [Error]    Error while while configuring I2PInterface[I2P]:
+  [rns] [2026-10-23 18:50:48] [Error]    Check that I2P is installed and running, and that SAM is enabled. Retrying tunnel setup later.
+  [rns] B32 f5oc4pt5o7sqto3jq2ih4xzkzdpzka27fbaqiwuacaqc7bs6hsna.b32.i2p
+  [rns] [2026-10-23 18:51:03] [Info]     I2PInterface[I2P] Bringing up I2P endpoint, this may take a while...
+  [rns] [2026-10-23 18:51:27] [Verbose]  I2PInterface[I2P] endpoint setup complete. Now reachable at: f5oc4pt5o7sqto3jq2ih4xzkzdpzka27fbaqiwuacaqc7bs6hsna.b32.i2p
+  [retinue] ONLINE false 174241
+  [retinue] SAM_CMD SESSION CREATE 189237
+  [retinue] SAM_REPLY SESSION STATUS RESULT=OK 198134
+  [retinue] SAM_CMD STREAM CONNECT 198652
+  [rns] [2026-10-23 18:52:57] [Verbose]  Accepting incoming I2P connection
+  [rns] [2026-10-23 18:52:57] [Verbose]  Spawned new I2PInterface Peer: I2PInterfacePeer[Connected peer on I2P]
+  [retinue] SAM_REPLY STREAM STATUS RESULT=OK 200111
+  [retinue] ONLINE true 200230
+  [retinue] ROUTE af4a17165c575e0e8ba3e1e3b5cc4b64 true 200242
+  [rns] [2026-10-23 18:52:59] [Pathing]  Tunnel endpoint <7cd8956239816e3a532844257b42e44cb0e7f2278156cbf837bbb545baf22382> established.
+  [retinue] STATS 0 online=true rx=14 tx=22 rx_bytes=2170 tx_bytes=3220 200292
+  [rns] [2026-10-23 18:52:59] [Debug]    Incoming link request with mode AES_256_CBC
+  [rns] [2026-10-23 18:52:59] [Debug]    Validating link request <82ecf2eda994cf9f9eacf1d75c69df26>
+  [rns] [2026-10-23 18:52:59] [Debug]    Incoming link request <82ecf2eda994cf9f9eacf1d75c69df26> accepted on I2PInterfacePeer[Connected peer on I2P]
+  [rns] RX after-restart
+  [retinue] ECHO_OK echo:after-restart 201777
+  [retinue] STATS 0 online=true rx=16 tx=26 rx_bytes=2387 tx_bytes=3571 201802
+Exception ignored while finalizing file <_io.TextIOWrapper name=3 encoding='utf-8'>:
+Traceback (most recent call last):
+  File "C:\Users\mark_\Code\worktrees\murm-i2p-rns\crates\retinue\oracle\interop_i2p.py", line 439, in main
+    results.append(variant(name, carrier, ifac, storage, extra=extra))
+OSError: [Errno 22] Invalid argument
+
+=== retinue-dials-rns-ifac16 ===
+  [rns] TRANSPORT a9c353ec107c0051e28538fb870464b9
+  [rns] DEST af4a17165c575e0e8ba3e1e3b5cc4b64
+  [rns] B32 hl3f5dvmg3ghxarrtfscnsa6jlscnxnn4fe5iwnu7z3fx57n7wfa.b32.i2p
+  [retinue] ROUTER StartReport { stored_routers: 276, reseeded: None, sam: 127.0.0.1:57602 } 2956
+  [retinue] ONLINE false 2956
+  [retinue] IFACES 1 2956
+  [retinue] READY b5143116e9bd1f0956a43df08b4d0881 623e27cf24435b47a1dd55002f313b84 2956
+  [retinue] SAM_CMD SESSION CREATE 2958
+  [retinue] SAM_REPLY SESSION STATUS RESULT=OK 30579
+  [retinue] SAM_CMD STREAM CONNECT 34347
+  [retinue] SAM_REPLY STREAM STATUS RESULT=OK 36039
+  [retinue] ONLINE true 36305
+  [rns] HEARD i2p4.retinue b5143116e9bd1f0956a43df08b4d0881
+  [rns] HEARD i2p4.retinue-res 623e27cf24435b47a1dd55002f313b84
+  [retinue] HEARD af4a17165c575e0e8ba3e1e3b5cc4b64  38621
+  [rns] RX hello-from-retinue
+  [retinue] ECHO_OK echo:hello-from-retinue 46233
+  [retinue] RX hello-from-rns 48139
+  [rns] ECHO echo:hello-from-rns
+  [rns] RES_IN 12000 d79e3a8f8742e32fbb2ab85fde665915946b0836877a43b2f1fac13ac6517d10 COMPLETE
+  [retinue] PUBLISH_OK 12000 Resource d79e3a8f8742e32fbb2ab85fde665915946b0836877a43b2f1fac13ac6517d10 52080
+  [retinue] RES_IN 12000 d79e3a8f8742e32fbb2ab85fde665915946b0836877a43b2f1fac13ac6517d10 55165
+  [rns] RES_OUT COMPLETE
+
+=== rns-dials-retinue ===
+  [retinue] ROUTER StartReport { stored_routers: 276, reseeded: None, sam: 127.0.0.1:63088 } 2971
+  [retinue] SAM_CMD DEST GENERATE 2974
+  [retinue] SAM_REPLY DEST REPLY PUB=RjorA2BuwKe20xtslrMedGUunTr5KPTkTRledAo1~EV15klmWNi8SJ~2nMV1WYEARuCw~M1W1PSnntdSlwbvlA1YeuYsx5ffAI32339EGsuiRBXoF9mCO8kCIU7DxL43T0g-so0Gz7wneLnVUKTAXPrrEYLz~sHaTYwpFzOFy6q9JA4tv4HAmIfcfN3RdAuRTqhVzkhY7eH~ZsOUEC4fNcEro1q788tUN2U0wezPU8cS~pmVgysBu-ZLR2X4934JMAxXek9SdHnLiaOOp6NNw94Qca~h2-XwCypjF9Yw74XvR9FHthqVxqVaxfl~3fXKPGByeD61ETBSYYmFITYfDsw4UuLfT8PS~clF3KTqCdUIr4MREo6nt21zYSujvUKs934rHflqkuj0g5pLbyEQRvX-FP4lyZRsuNiEE~e2ftxhT3lVVxXiwrUkY2w1mU6N6suVwlTc88B4C~l5MKiXC2z9WN2Nv-X9hnsK29VFrl--KQNTENCT9BzDjlX3cFLaBQAEAAcAAA== 2977
+  [retinue] B32 k76koz7smlvdjskqcagv4eyscdh3wua4qligtyyww2gbqkarrlvq.b32.i2p
+  [retinue] READY b5143116e9bd1f0956a43df08b4d0881 623e27cf24435b47a1dd55002f313b84 2977
+  [retinue] IFACES 0 2977
+  [retinue] SAM_CMD SESSION CREATE 2981
+  [retinue] SAM_REPLY SESSION STATUS RESULT=OK 28342
+  [retinue] SAM_CMD STREAM ACCEPT 28344
+  [retinue] SAM_REPLY STREAM STATUS RESULT=OK 28345
+  i2pd resolves retinue's b32 after 30.6s
+  [rns] TRANSPORT 7057acb5ce1611656f8a84aecbc97221
+  [rns] DEST af4a17165c575e0e8ba3e1e3b5cc4b64
+  [retinue] SAM_CMD STREAM ACCEPT 67318
+  [retinue] IFACES 1 67549
+  [retinue] SAM_REPLY STREAM STATUS RESULT=OK 67930
+  [retinue] HEARD af4a17165c575e0e8ba3e1e3b5cc4b64  68957
+  [rns] HEARD i2p4.retinue b5143116e9bd1f0956a43df08b4d0881
+  [rns] HEARD i2p4.retinue-res 623e27cf24435b47a1dd55002f313b84
+  [retinue] HEARD af4a17165c575e0e8ba3e1e3b5cc4b64  70035
+  [rns] RX hello-from-retinue
+  [retinue] ECHO_OK echo:hello-from-retinue 76275
+  [retinue] RX hello-from-rns 78291
+  [rns] ECHO echo:hello-from-rns
+  [rns] RES_IN 12000 d79e3a8f8742e32fbb2ab85fde665915946b0836877a43b2f1fac13ac6517d10 COMPLETE
+  [retinue] PUBLISH_OK 12000 Resource d79e3a8f8742e32fbb2ab85fde665915946b0836877a43b2f1fac13ac6517d10 82324
+  [rns] RES_OUT 7
+  [retinue] RES_ERR resource canceled by sender
+
+=== rns-dials-retinue-ifac16 ===
+  [retinue] ROUTER StartReport { stored_routers: 309, reseeded: None, sam: 127.0.0.1:60537 } 12327
+  [retinue] SAM_CMD DEST GENERATE 12335
+  [retinue] SAM_REPLY DEST REPLY PUB=wvw~X5KOVilcaj1Ibm8t9ziHI1ZrF8sP2AEfoO1Ut2f~vZUOONwbIoWj8iTJGV4YhXUm21qkCzStH~tD3ZqgYco7yeiIR0YrFrYuXnNBNeGGEc~F4a2w5kXwmXhywDo45lnMIwrKL6Cb67RBHzyFgc5FmsczQqRql1tKXSVN9Ox73fA~DbmIRUMor-25RLz3aLxPHvDE71G6-fYpxCamCI7vWubDOswD52a4h4pDZTZHcBIXZfWIcAGmx3D8ePlvELmly1GsR5sgoyQ6UcQ5TS5GLPtDduYpwR0xqYAwrbJO3xbn4g9XCK-ALc0hko-Gd8HUVpRNSOLQ2MObaJ-kBQKSxMuOueKBZC4~rW66jrr7ZVCVO86PpdzqQ0K2z6e9QC2YNT2yKdSxkNYeKVkx4uM8z0ov5R97behENkM-JD9-uY-5Z-XBlydEsg6BY3e6qesvBvaEq6BLAVC8hLa55qIHxeZ00NhZfx7D9wfPpVtfQE89KRiqv~mj9ICH0k7BBQAEAAcAAA== 12337
+  [retinue] B32 wcx6yca6ebih6tw6kl6ypes4e7nsrkmscjvolgvv335y4oi3wjcq.b32.i2p
+  [retinue] READY b5143116e9bd1f0956a43df08b4d0881 623e27cf24435b47a1dd55002f313b84 12338
+  [retinue] IFACES 0 12338
+  [retinue] SAM_CMD SESSION CREATE 12341
+  [retinue] SAM_REPLY SESSION STATUS RESULT=OK 36828
+  [retinue] SAM_CMD STREAM ACCEPT 36830
+  [retinue] SAM_REPLY STREAM STATUS RESULT=OK 36830
+  i2pd resolves retinue's b32 after 25.4s
+  [rns] TRANSPORT ac2ad4c50e8fd6667232a88648b24ff9
+  [rns] DEST af4a17165c575e0e8ba3e1e3b5cc4b64
+  [retinue] SAM_CMD STREAM ACCEPT 63107
+  [retinue] IFACES 1 63237
+  [retinue] SAM_REPLY STREAM STATUS RESULT=OK 63726
+  [retinue] HEARD af4a17165c575e0e8ba3e1e3b5cc4b64  65001
+  [rns] HEARD i2p4.retinue b5143116e9bd1f0956a43df08b4d0881
+  [rns] HEARD i2p4.retinue-res 623e27cf24435b47a1dd55002f313b84
+  [retinue] HEARD af4a17165c575e0e8ba3e1e3b5cc4b64  66030
+  [rns] RX hello-from-retinue
+  [retinue] ECHO_OK echo:hello-from-retinue 72689
+  [retinue] RX hello-from-rns 75109
+  [rns] ECHO echo:hello-from-rns
+  [rns] RES_IN 12000 d79e3a8f8742e32fbb2ab85fde665915946b0836877a43b2f1fac13ac6517d10 COMPLETE
+  [retinue] PUBLISH_OK 12000 Resource d79e3a8f8742e32fbb2ab85fde665915946b0836877a43b2f1fac13ac6517d10 79101
+  [retinue] RES_IN 12000 d79e3a8f8742e32fbb2ab85fde665915946b0836877a43b2f1fac13ac6517d10 82559
+  [rns] RES_OUT COMPLETE
+
+========================================================================
+tcp-control                  exchange   PASS
+retinue-dials-rns            exchange   PASS
+retinue-dials-rns            keyfile    PASS
+retinue-dials-rns            reconnect  PASS
+retinue-dials-rns            relink     PASS
+retinue-dials-rns-ifac16     exchange   PASS
+rns-dials-retinue            exchange   FAIL  (rns_resource)
+rns-dials-retinue-ifac16     exchange   PASS
+========================================================================
+I2P4 STOCK RNS INTEROP: FAIL

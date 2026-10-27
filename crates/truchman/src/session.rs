@@ -1,8 +1,9 @@
 //! STREAM sessions over tokio. A session lives as long as the connection that created it, so
-//! it keeps that connection in a task that answers the bridge's `PING`s and notices when it
-//! closes.
+//! it keeps that connection in a task that answers the bridge's `PING`s, carries the
+//! session's name lookups, and notices when it closes.
 
-use tokio::sync::watch;
+use tokio::io::AsyncWriteExt;
+use tokio::sync::{mpsc, oneshot, watch};
 use tokio::task::JoinHandle;
 
 use crate::bridge::Bridge;
@@ -18,8 +19,12 @@ pub struct StreamSession {
     id: String,
     key: PrivateKey,
     alive: watch::Receiver<bool>,
+    lookups: mpsc::UnboundedSender<Lookup>,
     control: JoinHandle<()>,
 }
+
+/// A name to look up on the session's control connection, and where its answer goes.
+type Lookup = (String, oneshot::Sender<Result<Destination>>);
 
 impl StreamSession {
     /// `SESSION CREATE STYLE=STREAM` on `bridge`. Building the session's tunnels can take the
@@ -44,21 +49,14 @@ impl StreamSession {
             )?,
         };
         let (tx, alive) = watch::channel(true);
-        let control = tokio::spawn(async move {
-            while let Ok(line) = control.read_line().await {
-                if let Some(rest) = line.strip_prefix("PING")
-                    && control.send(Command::Pong { rest }).await.is_err()
-                {
-                    break;
-                }
-            }
-            let _ = tx.send(false);
-        });
+        let (lookups, requests) = mpsc::unbounded_channel();
+        let control = tokio::spawn(serve_control(control, requests, tx));
         Ok(Self {
             bridge,
             id,
             key,
             alive,
+            lookups,
             control,
         })
     }
@@ -93,6 +91,26 @@ impl StreamSession {
         let _ = self.alive.clone().wait_for(|alive| !alive).await;
     }
 
+    /// Look up a name (`xxx.b32.i2p`, a host name) on the session's own control connection,
+    /// as SAMv3 allows. Routers that answer `NAMING LOOKUP` only inside a session, such as
+    /// emissary, resolve `.b32.i2p` names this way through a lease-set query.
+    pub async fn lookup(&self, name: &str) -> Result<Destination> {
+        Command::NamingLookup { name }.line()?;
+        let (answer, answered) = oneshot::channel();
+        self.lookups
+            .send((name.to_string(), answer))
+            .map_err(|_| closed())?;
+        answered.await.map_err(|_| closed())?
+    }
+
+    /// A destination given as base64, or else a name looked up through this session.
+    pub async fn resolve(&self, peer: &str) -> Result<Destination> {
+        match Destination::from_base64(peer) {
+            Ok(dest) => Ok(dest),
+            Err(_) => self.lookup(peer).await,
+        }
+    }
+
     /// Open a stream to `to` (`STREAM CONNECT`).
     pub async fn connect(&self, to: &Destination) -> Result<Stream> {
         let mut control = self.bridge.open().await?;
@@ -116,4 +134,58 @@ impl Drop for StreamSession {
     fn drop(&mut self) {
         self.control.abort();
     }
+}
+
+/// The session's control connection: answer `PING`, write lookups and hand each `NAMING
+/// REPLY` to the request for its `NAME`, until the bridge closes it.
+async fn serve_control(
+    control: crate::control::Control,
+    mut requests: mpsc::UnboundedReceiver<Lookup>,
+    alive: watch::Sender<bool>,
+) {
+    let (mut reader, mut writer) = control.into_split();
+    let mut pending: Vec<(String, oneshot::Sender<Result<Destination>>)> = Vec::new();
+    loop {
+        tokio::select! {
+            line = reader.read_line() => {
+                let Ok(line) = line else { break };
+                if let Some(rest) = line.strip_prefix("PING") {
+                    let Ok(pong) = Command::Pong { rest }.line() else { continue };
+                    if writer.write_all(pong.as_bytes()).await.is_err() {
+                        break;
+                    }
+                } else if line.starts_with("NAMING REPLY") {
+                    let name = crate::Reply::parse(&line)
+                        .ok()
+                        .and_then(|r| r.get("NAME").map(str::to_string));
+                    if let Some(at) = pending.iter().position(|(n, _)| Some(n) == name.as_ref()) {
+                        let (_, answer) = pending.swap_remove(at);
+                        let _ = answer.send(proto::naming_reply(&line));
+                    }
+                }
+            }
+            Some((name, answer)) = requests.recv() => {
+                let line = match (Command::NamingLookup { name: &name }).line() {
+                    Ok(line) => line,
+                    Err(e) => {
+                        let _ = answer.send(Err(e));
+                        continue;
+                    }
+                };
+                if writer.write_all(line.as_bytes()).await.is_err() {
+                    let _ = answer.send(Err(closed()));
+                    break;
+                }
+                pending.push((name, answer));
+            }
+        }
+    }
+    for (_, answer) in pending {
+        let _ = answer.send(Err(closed()));
+    }
+    let _ = alive.send(false);
+}
+
+fn closed() -> Error {
+    Error::Io(std::io::ErrorKind::NotConnected.into())
 }

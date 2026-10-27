@@ -483,8 +483,11 @@ RNS's vendored i2plib:
   `I2PInterfacePeer[<name> to <peer>]`; peers that keep full mode and default
   policy while accepted streams inherit the section's settings. Unlike RNS,
   there is no "stale" state at 20 s (RNS only logs it), SAM is spoken directly
-  rather than through forwarded local ports, and a failed write redials rather
-  than tearing the interface down. RNS `Interfaces/I2PInterface.py` 323-331,
+  rather than through forwarded local ports, a failed write redials rather
+  than tearing the interface down, and by default each redial starts from a
+  fresh SAM session (`fresh_session_per_redial`), where RNS's client tunnel
+  keeps one, because a kept session never reaches a peer that restarted
+  (`testing/receipts/i2p4-stock-rns/`, runs 7-9). RNS `Interfaces/I2PInterface.py` 323-331,
   337-441, 503, 507-533, 539-603, 719-720, 737, 805, 812-870.
   Targets: `src/endpoint/i2p.rs`, `src/endpoint/pump.rs`.
 - The destination keyfile: `storagepath/i2p/<hex(H(H(name) + H(transport)))>.i2p`,

@@ -50,3 +50,9 @@ luggage = { git = "https://github.com/merely-made/eidetic.git", rev = "f599ffe93
 mere-proofs = { git = "https://github.com/merely-made/eidetic.git", rev = "f599ffe93298025bf6d65ae310a7cb4270ea52e3" }
 muniment = { git = "https://github.com/merely-made/eidetic.git", rev = "f599ffe93298025bf6d65ae310a7cb4270ea52e3" }
 stickleback = { git = "https://github.com/merely-made/eidetic.git", rev = "f599ffe93298025bf6d65ae310a7cb4270ea52e3" }
+
+# Preserve the I2P3 mitigation: emissary-core 0.4.0 can reach debug_assert!(false)
+# from a peer's message. Release builds reject that message; dev/test hosts must
+# do the same. The I2P plan records the original failure and the owner's decision.
+[profile.dev.package.emissary-core]
+debug-assertions = false

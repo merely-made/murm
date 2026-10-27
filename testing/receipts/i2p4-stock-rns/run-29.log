@@ -1,0 +1,160 @@
+RNS 1.5.7
+retinue example: C:\Users\mark_\Code\worktrees\murm-i2p-rns\native\target\debug\examples\rns_i2p_peer.exe
+
+=== tcp-control ===
+  [rns] [2026-10-23 20:55:07] [Debug]    Reticulum running in interpreted mode
+  [rns] [2026-10-23 20:55:07] [Verbose]  Bringing up system interfaces...
+  [rns] [2026-10-23 20:55:07] [Verbose]  System interfaces are ready
+  [rns] [2026-10-23 20:55:07] [Debug]    Utilising cryptography backend "openssl, PyCA 49.0.0"
+  [rns] [2026-10-23 20:55:07] [Verbose]  Configuration loaded from C:\Users\mark_\AppData\Local\Temp\retinue-i2p4-tcp-control-r6xczy_2/config
+  [rns] [2026-10-23 20:55:07] [Verbose]  Destinations file does not exist, no known destinations loaded
+  [rns] [2026-10-23 20:55:07] [Debug]    Cleaning ratchets...
+  [rns] [2026-10-23 20:55:07] [Debug]    Processed 0 ratchets in 0s, not in use 0, removed 0
+  [rns] [2026-10-23 20:55:07] [Verbose]  No valid Transport Identity in storage, creating...
+  [rns] [2026-10-23 20:55:07] [Verbose]  Identity keys created for <788292e56faa0be4d9b1cf1e9997e355>
+  [rns] [2026-10-23 20:55:07] [Verbose]  Identity keys created for <d1b9e6699b1de936679706685dd7efd5>
+  [rns] [2026-10-23 20:55:07] [Verbose]  Initialized ephemeral transport identity <d1b9e6699b1de936679706685dd7efd5>
+  [rns] TRANSPORT d1b9e6699b1de936679706685dd7efd5
+  [rns] DEST af4a17165c575e0e8ba3e1e3b5cc4b64
+  [retinue] READY b5143116e9bd1f0956a43df08b4d0881 623e27cf24435b47a1dd55002f313b84 5
+  [retinue] ONLINE true 5
+  [retinue] IFACES 1 5
+  [rns] [2026-10-23 20:55:08] [Verbose]  Accepting incoming TCP connection
+  [rns] [2026-10-23 20:55:08] [Verbose]  Spawned new TCPClient Interface: TCPInterface[Client on TCP/127.0.0.1:56556]
+  [rns] [2026-10-23 20:55:08] [Pathing]  Tunnel endpoint <eec17f8c6b247ace9db7b2eb4d4fd0d7bd6f636269fddbd266f983f9bd36c7c9> established.
+  [rns] [2026-10-23 20:55:08] [Pathing]  Destination <b5143116e9bd1f0956a43df08b4d0881> is now 1 hops away via <b5143116e9bd1f0956a43df08b4d0881> on TCPInterface[Client on TCP/127.0.0.1:56556]
+  [rns] [2026-10-23 20:55:08] [Pathing]  Path to <b5143116e9bd1f0956a43df08b4d0881> associated with tunnel <eec17f8c6b247ace9db7b2eb4d4fd0d7bd6f636269fddbd266f983f9bd36c7c9>
+  [rns] HEARD i2p4.retinue b5143116e9bd1f0956a43df08b4d0881
+  [rns] [2026-10-23 20:55:08] [Pathing]  Destination <623e27cf24435b47a1dd55002f313b84> is now 1 hops away via <623e27cf24435b47a1dd55002f313b84> on TCPInterface[Client on TCP/127.0.0.1:56556]
+  [rns] [2026-10-23 20:55:08] [Pathing]  Path to <623e27cf24435b47a1dd55002f313b84> associated with tunnel <eec17f8c6b247ace9db7b2eb4d4fd0d7bd6f636269fddbd266f983f9bd36c7c9>
+  [rns] HEARD i2p4.retinue-res 623e27cf24435b47a1dd55002f313b84
+  [retinue] HEARD af4a17165c575e0e8ba3e1e3b5cc4b64  26
+  [rns] [2026-10-23 20:55:13] [Debug]    Incoming link request with mode AES_256_CBC
+  [rns] [2026-10-23 20:55:13] [Debug]    Validating link request <6853de65ff8020b5d40a6aba22eb892c>
+  [rns] [2026-10-23 20:55:13] [Debug]    Incoming link request <6853de65ff8020b5d40a6aba22eb892c> accepted on TCPInterface[Client on TCP/127.0.0.1:56556]
+  [rns] RX hello-from-retinue
+  [retinue] ECHO_OK echo:hello-from-retinue 5036
+  [rns] [2026-10-23 20:55:13] [Debug]    Signalling link MTU of 16.38 KB for link
+  [rns] [2026-10-23 20:55:13] [Debug]    Establishing link with mode AES_256_CBC
+  [rns] [2026-10-23 20:55:13] [Debug]    Link request <96fec7a5c895c97f2aa7266b2b333199> sent to <i2p4.retinue.5789fb0cc6cc1a2ed34c7f25e68d874e:b5143116e9bd1f0956a43df08b4d0881>
+  [rns] [2026-10-23 20:55:13] [Debug]    Validating link request proof with mode AES_256_CBC
+  [rns] [2026-10-23 20:55:13] [Debug]    Destination confirmed link MTU of 500 B
+  [rns] [2026-10-23 20:55:13] [Debug]    Link <96fec7a5c895c97f2aa7266b2b333199> established with <i2p4.retinue.5789fb0cc6cc1a2ed34c7f25e68d874e:b5143116e9bd1f0956a43df08b4d0881>, RTT is 2ms and 797.13µs
+  [retinue] RX hello-from-rns 5073
+  [rns] ECHO echo:hello-from-rns
+  [rns] [2026-10-23 20:55:13] [Debug]    Incoming link request with mode AES_256_CBC
+  [rns] [2026-10-23 20:55:13] [Debug]    Validating link request <2ed4452a832990829a590c7681806586>
+  [rns] [2026-10-23 20:55:13] [Debug]    Incoming link request <2ed4452a832990829a590c7681806586> accepted on TCPInterface[Client on TCP/127.0.0.1:56556]
+  [rns] [2026-10-23 20:55:13] [Debug]    Accepting resource advertisement for <46e465f022b77c7dcc695e3c5cbf84e286e06ff00b9c80166d1e78c3de4b4926>. Transfer size is 816 B in 2 parts.
+  [retinue] PUBLISH_OK 12000 Resource d79e3a8f8742e32fbb2ab85fde665915946b0836877a43b2f1fac13ac6517d10 5166
+  [rns] RES_IN 12000 d79e3a8f8742e32fbb2ab85fde665915946b0836877a43b2f1fac13ac6517d10 COMPLETE
+  [rns] [2026-10-23 20:55:13] [Debug]    Signalling link MTU of 16.38 KB for link
+  [rns] [2026-10-23 20:55:13] [Debug]    Establishing link with mode AES_256_CBC
+  [rns] [2026-10-23 20:55:13] [Debug]    Link request <0c0896bfaf7a7275e779348ecbefb728> sent to <i2p4.retinue-res.5789fb0cc6cc1a2ed34c7f25e68d874e:623e27cf24435b47a1dd55002f313b84>
+  [rns] [2026-10-23 20:55:13] [Debug]    Validating link request proof with mode AES_256_CBC
+  [rns] [2026-10-23 20:55:13] [Debug]    Destination confirmed link MTU of 500 B
+  [rns] [2026-10-23 20:55:13] [Debug]    Link <0c0896bfaf7a7275e779348ecbefb728> established with <i2p4.retinue-res.5789fb0cc6cc1a2ed34c7f25e68d874e:623e27cf24435b47a1dd55002f313b84>, RTT is 2ms and 728.22µs
+  [rns] [2026-10-23 20:55:13] [Debug]    Compressing resource data...
+  [rns] [2026-10-23 20:55:13] [Debug]    Compression completed in 0.003 seconds
+  [rns] [2026-10-23 20:55:13] [Debug]    Compression saved 11241 bytes, sending compressed
+  [retinue] RES_IN 12000 d79e3a8f8742e32fbb2ab85fde665915946b0836877a43b2f1fac13ac6517d10 5233
+  [rns] RES_OUT COMPLETE
+  [rns] [2026-10-23 20:55:13] [Debug]    The socket for remote client TCPInterface[Client on TCP/127.0.0.1:56556] was closed.
+  [rns] [2026-10-23 20:55:13] [Verbose]  The interface TCPInterface[Client on TCP/127.0.0.1:56556] is being torn down.
+
+=== rns-dials-retinue ===
+  [retinue] ROUTER StartReport { stored_routers: 309, reseeded: None, sam: 127.0.0.1:49310 } 3399
+  [retinue] SAM_CMD DEST GENERATE 3402
+  [retinue] SAM_REPLY DEST REPLY PUB=EGcB-Pznq~8aSQ963IoUlJBNfPsNP1KwAICButMzGckzQS9G1QRQu4Zb9dEB4U7mvSc-vsuULgRfCpVX7KDlBGhS6MxoJ8SkOJ7gpDtQNcO8Qj50gD9tu3ss9Jn9UljUvf3b3zB3Ly-v-6eQQbI278VtEbjn~D8N5Jp1Pk0phpV~z3yXaQs9JYsQjr3RB4-L01Pl5hdGX58nYuTVmhj0U9iCsjZf6CiGxG5noiZ0hvD3mioXyH6dtKqXL56zgko-Che0aE1NdTHS~fVRd63sGjj2BnPzIMLERBN3bCgzH34sg~iLLsBjq26wuAHHou6QtINgXHKPfZM~Yi4UKJqTseP1wM3I8RVXVmHrKNxWjVVsJfeBbK2Y2EeT39Uxj2GOe59Wcx3b8pRlUwNvU7CZIV6J7Affm-9cG9SG87yYgn~CytpkmGYTS4cHWlBzshRB7bCMEC2rcNa6s8WGseP3z72Lm1Zg~Du7mhGBq2gCnHRR9jRxBu3AVKgIonysz13rBQAEAAcAAA== 3404
+  [retinue] B32 gebzp75avw2niytoj6xdp3flex5glbyhcd22q5wz7nyxc346cx5q.b32.i2p
+  [retinue] READY b5143116e9bd1f0956a43df08b4d0881 623e27cf24435b47a1dd55002f313b84 3405
+  [retinue] IFACES 0 3405
+  [retinue] SAM_CMD SESSION CREATE 3409
+  [retinue] SAM_REPLY SESSION STATUS RESULT=OK 28053
+  [retinue] SAM_CMD STREAM ACCEPT 28055
+  [retinue] SAM_REPLY STREAM STATUS RESULT=OK 28055
+  i2pd resolves retinue's b32 after 57.9s
+  [rns] [2026-10-23 20:56:15] [Debug]    Reticulum running in interpreted mode
+  [rns] [2026-10-23 20:56:15] [Verbose]  Bringing up system interfaces...
+  [rns] [2026-10-23 20:56:15] [Verbose]  System interfaces are ready
+  [rns] [2026-10-23 20:56:15] [Debug]    Utilising cryptography backend "openssl, PyCA 49.0.0"
+  [rns] [2026-10-23 20:56:15] [Verbose]  Configuration loaded from C:\Users\mark_\AppData\Local\Temp\retinue-i2p4-rns-dials-retinue-2c8ln3et/config
+  [rns] [2026-10-23 20:56:15] [Info]     Bringing up I2P tunnel to I2PInterfacePeer[I2P to gebzp75avw2niytoj6xdp3flex5glbyhcd22q5wz7nyxc346cx5q.b32.i2p], this may take a while...
+  [rns] [2026-10-23 20:56:15] [Verbose]  Destinations file does not exist, no known destinations loaded
+  [rns] [2026-10-23 20:56:15] [Debug]    Cleaning ratchets...
+  [rns] [2026-10-23 20:56:15] [Debug]    Processed 0 ratchets in 0s, not in use 0, removed 0
+  [rns] [2026-10-23 20:56:15] [Verbose]  No valid Transport Identity in storage, creating...
+  [rns] [2026-10-23 20:56:15] [Verbose]  Identity keys created for <3a8518dfb3245cfec0781d4c7dbdfffa>
+  [rns] [2026-10-23 20:56:15] [Verbose]  Identity keys created for <104eb2cf3b8e483802ccdef31b4105f8>
+  [rns] [2026-10-23 20:56:15] [Verbose]  Initialized ephemeral transport identity <104eb2cf3b8e483802ccdef31b4105f8>
+  [rns] TRANSPORT 104eb2cf3b8e483802ccdef31b4105f8
+  [rns] DEST af4a17165c575e0e8ba3e1e3b5cc4b64
+  [rns] [2026-10-23 20:56:15] [Debug]    No interfaces could process the outbound 0 hop, type 1 packet for <i2p4.rns.dc46154c78cc9c3c02de88c287863d92:af4a17165c575e0e8ba3e1e3b5cc4b64>
+  [rns] [2026-10-23 20:56:20] [Debug]    No interfaces could process the outbound 0 hop, type 1 packet for <i2p4.rns.dc46154c78cc9c3c02de88c287863d92:af4a17165c575e0e8ba3e1e3b5cc4b64>
+  [rns] [2026-10-23 20:56:25] [Debug]    No interfaces could process the outbound 0 hop, type 1 packet for <i2p4.rns.dc46154c78cc9c3c02de88c287863d92:af4a17165c575e0e8ba3e1e3b5cc4b64>
+  [rns] [2026-10-23 20:56:30] [Debug]    No interfaces could process the outbound 0 hop, type 1 packet for <i2p4.rns.dc46154c78cc9c3c02de88c287863d92:af4a17165c575e0e8ba3e1e3b5cc4b64>
+  [rns] [2026-10-23 20:56:35] [Debug]    No interfaces could process the outbound 0 hop, type 1 packet for <i2p4.rns.dc46154c78cc9c3c02de88c287863d92:af4a17165c575e0e8ba3e1e3b5cc4b64>
+  [rns] [2026-10-23 20:56:39] [Debug]    Waiting for status from I2P control process
+  [rns] [2026-10-23 20:56:39] [Debug]    Got status from I2P control process
+  [rns] [2026-10-23 20:56:39] [Verbose]  I2PInterfacePeer[I2P to gebzp75avw2niytoj6xdp3flex5glbyhcd22q5wz7nyxc346cx5q.b32.i2p] tunnel setup complete
+  [rns] [2026-10-23 20:56:40] [Debug]    No interfaces could process the outbound 0 hop, type 1 packet for <i2p4.rns.dc46154c78cc9c3c02de88c287863d92:af4a17165c575e0e8ba3e1e3b5cc4b64>
+  [rns] [2026-10-23 20:56:59] [Error]    An error ocurred while setting up I2P tunnel to gebzp75avw2niytoj6xdp3flex5glbyhcd22q5wz7nyxc346cx5q.b32.i2p
+  [rns] [2026-10-23 20:56:59] [Error]    The I2P daemon can't reach peer gebzp75avw2niytoj6xdp3flex5glbyhcd22q5wz7nyxc346cx5q.b32.i2p
+  [rns] [2026-10-23 20:56:59] [Error]    Resetting I2P tunnel and retrying later
+  [rns] [2026-10-23 20:56:59] [Error]    I2PInterfacePeer[I2P to gebzp75avw2niytoj6xdp3flex5glbyhcd22q5wz7nyxc346cx5q.b32.i2p] I2P control process experienced an error, requesting new tunnel...
+  [rns] [2026-10-23 20:57:01] [Debug]    I2P tunnel became unresponsive
+  [rns] [2026-10-23 20:57:07] [Info]     Bringing up I2P tunnel to I2PInterfacePeer[I2P to gebzp75avw2niytoj6xdp3flex5glbyhcd22q5wz7nyxc346cx5q.b32.i2p], this may take a while...
+  [rns] [2026-10-23 20:57:19] [Debug]    Waiting for status from I2P control process
+  [rns] [2026-10-23 20:57:19] [Debug]    Got status from I2P control process
+  [rns] [2026-10-23 20:57:19] [Verbose]  I2PInterfacePeer[I2P to gebzp75avw2niytoj6xdp3flex5glbyhcd22q5wz7nyxc346cx5q.b32.i2p] tunnel setup complete
+  [rns] [2026-10-23 20:57:19] [Warning]  An interface error occurred for I2PInterfacePeer[I2P to gebzp75avw2niytoj6xdp3flex5glbyhcd22q5wz7nyxc346cx5q.b32.i2p], the contained exception was: [WinError 10038] An operation was attempted on something that is not a socket
+  [rns] [2026-10-23 20:57:19] [Warning]  Attempting to reconnect...
+  [rns] [2026-10-23 20:57:20] [Debug]    No interfaces could process the outbound 0 hop, type 1 packet for <i2p4.rns.dc46154c78cc9c3c02de88c287863d92:af4a17165c575e0e8ba3e1e3b5cc4b64>
+  [rns] [2026-10-23 20:57:25] [Debug]    No interfaces could process the outbound 0 hop, type 1 packet for <i2p4.rns.dc46154c78cc9c3c02de88c287863d92:af4a17165c575e0e8ba3e1e3b5cc4b64>
+  [rns] [2026-10-23 20:57:25] [Error]    An error ocurred while sending I2P keepalive. The contained exception was: [WinError 10038] An operation was attempted on something that is not a socket
+  [rns] [2026-10-23 20:57:25] [Notice]   Error while shutting down socket for I2PInterfacePeer[I2P to gebzp75avw2niytoj6xdp3flex5glbyhcd22q5wz7nyxc346cx5q.b32.i2p]: [WinError 10038] An operation was attempted on something that is not a socket
+  [rns] [2026-10-23 20:57:30] [Debug]    No interfaces could process the outbound 0 hop, type 1 packet for <i2p4.rns.dc46154c78cc9c3c02de88c287863d92:af4a17165c575e0e8ba3e1e3b5cc4b64>
+  [rns] [2026-10-23 20:57:34] [Info]     I2PInterfacePeer[I2P to gebzp75avw2niytoj6xdp3flex5glbyhcd22q5wz7nyxc346cx5q.b32.i2p] Re-established connection via I2P tunnel
+  [retinue] SAM_CMD STREAM ACCEPT 142491
+  [retinue] IFACES 1 142527
+  [retinue] SAM_REPLY STREAM STATUS RESULT=OK 143038
+  [retinue] HEARD af4a17165c575e0e8ba3e1e3b5cc4b64  144096
+  [rns] [2026-10-23 20:57:40] [Pathing]  Destination <b5143116e9bd1f0956a43df08b4d0881> is now 1 hops away via <b5143116e9bd1f0956a43df08b4d0881> on I2PInterfacePeer[I2P to gebzp75avw2niytoj6xdp3flex5glbyhcd22q5wz7nyxc346cx5q.b32.i2p]
+  [rns] HEARD i2p4.retinue b5143116e9bd1f0956a43df08b4d0881
+  [rns] [2026-10-23 20:57:40] [Pathing]  Destination <623e27cf24435b47a1dd55002f313b84> is now 1 hops away via <623e27cf24435b47a1dd55002f313b84> on I2PInterfacePeer[I2P to gebzp75avw2niytoj6xdp3flex5glbyhcd22q5wz7nyxc346cx5q.b32.i2p]
+  [rns] HEARD i2p4.retinue-res 623e27cf24435b47a1dd55002f313b84
+  [retinue] HEARD af4a17165c575e0e8ba3e1e3b5cc4b64  148262
+  [rns] [2026-10-23 20:57:45] [Debug]    Incoming link request with mode AES_256_CBC
+  [rns] [2026-10-23 20:57:45] [Debug]    Validating link request <f59b36627fa2b8d3df5533fb8c0f6a01>
+  [rns] [2026-10-23 20:57:45] [Debug]    Incoming link request <f59b36627fa2b8d3df5533fb8c0f6a01> accepted on I2PInterfacePeer[I2P to gebzp75avw2niytoj6xdp3flex5glbyhcd22q5wz7nyxc346cx5q.b32.i2p]
+  [rns] RX hello-from-retinue
+  [retinue] ECHO_OK echo:hello-from-retinue 154098
+  [rns] [2026-10-23 20:57:47] [Debug]    Establishing link with mode AES_256_CBC
+  [rns] [2026-10-23 20:57:47] [Debug]    Link request <15916c93a79d1bf563a92f636f0407de> sent to <i2p4.retinue.5789fb0cc6cc1a2ed34c7f25e68d874e:b5143116e9bd1f0956a43df08b4d0881>
+  [rns] [2026-10-23 20:57:48] [Debug]    Validating link request proof with mode AES_256_CBC
+  [rns] [2026-10-23 20:57:48] [Debug]    Destination confirmed link MTU of 500 B
+  [rns] [2026-10-23 20:57:48] [Debug]    Link <15916c93a79d1bf563a92f636f0407de> established with <i2p4.retinue.5789fb0cc6cc1a2ed34c7f25e68d874e:b5143116e9bd1f0956a43df08b4d0881>, RTT is 1s, 116ms and 670.13µs
+  [retinue] RX hello-from-rns 156351
+  [rns] ECHO echo:hello-from-rns
+  [rns] [2026-10-23 20:57:50] [Debug]    Incoming link request with mode AES_256_CBC
+  [rns] [2026-10-23 20:57:50] [Debug]    Validating link request <7259fc8adcb39884fdce6baf077c260f>
+  [rns] [2026-10-23 20:57:50] [Debug]    Incoming link request <7259fc8adcb39884fdce6baf077c260f> accepted on I2PInterfacePeer[I2P to gebzp75avw2niytoj6xdp3flex5glbyhcd22q5wz7nyxc346cx5q.b32.i2p]
+  [rns] [2026-10-23 20:57:51] [Debug]    Accepting resource advertisement for <65c36c5b5195277504e86ca54349dbb784454c64d8d901f2b8a6a58ee22b98d4>. Transfer size is 816 B in 2 parts.
+  [rns] RES_IN 12000 d79e3a8f8742e32fbb2ab85fde665915946b0836877a43b2f1fac13ac6517d10 COMPLETE
+  [retinue] PUBLISH_OK 12000 Resource d79e3a8f8742e32fbb2ab85fde665915946b0836877a43b2f1fac13ac6517d10 160317
+  [rns] [2026-10-23 20:57:53] [Debug]    Establishing link with mode AES_256_CBC
+  [rns] [2026-10-23 20:57:53] [Debug]    Link request <b5182c4eca6689edd6192a4a7ab84ef9> sent to <i2p4.retinue-res.5789fb0cc6cc1a2ed34c7f25e68d874e:623e27cf24435b47a1dd55002f313b84>
+  [rns] [2026-10-23 20:57:54] [Debug]    Validating link request proof with mode AES_256_CBC
+  [rns] [2026-10-23 20:57:54] [Debug]    Destination confirmed link MTU of 500 B
+  [rns] [2026-10-23 20:57:54] [Debug]    Link <b5182c4eca6689edd6192a4a7ab84ef9> established with <i2p4.retinue-res.5789fb0cc6cc1a2ed34c7f25e68d874e:623e27cf24435b47a1dd55002f313b84>, RTT is 1s, 83ms and 176.61µs
+  [rns] [2026-10-23 20:57:54] [Debug]    Compressing resource data...
+  [rns] [2026-10-23 20:57:54] [Debug]    Compression completed in 0.002 seconds
+  [rns] [2026-10-23 20:57:54] [Debug]    Compression saved 11241 bytes, sending compressed
+  [retinue] RES_IN 12000 d79e3a8f8742e32fbb2ab85fde665915946b0836877a43b2f1fac13ac6517d10 164073
+  [rns] RES_OUT COMPLETE
+
+========================================================================
+tcp-control                  exchange   PASS
+rns-dials-retinue            exchange   PASS
+========================================================================
+I2P4 STOCK RNS INTEROP: PASS

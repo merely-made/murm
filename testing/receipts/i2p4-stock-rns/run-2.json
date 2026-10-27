@@ -1,0 +1,116 @@
+{
+  "started": "2026-10-23T20:23:53Z",
+  "rns": "1.5.7",
+  "results": [
+    {
+      "name": "tcp-control",
+      "ifac": false,
+      "announces_s": 5.1,
+      "retinue_echo_s": 5.1,
+      "rns_echo_s": 5.2,
+      "retinue_resource_s": 5.2,
+      "rns_resource_s": 5.3,
+      "ok": true,
+      "rns_dest": "af4a17165c575e0e8ba3e1e3b5cc4b64",
+      "retinue_dests": [
+        "b5143116e9bd1f0956a43df08b4d0881",
+        "623e27cf24435b47a1dd55002f313b84"
+      ]
+    },
+    {
+      "name": "retinue-dials-rns",
+      "ifac": false,
+      "rns_static_transport_identity": true,
+      "rns_b32": "qtkusthhrnzcym4amzrlux736lstfltjtyz3esmn6h33lxawpf5q.b32.i2p",
+      "announces_s": 92.0,
+      "retinue_echo_s": 93.3,
+      "rns_echo_s": 94.9,
+      "retinue_resource_s": 97.0,
+      "rns_resource_s": 99.4,
+      "ok": true,
+      "rns_dest": "af4a17165c575e0e8ba3e1e3b5cc4b64",
+      "retinue_dests": [
+        "b5143116e9bd1f0956a43df08b4d0881",
+        "623e27cf24435b47a1dd55002f313b84"
+      ],
+      "keyfile_rns_files": [
+        "8d487269773f47f1d337ef4507acd088dbccea261f4946e0354f1a9fa0a9b7f0.i2p"
+      ],
+      "keyfile_ok": true,
+      "route_before": true,
+      "same_b32_after_restart": true,
+      "back_online": false,
+      "redial_gaps_s": [
+        15.0,
+        15.0,
+        15.0,
+        15.0,
+        15.0,
+        15.0,
+        15.0,
+        15.0,
+        15.0,
+        15.0,
+        15.0,
+        15.0,
+        15.0,
+        15.0,
+        15.0,
+        15.0,
+        15.0,
+        15.0,
+        15.0,
+        15.0,
+        15.0,
+        15.0,
+        15.0
+      ],
+      "redials_about_15s": true,
+      "route_kept": true,
+      "echo_after_restart": false,
+      "reconnect_ok": false
+    },
+    {
+      "name": "retinue-dials-rns-ifac16",
+      "ifac": true,
+      "rns_static_transport_identity": true,
+      "rns_b32": "kw2lr7hco34nijyo2o3zlmkcut4tplscvwxekl4ba4vkglejz6uq.b32.i2p",
+      "announces_s": 67.1,
+      "retinue_echo_s": 68.3,
+      "rns_echo_s": 69.8,
+      "retinue_resource_s": 73.7,
+      "rns_resource_s": 77.5,
+      "ok": true,
+      "rns_dest": "af4a17165c575e0e8ba3e1e3b5cc4b64",
+      "retinue_dests": [
+        "b5143116e9bd1f0956a43df08b4d0881",
+        "623e27cf24435b47a1dd55002f313b84"
+      ]
+    },
+    {
+      "name": "rns-dials-retinue",
+      "ifac": false,
+      "retinue_b32": "76zwthoncb6xwfp3l3ioorkz52xh6zyayfeh5q334d7e56ebhniq.b32.i2p",
+      "i2pd_resolved_retinue_after_s": 30.0,
+      "announces_s": 16.1,
+      "retinue_echo_s": 17.4,
+      "rns_echo_s": 19.4,
+      "retinue_resource_s": 21.7,
+      "rns_resource_s": 24.1,
+      "ok": true,
+      "rns_dest": "af4a17165c575e0e8ba3e1e3b5cc4b64",
+      "retinue_dests": [
+        "b5143116e9bd1f0956a43df08b4d0881",
+        "623e27cf24435b47a1dd55002f313b84"
+      ]
+    },
+    {
+      "name": "rns-dials-retinue-ifac16",
+      "ifac": true,
+      "retinue_b32": "l33t7p3sety6dwliycmgwhbekrpg6l7lpi4jtbmysh3jmoa6z46a.b32.i2p",
+      "i2pd_resolved_retinue_after_s": 132.3,
+      "ok": false,
+      "failed": "announces"
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+RNS 1.5.7
+retinue example: C:\Users\mark_\Code\worktrees\murm-i2p-rns\native\target\debug\examples\rns_i2p_peer.exe
+
+=== tcp-control ===
+  [rns] TRANSPORT 05b54ec7f2f6db32dd57701463fbe155
+  [rns] DEST af4a17165c575e0e8ba3e1e3b5cc4b64
+  [retinue] ONLINE true 3
+  [retinue] READY b5143116e9bd1f0956a43df08b4d0881 623e27cf24435b47a1dd55002f313b84 3
+  [retinue] IFACES 1 3
+  [rns] HEARD i2p4.retinue b5143116e9bd1f0956a43df08b4d0881
+  [rns] HEARD i2p4.retinue-res 623e27cf24435b47a1dd55002f313b84
+  [retinue] HEARD af4a17165c575e0e8ba3e1e3b5cc4b64  33
+  [rns] RX hello-from-retinue
+  [retinue] ECHO_OK echo:hello-from-retinue 5038
+  [retinue] RX hello-from-rns 5079
+  [rns] ECHO echo:hello-from-rns
+  [retinue] PUBLISH_OK 12000 Resource d79e3a8f8742e32fbb2ab85fde665915946b0836877a43b2f1fac13ac6517d10 5156
+  [rns] RES_IN 12000 d79e3a8f8742e32fbb2ab85fde665915946b0836877a43b2f1fac13ac6517d10 COMPLETE
+  [retinue] RES_IN 12000 d79e3a8f8742e32fbb2ab85fde665915946b0836877a43b2f1fac13ac6517d10 5185
+  [rns] RES_OUT COMPLETE
+
+=== retinue-dials-rns ===
+  [rns] TRANSPORT bf614db817ceb654002af5c120a4545b
+  [rns] DEST af4a17165c575e0e8ba3e1e3b5cc4b64
+  [rns] B32 46jskc6l6euklfg6sxdynlvkhiuysfswbxqduidajrragqyzteha.b32.i2p
+  [retinue] READY b5143116e9bd1f0956a43df08b4d0881 623e27cf24435b47a1dd55002f313b84 4
+  [retinue] ONLINE false 4
+  [retinue] IFACES 1 4
+
+========================================================================
+tcp-control                  exchange   PASS
+retinue-dials-rns            exchange   FAIL  (announces)
+========================================================================
+I2P4 STOCK RNS INTEROP: FAIL

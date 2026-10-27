@@ -19,8 +19,8 @@ use emissary_core::{Config, Ntcp2Config, SamConfig, Ssu2Config, TransitConfig};
 use emissary_util::reseeder::Reseeder;
 use emissary_util::runtime::tokio::Runtime;
 use emissary_util::storage::{Storage, StorageBundle};
-use tokio::sync::Notify;
-use tokio::task::JoinHandle;
+use tokio::sync::{Notify, watch};
+use tokio::task::{AbortHandle, JoinHandle};
 use truchman::Bridge;
 
 /// Reseed when fewer routers than this are stored, as emissary-cli 0.4.0 does
@@ -102,7 +102,19 @@ pub struct StartReport {
 pub struct EmbeddedRouter {
     report: StartReport,
     stop: Arc<Notify>,
-    task: Option<JoinHandle<()>>,
+    router: AbortHandle,
+    end: watch::Receiver<Option<RouterEnd>>,
+}
+
+/// How the router task ended.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum RouterEnd {
+    /// The router future finished, on its own or after [`EmbeddedRouter::shutdown`].
+    Exited,
+    /// The router task panicked, with the panic's message when it had one.
+    Panicked(String),
+    /// The task was aborted, as dropping the handle does.
+    Aborted,
 }
 
 impl EmbeddedRouter {
@@ -213,6 +225,8 @@ impl EmbeddedRouter {
             }
             let _ = tokio::time::timeout(SHUTDOWN_GRACE, router).await;
         });
+        let router = task.abort_handle();
+        let end = watch_end(task);
         Ok(Self {
             report: StartReport {
                 stored_routers,
@@ -220,8 +234,23 @@ impl EmbeddedRouter {
                 sam,
             },
             stop,
-            task: Some(task),
+            router,
+            end,
         })
+    }
+
+    /// Whether the router is still running.
+    pub fn is_running(&self) -> bool {
+        self.end.borrow().is_none()
+    }
+
+    /// Wait until the router ends, and say how.
+    pub async fn stopped(&self) -> RouterEnd {
+        let mut end = self.end.clone();
+        match end.wait_for(Option::is_some).await {
+            Ok(end) => end.clone().unwrap_or(RouterEnd::Aborted),
+            Err(_) => RouterEnd::Aborted,
+        }
     }
 
     /// The SAMv3 bridge to hand to [`truchman`] and retinue.
@@ -234,23 +263,74 @@ impl EmbeddedRouter {
         &self.report
     }
 
-    /// Shut the router down gracefully, waiting up to ten seconds.
-    pub async fn shutdown(mut self) {
+    /// Shut the router down gracefully, waiting up to ten seconds, and say how it ended.
+    pub async fn shutdown(self) -> RouterEnd {
         self.stop.notify_one();
-        if let Some(task) = self.task.take() {
-            let _ = task.await;
-        }
+        self.stopped().await
     }
 }
 
 impl Drop for EmbeddedRouter {
     fn drop(&mut self) {
-        if let Some(task) = self.task.take() {
-            task.abort();
-        }
+        self.router.abort();
+    }
+}
+
+/// Watch `task` from a second task, so a panic in it is reported rather than leaving callers
+/// to wait out their own timeouts.
+fn watch_end(task: JoinHandle<()>) -> watch::Receiver<Option<RouterEnd>> {
+    let (tx, end) = watch::channel(None);
+    tokio::spawn(async move {
+        let ended = match task.await {
+            Ok(()) => RouterEnd::Exited,
+            Err(e) if e.is_panic() => RouterEnd::Panicked(panic_message(e.into_panic())),
+            Err(_) => RouterEnd::Aborted,
+        };
+        let _ = tx.send(Some(ended));
+    });
+    end
+}
+
+fn panic_message(payload: Box<dyn std::any::Any + Send>) -> String {
+    match payload.downcast::<String>() {
+        Ok(s) => *s,
+        Err(payload) => payload
+            .downcast_ref::<&str>()
+            .map_or_else(String::new, |s| (*s).to_string()),
     }
 }
 
 fn other(e: impl std::fmt::Display) -> io::Error {
     io::Error::other(e.to_string())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    async fn ended(task: JoinHandle<()>) -> RouterEnd {
+        let mut end = watch_end(task);
+        end.wait_for(Option::is_some)
+            .await
+            .unwrap()
+            .clone()
+            .unwrap()
+    }
+
+    #[tokio::test]
+    async fn the_watcher_reports_a_panic_an_exit_and_an_abort() {
+        assert_eq!(
+            ended(tokio::spawn(async { panic!("garlic tag") })).await,
+            RouterEnd::Panicked("garlic tag".into())
+        );
+        let formatted = tokio::spawn(async { panic!("tag {}", 915) });
+        assert_eq!(
+            ended(formatted).await,
+            RouterEnd::Panicked("tag 915".into())
+        );
+        assert_eq!(ended(tokio::spawn(async {})).await, RouterEnd::Exited);
+        let pending = tokio::spawn(std::future::pending::<()>());
+        pending.abort();
+        assert_eq!(ended(pending).await, RouterEnd::Aborted);
+    }
 }

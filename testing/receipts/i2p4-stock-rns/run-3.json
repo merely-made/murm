@@ -1,0 +1,34 @@
+{
+  "started": "2026-10-23T21:06:11Z",
+  "rns": "1.5.7",
+  "retinue_router": "127.0.0.1:7656",
+  "recovery_window_s": 900.0,
+  "only": [
+    "retinue-dials-rns"
+  ],
+  "results": [
+    {
+      "name": "tcp-control",
+      "ifac": false,
+      "announces_s": 5.1,
+      "retinue_echo_s": 5.1,
+      "rns_echo_s": 5.2,
+      "retinue_resource_s": 5.2,
+      "rns_resource_s": 5.3,
+      "ok": true,
+      "rns_dest": "af4a17165c575e0e8ba3e1e3b5cc4b64",
+      "retinue_dests": [
+        "b5143116e9bd1f0956a43df08b4d0881",
+        "623e27cf24435b47a1dd55002f313b84"
+      ]
+    },
+    {
+      "name": "retinue-dials-rns",
+      "ifac": false,
+      "rns_static_transport_identity": true,
+      "rns_b32": "46jskc6l6euklfg6sxdynlvkhiuysfswbxqduidajrragqyzteha.b32.i2p",
+      "ok": false,
+      "failed": "announces"
+    }
+  ]
+}

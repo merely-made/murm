@@ -16,4 +16,5 @@ truchman = { version = "0.1.1", path = "../../../crates/truchman" }
 
 [dev-dependencies]
 retinue = { workspace = true, features = ["i2p"] }
-tokio = { version = "1", features = ["macros", "rt-multi-thread", "time", "io-util"] }
+sha2 = { version = "0.11", default-features = false }
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "time", "io-util", "io-std", "net"] }
