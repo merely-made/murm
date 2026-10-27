@@ -144,6 +144,20 @@ impl ConversationId {
     }
 }
 
+/// The correspondent a `misfin://mailbox@host` address names, as `mailbox@host`.
+/// A misfin address names a correspondent, not a document, so a node carrying one
+/// opens that conversation. `None` for another scheme or an address with no mailbox.
+pub fn misfin_correspondent(address: &str) -> Option<&str> {
+    let (scheme, rest) = address.split_once("://")?;
+    let correspondent = rest.trim_end_matches('/');
+    let (mailbox, host) = correspondent.split_once('@')?;
+    (scheme.eq_ignore_ascii_case("misfin")
+        && !mailbox.is_empty()
+        && !host.is_empty()
+        && !correspondent.contains(['/', '?', '#']))
+    .then_some(correspondent)
+}
+
 /// A message identifier, unique within its conversation. Opaque and
 /// adapter-defined (a misfin sequence, a murm post id as hex) so consumers can
 /// dedup and address messages without knowing the backend.
