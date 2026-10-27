@@ -7,7 +7,7 @@
 //! The live station actor.
 //!
 //! One ordinary worker thread owns a small Tokio runtime and the lease-gated
-//! `mere_signalman::SitedStation`. It polls the port's read-only management
+//! `station_custody::SitedStation`. It polls the port's read-only management
 //! snapshot getter and hands owned Postilion snapshots to the UI thread, which
 //! projects them under the owner's stale policy. The actor never touches
 //! Retinue routing state directly, renders nothing, and holds no policy: a
@@ -25,7 +25,7 @@ use std::sync::mpsc::{self, Receiver, Sender};
 use std::thread::{self, JoinHandle};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
-use mere_signalman::{
+use station_custody::{
     DjinnStationAuthority, SitedStation, SitedStationCredential, SitedStationError,
 };
 use pandect::DeviceId;

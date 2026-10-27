@@ -2,7 +2,7 @@
 //! channel lane selects the bench's public LongFast key explicitly; private
 //! channel provisioning and authenticated senders are not implied.
 use super::*;
-use mere_signalman::DjinnStationAuthority;
+use station_custody::DjinnStationAuthority;
 use radio_hand::instances::Config;
 use selvage::personality::{ControllerConfig, CoveragePolicy, InstalledPersonalitySet};
 use serde::Deserialize;

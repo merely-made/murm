@@ -1,7 +1,7 @@
 //! Djinn-backed Tucket activation. The file is public configuration only;
 //! the wallet and all seed persistence remain with the resident.
 use super::*;
-use mere_signalman::DjinnStationAuthority;
+use station_custody::DjinnStationAuthority;
 use radio_hand::instances::Config;
 use selvage::personality::{ControllerConfig, CoveragePolicy, InstalledPersonalitySet};
 use serde::Deserialize;

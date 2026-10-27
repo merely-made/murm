@@ -1,6 +1,6 @@
 //! Attended standalone-firmware probe. Public config, isolated Djinn bench wallet.
 //! No private material is written. Firmware setup remains volatile across reboot.
-use mere_signalman::DjinnStationAuthority;
+use station_custody::DjinnStationAuthority;
 use radio_hand::{
     resident_command::Command,
     resident_wire::{ResidentSetup, SennetKey},

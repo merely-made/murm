@@ -58,7 +58,7 @@ cpal = "=0.18.2"
 
 # Signalman's management graph and sealed station authority share the same
 # Mere source as the desktop host.
-mere-signalman = { git = "https://github.com/merely-made/mere.git", branch = "main" }
+station-custody = { git = "https://github.com/merely-made/mere.git", branch = "main" }
 chartulary = { git = "https://github.com/merely-made/eidetic.git", rev = "f599ffe93298025bf6d65ae310a7cb4270ea52e3" }
 gaz = { git = "https://github.com/merely-made/dramatis.git", branch = "main" }
 muniment = { features = ["redb"], git = "https://github.com/merely-made/eidetic.git", rev = "f599ffe93298025bf6d65ae310a7cb4270ea52e3" }
@@ -128,7 +128,7 @@ vello_shaders = { git = "https://github.com/mark-ik/vello", rev = "276b46648c08f
 # this workspace used to pin, so the patch must name the package explicitly
 # while keeping the `taffy` dependency alias Cargo expects.
 taffy = { package = "genet-taffy", version = "=0.14.0", git = "https://github.com/merely-made/genet.git", branch = "main" }
-# mere-signalman's control codec calls `decode_cbor_strict`, which only Mere's
+# station-custody's control codec calls `decode_cbor_strict`, which only Mere's
 # p2panda fork carries. Restate mere's row for the one p2panda package this
 # graph reaches, at the same immutable tag.
 p2panda-core = { git = "https://github.com/mark-ik/p2panda.git", tag = "mere-p2panda-net-0.7.5-upstream-20261013" }
@@ -136,12 +136,12 @@ p2panda-core = { git = "https://github.com/mark-ik/p2panda.git", tag = "mere-p2p
 # `genet-parley`, nothing in genet answers to `parley`, and a patch row would
 # fail resolution (mere's own [patch.crates-io] says the same).
 
-# mere-signalman names the Murm family through its tracked branch so its
+# station-custody names the Murm family through its tracked branch so its
 # manifest works in a clean Mere checkout. Redirect every directly named
 # type-bearing member to this workspace: the desktop and private port must
 # exchange one Retinue/Postilion/radio-hand family.
 [patch."https://github.com/merely-made/murm.git"]
-# outrider joined the list 2026-09-02: mere-signalman now names it directly,
+# outrider joined the list 2026-09-02: station-custody now names it directly,
 # and without the redirect two `outrider::codec::LxmfPayload`s land and
 # `Station::send_payload` stops type-checking against the port.
 outrider = { path = "../../crates/outrider" }
@@ -168,6 +168,12 @@ muniment = { git = "https://github.com/merely-made/eidetic.git", rev = "f599ffe9
 chartulary = { git = "https://github.com/merely-made/eidetic.git", rev = "f599ffe93298025bf6d65ae310a7cb4270ea52e3" }
 eidetic = { git = "https://github.com/merely-made/eidetic.git", rev = "f599ffe93298025bf6d65ae310a7cb4270ea52e3" }
 muniment = { git = "https://github.com/merely-made/eidetic.git", rev = "f599ffe93298025bf6d65ae310a7cb4270ea52e3" }
+
+# Keep the actor and apparatus-core on one published Armillary source identity
+# when Mere and other Git suppliers refer to its canonical URL.
+[patch."https://github.com/merely-made/armillary.git"]
+armillary = { git = "https://www.github.com/merely-made/armillary.git", rev = "864f107d44bf759111ad2ea3c9036b2cfbf03f4c" }
+apparatus-core = { git = "https://www.github.com/merely-made/armillary.git", rev = "06340b08327b29c3485ecb0089bb5cafed20fd80" }
 
 # Keep admitted store and graph types identical across the local native crates
 # and the current Mere Git consumer while the answer cohort advances.

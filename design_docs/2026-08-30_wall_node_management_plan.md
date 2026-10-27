@@ -1530,3 +1530,8 @@ successful announce, or two-party exchange does not satisfy either half.
   retained source/lock fingerprints and dependency graph. The campaign,
   integration test, Clippy with denied warnings, formatting, and whitespace
   checks passed. Device/RF/power/commissioning work remains open.
+
+**Current Mere CLI names (2026-10-26):** the controller commands formerly
+named `mere-signalman-first-owner` now live under the `station-custody` owner
+as `station-provision` and `station-claim`. The historical command examples
+above remain part of their recorded source context.

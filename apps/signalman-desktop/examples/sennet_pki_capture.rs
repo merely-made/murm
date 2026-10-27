@@ -1,7 +1,7 @@
 //! Bounded PKI wire experiment under real scoped custody. Default is receive
 //! only. Optional `reply` consumes a durable ID, sends one PKI text and captures
 //! an unclassified stock control response; it does not assert ACK semantics.
-use mere_signalman::DjinnStationAuthority;
+use station_custody::DjinnStationAuthority;
 use sennet::{
     pki::LocalIdentity,
     transport::{Header, Packet},
