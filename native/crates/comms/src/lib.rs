@@ -51,7 +51,7 @@ pub use adapter::{AdapterError, ProtocolAdapter};
 pub use comms::{AccountIdentity, AdapterFailure, Comms, Inbox};
 pub use model::{
     AccountId, Conversation, ConversationId, DeliveryQueueReason, DeliveryStatus, Direction, Draft,
-    Identity, Message, MessageBody, MessageId, ProtocolKind,
+    Identity, Message, MessageBody, MessageId, ProtocolKind, misfin_correspondent,
 };
 pub use pane::{CommsPane, DockSide, DockState, NewMessageForm, ThreadRequest};
 
