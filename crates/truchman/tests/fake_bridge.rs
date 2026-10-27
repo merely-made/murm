@@ -320,3 +320,96 @@ async fn values_that_would_break_the_line_never_reach_the_bridge() {
     let _ = bridge.lookup("x.i2p").await;
     assert_eq!(*log.lock().unwrap(), ["NAMING LOOKUP NAME=x.i2p"]);
 }
+
+#[tokio::test]
+async fn a_session_looks_names_up_on_its_own_connection() {
+    let (public, private) = keypair(15);
+    // A bridge that accepts exactly one connection, the session's, then stops listening:
+    // a lookup that opened a fresh connection would be refused, not answered.
+    let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let bridge = Bridge::new(listener.local_addr().unwrap());
+    let (p, s) = (public.clone(), private.clone());
+    tokio::spawn(async move {
+        let (tcp, _) = listener.accept().await.unwrap();
+        drop(listener);
+        let (read, mut write) = tcp.into_split();
+        let mut read = BufReader::new(read);
+        let mut line = String::new();
+        while read.read_line(&mut line).await.unwrap_or(0) > 0 {
+            let reply = match line.trim_end() {
+                l if l.starts_with("HELLO") => "HELLO REPLY RESULT=OK VERSION=3.1".to_string(),
+                l if l.starts_with("SESSION CREATE") => {
+                    format!("SESSION STATUS RESULT=OK DESTINATION={s}")
+                }
+                "NAMING LOOKUP NAME=peer.b32.i2p" => {
+                    format!("NAMING REPLY RESULT=OK NAME=peer.b32.i2p VALUE={p}")
+                }
+                l => format!(
+                    "NAMING REPLY RESULT=KEY_NOT_FOUND NAME={}",
+                    l.rsplit('=').next().unwrap()
+                ),
+            };
+            write
+                .write_all(
+                    format!(
+                        "{reply}
+"
+                    )
+                    .as_bytes(),
+                )
+                .await
+                .unwrap();
+            line.clear();
+        }
+    });
+    let session = StreamSession::create(bridge, Key::Transient, SessionOptions::default())
+        .await
+        .unwrap();
+    let dest = Destination::from_base64(&public).unwrap();
+    assert_eq!(session.lookup("peer.b32.i2p").await.unwrap(), dest);
+    assert_eq!(session.resolve("peer.b32.i2p").await.unwrap(), dest);
+    assert_eq!(
+        session.resolve(&public).await.unwrap(),
+        dest,
+        "base64 needs no lookup"
+    );
+    let missing = session.lookup("gone.b32.i2p").await.unwrap_err();
+    assert_eq!(missing.result(), Some("KEY_NOT_FOUND"));
+    assert!(session.lookup("a b").await.is_err());
+    // Positive control: a fresh-connection lookup on the same bridge is refused, so the
+    // answers above can only have come over the session's connection.
+    assert!(matches!(
+        bridge.lookup("peer.b32.i2p").await,
+        Err(Error::Io(_))
+    ));
+    assert!(session.is_alive());
+}
+
+#[tokio::test]
+async fn a_lookup_fails_cleanly_once_the_session_is_gone() {
+    let (_, private) = keypair(17);
+    let (bridge, _) = fake(move |line| {
+        if line.starts_with("SESSION CREATE") {
+            vec![Act::Line(format!(
+                "SESSION STATUS RESULT=OK DESTINATION={private}"
+            ))]
+        } else {
+            // The lookup: drop the session instead of answering.
+            vec![Act::Close]
+        }
+    })
+    .await;
+    let session = StreamSession::create(bridge, Key::Transient, SessionOptions::default())
+        .await
+        .unwrap();
+    let err = tokio::time::timeout(
+        std::time::Duration::from_secs(5),
+        session.lookup("peer.b32.i2p"),
+    )
+    .await
+    .expect("the pending lookup is answered when the session closes")
+    .unwrap_err();
+    assert!(matches!(err, Error::Io(ref e) if e.kind() == io::ErrorKind::NotConnected));
+    session.closed().await;
+    assert!(session.lookup("again.b32.i2p").await.is_err());
+}

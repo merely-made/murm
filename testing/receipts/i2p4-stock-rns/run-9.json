@@ -1,0 +1,64 @@
+{
+  "started": "2026-10-23T22:39:58Z",
+  "rns": "1.5.7",
+  "retinue_router": "emissary",
+  "retinue_extra": [
+    "--fresh-session"
+  ],
+  "recovery_window_s": 1800.0,
+  "only": [
+    "retinue-dials-rns"
+  ],
+  "results": [
+    {
+      "name": "tcp-control",
+      "ifac": false,
+      "announces_s": 5.1,
+      "retinue_echo_s": 5.1,
+      "rns_echo_s": 5.2,
+      "retinue_resource_s": 5.2,
+      "rns_resource_s": 5.3,
+      "ok": true,
+      "rns_dest": "af4a17165c575e0e8ba3e1e3b5cc4b64",
+      "retinue_dests": [
+        "b5143116e9bd1f0956a43df08b4d0881",
+        "623e27cf24435b47a1dd55002f313b84"
+      ]
+    },
+    {
+      "name": "retinue-dials-rns",
+      "ifac": false,
+      "rns_static_transport_identity": true,
+      "rns_b32": "qkggxlpbqbvrvdteia4da6v5ffttqucktzkfp7elhd5zncooy7iq.b32.i2p",
+      "announces_s": 55.1,
+      "retinue_echo_s": 56.9,
+      "rns_echo_s": 58.9,
+      "retinue_resource_s": 61.8,
+      "rns_resource_s": 64.8,
+      "ok": true,
+      "rns_dest": "af4a17165c575e0e8ba3e1e3b5cc4b64",
+      "retinue_dests": [
+        "b5143116e9bd1f0956a43df08b4d0881",
+        "623e27cf24435b47a1dd55002f313b84"
+      ],
+      "keyfile_rns_files": [
+        "e2f51ad81145ed6490a27542566431595c6ef18ace4a241543772e94ff87baa4.i2p"
+      ],
+      "keyfile_ok": true,
+      "route_before": true,
+      "same_b32_after_restart": true,
+      "back_online": true,
+      "recovery_s": 135.6,
+      "redial_gaps_s": [
+        24.6
+      ],
+      "redials_about_15s": false,
+      "route_kept": true,
+      "link_after_restart": true,
+      "stats": [
+        "STATS 0 online=true rx=14 tx=22 rx_bytes=2170 tx_bytes=3220 200555"
+      ],
+      "reconnect_ok": false
+    }
+  ]
+}

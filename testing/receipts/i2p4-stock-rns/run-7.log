@@ -1,0 +1,92 @@
+RNS 1.5.7
+retinue example: C:\Users\mark_\Code\worktrees\murm-i2p-rns\native\target\debug\examples\rns_i2p_peer.exe
+
+=== tcp-control ===
+  [rns] TRANSPORT 42ddcf4846b3c0ad45cb73e4b94a4079
+  [rns] DEST af4a17165c575e0e8ba3e1e3b5cc4b64
+  [retinue] ONLINE true 5
+  [retinue] READY b5143116e9bd1f0956a43df08b4d0881 623e27cf24435b47a1dd55002f313b84 5
+  [retinue] IFACES 1 5
+  [rns] HEARD i2p4.retinue b5143116e9bd1f0956a43df08b4d0881
+  [rns] HEARD i2p4.retinue-res 623e27cf24435b47a1dd55002f313b84
+  [retinue] HEARD af4a17165c575e0e8ba3e1e3b5cc4b64  37
+  [rns] RX hello-from-retinue
+  [retinue] ECHO_OK echo:hello-from-retinue 5040
+  [retinue] RX hello-from-rns 5081
+  [rns] ECHO echo:hello-from-rns
+  [retinue] PUBLISH_OK 12000 Resource d79e3a8f8742e32fbb2ab85fde665915946b0836877a43b2f1fac13ac6517d10 5164
+  [rns] RES_IN 12000 d79e3a8f8742e32fbb2ab85fde665915946b0836877a43b2f1fac13ac6517d10 COMPLETE
+  [retinue] RES_IN 12000 d79e3a8f8742e32fbb2ab85fde665915946b0836877a43b2f1fac13ac6517d10 5187
+  [rns] RES_OUT COMPLETE
+
+=== retinue-dials-rns ===
+  [rns] TRANSPORT 929eca8dfea159b462189d74d6e0db1e
+  [rns] DEST af4a17165c575e0e8ba3e1e3b5cc4b64
+  [rns] B32 f6dn4ngbhv2s4dck3vsspjk4mqbmwrgeh636uydondwhdyoaat3q.b32.i2p
+  [retinue] ONLINE false 4
+  [retinue] IFACES 1 4
+  [retinue] READY b5143116e9bd1f0956a43df08b4d0881 623e27cf24435b47a1dd55002f313b84 4
+  [retinue] SAM_CMD SESSION CREATE 5
+  [retinue] SAM_REPLY SESSION STATUS RESULT=OK 9036
+  [retinue] SAM_CMD STREAM CONNECT 39985
+  [retinue] SAM_REPLY STREAM STATUS RESULT=OK 39985
+  [retinue] ONLINE true 40204
+  [rns] HEARD i2p4.retinue b5143116e9bd1f0956a43df08b4d0881
+  [rns] HEARD i2p4.retinue-res 623e27cf24435b47a1dd55002f313b84
+  [rns] HEARD i2p4.retinue b5143116e9bd1f0956a43df08b4d0881
+  [rns] HEARD i2p4.retinue-res 623e27cf24435b47a1dd55002f313b84
+  [retinue] HEARD af4a17165c575e0e8ba3e1e3b5cc4b64  49547
+  [rns] RX hello-from-retinue
+  [retinue] ECHO_OK echo:hello-from-retinue 56727
+  [retinue] RX hello-from-rns 63625
+  [rns] ECHO echo:hello-from-rns
+  [rns] RES_IN 12000 d79e3a8f8742e32fbb2ab85fde665915946b0836877a43b2f1fac13ac6517d10 COMPLETE
+  [retinue] PUBLISH_OK 12000 Resource d79e3a8f8742e32fbb2ab85fde665915946b0836877a43b2f1fac13ac6517d10 77181
+  [retinue] RES_IN 12000 d79e3a8f8742e32fbb2ab85fde665915946b0836877a43b2f1fac13ac6517d10 86114
+  [rns] RES_OUT COMPLETE
+  keyfile: KEYFILE C:\Users\mark_\AppData\Local\Temp\retinue-i2p4-retinue-dials-rns-6t_ue6g8\storage\i2p\740d5d71759ede4384cdea042e005dc30f1630b9e46a0f494d655f8e6b234ba8.i2p f6dn4ngbhv2s4dck3vsspjk4mqbmwrgeh636uydondwhdyoaat3q.b32.i2p vs RNS files ['740d5d71759ede4384cdea042e005dc30f1630b9e46a0f494d655f8e6b234ba8.i2p'], RNS b32 f6dn4ngbhv2s4dck3vsspjk4mqbmwrgeh636uydondwhdyoaat3q.b32.i2p
+  [retinue] ROUTE af4a17165c575e0e8ba3e1e3b5cc4b64 true 90717
+  [rns] [2026-10-23 18:27:36] [Debug]    Reticulum running in interpreted mode
+  [rns] [2026-10-23 18:27:36] [Verbose]  Bringing up system interfaces...
+  [rns] [2026-10-23 18:27:36] [Verbose]  System interfaces are ready
+  [rns] [2026-10-23 18:27:36] [Debug]    Utilising cryptography backend "openssl, PyCA 49.0.0"
+  [rns] [2026-10-23 18:27:36] [Verbose]  Configuration loaded from C:\Users\mark_\AppData\Local\Temp\retinue-i2p4-retinue-dials-rns-6t_ue6g8/config
+  [rns] [2026-10-23 18:27:36] [Verbose]  Destinations file does not exist, no known destinations loaded
+  [rns] [2026-10-23 18:27:36] [Debug]    Cleaning ratchets...
+  [rns] [2026-10-23 18:27:36] [Debug]    Processed 0 ratchets in 0s, not in use 0, removed 0
+  [rns] [2026-10-23 18:27:36] [Verbose]  Loaded Transport Identity from storage
+  [rns] TRANSPORT 929eca8dfea159b462189d74d6e0db1e
+  [rns] DEST af4a17165c575e0e8ba3e1e3b5cc4b64
+  [rns] [2026-10-23 18:27:37] [Info]     I2PInterface[I2P] Bringing up I2P endpoint, this may take a while...
+  [rns] [2026-10-23 18:27:37] [Error]    Error while while configuring I2PInterface[I2P]:
+  [rns] [2026-10-23 18:27:37] [Error]    Check that I2P is installed and running, and that SAM is enabled. Retrying tunnel setup later.
+  [rns] B32 f6dn4ngbhv2s4dck3vsspjk4mqbmwrgeh636uydondwhdyoaat3q.b32.i2p
+  [rns] [2026-10-23 18:27:52] [Info]     I2PInterface[I2P] Bringing up I2P endpoint, this may take a while...
+  [rns] [2026-10-23 18:28:01] [Verbose]  I2PInterface[I2P] endpoint setup complete. Now reachable at: f6dn4ngbhv2s4dck3vsspjk4mqbmwrgeh636uydondwhdyoaat3q.b32.i2p
+  [retinue] ONLINE false 194778
+  [retinue] SAM_CMD STREAM CONNECT 209731
+  [retinue] SAM_REPLY STREAM STATUS RESULT=OK 209731
+  [retinue] ONLINE true 209871
+  [retinue] ROUTE af4a17165c575e0e8ba3e1e3b5cc4b64 true 209919
+  [retinue] STATS 0 online=true rx=18 tx=26 rx_bytes=3878 tx_bytes=3798 209969
+  [retinue] ECHO_ERR link setup timed out
+  [retinue] STATS 0 online=true rx=18 tx=28 rx_bytes=3878 tx_bytes=3935 222001
+  [retinue] STATS 0 online=true rx=18 tx=28 rx_bytes=3878 tx_bytes=3935 252001
+  [retinue] ECHO_ERR link setup timed out
+  [retinue] STATS 0 online=true rx=18 tx=30 rx_bytes=3878 tx_bytes=4072 264035
+  [rns] [2026-10-23 18:30:26] [Debug]    Detaching interfaces
+  [rns] [2026-10-23 18:30:26] [Debug]    Detaching I2PInterface[I2P]
+Exception ignored while finalizing file <_io.TextIOWrapper name=3 encoding='utf-8'>:
+Traceback (most recent call last):
+  File "C:\Users\mark_\Code\worktrees\murm-i2p-rns\crates\retinue\oracle\interop_i2p.py", line 434, in main
+    results.append(variant(name, carrier, ifac, storage, extra=extra))
+OSError: [Errno 22] Invalid argument
+
+========================================================================
+tcp-control                  exchange   PASS
+retinue-dials-rns            exchange   PASS
+retinue-dials-rns            keyfile    PASS
+retinue-dials-rns            reconnect  PASS
+retinue-dials-rns            relink     FAIL  ()
+========================================================================
+I2P4 STOCK RNS INTEROP: FAIL

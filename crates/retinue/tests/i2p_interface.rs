@@ -1,5 +1,5 @@
 //! The I2P interface over a fake loopback SAM bridge. The fake keeps sessions, answers name
-//! lookups for the destinations it holds, and joins each `STREAM CONNECT` to a waiting
+//! lookups for the destinations it holds (inside a session only, as emissary does), and joins each `STREAM CONNECT` to a waiting
 //! `STREAM ACCEPT` at that destination, as a router does across the network.
 
 use std::collections::{HashMap, VecDeque};
@@ -86,6 +86,14 @@ fn pair<'a>(line: &'a str, key: &str) -> Option<&'a str> {
         .find_map(|w| w.strip_prefix(key)?.strip_prefix('='))
 }
 
+/// The destination whose b32 name is `name`, among the sessions the router holds.
+fn lookup(router: &Shared, name: &str) -> Option<String> {
+    router.lock().unwrap().sessions.values().find_map(|dest| {
+        let d = truchman::Destination::from_base64(dest).unwrap();
+        (d.b32() == name).then(|| dest.clone())
+    })
+}
+
 async fn serve(mut tcp: TcpStream, router: Shared) {
     while let Some(cmd) = line(&mut tcp).await {
         if cmd.starts_with("HELLO") {
@@ -105,15 +113,12 @@ async fn serve(mut tcp: TcpStream, router: Shared) {
             let reply = format!("DEST REPLY PUB={public} PRIV={private}\n");
             tcp.write_all(reply.as_bytes()).await.unwrap();
         } else if cmd.starts_with("NAMING LOOKUP") {
+            // As emissary does: outside a session no name resolves.
             let name = pair(&cmd, "NAME").unwrap().to_string();
-            let found = router.lock().unwrap().sessions.values().find_map(|dest| {
-                let d = truchman::Destination::from_base64(dest).unwrap();
-                (d.b32() == name).then(|| dest.clone())
-            });
-            let reply = match found {
-                Some(dest) => format!("NAMING REPLY RESULT=OK NAME={name} VALUE={dest}\n"),
-                None => format!("NAMING REPLY RESULT=KEY_NOT_FOUND NAME={name}\n"),
-            };
+            let reply = format!(
+                "NAMING REPLY RESULT=KEY_NOT_FOUND NAME={name}
+"
+            );
             tcp.write_all(reply.as_bytes()).await.unwrap();
         } else if cmd.starts_with("SESSION CREATE") {
             let id = pair(&cmd, "ID").unwrap().to_string();
@@ -133,9 +138,24 @@ async fn serve(mut tcp: TcpStream, router: Shared) {
                 .insert(id.clone(), dest.clone());
             let reply = format!("SESSION STATUS RESULT=OK DESTINATION={private}\n");
             tcp.write_all(reply.as_bytes()).await.unwrap();
-            // The session lives while this connection does.
-            let mut sink = [0u8; 64];
-            while tcp.read(&mut sink).await.is_ok_and(|n| n > 0) {}
+            // The session lives while this connection does, and resolves names on it.
+            while let Some(cmd) = line(&mut tcp).await {
+                router.lock().unwrap().log.push(cmd.clone());
+                if cmd.starts_with("NAMING LOOKUP") {
+                    let name = pair(&cmd, "NAME").unwrap().to_string();
+                    let reply = match lookup(&router, &name) {
+                        Some(dest) => format!(
+                            "NAMING REPLY RESULT=OK NAME={name} VALUE={dest}
+"
+                        ),
+                        None => format!(
+                            "NAMING REPLY RESULT=KEY_NOT_FOUND NAME={name}
+"
+                        ),
+                    };
+                    tcp.write_all(reply.as_bytes()).await.unwrap();
+                }
+            }
             let mut r = router.lock().unwrap();
             r.sessions.remove(&id);
             r.acceptors.remove(&dest);
@@ -363,15 +383,24 @@ async fn an_unreachable_peer_stays_offline_and_keeps_retrying() {
         .filter(|l| l.starts_with("STREAM CONNECT"))
         .count();
     assert!(attempts >= 3, "kept redialing: {attempts}");
-    // Exactly one session: a refused connect does not recreate it.
-    let sessions = router
-        .lock()
-        .unwrap()
-        .log
-        .iter()
-        .filter(|l| l.starts_with("SESSION CREATE"))
-        .count();
-    assert_eq!(sessions, 1);
+    // By default every redial starts from a fresh session: one per attempt, plus at most
+    // one built for the attempt in flight.
+    let sessions = count(&router, "SESSION CREATE");
+    assert!(
+        (attempts..=attempts + 1).contains(&sessions),
+        "{sessions} sessions for {attempts} attempts"
+    );
+
+    // With the session kept, the same refusals reuse exactly one.
+    let (bridge, router) = fake_router().await;
+    let mut kept = I2pPeer::new(bridge, "I2P", nobody.destination().to_base64());
+    kept.timers = quick();
+    kept.fresh_session_per_redial = false;
+    let kept = node.attach_i2p_peer(kept).unwrap();
+    tokio::time::sleep(Duration::from_millis(700)).await;
+    assert!(!node.interface_online(kept));
+    assert!(count(&router, "STREAM CONNECT") >= 3);
+    assert_eq!(count(&router, "SESSION CREATE"), 1);
 
     // No bridge at all: the endpoint is unharmed and the interface waits offline.
     let closed = TcpListener::bind("127.0.0.1:0").await.unwrap();
@@ -382,7 +411,13 @@ async fn an_unreachable_peer_stays_offline_and_keeps_retrying() {
     let lost = node.attach_i2p_peer(lost).unwrap();
     tokio::time::sleep(Duration::from_millis(300)).await;
     assert!(!node.interface_online(lost));
-    assert_eq!(node.interface_count(), 2);
+    assert_eq!(node.interface_count(), 3);
+}
+
+/// Lines the fake router logged that start with `prefix`.
+fn count(router: &Shared, prefix: &str) -> usize {
+    let router = router.lock().unwrap();
+    router.log.iter().filter(|l| l.starts_with(prefix)).count()
 }
 
 /// RNS's keyfile names, old-format preference, and generate-once storage.

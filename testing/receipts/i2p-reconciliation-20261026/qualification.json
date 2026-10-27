@@ -1,0 +1,106 @@
+{
+  "date_local": "2026-10-26",
+  "source_base": "a30c148cc7b8fb978f906257395239b15a8833ed",
+  "retained_cohort": "543a2a014c2d35813209003eeaba41a1cecc3037",
+  "purpose": "Restore omitted I2P3/I2P4 code and receipts onto rewritten Murm main without restoring old dependency pins or ancestry.",
+  "rust_toolchain": "1.99.1",
+  "software_checks": [
+    {
+      "host": "macOS",
+      "command": "guarded build: cargo +1.99.1 test --locked --offline -p truchman -p retinue --features retinue/i2p --test fake_bridge --test i2p_interface -j 4",
+      "passed": 14,
+      "failed": 0
+    },
+    {
+      "host": "macOS and Windows o-pc",
+      "command": "cargo +1.99.1 test --offline --manifest-path native/Cargo.toml -p murm-i2p --all-targets -j 4",
+      "passed_per_host": 1,
+      "failed": 0,
+      "ignored_live_tests_per_host": 3,
+      "example_test_target_compiled": true
+    },
+    {
+      "host": "Windows o-pc",
+      "command": "cargo +1.99.1 build --locked --offline --manifest-path native/Cargo.toml -p murm-i2p --example rns_i2p_peer -j 4",
+      "passed": true
+    },
+    {
+      "host": "macOS",
+      "checks": [
+        "rustup run 1.99.1 rustfmt --edition 2024 --check (eight changed Rust files)",
+        "git diff --cached --check on source, docs and new receipts; restored historical receipts excluded to preserve their original CRLF/log whitespace",
+        "Python oracle AST parse"
+      ],
+      "passed": true
+    }
+  ],
+  "live": {
+    "host": "Windows o-pc",
+    "receipt": "live-interop.json",
+    "variant": "retinue-dials-rns, no IFAC, plus loopback TCP control",
+    "rns": "1.5.7",
+    "routers": "i2pd 3.0.0 and embedded emissary-core/util 0.4.0",
+    "passed": [
+      "bidirectional announces and echo links",
+      "12000-byte Resource each direction with matching SHA-256",
+      "RNS keyfile and b32 compatibility",
+      "same destination after stock RNS restart",
+      "fresh-session redial cadence",
+      "route retained and fresh link after restart"
+    ],
+    "recovery_seconds": 60.7,
+    "redial_gaps_seconds": [
+      14.8,
+      15.0
+    ],
+    "run_elapsed_seconds": 265.4,
+    "binary_sha256": "6abe71b795c659b149f9c6e4330c27c79949ba9e5e31e72e756e04e637e3cc2f",
+    "deadline_seconds": 1800,
+    "timed_out": false,
+    "sam_stopped_after_run": true,
+    "environment": "Existing Python 3.14.2 version directory with PYTHONPATH pointing to the existing oracle .venv/Lib/site-packages. The venv launcher failed because its Scoop current junction was refused by Windows; no security setting or installation changed.",
+    "cleanup_observations": [
+      "Python reported an ignored TextIOWrapper finalization OSError after the successful post-restart echo; all assertions and the harness exit status passed.",
+      "The owned i2pd process required forced termination after its ordinary stop request; SAM was verified closed."
+    ],
+    "not_retested": [
+      "RNS-dials-Retinue variants",
+      "IFAC variants",
+      "all three standalone ignored native live tests"
+    ]
+  },
+  "historical_receipts": {
+    "restored_files": 72,
+    "byte_identical_to_cohort": true,
+    "scope": "Original October 23-24 Windows evidence remains unchanged, including documented failures and limitations.",
+    "whitespace": "Original CRLF endings and log whitespace are retained byte for byte; the unrestricted staged whitespace check reports these archived lines."
+  },
+  "source_sha256": {
+    "Cargo.lock": "0342cea4a89b9a79f6cca83eb469e71d46e9830edff24f6f9399043128519b73",
+    "Cargo.toml": "cbcf1bde6a47c37d04882a1c12e75f652e9addba501369319f74c8d7f5b76501",
+    "crates/retinue/oracle/interop_i2p.py": "5b4dc75cb9a6449be5bf2cc54733fcd81a7550f815251c0afe3b3acca6f03286",
+    "crates/retinue/src/endpoint/i2p.rs": "c84a0c811bcb3e75d7b48f06842e502ce07d89b7060a9d155647dd6a220d3131",
+    "crates/retinue/tests/i2p_interface.rs": "df636f0150abdaa29e9d46327ba8da3757fc7f98e8d189167812c4722d544d86",
+    "crates/truchman/src/control.rs": "8e5cb74a43dbc59c003ab4e4e1e8b47474d455d28c3fd6782d1bedc758e7f298",
+    "crates/truchman/src/session.rs": "13f79cb50655b25f0e0f043f9830a732da97f7e227d399cfed7d6947ac906cb0",
+    "crates/truchman/tests/fake_bridge.rs": "849ecd97e0bab5fd74f2bc616244841b33a53a64273b53fa0cff4bb68ac0ae55",
+    "native/Cargo.lock": "a98fe8b1fb5ea8f3c4e8543710d8b74cb5d9a155c01a02f2dd8518432e09c5a6",
+    "native/Cargo.toml": "eca0678e7ca7be906264911799b79ad1a98ab90c8b78843c333f48c05979f3bf",
+    "native/crates/murm-i2p/Cargo.toml": "1fc67ff5035b021cfe6524d83484f2c06bca41ba16a044fc1822bd97efd8dfd9",
+    "native/crates/murm-i2p/examples/rns_i2p_peer.rs": "7cb49a88090c82f0970a8f73a43798e7ab1887dfddf387cc49cd2b8a44466dc5",
+    "native/crates/murm-i2p/src/lib.rs": "505b6847a898c8d78e80258af9b7dfc4dc809c0950c11c600189f22c8af56bbc",
+    "native/crates/murm-i2p/tests/live.rs": "8858abb5181399c4771863bb779df4789686288324684e409c7679f3f3f23bda",
+    "rust-toolchain.toml": "d13306be0ecda81ce779baa290ffb417380d525928477f16200884b5169cca33"
+  },
+  "evidence_location": "/Users/markik/Code/output/murm-i2p-reconciliation-20261026",
+  "evidence_sha256": {
+    "core-tests.log": "557d5d0a0b05707c3dc9b437405ec74833ac3d6d8eeb7827901c11c88b0da33e",
+    "native-tests.log": "9ace35810597009826b3984551174df4f8d11a29d49c0e30173938f6dee73230",
+    "rustfmt-toolchain.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "windows-qualification/windows-native-tests.log": "c79d49c9af87fe863498f503c1d2eed878c832d94502430139c37ed89d59502d",
+    "windows-qualification/windows-example-build.log": "34845d1fb11d96411c63a032ec494a34c6ed8ee849d85b2c05625cc385f1af7c",
+    "windows-qualification/live-interop.log": "08940cfc1233716486a8f3d38dac2dcabeec2ccc6bc854eba8e3ea567d84b0e7",
+    "windows-qualification/live-run-state.json": "9786c95c9b081493ef2086200fdbb89552b6a6b8a38088265deed5ba6415616c",
+    "windows-qualification/attempt-01-live-interop.log": "70e1ef89d54c732d4fd45ff203c0d201a4aa98eb549d2c3d92866f031530bcef"
+  }
+}

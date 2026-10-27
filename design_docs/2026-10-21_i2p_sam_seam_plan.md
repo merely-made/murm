@@ -1,14 +1,14 @@
 # I2P over SAMv3: retinue's I2P interface and the embedded router
 
-**Date:** 2026-10-21. **Status:** in progress. The refreshed source contains
-I2P4 implementation and pins `truchman` 0.1.1. The earlier I2P3/I2P4
-qualification receipts and expanded status notes remain reachable from the
-pre-refresh recovery ref; this refreshed tree does not claim those gates.
-
-Refresh note (2026-10-26): `truchman` 0.1.1 was published from `37f60c1`.
-Its standalone manifest now enables Tokio macros, which `serve_control` uses
-for `tokio::select!`; workspace feature unification had previously hidden
-that package-manifest omission. The native `murm-i2p` consumer pins 0.1.1.
+**Date:** 2026-10-21. **Status:** retained I2P3/I2P4 reconciled (2026-10-26).
+The retained I2P3/I2P4 implementation, harnesses and October 23-24 receipts
+are restored from cohort `543a2a014c2`. Current `truchman` 0.1.1 pins and
+its explicit Tokio macros dependency remain. The refreshed main had omitted
+session-bound lookup, fresh-session redial, router termination reporting and
+the interop harnesses despite its status note claiming I2P4 was present.
+Current-tree qualification is recorded in the progress entry below; the
+restored live receipts establish their original Windows cohort only.
+The ephemeral identity parity fork remains open.
 
 Related: Mere's reachability rungs and privacy lanes,
 `mere/design_docs/mere_docs/implementation_strategy/2026-08-03_reachability_rungs_and_privacy_lanes_plan.md`
@@ -302,9 +302,119 @@ F1, F2 and F4 were answered on 2026-10-21, and F3's names on 2026-10-22
   by rev. The fork currently differs only in a lockfile consumers never read.
 - **F3 — provider crate name and location.** Radio workspace `crates/` or the
   `native/` workspace. The name is the owner's.
+- **Ephemeral identity parity (open, unnumbered, raised 2026-10-23).** A stock
+  non-transport RNS node gets a new I2P b32 at every start (see the upstream
+  ledger). retinue's `attach_i2p_section` always names the keyfile from the
+  endpoint's stable identity, so a retinue node keeps its b32. The options:
+  - Keep retinue stable, as now.
+  - Mirror RNS: an ephemeral transport hash unless the host asks for a
+    static one.
 - **F4 — keyfile compatibility.** Mirror RNS's `storagepath/i2p/<hash>.i2p`
   layout and its old-format preference, so a node keeps its b32 across RNS
   and retinue. The alternative is a retinue-owned layout.
+
+## Upstream ledger
+
+These are findings about upstream projects, recorded here first. Nothing is
+filed upstream until the owner has read the entry and decided.
+
+- **emissary: a remote peer can panic a debug build** (found 2026-10-22,
+  I2P3). The cross-router run had a hub on i2pd 3.0.0 and a leaf on
+  emissary-core 0.4.0. During it, the emissary leaf received a garlic
+  message whose tag matched no tag-set entry and failed as NSR, and hit
+  `debug_assert!(false)` at `destination/session/session.rs` 915. The router
+  task panicked.
+  - In release builds the assert compiles out and the message is rejected
+    with `SessionError::InvalidState`.
+  - The line is unchanged on upstream `master` (`9b43484`), and emissary-core
+    has 108 `debug_assert!(false)`s in all.
+  - The condition itself may be ordinary: a late or retransmitted message
+    after a session reset, which emissary's own comment anticipates.
+  - **Mitigation here:** `native/Cargo.toml` turns `debug-assertions` off
+    for emissary-core in dev and test, and `murm-i2p` reports a router that
+    ends (`stopped`, `RouterEnd::Panicked`).
+  - **Upstream status:** not filed.
+- **A kept SAM session cannot reach a destination that restarted, on emissary
+  and on i2pd** (found 2026-10-23, I2P4 runs 2 and 5-9).
+  - **What happened:** stock RNS on i2pd was killed and restarted on the
+    same key and b32, and retinue kept its SAM session across the outage.
+  - **Through emissary-core 0.4.0:** every `STREAM CONNECT` from that
+    session got `CANT_REACH_PEER`, 34 attempts over about 15 minutes and 89
+    over 40 minutes.
+  - **Through i2pd 3.0.0:** `STREAM CONNECT` answered `RESULT=OK` and the
+    interface came online (run 7). The restarted RNS logged no incoming
+    connection, retinue's counters showed packets sent and none received,
+    and two link attempts 30 s apart both timed out. i2pd reports OK without
+    waiting for the far end.
+  - **Shown by runs 8 and 9:** with a fresh session per redial
+    (`fresh_session_per_redial`), both routers reached the restarted node on
+    the first redial. RNS logged the accepted connection, and the
+    post-restart link worked: back online 123.3 s after the kill on i2pd,
+    135.6 s on emissary.
+  - **So the stale state lives in the session, not in retinue:** each
+    router keeps per-session remote state (the old lease set or garlic
+    session) for the destination and does not rebuild it.
+  - **Not tested:** whether stock RNS as the dialer, which also keeps one
+    session per client tunnel, suffers the same.
+  - **Upstream status:** not filed. Whether this is a defect or expected
+    router behaviour is unsettled; on i2pd, the optimistic `OK` makes it
+    silent.
+- **RNS: one failed lookup kills a stock I2P peer for good** (found 2026-10-23,
+  I2P4 run 1). RNS 1.5.7 was configured with `peers =` a fresh retinue b32.
+  i2pd answered its first lookup `INVALID_KEY`, before emissary had
+  published the lease set. RNS then logged "Exception on event loop ...
+  invalid state" and, from then on, only "Event loop is closed", every 8 s,
+  for the life of the process.
+  - **Cause, by reading the code:** `I2PController.start` runs the asyncio
+    loop and closes it in `finally` on any exception (`I2PInterface.py`
+    94-112). Nothing restarts it, so every later tunnel attempt fails.
+  - **Effect:** a stock RNS node whose I2P peer is briefly unresolvable at
+    start (a new destination, or a router not yet integrated) never connects
+    until restarted.
+  - **Workaround here:** the I2P4 orchestrator starts RNS only once i2pd can
+    resolve retinue's b32 on a fresh connection.
+  - **Upstream status:** not filed.
+- **RNS: a non-transport node's I2P b32 changes on every start** (found
+  2026-10-23, I2P4 run 1).
+  - **Mechanism:** with `enable_transport = No` (the default) and no
+    `static_transport_identity`, RNS loads the stored transport identity and
+    then replaces it with a fresh ephemeral one (`Transport.py` 332-335).
+    `I2PInterface` names its keyfile from `RNS.Transport.identity.hash`
+    (`I2PInterface.py` 234), so a connectable non-transport node writes a new
+    key, and gets a new b32, at each start. Any `peers =` entry naming it goes
+    stale on its first restart.
+  - **This looks deliberate on RNS's side** (privacy for non-transport
+    nodes), so it is recorded as behaviour, not as a defect.
+  - **The parity question it raises** is in Open forks ("Ephemeral identity
+    parity").
+  - **Upstream status:** not filed.
+- **RNS: I2P `peers` with IFAC and no explicit `ifac_size` fail on every
+  frame** (found 2026-10-23, I2P4 run 2).
+  - **What happened:** with `networkname`/`passphrase` and no `ifac_size`,
+    a stock RNS 1.5.7 node dialing through `peers =` logged
+    `unsupported operand type(s) for +: 'int' and 'NoneType'` at `len(raw) >
+    2+interface.ifac_size` on every inbound frame, plus `bad operand type for
+    unary -: 'NoneType'` on transmit, and no traffic passed.
+  - **Cause, by reading the code:** `I2PInterfacePeer.__init__` copies
+    `parent_interface.ifac_size` (`I2PInterface.py` 366). For `peers`, that
+    runs inside `I2PInterface.__init__` (812-820), before `Reticulum.py`
+    assigns the parent its default size, so each peer holds `None`. Accepted
+    connections copy it later (847), so the connectable side works.
+  - **Confirmed by the workaround:** with `ifac_size = 128` the same variant
+    passed (run 4).
+  - **Upstream status:** not filed.
+- **i2pd: a SAM `HELLO` split across TCP segments drops the connection**
+  (found 2026-10-23, I2P4 run 3).
+  - **Probe:** against i2pd 3.0.0, `HELLO VERSION MIN=3.1 MAX=3.3` sent whole
+    is answered `HELLO REPLY RESULT=OK VERSION=3.3`. Sent as `HE` then the
+    rest 0.5 s later, the connection is aborted, and i2pd logs "SAM: Handshake
+    mismatch".
+  - TCP gives no segment boundaries, so this is a robustness defect. Real
+    clients, truchman included, send each line in one write and are
+    unaffected.
+  - It broke this lane's byte-wise SAM logging proxy, which now forwards
+    whole lines.
+  - **Upstream status:** not filed.
 
 ## Progress
 
@@ -444,3 +554,157 @@ F1, F2 and F4 were answered on 2026-10-21, and F3's names on 2026-10-22
   - **Locks:** `native/Cargo.lock` adds 68 packages and changes no existing
     version.
   - **Not done:** I2P3 (i2pd, and across routers) and I2P4 (stock RNS).
+- 2026-10-23: **I2P3 passed** on branch `i2p-ext` (worktree
+  `Code/worktrees/murm-i2p-ext`). The receipt is
+  `testing/receipts/i2p3-external-router/`. Details follow.
+  - **i2pd:** 3.0.0 ran client-only from the staged copy, configured to
+    follow the owner's I2P2 answers (`notransit`, transports unpublished,
+    no UPnP, no console, proxies or address book; SAM on `127.0.0.1:7656`).
+    It reseeded once, and was stopped gracefully after the runs.
+  - **Results:** both endpoints on i2pd passed (140.4 s in all, first
+    contact 110.5 s). Across routers, both directions passed in one run: hub
+    on emissary with its leaf on i2pd took 56.9 s, hub on i2pd with its leaf
+    on emissary 54.1 s. The refactored I2P2 test passed again (38.7 s).
+    Every run had its TCP control.
+  - **Failure, kept:** the first cross run panicked emissary at
+    `destination/session/session.rs` 915 (`debug_assert!(false)` on an
+    unknown garlic tag from the i2pd peer). See the upstream ledger.
+  - **The owner's two answers, applied:**
+    - `[profile.dev.package.emissary-core] debug-assertions = false` in
+      `native/Cargo.toml`.
+    - `EmbeddedRouter::is_running`, `stopped() -> RouterEnd` (Exited,
+      Panicked with message, Aborted), and `shutdown` now returns it.
+      `watch_end` is unit-tested for all three outcomes.
+    - The live tests race each emissary leg against `stopped()`.
+    - The live tests were refactored into `control`, `emissary`,
+      `external` and `over_i2p` helpers.
+  - **Not established:**
+    - whether the unknown-tag condition recurred in the passing cross run;
+    - that the profile override took effect, beyond the panic's absence;
+    - more than one run per configuration.
+  - **Not done:** I2P4 (stock RNS 1.5.7 `I2PInterface` on i2pd against
+    retinue on emissary).
+- 2026-10-23: **I2P4** on branch `i2p-rns` (worktree
+  `Code/worktrees/murm-i2p-rns`). The receipt is
+  `testing/receipts/i2p4-stock-rns/` (six runs). Details follow.
+  - **Owner's answers:** session-bound lookup; an oracle script plus a
+    murm-i2p example; the keyfile proven by path and destination match;
+    reconnect judged on 15 s redials and kept routes, with recovery recorded
+    but not bounded.
+  - **truchman 0.1.1 (unpublished):** `StreamSession::lookup` and `resolve`
+    run on the session's own control connection. The control task
+    interleaves lookups with PING/PONG and matches replies by `NAME`. A test
+    against a bridge that accepts only one connection proves the lookups
+    went over the session.
+  - **retinue:** I2P peers resolve through their session. emissary answers
+    b32 lookups only there (`sam/pending/connection.rs` 391-402,
+    `sam/session.rs` 1160). The fake router now behaves the same way, and
+    putting back the old fresh-connection lookup fails the hub test.
+  - **murm-i2p:** example `rns_i2p_peer`: retinue on emissary, or on an
+    external router with `--sam`. It has a SAM logging proxy that forwards
+    whole lines, and a `keyfile` subcommand. Oracle: `interop_i2p.py` with
+    `--only`, `--retinue-sam` and `--recovery-window`.
+  - **Results:** see the receipt. Every exchange passed in both directions,
+    IFAC off and 16 (one variant needed an RNS-defect workaround); the
+    keyfile layout passed; redials came 15.0 s apart with routes kept; the
+    interface came back online on i2pd in 107.7 s.
+  - **Open:**
+    - Through emissary, a restarted RNS is never reached (upstream ledger).
+    - On i2pd, the first link after the restart timed out, cause
+      undiagnosed. It could be retinue's.
+  - **Upstream ledger:** five entries in all. This phase added three for
+    RNS (first-lookup death, ephemeral identity, IFAC peers), one for i2pd
+    (split `HELLO`) and one for emissary (restart), alongside I2P3's panic.
+    The new open fork: ephemeral identity parity.
+- 2026-10-23: **Post-restart link timeout diagnosed** (owner: "Diagnose the
+  post-restart link timeout on i2pd first (it may be retinue's); keep the
+  branch unmerged until then"). Runs 7-9 are in the I2P4 receipt.
+  - **Instruments:**
+    - the restarted RNS logs at level 7;
+    - the example gained `STATS` (interface counters);
+    - the harness echoes again 30 s after a failure.
+  - **Run 7 (i2pd, session kept):**
+    - reconnect passed: redial 15.0 s after the stream ended, online 119.1 s
+      after the kill, route kept;
+    - both link attempts timed out;
+    - the restarted RNS logged no accepted connection;
+    - retinue's counters went `tx` 26 → 28 → 30 with `rx` steady at 18.
+    `establish` never reuses a link, so stale-link reuse is ruled out.
+  - **Cause:** the session retinue kept across the outage could not reach the
+    restarted destination. On i2pd the stream looked open (an optimistic
+    `STREAM STATUS OK`); on emissary every connect was refused.
+  - **Test (runs 8, 9):** experimental `I2pPeer::fresh_session_per_redial`,
+    default off, sets session and target to `None` after a stream ends or a
+    connect is refused. With it, both routers recovered on the first redial
+    and the post-restart link passed:
+    - i2pd: redial began 14.8 s after the stream ended, session ready
+      +26.8 s, online +30.2 s;
+    - emissary: 14.9 s, +23.2 s, +26.1 s.
+  - **Harness:** a redial is now timed from its first SAM command.
+  - **Open:** whether `fresh_session_per_redial` should become the default.
+    That question is for the owner.
+- 2026-10-23: **`fresh_session_per_redial` is now the default** (owner: "Make
+  fresh_session_per_redial the default (keep the field so a host can keep one
+  session), rerun the full I2P4 orchestrator to confirm, then I'll decide on
+  merging").
+  - **Code:** the field's doc now carries the reason, and the
+    `attach_i2p_peer` doc describes the behaviour. The fake-router test
+    covers both arms: by default one session per attempt; kept, exactly
+    one. The example's opt-out is `--keep-session`. `NOTICE` records the
+    difference from RNS's one-session client tunnel.
+  - **Run 10, the full orchestrator on emissary:** everything passed,
+    including reconnect (redial 15.0 s after the stream ended, back online
+    135.1 s after the kill, route kept) and the post-restart link. The one
+    exception was RNS's Resource to retinue in RNS-dials no-IFAC: RNS's
+    sender reported `FAILED` and cancelled. The new default does not touch
+    that variant, since retinue is the listener there.
+  - **Runs 11-13** repeated that variant three times with RNS at log level
+    7, and all passed. It stands at 1 failure in 5, intermittent, cause
+    unknown.
+  - **Harness fixes this round:** `--rns-loglevel`, and UTF-8 output in both
+    processes. A cp1252 encode error in verbose RNS output had killed the
+    line-relay thread; the three runs that hit it were discarded and rerun.
+- 2026-10-23: **Run 10's Resource failure diagnosed** (owner: "Hold the merge;
+  run the RNS-dials no-IFAC variant more times with RNS at log level 7 until
+  the Resource failure recurs, and diagnose it").
+  - **Runs 14-33:** 20 more runs of the variant at RNS level 7, all passed.
+    The variant now stands at 1 failure in 25 (runs 2 and 10-33). No run
+    logged a single RNS Resource watchdog retry.
+  - **The cause, from i2pd's log of run 10:** RNS's Resource to retinue
+    began at about 18:55:21 local. From 18:55:27 the variant's only I2P
+    stream (RNS's peer stream to retinue) stalled both ways:
+    - i2pd resent its outgoing messages three times on other leases and
+      tunnels;
+    - from 18:55:44 to 18:55:58 incoming message 15 was missing while 16-21
+      queued behind it, so RNS received nothing from retinue;
+    - tunnel tests failed at about 2 a minute through the variant's window,
+      against about 0.9 a minute across runs 14-33. Runs 14-33 logged no
+      stream resends and one single-message gap that recovered.
+  - **Why RNS gave up:** an RNS sender's shortest patience is the advertised
+    stage, 5 waits of 6 × RTT + 1 s. That is 20-107 s at the link RTTs these
+    runs measured (0.5-3.4 s). The stall was at least 31 s. Retinue had the
+    advertisement (its error names the Resource), so its part request was
+    probably what sat behind message 15. Which watchdog path fired is
+    inferred, not logged: run 10 logged RNS at level 3.
+  - **Verdict:** I2P network loss on the path between the two routers,
+    longer than RNS's Resource sender tolerance. Nothing points at retinue,
+    and nothing is ledgered.
+
+- 2026-10-26: **Reconcile retained I2P3/I2P4 with current Murm main.**
+  Restore the source, tests, harnesses, NOTICE entry, router profile override
+  and 72 historical receipt files from `543a2a014c2`, while retaining current
+  supplier revisions and `truchman` 0.1.1. The prior refresh's status claim
+  was incorrect: the session lookup/redial and router-end changes were absent.
+  Recovery refs and Windows dirty work are preserved separately.
+  - Current-tree checks pass: 14 focused SAM/I2P tests on macOS, and the
+    native router termination test plus example compilation on macOS and
+    Windows. The three standalone public-network native tests remain ignored.
+  - The Windows stock-RNS live check passes for **Retinue dials RNS, no
+    IFAC**, with a TCP control: bidirectional links and 12,000-byte Resources,
+    matching keyfile/b32, same destination on restart, route retention and
+    a fresh working link. Recovery took 60.7 s; redial gaps were 14.8 and
+    15.0 s. The run completed in 265.4 s within a 30-minute cap.
+  - Other dial/IFAC variants were not rerun. The current receipt records
+    the initial Python launcher failure and shutdown observations separately
+    from the successful exchange. See [qualification](../testing/receipts/i2p-reconciliation-20261026/qualification.json)
+    and [live measurements](../testing/receipts/i2p-reconciliation-20261026/live-interop.json).

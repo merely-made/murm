@@ -8,7 +8,8 @@
 //! MURM_I2P_STORAGE=<dir> cargo test -p murm-i2p --test live -- --ignored --nocapture
 //! ```
 //!
-//! `MURM_I2P_RECEIPT=<file>` also writes the measurements as JSON.
+//! `MURM_I2P_RECEIPT=<file>` also writes the measurements as JSON. The I2P3 tests also need
+//! `MURM_I2P_EXTERNAL_SAM=<host:port>`, an external router's SAM bridge.
 
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -24,6 +25,7 @@ use retinue::endpoint::{
 };
 use retinue::hash::AddressHash;
 use retinue::identity::{Identity, PrivateIdentity};
+use truchman::Bridge;
 
 /// What one exchange measured, each from the start of the exchange.
 #[derive(Debug)]
@@ -147,14 +149,9 @@ async fn exchange(
     .expect("exchange within its limit")
 }
 
-#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
-#[ignore = "live: reseeds from and builds tunnels on the public I2P network"]
-async fn two_endpoints_exchange_over_an_embedded_emissary() {
-    let storage = std::env::var_os("MURM_I2P_STORAGE").expect("set MURM_I2P_STORAGE");
-
-    // Positive control: the same exchange over loopback TCP, held at the 500-byte protocol
-    // MTU the I2P interface uses, so both runs packetize alike and the payload is a Resource
-    // in each.
+/// Positive control: the exchange over loopback TCP, held at the 500-byte protocol MTU the
+/// I2P interface uses, so both runs packetize alike and the payload is a Resource in each.
+async fn control() -> Exchange {
     let (a, a_names) = node(0x31, "tcp-a");
     let (b, b_names) = node(0x32, "tcp-b");
     let policy = ListenPolicy {
@@ -172,54 +169,165 @@ async fn two_endpoints_exchange_over_an_embedded_emissary() {
     b.attach_tcp(client).await.unwrap();
     let control = exchange((&a, &a_names), (&b, &b_names), Duration::from_secs(60)).await;
     println!("control (tcp): {control:?}");
+    control
+}
 
+/// The embedded router, client-only, from `MURM_I2P_STORAGE`, with how long it took to start.
+async fn emissary() -> (EmbeddedRouter, Duration) {
+    let storage = std::env::var_os("MURM_I2P_STORAGE").expect("set MURM_I2P_STORAGE");
     let started = Instant::now();
     let router = EmbeddedRouter::start(RouterConfig::new(storage, Transit::Off, false))
         .await
         .expect("router starts");
-    let router_up = started.elapsed();
-    let report = router.report().clone();
-    println!("router: {report:?} in {router_up:?}");
-    let bridge = router.bridge();
-    let key = bridge
+    let up = started.elapsed();
+    println!("emissary: {:?} in {up:?}", router.report());
+    (router, up)
+}
+
+/// The external router's bridge from `MURM_I2P_EXTERNAL_SAM` (`host:port`).
+fn external() -> Bridge {
+    let addr = std::env::var("MURM_I2P_EXTERNAL_SAM").expect("set MURM_I2P_EXTERNAL_SAM");
+    Bridge::new(addr.parse().expect("MURM_I2P_EXTERNAL_SAM is host:port"))
+}
+
+/// A hub listening through `hub_bridge` and a leaf dialing it through `leaf_bridge`, run
+/// through the exchange. Returns it with the hub's b32 name.
+async fn over_i2p(
+    hub_bridge: Bridge,
+    leaf_bridge: Bridge,
+    seed: u8,
+    tag: &str,
+) -> (Exchange, String) {
+    let key = hub_bridge
         .generate(truchman::SIGNATURE_ED25519)
         .await
-        .expect("bridge generates a destination");
-
-    let (c, c_names) = node(0x41, "i2p-c");
-    let (d, d_names) = node(0x42, "i2p-d");
-    c.listen_i2p(I2pListen::new(bridge, key.clone())).unwrap();
-    let peer = d
-        .attach_i2p_peer(I2pPeer::new(bridge, "I2P", key.destination().to_base64()))
+        .expect("the hub's router generates a destination");
+    let hub_tag: &'static str = Box::leak(format!("{tag}-hub").into_boxed_str());
+    let leaf_tag: &'static str = Box::leak(format!("{tag}-leaf").into_boxed_str());
+    let (hub, hub_names) = node(seed, hub_tag);
+    let (leaf, leaf_names) = node(seed + 1, leaf_tag);
+    hub.listen_i2p(I2pListen::new(hub_bridge, key.clone()))
         .unwrap();
-    let i2p = exchange((&c, &c_names), (&d, &d_names), Duration::from_secs(600)).await;
-    assert!(d.interface_online(peer));
-    println!("i2p: {i2p:?}");
+    let peer = leaf
+        .attach_i2p_peer(I2pPeer::new(
+            leaf_bridge,
+            "I2P",
+            key.destination().to_base64(),
+        ))
+        .unwrap();
+    let i2p = exchange(
+        (&hub, &hub_names),
+        (&leaf, &leaf_names),
+        Duration::from_secs(600),
+    )
+    .await;
+    assert!(leaf.interface_online(peer));
+    println!("{tag}: {i2p:?}");
+    (i2p, key.destination().b32())
+}
 
-    if let Some(path) = std::env::var_os("MURM_I2P_RECEIPT") {
-        let ms = |d: Duration| d.as_millis();
-        let row = |e: &Exchange| {
-            format!(
-                "{{\"announces_ms\":{},\"link_a_to_b_ms\":{},\"link_b_to_a_ms\":{},\"resource_a_to_b_ms\":{},\"resource_b_to_a_ms\":{}}}",
-                ms(e.announces),
-                ms(e.link_a_to_b),
-                ms(e.link_b_to_a),
-                ms(e.resource_a_to_b),
-                ms(e.resource_b_to_a)
-            )
-        };
-        let json = format!(
-            "{{\"router\":{{\"stored_routers\":{},\"reseeded\":{},\"start_ms\":{},\"transit\":\"off\",\"publish\":false}},\"destination_b32\":\"{}\",\"control_tcp\":{},\"i2p\":{}}}\n",
-            report.stored_routers,
-            report
-                .reseeded
-                .map_or("null".to_string(), |n| n.to_string()),
-            ms(router_up),
-            key.destination().b32(),
-            row(&control),
-            row(&i2p)
-        );
-        std::fs::write(path, json).unwrap();
+/// `work`, failing at once if the embedded router ends before it does.
+async fn watched<T>(router: &EmbeddedRouter, work: impl std::future::Future<Output = T>) -> T {
+    tokio::select! {
+        out = work => out,
+        end = router.stopped() => panic!("emissary ended mid-exchange: {end:?}"),
     }
+}
+
+fn row(e: &Exchange) -> String {
+    let ms = |d: Duration| d.as_millis();
+    format!(
+        "{{\"announces_ms\":{},\"link_a_to_b_ms\":{},\"link_b_to_a_ms\":{},\"resource_a_to_b_ms\":{},\"resource_b_to_a_ms\":{}}}",
+        ms(e.announces),
+        ms(e.link_a_to_b),
+        ms(e.link_b_to_a),
+        ms(e.resource_a_to_b),
+        ms(e.resource_b_to_a)
+    )
+}
+
+fn emissary_json(router: &EmbeddedRouter, up: Duration) -> String {
+    let report = router.report();
+    format!(
+        "{{\"stored_routers\":{},\"reseeded\":{},\"start_ms\":{},\"transit\":\"off\",\"publish\":false}}",
+        report.stored_routers,
+        report
+            .reseeded
+            .map_or("null".to_string(), |n| n.to_string()),
+        up.as_millis()
+    )
+}
+
+fn write_receipt(json: String) {
+    if let Some(path) = std::env::var_os("MURM_I2P_RECEIPT") {
+        std::fs::write(
+            path,
+            json + "
+",
+        )
+        .unwrap();
+    }
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+#[ignore = "live: reseeds from and builds tunnels on the public I2P network"]
+async fn two_endpoints_exchange_over_an_embedded_emissary() {
+    let control = control().await;
+    let (router, up) = emissary().await;
+    let (i2p, b32) = watched(
+        &router,
+        over_i2p(router.bridge(), router.bridge(), 0x41, "i2p"),
+    )
+    .await;
+    write_receipt(format!(
+        "{{\"router\":{},\"destination_b32\":\"{b32}\",\"control_tcp\":{},\"i2p\":{}}}",
+        emissary_json(&router, up),
+        row(&control),
+        row(&i2p)
+    ));
+    router.shutdown().await;
+}
+
+/// I2P3: both endpoints on an external router (i2pd or Java I2P) at `MURM_I2P_EXTERNAL_SAM`.
+#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+#[ignore = "live: needs a running external router and builds tunnels on the public I2P network"]
+async fn two_endpoints_exchange_over_an_external_router() {
+    let control = control().await;
+    let bridge = external();
+    let (i2p, b32) = over_i2p(bridge, bridge, 0x51, "ext").await;
+    write_receipt(format!(
+        "{{\"router\":{{\"external_sam\":\"{}\"}},\"destination_b32\":\"{b32}\",\"control_tcp\":{},\"i2p\":{}}}",
+        bridge.addr(),
+        row(&control),
+        row(&i2p)
+    ));
+}
+
+/// I2P3: across two routers, each way: a hub on the embedded emissary with its leaf on the
+/// external router, then a hub on the external router with its leaf on emissary.
+#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+#[ignore = "live: needs a running external router and builds tunnels on the public I2P network"]
+async fn endpoints_exchange_across_emissary_and_an_external_router() {
+    let control = control().await;
+    let (router, up) = emissary().await;
+    let ext = external();
+    let (to_ext, to_ext_b32) = watched(
+        &router,
+        over_i2p(router.bridge(), ext, 0x61, "emissary-hub"),
+    )
+    .await;
+    let (to_emissary, to_emissary_b32) = watched(
+        &router,
+        over_i2p(ext, router.bridge(), 0x71, "external-hub"),
+    )
+    .await;
+    write_receipt(format!(
+        "{{\"emissary\":{},\"external_sam\":\"{}\",\"control_tcp\":{},\"hub_on_emissary\":{{\"destination_b32\":\"{to_ext_b32}\",\"i2p\":{}}},\"hub_on_external\":{{\"destination_b32\":\"{to_emissary_b32}\",\"i2p\":{}}}}}",
+        emissary_json(&router, up),
+        ext.addr(),
+        row(&control),
+        row(&to_ext),
+        row(&to_emissary)
+    ));
     router.shutdown().await;
 }

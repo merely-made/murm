@@ -1,0 +1,57 @@
+RNS 1.5.7
+retinue example: C:\Users\mark_\Code\worktrees\murm-i2p-rns\native\target\debug\examples\rns_i2p_peer.exe
+
+=== tcp-control ===
+  [rns] TRANSPORT 73910b210ffe5c26d8706c9d11195452
+  [rns] DEST af4a17165c575e0e8ba3e1e3b5cc4b64
+  [retinue] ONLINE true 3
+  [retinue] IFACES 1 3
+  [retinue] READY b5143116e9bd1f0956a43df08b4d0881 623e27cf24435b47a1dd55002f313b84 3
+  [rns] HEARD i2p4.retinue b5143116e9bd1f0956a43df08b4d0881
+  [rns] HEARD i2p4.retinue-res 623e27cf24435b47a1dd55002f313b84
+  [retinue] HEARD af4a17165c575e0e8ba3e1e3b5cc4b64  33
+  [rns] RX hello-from-retinue
+  [retinue] ECHO_OK echo:hello-from-retinue 5037
+  [retinue] RX hello-from-rns 5079
+  [rns] ECHO echo:hello-from-rns
+  [retinue] PUBLISH_OK 12000 Resource d79e3a8f8742e32fbb2ab85fde665915946b0836877a43b2f1fac13ac6517d10 5155
+  [rns] RES_IN 12000 d79e3a8f8742e32fbb2ab85fde665915946b0836877a43b2f1fac13ac6517d10 COMPLETE
+  [retinue] RES_IN 12000 d79e3a8f8742e32fbb2ab85fde665915946b0836877a43b2f1fac13ac6517d10 5184
+  [rns] RES_OUT COMPLETE
+
+=== rns-dials-retinue-ifac16 ===
+  [retinue] ROUTER StartReport { stored_routers: 247, reseeded: None, sam: 127.0.0.1:60381 } 2250
+  [retinue] SAM_CMD DEST GENERATE 2253
+  [retinue] SAM_REPLY DEST REPLY PUB=3l~1nhfKoy-HhLgcnUTVf2L5z~n913nW6d3wrAtLmxzx4QaFEo6-rVTk7lHY4TaGjTgURBeyykHXUwEH4XM7VIyXir9jnjqc~ITLQc9vF5cH4PY59CJsaLar879do0OMS5bLZx2KfPzYyL7fP~1aNeG7EiNTo2lzedZKxhY9m4UBXGaqtX6aBcMKdeKBrM37J-blzEK255qk2Lj2Nz0mfmYbUWKGKqnSNsiDf0IZBfoFJQlcMVj0hdFIcuf6OMkY5pjQ-4Iz6wcs3rzLCfVhzGuLWsqSVpgZvYCJPEMUxvwquwFLeChB7nkbM5k0k0N2IJOqR63fg8JBtj~i2dZDk9VzMNMiAuNb2bOhz3T4pzuoCX~f5AoBT~85GEQwsuQBxZswMxww-AUFXi6NTJq6YBVDRetAgzsy~Q6QO5KqyAkT5M98DojSPcQcJWQYI7ebwWAgrL8E61Ll~qg9zJvc6LHOAbp7vs~SLIDMVDdxupgK6TM7zyACEu4WNUh63je5BQAEAAcAAA== 2264
+  [retinue] B32 tqvctg3atx7t345wu57nw24w3yv3mhxs5nmawaxnbtih27und4wq.b32.i2p
+  [retinue] READY b5143116e9bd1f0956a43df08b4d0881 623e27cf24435b47a1dd55002f313b84 2265
+  [retinue] IFACES 0 2265
+  [retinue] SAM_CMD SESSION CREATE 2274
+  [retinue] SAM_CMD SESSION CREATE 27281
+  [retinue] SAM_REPLY SESSION STATUS RESULT=OK 51990
+  [retinue] SAM_CMD STREAM ACCEPT 51992
+  [retinue] SAM_REPLY STREAM STATUS RESULT=OK 51993
+  i2pd resolves retinue's b32 after 62.6s
+  [rns] TRANSPORT fa9413be15b3162cadfa1c4aea46b876
+  [rns] DEST af4a17165c575e0e8ba3e1e3b5cc4b64
+  [retinue] SAM_CMD STREAM ACCEPT 97402
+  [retinue] IFACES 1 97567
+  [retinue] SAM_REPLY STREAM STATUS RESULT=OK 97710
+  [retinue] HEARD af4a17165c575e0e8ba3e1e3b5cc4b64  98580
+  [retinue] HEARD af4a17165c575e0e8ba3e1e3b5cc4b64  101059
+  [rns] HEARD i2p4.retinue b5143116e9bd1f0956a43df08b4d0881
+  [rns] HEARD i2p4.retinue-res 623e27cf24435b47a1dd55002f313b84
+  [rns] RX hello-from-retinue
+  [retinue] ECHO_OK echo:hello-from-retinue 107345
+  [retinue] RX hello-from-rns 108924
+  [rns] ECHO echo:hello-from-rns
+  [rns] RES_IN 12000 d79e3a8f8742e32fbb2ab85fde665915946b0836877a43b2f1fac13ac6517d10 COMPLETE
+  [retinue] PUBLISH_OK 12000 Resource d79e3a8f8742e32fbb2ab85fde665915946b0836877a43b2f1fac13ac6517d10 112051
+  [retinue] RES_IN 12000 d79e3a8f8742e32fbb2ab85fde665915946b0836877a43b2f1fac13ac6517d10 114639
+  [rns] RES_OUT COMPLETE
+
+========================================================================
+tcp-control                  exchange   PASS
+rns-dials-retinue-ifac16     exchange   PASS
+========================================================================
+I2P4 STOCK RNS INTEROP: PASS
