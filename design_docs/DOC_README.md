@@ -1,5 +1,6 @@
 # Murm Documentation Index
 
+- [Transport consolidation](2026-10-28_transport_consolidation_plan.md): what Murm owns family-wide, where family code reaches iroh or p2panda-net without it, and what consolidation does not cut (patch tables, lockfiles).
 - [Resource client receive limits](2026-10-22_resource_client_limits_plan.md): early encoded/decoded Resource budgets and bounded Micron page decoding, with Turnstone-owned policy and deadlines.
 
 T114 live Tucket (2026-10-20): the [qualified endpoint receipt](../testing/receipts/tucket-t114/README.md)
@@ -332,6 +333,7 @@ supplying data-graph and identity crates.
 | Document | What it is |
 | --- | --- |
 | [`DOC_POLICY.md`](DOC_POLICY.md) | Documentation governance; canonical core plus Retinue addendum. |
+| [Transport consolidation plan](2026-10-28_transport_consolidation_plan.md) | Family transport boundary: endpoints, tickets, relays and carriers are Murm's; p2panda-core is replication vocabulary; Stickleback owns the join. T1 (domain crates name handles through Stickleback) landed 2026-10-28; Isonetry, Distillery remote and the relay fixture open. |
 | [Reticulum License adoption](2026-10-05_reticulum_license_adoption.md) | Ruling, 2026-10-05: retinue and outrider move to the Reticulum License (0.3.0) so RNS/LXMF source can be adapted into those two crates only; RNode firmware stays unread; firmware images are no longer GPLv3. Review and adaptation rules, and upstream versions checked. Amended 2026-10-09: tulle (0.2.0) and radio-hand join, for the RNode host semantics. |
 | [RNS 1.5.7 comparative review](2026-10-07_rns_157_comparative_review.md) | First source review under the Reticulum License: Transport, Link, Resource, Identity/Packet/Channel against retinue. 39 ranked findings (11 P0 interop/safety, including the DATA-typed resource proof, unbounded bz2, wrong link-proof key, unauthenticated LINKCLOSE), provenance and lines read. P0 landed 2026-10-07 (live 17/17 on RNS 1.5.7); P1 and one-week route TTL landed 2026-10-08; P2 landed 2026-10-09. |
 | [LXMF 1.2.0 comparative review](2026-10-09_lxmf_120_comparative_review.md) | Outrider against LXMF 1.2.0: message format, stamps and tickets; client delivery; the propagation node and peering. 11 interop breaks (A, including unproved inbound messages and the ignored fetch acknowledgement), 10 node and feature items (B), efficiency (C), and the larger parity work (Outbox, link reuse, peering). Includes the provenance record. A, B and C landed 2026-10-09 (outrider 18/18, live 30/30); L1-L3 remain. |
