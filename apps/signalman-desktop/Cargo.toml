@@ -70,8 +70,8 @@ pollster = "0.4"
 thiserror = "2"
 
 # The live station actor. Postilion supplies the snapshot type the projection
-# consumes. Djinn releases station-scoped keys and signs grants; Pandect
-# supplies the public device id and lease records.
+# consumes. Djinn releases station-scoped keys and signs grants; Personae
+# supplies the public device id.
 postilion = { version = "0.3.0", path = "../../crates/postilion" }
 radio-hand = { version = "0.0.1", path = "../../crates/radio-hand", features = ["instances"] }
 retinue = { version = "0.3.0", path = "../../crates/retinue" }
@@ -81,7 +81,6 @@ selvage = { version = "0.1.0", path = "../../crates/selvage" }
 serde = { version = "1", features = ["derive"] }
 zeroize = "1"
 personae = { git = "https://github.com/merely-made/dramatis.git", branch = "main" }
-pandect = { git = "https://github.com/merely-made/mere.git", branch = "main" }
 # Application choice and authoring use the existing shared stack.
 tabard = { git = "https://github.com/merely-made/mere.git", branch = "main" }
 tabard-workshop = { git = "https://github.com/merely-made/mere.git", branch = "main", features = ["native-host"] }

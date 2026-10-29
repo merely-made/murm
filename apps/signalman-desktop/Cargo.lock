@@ -5821,7 +5821,6 @@ dependencies = [
  "mesquite",
  "muniment",
  "outrider",
- "pandect",
  "personae",
  "pollster 0.4.0",
  "postilion",
