@@ -1,8 +1,10 @@
 # Secure sessions and optional live interaction
 
-**Status:** 2026-10-29: N1 in progress across Murm, Dramatis/Notochord and
-Knot. N2–N3 (Noise policy and carrier qualification) and O1–O4 (optional OCapN)
-remain planned.
+**Status:** 2026-10-29: N1 landed across Murm, Dramatis/Notochord and Knot with
+focused software and local-network acceptance. N2–N3 (Noise policy and broader
+carrier qualification) and O1–O4 (optional OCapN) remain planned. The
+[N1 qualification record](archive_docs/2026-10-29/2026-10-29_secure_sessions_and_live_interaction_plan_receipts.md)
+keeps exact source revisions, commands and evidence limits.
 
 **For:** a reusable authenticated session over Murm's ordered carriers, followed
 by an optional Rust OCapN live interaction layer on the existing iroh endpoint.
@@ -152,6 +154,8 @@ execution. A carrier must first meet the ordered-channel contract.
 ## Phases
 
 ### N1. Separate secure-channel facts and complete AT1
+
+**Status:** landed in source with focused admission and publishing acceptance.
 
 Extend the shared host contract in `mere-transport`, Personae/Notochord and
 Knot's publishing consumer. This phase owns the acceptance criteria formerly
@@ -329,6 +333,24 @@ service over an admitted second carrier using the selected secure profile.
   when a carrier authenticates a peer, and checks the publisher ticket before
   disclosure. Its owning source is
   `knot-editor/crates/knot-editor/src/publish_carrier.rs` and `publish_client.rs`.
+- 2026-10-29: Dramatis's `crates/notochord/src/secure.rs` retains the original
+  carrier record alongside verified secure facts. Its explicit identity policy
+  admits the proved subject or its checked session signer and still enforces a
+  service's actual carrier-authentication requirement. The v2 transcript is
+  additive; the legacy carrier-only public shapes and v1 transcript remain
+  intact.
+- 2026-10-29: the new real Reticulum local-TCP case in
+  [`tests/notochord.rs`](../native/crates/transport/tests/notochord.rs) admits a
+  granted subject through Noise and secure v2 while preserving the real shared
+  link and absent carrier peer. Knot's publishing tests cover its consumer,
+  including real P2panda loopback, publisher checking before disclosure and
+  cross-session/link replay refusal. These do not establish physical-radio,
+  firmware, headed-browser or broader N2/N3 acceptance.
+- 2026-10-29: Knot publishing now requires secure admission wire v2 without a
+  v1 fallback. Its application grammar and `mere/knot-publish/v1` ALPN remain
+  unchanged. Existing admission peers must upgrade together. Iroh-specific
+  deployment tickets still require carrier-specific routing adaptation before
+  broader publishing carrier claims.
 - 2026-10-29: the source test
   `noise_over_an_iroh_stream_layers_a_second_identity` in
   [`noise/tests.rs`](../native/crates/transport/src/noise/tests.rs) exercises
@@ -372,3 +394,7 @@ Recheck them at O1 intake because the specification and implementations evolve.
 - 2026-10-29: Murm's verified Noise facts, honest outbound carrier metadata and
   shared conversion implemented; Dramatis's additive secure v2 admission is
   published. Knot intake and final coordinated N1 acceptance are in progress.
+- 2026-10-29: N1 completed: Dramatis, Murm and Knot source integration published,
+  final Git-source lock intake accepted, and focused admission/publishing checks
+  passed. AT1 is fulfilled by this phase; AT0, N2–N3 and O1–O4 retain their own
+  open work.

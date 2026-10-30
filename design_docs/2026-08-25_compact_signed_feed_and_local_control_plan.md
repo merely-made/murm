@@ -238,7 +238,8 @@ time bounds; T114 flash, static RAM and heap high-water deltas are recorded.
 That phase owns the shared carrier/secure-channel fact contract and its
 Murm, Notochord and Knot adoption. AT0 above retains embedded secure-attachment
 feasibility and host/device binding; it consumes that contract rather than
-defining a second identity meaning. AT1 remains unimplemented.
+defining a second identity meaning. N1's source and focused software acceptance
+now fulfill AT1; embedded AT0 remains open.
 
 ## TP family: exact tinySSB radio personality
 
