@@ -12,6 +12,9 @@ mere `design_docs/mere_docs/implementation_strategy/2026-10-28_murm_runtime_plan
 wire compatibility, Reticulum and I2P, which keep their own plans here; which Mere
 packages belong in other repositories, which is mere
 `design_docs/mere_docs/technical_architecture/2026-10-28_source_homes_map.md`.
+Generic Noise/AT1 admission and optional OCapN live interaction are in the
+[secure-session plan](2026-10-29_secure_sessions_and_live_interaction_plan.md);
+that service reuses the endpoint authority defined here.
 
 ## Boundary
 
