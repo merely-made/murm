@@ -103,7 +103,7 @@ Preserve three records throughout setup and admission:
 | Record | Meaning | Owner |
 | --- | --- | --- |
 | Carrier facts | Protocol, authenticated carrier peer when available, shared link identity, and local ingress context | Murm carrier |
-| Secure-channel facts | Proven application peer, security profile/version, session binding, and authenticated application protocol | Secure-session implementation |
+| Secure-channel facts | Profile-proved peer key, security profile/version, session binding, and authenticated application protocol; a native profile may prove an endpoint key | Secure-session implementation |
 | Admitted principal and capabilities | Accepted identity/delegation, permitted actions, expiry and revocation | Personae/Notochord and application owner |
 
 A Noise-proven key never fills an absent carrier-authenticated peer field.
@@ -114,6 +114,16 @@ two valid handshakes alone do not establish that relationship. Check the
 expected remote identity from a trusted invitation or grant before releasing
 application capabilities. Completing Noise XX does not persist a TOFU decision
 or authorize an arbitrary newly encountered key.
+
+For native iroh, an existing scoped endpoint key need not be the application's
+stable Personae root. Notochord's explicit `BoundChannelApplicationProof` policy
+verifies the root's checked signer and v2 signature over this actual stream
+binding and requested action. This proves consent to this particular channel;
+it makes no claim of durable endpoint-key ownership. The adapter checks the
+trusted expected server endpoint before issuing that proof. This authenticates
+the initiating application root and the expected responder endpoint; a distinct
+responder application root needs its own proof. Existing strict identity
+policies and Knot's selected Noise policy retain their behavior.
 
 Export a verified session binding from the Noise handshake rather than
 reconstructing it from public key bytes. Bind the handshake hash, selected
@@ -201,7 +211,7 @@ listed under AT1; AT0's host/device and embedded proof remains separate.
 ### N2. Apply explicit security policy and bound session setup
 
 **Status:** implemented, independently reviewed and accepted with N3 process
-qualification. Knot's receiving-source publication follows its current main.
+qualification and Knot's published receiving-source integration.
 
 Integrate the existing Noise primitive into service setup under explicit
 requirements. Correct its relay/identity privacy documentation as part of this
@@ -278,6 +288,11 @@ maintained source availability before importing a supplier.
 
 ### O2. Run one bounded live capability service on the existing endpoint
 
+**Status:** implementation and focused qualification in progress. The first
+consumer is `mere/ports/moot`'s optional `ocapn-coop` feature: a fixed collection
+view, callback subscription and membership proposal, with no endpoint ownership
+in the runtime or product adapter.
+
 Register the selected versioned protocol through `P2pandaTransport`'s existing
 ALPN/service seam. Use one reliable ordered stream per CapTP session, following
 the selected profile's peer-pair session rules. The first consumer is a
@@ -298,6 +313,10 @@ O4, and unsupported operations must fail explicitly.
   continue through their existing interfaces.
 
 ### O3. Define revocation, reconnect and durable mutation
+
+**Status:** implemented for session-scoped references and the bounded collection
+proposal; final Git-source consumer qualification follows. Durable references
+and broader command exports remain follow-on work.
 
 Use application-owned revocable wrappers or leases. Dropping a local Rust
 handle, deleting a locator or closing a UI is not remote authority revocation.
@@ -425,6 +444,26 @@ service over an admitted second carrier using the selected secure profile.
   `op:deliver` remains. The pinned `ocapn-suite-31f0b806` profile keeps O1
   clear of that churn; O1's "Syrup codec" wording, and the codec, follow the
   encoding when it settles.
+- 2026-10-30: [`murm-ocapn`](../native/crates/ocapn/README.md) is a separately
+  optional owned Rust runtime. Its Syrup/CapTP profile declares the legacy
+  message forms used by the independent pinned suite. Floating point, arbitrary
+  integers, sets, third-party handoffs, sturdyref dialing and crossed hellos are
+  refused or outside its declared supported subset. Wire interoperability is
+  separate from native Murm netlayer interoperability.
+- 2026-10-30: [`murm-ocapn-transport`](../native/crates/ocapn-transport/README.md)
+  borrows the existing endpoint, selects native security and admits the
+  application root before CapTP starts. The native endpoint test uses
+  production scoped-key constructors while both endpoint keys differ from
+  their application roots. Another registered service remains usable on those
+  same endpoints during the live session.
+- 2026-10-30: the Gemot adapter in `mere/ports/moot/src/ocapn_coop.rs` retains
+  Notochord admission as immutable host context and checks current admission,
+  membership and the exact typed collection capability. A serialized owner
+  coordinator covers reads, emissions, proposals and host ingress updates.
+  Proposals use the host's independently authorized ordinary Gemot command,
+  exact observed heads and existing outbound operation. Returned receipts
+  distinguish the admitted submitter from the actual host author; they do not
+  invent remote authorship in durable history.
 
 ## External design references
 

@@ -1,0 +1,20 @@
+[package]
+name = "murm-ocapn-transport"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Admitted OCapN channels on Murm's existing native endpoint"
+
+[dependencies]
+transport = { workspace = true, features = ["noise", "notochord"] }
+identity.workspace = true
+insigne.workspace = true
+notochord = { workspace = true, features = ["tokio"] }
+murm-ocapn = { path = "../ocapn", version = "0.1.0" }
+thiserror = "1"
+tokio = { version = "1", features = ["io-util", "time"] }
+
+[dev-dependencies]
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "sync"] }
