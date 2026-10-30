@@ -1,11 +1,10 @@
 # Secure sessions and optional live interaction
 
 **Status:** 2026-10-30: N1 landed across Murm, Dramatis/Notochord and Knot with
-focused software and local-network acceptance. N2's bounded security policy is
-implemented and reviewed; N3's final carrier qualification is in progress.
-Optional OCapN intake is being assessed
-for a bounded Gemot/coop adapter after those prerequisites. The
-[N1 qualification record](archive_docs/2026-10-29/2026-10-29_secure_sessions_and_live_interaction_plan_receipts.md)
+focused software and local-network acceptance. N2's bounded security policy and
+N3's native process/carrier qualification passed. Optional OCapN implementation
+is in progress for a bounded Gemot/coop adapter after those prerequisites. The
+[qualification record](archive_docs/2026-10-29/2026-10-29_secure_sessions_and_live_interaction_plan_receipts.md)
 keeps exact source revisions, commands and evidence limits.
 
 **For:** a reusable authenticated session over Murm's ordered carriers, followed
@@ -201,8 +200,8 @@ listed under AT1; AT0's host/device and embedded proof remains separate.
 
 ### N2. Apply explicit security policy and bound session setup
 
-**Status:** implemented and independently reviewed; final receiving-lock intake
-and N3 process qualification follow.
+**Status:** implemented, independently reviewed and accepted with N3 process
+qualification. Knot's receiving-source publication follows its current main.
 
 Integrate the existing Noise primitive into service setup under explicit
 requirements. Correct its relay/identity privacy documentation as part of this
@@ -225,6 +224,10 @@ before accepting an untrusted handshake or identity proof.
 
 ### N3. Qualify the same secure service on two carriers
 
+**Status:** accepted for native local process/network scope over all declared
+profiles. Native Reticulum without Noise, remote hosts, physical radios,
+firmware and browsers retain separate qualification.
+
 Exercise one bounded host service over existing iroh and a second ordered
 carrier. TCP is the first controlled unencrypted-carrier fixture. Reticulum
 adds a distinct acceptance case for N1's honest absent carrier identity;
@@ -246,6 +249,14 @@ its live network and radio behavior retain separate receipts.
   secure-session contract is accepted.
 
 ### O1. Select the optional Rust OCapN implementation and wire profile
+
+**Status:** intake selected an owned bounded Rust runtime in optional
+`murm-ocapn`, with a separate `murm-ocapn-transport` endpoint/admission adapter.
+Implementation and independent supported-subset interoperability are in progress.
+The declared `ocapn-suite-31f0b806` profile matches the pinned independent suite's
+legacy message forms; it is not a claim of current-draft or full OCapN support.
+The first pass explicitly refuses third-party handoffs and duplicate-session
+crossed hellos rather than assigning identity-bound community grants to them.
 
 Compare adoption of available Rust work with implementing a bounded adapter
 and runtime. Freeze the chosen specification/profile, Syrup codec, netlayer
@@ -446,3 +457,8 @@ Recheck them at O1 intake because the specification and implementations evolve.
   and stage diagnostics. Independent review closed the partial-future
   cancellation gap. Knot's consumer uses the shared gate; final supplier intake
   and N3 carrier process qualification are in progress.
+- 2026-10-30: N2/N3 accepted after independent review and native process
+  qualification, including native iroh without inner Noise. The optional Rust
+  runtime and bounded Gemot/coop adapter now proceed under the declared pinned
+  interoperability profile; broader handoffs and current-draft compatibility
+  remain O4 work.

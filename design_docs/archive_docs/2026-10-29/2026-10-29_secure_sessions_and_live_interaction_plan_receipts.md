@@ -1,4 +1,4 @@
-# N1 secure-channel facts and AT1 integration qualification
+# Secure-channel facts and optional live interaction qualification
 
 **Date:** 2026-10-29 (America/New_York).
 
@@ -125,3 +125,65 @@ receipts retain their original scope and do not qualify the v2 path.
 These tests do not establish broader handshake/rate/deadline policy (N2), full
 carrier lifecycle acceptance (N3), group encryption, stored-object protection,
 browser behavior, physical-device execution or OCapN compatibility.
+
+## N2/N3 checkpoint — 2026-10-30
+
+**Published Murm implementation:** `e57b92273c6de4c2832b90e06565001fcad2f352`.
+The fixture is [`testing/secure-sessions-n3`](../../../testing/secure-sessions-n3/README.md).
+
+The shared gate holds capacity and one deadline across carrier establishment,
+selected security and Notochord admission. The private native backend evidence
+binds the actual stream, identities, service and negotiated TLS ALPN. A review
+found cancellation of only a `SetupGuard::run` future could retain an active
+lease. The fix arms a cancellation token and moves the permit into shared
+terminal state, releasing capacity and poisoning buffered I/O immediately.
+An independent reviewer approved the fix and found no further actionable issues.
+
+Final transport checks used committed suppliers and `--locked`:
+
+| Check | Result |
+| --- | --- |
+| `cargo test --locked --manifest-path native/Cargo.toml -p mere-transport --all-features --lib security::` | 14 passed after the review fix |
+| `cargo test --locked --manifest-path native/Cargo.toml -p mere-transport --features noise,notochord,reticulum --lib noise::` | 14 passed before the isolated lease-cancellation fix; no subsequent wire/parser changes |
+| `cargo clippy --locked --manifest-path native/Cargo.toml -p mere-transport --features noise,notochord,reticulum --all-targets -- -D warnings` | Passed after the review fix |
+| Default and Noise-only library feature checks | Passed |
+| Rustfmt and owned-path whitespace checks | Passed |
+
+The final two-process matrix receipt is
+`/Users/markik/Code/testing/murm-secure-sessions-n3-20261030-final/summary.json`.
+It reports `overall_passed: true`, 31 expected/passing cases, and the exact
+published implementation above. Retained fixture/transport snapshots, source
+hashes, binary hash, per-case process IDs, contacts, results and logs accompany it.
+The binary SHA-256 is
+`8396cdb3f22a6bf4a58ee047e75686039333af7e7ef5c9dae17439f447cf8064`;
+the transport source aggregate is
+`7f5eb564bc191a1b635541cea2946d2b601fbe629012670c43663d5003076cae`.
+
+The committed Python harness runs separate native server/client processes:
+
+```sh
+cargo build --locked --manifest-path testing/secure-sessions-n3/Cargo.toml
+python3 testing/secure-sessions-n3/run.py --binary <actual-built-binary> --output <new-output-directory>
+```
+
+There are eight cases each for Noise over raw TCP, iroh and Reticulum reliable
+links over local TCP, plus seven for native iroh TLS without inner Noise. Cases
+cover fresh reconnect, old-hello replay, wrong keys, signed-proof mutation,
+below-Noise ciphertext mutation, cancellation, stalled admission/setup and a
+consumer that never acknowledges its response. Negative admission controls
+reach no handler, positive handler/completion counts are exact, mutators prove
+they changed input, and every setup lease returns to zero. Native iroh's
+ciphertext-mutation case is explicitly excluded: this stream API is above TLS
+and cannot mutate encrypted QUIC packets. A backend unit test separately checks
+different streams on one TLS connection have different bindings.
+
+An earlier fixture teardown trial failed because the client dropped its endpoint
+before the server completed shutdown/result writing. That failure is retained;
+the final harness keeps connection/stream handles alive through server completion.
+It does not count a teardown race as successful application completion.
+
+This is native local process/network evidence, including actual Reticulum
+links over TCP. It does not qualify native Reticulum without Noise, physical
+radio, firmware, browser, remote-host, relay failover, group-key or durable
+mutation behavior. Reticulum links already encrypt; their absent authenticated
+initiator field is not evidence of plaintext.
