@@ -2,8 +2,10 @@
 
 **Status:** 2026-10-30: N1 landed across Murm, Dramatis/Notochord and Knot with
 focused software and local-network acceptance. N2's bounded security policy and
-N3's native process/carrier qualification passed. Optional OCapN implementation
-is in progress for a bounded Gemot/coop adapter after those prerequisites. The
+N3's native process/carrier qualification passed. The optional OCapN runtime
+and bounded Gemot/coop adapter are implemented and qualified for their declared
+native software and pinned wire subset. O4's broader handoff/netlayer work,
+product UI and physical-device qualification remain open. The
 [qualification record](archive_docs/2026-10-29/2026-10-29_secure_sessions_and_live_interaction_plan_receipts.md)
 keeps exact source revisions, commands and evidence limits.
 
@@ -262,11 +264,13 @@ its live network and radio behavior retain separate receipts.
 
 **Status:** intake selected an owned bounded Rust runtime in optional
 `murm-ocapn`, with a separate `murm-ocapn-transport` endpoint/admission adapter.
-Implementation and independent supported-subset interoperability are in progress.
+Implementation and independent supported-subset interoperability are qualified.
 The declared `ocapn-suite-31f0b806` profile matches the pinned independent suite's
 legacy message forms; it is not a claim of current-draft or full OCapN support.
 The first pass explicitly refuses third-party handoffs and duplicate-session
 crossed hellos rather than assigning identity-bound community grants to them.
+An upstream encoding change requires a new explicit profile and independent
+fixture intake; it must not redefine this pinned legacy profile silently.
 
 Compare adoption of available Rust work with implementing a bounded adapter
 and runtime. Freeze the chosen specification/profile, Syrup codec, netlayer
@@ -288,7 +292,7 @@ maintained source availability before importing a supplier.
 
 ### O2. Run one bounded live capability service on the existing endpoint
 
-**Status:** implementation and focused qualification in progress. The first
+**Status:** implemented and qualified for the declared native software scope. The first
 consumer is `mere/ports/moot`'s optional `ocapn-coop` feature: a fixed collection
 view, callback subscription and membership proposal, with no endpoint ownership
 in the runtime or product adapter.
@@ -314,9 +318,11 @@ O4, and unsupported operations must fail explicitly.
 
 ### O3. Define revocation, reconnect and durable mutation
 
-**Status:** implemented for session-scoped references and the bounded collection
-proposal; final Git-source consumer qualification follows. Durable references
-and broader command exports remain follow-on work.
+**Status:** implemented and qualified for session-scoped references and the
+bounded collection proposal, including final Git-source consumer checks.
+Exact observed heads refuse duplicate or ambiguously retried proposals;
+automatic mutation retries, durable references and broader command exports
+remain follow-on work.
 
 Use application-owned revocable wrappers or leases. Dropping a local Rust
 handle, deleting a locator or closing a UI is not remote authority revocation.
@@ -455,7 +461,10 @@ service over an admitted second carrier using the selected secure profile.
   application root before CapTP starts. The native endpoint test uses
   production scoped-key constructors while both endpoint keys differ from
   their application roots. Another registered service remains usable on those
-  same endpoints during the live session.
+  same endpoints during the live session. The typed listener requires bounded
+  registration before acceptance and carries actual first-stream/queue age
+  into the setup deadline; a later gate cannot protect an unbounded earlier
+  ingress queue.
 - 2026-10-30: the Gemot adapter in `mere/ports/moot/src/ocapn_coop.rs` retains
   Notochord admission as immutable host context and checks current admission,
   membership and the exact typed collection capability. A serialized owner
@@ -512,3 +521,9 @@ Recheck them at O1 intake because the specification and implementations evolve.
   runtime and bounded Gemot/coop adapter now proceed under the declared pinned
   interoperability profile; broader handoffs and current-draft compatibility
   remain O4 work.
+- 2026-10-30: the optional bounded Rust runtime, native existing-endpoint
+  adapter and Gemot/coop consumer are implemented, independently reviewed and
+  published. Final Git-source consumer intake, current authority/expiry,
+  exact-head proposal, ordinary replica intake, backpressure and disconnect
+  controls passed for the declared subset. O4 and broader product/device
+  qualification remain open.

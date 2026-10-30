@@ -2,10 +2,13 @@
 
 **Date:** 2026-10-29 (America/New_York).
 
-**Scope:** source integration, focused Rust tests and local-network acceptance
+**Scope at the initial checkpoint:** source integration, focused Rust tests and local-network acceptance
 for [N1](../../2026-10-29_secure_sessions_and_live_interaction_plan.md#n1-separate-secure-channel-facts-and-complete-at1).
 N2/N3, OCapN, physical radios, firmware and headed-browser acceptance remain
 open. No release or crates.io publication was performed.
+
+The later 2026-10-30 sections record N2/N3 acceptance and the published bounded
+OCapN/Gemot implementation with its separate interoperability and consumer checks.
 
 ## Source revisions
 
@@ -281,3 +284,78 @@ uses Git suppliers without development path patches; its registry
 package/version/source set is unchanged. The optional packages are separate
 from the ordinary carrier/conversation dependency graph. No crate release or
 crates.io publication was performed.
+
+## Final consumer intake and publication — 2026-10-30
+
+| Repository | Published source |
+| --- | --- |
+| Dramatis | `6aa0daa4ba957e2197d649e1e87f381261f9087e` |
+| Murm runtime/native adapter | `75eb9108879003015c934426565a55097d21a193` |
+| Mere optional Gemot port | `56fbdc2e45f0ef18db1eda8ee518723ce788a264` |
+| Knot final supplier intake | `fbb65fd17354d19bbf10f52edfcd67e6277090f9` |
+
+Mere's root lock and the isolated source consumer resolve the published Murm
+and Dramatis revisions above. The isolated manifest explicitly pins the three
+Murm packages to that source revision, and its committed lock has no local
+supplier path substitutions. Gemot's existing `998133bc` and Mere's existing
+Eidetic supplier pins were retained. The root Mere and Knot registry
+package/version/source sets did not change; Cargo normalized some dependency
+edges while receiving the Git cohort.
+
+The optional consumer is `mere/ports/moot/src/ocapn_coop.rs` and `object.rs`.
+Its immutable context comes from actual secure admission, and its coordinator
+serializes current admission, membership, typed collection authority, reads,
+callback enqueue, proposals and trusted host updates. A read member cannot
+propose a write. Service revocation/expiry and signed Gemot grant or membership
+changes prevent later use through copied references. Callback quotas and queue
+refusal are bounded; disconnect removes retained callbacks. A fresh-clock
+control expires a collection grant during view preparation and verifies no
+callback is enqueued. Storage diagnostics are sanitized on the wire.
+
+The proposal uses the host's independently authorized ordinary Gemot command,
+with exact observed collection heads, and returns its normal outbound operation.
+Receipts distinguish admitted submitter and actual author, without adding an
+unsigned remote-author field to Moot history. The native composition test
+ingests the signed outbound operation in an independent Moot and checks the
+result. This is ordinary replica intake, not a fresh-process durability claim.
+An ambiguous or repeated request with the old frontier fails; transport never
+replays it automatically. A trusted publication hook must enqueue promptly;
+it is not a peer callback or a delivery guarantee.
+
+Final checks ran without development dependency overrides from the isolated
+Mere worktree:
+
+```sh
+cargo check --locked -j 2 -p mere-moot --features ocapn-coop --lib
+cargo test --locked --manifest-path testing/moot-ocapn-coop/Cargo.toml --lib -j 2
+cargo clippy --locked --manifest-path testing/moot-ocapn-coop/Cargo.toml -j 2 --all-targets --no-deps -- -D warnings
+cargo +1.97.1 check --locked --manifest-path testing/moot-ocapn-coop/Cargo.toml -j 2
+```
+
+All passed; the source consumer reports **24/24 tests**, including the existing
+coop report contract and the new adapter controls. The actual `mere-moot`
+feature builds in its normal workspace; the source consumer does not stand in
+for that check. Default `mere-moot` and ordinary `mere-transport` dependency
+graphs exclude `murm-ocapn`. Final logs are in
+`/Users/markik/Code/testing/murm-ocapn-o1-20261030/`, named
+`mere-port-feature-check.log`, `mere-adapter-final-locked-tests.log`,
+`mere-adapter-final-clippy.log` and `mere-adapter-final-msrv.log`.
+
+Final Knot receiving tests passed **15/15** against the published cohort after
+fast-forwarding the worktree to its independently advanced main. The log is
+`knot-final-publish-tests.log` in the same evidence directory. Knot's publishing
+profile remains Noise plus secure admission v2. Murm's final shared-security
+regressions passed **14/14**, and the admission integration tests passed
+**3/3**, including actual Reticulum links over TCP, against published Dramatis.
+
+Mere and Murm both received concurrent documentation-only main advances before
+publication; the task commits were rebased while preserving those changes.
+Murm's O1 upstream findings remain alongside this implementation's explicit
+pinned-profile limits. Unrelated primary-checkout work was not staged or
+pushed by this task. The retained worktrees are the reviewable task sources.
+
+This completes the declared bounded native software pass. It does not qualify
+OCapN third-party handoffs, current-draft/full-protocol conformance, cross-netlayer
+interoperability, durable object references, public failover, physical radios,
+embedded execution or browser/product UI. Native Reticulum without inner Noise
+still requires its own direct profile adapter and acceptance.
