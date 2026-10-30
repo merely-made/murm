@@ -76,6 +76,68 @@ vocabulary; the original carrier facts stay separate and unchanged. Noise
 alone does not enable the Notochord dependency. Expected-peer checks and
 admission remain the service owner's responsibility.
 
+## Bounded service security
+
+The `security` module (`noise` feature) adds exact owner-selected profiles:
+`ServiceSecurityPolicy::noise`, `native`, or explicit `public_plaintext`.
+There is no opportunistic negotiation or fallback. Noise requires the existing
+XX/Ed25519 wire, checks the expected peer when configured, and verifies the
+independent inner protocol. Plaintext produces no secure-channel facts or
+authenticated peer. Services disclosing bearer invitations or privileged
+object references require a confidential profile.
+
+Store one `SetupGate` with the service and call `reserve` before connecting.
+`SetupGuard::run` applies the same absolute deadline to connection establishment
+and subsequent admission. Its `noise_initiator` / `noise_responder` return a
+`PreparedStream`, security facts and the same guard. Keep that guard through
+Notochord admission; only `admitted()` lifts setup I/O budgets and returns the
+pending permit. `refused()` records admission refusal. Drop/cancellation
+returns the permit and poisons both raw I/O and buffered decrypted bytes.
+Cancelling a polled `guard.run(...)` also poisons partial framing and returns
+capacity immediately, even if the guard and stream remain retained. A retained
+guard cannot admit or restart that cancelled session. Timeouts and I/O-budget
+refusals likewise release the shared permit at their terminal transition.
+Convenience methods on `SetupGate` serve already-established streams; their
+deadline begins at that call and therefore does not cover an earlier connect.
+Application lifetime, payload, subscriber and slow-consumer limits begin after
+admission and remain the application owner's responsibility.
+
+`SetupGuard::native(P2pandaStream)` obtains evidence from that exact backend
+stream. Its TLS exporter context binds the bidirectional stream ID, both
+role-ordered backend identities, profile/version, the registered service name
+and p2panda's actual network-salted TLS ALPN. The returned public binding is a
+digest, not raw exporter keying material. A different stream on the same QUIC
+connection has a different binding. This mode authenticates the carrier's
+identity; an independent application identity requires an appropriate admission
+proof or the selected inner Noise profile.
+
+Iroh already encrypts through relays. Reticulum links also encrypt their link
+payload; their absent carrier-proven initiator is an authentication distinction,
+not a plaintext label. This native evidence adapter currently covers iroh.
+A Reticulum-native admission profile needs its own verified link evidence and
+qualification; it must not invent an authenticated initiator. Noise remains
+optional under each service's declared requirements.
+
+Defaults are a 10-second total deadline, 16 KiB read/write each, a 4 KiB encoded
+frame, 24 frames and 512 I/O polls through security plus admission. Limits are
+explicit and configurable up to 300 seconds, 1 MiB each direction, 65,535 bytes
+per frame, 4,096 frames and 16,384 polls. The shared pending gate clamps to
+`MAX_PENDING_SETUPS` (256), including absurd caller values without a semaphore
+panic; zero disables admission. Frame prefixes are checked before body
+allocation, and setup byte/poll counters are cumulative. Encoded buffer storage
+scales with pending setups and bounded frames. Incoming setup scratch follows
+the configured frame cap; the shared Noise writer can still allocate one
+65,535-byte output frame before its setup adapter refuses an oversized write.
+At the hard ceilings this cost is multiplied by at most 256 pending setups;
+crypto state and caller-owned
+admission allocations remain additional costs. These are software bounds, not
+a measured whole-process heap or embedded-memory receipt.
+
+`SetupStats` reports establishment, secure-policy success, application admission,
+stage-specific refusal, timeout, cancellation and capacity counts. Public
+plaintext does not increment the secured count. Diagnostics contain no bearer
+capabilities, plaintext buffers or protocol/identity dumps.
+
 ## Key entry points
 
 | Item | Role |

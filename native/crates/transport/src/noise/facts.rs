@@ -70,6 +70,12 @@ pub struct NoiseSessionFacts {
 }
 
 impl NoiseSessionFacts {
+    pub(crate) fn from_verified(handshake: NoiseHandshakeFacts, protocol: Alpn) -> Self {
+        Self {
+            handshake,
+            protocol,
+        }
+    }
     /// The verified handshake underlying this protocol session.
     pub fn handshake(&self) -> &NoiseHandshakeFacts {
         &self.handshake

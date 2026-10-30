@@ -1,8 +1,10 @@
 # Secure sessions and optional live interaction
 
-**Status:** 2026-10-29: N1 landed across Murm, Dramatis/Notochord and Knot with
-focused software and local-network acceptance. N2–N3 (Noise policy and broader
-carrier qualification) and O1–O4 (optional OCapN) remain planned. The
+**Status:** 2026-10-30: N1 landed across Murm, Dramatis/Notochord and Knot with
+focused software and local-network acceptance. N2's bounded security policy is
+implemented and reviewed; N3's final carrier qualification is in progress.
+Optional OCapN intake is being assessed
+for a bounded Gemot/coop adapter after those prerequisites. The
 [N1 qualification record](archive_docs/2026-10-29/2026-10-29_secure_sessions_and_live_interaction_plan_receipts.md)
 keeps exact source revisions, commands and evidence limits.
 
@@ -32,6 +34,19 @@ Links: area transport · draws on [transport consolidation](2026-10-28_transport
 The order and endpoint reuse are decided. The detailed contracts below are the
 implementation targets; O1 must settle the supplier and interoperability profile
 before a product dependency is added.
+
+### secure_sessions_and_live_interaction D2 — first live consumer
+
+**2026-10-30 · refines D1.** Mark:
+
+> Continue into OCapN after N2/N3, using a bounded Gemot/coop adapter
+
+Links: area transport · amends secure_sessions_and_live_interaction D1 · plans N2–N3, O1–O3 · summary qualify the secure foundation, then expose a bounded Gemot/coop live adapter
+
+Gemot's governance, membership, delegation and durable command boundary remain
+independent of the optional live runtime. The adapter maps current authority to
+narrow exported operations; invocation still enters the owning domain's checks.
+OCapN handoffs cannot silently transfer identity-bound community grants.
 
 ## Boundary and intended use
 
@@ -132,6 +147,15 @@ an application proxy that terminates an outer connection. It is not needed to
 hide iroh plaintext from its relay. Distinct application keys also do not hide
 the reached carrier endpoint from the other carrier endpoint.
 
+Reticulum's reliable links also encrypt traffic end to end. Its absent
+carrier-proven initiator key does not mean plaintext: encryption and proof of
+the application's Personae identity are separate observations. A direct native
+Reticulum profile needs a verified link binding and application proof adapter
+before this setup policy can accept it. The qualified Reticulum composition
+here continues to use Noise for that application binding. Announces, routing
+metadata, sizes and timing are outside the bilateral payload-confidentiality
+claim; retained data and group keys keep their own protection.
+
 The existing Murm profile uses `Noise_XX_25519_ChaChaPoly_BLAKE2b`, an encrypted
 protocol declaration, and a Mere-specific Ed25519 proof. Keep its profile
 explicit. Sharing the Noise framework with another implementation does not
@@ -176,6 +200,9 @@ listed under AT1; AT0's host/device and embedded proof remains separate.
   consumer. Murm's local primitive tests alone cannot close consumer adoption.
 
 ### N2. Apply explicit security policy and bound session setup
+
+**Status:** implemented and independently reviewed; final receiving-lock intake
+and N3 process qualification follow.
 
 Integrate the existing Noise primitive into service setup under explicit
 requirements. Correct its relay/identity privacy documentation as part of this
@@ -360,6 +387,22 @@ service over an admitted second carrier using the selected secure profile.
 - 2026-10-29: Murm's [conversation status](../native/crates/murm/README.md#status)
   explicitly leaves live group-key distribution/history open. Bilateral Noise
   does not close that work.
+- 2026-10-30: the shared [security setup module](../native/crates/transport/src/security.rs)
+  now keeps one service-owned capacity lease and deadline through establishment,
+  selected security and application admission. The owner selects Noise, native
+  iroh or explicit public plaintext; no failed secure mode retries plaintext.
+  Plaintext produces no authenticated peer or secure admission evidence.
+- 2026-10-30: native [iroh channel evidence](../native/crates/transport/src/p2panda_transport/native_security.rs)
+  comes from the concrete backend stream. Its TLS exporter context binds the
+  stream identifier, ordered endpoint identities, selected service, actual
+  negotiated TLS ALPN and profile/version. Another stream on the same TLS
+  connection has a different admission binding.
+- 2026-10-30: the [native process fixture](../testing/secure-sessions-n3/README.md)
+  exercises one admitted service with Noise over raw TCP, iroh and Reticulum,
+  and with native iroh security. The native stream API is above TLS, so the
+  fixture explicitly excludes packet-level ciphertext mutation for that mode.
+  Native Reticulum without Noise, physical radios and headed browsers retain
+  separate qualification gates.
 
 ## External design references
 
@@ -398,3 +441,8 @@ Recheck them at O1 intake because the specification and implementations evolve.
   final Git-source lock intake accepted, and focused admission/publishing checks
   passed. AT1 is fulfilled by this phase; AT0, N2–N3 and O1–O4 retain their own
   open work.
+- 2026-10-30: N2 implemented: explicit service security modes, bounded shared
+  setup/admission leases, native iroh stream bindings, cancellation poisoning
+  and stage diagnostics. Independent review closed the partial-future
+  cancellation gap. Knot's consumer uses the shared gate; final supplier intake
+  and N3 carrier process qualification are in progress.

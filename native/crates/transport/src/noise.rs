@@ -23,10 +23,10 @@
 //!
 //! ## What composing it over iroh buys
 //!
-//! **Zero trust through relays.** An iroh connection through a relay is
-//! encrypted to the relay's satisfaction of QUIC, but the plane it traverses is
-//! not ours. A Noise session inside it is opaque to everything between the two
-//! endpoints, including infrastructure we run.
+//! Iroh already encrypts traffic end to end, including through its relays.
+//! Inner Noise supplies an independent application identity and trust boundary,
+//! or protects a channel through an application proxy that terminates an outer
+//! connection. It is not needed to hide iroh plaintext from its relay.
 //!
 //! **Layered identity.** This is the part worth being precise about, because
 //! the two keys answer different questions:
@@ -40,9 +40,9 @@
 //!   persona, or an identity that exists only for this session.
 //!
 //! Collapsing them is a choice, not a default: pass the same keypair and you
-//! get one identity in two places. Pass [`Ed25519Keypair::derive_child`] or
-//! [`Ed25519Keypair::generate`] and the peer learns who it is talking to
-//! without learning which node, at which address, it reached them on.
+//! get one identity in two places. A child or ephemeral application key can be
+//! independent of the carrier key. The remote carrier endpoint still knows
+//! which endpoint it reached; this separation does not hide that network path.
 //!
 //! ## Two things this layer defines, because Noise does not
 //!
@@ -61,8 +61,9 @@
 //! [`NOISE_PARAMS`]: `Noise_XX_25519_ChaChaPoly_BLAKE2b`. `XX` is the
 //! mutual-unknown pattern: neither side needs the other's key in advance, both
 //! transmit theirs encrypted during the handshake, and both end up holding the
-//! other's proven static key. That is trust-on-first-use as a protocol
-//! property rather than as a workaround.
+//! other's proven static key. The caller must check the intended peer or
+//! explicitly establish and persist a trust-on-first-use decision; XX does not
+//! perform either policy operation by itself.
 //!
 //! ## On BLAKE2b, since our stack is BLAKE3
 //!
@@ -140,8 +141,20 @@ where
 /// Expected-peer checks and authorization remain the caller's responsibility.
 pub async fn handshake_with_facts<S>(
     identity: &Ed25519Keypair,
+    inner: S,
+    initiator: bool,
+) -> Result<(NoiseStream<S>, NoiseHandshakeFacts), TransportError>
+where
+    S: AsyncRead + AsyncWrite + Unpin,
+{
+    handshake_limited(identity, inner, initiator, stream::MAX_MESSAGE).await
+}
+
+pub(super) async fn handshake_limited<S>(
+    identity: &Ed25519Keypair,
     mut inner: S,
     initiator: bool,
+    max_message: usize,
 ) -> Result<(NoiseStream<S>, NoiseHandshakeFacts), TransportError>
 where
     S: AsyncRead + AsyncWrite + Unpin,
@@ -161,7 +174,7 @@ where
         .map_err(|e| backend("build", e))?
     };
 
-    let mut scratch = vec![0u8; stream::MAX_MESSAGE];
+    let mut scratch = vec![0u8; max_message];
 
     // XX is three messages: -> e, <- e ee s es, -> s se.
     while !state.is_handshake_finished() {
@@ -173,7 +186,7 @@ where
                 .await
                 .map_err(|e| backend("frame write", e))?;
         } else {
-            let frame = stream::read_frame(&mut inner)
+            let frame = stream::read_frame_limited(&mut inner, max_message)
                 .await
                 .map_err(|e| backend("frame read", e))?;
             state
@@ -181,6 +194,7 @@ where
                 .map_err(|e| backend("handshake read", e))?;
         }
     }
+    drop(scratch);
 
     // Both sides derive the same hash, and only a peer that completed this
     // handshake can sign it.
@@ -191,6 +205,8 @@ where
     let session = state
         .into_transport_mode()
         .map_err(|e| backend("transport mode", e))?;
+    // The setup I/O adapter enforces its small frame cap before allocation.
+    // The completed stream keeps the original application frame budget.
     let mut stream = NoiseStream::new(inner, session);
 
     // The proof rides the encrypted session, so an observer never learns which
@@ -234,9 +250,8 @@ where
 ///
 /// The composition this module exists for: the carrier dialled and knows where
 /// the bytes go; this adds the second handshake inside. Over iroh that means
-/// the ALPN was already negotiated in QUIC's clear -- `alpn` here is a
-/// *second*, encrypted declaration, which is what lets the two layers disagree
-/// deliberately (one protocol visible to relays, another actually spoken).
+/// the carrier already selected its ALPN. `alpn` here is a second, encrypted
+/// declaration, so an opaque outer protocol may carry another inner service.
 pub async fn secure_initiator<S>(
     identity: &Ed25519Keypair,
     inner: S,
@@ -263,8 +278,7 @@ where
 {
     let (mut stream, handshake) = handshake_with_facts(identity, inner, true).await?;
     // Noise has no ALPN concept, so the protocol name is a framed message
-    // inside the session. Sending it encrypted keeps which protocol is being
-    // spoken confidential, unlike TLS ALPN.
+    // inside the session. This authenticates the independent inner declaration.
     write_len_prefixed(&mut stream, alpn.as_bytes())
         .await
         .map_err(|e| backend("alpn write", e))?;
@@ -339,7 +353,7 @@ pub async fn accept_from(
 /// The Noise framing below carries whole messages, but a byte-stream reader
 /// still needs to know where one logical message ends, so short control
 /// messages (the ALPN, the identity proof) carry their own length.
-async fn write_len_prefixed<S>(stream: &mut S, message: &[u8]) -> std::io::Result<()>
+pub(crate) async fn write_len_prefixed<S>(stream: &mut S, message: &[u8]) -> std::io::Result<()>
 where
     S: AsyncWrite + Unpin,
 {
@@ -351,7 +365,7 @@ where
 }
 
 /// Read a length-prefixed control message, refusing anything over `max`.
-async fn read_len_prefixed<S>(stream: &mut S, max: usize) -> std::io::Result<Vec<u8>>
+pub(crate) async fn read_len_prefixed<S>(stream: &mut S, max: usize) -> std::io::Result<Vec<u8>>
 where
     S: AsyncRead + Unpin,
 {

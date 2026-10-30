@@ -63,6 +63,9 @@ mod peer_id;
 mod peer_route;
 #[cfg(feature = "reticulum")]
 pub mod reticulum_transport;
+/// Owner-selected session security with bounded setup and admission leases.
+#[cfg(feature = "noise")]
+pub mod security;
 mod transport;
 
 pub use crate::accepted::{AcceptedSession, IngressContext, IngressInterfaceId, TransportKind};
