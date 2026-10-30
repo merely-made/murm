@@ -233,22 +233,13 @@ time bounds; T114 flash, static RAM and heap high-water deltas are recorded.
 
 ### AT1. Keep carrier and secure-channel facts distinct
 
-Mere currently records `authenticated_initiator` as identity proved by the
-carrier. Reticulum correctly supplies none there, while preserving its shared
-link id. Knot's current publishing carrier then requires that outer carrier
-identity to equal the inner Noise peer, which structurally rejects Reticulum
-plus Noise.
-
-Add a separate secure-channel fact containing the proven Noise peer and a
-channel-binding hash. Notochord's transcript may bind both that fact and the
-Reticulum shared-link id; it must not relabel a Noise identity as carrier
-authentication. Local interface identity remains responder-owned policy
-context rather than signed common transcript material.
-
-**Done when:** p2panda plus Noise still detects outer/inner identity mismatch;
-Reticulum plus Noise admits a correctly bound Personae subject despite the
-carrier having no authenticated peer; replay on another Reticulum link fails;
-Knot and Murm consume the same fact vocabulary.
+**2026-10-29: acceptance ownership moved to N1 in the
+[secure sessions and live interaction plan](2026-10-29_secure_sessions_and_live_interaction_plan.md#n1-separate-secure-channel-facts-and-complete-at1).**
+That phase owns the shared carrier/secure-channel fact contract and its
+Murm, Notochord and Knot adoption. AT0 above retains embedded secure-attachment
+feasibility and host/device binding; it consumes that contract rather than
+defining a second identity meaning. N1's source and focused software acceptance
+now fulfill AT1; embedded AT0 remains open.
 
 ## TP family: exact tinySSB radio personality
 

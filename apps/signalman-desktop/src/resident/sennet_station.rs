@@ -2,11 +2,11 @@
 //! channel lane selects the bench's public LongFast key explicitly; private
 //! channel provisioning and authenticated senders are not implied.
 use super::*;
-use station_custody::DjinnStationAuthority;
 use radio_hand::instances::Config;
 use selvage::personality::{ControllerConfig, CoveragePolicy, InstalledPersonalitySet};
 use serde::Deserialize;
 use signalman::radio_comms::sennet_ids::SennetPacketIds;
+use station_custody::DjinnStationAuthority;
 
 const PUBLIC_LONGFAST: [u8; 16] = [
     0xd4, 0xf1, 0xbb, 0x3a, 0x20, 0x29, 0x07, 0x59, 0xf0, 0xbc, 0xff, 0xab, 0xcf, 0x4e, 0x69, 0x01,
@@ -17,7 +17,7 @@ const PUBLIC_LONGFAST: [u8; 16] = [
 struct ConfigFile {
     #[serde(default)]
     directed: Option<DirectedConfig>,
-    device_id: pandect::DeviceId,
+    device_id: personae::carry::DeviceId,
     port: PathBuf,
     realm: String,
     journal: PathBuf,
@@ -251,7 +251,7 @@ impl ResidentAuthority for Authority {
 mod tests {
     use super::*;
     fn config(dir: &std::path::Path) -> serde_json::Value {
-        serde_json::json!({"device_id":pandect::DeviceId::new(),"port":dir.join("no-radio"),
+        serde_json::json!({"device_id":personae::carry::DeviceId::new(),"port":dir.join("no-radio"),
             "realm":"bench-sennet-absent","journal":dir.join("journal.json"),"packet_ids":dir.join("ids.json"),
             "name":"Sennet bench","public_channel":"LongFast","peer_node":7,"frequency_hz":906875000,
             "tx_power_dbm":0,"tx_budget_ms":2000,"frame_ttl_ms":15000,"reservation_size":256,
@@ -295,7 +295,7 @@ mod tests {
             config: parse(&path).unwrap(),
             djinn: DjinnStationAuthority::at(format!(
                 r"\\.\pipe\signalman-sennet-absent-{}",
-                pandect::DeviceId::new().as_uuid()
+                personae::carry::DeviceId::new().as_uuid()
             )),
         });
         let worker = ResidentWorker::spawn(settings, Arc::new(|| {}));

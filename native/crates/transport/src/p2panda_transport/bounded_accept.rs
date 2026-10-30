@@ -76,6 +76,10 @@ struct Handler {
     tx: mpsc::Sender<QueuedStream>,
     state: Arc<State>,
     first_stream_timeout: Duration,
+    #[cfg(feature = "noise")]
+    local_peer: crate::PeerID,
+    #[cfg(feature = "noise")]
+    service_protocol: Alpn,
 }
 
 impl ProtocolHandler for Handler {
@@ -111,6 +115,10 @@ impl ProtocolHandler for Handler {
             arrived_at,
             _queue_permit: Some(permit),
             stream: P2pandaStream {
+                #[cfg(feature = "noise")]
+                local_peer: self.local_peer,
+                #[cfg(feature = "noise")]
+                service_protocol: self.service_protocol.clone(),
                 send,
                 recv,
                 _connection: connection,
@@ -174,6 +182,10 @@ impl P2pandaTransport {
                     tx,
                     state: state.clone(),
                     first_stream_timeout,
+                    #[cfg(feature = "noise")]
+                    local_peer: self.peer_id,
+                    #[cfg(feature = "noise")]
+                    service_protocol: alpn.clone(),
                 },
             )
             .await

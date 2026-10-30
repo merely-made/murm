@@ -25,11 +25,11 @@ use std::sync::mpsc::{self, Receiver, Sender};
 use std::thread::{self, JoinHandle};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
+use personae::carry::DeviceId;
+use postilion::management::ManagementSnapshot;
 use station_custody::{
     DjinnStationAuthority, SitedStation, SitedStationCredential, SitedStationError,
 };
-use pandect::DeviceId;
-use postilion::management::ManagementSnapshot;
 
 use crate::network::LayoutWake;
 

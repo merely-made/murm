@@ -84,6 +84,8 @@ use bounded_accept::AcceptReceiver;
 pub use bounded_accept::{BoundedAcceptHandle, BoundedAcceptStats};
 use zeroize::{Zeroize, Zeroizing};
 
+#[cfg(feature = "noise")]
+mod native_security;
 mod open_connections;
 
 use open_connections::OpenConnections;
@@ -96,6 +98,10 @@ use crate::{AcceptedSession, Alpn, PeerID, Transport, TransportError};
 ///
 /// `_connection` is held so the QUIC connection stays open for the stream's life.
 pub struct P2pandaStream {
+    #[cfg(feature = "noise")]
+    local_peer: PeerID,
+    #[cfg(feature = "noise")]
+    service_protocol: Alpn,
     send: SendStream,
     recv: RecvStream,
     _connection: Connection,
@@ -195,6 +201,10 @@ struct QueuedStream {
 #[derive(Debug, Clone)]
 struct StreamQueueHandler {
     tx: mpsc::UnboundedSender<QueuedStream>,
+    #[cfg(feature = "noise")]
+    local_peer: PeerID,
+    #[cfg(feature = "noise")]
+    service_protocol: Alpn,
 }
 
 impl ProtocolHandler for StreamQueueHandler {
@@ -209,6 +219,10 @@ impl ProtocolHandler for StreamQueueHandler {
             .map_err(AcceptError::from_err)?;
         let _ = self.tx.send(QueuedStream {
             stream: P2pandaStream {
+                #[cfg(feature = "noise")]
+                local_peer: self.local_peer,
+                #[cfg(feature = "noise")]
+                service_protocol: self.service_protocol.clone(),
                 send,
                 recv,
                 _connection: connection,
@@ -796,7 +810,16 @@ impl P2pandaTransport {
         for alpn in &alpns {
             let (tx, rx) = mpsc::unbounded_channel();
             endpoint
-                .accept(alpn.as_bytes(), StreamQueueHandler { tx })
+                .accept(
+                    alpn.as_bytes(),
+                    StreamQueueHandler {
+                        tx,
+                        #[cfg(feature = "noise")]
+                        local_peer: peer_id,
+                        #[cfg(feature = "noise")]
+                        service_protocol: alpn.clone(),
+                    },
+                )
                 .await
                 .map_err(|e| TransportError::Backend(format!("accept register: {e}")))?;
             queues.lock().unwrap().insert(
@@ -1302,6 +1325,10 @@ impl Transport for P2pandaTransport {
             .await
             .map_err(|e| TransportError::Backend(format!("open_bi: {e}")))?;
         Ok(P2pandaStream {
+            #[cfg(feature = "noise")]
+            local_peer: self.peer_id,
+            #[cfg(feature = "noise")]
+            service_protocol: alpn,
             send,
             recv,
             _connection: conn,
@@ -1313,6 +1340,20 @@ impl Transport for P2pandaTransport {
 
     async fn accept(&self, alpn: Alpn) -> Result<AcceptedSession<P2pandaStream>, TransportError> {
         self.accept_observed(alpn).await.map(|(session, _)| session)
+    }
+
+    async fn connect_session(
+        &self,
+        peer: PeerID,
+        alpn: Alpn,
+    ) -> Result<crate::OutboundSession<P2pandaStream>, TransportError> {
+        let stream = self.connect(peer, alpn.clone()).await?;
+        Ok(crate::OutboundSession::new(
+            stream,
+            alpn,
+            Some(self.peer_id),
+            None,
+        ))
     }
 }
 

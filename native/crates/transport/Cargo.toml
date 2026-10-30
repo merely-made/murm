@@ -19,8 +19,8 @@ reticulum = ["dep:retinue", "dep:hkdf", "dep:sha2"]
 # A Noise session layer: a second, application-layer handshake that runs inside
 # a stream a carrier already opened. Off by default. It is not an alternative
 # to the iroh lane -- iroh stays the byte plane, and Noise composes over it for
-# end-to-end confidentiality through relays and for an identity distinct from
-# the carrier's. It also stands alone over TCP where there is no carrier.
+# an application identity distinct from the carrier's. Iroh already encrypts
+# through its relays. Noise also stands alone over plain TCP.
 noise = ["dep:snow", "dep:hkdf", "dep:sha2"]
 # Conversion from this crate's acceptance record into the notochord
 # layer's carrier facts. The dependency runs in this direction on purpose:

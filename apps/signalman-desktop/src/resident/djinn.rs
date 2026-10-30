@@ -1,15 +1,15 @@
 //! Djinn-backed Tucket activation. The file is public configuration only;
 //! the wallet and all seed persistence remain with the resident.
 use super::*;
-use station_custody::DjinnStationAuthority;
 use radio_hand::instances::Config;
 use selvage::personality::{ControllerConfig, CoveragePolicy, InstalledPersonalitySet};
 use serde::Deserialize;
+use station_custody::DjinnStationAuthority;
 
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 struct ConfigFile {
-    device_id: pandect::DeviceId,
+    device_id: personae::carry::DeviceId,
     port: PathBuf,
     realm: String,
     journal: PathBuf,
@@ -35,7 +35,7 @@ struct ConfigFile {
 
 struct Authority {
     djinn: DjinnStationAuthority,
-    device: pandect::DeviceId,
+    device: personae::carry::DeviceId,
     realm: String,
     tx_budget_ms: u64,
     frame_ttl_ms: u64,
@@ -209,11 +209,11 @@ mod tests {
         let dir = tempfile::tempdir().unwrap();
         let endpoint = format!(
             r"\\.\pipe\signalman-tucket-absent-{}",
-            pandect::DeviceId::new().as_uuid()
+            personae::carry::DeviceId::new().as_uuid()
         );
         let authority = Arc::new(Authority {
             djinn: DjinnStationAuthority::at(endpoint),
-            device: pandect::DeviceId::new(),
+            device: personae::carry::DeviceId::new(),
             realm: "custody-test".into(),
             tx_budget_ms: 2_000,
             frame_ttl_ms: 15_000,

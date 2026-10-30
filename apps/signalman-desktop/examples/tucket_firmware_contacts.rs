@@ -1,11 +1,11 @@
 //! Attended standalone-firmware probe. Public config, isolated Djinn bench wallet.
 //! No private material is written. Firmware setup remains volatile across reboot.
-use station_custody::DjinnStationAuthority;
 use radio_hand::{
     resident_command::Command,
     resident_wire::{ResidentSetup, SennetKey},
 };
 use serde::Deserialize;
+use station_custody::DjinnStationAuthority;
 use std::{
     path::{Path, PathBuf},
     time::{Duration, Instant},
@@ -16,7 +16,7 @@ type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 #[derive(Deserialize)]
 struct PublicConfig {
-    device_id: pandect::DeviceId,
+    device_id: personae::carry::DeviceId,
     realm: String,
     port: PathBuf,
     #[serde(default, rename = "dtr")]

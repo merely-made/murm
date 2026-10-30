@@ -518,6 +518,16 @@ impl Transport for ReticulumTransport {
         Ok(ReticulumStream::new(stream))
     }
 
+    async fn connect_session(
+        &self,
+        peer: PeerID,
+        alpn: Alpn,
+    ) -> Result<crate::OutboundSession<ReticulumStream>, TransportError> {
+        let stream = self.connect(peer, alpn.clone()).await?;
+        let link = stream.link_id();
+        Ok(crate::OutboundSession::new(stream, alpn, None, Some(link)))
+    }
+
     async fn accept(&self, alpn: Alpn) -> Result<AcceptedSession<ReticulumStream>, TransportError> {
         let queue = self
             .inbound

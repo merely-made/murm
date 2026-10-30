@@ -150,6 +150,20 @@ impl Transport for MemoryTransport {
         Ok(my_end)
     }
 
+    async fn connect_session(
+        &self,
+        peer: PeerID,
+        alpn: Alpn,
+    ) -> Result<crate::OutboundSession<DuplexStream>, TransportError> {
+        let stream = self.connect(peer, alpn.clone()).await?;
+        Ok(crate::OutboundSession::new(
+            stream,
+            alpn,
+            Some(self.peer_id),
+            None,
+        ))
+    }
+
     async fn accept(&self, alpn: Alpn) -> Result<AcceptedSession<DuplexStream>, TransportError> {
         let channel = get_or_create_channel(&self.incoming, &alpn);
         let mut rx = channel.rx.lock().await;
