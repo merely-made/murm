@@ -1,8 +1,8 @@
 # Secure sessions and optional live interaction
 
-**Status:** 2026-10-29: plan. N1–N3 (Noise and AT1) precede O1–O4
-(optional OCapN). No implementation or runtime qualification lands with this
-document.
+**Status:** 2026-10-29: N1 in progress across Murm, Dramatis/Notochord and
+Knot. N2–N3 (Noise policy and carrier qualification) and O1–O4 (optional OCapN)
+remain planned.
 
 **For:** a reusable authenticated session over Murm's ordered carriers, followed
 by an optional Rust OCapN live interaction layer on the existing iroh endpoint.
@@ -136,6 +136,12 @@ explicit. Sharing the Noise framework with another implementation does not
 establish interoperability: suite, framing, proof, negotiation and key binding
 must match. Preserve existing users or make any wire change explicitly
 versioned.
+
+Carrier protocol and authenticated inner application protocol remain separate
+facts and are both signed. The generic binding supports an opaque outer
+protocol carrying a different inner service; each service adapter checks its
+own expected values. Knot publishing deliberately requires its publishing
+protocol at both layers.
 
 Noise operates over a live bilateral session. Retained-object encryption,
 offline store-and-forward protection, group membership/epochs and message
@@ -295,6 +301,11 @@ service over an admitted second carrier using the selected secure profile.
 
 ## Findings
 
+- 2026-10-29: [`Transport::connect_session`](../native/crates/transport/src/transport.rs)
+  now returns an additive [outbound-session record](../native/crates/transport/src/outbound.rs)
+  supplied by each carrier: an authenticated initiator only where proved, and
+  the real shared-link identity where available. Unknown adapters report absent
+  facts. `local_peer_id` alone does not establish either fact.
 - 2026-10-29: the current [native workspace manifest](../native/Cargo.toml)
   sources Personae/Notochord from Dramatis and Stickleback from Eidetic. Their
   source changes belong there; the Mere runtime plan coordinates consumers and
@@ -304,19 +315,20 @@ service over an admitted second carrier using the selected secure profile.
   [`P2pandaTransport`](../native/crates/transport/src/p2panda_transport.rs)
   provides `alpns` registration and `protocol_endpoint`; endpoint reuse is an
   existing integration seam.
-- 2026-10-29: [`noise::handshake`](../native/crates/transport/src/noise.rs)
-  already implements the internal XX/BLAKE2b profile and verifies an Ed25519
-  proof over its handshake hash. That hash is computed internally but is not
-  returned as secure-channel facts.
-  [`NoiseStream`](../native/crates/transport/src/noise/stream.rs) exposes a
-  peer static key, which is not a substitute for exporting the session binding.
-  The [`noise` feature](../native/crates/transport/Cargo.toml) is default-off.
+- 2026-10-29: [`noise::handshake_with_facts`](../native/crates/transport/src/noise.rs)
+  now returns the verified role-ordered identities, exact internal XX/BLAKE2b
+  profile/version and handshake hash. The secure variants retain the inner
+  protocol and the [Notochord adapter](../native/crates/transport/src/notochord.rs)
+  converts them to the shared admission vocabulary. Legacy Noise APIs and wire
+  behavior remain intact; the [`noise` feature](../native/crates/transport/Cargo.toml)
+  remains default-off and independent of Notochord.
 - 2026-10-29: [`AcceptedSession`](../native/crates/transport/src/accepted.rs)
   and its [`Notochord conversion`](../native/crates/transport/src/notochord.rs)
   preserve absent carrier authentication and local/shared ingress distinctions.
-  `knot-editor/crates/knot-editor/src/publish_carrier.rs` currently requires
-  carrier/Noise identity equality; `publish_client.rs` checks the Noise peer
-  against the publisher ticket. N1 therefore includes real consumer/API work.
+  Knot's N1 consumer intake uses secure v2 admission while retaining equality
+  when a carrier authenticates a peer, and checks the publisher ticket before
+  disclosure. Its owning source is
+  `knot-editor/crates/knot-editor/src/publish_carrier.rs` and `publish_client.rs`.
 - 2026-10-29: the source test
   `noise_over_an_iroh_stream_layers_a_second_identity` in
   [`noise/tests.rs`](../native/crates/transport/src/noise/tests.rs) exercises
@@ -357,3 +369,6 @@ Recheck them at O1 intake because the specification and implementations evolve.
 - 2026-10-29: plan opened with Noise/AT1 before optional OCapN on the existing
   endpoint. Generic AT1 acceptance moved here; embedded AT0 remains in the
   compact-feed/local-control plan. All implementation phases remain open.
+- 2026-10-29: Murm's verified Noise facts, honest outbound carrier metadata and
+  shared conversion implemented; Dramatis's additive secure v2 admission is
+  published. Knot intake and final coordinated N1 acceptance are in progress.

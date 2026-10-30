@@ -1314,6 +1314,20 @@ impl Transport for P2pandaTransport {
     async fn accept(&self, alpn: Alpn) -> Result<AcceptedSession<P2pandaStream>, TransportError> {
         self.accept_observed(alpn).await.map(|(session, _)| session)
     }
+
+    async fn connect_session(
+        &self,
+        peer: PeerID,
+        alpn: Alpn,
+    ) -> Result<crate::OutboundSession<P2pandaStream>, TransportError> {
+        let stream = self.connect(peer, alpn.clone()).await?;
+        Ok(crate::OutboundSession::new(
+            stream,
+            alpn,
+            Some(self.peer_id),
+            None,
+        ))
+    }
 }
 
 /// Mix value p2panda-net's sync manager uses to derive the gossip *overlay*

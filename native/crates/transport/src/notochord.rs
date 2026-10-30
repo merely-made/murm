@@ -19,7 +19,7 @@
 
 use notochord::{CarrierKind, IngressFacts, ProofBinding, SessionFacts};
 
-use crate::{AcceptedSession, Alpn, PeerID, TransportKind};
+use crate::{AcceptedSession, Alpn, OutboundSession, PeerID, TransportKind};
 
 fn carrier_of(transport: TransportKind) -> CarrierKind {
     match transport {
@@ -69,6 +69,39 @@ impl<S> AcceptedSession<S> {
     pub fn into_session(self) -> (S, SessionFacts) {
         let facts = self.session_facts();
         (self.stream, facts)
+    }
+}
+
+impl<S> OutboundSession<S> {
+    /// The same canonical carrier binding the responder derives on acceptance.
+    ///
+    /// Uses facts supplied by the carrier rather than guessing from the local
+    /// routing identity. Local ingress identifiers never enter this binding.
+    pub fn proof_binding(&self) -> ProofBinding {
+        ProofBinding::initiator(
+            self.protocol.as_bytes().to_vec(),
+            self.authenticated_initiator.map(|peer| peer.to_bytes()),
+            self.shared_link,
+        )
+    }
+}
+
+#[cfg(feature = "noise")]
+impl crate::noise::NoiseSessionFacts {
+    /// Convert verified local Noise output into the shared admission vocabulary.
+    ///
+    /// This is separate from carrier facts: it never fills an absent carrier
+    /// peer or changes the original protocol, shared link or local interface.
+    pub fn secure_channel_facts(&self) -> notochord::SecureChannelFacts {
+        let handshake = self.handshake();
+        notochord::SecureChannelFacts::new(
+            handshake.profile(),
+            handshake.version(),
+            handshake.handshake_hash().to_vec(),
+            handshake.initiator().to_bytes(),
+            handshake.responder().to_bytes(),
+            self.protocol().as_bytes(),
+        )
     }
 }
 
@@ -231,5 +264,19 @@ mod tests {
         let expected = session.session_facts();
         let ((), facts) = session.into_session();
         assert_eq!(facts, expected);
+    }
+
+    #[tokio::test]
+    async fn outbound_memory_metadata_matches_the_independent_acceptance_binding() {
+        use crate::{Transport, memory::MemoryTransport};
+        let (left, right) = MemoryTransport::pair(peer(4), peer(9));
+        let alpn = Alpn::new("mere/outbound-test/v1");
+        let outbound = left.connect_session(peer(9), alpn.clone()).await.unwrap();
+        let accepted = right.accept(alpn).await.unwrap();
+        assert_eq!(outbound.authenticated_initiator, Some(peer(4)));
+        assert_eq!(
+            outbound.proof_binding(),
+            accepted.session_facts().proof_binding()
+        );
     }
 }

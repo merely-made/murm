@@ -75,6 +75,7 @@
 //! would mean either breaking interoperability or letting a foreign protocol
 //! choose our content-addressing hash.
 
+mod facts;
 mod keys;
 mod stream;
 
@@ -93,6 +94,7 @@ use identity::Ed25519Keypair;
 
 use crate::{AcceptedSession, Alpn, IngressContext, PeerID, TransportError};
 
+pub use facts::{NOISE_PROFILE, NOISE_PROFILE_VERSION, NoiseHandshakeFacts, NoiseSessionFacts};
 pub use keys::ProofError;
 pub use stream::NoiseStream;
 
@@ -121,9 +123,26 @@ fn backend(context: &str, error: impl std::fmt::Display) -> TransportError {
 /// claimed.
 pub async fn handshake<S>(
     identity: &Ed25519Keypair,
-    mut inner: S,
+    inner: S,
     initiator: bool,
 ) -> Result<(NoiseStream<S>, PeerID), TransportError>
+where
+    S: AsyncRead + AsyncWrite + Unpin,
+{
+    let (stream, facts) = handshake_with_facts(identity, inner, initiator).await?;
+    Ok((stream, facts.peer()))
+}
+
+/// Run the existing wire-compatible handshake and retain its verified binding.
+///
+/// Unlike a raw static public key, the handshake hash is fresh per connection.
+/// Both roles receive the same role-ordered participant identities and hash.
+/// Expected-peer checks and authorization remain the caller's responsibility.
+pub async fn handshake_with_facts<S>(
+    identity: &Ed25519Keypair,
+    mut inner: S,
+    initiator: bool,
+) -> Result<(NoiseStream<S>, NoiseHandshakeFacts), TransportError>
 where
     S: AsyncRead + AsyncWrite + Unpin,
 {
@@ -165,7 +184,10 @@ where
 
     // Both sides derive the same hash, and only a peer that completed this
     // handshake can sign it.
-    let handshake_hash = state.get_handshake_hash().to_vec();
+    let handshake_hash: [u8; 64] = state
+        .get_handshake_hash()
+        .try_into()
+        .map_err(|_| backend("handshake hash", "unexpected BLAKE2b hash length"))?;
     let session = state
         .into_transport_mode()
         .map_err(|e| backend("transport mode", e))?;
@@ -191,7 +213,21 @@ where
     let peer =
         keys::verify_proof(&theirs, &handshake_hash).map_err(|e| backend("peer identity", e))?;
 
-    Ok((stream, peer))
+    let local = PeerID::from_public_key(identity.public_key());
+    let (initiator_peer, responder_peer) = if initiator {
+        (local, peer)
+    } else {
+        (peer, local)
+    };
+    Ok((
+        stream,
+        NoiseHandshakeFacts {
+            initiator: initiator_peer,
+            responder: responder_peer,
+            handshake_hash,
+            local_is_initiator: initiator,
+        },
+    ))
 }
 
 /// Secure a stream the carrier already opened, and announce a protocol.
@@ -209,14 +245,36 @@ pub async fn secure_initiator<S>(
 where
     S: AsyncRead + AsyncWrite + Unpin,
 {
-    let (mut stream, peer) = handshake(identity, inner, true).await?;
+    let (stream, facts) = secure_initiator_with_facts(identity, inner, alpn).await?;
+    Ok((stream, facts.peer()))
+}
+
+/// [`secure_initiator`] retaining verified handshake and protocol facts.
+///
+/// The wire is unchanged. This adapter output can be bound to admission while
+/// leaving the original carrier authentication and shared link untouched.
+pub async fn secure_initiator_with_facts<S>(
+    identity: &Ed25519Keypair,
+    inner: S,
+    alpn: &Alpn,
+) -> Result<(NoiseStream<S>, NoiseSessionFacts), TransportError>
+where
+    S: AsyncRead + AsyncWrite + Unpin,
+{
+    let (mut stream, handshake) = handshake_with_facts(identity, inner, true).await?;
     // Noise has no ALPN concept, so the protocol name is a framed message
     // inside the session. Sending it encrypted keeps which protocol is being
     // spoken confidential, unlike TLS ALPN.
     write_len_prefixed(&mut stream, alpn.as_bytes())
         .await
         .map_err(|e| backend("alpn write", e))?;
-    Ok((stream, peer))
+    Ok((
+        stream,
+        NoiseSessionFacts {
+            handshake,
+            protocol: alpn.clone(),
+        },
+    ))
 }
 
 /// The responder half of [`secure_initiator`], returning the protocol asked for.
@@ -227,11 +285,29 @@ pub async fn secure_responder<S>(
 where
     S: AsyncRead + AsyncWrite + Unpin,
 {
-    let (mut stream, peer) = handshake(identity, inner, false).await?;
+    let (stream, facts) = secure_responder_with_facts(identity, inner).await?;
+    Ok((stream, facts.peer(), facts.protocol().clone()))
+}
+
+/// [`secure_responder`] retaining verified handshake and protocol facts.
+pub async fn secure_responder_with_facts<S>(
+    identity: &Ed25519Keypair,
+    inner: S,
+) -> Result<(NoiseStream<S>, NoiseSessionFacts), TransportError>
+where
+    S: AsyncRead + AsyncWrite + Unpin,
+{
+    let (mut stream, handshake) = handshake_with_facts(identity, inner, false).await?;
     let alpn = read_len_prefixed(&mut stream, 512)
         .await
         .map_err(|e| backend("alpn read", e))?;
-    Ok((stream, peer, Alpn::from_bytes(alpn)))
+    Ok((
+        stream,
+        NoiseSessionFacts {
+            handshake,
+            protocol: Alpn::from_bytes(alpn),
+        },
+    ))
 }
 
 /// Open a standalone Noise session over TCP: connect, handshake, announce.

@@ -24,13 +24,14 @@ their contents are re-exported at the crate root, so a caller writes
 | --- | --- |
 | `transport` | The `Transport` trait |
 | `accepted` | `AcceptedSession<S>`, `IngressContext`, `IngressInterfaceId`, `TransportKind` |
+| `OutboundSession<S>` | Outbound stream with honest initiator authentication and shared-link facts |
 | `p2panda_transport` | `P2pandaTransport`, `P2pandaTransportBuilder`, `P2pandaStream`, `KnownPeer`, `sync_overlay_topic`, re-exports `MdnsDiscoveryMode` and `RelayUrl` |
 | `memory` | `MemoryTransport::pair(a, b)`, the in-process test fixture |
 | `peer_id` | `PeerID` (newtype over `Ed25519PublicKey`; `from_public_key`, `public_key`, `to_bytes`, `from_bytes`) |
 | `alpn` | `Alpn`, a hash-friendly protocol-name newtype |
 | `blobs` | `BlobStore`, `BlobHash`, `BlobError` |
 | `error` | `TransportError` |
-| `noise` (feature) | `NoiseStream`, `NoiseListener`, `handshake`, `secure_initiator`, `secure_responder`, `connect_to`, `accept_from`, `ProofError`, `NOISE_PARAMS` |
+| `noise` (feature) | `NoiseStream`, `NoiseListener`, `handshake`, `secure_initiator`, `secure_responder`, their `*_with_facts` variants, `NoiseHandshakeFacts`, `NoiseSessionFacts`, `connect_to`, `accept_from`, `ProofError`, `NOISE_PARAMS`, `NOISE_PROFILE`, `NOISE_PROFILE_VERSION` |
 | `notochord` (feature) | `AcceptedSession::session_facts` / `into_session`, `initiator_binding`, `initiator_link_binding` |
 | `reticulum_transport` (feature) | `ReticulumTransport`, `ReticulumTransportBuilder`, `ReticulumInterface`, `ReticulumStream` |
 
@@ -57,6 +58,23 @@ only where the carrier itself authenticated it (p2panda, and `MemoryTransport`
 by construction); Reticulum reports `None`. A subject named by application
 bytes is never placed there. `is_transport_authenticated()` reads that
 distinction; `into_stream()` discards the context.
+
+`connect_session` retains outbound binding facts alongside its stream. The
+default for an unknown adapter reports no authenticated initiator or shared
+link. P2panda and the paired memory fixture report the local identity they
+prove to the responder; Reticulum reports no initiator identity and its actual
+shared link. `OutboundSession::proof_binding()` (`notochord` feature) produces
+the same common carrier context as the responder's acceptance. A local routing
+key alone is never evidence that the far end authenticated it.
+
+The Noise `*_with_facts` APIs preserve the existing wire while exposing the
+verified role-ordered Ed25519 participants, exact profile/version and fresh
+handshake hash. The secure variants also retain the authenticated inner
+protocol. With both `noise` and `notochord`,
+`NoiseSessionFacts::secure_channel_facts()` supplies the shared admission
+vocabulary; the original carrier facts stay separate and unchanged. Noise
+alone does not enable the Notochord dependency. Expected-peer checks and
+admission remain the service owner's responsibility.
 
 ## Key entry points
 
