@@ -414,6 +414,17 @@ service over an admitted second carrier using the selected secure profile.
   fixture explicitly excludes packet-level ciphertext mutation for that mode.
   Native Reticulum without Noise, physical radios and headed browsers retain
   separate qualification gates.
+- 2026-10-30: the references below, rechecked upstream for O1. Rexa's last
+  commit is 2024-06-07; it is unpublished, LGPL-3.0-or-later, and its
+  workspace takes `syrup` from a path outside the repository, so it does not
+  build on its own. The Goblins/iroh demo's Rust library is still unpublished.
+  OCapN has ratified nothing: the group agreed in August to replace Syrup with
+  a new concrete encoding ([ocapn#275](https://github.com/ocapn/ocapn/issues/275),
+  open), and on 2026-10-13 removed `op:get`, `op:index` and `op:untag`
+  ([ocapn#293](https://github.com/ocapn/ocapn/pull/293)); pipelining through
+  `op:deliver` remains. The pinned `ocapn-suite-31f0b806` profile keeps O1
+  clear of that churn; O1's "Syrup codec" wording, and the codec, follow the
+  encoding when it settles.
 
 ## External design references
 
