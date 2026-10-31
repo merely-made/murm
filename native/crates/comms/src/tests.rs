@@ -613,3 +613,27 @@ async fn inbox_surfaces_a_failing_backend_without_dropping_others() {
         ["misfin-primary", "misfin-secondary"].into_iter().collect()
     );
 }
+
+#[test]
+fn a_misfin_address_names_its_correspondent_and_nothing_else_does() {
+    use crate::misfin_correspondent;
+
+    assert_eq!(
+        misfin_correspondent("misfin://alice@example.test"),
+        Some("alice@example.test")
+    );
+    assert_eq!(
+        misfin_correspondent("MISFIN://alice@example.test/"),
+        Some("alice@example.test")
+    );
+    for other in [
+        "gemini://alice@example.test",
+        "misfin://example.test",
+        "misfin://@example.test",
+        "misfin://alice@",
+        "misfin://alice@example.test/inbox",
+        "alice@example.test",
+    ] {
+        assert_eq!(misfin_correspondent(other), None, "{other}");
+    }
+}

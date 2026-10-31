@@ -290,6 +290,17 @@ impl CommsPane {
         true
     }
 
+    /// The loaded misfin conversation with `correspondent` (`mailbox@host`), if any.
+    pub fn misfin_conversation(&self, correspondent: &str) -> Option<ConversationId> {
+        self.inbox
+            .iter()
+            .find(|c| {
+                c.id.protocol == ProtocolKind::Misfin
+                    && c.id.key.eq_ignore_ascii_case(correspondent)
+            })
+            .map(|c| c.id.clone())
+    }
+
     /// The selected conversation's metadata from the loaded list, if present.
     pub fn selected_conversation(&self) -> Option<&Conversation> {
         let id = self.selected.as_ref()?;
@@ -435,6 +446,21 @@ mod tests {
         });
         assert_eq!(pane.failures.len(), 1);
         assert_eq!(pane.failures[0].protocol, ProtocolKind::Misfin);
+    }
+
+    #[test]
+    fn misfin_conversation_matches_the_correspondent_in_the_loaded_list() {
+        let mut pane = CommsPane::new();
+        let ana = ConversationId::for_account(ProtocolKind::Misfin, "primary", "ana@example.test");
+        let mut misfin_row = conversation("ana@example.test", 10);
+        misfin_row.id = ana.clone();
+        pane.set_inbox(Inbox {
+            // A murm conversation keyed the same is not a misfin correspondent.
+            conversations: vec![conversation("ana@example.test", 20), misfin_row],
+            failures: Vec::new(),
+        });
+        assert_eq!(pane.misfin_conversation("Ana@Example.test"), Some(ana));
+        assert_eq!(pane.misfin_conversation("bob@example.test"), None);
     }
 
     #[test]
