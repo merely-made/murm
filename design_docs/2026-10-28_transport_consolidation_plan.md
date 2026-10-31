@@ -1,6 +1,7 @@
 # Transport consolidation through Murm
 
-**Status:** 2026-10-28: in progress. T1 landed; T2 to T5 open.
+**Status:** 2026-10-31: in progress. T1 landed; T2 to T6 open. T6 (admitted
+services onto the secure setup gate) added from the 2026-10-31 survey.
 
 **For:** Mark, 2026-10-28: "we should consolidate transport concerns through
 murm and not sidestep around it." This plan says what Murm owns at the family
@@ -14,7 +15,8 @@ packages belong in other repositories, which is mere
 `design_docs/mere_docs/technical_architecture/2026-10-28_source_homes_map.md`.
 Generic Noise/AT1 admission and optional OCapN live interaction are in the
 [secure-session plan](2026-10-29_secure_sessions_and_live_interaction_plan.md);
-that service reuses the endpoint authority defined here.
+that service reuses the endpoint authority defined here, and T6 moves the
+family's other admitted services onto its setup gate.
 
 ## Boundary
 
@@ -56,7 +58,8 @@ consumer has to opt out, not just one."
 isocosm `crates/isonetry/src/iroh_link.rs` (517 lines, the `iroh` feature, which
 `isometry-genet` enables) builds its own iroh `Endpoint` and parses its own
 `EndpointTicket`s, then runs one bidirectional stream per peer under ALPN
-`isometry/session/v22`. That duplicates `Transport::connect`/`accept` on an ALPN
+`isocosm/session/v25` (`isometry/session/v22` when surveyed). It admits no
+peer through Notochord; a session keys peers by a hash of the iroh remote id. That duplicates `Transport::connect`/`accept` on an ALPN
 and Murm's `encode_peer_ticket`/`decode_peer_ticket`, which use the same
 `EndpointTicket` text. The session keeps a second endpoint implementation with
 its own identity, relay and discovery defaults, and Murm's transport diagnostics
@@ -104,6 +107,26 @@ inputs.
   runs it by a stable path.
 - Needs: the Graphshell co-op harness owner.
 
+### T6. Admitted services set up through the shared gate
+
+The secure-session plan's N2 put setup and admission under one gate,
+`transport::security`: a service-owned capacity lease and deadline that run
+through admission, an owner-selected mode with no plaintext retry, and native
+iroh channel binding. Two services use it, Knot publishing and
+`murm-ocapn-transport`. The others that admit peers on Murm endpoints each
+build their own setup (Findings, 2026-10-31), so the gate's bounds do not
+reach them.
+
+- Done when: each service that admits peers on a Murm endpoint sets up through
+  `transport::security` with secure admission v2, or this plan records the
+  carrier profile it waits on. WebRTC has no `SecurityMode` profile, so
+  Graphshell's WebRTC door waits on one.
+- Done when: Murm's own `session_lane.rs` is on the gate, since a Murm service
+  outside it leaves no example of the path for the rest.
+- Needs: each service's owner: Graphshell (host and the resident's browser
+  door), Mesh, Distillery, the resident inference mesh and Gemot (commons call,
+  when its A1 lands). Isonetry follows T2.
+
 ## Findings
 
 - 2026-10-28, survey of origin/main in Mere, Eidetic, Gemot, Isocosm, Knot,
@@ -148,7 +171,24 @@ inputs.
   keeps its own `Cargo.lock`. The rustls advisory touched 20 locks in 15 repos
   on 2026-10-28. Fewer direct transport rows mean fewer manifest edits on a
   bump, not fewer locks.
+- 2026-10-31, survey of origin/main across `Code/repos` for peer admission on
+  Murm endpoints. On the shared gate (`transport::security`, secure admission
+  v2): Knot publishing (`knot-editor/crates/knot-editor/src/publish_host.rs`,
+  `publish_carrier.rs`), `murm-ocapn-transport` and the N3 fixture. Outside it:
+  - **Notochord v1 `admit_session`:** Murm's
+    [`session_lane.rs`](../native/crates/murm/src/session_lane.rs), Mere's
+    `graphshell-host` (`admission.rs`, its WebRTC door included) and
+    `mere-resident`'s `door/browser_carrier.rs`.
+  - **Murm's bounded accept with Notochord's `admit`:** Mesh's `ingress`.
+  - **Own admission:** Distillery's `inference_stage.rs` frames with Notochord
+    and admits against its mesh lease; the resident inference mesh
+    (`resident_inference/mesh_discovery.rs`) verifies its own signed claims.
+  - **Planned:** Gemot's `crates/commons/src/call.rs` names Notochord admission
+    (its A1) and calls none yet.
+  - **None:** Isonetry (T2).
 
 ## Progress
 
 - 2026-10-28: plan opened from the family survey. T1 landed: Mere `29e11b3e4` (mesh) and Gemot `2fafd5d` (commons-spine, gemot, mien).
+- 2026-10-31: refreshed T2 (Isonetry's ALPN and peer keying); T6 opened from
+  the admitted-services survey.

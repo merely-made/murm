@@ -2,10 +2,11 @@
 
 **Date:** 2026-08-25.
 
-**Status (2026-10-10):** plan; CF0/CF1 implemented and
-locally verified; later families remain unstarted. MC0 now separates the host
-canonical-operation control from the device portability and physical-carriage
-probe. No native embedded Mere result is claimed.
+**Status (2026-10-31):** plan; CF0/CF1 implemented and
+locally verified, and `tinyssb-core` has no consumer yet; later families remain
+unstarted. AT1 is fulfilled by the secure-session plan's N1. MC0 separates the
+host canonical-operation control from the device portability and
+physical-carriage probe. No native embedded Mere result is claimed.
 
 **Authority:** the
 [permissive protocol survey](2026-08-25_permissive_radio_protocol_compatibility_survey.md)
@@ -352,6 +353,16 @@ Every fixture and donor note carries `official-doc`, `observed-wire`,
 
 ## Findings
 
+- **2026-10-31:** `tinyssb-core` has no consumer. Murm's root workspace member
+  list is its only reference on origin/main across `Code/repos`. Mere's
+  frontier-sync brief
+  (`mere/design_docs/mere_docs/research/2026-09-01_frontier_sync_over_reticulum_brief.md`)
+  already takes tinySSB's per-feed frontier and DMX pattern, so the exact-wire
+  verifier adds interop with unmodified tinySSB peers and nothing else.
+  Upstream `ssbc/tinySSB` last pushed 2026-07-09, mostly Android app work. MF0
+  and TP0 return value only to someone reading feeds from such peers. MC0's
+  three-way choice waits on MF0, so the native compact carriage is gated on
+  that foreign-source probe although its first two options use no tinySSB code.
 - **2026-10-10:** the current Mere lock and exact p2panda fork were inspected.
   Iroh 1.3.0 and the newer sync primitives are already in the host graph;
   canonical device authoring and embedded p2panda execution remain unproven.

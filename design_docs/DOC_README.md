@@ -1,7 +1,7 @@
 # Murm Documentation Index
 
-- [Secure sessions and live interaction](2026-10-29_secure_sessions_and_live_interaction_plan.md): N1 shared Noise/AT1 facts landed across Murm, Dramatis and Knot with focused software/local-network acceptance; N2–N3 and optional OCapN remain planned. [Exact N1 qualification](archive_docs/2026-10-29/2026-10-29_secure_sessions_and_live_interaction_plan_receipts.md).
-- [Transport consolidation](2026-10-28_transport_consolidation_plan.md): what Murm owns family-wide, where family code reaches iroh or p2panda-net without it, and what consolidation does not cut (patch tables, lockfiles).
+- [Secure sessions and live interaction](2026-10-29_secure_sessions_and_live_interaction_plan.md): cut to open work 2026-10-31. N1–N3 and O1–O3 landed and are [archived whole](archive_docs/2026-10-31/2026-10-29_secure_sessions_and_live_interaction_plan.md); O4 handoffs/interoperability and deferred items remain, with the family fit survey in Findings. [Qualification record](archive_docs/2026-10-29/2026-10-29_secure_sessions_and_live_interaction_plan_receipts.md).
+- [Transport consolidation](2026-10-28_transport_consolidation_plan.md): what Murm owns family-wide, where family code reaches iroh or p2panda-net without it, and what consolidation does not cut (patch tables, lockfiles). T6 (2026-10-31): admitted services onto the shared secure setup gate.
 - [Resource client receive limits](2026-10-22_resource_client_limits_plan.md): early encoded/decoded Resource budgets and bounded Micron page decoding, with Turnstone-owned policy and deadlines.
 
 T114 live Tucket (2026-10-20): the [qualified endpoint receipt](../testing/receipts/tucket-t114/README.md)
@@ -334,8 +334,8 @@ supplying data-graph and identity crates.
 | Document | What it is |
 | --- | --- |
 | [`DOC_POLICY.md`](DOC_POLICY.md) | Documentation governance; canonical core plus Retinue addendum. |
-| [Transport consolidation plan](2026-10-28_transport_consolidation_plan.md) | Family transport boundary: endpoints, tickets, relays and carriers are Murm's; p2panda-core is replication vocabulary; Stickleback owns the join. T1 (domain crates name handles through Stickleback) landed 2026-10-28; Isonetry, Distillery remote and the relay fixture open. |
-| [Secure sessions and live interaction plan](2026-10-29_secure_sessions_and_live_interaction_plan.md) | N1–N3 accepted; optional bounded Rust CapTP/native endpoint and Gemot/coop integration published and qualified under a pinned interoperability subset. O4, embedded AT0 and broader product/device acceptance retain their own gates. |
+| [Transport consolidation plan](2026-10-28_transport_consolidation_plan.md) | Family transport boundary: endpoints, tickets, relays and carriers are Murm's; p2panda-core is replication vocabulary; Stickleback owns the join. T1 (domain crates name handles through Stickleback) landed 2026-10-28; Isonetry, Distillery remote, the relay fixture and admitted services onto the secure setup gate (T6) open. |
+| [Secure sessions and live interaction plan](2026-10-29_secure_sessions_and_live_interaction_plan.md) | Cut to open work 2026-10-31: N1–N3 (Noise and native iroh behind one setup gate) and O1–O3 (optional bounded CapTP runtime, Gemot/coop adapter, pinned interoperability subset) landed and are archived whole. Open: O4 handoffs, interoperability and carrier classes; native Reticulum profile, coop hosting and current-draft encoding deferred. |
 | [Reticulum License adoption](2026-10-05_reticulum_license_adoption.md) | Ruling, 2026-10-05: retinue and outrider move to the Reticulum License (0.3.0) so RNS/LXMF source can be adapted into those two crates only; RNode firmware stays unread; firmware images are no longer GPLv3. Review and adaptation rules, and upstream versions checked. Amended 2026-10-09: tulle (0.2.0) and radio-hand join, for the RNode host semantics. |
 | [RNS 1.5.7 comparative review](2026-10-07_rns_157_comparative_review.md) | First source review under the Reticulum License: Transport, Link, Resource, Identity/Packet/Channel against retinue. 39 ranked findings (11 P0 interop/safety, including the DATA-typed resource proof, unbounded bz2, wrong link-proof key, unauthenticated LINKCLOSE), provenance and lines read. P0 landed 2026-10-07 (live 17/17 on RNS 1.5.7); P1 and one-week route TTL landed 2026-10-08; P2 landed 2026-10-09. |
 | [LXMF 1.2.0 comparative review](2026-10-09_lxmf_120_comparative_review.md) | Outrider against LXMF 1.2.0: message format, stamps and tickets; client delivery; the propagation node and peering. 11 interop breaks (A, including unproved inbound messages and the ignored fetch acknowledgement), 10 node and feature items (B), efficiency (C), and the larger parity work (Outbox, link reuse, peering). Includes the provenance record. A, B and C landed 2026-10-09 (outrider 18/18, live 30/30); L1-L3 remain. |
@@ -380,7 +380,7 @@ provisioning and physical acceptance. Total decoder peak allocation remains unme
 | [RNS 1.5.4 signed-artifact receipt](../testing/receipts/rns-1.5.4-signed-artifact/README.md) | Historical first 1.5.4 slice: six CLI captures match retained 1.5.2 bytes. Rust replay covers both versions. Broader qualification followed in the repin receipt; provenance uncertainty remains. |
 | [Historical re-pin receipt, RNS 1.5.0 / LXMF 1.1.1](2026-08-23_rns_150_lxmf_111_repin_receipt.md) | Superseded pin receipt. Records the earlier flake finding and one Outrider defect fixed. |
 | [Permissive radio protocol compatibility survey](2026-08-25_permissive_radio_protocol_compatibility_survey.md) | Revision-pinned Reticulum, MeshChat, MeshCore and adjacent LoRa survey; separates donors, executable peers, radio adapters, bearers and semantic bridges. Opens no gates. |
-| [Compact signed feed and local control plan](2026-08-25_compact_signed_feed_and_local_control_plan.md) | Exact allocation-free tinySSB core; foreign-source, local-control and radio gates. October 10 refresh scopes canonical device operations across LoRa/IP using the current host sync primitives; embedded execution remains unproven. |
+| [Compact signed feed and local control plan](2026-08-25_compact_signed_feed_and_local_control_plan.md) | Exact allocation-free tinySSB core; foreign-source, local-control and radio gates. October 10 refresh scopes canonical device operations across LoRa/IP using the current host sync primitives; embedded execution remains unproven. 2026-10-31: `tinyssb-core` has no consumer; AT1 fulfilled by the secure-session plan's N1. |
 | [Peer matrix receipt](2026-08-11_prns_peer_matrix_receipt.md) | H8 three-corner interop at RNS 1.4.2. |
 | [Peer matrix at RNS 1.5.0](2026-08-23_prns_peer_matrix_rns150_receipt.md) | Historical H8 re-receipt. Seven runs, 35/35. Establishes that capture byte counts are not constants. Current H8 evidence is in the RNS 1.5.2 re-pin receipt. |
 | [Live-gate flake lane](2026-08-23_live_gate_flake_lane.md) | FLK1–FLK5. Per-gate rates, mechanisms, and what a suite run may prove. |
@@ -533,9 +533,11 @@ named owners when an implementation changes repository.
 ### Live protocols reuse Murm's endpoint authority
 
 The [secure-session plan](2026-10-29_secure_sessions_and_live_interaction_plan.md)
-sequences Noise/AT1 before optional OCapN on the existing endpoint. Keep carrier
-facts, secure-channel facts and application authority distinct; live
-capabilities invoke the owning domain's durable-operation path.
+puts Noise and native iroh security behind one setup gate,
+`transport::security`, and runs optional OCapN on the existing endpoint. A
+service that admits peers sets up through that gate. Keep carrier facts,
+secure-channel facts and application authority distinct; live capabilities
+invoke the owning domain's durable-operation path.
 
 ### Murmuration coordinates our implementations
 
