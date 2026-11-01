@@ -2554,8 +2554,9 @@ their named sources. Candidate core tests are not replacement acceptance.
 Mark accepted continuing with RTC after the comparison. `wire/crates/rtc`
 now supplies `murm-rtc`, independently selectable from the HTTP/QUIC package.
 Its default surface re-exports the one pinned Sans-I/O engine; the optional
-`udp` adapter owns one concrete local socket with caller-selected packet,
-datagram and timer budgets. It spawns no task or runtime. The host can pause
+`host` adapter owns one concrete nonblocking local socket with caller-selected
+packet, datagram and timer budgets. The optional `udp` feature adds Tokio waits
+over the same packet driver. It spawns no task or runtime. The host can pause
 data-channel reads while still servicing I/O, protocol timers and media.
 Application framing, invitations and admission stay outside this package.
 
@@ -2592,3 +2593,12 @@ previous ordinary build selection; the final selection/source audit records
 that adjustment without implying an application cutover. No isolated target,
 Cargo home or worktree was created. Genet binding and replacement-carrier
 qualification remain E1b/E2.
+
+The receiving Genet integration required nonblocking polling without installing
+an async runtime on its JS thread. `bind_host`, `poll` and `next_deadline` now
+provide that path; the existing async API uses the same packet/timer machinery.
+All five native cases pass on Rust 1.99.1 and 1.97.1, including actual encrypted
+transfer without an async runtime. Strict Clippy and formatting pass, and the
+host-only normal/build graph excludes Tokio and upper-layer consumers. The
+shared provider qualification remains native loopback, with STUN/TURN and
+application-carrier cutover open.
