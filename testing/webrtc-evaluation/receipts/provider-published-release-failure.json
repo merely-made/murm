@@ -1,0 +1,11 @@
+{
+  "schema": 1,
+  "gate": "E1a real UDP, published rtc 0.21.1",
+  "exit_code": 1,
+  "passed": 3,
+  "failed": 1,
+  "diagnostic": "Accepted unordered max_retransmits=Some(0) channel reported None. Expected Some(0).",
+  "upstream_fix": "https://github.com/webrtc-rs/rtc/commit/70901c3df6ad92dcb87d97af3d1e2fa8a2e2ae38",
+  "test_source_sha256": "a7b0dc2d12f99b285d50411a8d5169ca33b1184475b3b265d2c816cce4879b78",
+  "status": "Preserved failure before selecting the existing upstream DCEP acceptance fix."
+}

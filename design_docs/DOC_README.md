@@ -1,5 +1,7 @@
 # Murm Documentation Index
 
+WebRTC (2026-11-01): the [family move plan](2026-10-13_murm_family_move_plan.md#2026-11-01-webrtc-provider-evaluation) records E0 and the local E1a [murm-rtc provider](../wire/crates/rtc/README.md), a caller-driven RTC core and optional UDP adapter below both browser and application consumers. Genet owns the conformance and receiving gates in `genet/design_docs/2026-11-01_webrtc_conformance_plan.md`. The [E0 probe](../testing/webrtc-evaluation/README.md) stays frozen; E1a uses an exact upstream DCEP fix found by real packet tests. Genet binding and application-carrier cutover remain separate gates.
+
 - [Resource client receive limits](2026-10-22_resource_client_limits_plan.md): early encoded/decoded Resource budgets and bounded Micron page decoding, with Turnstone-owned policy and deadlines.
 
 T114 live Tucket (2026-10-20): the [qualified endpoint receipt](../testing/receipts/tucket-t114/README.md)
@@ -525,6 +527,11 @@ The MSRV does not automatically follow the working toolchain; compiler
 qualification and manifest/CI rollout remain pending.
 Host persistence, identity roots, governance and browser policy keep their
 named owners when an implementation changes repository.
+
+Shared wire implementations stay below both Genet and application transports.
+Browser APIs and WPT remain Genet's; invitations, application framing and
+admission remain above the raw connection. Repository co-location does not
+make the native peer facade a prerequisite for a generic protocol provider.
 
 ### Murmuration coordinates our implementations
 

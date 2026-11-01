@@ -139,9 +139,11 @@ wasm-bindgen-test = "0.3"
 # The native adapter's engine and runtime. Declared for everything but wasm32,
 # so enabling `native` for a browser build resolves none of it.
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-# str0m 0.23.1, chosen against webrtc-rs on a measured bake-off: 89 crates
-# against 212, and 214 MB of added compiled artifacts against 329 MB. The
-# deciding argument is not size, though: str0m is Sans-IO, and this codebase
+# str0m 0.23.1, chosen in the August bake-off against the then-current
+# webrtc-rs: 89 crates against 212, and 214 MB of added compiled artifacts
+# against 329 MB. Those historical counts do not measure rtc/webrtc 0.21.1;
+# see testing/webrtc-evaluation and Genet's 2026-11-01 conformance plan.
+# The deciding argument was not size, though: str0m is Sans-IO, and this codebase
 # already runs that way — Notochord's handshake core and this carrier's own
 # core are both deliberately I/O-free, so the WebRTC engine being I/O-free too
 # leaves exactly one file in the native stack that knows what a socket is.
@@ -149,12 +151,13 @@ wasm-bindgen-test = "0.3"
 # `default-features = false` drops two things. `examples` pulls rouille and
 # rustls for str0m's own demo web server, which has no business in a library
 # dependency graph. `aws-lc-rs` is str0m's default crypto backend and builds
-# `aws-lc-sys` from C and assembly, needing cmake and a C toolchain on every
-# machine and target this crate is built for. `rust-crypto` is the pure-Rust
-# backend (dimpl for DTLS over RustCrypto primitives): no build tooling, and
-# it cross-compiles wherever rustc does, which is what Mere's five validation
-# targets need. It is an evidence result, not a permanent rule — a deployment
-# that wants AWS-LC swaps the feature and calls
+# `aws-lc-sys` from C and assembly. `rust-crypto` selects RustCrypto primitives
+# for packet crypto, but does NOT remove AWS-LC from the current graph:
+# str0m-rust-crypto -> dimpl's rcgen feature -> aws-lc-rs. This is verified
+# against native/Cargo.lock (dimpl 0.7.4) on 2026-11-01; the previous no-C/build-
+# tooling claim was stale. Qualify the certificate-generation dependency
+# separately before promising an all-Rust build. Provider selection is not a
+# permanent rule — a deployment selecting another provider calls
 # `RtcConfig::set_crypto_provider`.
 str0m = { version = "0.23.1", optional = true, default-features = false, features = [
     "rust-crypto",

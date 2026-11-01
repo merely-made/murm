@@ -2497,3 +2497,98 @@ and the 16 KiB stack / 25% free-heap limits. Sixteen pressure rounds peak at
 peaks at 6404 bytes. Both original named firmware/profiles restore and helpers
 stop. Volatile setup, installed personal-daemon/UI integration, power cuts and
 broader routing/roles remain open in the parity plan.
+
+## 2026-11-01: WebRTC provider evaluation
+
+**Status:** E0 complete; E1a provider qualified locally on Windows.
+Genet binding and application-carrier cutover remain E1b. Mark requested
+the comparison with webrtc-rs, inspection of duplicated Murm effort and
+dependency direction, and Genet support as required for WPT. The canonical
+comparison and browser done-conditions live in
+`genet/design_docs/2026-11-01_webrtc_conformance_plan.md`. The bounded native
+source/lock and compact receipts live in
+[`testing/webrtc-evaluation`](../testing/webrtc-evaluation/README.md).
+
+The local Windows/Rust 1.99.1 probe passes six API/SDP cases, including
+cross-engine negotiation in both directions; the exact receipt scope and
+independent dependency counts live with that probe. The existing locked
+carrier also reaches AWS-LC through dimpl's rcgen feature, contrary to its old
+no-build-tooling comment; the comment is corrected without a provider change.
+No packet exchange, WPT, headed browser, relay or replacement-carrier
+qualification is inferred from these results.
+
+The HTTP/WebSocket MOVE5 split is the precedent: web semantics stay in Genet,
+generic protocol machinery can be supplied from the independent `wire/`
+workspace, and neither the generic supplier nor the VM depends on application
+admission. A separate RTC leaf there is the proposed home, pending engine and
+consumer qualification; it does not require enabling HTTP, QUIC, radio or the
+native peer workspace. This is an ownership proposal, not a new aggregate
+transport trait or a blanket source move.
+
+`native/crates/webrtc-carrier` is currently a Merely application profile over
+str0m: `Answerer`/`Driver`/`Carrier` combine sockets and peer processing with
+one configured reliable ordered channel, framed byte-stream adaptation,
+fingerprint roles, a host challenge and Luggage-bearing invitation grammar.
+`native/crates/transport` adds the known-peer, Iroh/blob/p2panda, storage and
+optional Notochord seams. Neither whole package is the generic web backend.
+
+Share the peer engine, candidate/relay handling and explicit I/O driver under
+both the application carrier and Genet's host capability. Keep the invitation,
+length-prefixed application frames, verified-fingerprint link transcript and
+admission above it. The browser's `RTCDataChannel` remains a message API with
+multiple modes and channels; it must not inherit the application's one-channel
+restriction or require Personae/Notochord. Mere's broader framing/admission
+composition proposals remain in
+`mere/design_docs/mere_docs/technical_architecture/2026-10-15_transport_agnosticism_note.md`;
+this evaluation does not settle its T1-T8 rulings.
+
+Any extraction is done only when the leaf resolves without Genet, Murm's
+conversation facade, `mere-transport`, Personae, Notochord, Luggage, storage or
+radio dependencies; both real consumers use that implementation; and the
+existing application carrier's binding, backpressure, refusal and reconnect
+receipts pass again. Preserve the existing headed/direct/relay receipts at
+their named sources. Candidate core tests are not replacement acceptance.
+
+### E1a: selected RTC provider
+
+Mark accepted continuing with RTC after the comparison. `wire/crates/rtc`
+now supplies `murm-rtc`, independently selectable from the HTTP/QUIC package.
+Its default surface re-exports the one pinned Sans-I/O engine; the optional
+`udp` adapter owns one concrete local socket with caller-selected packet,
+datagram and timer budgets. It spawns no task or runtime. The host can pause
+data-channel reads while still servicing I/O, protocol timers and media.
+Application framing, invitations and admission stay outside this package.
+
+The real UDP test exposed the published 0.21.1 release's loss of accepted
+data-channel reliability settings. Upstream already fixed both the SCTP
+stream's behavior and the public channel attributes in
+[`70901c3`](https://github.com/webrtc-rs/rtc/commit/70901c3df6ad92dcb87d97af3d1e2fa8a2e2ae38),
+so this provider uses that exact Git revision, including its workspace
+protocol crates. It does not patch the registry cache or depend on a root
+Cargo patch that downstream consumers would fail to inherit. Registry
+publication is disabled until a released engine contains the fix. E0's
+published-release source and receipts remain unchanged.
+
+Native qualification covers real ICE/DTLS/SCTP over loopback UDP, two channel
+modes including accepted `maxRetransmits: 0`, UTF-8 and a fragmented 48,000-byte
+binary message, reverse traffic while application reads are paused, certificate
+fingerprints derived from the handshake, local/remote DTLS closure, cancellation
+and socket release, invalid route/budget refusal and oversize datagrams.
+No induced-loss, saturated-window, media, STUN/TURN, browser or WPT result is
+inferred. The first compile failure, the release reliability failure and a
+transport-close observation repair retain compact receipts in
+`testing/webrtc-evaluation/receipts/`; success qualification is recorded there
+separately. All receipts share the existing 1 MB cap and reusable target.
+
+E1a passes all four native cases on working Rust 1.99.1 and shared MSRV
+1.97.1, the default core-only compile, strict Clippy and formatting. A
+normal/build dependency audit proves one exact RTC source and excludes Tokio
+from the core as well as HTTP/QUIC, the peer stack and all application owners.
+The source and binary hashes are in `provider-qualification.json`; the
+independent graph is in `provider-boundaries.json`. The exact workspace
+manifest used for those package-scoped gates is preserved alongside them.
+Afterward, `default-members = ["crates/wire"]` preserves the wire workspace's
+previous ordinary build selection; the final selection/source audit records
+that adjustment without implying an application cutover. No isolated target,
+Cargo home or worktree was created. Genet binding and replacement-carrier
+qualification remain E1b/E2.

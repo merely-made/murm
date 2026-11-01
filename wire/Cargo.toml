@@ -1,3 +1,5 @@
 [workspace]
 resolver = "2"
-members = ["crates/wire"]
+members = ["crates/wire", "crates/rtc"]
+# Keep the ordinary HTTP/WebSocket build unchanged; select RTC explicitly.
+default-members = ["crates/wire"]

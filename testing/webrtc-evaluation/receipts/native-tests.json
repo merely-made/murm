@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "recorded_at_utc": "2026-11-01T14:15:05.316227+00:00",
+  "scope": "Native SDP negotiation/API only. No ICE/DTLS/SCTP/data exchange, Genet JS, WPT, headed browser, TURN or media qualification.",
+  "command": "cargo test --manifest-path testing/webrtc-evaluation/Cargo.toml --no-default-features --features rtc-core,str0m-core -j 1",
+  "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+  "repository_head": "93885664a0c26d84638b609205dd2e31e3aca12d",
+  "source_state": "New evaluation files were uncommitted at execution; exact hashes below.",
+  "environment": {
+    "CARGO_TARGET_DIR": "C:\\t\\cargo-targets\\retinue",
+    "CARGO_BUILD_BUILD_DIR": "C:\\t\\cargo-targets\\retinue\\build",
+    "CARGO_PROFILE_DEV_DEBUG": "0"
+  },
+  "files_sha256": {
+    "Cargo.toml": "fa8010921008d5b078a88b0211352822ee2b41b01929c3aa0385989ebdde0d9d",
+    "Cargo.lock": "22dd9aeb1da1f4e3f73738c940f877c107eabcb446a173a6b8624eb851494618",
+    "evaluation.rs": "073715f0a94697fe2b4dda27a72fbd1a56719bbc425bded31f8c71447de00609"
+  },
+  "test_binary_sha256": "6e8496ab8a46e08f1a0d8833d79d5c702168107fc919476717a477167b8c01eb",
+  "process_exit_code": 0,
+  "tests": [
+    {
+      "name": "rtc_core::invalid_channel_options_and_closed_connection_are_refused",
+      "outcome": "passed"
+    },
+    {
+      "name": "rtc_core::rollback_clears_pending_offer_and_allows_a_fresh_offer",
+      "outcome": "passed"
+    },
+    {
+      "name": "rtc_core::offer_answer_preserves_pending_and_current_descriptions",
+      "outcome": "passed"
+    },
+    {
+      "name": "sdp_interop::str0m_offer_is_accepted_by_rtc_and_its_answer_by_str0m",
+      "outcome": "passed"
+    },
+    {
+      "name": "sdp_interop::rtc_offer_is_accepted_by_str0m_and_its_answer_by_rtc",
+      "outcome": "passed"
+    },
+    {
+      "name": "str0m_core::native_data_channel_offer_answer_uses_the_existing_crypto_configuration",
+      "outcome": "passed"
+    }
+  ],
+  "totals": {
+    "passed": 6,
+    "failed": 0,
+    "ignored": 0,
+    "filtered_out": 0
+  }
+}
