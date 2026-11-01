@@ -663,3 +663,11 @@ Stop when any of these occurs:
 - public packaging of the private Genet/Mere composition;
 - Micron fetching before its engine and the R-A/R-B carriage gates both pass;
 - any claim that a host fixture proves RF, headed UI, or two-site operation.
+
+## Current consumer name (2026-10-26)
+
+The desktop consumer now depends on Mere's `station-custody` package and
+imports `station_custody` directly. The former `mere-signalman` port name is
+retired; the adapter lives under Mere's system custody owner. This rename
+does not change Signalman AppIds, salts, wire IDs, or behavior. Current Mere
+CLI names are `station-provision` and `station-claim`.

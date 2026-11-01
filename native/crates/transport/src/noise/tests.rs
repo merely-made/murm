@@ -33,6 +33,174 @@ async fn listener() -> (TcpListener, SocketAddr) {
 }
 
 #[tokio::test]
+async fn verified_facts_share_role_order_protocol_and_fresh_handshake_hash() {
+    let (server, client) = (keypair(40), keypair(41));
+    let server_id = PeerID::from_public_key(server.public_key());
+    let client_id = PeerID::from_public_key(client.public_key());
+    let alpn = Alpn::new("mere/noise-facts/v1");
+    let mut hashes = Vec::new();
+    for _ in 0..2 {
+        let (client_stream, server_stream) = tokio::io::duplex(4096);
+        let (initiator, responder) = tokio::join!(
+            secure_initiator_with_facts(&client, client_stream, &alpn),
+            secure_responder_with_facts(&server, server_stream),
+        );
+        let (_, initiator) = initiator.unwrap();
+        let (_, responder) = responder.unwrap();
+        for facts in [&initiator, &responder] {
+            assert_eq!(facts.handshake().initiator(), client_id);
+            assert_eq!(facts.handshake().responder(), server_id);
+            assert_eq!(facts.handshake().profile(), NOISE_PROFILE);
+            assert_eq!(facts.handshake().version(), NOISE_PROFILE_VERSION);
+            assert_eq!(facts.protocol(), &alpn);
+        }
+        assert_eq!(initiator.peer(), server_id);
+        assert_eq!(responder.peer(), client_id);
+        assert_eq!(
+            initiator.handshake().handshake_hash(),
+            responder.handshake().handshake_hash()
+        );
+        hashes.push(*initiator.handshake().handshake_hash());
+    }
+    assert_ne!(
+        hashes[0], hashes[1],
+        "reconnecting with the same identity keys creates a fresh binding"
+    );
+}
+
+#[tokio::test]
+async fn retaining_facts_preserves_both_legacy_wire_roles() {
+    let (server, client) = (keypair(42), keypair(43));
+    let alpn = Alpn::new("mere/noise-facts/v1");
+    let (client_stream, server_stream) = tokio::io::duplex(4096);
+    let (initiator, responder) = tokio::join!(
+        secure_initiator(&client, client_stream, &alpn),
+        secure_responder_with_facts(&server, server_stream),
+    );
+    assert_eq!(
+        initiator.unwrap().1,
+        PeerID::from_public_key(server.public_key())
+    );
+    assert_eq!(responder.unwrap().1.protocol(), &alpn);
+
+    let (client_stream, server_stream) = tokio::io::duplex(4096);
+    let (initiator, responder) = tokio::join!(
+        secure_initiator_with_facts(&client, client_stream, &alpn),
+        secure_responder(&server, server_stream),
+    );
+    assert_eq!(
+        initiator.unwrap().1.peer(),
+        PeerID::from_public_key(server.public_key())
+    );
+    assert_eq!(responder.unwrap().2, alpn);
+}
+
+#[cfg(feature = "notochord")]
+#[tokio::test]
+async fn secure_admission_binding_preserves_carrier_and_binds_real_noise_facts() {
+    use crate::{AcceptedSession, IngressContext, IngressInterfaceId, OutboundSession};
+    use identity::InMemoryProvider;
+    use notochord::{NetworkId, ProfileRef, RequestedAction, SessionHello, TrafficClass};
+
+    let (server, client) = (keypair(44), keypair(45));
+    let outer = Alpn::new("mere/secure-carrier/v1");
+    let inner = Alpn::new("mere/private-service/v1");
+    let link = [0xad; 16];
+    let (client_stream, server_stream) = tokio::io::duplex(4096);
+    let outbound = OutboundSession::new(client_stream, outer.clone(), None, Some(link));
+    let accepted = AcceptedSession::new(
+        server_stream,
+        outer.clone(),
+        None,
+        IngressContext::reticulum(IngressInterfaceId(19), link),
+    );
+    let carrier_facts = accepted.session_facts();
+    let unchanged = carrier_facts.clone();
+    let initiator_carrier = outbound.proof_binding();
+    assert_eq!(initiator_carrier, carrier_facts.proof_binding());
+    let (initiator, responder) = tokio::join!(
+        secure_initiator_with_facts(&client, outbound.stream, &inner),
+        secure_responder_with_facts(&server, accepted.stream),
+    );
+    let (_, initiator) = initiator.unwrap();
+    let (_, responder) = responder.unwrap();
+    let initiator = initiator_carrier.with_secure_channel(initiator.secure_channel_facts());
+    let responder = carrier_facts.secure_proof_binding(&responder.secure_channel_facts());
+    assert_eq!(
+        initiator, responder,
+        "both adapters derive the same common binding"
+    );
+    assert_eq!(carrier_facts, unchanged);
+    assert_eq!(carrier_facts.authenticated_initiator, None);
+    assert_eq!(carrier_facts.ingress.local_interface, Some(19));
+    assert_eq!(carrier_facts.ingress.shared_link, Some(link));
+    assert_ne!(
+        responder.carrier.protocol,
+        responder.secure_channel.protocol
+    );
+
+    let hello = SessionHello::issue_secure(
+        &InMemoryProvider::from_seed([45; 32]),
+        NetworkId([3; 32]),
+        ProfileRef {
+            id: "mere.base".into(),
+            revision: 1,
+        },
+        RequestedAction {
+            domain: "mere.network".into(),
+            path: "/services/test".into(),
+            action: "read".into(),
+        },
+        TrafficClass::Interactive,
+        [41; 32],
+        &initiator,
+        Vec::new(),
+    )
+    .unwrap();
+    assert!(hello.verify_secure_proof(&responder));
+
+    let mut changed = responder.clone();
+    changed.secure_channel.handshake_hash[0] ^= 1;
+    assert!(
+        !hello.verify_secure_proof(&changed),
+        "another secure session cannot reuse the proof"
+    );
+    let mut changed = responder.clone();
+    std::mem::swap(
+        &mut changed.secure_channel.initiator,
+        &mut changed.secure_channel.responder,
+    );
+    assert!(
+        !hello.verify_secure_proof(&changed),
+        "participant roles cannot be reflected"
+    );
+    let mut changed = responder.clone();
+    changed.secure_channel.protocol = b"mere/other-service/v1".to_vec();
+    assert!(
+        !hello.verify_secure_proof(&changed),
+        "the inner protocol is bound"
+    );
+    let mut changed = responder.clone();
+    changed.carrier.protocol = b"mere/other-carrier/v1".to_vec();
+    assert!(
+        !hello.verify_secure_proof(&changed),
+        "the outer protocol is independently bound"
+    );
+    let mut changed = responder.clone();
+    changed.carrier.shared_link = Some([0xbd; 16]);
+    assert!(
+        !hello.verify_secure_proof(&changed),
+        "another Reticulum link cannot reuse the proof"
+    );
+    let mut changed = responder;
+    changed.secure_channel.version += 1;
+    assert!(
+        !hello.verify_secure_proof(&changed),
+        "the security profile version is bound"
+    );
+}
+
+#[tokio::test]
 async fn a_session_is_encrypted_and_both_peers_are_proven() {
     let (server_keys, client_keys) = (keypair(1), keypair(2));
     let server_id = PeerID::from_public_key(server_keys.public_key());
@@ -282,11 +450,13 @@ async fn noise_over_an_iroh_stream_layers_a_second_identity() {
         let alpn = alpn.clone();
         tokio::spawn(async move {
             // The carrier opens the stream; Noise runs *inside* it.
-            let carrier_stream = alice
-                .connect(bob_carrier_id, alpn.clone())
+            let outbound = alice
+                .connect_session(bob_carrier_id, alpn.clone())
                 .await
                 .expect("iroh connect");
-            let (mut secured, peer) = secure_initiator(&alice_app, carrier_stream, &alpn)
+            assert_eq!(outbound.authenticated_initiator, Some(alice_carrier_id));
+            assert_eq!(outbound.shared_link, None);
+            let (mut secured, peer) = secure_initiator(&alice_app, outbound.stream, &alpn)
                 .await
                 .expect("noise handshake over iroh");
 

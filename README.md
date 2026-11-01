@@ -8,7 +8,10 @@ repository is [merely-made/murm](https://github.com/merely-made/murm). See the
 receiving-build and consumer-cutover status.
 
 The radio workspace stays at the root. The separate `native/` workspace contains
-`murm`, `mere-transport`, and `murm-webrtc`. The independent `wire/`
+`murm`, `mere-transport`, `murm-webrtc`, and the separately optional
+[`murm-ocapn`](native/crates/ocapn/README.md) and
+[`murm-ocapn-transport`](native/crates/ocapn-transport/README.md) packages.
+The independent `wire/`
 workspace provides `murm-wire`, the reusable one-hop HTTP/1-2-3 and raw
 WebSocket engines. All use Rust 1.99.1 for development and declare a shared
 MSRV of 1.97.1. Build the native libraries with
@@ -63,6 +66,8 @@ Each crate has its own README with more detail, and here's a generated overview.
 | `murm` | Peer conversation service in `native/crates/murm`; immutable Git source, package identity preserved. | Git |
 | `mere-transport` | Native peer carriers in `native/crates/transport`. | Git |
 | `murm-webrtc` | Portable WebRTC core with optional browser/native adapters. | Git |
+| `murm-ocapn` | Optional bounded Rust CapTP runtime with a pinned interoperability subset. | Git |
+| `murm-ocapn-transport` | Bounded native iroh admission on the host's existing endpoint; product authority stays with its owner. | Git |
 | `retinue` | Reticulum protocol: identity, announces, links, requests, Resources, routing. `no_std + alloc` core with a tokio shell. | published |
 | `outrider` | LXMF: message codec, direct and opportunistic delivery, propagation client and server. | published |
 | `postilion` | Shared radio-host library: a Station wraps one identity, one board, an announce cadence and a peer table. | published |

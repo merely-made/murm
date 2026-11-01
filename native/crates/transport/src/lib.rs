@@ -56,12 +56,16 @@ pub mod memory;
 pub mod noise;
 #[cfg(feature = "notochord")]
 pub mod notochord;
+mod outbound;
 mod p2panda_host;
 pub mod p2panda_transport;
 mod peer_id;
 mod peer_route;
 #[cfg(feature = "reticulum")]
 pub mod reticulum_transport;
+/// Owner-selected session security with bounded setup and admission leases.
+#[cfg(feature = "noise")]
+pub mod security;
 mod transport;
 
 pub use crate::accepted::{AcceptedSession, IngressContext, IngressInterfaceId, TransportKind};
@@ -70,6 +74,7 @@ pub use crate::blobs::{
     BlobError, BlobHash, BlobLease, BlobPeerAuthorizer, BlobReadAuthorizer, BlobScope, BlobStore,
 };
 pub use crate::error::TransportError;
+pub use crate::outbound::OutboundSession;
 pub use crate::p2panda_host::{P2pandaHostPolicy, P2pandaOverlayHost, RejectedPeerHint};
 pub use crate::p2panda_transport::{
     BoundedAcceptHandle, BoundedAcceptStats, P2pandaStream, P2pandaTransport, sync_overlay_topic,

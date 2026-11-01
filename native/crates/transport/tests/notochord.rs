@@ -31,8 +31,6 @@ use notochord::{
     TrustedRoot, accept_session, initiate_session,
 };
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
-#[cfg(feature = "reticulum")]
-use transport::initiator_link_binding;
 use transport::memory::MemoryTransport;
 use transport::{Alpn, PeerID, Transport, initiator_binding};
 
@@ -212,6 +210,132 @@ mod reticulum {
         }
     }
 
+    #[cfg(feature = "noise")]
+    #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+    async fn reticulum_tcp_noise_admits_a_secure_subject_on_the_real_shared_link() {
+        tokio::time::timeout(Duration::from_secs(45), async {
+            use notochord::{SecureIdentityPolicy, admit_session_secure};
+            use transport::noise::{secure_initiator_with_facts, secure_responder_with_facts};
+
+            let socket = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+            let port = socket.local_addr().unwrap().port();
+            drop(socket);
+            let alpn = Alpn::new("mere/murm/v1");
+            let server_carrier = Ed25519Keypair::from_seed([71; 32]);
+            let client_carrier = Ed25519Keypair::from_seed([72; 32]);
+            let server_peer = PeerID::from_public_key(server_carrier.public_key());
+            let server_noise = Ed25519Keypair::from_seed([73; 32]);
+            let expected_server_noise = PeerID::from_public_key(server_noise.public_key());
+            let client_noise = Ed25519Keypair::from_seed([4; 32]);
+            let expected_subject = member().master_public_key().to_bytes();
+
+            let server = ReticulumTransport::builder(&server_carrier)
+                .alpns(vec![alpn.clone()])
+                .interfaces(vec![iface_server(port)])
+                .announce_interval(Duration::from_millis(200))
+                .reliable_links(true)
+                .bind()
+                .await
+                .unwrap();
+            let client = ReticulumTransport::builder(&client_carrier)
+                .alpns(vec![alpn.clone()])
+                .interfaces(vec![iface_client(port)])
+                .announce_interval(Duration::from_millis(200))
+                .reliable_links(true)
+                .bind()
+                .await
+                .unwrap();
+            let (read_done_tx, read_done) = tokio::sync::oneshot::channel::<()>();
+            let server_alpn = alpn.clone();
+            let responder = tokio::spawn(async move {
+                let accepted = server.accept(server_alpn).await.unwrap();
+                assert_eq!(accepted.peer, None);
+                let carrier = accepted.session_facts();
+                let original = carrier.clone();
+                let (stream, noise) = secure_responder_with_facts(&server_noise, accepted.stream)
+                    .await
+                    .unwrap();
+                assert_eq!(noise.peer().to_bytes(), expected_subject);
+                let secure_channel = noise.secure_channel_facts();
+                let mut admitted = admit_session_secure(
+                    stream,
+                    &policy(ServiceAccess::MemberOnly),
+                    &RevocationLedger::new(),
+                    &carrier,
+                    &secure_channel,
+                    SecureIdentityPolicy::MatchCarrierWhenPresent,
+                    NOW_MS,
+                    0,
+                )
+                .await
+                .unwrap()
+                .unwrap();
+                assert_eq!(admitted.session.facts, original);
+                assert_eq!(admitted.session.facts.authenticated_initiator, None);
+                assert_eq!(admitted.session.principal.subject, expected_subject);
+                admitted
+                    .session
+                    .stream
+                    .write_all(APPLICATION_BYTES)
+                    .await
+                    .unwrap();
+                admitted.session.stream.flush().await.unwrap();
+                let _ = read_done.await;
+                (carrier, secure_channel)
+            });
+
+            let outbound = client
+                .connect_session(server_peer, alpn.clone())
+                .await
+                .unwrap();
+            assert_eq!(outbound.authenticated_initiator, None);
+            assert_eq!(outbound.shared_link, Some(outbound.stream.link_id()));
+            let carrier_binding = outbound.proof_binding();
+            let (mut stream, noise) =
+                secure_initiator_with_facts(&client_noise, outbound.stream, &alpn)
+                    .await
+                    .unwrap();
+            assert_eq!(noise.peer(), expected_server_noise);
+            let secure_channel = noise.secure_channel_facts();
+            let binding = carrier_binding.with_secure_channel(secure_channel.clone());
+            let hello = SessionHello::issue_secure(
+                &member(),
+                NETWORK,
+                ProfileRef {
+                    id: "mere.base".into(),
+                    revision: 1,
+                },
+                RequestedAction {
+                    domain: "mere.network".into(),
+                    path: MURM.into(),
+                    action: "connect".into(),
+                },
+                TrafficClass::Interactive,
+                [81; 32],
+                &binding,
+                vec![grant_to(expected_subject)],
+            )
+            .unwrap();
+            let reply = initiate_session(
+                &mut stream,
+                &hello,
+                &policy(ServiceAccess::MemberOnly).limits,
+            )
+            .await
+            .unwrap();
+            assert!(reply.is_accept());
+            let mut application = vec![0; APPLICATION_BYTES.len()];
+            stream.read_exact(&mut application).await.unwrap();
+            assert_eq!(application, APPLICATION_BYTES);
+            let _ = read_done_tx.send(());
+            let (server_carrier, server_secure) = responder.await.unwrap();
+            assert_eq!(server_carrier.proof_binding(), binding.carrier);
+            assert_eq!(server_secure, secure_channel);
+        })
+        .await
+        .expect("Reticulum/Noise/v2 exchange must finish within its fixture deadline");
+    }
+
     /// The Reticulum arm. Acceptance here is best-effort: the transport cannot
     /// name the initiator, so `peer` is `None` and the session proof is the
     /// only thing that establishes a subject. The transcript still binds the
@@ -287,19 +411,21 @@ mod reticulum {
             (decision, facts)
         });
 
-        let mut stream = tokio::time::timeout(
+        let outbound = tokio::time::timeout(
             Duration::from_secs(25),
-            client.connect(server_peer, alpn.clone()),
+            client.connect_session(server_peer, alpn.clone()),
         )
         .await
         .expect("connect timed out")
         .expect("connect failed");
 
-        // The initiator learns the link it opened from its own stream. Both
-        // ends of a retinue link compute the same id, so this matches what the
-        // responder independently observed, and the proof verifies there.
-        let binding = initiator_link_binding(&alpn, stream.link_id());
-        let stream_link = stream.link_id();
+        // Carrier metadata reports the real shared link, never a guessed local
+        // identity. It must agree with both the stream and responder facts.
+        let binding = outbound.proof_binding();
+        assert_eq!(outbound.authenticated_initiator, None);
+        assert_eq!(outbound.shared_link, Some(outbound.stream.link_id()));
+        let stream_link = outbound.stream.link_id();
+        let mut stream = outbound.stream;
         let reply = tokio::time::timeout(
             Duration::from_secs(30),
             initiate_session(

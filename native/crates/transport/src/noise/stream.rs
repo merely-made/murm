@@ -38,8 +38,8 @@ pub(super) const MAX_MESSAGE: usize = 65535;
 /// Payload budget once the 16-byte AEAD tag is accounted for.
 pub(super) const MAX_PLAINTEXT: usize = MAX_MESSAGE - 16;
 
-/// Read one length-prefixed Noise message from `stream`.
-pub(super) async fn read_frame<S>(stream: &mut S) -> io::Result<Vec<u8>>
+/// Refuse a declared frame past the setup budget before allocating its body.
+pub(super) async fn read_frame_limited<S>(stream: &mut S, maximum: usize) -> io::Result<Vec<u8>>
 where
     S: AsyncRead + Unpin,
 {
@@ -48,6 +48,12 @@ where
     let mut length = [0u8; 2];
     stream.read_exact(&mut length).await?;
     let length = usize::from(u16::from_be_bytes(length));
+    if length > maximum {
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidData,
+            "noise frame limit",
+        ));
+    }
     let mut frame = vec![0u8; length];
     stream.read_exact(&mut frame).await?;
     Ok(frame)
@@ -186,7 +192,7 @@ where
                         }
                     }
                     if *filled == buffer.len() {
-                        let mut plaintext = vec![0u8; MAX_MESSAGE];
+                        let mut plaintext = vec![0u8; buffer.len()];
                         let written = this
                             .session
                             .read_message(buffer, &mut plaintext)
@@ -236,7 +242,7 @@ where
 
         // One frame per poll; a longer write is split and the caller loops.
         let take = buf.len().min(MAX_PLAINTEXT);
-        let mut ciphertext = vec![0u8; MAX_MESSAGE];
+        let mut ciphertext = vec![0u8; take + 16];
         let written = this
             .session
             .write_message(&buf[..take], &mut ciphertext)
