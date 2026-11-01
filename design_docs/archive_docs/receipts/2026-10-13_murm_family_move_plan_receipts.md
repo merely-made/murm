@@ -214,3 +214,62 @@ Earlier E0/E1a receipts remain in their original, cited location.
   "rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: x86_64-pc-windows-msvc\nrelease: 1.99.1\nLLVM version: 23.1.1\n"
 }
 ```
+
+## 2026-11-01: earlier RTC provider notes
+
+Moved from the plan under the documentation policy; cited E0/E1a files remain
+in their original location.
+
+### E1a: selected RTC provider
+
+Mark accepted continuing with RTC after the comparison. `wire/crates/rtc`
+now supplies `murm-rtc`, independently selectable from the HTTP/QUIC package.
+Its default surface re-exports the one pinned Sans-I/O engine; the optional
+`host` adapter owns one concrete nonblocking local socket with caller-selected
+packet, datagram and timer budgets. The optional `udp` feature adds Tokio waits
+over the same packet driver. It spawns no task or runtime. The host can pause
+data-channel reads while still servicing I/O, protocol timers and media.
+Application framing, invitations and admission stay outside this package.
+
+The real UDP test exposed the published 0.21.1 release's loss of accepted
+data-channel reliability settings. Upstream already fixed both the SCTP
+stream's behavior and the public channel attributes in
+[`70901c3`](https://github.com/webrtc-rs/rtc/commit/70901c3df6ad92dcb87d97af3d1e2fa8a2e2ae38),
+so this provider uses that exact Git revision, including its workspace
+protocol crates. It does not patch the registry cache or depend on a root
+Cargo patch that downstream consumers would fail to inherit. Registry
+publication is disabled until a released engine contains the fix. E0's
+published-release source and receipts remain unchanged.
+
+Native qualification covers real ICE/DTLS/SCTP over loopback UDP, two channel
+modes including accepted `maxRetransmits: 0`, UTF-8 and a fragmented 48,000-byte
+binary message, reverse traffic while application reads are paused, certificate
+fingerprints derived from the handshake, local/remote DTLS closure, cancellation
+and socket release, invalid route/budget refusal and oversize datagrams.
+No induced-loss, saturated-window, media, STUN/TURN, browser or WPT result is
+inferred. The first compile failure, the release reliability failure and a
+transport-close observation repair retain compact receipts in
+`testing/webrtc-evaluation/receipts/`; success qualification is recorded there
+separately. All receipts share the existing 1 MB cap and reusable target.
+
+E1a passes all four native cases on working Rust 1.99.1 and shared MSRV
+1.97.1, the default core-only compile, strict Clippy and formatting. A
+normal/build dependency audit proves one exact RTC source and excludes Tokio
+from the core as well as HTTP/QUIC, the peer stack and all application owners.
+The source and binary hashes are in `provider-qualification.json`; the
+independent graph is in `provider-boundaries.json`. The exact workspace
+manifest used for those package-scoped gates is preserved alongside them.
+Afterward, `default-members = ["crates/wire"]` preserves the wire workspace's
+previous ordinary build selection; the final selection/source audit records
+that adjustment without implying an application cutover. No isolated target,
+Cargo home or worktree was created. Genet binding and replacement-carrier
+qualification remain E1b/E2.
+
+The receiving Genet integration required nonblocking polling without installing
+an async runtime on its JS thread. `bind_host`, `poll` and `next_deadline` now
+provide that path; the existing async API uses the same packet/timer machinery.
+All five native cases pass on Rust 1.99.1 and 1.97.1, including actual encrypted
+transfer without an async runtime. Strict Clippy and formatting pass, and the
+host-only normal/build graph excludes Tokio and upper-layer consumers. The
+shared provider qualification remains native loopback, with STUN/TURN and
+application-carrier cutover open.
