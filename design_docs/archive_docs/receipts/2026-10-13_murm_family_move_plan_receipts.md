@@ -342,3 +342,15 @@ Review against [JSEP section 7.3](https://www.rfc-editor.org/rfc/rfc9429.html#se
   "wire/crates/rtc/tests/turn.rs": "8c238abe5633f78d816b1eabd97497bb1c10a868675c5935d777f8af07e22d9c"
 }
 ```
+
+
+## 2026-11-01: local gatherer metadata retained
+
+Genet relay intake caught a local-URL omission: the core deliberately strips the URL in signaling to_json. The driver now supplies the URL explicitly when registering local candidates. The core exposes it on the candidate event, separately from the protocol candidate; receivers retain it as local metadata. Controlled STUN/TURN 3/3 pass on working Rust and MSRV, now asserting event URL presence and signaling URL absence, with strict all-target Clippy passing. Initial new assertions caught the omission; no prior receipt is changed.
+
+```json
+{
+  "wire/crates/rtc/src/udp/discovery.rs": "f1b0ba5d1d1f8129d34cf275412ac33d9232e80f285bd36a3ea144a3b83d4414",
+  "wire/crates/rtc/tests/turn.rs": "fc3840a2f78e3d022839354a60e62e3400adf037e7faba3b9b9de2c98f12991e"
+}
+```
