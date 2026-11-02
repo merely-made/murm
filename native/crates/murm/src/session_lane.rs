@@ -18,10 +18,19 @@
 //! self-describing cabal id, and the per-author log rule, and is idempotent.
 //! A post arriving here and on gossip lands once.
 //!
+//! ## Setup
+//!
+//! Every session reserves from its [`SessionLane`]'s shared gate before
+//! security runs and keeps that lease, with one deadline and fixed byte
+//! budgets, through admission (consolidation T6). The owner picks the profile
+//! by the method it calls: native iroh security on p2panda, Noise on any other
+//! ordered carrier. A profile that fails is a refusal; nothing retries a
+//! weaker one. Admission is Notochord's secure v2, so the subject signs this
+//! exact channel and a hello lifted from another channel does not verify.
+//!
 //! ## What admission buys
 //!
-//! [`serve_session`] runs the bounded handshake before anything else. A
-//! refused peer gets a well-formed `DenyReason`, its stream is finished, and
+//! A refused peer gets a well-formed `DenyReason`, its stream is finished, and
 //! `ingest_post` is never reached — the engine does not see a byte. An
 //! admitted peer's [`AdmittedPrincipal`] is returned alongside the count of
 //! what it sent, so a caller can attribute traffic to the subject the proof
@@ -29,12 +38,20 @@
 
 use std::sync::Arc;
 
+use identity::{Ed25519Keypair, IdentityProvider};
+use insigne::delegation::SignedDelegationCertificate;
 use notochord::{
-    AdmittedPrincipal, DenyReason, FrameError, LocalNetworkPolicy, ProofBinding, RevocationLedger,
-    SessionFacts, SessionHello, admit_session, initiate_session, read_frame_or_eof, write_frame,
+    AdmittedPrincipal, DenyReason, FrameError, LocalNetworkPolicy, NetworkId, ProfileRef,
+    ProofBinding, RequestedAction, RevocationLedger, SecureIdentityPolicy, SessionFacts,
+    SessionHello, SessionReply, TrafficClass, admit_session_secure, initiate_session,
+    read_frame_or_eof, write_frame,
 };
 use tokio::io::{AsyncRead, AsyncWrite, AsyncWriteExt};
-use transport::AcceptedSession;
+use transport::security::{
+    PreparedStream, ServiceSecurityPolicy, SessionSecurityFacts, SetupError, SetupGate, SetupGuard,
+    SetupLimits, SetupStats,
+};
+use transport::{AcceptedSession, Alpn, P2pandaStream, P2pandaTransport, PeerID, Transport};
 
 use crate::conversation_engine::ConversationEngine;
 use crate::error::MurmError;
@@ -75,31 +92,188 @@ fn framing(error: FrameError) -> MurmError {
     MurmError::Backend(error.to_string())
 }
 
+fn backend(error: impl std::fmt::Display) -> MurmError {
+    MurmError::Backend(error.to_string())
+}
+
 /// Everything the owner's rule needs to decide one session.
 ///
-/// Bundled because these five always travel together, and a service that
-/// serves many sessions builds it once per accept loop rather than threading
-/// five arguments through every call.
+/// Bundled because these always travel together, and a service that serves
+/// many sessions builds it once per accept loop rather than threading five
+/// arguments through every call. Carrier facts are not here: they come off
+/// the accepted session, never from the caller.
 pub struct Admission<'a> {
     /// The owner's local policy.
     pub policy: &'a LocalNetworkPolicy,
     /// Revocations this node has folded.
     pub ledger: &'a RevocationLedger,
-    /// What the carrier observed about this session.
-    pub facts: &'a SessionFacts,
+    /// How the channel's proved key must relate to the hello's subject. The
+    /// owner selects it; nothing a peer sends can.
+    pub identity: SecureIdentityPolicy,
     /// The caller's clock, in milliseconds.
     pub now_ms: u64,
     /// Live sessions already admitted under this action's rule.
     pub active_sessions: u32,
 }
 
-/// Serve one inbound session: admit it, then ingest the posts it sends.
+/// Who is pushing, and under what invitation.
 ///
-/// Returns `Err(reason)` when the owner's rule refuses the peer, having
-/// already written the refusal and finished the stream. The engine is not
-/// touched on that path.
-pub async fn serve_session<S>(
-    stream: S,
+/// The lane issues the hello once the channel exists, because a v2 proof signs
+/// that channel's binding; a hello made in advance would have nothing to sign.
+pub struct Credentials<'a, I: IdentityProvider> {
+    /// The subject's custody provider; no key is kept here.
+    pub identity: &'a I,
+    /// The invited network.
+    pub network: NetworkId,
+    /// The requested profile.
+    pub profile: ProfileRef,
+    /// The service action asked for.
+    pub action: RequestedAction,
+    /// The traffic class asked for.
+    pub class: TrafficClass,
+    /// A fresh admission nonce.
+    pub nonce: [u8; 32],
+    /// The invitation chain, sent only inside the secured channel.
+    pub delegations: Vec<SignedDelegationCertificate>,
+}
+
+/// What the gate hands back: the bounded stream, the channel's verified facts,
+/// and the lease that lasts through admission.
+type Secured<S> = (PreparedStream<S>, SessionSecurityFacts, SetupGuard);
+
+/// One lane service: its protocol, setup limits and shared setup gate.
+///
+/// Keep one per service and clone it into accept loops. Clones share the gate,
+/// so sessions still in setup on every carrier meet one ceiling.
+#[derive(Clone, Debug)]
+pub struct SessionLane {
+    protocol: Alpn,
+    gate: SetupGate,
+    limits: SetupLimits,
+}
+
+impl SessionLane {
+    /// A lane for `protocol` with at most `max_pending` sessions in setup.
+    pub fn new(protocol: Alpn, max_pending: usize, limits: SetupLimits) -> Self {
+        Self {
+            protocol,
+            gate: SetupGate::new(max_pending),
+            limits,
+        }
+    }
+
+    /// Counter-only setup observations, shared by every clone.
+    pub fn stats(&self) -> SetupStats {
+        self.gate.stats()
+    }
+
+    /// Serve an accepted p2panda session through native iroh security.
+    ///
+    /// Returns `Ok(Err(reason))` when the owner's rule refuses the peer, having
+    /// already written the refusal and finished the stream. The engine is not
+    /// touched on that path.
+    pub async fn serve_native(
+        &self,
+        accepted: AcceptedSession<P2pandaStream>,
+        engine: &Arc<ConversationEngine>,
+        cabal_id: [u8; 32],
+        admission: Admission<'_>,
+    ) -> Result<Result<SessionOutcome, DenyReason>, MurmError> {
+        let (stream, facts) = accepted.into_session();
+        let security =
+            ServiceSecurityPolicy::native(self.protocol.clone(), None, self.limits.clone());
+        let secured = self
+            .gate
+            .reserve(&security)
+            .and_then(|guard| guard.native(stream))
+            .map_err(backend)?;
+        serve(secured, &facts, engine, cabal_id, admission).await
+    }
+
+    /// Serve an accepted session on any ordered carrier through Noise, proving
+    /// `key` as this end.
+    pub async fn serve_noise<S>(
+        &self,
+        key: &Ed25519Keypair,
+        accepted: AcceptedSession<S>,
+        engine: &Arc<ConversationEngine>,
+        cabal_id: [u8; 32],
+        admission: Admission<'_>,
+    ) -> Result<Result<SessionOutcome, DenyReason>, MurmError>
+    where
+        S: AsyncRead + AsyncWrite + Unpin,
+    {
+        let (stream, facts) = accepted.into_session();
+        let security =
+            ServiceSecurityPolicy::noise(self.protocol.clone(), None, self.limits.clone());
+        let secured = self
+            .gate
+            .noise_responder(key, stream, &security)
+            .await
+            .map_err(backend)?;
+        serve(secured, &facts, engine, cabal_id, admission).await
+    }
+
+    /// Dial `server` over p2panda, require that endpoint, then push `posts`.
+    ///
+    /// The dial runs under the setup deadline. The stream is finished when the
+    /// posts are away, so the peer sees a clean end.
+    pub async fn push_native<I: IdentityProvider>(
+        &self,
+        carrier: &P2pandaTransport,
+        server: PeerID,
+        credentials: Credentials<'_, I>,
+        posts: &[Post],
+    ) -> Result<Result<usize, DenyReason>, MurmError> {
+        let security =
+            ServiceSecurityPolicy::native(self.protocol.clone(), Some(server), self.limits.clone());
+        let guard = self.gate.reserve(&security).map_err(backend)?;
+        let outbound = guard
+            .run(carrier.connect_session(server, self.protocol.clone()))
+            .await
+            .map_err(backend)??;
+        let binding = outbound.proof_binding();
+        let secured = guard.native(outbound.stream).map_err(backend)?;
+        push(secured, binding, credentials, posts).await
+    }
+
+    /// Dial `server` on any carrier, run Noise as `key` and require the
+    /// responder to prove `expected`, then push `posts`.
+    ///
+    /// `expected` comes from the invitation, not the carrier: on Reticulum the
+    /// destination identity and the responder's Noise key are different keys.
+    pub async fn push_noise<T: Transport, I: IdentityProvider>(
+        &self,
+        carrier: &T,
+        server: PeerID,
+        key: &Ed25519Keypair,
+        expected: PeerID,
+        credentials: Credentials<'_, I>,
+        posts: &[Post],
+    ) -> Result<Result<usize, DenyReason>, MurmError> {
+        let security = ServiceSecurityPolicy::noise(
+            self.protocol.clone(),
+            Some(expected),
+            self.limits.clone(),
+        );
+        let guard = self.gate.reserve(&security).map_err(backend)?;
+        let outbound = guard
+            .run(carrier.connect_session(server, self.protocol.clone()))
+            .await
+            .map_err(backend)??;
+        let binding = outbound.proof_binding();
+        let secured = guard
+            .noise_initiator(key, outbound.stream)
+            .await
+            .map_err(backend)?;
+        push(secured, binding, credentials, posts).await
+    }
+}
+
+/// Admit a secured session under its lease, then ingest the posts it sends.
+async fn serve<S>(
+    (stream, security, guard): Secured<S>,
+    facts: &SessionFacts,
     engine: &Arc<ConversationEngine>,
     cabal_id: [u8; 32],
     admission: Admission<'_>,
@@ -107,20 +281,31 @@ pub async fn serve_session<S>(
 where
     S: AsyncRead + AsyncWrite + Unpin,
 {
-    let admitted = admit_session(
-        stream,
-        admission.policy,
-        admission.ledger,
-        admission.facts,
-        admission.now_ms,
-        admission.active_sessions,
-    )
-    .await
-    .map_err(|e| MurmError::Backend(e.to_string()))?;
+    let channel = security
+        .secure_channel_facts()
+        .ok_or_else(|| backend(SetupError::Security))?;
+    let admitted = guard
+        .run(admit_session_secure(
+            stream,
+            admission.policy,
+            admission.ledger,
+            facts,
+            &channel,
+            admission.identity,
+            admission.now_ms,
+            admission.active_sessions,
+        ))
+        .await
+        .map_err(backend)?
+        .map_err(backend)?;
     let mut admitted = match admitted {
-        Ok(session) => session,
-        Err(reason) => return Ok(Err(reason)),
+        Ok(session) => session.into_session(),
+        Err(reason) => {
+            guard.refused();
+            return Ok(Err(reason));
+        },
     };
+    guard.admitted().map_err(backend)?;
 
     let mut outcome = SessionOutcome {
         principal: admitted.principal.clone(),
@@ -145,62 +330,40 @@ where
     Ok(Ok(outcome))
 }
 
-/// Serve an inbound transport session using only facts recorded at acceptance.
-///
-/// This is the application-facing listener seam. The transport's
-/// [`AcceptedSession`] is consumed at the boundary, and its protocol,
-/// authenticated peer, and ingress context are converted through the one
-/// audited `mere-transport` adapter before [`serve_session`] reads the
-/// Notochord hello. A caller cannot accidentally substitute claims decoded
-/// from that hello for carrier facts.
-pub async fn serve_accepted_session<S>(
-    accepted: AcceptedSession<S>,
-    engine: &Arc<ConversationEngine>,
-    cabal_id: [u8; 32],
-    policy: &LocalNetworkPolicy,
-    ledger: &RevocationLedger,
-    now_ms: u64,
-    active_sessions: u32,
-) -> Result<Result<SessionOutcome, DenyReason>, MurmError>
-where
-    S: AsyncRead + AsyncWrite + Unpin,
-{
-    let (stream, facts) = accepted.into_session();
-    serve_session(
-        stream,
-        engine,
-        cabal_id,
-        Admission {
-            policy,
-            ledger,
-            facts: &facts,
-            now_ms,
-            active_sessions,
-        },
-    )
-    .await
-}
-
-/// Open a session as the initiator: prove the subject, then push `posts`.
-///
-/// The stream is finished when the posts are away, so the peer sees a clean
-/// end rather than waiting on a sender that has nothing more to say.
-pub async fn push_posts<S>(
-    mut stream: S,
-    hello: &SessionHello,
-    policy: &LocalNetworkPolicy,
+/// Prove the subject on this exact channel under its lease, then send `posts`.
+async fn push<S, I: IdentityProvider>(
+    (mut stream, security, guard): Secured<S>,
+    carrier: ProofBinding,
+    credentials: Credentials<'_, I>,
     posts: &[Post],
 ) -> Result<Result<usize, DenyReason>, MurmError>
 where
     S: AsyncRead + AsyncWrite + Unpin,
 {
-    let reply = initiate_session(&mut stream, hello, &policy.limits)
+    let channel = security
+        .secure_channel_facts()
+        .ok_or_else(|| backend(SetupError::Security))?;
+    let hello = SessionHello::issue_secure(
+        credentials.identity,
+        credentials.network,
+        credentials.profile,
+        credentials.action,
+        credentials.class,
+        credentials.nonce,
+        &carrier.with_secure_channel(channel),
+        credentials.delegations,
+    )
+    .map_err(backend)?;
+    let reply = guard
+        .run(initiate_session(&mut stream, &hello, &Default::default()))
         .await
-        .map_err(|e| MurmError::Backend(e.to_string()))?;
-    match reply {
-        notochord::SessionReply::Reject { reason } => return Ok(Err(reason)),
-        notochord::SessionReply::Accept { .. } => {},
+        .map_err(backend)?
+        .map_err(backend)?;
+    if let SessionReply::Reject { reason } = reply {
+        guard.refused();
+        return Ok(Err(reason));
     }
+    guard.admitted().map_err(backend)?;
     for post in posts {
         write_frame(&mut stream, &encode_post(post), MAX_POST_FRAME)
             .await
@@ -208,10 +371,4 @@ where
     }
     let _ = stream.shutdown().await;
     Ok(Ok(posts.len()))
-}
-
-/// The binding an initiator signs for a session lane on an authenticating
-/// carrier. Re-exported shape so callers do not hand-build one.
-pub fn lane_binding(protocol: &[u8], local_identity: [u8; 32]) -> ProofBinding {
-    ProofBinding::initiator(protocol.to_vec(), Some(local_identity), None)
 }

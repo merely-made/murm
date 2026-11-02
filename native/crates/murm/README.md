@@ -29,7 +29,7 @@ writes `murm::CabalHandle`. The `Source` column names the source file.
 | `post_hash` | `hash_cabal_id` (`cabal_id = BLAKE3-256(cabal_key)`) |
 | `post_wire` | `CabalExt`, `encode_post`, `decode_post`, `operation_id`, `post_to_operation`, `operation_to_post` |
 | `gossip_sync` | `SyncedCabal`, and `subscribe_cabal` on `Murm<P2pandaTransport>` |
-| `session_lane` (feature) | `serve_session`, `serve_accepted_session`, `push_posts`, `lane_binding`, `Admission`, `SessionOutcome`, `MAX_POST_FRAME` |
+| `session_lane` (feature) | `SessionLane`, `Admission`, `Credentials`, `SessionOutcome`, `MAX_POST_FRAME` |
 | `error` | `MurmError` |
 
 `lib.rs` itself defines `Murm<T>`, `hash_post`, and the `VERSION` / `STAGE`
@@ -70,7 +70,7 @@ idempotently, so a post arriving on both lands once. It exposes `send_text`,
 
 | Feature | Effect |
 | --- | --- |
-| `session-lane` (off) | Enables `session_lane`: an owner-gated point-to-point lane carrying posts over a stream a carrier already opened. Pulls in `notochord` and `transport/notochord`. |
+| `session-lane` (off) | Enables `session_lane`: an owner-gated point-to-point lane carrying posts, set up through `transport::security` (native iroh security on p2panda, Noise elsewhere) with Notochord secure v2 admission. Pulls in `notochord`, `insigne`, `transport/notochord` and `transport/noise`. |
 
 ## Dependencies
 
@@ -83,6 +83,7 @@ idempotently, so a post arriving on both lands once. It exposes `send_text`,
 | `p2panda-core` | `Operation`, `Topic`, header hashing; the stored form of a post. |
 | `p2panda-encryption` | XChaCha20 AEAD behind `CabalKeyring`. |
 | `notochord` (optional) | Session admission for `session-lane`. |
+| `insigne` (optional) | The delegation chain a `session-lane` initiator presents. |
 | `blake3` | `hash_cabal_id`. |
 | `tokio`, `tokio-stream` | Sync tasks, the `subscribe` broadcast channel, gossip streams. |
 

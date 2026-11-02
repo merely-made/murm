@@ -86,8 +86,7 @@ pub use crate::post_wire::{
 };
 #[cfg(feature = "session-lane")]
 pub use crate::session_lane::{
-    Admission, MAX_POST_FRAME, SessionOutcome, lane_binding, push_posts, serve_accepted_session,
-    serve_session,
+    Admission, Credentials, MAX_POST_FRAME, SessionLane, SessionOutcome,
 };
 
 // Re-export key types from the layers we sit on, so consumers don't all
