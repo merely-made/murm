@@ -354,3 +354,27 @@ Genet relay intake caught a local-URL omission: the core deliberately strips the
   "wire/crates/rtc/tests/turn.rs": "fc3840a2f78e3d022839354a60e62e3400adf037e7faba3b9b9de2c98f12991e"
 }
 ```
+
+
+## 2026-11-01: E1c final receiving and fixture audit
+
+Genet receives the exact supplier revision below. Both engines pass encrypted relay transfer and local metadata/privacy checks; the verbose controlled coturn fixture independently confirms authenticated allocation renewals and lifetime-zero release. The selected server lines and full receiving gates are appended to `genet/design_docs/archive_docs/receipts/2026-11-01_webrtc_conformance_plan_receipts.md`. Adding verbose fixture output changes no provider protocol source. Final ordinary gates on the supplier code pass on both toolchains. All fixture processes were stopped, with no isolated target, Cargo home or worktree retained. The installed WSL coturn package remains available for repeating the fixture; its automatic service is disabled.
+
+```json
+{
+  "supplier_source": "ebafed19bf68edcfa0c276f0693a2bf45c858174",
+  "Genet_receiving_source": "0f38cba4fbe9d5a8158170f18469743b8b7c4433",
+  "fixture_sha256": "745ad015cf1c9c8703698794a7c43f8da92c622c5f6d1f1812d3ad7282db9875",
+  "controlled_server_confirmations": {
+    "allocations": 4,
+    "renewals": 22,
+    "lifetime_zero_releases": 4
+  },
+  "final_ordinary_tests": {
+    "working": 7,
+    "MSRV": 7
+  },
+  "fixture_stopped": true,
+  "coturn_system_service": "inactive and disabled"
+}
+```

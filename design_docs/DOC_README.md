@@ -2,6 +2,13 @@
 
 WebRTC (2026-11-01): the [family move plan](2026-10-13_murm_family_move_plan.md#2026-11-01-webrtc-provider-evaluation) records E0 and the local E1a [murm-rtc provider](../wire/crates/rtc/README.md), a caller-driven RTC core and optional UDP adapter below both browser and application consumers. Genet owns the conformance and receiving gates in `genet/design_docs/2026-11-01_webrtc_conformance_plan.md`. The [E0 probe](../testing/webrtc-evaluation/README.md) stays frozen; E1a uses an exact upstream DCEP fix found by real packet tests. Genet now consumes the provider through a native runtime host; its selected WPT and browser qualification stay in the receiving plan. Application-carrier cutover remains separate.
 
+E1c adds resolved UDP STUN/TURN to the same driver, qualified against controlled
+coturn with relay privacy, local metadata, refresh, refusal and socket release.
+Genet receives IP-literal UDP servers first; DNS, TCP/TLS, restart and carrier
+cutover remain separate gates.
+Candidate signaling intentionally omits local gatherer metadata; the host
+observation retains the server URL separately.
+
 
 - [Secure sessions and live interaction](2026-10-29_secure_sessions_and_live_interaction_plan.md): cut to open work 2026-10-31. N1–N3 and O1–O3 landed and are [archived whole](archive_docs/2026-10-31/2026-10-29_secure_sessions_and_live_interaction_plan.md); O4 handoffs/interoperability and deferred items remain, with the family fit survey in Findings. [Qualification record](archive_docs/2026-10-29/2026-10-29_secure_sessions_and_live_interaction_plan_receipts.md).
 - [Transport consolidation](2026-10-28_transport_consolidation_plan.md): what Murm owns family-wide, where family code reaches iroh or p2panda-net without it, and what consolidation does not cut (patch tables, lockfiles). T6 (2026-10-31): admitted services onto the shared secure setup gate.

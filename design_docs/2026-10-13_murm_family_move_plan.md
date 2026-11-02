@@ -2569,8 +2569,8 @@ WPT, and remaining web/media/browser gates belong to
 `genet/design_docs/2026-11-01_webrtc_conformance_plan.md`. The existing
 application carrier retains str0m until its own admission, backpressure,
 refusal and reconnect gates pass through the shared provider. Host-candidate
-routing is present; discovery, STUN/TURN, mDNS and additional network fallbacks
-remain open. Native loopback evidence does not qualify a carrier cutover or
+routing and resolved UDP STUN/TURN are present; DNS, mDNS, TCP/TLS, restart and
+server replacement remain open. Native provider evidence does not qualify a carrier cutover or
 headed browser interoperability.
 
 E1c now supplies caller-resolved UDP STUN/TURN, permission backpressure,
