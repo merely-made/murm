@@ -1,7 +1,8 @@
 # Transport consolidation through Murm
 
-**Status:** 2026-10-31: in progress. T1 landed; T2 to T6 open. T6 (admitted
-services onto the secure setup gate) added from the 2026-10-31 survey.
+**Status:** 2026-11-01: in progress. T1 landed; T2 to T6 open. T6 (admitted
+services onto the secure setup gate), added from the 2026-10-31 survey, has
+its Murm piece landed: the session lane sets up through the gate.
 
 **For:** Mark, 2026-10-28: "we should consolidate transport concerns through
 murm and not sidestep around it." This plan says what Murm owns at the family
@@ -112,17 +113,21 @@ inputs.
 The secure-session plan's N2 put setup and admission under one gate,
 `transport::security`: a service-owned capacity lease and deadline that run
 through admission, an owner-selected mode with no plaintext retry, and native
-iroh channel binding. Two services use it, Knot publishing and
-`murm-ocapn-transport`. The others that admit peers on Murm endpoints each
-build their own setup (Findings, 2026-10-31), so the gate's bounds do not
-reach them.
+iroh channel binding. Three services use it: Knot publishing,
+`murm-ocapn-transport` and, since 2026-11-01, Murm's session lane. The others
+that admit peers on Murm endpoints each build their own setup (Findings,
+2026-10-31), so the gate's bounds do not reach them.
 
 - Done when: each service that admits peers on a Murm endpoint sets up through
   `transport::security` with secure admission v2, or this plan records the
   carrier profile it waits on. WebRTC has no `SecurityMode` profile, so
   Graphshell's WebRTC door waits on one.
 - Done when: Murm's own `session_lane.rs` is on the gate, since a Murm service
-  outside it leaves no example of the path for the rest.
+  outside it leaves no example of the path for the rest. Met 2026-11-01:
+  [`SessionLane`](../native/crates/murm/src/session_lane.rs) serves and pushes
+  through one shared gate, native on p2panda and Noise elsewhere, with secure
+  v2 admission under the owner's `SecureIdentityPolicy`; its v1 entry points
+  are gone.
 - Needs: each service's owner: Graphshell (host and the resident's browser
   door), Mesh, Distillery, the resident inference mesh and Gemot (commons call,
   when its A1 lands). Isonetry follows T2.
@@ -186,9 +191,27 @@ reach them.
   - **Planned:** Gemot's `crates/commons/src/call.rs` names Notochord admission
     (its A1) and calls none yet.
   - **None:** Isonetry (T2).
+- 2026-11-01: the session lane is on the gate (murm `4fd77e5d78b`). The
+  initiator now issues its hello once the channel exists, since a v2 proof
+  signs that channel, and it names the responder key from its invitation:
+  over Reticulum that is the responder's Noise key, not the destination
+  identity it dials. The lane's tests cover both owner identity policies on
+  native p2panda, a scoped endpoint key admitted by bound proof and refused by
+  the strict policy. Mere's direct-PHY probe (`crates/probes/murm-direct-phy`,
+  mere `c6d1d19f9`) moved with it and checks against Murm main, but nobody has
+  rerun it on the radios. Its LoRa setup limits (a 240-second deadline, 4,096
+  I/O polls) are estimates until it is. It had stopped resolving before this
+  change, because its patch table still sent `muniment` and `mere-proofs` to
+  Mere after they moved to eidetic.
+- 2026-11-01: over Reticulum the lane runs Noise inside a link Reticulum
+  already encrypts. On LoRa that costs airtime: three handshake messages and
+  an encrypted protocol frame before the hello. The native Reticulum profile
+  deferred in the secure-session plan would remove that layer.
 
 ## Progress
 
 - 2026-10-28: plan opened from the family survey. T1 landed: Mere `29e11b3e4` (mesh) and Gemot `2fafd5d` (commons-spine, gemot, mien).
 - 2026-10-31: refreshed T2 (Isonetry's ALPN and peer keying); T6 opened from
   the admitted-services survey.
+- 2026-11-01: T6's Murm piece landed: the session lane on the gate (murm
+  `4fd77e5d78b`), Mere's direct-PHY probe moved with it (mere `c6d1d19f9`).
