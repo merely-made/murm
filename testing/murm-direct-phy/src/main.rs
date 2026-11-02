@@ -5,6 +5,9 @@
 // SPDX-License-Identifier: MPL-2.0
 
 //! V7: Murm owner-policy admission over Reticulum and two direct-PHY radios.
+//!
+//! Each session sets up through Murm's session lane gate: Noise over the
+//! Reticulum link, then Notochord secure v2 admission bound to that channel.
 
 use std::collections::BTreeMap;
 use std::sync::Arc;
@@ -16,14 +19,15 @@ use insigne::delegation::{
     CapabilityScope, DelegationCertificate, DelegationParent, SignedDelegationCertificate,
 };
 use murm::{
-    CabalKey, ConversationEngine, Post, SessionOutcome, push_posts, serve_accepted_session,
+    Admission, CabalKey, ConversationEngine, Credentials, Post, SessionLane, SessionOutcome,
 };
 use notochord::{
     DenyReason, LocalNetworkPolicy, NetworkId, ProfileRef, RequestedAction, RevocationLedger,
-    ServiceAccess, ServiceRule, SessionHello, TrafficClass, TrustedRoot,
+    SecureIdentityPolicy, ServiceAccess, ServiceRule, TrafficClass, TrustedRoot,
 };
 use retinue::iface::tulle::drive;
-use transport::{Alpn, PeerID, ReticulumTransport, Transport, initiator_link_binding};
+use transport::security::SetupLimits;
+use transport::{Alpn, PeerID, ReticulumTransport, Transport};
 use tulle::PhyProfile;
 use tulle::airtime::AirtimeBudget;
 use tulle::direct_phy_serial::{DirectPhySerialConfig, DirectPhySerialLink};
@@ -32,6 +36,27 @@ const NETWORK: NetworkId = NetworkId([3; 32]);
 const ROOT_AUTHORITY: [u8; 32] = [7; 32];
 const MURM_SERVICE: &str = "/services/murm";
 const NOW_MS: u64 = 50;
+/// One setup deadline covering the radio link, Noise and admission.
+const SETUP: Duration = Duration::from_secs(240);
+
+/// Setup bounds sized for a LoRa link: the deadline is long, and slow
+/// segments wake the reader many times before a frame completes.
+fn lane(alpn: &Alpn) -> SessionLane {
+    SessionLane::new(
+        alpn.clone(),
+        2,
+        SetupLimits {
+            timeout: SETUP,
+            max_io_operations: 4096,
+            ..SetupLimits::default()
+        },
+    )
+}
+
+/// The responder's Noise key, which the member's invitation names.
+fn server_noise() -> Ed25519Keypair {
+    Ed25519Keypair::from_seed([23u8; 32])
+}
 
 fn root() -> InMemoryProvider {
     InMemoryProvider::from_seed([1; 32])
@@ -100,25 +125,23 @@ fn policy(access: ServiceAccess) -> LocalNetworkPolicy {
     policy
 }
 
-fn hello(binding: &notochord::ProofBinding) -> SessionHello {
-    SessionHello::issue(
-        &member(),
-        NETWORK,
-        ProfileRef {
+fn credentials(subject: &InMemoryProvider) -> Credentials<'_, InMemoryProvider> {
+    Credentials {
+        identity: subject,
+        network: NETWORK,
+        profile: ProfileRef {
             id: "mere.base".into(),
             revision: 2,
         },
-        RequestedAction {
+        action: RequestedAction {
             domain: "mere.network".into(),
             path: MURM_SERVICE.into(),
             action: "connect".into(),
         },
-        TrafficClass::Interactive,
-        [42; 32],
-        binding,
-        vec![grant()],
-    )
-    .expect("issue hello")
+        class: TrafficClass::Interactive,
+        nonce: [42; 32],
+        delegations: vec![grant()],
+    }
 }
 
 async fn fixtures() -> (Arc<ConversationEngine>, [u8; 32], Post) {
@@ -145,7 +168,7 @@ async fn accept_once(
     cabal_id: [u8; 32],
     access: ServiceAccess,
 ) -> Result<SessionOutcome, DenyReason> {
-    let accepted = tokio::time::timeout(Duration::from_secs(90), server.accept(alpn))
+    let accepted = tokio::time::timeout(Duration::from_secs(90), server.accept(alpn.clone()))
         .await
         .expect("RF accept timed out")
         .expect("RF accept failed");
@@ -163,15 +186,19 @@ async fn accept_once(
     let owner_policy = policy(access);
     let ledger = RevocationLedger::new();
     tokio::time::timeout(
-        Duration::from_secs(150),
-        serve_accepted_session(
+        SETUP + Duration::from_secs(60),
+        lane(&alpn).serve_noise(
+            &server_noise(),
             accepted,
             &engine,
             cabal_id,
-            &owner_policy,
-            &ledger,
-            NOW_MS,
-            0,
+            Admission {
+                policy: &owner_policy,
+                ledger: &ledger,
+                identity: SecureIdentityPolicy::MatchCarrierWhenPresent,
+                now_ms: NOW_MS,
+                active_sessions: 0,
+            },
         ),
     )
     .await
@@ -185,21 +212,17 @@ async fn push_once(
     alpn: &Alpn,
     post: &Post,
 ) -> Result<usize, DenyReason> {
-    let stream = tokio::time::timeout(
-        Duration::from_secs(90),
-        client.connect(server_peer, alpn.clone()),
-    )
-    .await
-    .expect("RF connect timed out")
-    .expect("RF connect failed");
-    let binding = initiator_link_binding(alpn, stream.link_id());
-    let owner_policy = policy(ServiceAccess::MemberOnly);
+    // Over Reticulum the carrier names no initiator, so the member's Noise
+    // key is its root and the strict owner policy can match it to the subject.
+    let subject = member();
     tokio::time::timeout(
-        Duration::from_secs(150),
-        push_posts(
-            stream,
-            &hello(&binding),
-            &owner_policy,
+        SETUP + Duration::from_secs(60),
+        lane(alpn).push_noise(
+            client,
+            server_peer,
+            subject.master_keypair(),
+            PeerID::from_public_key(server_noise().public_key()),
+            credentials(&subject),
             std::slice::from_ref(post),
         ),
     )
