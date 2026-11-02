@@ -273,3 +273,60 @@ transfer without an async runtime. Strict Clippy and formatting pass, and the
 host-only normal/build graph excludes Tokio and upper-layer consumers. The
 shared provider qualification remains native loopback, with STUN/TURN and
 application-carrier cutover open.
+
+
+## 2026-11-01: E1c resolved UDP STUN/TURN
+
+Windows host polling through the WSL-local coturn 4.6.1 fixture at numeric
+172.28.40.199:34790. Bind selected by an ordinary UDP route probe; this is
+Windows/WSL virtual-network evidence, not cross-machine or headed acceptance.
+The fixture uses source-controlled test credentials only. The installed coturn
+system service was stopped and disabled; the foreground fixture is task-owned.
+No additional target, Cargo home or worktree was created. Reused
+C:\t\cargo-targets\retinue and its build subdirectory, debug=0, jobs=1.
+
+- Working and MSRV ordinary gates: 7 passed, 3 controlled-server cases ignored.
+- Explicit controlled gate on both toolchains: 3 passed. STUN reflexive candidate;
+  relay-only encrypted 48 KB delivery after 2.2 seconds with a 1-second allocation
+  refresh cap; bad credentials complete gathering without direct candidates.
+- Ordinary regressions include exact endpoint/transaction demux preserving ICE
+  requests, a bounded blackhole deadline, DTLS close, backpressure and socket
+  release. Core and host normal/build dependency trees contain none of Tokio,
+  Genet, murm-wire, mere-transport, Personae, Notochord or Luggage.
+- Strict all-target Clippy and core with no built-in crypto compile passed.
+- Initial exploratory attempts failed on the test's assumption that the core
+  emitted an empty candidate (it emits gathering Complete), a BytesMut test
+  conversion, and close flushing suppressed by the first draft. Those were
+  corrected before acceptance. Clippy also required moving the unit module.
+
+Commands from wire/: cargo test -p murm-rtc --features udp -j 1;
+cargo test -p murm-rtc --features udp --test turn -j 1 -- --ignored --test-threads=1;
+cargo +1.97.1 test -p murm-rtc --features udp -j 1 and the same controlled gate;
+cargo clippy -p murm-rtc --features udp --all-targets -j 1 -- -D warnings;
+cargo check -p murm-rtc --no-default-features -j 1.
+Tree SHA256 core=4909790b4fa6bc37cfb0e24f3d80dacbcc44a07ec9e48d74ac30041b24fd84dd;
+host=5436ba0614ddae801da2de382f46708fe8d986eaa40614dd5e143070c6dc904a.
+
+DNS, TCP/TLS, mDNS, server replacement, restart, permission-lifetime expiry,
+allocation-loss recovery, packet loss, saturation, public deployment, media and
+application-carrier acceptance remain open. Release is best effort; the test
+asserts socket release, not server receipt of Refresh(0).
+
+Source and lock hashes at qualification (working-file bytes):
+
+```json
+{
+  "base": "81495e4c46f992e488d6432076fba77b173cc420",
+  "files": {
+    "wire/crates/rtc/src/udp.rs": "b64fe6b1be75b798509859e6ca081b90bc538224eff925fe124acf00ec176232",
+    "wire/crates/rtc/src/udp/discovery.rs": "976e780022d345afe61fb348ced020118ab774eea641d4884a57dc69919df096",
+    "wire/crates/rtc/tests/turn.rs": "9c649f5a75ec218bddc16e5b9bb34ab066b89b447fda59bae181f95588811259",
+    "wire/crates/rtc/tests/coturn.sh": "cc4a9eae722d8011c14ac2a2ee9c4770fce25a4a15a91c07d2f8890158f38e31",
+    "wire/Cargo.lock": "2cfc1f6ee40947aa1d106fd2fd80b05c8f57389855eec3cbbe05f5e6cf1adcae"
+  },
+  "toolchains": [
+    "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+    "rustc 1.97.1 (8bab26f4f 2026-07-14)"
+  ]
+}
+```

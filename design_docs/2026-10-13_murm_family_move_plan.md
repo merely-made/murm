@@ -2572,3 +2572,28 @@ refusal and reconnect gates pass through the shared provider. Host-candidate
 routing is present; discovery, STUN/TURN, mDNS and additional network fallbacks
 remain open. Native loopback evidence does not qualify a carrier cutover or
 headed browser interoperability.
+
+E1c now supplies caller-resolved UDP STUN/TURN, permission backpressure,
+allocation refresh and best-effort release in that same driver. Genet receives
+IP-literal UDP servers first. DNS, TCP/TLS, mDNS, server replacement and ICE
+restart remain open. The native and controlled-coturn gates are recorded in the
+existing receipt file; they do not qualify the application carrier.
+
+### E1c: UDP server discovery and relay
+
+Extend the same caller-driven host/async driver with resolved UDP STUN and TURN
+endpoints. The first receiving slice supports IP-literal URLs; host name
+resolution, TCP/TLS, mDNS, restart and server replacement remain explicit open
+gates. Relay-only policy must never register or transmit a direct candidate.
+Reuse the pinned engine's TURN client for authentication, permissions, allocation
+refresh and deallocation. One retained protocol packet provides bounded
+backpressure while a permission is pending. Match discovery responses by both
+server endpoint and transaction; preserve ICE Binding requests for the peer.
+
+Done: real STUN and authenticated forced-relay encrypted message exchange against
+coturn; gathering timeout/authentication refusal with no direct fallback;
+allocation refresh and socket release; unchanged host/async gates and independent
+core/host dependency boundaries. Append compact evidence to this plan's existing
+receipt file, with a total E1c retained-byte cap of 100 KB. Genet receiving evidence
+belongs to its conformance plan. This does not authorize application-carrier
+cutover or claim headed, cross-machine, TCP/TLS or media qualification.
