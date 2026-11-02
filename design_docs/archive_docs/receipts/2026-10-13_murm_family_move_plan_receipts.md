@@ -330,3 +330,15 @@ Source and lock hashes at qualification (working-file bytes):
   ]
 }
 ```
+
+
+## 2026-11-01: relay-policy related-address correction
+
+Review against [JSEP section 7.3](https://www.rfc-editor.org/rfc/rfc9429.html#section-7.3) found that the first E1c draft exposed the physical address in relay candidates. Relay-only candidates now use an unspecified related address and zero port, retained by core SDP/transport views. The forced-relay assertion checks this before exchanging candidates. Working ordinary 7/7, controlled 3/3, strict all-target Clippy, and MSRV controlled 3/3 pass after this correction. Earlier acceptance above remains evidence of its named source; Genet must consume the correction before final relay acceptance.
+
+```json
+{
+  "wire/crates/rtc/src/udp/discovery.rs": "c0b897e57d9ba48850a4eeed3824518add4fa690bfff43710ca02833049d76f8",
+  "wire/crates/rtc/tests/turn.rs": "8c238abe5633f78d816b1eabd97497bb1c10a868675c5935d777f8af07e22d9c"
+}
+```
