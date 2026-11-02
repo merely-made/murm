@@ -1,6 +1,6 @@
 # Murm Documentation Index
 
-WebRTC (2026-11-01): the [family move plan](2026-10-13_murm_family_move_plan.md#2026-11-01-webrtc-provider-evaluation) records E0 and the local E1a [murm-rtc provider](../wire/crates/rtc/README.md), a caller-driven RTC core and optional UDP adapter below both browser and application consumers. Genet owns the conformance and receiving gates in `genet/design_docs/2026-11-01_webrtc_conformance_plan.md`. The [E0 probe](../testing/webrtc-evaluation/README.md) stays frozen; E1a uses an exact upstream DCEP fix found by real packet tests. Genet now consumes the provider through a native runtime host; its selected WPT and browser qualification stay in the receiving plan. Application-carrier cutover remains separate.
+WebRTC (2026-11-02): the [family move plan](2026-10-13_murm_family_move_plan.md#2026-11-01-webrtc-provider-evaluation) records E0, the local E1a [murm-rtc provider](../wire/crates/rtc/README.md) and E1c UDP STUN/TURN, below browser and application consumers. Genet owns conformance, its selected WPT and the qualified headed Chrome/Firefox receiving gate in `genet/design_docs/2026-11-01_webrtc_conformance_plan.md`. The [E0 probe](../testing/webrtc-evaluation/README.md) stays frozen; E1a uses an exact upstream DCEP fix found by real packet tests. The native host explicitly disables unsupported mDNS queries. Application-carrier cutover remains separate.
 
 E1c adds resolved UDP STUN/TURN to the same driver, qualified against controlled
 coturn with relay privacy, local metadata, refresh, refusal and socket release.

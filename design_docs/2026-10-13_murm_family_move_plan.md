@@ -2500,8 +2500,9 @@ broader routing/roles remain open in the parity plan.
 
 ## 2026-11-01: WebRTC provider evaluation
 
-**Status:** E0 complete; E1a provider qualified locally on Windows.
-Genet binding and application-carrier cutover remain E1b. Mark requested
+**Status (2026-11-02):** E0, E1a and E1c qualified locally on Windows;
+Genet's native binding and headed direct/UDP-relay receiving gate are qualified.
+Application-carrier cutover remains open. Mark requested
 the comparison with webrtc-rs, inspection of duplicated Murm effort and
 dependency direction, and Genet support as required for WPT. The canonical
 comparison and browser done-conditions live in
@@ -2520,10 +2521,9 @@ qualification is inferred from these results.
 The HTTP/WebSocket MOVE5 split is the precedent: web semantics stay in Genet,
 generic protocol machinery can be supplied from the independent `wire/`
 workspace, and neither the generic supplier nor the VM depends on application
-admission. A separate RTC leaf there is the proposed home, pending engine and
-consumer qualification; it does not require enabling HTTP, QUIC, radio or the
-native peer workspace. This is an ownership proposal, not a new aggregate
-transport trait or a blanket source move.
+admission. The separate RTC leaf there now supplies Genet, without enabling
+HTTP, QUIC, radio or the native peer workspace. Application-carrier adoption
+retains its own receiving gate; this introduces no aggregate transport trait.
 
 `native/crates/webrtc-carrier` is currently a Merely application profile over
 str0m: `Answerer`/`Driver`/`Carrier` combine sockets and peer processing with
@@ -2572,6 +2572,12 @@ refusal and reconnect gates pass through the shared provider. Host-candidate
 routing and resolved UDP STUN/TURN are present; DNS, mDNS, TCP/TLS, restart and
 server replacement remain open. Native provider evidence does not qualify a carrier cutover or
 headed browser interoperability.
+
+The core's default mDNS query mode needs a separate multicast socket route.
+Genet disables that undriven path and explicitly refuses unresolved `.local`
+candidates. Route errors retain transport context without protocol payloads.
+Genet's separate E2h gate now qualifies its installed headed Chrome/Firefox
+data-channel matrix; the provider and application-carrier scopes stay distinct.
 
 E1c now supplies caller-resolved UDP STUN/TURN, permission backpressure,
 allocation refresh and best-effort release in that same driver. Genet receives

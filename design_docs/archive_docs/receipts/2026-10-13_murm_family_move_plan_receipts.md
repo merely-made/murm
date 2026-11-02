@@ -378,3 +378,35 @@ Genet receives the exact supplier revision below. Both engines pass encrypted re
   "coturn_system_service": "inactive and disabled"
 }
 ```
+
+
+## 2026-11-02: browser interop route diagnostics
+
+Route refusals now carry the requested TransportContext; no protocol payload or credential is included. This exposed the core QueryOnly mDNS default trying to send from 0.0.0.0:5353 to the multicast group through the ordinary peer socket. Genet disables that undriven core path and refuses unresolved mDNS candidates until it has a dedicated resolver route. UDP routing refusal remains strict. The application carrier stays unchanged. Concurrent native session-lane work was merged before pushing, preserving its security-setup changes.
+
+Commands from wire/, target=retinue with its build subdirectory, debug=0, jobs=1, locked/offline: `cargo test -p murm-rtc --features udp`; the same test command with `+1.97.1`; `cargo test -p murm-rtc --features udp --test turn -- --ignored --test-threads=1`; `cargo clippy -p murm-rtc --features udp --all-targets -- -D warnings`. All pass. The controlled fixture was still live for the receiving browser matrix; its stop is recorded at completion in Genet.
+
+```json
+{
+  "supplier_revision": "01449d2822a8219f7531b2ea8ed59989535a86eb",
+  "integrated_main": "85bd99a5c34534c958460c9cbc14545e4983ebb5",
+  "sourceSHA256": {
+    "wire/crates/rtc/src/udp.rs": "718980f4f0ed5500bfbed830c321ab731b371988313329e812e6b1bc62cdeb73",
+    "wire/crates/rtc/src/udp/discovery.rs": "7e7d2e41e88e95cef952bfad38651a07c979788c7c32d72727ab84a2bfb46b14"
+  },
+  "wireLockSHA256": "2cfc1f6ee40947aa1d106fd2fd80b05c8f57389855eec3cbbe05f5e6cf1adcae",
+  "ordinary_tests": {
+    "working": 7,
+    "MSRV_1_97_1": 7
+  },
+  "controlled_coturn_tests": 3,
+  "strict_all_target_clippy": "pass"
+}
+```
+
+
+## 2026-11-02: headed receiving closure
+
+Genet's receiving source `73a2f0ae4be1e9da10b3acc410d910aa355559cb` retains supplier `01449d2822a8219f7531b2ea8ed59989535a86eb`. Its full headed Chrome/Firefox transport matrix passed 32 cases before the subsequent stats-privacy correction; eight targeted browser/engine/route privacy cases and a final cold-start case also pass. Final native ordinary/controlled checks, strict Clippy, selected historical WPT identities and Ortet receiving checks are recorded with their exact source/binary boundaries in `genet/design_docs/archive_docs/receipts/2026-11-01_webrtc_conformance_plan_receipts.md`. The Genet receipt owns the network frontend, scoped browser permissions and retained-profile exception; this does not qualify a carrier cutover.
+
+The verified task-owned foreground coturn process was stopped after the receiving checks; no turnserver remains. Its automatic service remains inactive and disabled. No isolated target, Cargo home or worktree was created by this follow-up. Supplier source is unchanged since its ordinary tests on working Rust/MSRV, controlled coturn checks and strict all-target Clippy recorded above.
