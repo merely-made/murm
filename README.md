@@ -97,7 +97,7 @@ T114 boards is in `firmware/`, with flashable packages in `firmware/packages/`.
   Routing decisions are identical to 1.5.6. The intermittent `interop_ifac`
   failure seen on 1.5.4 and 1.5.6 did not recur in 14 runs on the new macOS
   host. Two held RNS-side defects persist. The 0.2.0
-  [link lifecycle](design_docs/2026-10-02_node_link_lifecycle_plan.md) work
+  [link lifecycle](design_docs/archive_docs/2026-11-02/2026-10-02_node_link_lifecycle_plan.md) work
   landed: route learning, `open_link(now)`, link-request expiry, and
   own-echo and duplicate filtering. These results cover the measured
   local-TCP scopes; they are not full upstream parity.

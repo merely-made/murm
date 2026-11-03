@@ -6,7 +6,7 @@ verified against the codebase and reconciled with the standing docs. Answers
 the [channel murmuration design](2026-08-09_channel_murmuration.md) and the
 [mesh scaling doc](2026-08-09_mesh_scaling_and_asymmetric_routing.md); the
 authority model is the firmware-tier instance of mere's
-[boundary, identity, and grant composition](../../mere/design_docs/moothold_docs/research/2026-08-09_boundary_identity_and_grant_composition.md).
+boundary, identity, and grant composition (`gemot/design_docs/moothold_docs/research/2026-08-09_boundary_identity_and_grant_composition.md`).
 
 ## The answer to "how smart"
 

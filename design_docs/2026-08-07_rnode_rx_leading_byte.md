@@ -84,7 +84,7 @@ that never arrive). Worth reporting upstream to New Endian with this capture.
 
 ## What it incidentally proves: stock RNode and this firmware do cross
 
-`2026-07-25_rnode_direct_phy_rf_opacity.md` concluded the two firmwares "do not
+`archive_docs/2026-11-02/2026-07-25_rnode_direct_phy_rf_opacity.md` concluded the two firmwares "do not
 cross RF", after sweeping seven sync words and inverted IQ in both directions.
 **They cross.** Valid announces at −6 dBm, repeatedly, across several sessions.
 

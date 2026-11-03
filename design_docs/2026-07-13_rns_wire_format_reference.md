@@ -196,7 +196,7 @@ notes. Where it is wrong, the fix goes here first and into code second.
 - **Independent recomputation** by me, from allowed sources, with `hashlib` +
   `cryptography`. Cited as **[X]**.
 - **Prns** (MIT/Apache Rust implementation, pinned commit in the
-  [harvest brief](2026-08-09_prns_harvest_brief.md)), read freely, added
+  [harvest brief](archive_docs/2026-11-02/2026-08-09_prns_harvest_brief.md)), read freely, added
   2026-08-09. Cited as **[P]** with `file:line`. Current, actively
   interop-tested against stock RNS 1.4.2, and canonical-vector-tested; ranks
   above [B] as byte-level evidence, below [O]. A [P] claim is another
@@ -575,7 +575,7 @@ Beechat's `create_retransmit_packet` (`transport.rs:610-626`, which does `hops +
 re-broadcasts the received packet **verbatim**, hops untouched. Open question O-10.
 
 > **Second-implementation evidence, 2026-08-09 [P].** Prns (pinned commit in the
-> [harvest brief](2026-08-09_prns_harvest_brief.md)) increments **at ingest, on
+> [harvest brief](archive_docs/2026-11-02/2026-08-09_prns_harvest_brief.md)) increments **at ingest, on
 > the receiving node, before any routing decision**:
 > `prns-core/src/routing/ingress/classification/mod.rs:146` does
 > `header.hops.saturating_add(1)` on every inbound packet, the stored announce

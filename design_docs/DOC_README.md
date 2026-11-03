@@ -12,7 +12,7 @@ observation retains the server URL separately.
 
 - [Secure sessions and live interaction](2026-10-29_secure_sessions_and_live_interaction_plan.md): cut to open work 2026-10-31. N1–N3 and O1–O3 landed and are [archived whole](archive_docs/2026-10-31/2026-10-29_secure_sessions_and_live_interaction_plan.md); O4 handoffs/interoperability and deferred items remain, with the family fit survey in Findings. [Qualification record](archive_docs/2026-10-29/2026-10-29_secure_sessions_and_live_interaction_plan_receipts.md).
 - [Transport consolidation](2026-10-28_transport_consolidation_plan.md): what Murm owns family-wide, where family code reaches iroh or p2panda-net without it, and what consolidation does not cut (patch tables, lockfiles). T6 (2026-10-31): admitted services onto the shared secure setup gate; Murm's session lane moved 2026-11-01.
-- [Resource client receive limits](2026-10-22_resource_client_limits_plan.md): early encoded/decoded Resource budgets and bounded Micron page decoding, with Turnstone-owned policy and deadlines.
+- [Archived Resource client receive limits](archive_docs/2026-11-02/2026-10-22_resource_client_limits_plan.md): early encoded/decoded Resource budgets and bounded Micron page decoding, with Turnstone-owned policy and deadlines.
 
 T114 live Tucket (2026-10-20): the [qualified endpoint receipt](../testing/receipts/tucket-t114/README.md)
 records four texts/four protocol ACKs against stock MeshCore across reboot,
@@ -163,7 +163,7 @@ Historical H8 closure records observed runs, not approval for new Prns use.
 | Gate | Status | Where |
 | --- | --- | --- |
 | H8 | **Closed**, local-TCP scope only | [2026-08-11 receipt](2026-08-11_prns_peer_matrix_receipt.md), re-receipted at RNS 1.5.0 in [2026-08-23](2026-08-23_prns_peer_matrix_rns150_receipt.md), and at RNS 1.5.2 in the [current re-pin receipt](2026-08-29_rns_152_repin_receipt.md) |
-| H1–H7, H9, H10 | UNKNOWN — catalogue entries, no status stated | [Prns harvest brief](2026-08-09_prns_harvest_brief.md) |
+| H1–H7, H9, H10 | UNKNOWN — catalogue entries, no status stated | [Prns harvest brief](archive_docs/2026-11-02/2026-08-09_prns_harvest_brief.md) |
 | O-10 | **Partial** — local TCP resolved; RF forwarding receipt still owed | The three current and historical peer receipts |
 
 ### Air lane — radio, firmware, scaling
@@ -354,7 +354,6 @@ supplying data-graph and identity crates.
 | [Program sequencing](2026-08-12_program_sequencing_and_deadline_order.md) | Historical August ordering audit. September coordination and current gate owners govern active slices. |
 | [ARDC application lane](2026-07-31_ardc_application_lane.md) | Grant lane, G0–G4. Dormant by decision 2026-08-26: Sep 1 window passed, FIVCO-facilitated funding leads, next window Feb 1, 2027. |
 | [Project prospectus](2026-08-26_project_prospectus.md) | Grant-agnostic funding prospectus compressed from the corpus; serves FIVCO-facilitated applications and any future window. Draft pending Mark's review. |
-| [Prns harvest brief](2026-08-09_prns_harvest_brief.md) | Historical H-gate catalogue; donor/reference role withdrawn September 26. |
 | [Prns donor ledger](2026-08-10_prns_donor_ledger.md) | September 26 disposition applied: fresh RNS fixtures, Hopspot excluded from catalogs/stages with archived evidence, host admission replaced; codec/tooling retained with attribution. Original provenance remains recorded. |
 | [Prns mobile adoption brief](2026-08-11_prns_mobile_adoption_brief.md) | Historical recommendation withdrawn September 26; WN5 owns wall-node ordering. |
 
@@ -375,8 +374,6 @@ provisioning and physical acceptance. Total decoder peak allocation remains unme
 | [Retinue v0 plan](2026-07-06_retinue_v0_plan.md) | Historical protocol ledger. R0–R10 all closed. Its "next actions" block is not a queue. |
 | [RNS wire format reference](2026-07-13_rns_wire_format_reference.md) | Wire reference. Historical byte-fixture corpus is pinned at RNS 1.3.8; current announce and route probes use RNS 1.5.4. |
 | [Announce timebase plan](2026-08-25_announce_timebase_plan.md) | Active phased plan for the 5+5 announce blob, persistent stock-RNS decision probes, bounded receive freshness, and crash-monotonic firmware reservations. |
-| [retinue-sim plan](2026-10-01_retinue_sim_plan.md) | S7 of mer3ly's site-canvas plan: `Node` first-relay addressing and `next_hop`, and the unpublished `retinue-sim` route-trace harness. Landed on `main` in `fa4f925` (2026-10-02); forks 1-5 and 9 ruled by site Rulings 27-30, 6-8 stand as built. Records the warm-cut reroute timing, a sender's own-data echo, self-learning and the pending-link wedge. S7c (2026-10-07, on `main` from branch `radio-consumers`): the shipped `face` mapping and the `retinue-sim.face-track/v1` file. |
-| [Node link lifecycle and 0.2.0 plan](2026-10-02_node_link_lifecycle_plan.md) | Rulings 27-61 of mer3ly's site-canvas plan applied to the published crate: route learning, `open_link(now)`, link-request expiry, own-echo and self-announce filtering, 0.2.0, and the source-review provenance record for this batch. |
 | [RNS 1.5.4 repin receipt](../testing/receipts/rns-1.5.4-repin/README.md) | Superseded live oracle (see the 1.5.6 and 1.5.7 receipts): Retinue, LXMF 1.1.1, repeated Resources, timebase and route decisions. Separate host/core boundary repair tests; physical scope remains historical. |
 | [RNS 1.5.6 repin receipt](../testing/receipts/rns-1.5.6-repin/README.md) | Superseded live oracle, 2026-10-03, Windows host: every gate passed in at least one run; `interop_ifac` intermittent on an RNS-side race also present on 1.5.4; route decisions identical to 1.5.4; V1 re-checks. |
 | [RNS 1.5.7 repin receipt](../testing/receipts/rns-1.5.7-repin/README.md) | Current live oracle, 2026-10-06, first macOS host (CPython 3.13): live 13/13, outrider 7/7, resource 12/12 and routing 3/3, each in a single run; routing and timebase identical to 1.5.6; `interop_ifac` 14/14 (host difference noted); V1 re-checks unchanged, both held RNS defects persist; harness needs Python 3.11+; preliminary 3.9 runs kept as evidence. |
@@ -427,8 +424,6 @@ provisioning and physical acceptance. Total decoder peak allocation remains unme
 | [LoRa collision mitigation](2026-07-24_lora_collision_mitigation_ideas.md) | Techniques documented, not scheduled. |
 | [First reliable link over RF](2026-07-21_first_reliable_link_over_rf.md) · [Tulle headed acceptance](2026-07-22_tulle_headed_acceptance.md) · [MeshCore relay acceptance](2026-07-22_meshcore_relay_headed.md) · [direct-PHY resource acceptance](2026-07-23_direct_phy_resource_acceptance.md) · [host snapshot acceptance](2026-07-28_host_snapshot_acceptance.md) · [host projection acceptance](2026-07-29_retinue_host_projection_acceptance.md) | On-air and host milestones, July 2026. |
 | [T114 UI acceptance](2026-07-28_t114_on_device_ui_acceptance.md) · [V4 UI acceptance](2026-07-28_v4_on_device_ui_acceptance.md) · [display power and field behaviour](2026-07-29_display_power_field_acceptance.md) · [V4 light-sleep and RF wake](2026-07-29_v4_light_sleep_rf_wake_acceptance.md) | Board-level UI and power receipts. |
-| [T114 bulk TX asymmetry probe](2026-07-25_t114_bulk_tx_asymmetry_probe.md) | Does not reproduce under Tulle direct-PHY. |
-| [RNode direct-PHY RF opacity](2026-07-25_rnode_direct_phy_rf_opacity.md) | **Superseded 2026-08-07** — they do cross. |
 | [AIR0/AIR1](2026-08-12_air0_air1_software_receipt.md) · [AIR2](2026-08-12_air2_announce_ingress_receipt.md) · [AIR3 software](2026-08-12_air3_bounded_transport_software_receipt.md) · [AIR3 T114 on-air](2026-08-13_air3_t114_on_air_receipt.md) | Air-lane receipts. The T114 receipt also records the CDC endpoint defect. |
 | [Transit link receipt spec](2026-08-14_transit_link_receipt_spec.md) | Spec for the deferred three-party transit receipt. |
 
@@ -498,7 +493,6 @@ their filenames says so — see the `result` column.
 | [Signalman founding](2026-08-06_signalman_founding.md) | Historical founding note; execution authority moved to the Cambium scope. |
 | [Cambium desktop scope](2026-08-09_signalman_cambium_desktop_scope.md) | Desktop G0–G5 authority. G0–G4 complete, G5 partial. |
 | [G2 receipt](2026-08-09_signalman_desktop_g2_receipt.md) | Evidence, not a queue. **Its accessibility count is wrong** — see Known divergences. |
-| [Stack and custody refresh](2026-10-11_signalman_stack_refresh_plan.md) | Current locked renderer cohort; Djinn station authority, absent/Locked receipts and failing local-seed control. |
 | [Management surface direction](2026-08-15_signalman_management_surface_direction.md) | Ruling on the device-data mere. |
 | [Management surface plan](2026-08-15_signalman_management_surface_implementation_plan.md) | S0–S9 authority; also records Signalman's headless mixed-realization consumer receipt without changing S2's headed gate. |
 | [Survey and placement plan](2026-09-06_signalman_survey_and_placement_plan.md) | SP0–SP5. GPX/capture imports, directional evidence, candidate scenarios, terrain estimates, constrained placement and measured comparison. |
@@ -514,6 +508,16 @@ their filenames says so — see the `result` column.
 | [IoT device concepts](2026-08-13_iot_device_concepts.md) | Application-concept brainstorm; its ARDC-first hardware sequencing is superseded by the hardware-family plan. |
 | [Lofi voice codec scoping](2026-08-13_lofi_voice_codec_scoping.md) · [Rung 2 codec2 decision](2026-08-13_rung2_codec2_class_decision.md) | Pipit founding and codec choice. |
 | [Hopspot demo receipts](2026-08-11_hopspot_v4_com7_demo_receipt.md) · [Meshtastic T114 UF2 demo](2026-08-11_meshtastic_t114_uf2_demo_receipt.md) | Phone-app BLE demos. **Not Retinue capability claims.** |
+
+### Archived checkpoint: 2026-11-02
+
+- [Retinue simulation](archive_docs/2026-11-02/2026-10-01_retinue_sim_plan.md): Completed route-trace and face mapping; historical alternatives stand as built.
+- [Node link lifecycle](archive_docs/2026-11-02/2026-10-02_node_link_lifecycle_plan.md): Completed 0.2.0 lifecycle, publication and downstream adoption.
+- [Signalman stack and custody refresh](archive_docs/2026-11-02/2026-10-11_signalman_stack_refresh_plan.md): Recorded Windows software and custody qualification; headed and physical gates remain with their owners.
+- [Resource client receive limits](archive_docs/2026-11-02/2026-10-22_resource_client_limits_plan.md): Completed bounded native receiving and Turnstone adoption; broader acceptance remains separate.
+- [RNode RF opacity finding](archive_docs/2026-11-02/2026-07-25_rnode_direct_phy_rf_opacity.md): Superseded by the verified crossing and CRC finding.
+- [T114 bulk TX probe](archive_docs/2026-11-02/2026-07-25_t114_bulk_tx_asymmetry_probe.md): Closed by the RNode bulk-frame-loss follow-up.
+- [Prns harvest brief](archive_docs/2026-11-02/2026-08-09_prns_harvest_brief.md): Historical findings; donor/reference role withdrawn 2026-09-26.
 
 ## Working principles
 

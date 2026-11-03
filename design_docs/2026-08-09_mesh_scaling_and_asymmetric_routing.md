@@ -4,7 +4,7 @@ Findings from a design session, filed 2026-08-09. Reticulum behavior at
 regional and continental scale. Everything here is local-policy work: none of
 it requires a wire format change or a fork. The moot-layer counterpart from the
 same session is mere's
-[boundary, identity, and grant composition](../../mere/design_docs/moothold_docs/research/2026-08-09_boundary_identity_and_grant_composition.md);
+boundary, identity, and grant composition (`gemot/design_docs/moothold_docs/research/2026-08-09_boundary_identity_and_grant_composition.md`);
 the [channel murmuration design](2026-08-09_channel_murmuration.md) builds on
 both.
 

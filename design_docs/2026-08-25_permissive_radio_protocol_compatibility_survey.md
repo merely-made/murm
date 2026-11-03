@@ -13,7 +13,7 @@ this survey remains an architecture record, not a new delivery lane or gate rece
 
 **Related authority:** [mesh household](2026-07-20_mesh_household_tulle_tucket_sennet.md),
 [listener executive and protocol leases](2026-08-10_listener_executive_and_protocol_leases.md),
-[Prns harvest brief](2026-08-09_prns_harvest_brief.md), and
+[Prns harvest brief](archive_docs/2026-11-02/2026-08-09_prns_harvest_brief.md), and
 [current RNS/LXMF re-pin receipt](2026-08-29_rns_152_repin_receipt.md).
 Those documents retain authority over landed architecture and gate status.
 
@@ -42,7 +42,7 @@ Any proposed adaptation requires a separate decision and provenance record.
 Historical black-box receipts remain unchanged; later source-informed work
 must be described accurately rather than as strict clean-room work.
 
-*2026-10-02:* the first recorded reviews under this policy, with revisions, files, and lines, are in the [Node link lifecycle plan](2026-10-02_node_link_lifecycle_plan.md#source-review-and-provenance).
+*2026-10-02:* the first recorded reviews under this policy, with revisions, files, and lines, are in the [Node link lifecycle plan](archive_docs/2026-11-02/2026-10-02_node_link_lifecycle_plan.md#source-review-and-provenance).
 
 *2026-10-05:* the separate adaptation decision is made. retinue and outrider are now under the Reticulum License, and RNS and LXMF source and the manual may be adapted into those two crates only. RNode firmware (GPL-3.0) stays unread. See the [adoption record](2026-10-05_reticulum_license_adoption.md).
 

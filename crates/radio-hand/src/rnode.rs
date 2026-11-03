@@ -18,7 +18,7 @@
 //!
 //! This used to say the two firmwares had been swept across seven sync words and inverted IQ
 //! in both directions without ever crossing
-//! (`design_docs/2026-07-25_rnode_direct_phy_rf_opacity.md`), and that reaching stock RNode
+//! (`design_docs/archive_docs/2026-11-02/2026-07-25_rnode_direct_phy_rf_opacity.md`), and that reaching stock RNode
 //! hardware was an open question. **They cross.** A stock RNode 1.86 on a T114, driven over
 //! BLE by an iPhone, was received by a V4 on this channel at the trunk profile: RSSI -6 dBm,
 //! valid Reticulum announces, repeatedly.

@@ -92,7 +92,7 @@ authority alerts.
 ## Scopes are moots (Mark, ratified 2026-08-12)
 
 Mark's modeling, checked against mere's
-[boundary, identity, and grant composition](../../mere/design_docs/moothold_docs/research/2026-08-09_boundary_identity_and_grant_composition.md)
+boundary, identity, and grant composition (`gemot/design_docs/moothold_docs/research/2026-08-09_boundary_identity_and_grant_composition.md`)
 and ratified: a scope is a moot at the governance layer, and the
 retinue-side object is only the moot's **published policy artifact**, a
 signed record a board can verify cold. The split respects the FS ceiling
@@ -127,7 +127,7 @@ What the modeling buys, clause by clause:
   requires in that scope.
 
 The mere-side counterpart is
-[radio scopes are moots](../../mere/design_docs/moothold_docs/research/2026-08-12_radio_scopes_as_moots.md),
+radio scopes are moots (`gemot/design_docs/moothold_docs/research/2026-08-12_radio_scopes_as_moots.md`),
 which owns the governance half: the policy artifact shape, the partition
 merge rule, and the corroboration stake economics.
 

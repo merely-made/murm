@@ -1532,7 +1532,7 @@ reads back zero bytes where the modem channel reads 187.
 **What it does not claim.** Speaking the host protocol is not being on the air
 with a stock RNode. Those two firmwares were swept against each other across
 seven sync words and inverted IQ in both directions and never crossed
-(`2026-07-25_rnode_direct_phy_rf_opacity.md`); the protocol has no sync-word
+(`archive_docs/2026-11-02/2026-07-25_rnode_direct_phy_rf_opacity.md`); the protocol has no sync-word
 command, so whatever stock RNode programs stays invisible from the host side.
 This channel therefore uses **our** on-air settings — sync `0x12`, preamble 16,
 the same as every other personality here — which is what makes our own boards

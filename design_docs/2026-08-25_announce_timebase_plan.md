@@ -22,7 +22,7 @@ gate.
 receipt](2026-08-29_rns_152_repin_receipt.md), [historical RNS 1.5.0 re-pin
 receipt](2026-08-23_rns_150_lxmf_111_repin_receipt.md), [live-gate flake
 lane](2026-08-23_live_gate_flake_lane.md), [Prns harvest
-brief](2026-08-09_prns_harvest_brief.md), [work lanes](2026-08-09_retinue_work_lanes.md),
+brief](archive_docs/2026-11-02/2026-08-09_prns_harvest_brief.md), [work lanes](2026-08-09_retinue_work_lanes.md),
 and [permissive-source classification](2026-08-25_permissive_radio_protocol_compatibility_survey.md).
 
 ---

@@ -95,7 +95,7 @@ original 07-22 wording, "sometimes stopped arriving".
    is the reliable bulk sender" should be re-examined.
 2. **The direct-PHY lane is unaffected and is the healthy one.** The same
    three radios on Tulle direct-PHY firmware moved 16 KiB byte-exact in both
-   directions the day before (`2026-07-25_t114_bulk_tx_asymmetry_probe.md`),
+   directions the day before (`archive_docs/2026-11-02/2026-07-25_t114_bulk_tx_asymmetry_probe.md`),
    including with the T114 as the bulk sender. Whatever this is, our own
    firmware does not have it.
 3. **It weakens stock RNode as a product bearer for bulk traffic.** v1 sells
@@ -118,7 +118,7 @@ Two operational facts worth keeping:
 - **The 1200-baud touch works on the T114 under RNode firmware.** Opening its
   port at 1200 baud with DTR low drops it into the Adafruit serial bootloader
   (`239A:0071`); no physical reset press is needed. This confirms the claim
-  left unverified in `2026-07-25_rnode_direct_phy_rf_opacity.md`.
+  left unverified in `archive_docs/2026-11-02/2026-07-25_rnode_direct_phy_rf_opacity.md`.
 - **`rnodeconf -a` is drivable non-interactively** by piping its answers, and
   needs `--fw-version` alongside `--nocheck` or it refuses to resolve a
   cached image.

@@ -5,7 +5,7 @@
 //! T114 under RNode firmware sometimes stopped arriving. Both endpoints are
 //! stock RNodes, which is the pairing that produced the original observation.
 //! (A direct-PHY listener cannot serve here: the two firmwares do not share a
-//! demodulation configuration, see 2026-07-25_rnode_direct_phy_rf_opacity.md.)
+//! demodulation configuration, see design_docs/archive_docs/2026-11-02/2026-07-25_rnode_direct_phy_rf_opacity.md.)
 //!
 //! Usage:
 //! `cargo run --features serial-async --example rnode_bulk_probe -- COM5 COM7 [count] [frame_len] [bw_khz]`

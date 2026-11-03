@@ -115,7 +115,7 @@ smolweb framing:
   on-device or stores a pre-projected HTML form beside the knot is an
   implementation choice; storing both is simpler for a microcontroller.
 - **Boundary with the knot publishing protocol.** The
-  [knot publishing plan](../../mere/design_docs/mere_docs/implementation_strategy/2026-08-07_knot_publishing_protocol_plan.md)
+  knot publishing plan (`mere/design_docs/archive_docs/2026-10-06_completed_plans/2026-08-07_knot_publishing_protocol_plan.md`)
   Phase A is authenticated, private, ticketed reading between Mere instances,
   and it deliberately scoped out anonymous public hosting. The beacon is not
   Phase B and must not be confused with it: it is anonymous local-radius

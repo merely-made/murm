@@ -8,7 +8,7 @@
 with **no protocol changes at all**, because the compatibility test is only
 "does it need a bidirectional byte stream", and `LinkStream` is one
 (`crates/retinue/src/endpoint.rs:208,218`). The reasoning is in mere's
-[carrier independence analysis](../../mere/design_docs/nematic_docs/technical_architecture/2026-08-04_protocol_carrier_independence.md);
+carrier independence analysis (`smolweb/design_docs/research/2026-08-04_protocol_carrier_independence.md`);
 the conclusion is that this is **not per-protocol work**. Three shared pieces,
 written once, serve all of them.
 

@@ -2,7 +2,7 @@
 //!
 //! `rnode_bulk_probe` says a direct-PHY listener cannot serve as its receiver, because stock
 //! RNode firmware 1.86 and this project's direct-PHY firmware were swept against each other
-//! and never crossed (`design_docs/2026-07-25_rnode_direct_phy_rf_opacity.md`). That finding
+//! and never crossed (`design_docs/archive_docs/2026-11-02/2026-07-25_rnode_direct_phy_rf_opacity.md`). That finding
 //! is about *stock* RNode. Our own RNode channel is a different device: it speaks the same
 //! host protocol but programs the radio itself, with the sync word and preamble every other
 //! personality here uses. So the two should cross, and this is what asks.
