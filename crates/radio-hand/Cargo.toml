@@ -67,3 +67,6 @@ required-features = ["replay"]
 name = "instances"
 path = "tests/instances/main.rs"
 required-features = ["instances"]
+
+[lints]
+workspace = true

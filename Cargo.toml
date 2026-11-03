@@ -97,3 +97,10 @@ codegen-units = 1
 # Canonical promoted families; keep registry and Git consumers type-identical.
 
 [patch."https://github.com/merely-made/mere.git"]
+
+[workspace.lints.clippy]
+missing_errors_doc = "warn"
+missing_panics_doc = "warn"
+missing_safety_doc = "warn"
+undocumented_unsafe_blocks = "warn"
+too_many_lines = "warn"

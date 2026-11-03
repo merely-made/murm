@@ -75,3 +75,6 @@ required-features = ["tulle-radio"]
 [[example]]
 name = "park"
 required-features = ["tulle-radio"]
+
+[lints]
+workspace = true

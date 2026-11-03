@@ -87,3 +87,6 @@ rustix = { version = "1", features = ["termios"] }
 name = "signalman-survey-scene"
 path = "src/bin/signalman-survey-scene.rs"
 required-features = ["portable-scenes"]
+
+[lints]
+workspace = true

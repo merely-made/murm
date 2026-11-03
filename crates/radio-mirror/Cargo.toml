@@ -54,3 +54,6 @@ required-features = ["json"]
 [[test]]
 name = "input"
 required-features = ["json"]
+
+[lints]
+workspace = true

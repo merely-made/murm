@@ -30,3 +30,6 @@ retinue = { version = "0.3.0", path = "../retinue", default-features = false }
 [[test]]
 name = "retinue_command"
 required-features = ["retinue"]
+
+[lints]
+workspace = true

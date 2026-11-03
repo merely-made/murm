@@ -58,3 +58,6 @@ transport = { workspace = true, features = ["test-identity"] }
 insigne = { workspace = true, features = ["verify"] }
 tokio = { version = "1", features = ["io-util", "macros", "rt", "rt-multi-thread", "time"] }
 tempfile = "3"
+
+[lints]
+workspace = true

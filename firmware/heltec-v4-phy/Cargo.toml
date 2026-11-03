@@ -66,3 +66,6 @@ tucket = { path = "../../crates/tucket", default-features = false, optional = tr
 
 [dev-dependencies]
 protocol-capacity-probe = { path = "../../testing/protocol-capacity" }
+
+[lints]
+workspace = true

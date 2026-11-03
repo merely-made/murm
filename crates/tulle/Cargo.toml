@@ -74,3 +74,6 @@ required-features = ["serial-async"]
 [[example]]
 name = "rf_sniff"
 required-features = ["serial-async"]
+
+[lints]
+workspace = true

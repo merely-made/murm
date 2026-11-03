@@ -433,3 +433,6 @@ required-features = ["tokio"]
 [[example]]
 name = "rns_config_peer"
 required-features = ["tokio"]
+
+[lints]
+workspace = true

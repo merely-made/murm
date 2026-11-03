@@ -23,3 +23,13 @@ async-api = ["dep:webrtc"]
 rtc = { version = "=0.21.1", optional = true, default-features = false, features = ["crypto-ring"] }
 str0m = { version = "=0.23.1", optional = true, default-features = false, features = ["rust-crypto"] }
 webrtc = { version = "=0.21.1", optional = true, default-features = false, features = ["runtime-tokio", "crypto-ring"] }
+
+[workspace.lints.clippy]
+missing_errors_doc = "warn"
+missing_panics_doc = "warn"
+missing_safety_doc = "warn"
+undocumented_unsafe_blocks = "warn"
+too_many_lines = "warn"
+
+[lints]
+workspace = true

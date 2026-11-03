@@ -56,3 +56,10 @@ stickleback = { git = "https://github.com/merely-made/eidetic.git", rev = "f599f
 # do the same. The I2P plan records the original failure and the owner's decision.
 [profile.dev.package.emissary-core]
 debug-assertions = false
+
+[workspace.lints.clippy]
+missing_errors_doc = "warn"
+missing_panics_doc = "warn"
+missing_safety_doc = "warn"
+undocumented_unsafe_blocks = "warn"
+too_many_lines = "warn"

@@ -235,3 +235,10 @@ then Connect. The device supplies its public identity and owns radio keys and
 execution. Queue acceptance and protocol acknowledgements remain distinct;
 MeshCore contact prefixes must resolve to a unique full key. See the same
 plan's R4 section for startup settings and the software-only qualification.
+
+## Local checks
+
+Enable the commit checks with `prek install --allow-missing-config`; run
+`prek run --all-files` alongside the existing local gates. Check definitions
+live in `.pre-commit-config.yaml`, with source-size exclusions and exceptions
+in `line-ceiling.toml`. Shared house style and rollout: `mere/design_docs/mere_docs/implementation_strategy/2026-10-30_house_style_plan.md`.

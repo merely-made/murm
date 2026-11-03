@@ -27,3 +27,6 @@ radio-mirror = { path = "../radio-mirror" }
 [[test]]
 name = "face"
 required-features = ["face"]
+
+[lints]
+workspace = true

@@ -33,3 +33,6 @@ required-features = ["fixed-heap"]
 name = "protocol-capacity-fixed-64"
 path = "src/fixed64.rs"
 required-features = ["fixed-heap"]
+
+[lints]
+workspace = true

@@ -27,3 +27,6 @@ tokio = { version = "1", features = ["net", "io-util", "sync", "rt-multi-thread"
 [[test]]
 name = "fake_bridge"
 required-features = ["tokio"]
+
+[lints]
+workspace = true

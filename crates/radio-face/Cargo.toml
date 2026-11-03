@@ -17,3 +17,6 @@ embedded-graphics = { path = "../../vendor/embedded-graphics" }
 
 [dev-dependencies]
 png = "0.17.16"
+
+[lints]
+workspace = true

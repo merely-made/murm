@@ -36,3 +36,6 @@ required-features = ["hardware"]
 [[example]]
 name = "direct_phy_pair"
 required-features = ["hardware"]
+
+[lints]
+workspace = true

@@ -31,3 +31,6 @@ tulle = { version = "0.2.0", path = "../tulle", features = ["serial-async"], opt
 name = "meshcore_headed"
 path = "examples/meshcore_headed/main.rs"
 required-features = ["hardware"]
+
+[lints]
+workspace = true

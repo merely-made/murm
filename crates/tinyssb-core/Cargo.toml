@@ -11,3 +11,6 @@ publish = false
 [dependencies]
 ed25519-dalek = { version = "3", default-features = false }
 sha2 = { version = "0.11", default-features = false }
+
+[lints]
+workspace = true

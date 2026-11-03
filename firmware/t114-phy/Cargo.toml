@@ -45,3 +45,6 @@ embedded-alloc = { version = "0.7.0", features = ["llff"] }
 
 [dev-dependencies]
 protocol-capacity-probe = { path = "../../testing/protocol-capacity" }
+
+[lints]
+workspace = true
