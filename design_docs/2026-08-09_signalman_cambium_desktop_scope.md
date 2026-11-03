@@ -554,7 +554,7 @@ to 211, and `genet-layout`, `genet-winit-host`, `netrender`, `paint_list_*`,
 `cambium-winit`, and `cambium-winit-a11y` are no longer named by that
 workspace. Both of its semantic scenario receipts (p4a occurrence identity, p4b
 typed relations) pass unchanged, captures included. Write-up in woodshed
-`design_docs/2026-08-09_cambium_desktop_host_migration.md`.
+`woodshed/design_docs/archive_docs/2026-11-03/2026-08-09_cambium_desktop_host_migration.md`.
 
 Signalman's desktop face is the second, built on the same boundary from
 nothing. Between them the five criteria are all met by both — same `run` +
