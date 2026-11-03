@@ -213,7 +213,7 @@ mesh/retry layer and fragment reassembly.
 
 > **Superseded in part (2026-07-31).** No longer the third system. Native
 > Retinue is the trunk, and the gates live in
-> [`2026-07-31_retinue_small_plan.md`](2026-07-31_retinue_small_plan.md).
+> [`2026-07-31_retinue_small_plan.md`](archive_docs/2026-11-02/2026-07-31_retinue_small_plan.md).
 > Three corrections, in descending importance:
 >
 > 1. **The package split below is not the shape.** Capacity parameters go on

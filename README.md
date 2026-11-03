@@ -4,7 +4,7 @@ Murm brings the radio family together with the native peer carriers and
 conversation service imported from Mere. Retinue remains the Reticulum crate;
 all existing crate names and source histories are preserved. The canonical
 repository is [merely-made/murm](https://github.com/merely-made/murm). See the
-[family move plan](design_docs/2026-10-13_murm_family_move_plan.md) for the
+[family move plan](design_docs/2026-11-02_murm_family_move_plan.md) for the
 receiving-build and consumer-cutover status.
 
 The radio workspace stays at the root. The separate `native/` workspace contains
@@ -227,7 +227,7 @@ private text through the existing resident radio runtime. The Messages face
 keeps protocol-specific addresses and observed delivery facts; a host supplies
 its commissioned public journal and authorized runtime. The standalone face
 can reopen an existing journal with `SIGNALMAN_RADIO_JOURNAL`. See R3 in
-`design_docs/2026-10-13_murm_family_move_plan.md` for the software qualification
+`design_docs/archive_docs/2026-11-02/2026-10-13_murm_family_move_plan.md` for the software qualification
 and the separate physical and headed acceptance gates. R4 adds stock
 Meshtastic Stream API and MeshCore USB companion connections: select the
 protocol in Messages, enter its serial port, realm and public journal path,

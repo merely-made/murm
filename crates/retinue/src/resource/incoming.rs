@@ -62,7 +62,7 @@ impl Incoming {
     }
 
     /// Begin receiving with an explicit part ceiling. A board sets this far lower than a
-    /// desktop; see `design_docs/2026-07-31_retinue_small_plan.md`.
+    /// desktop; see `design_docs/archive_docs/2026-11-02/2026-07-31_retinue_small_plan.md`.
     pub fn new_with_max_parts(adv: &Advertisement, max_parts: usize) -> Result<Self> {
         if adv.resource_hash.len() != 32 {
             return Err(Error::BadRequest);

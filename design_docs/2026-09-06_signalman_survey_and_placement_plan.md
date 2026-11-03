@@ -14,9 +14,9 @@ scenarios over the same stable device identities used by Network.
 
 This plan owns survey imports, geographic correlation, candidate placements,
 terrain estimates, comparisons, and their Signalman presentation. It extends
-[management S6/S7](2026-08-15_signalman_management_surface_implementation_plan.md)
+[management S6/S7](2026-11-02_signalman_management_surface_implementation_plan.md)
 and consumes [position PD6](2026-09-01_position_disclosure_plan.md) and the
-[radio observation contract](2026-09-06_radio_observation_plan.md). Those plans
+[radio observation contract](2026-11-02_radio_observation_plan.md). Those plans
 retain ownership of placement persistence, disclosed positions, and raw radio
 facts respectively. SP gates do not close S, PD, WN, or LE gates.
 

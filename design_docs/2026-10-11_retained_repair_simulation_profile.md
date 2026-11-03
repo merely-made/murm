@@ -7,7 +7,7 @@ acceptance `abdf6d51`.
 This document records their boundary and the historical simulation choices so
 they can change with the prototype. It is not an RF wire protocol or a qualification gate. The owning sequence and later
 admission/device gates are in the
-[transport conformance plan](2026-10-11_transport_conformance_plan.md).
+[transport conformance plan](2026-11-02_transport_conformance_plan.md).
 
 ## Standards and evidence boundary
 

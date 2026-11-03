@@ -132,7 +132,7 @@ waterer). Takes enumerated in session:
 - **Bearer per zone.** LoRa for the field, WiFi/TCP indoors (which lifts the
   bandwidth ceiling entirely and is the anti-Tuya story: flash it yourself,
   it answers only to your roster), BLE for wearable or proximity range under
-  the [wall-node management plan](2026-08-30_wall_node_management_plan.md).
+  the [wall-node management plan](2026-11-02_wall_node_management_plan.md).
   Reticulum's bearer-agnosticism means one identity and one
   telemetry grammar across all three.
 - **Telemetry is small.** A few bytes per reading sits comfortably inside

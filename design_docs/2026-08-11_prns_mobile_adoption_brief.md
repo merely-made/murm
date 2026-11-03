@@ -19,7 +19,7 @@ when a dependency boundary is genuinely impractical, and use it only as an
 oracle when independent implementation is itself the requirement.
 
 **Scope correction, 2026-08-30:** the dependency-first mobile recommendation
-stands. The [wall-node management plan](2026-08-30_wall_node_management_plan.md)
+stands. The [wall-node management plan](2026-11-02_wall_node_management_plan.md)
 now owns the board-control contract and implementation order. Its WN5 starts
 with the target V4's management GATT service and uses a real phone as one
 controller face; this brief's P3 T114-first ordering is historical. References
@@ -433,5 +433,5 @@ Relevant Retinue authorities:
 
 - [`2026-08-09_channel_murmuration.md`](2026-08-09_channel_murmuration.md)
 - [`2026-08-06_signalman_founding.md`](2026-08-06_signalman_founding.md)
-- [`2026-07-31_retinue_small_plan.md`](2026-07-31_retinue_small_plan.md)
+- [`2026-07-31_retinue_small_plan.md`](archive_docs/2026-11-02/2026-07-31_retinue_small_plan.md)
 - [`2026-07-19_modem_embedded_and_meshtastic_research.md`](2026-07-19_modem_embedded_and_meshtastic_research.md)

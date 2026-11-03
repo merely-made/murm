@@ -38,7 +38,7 @@ py -m venv .venv
 release. The [September 27 repin receipt](../../../testing/receipts/rns-1.5.4-repin/README.md)
 records the local live, Outrider, Resource and route/timebase qualification. Open
 firmware, IFAC and buffering boundaries are tracked in the
-[wire compatibility plan](../../../design_docs/2026-09-27_wire_compatibility_plan.md).
+[wire compatibility plan](../../../design_docs/2026-11-02_wire_compatibility_plan.md).
 
 The separate [September 26 signed-artifact receipt](../../../testing/receipts/rns-1.5.4-signed-artifact/README.md)
 qualifies six project-input cases against `rnid 1.5.4`. All match the retained 1.5.2

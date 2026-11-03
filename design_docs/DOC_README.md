@@ -1,6 +1,8 @@
 # Murm Documentation Index
 
-WebRTC (2026-11-02): the [family move plan](2026-10-13_murm_family_move_plan.md#2026-11-01-webrtc-provider-evaluation) records E0, the local E1a [murm-rtc provider](../wire/crates/rtc/README.md) and E1c UDP STUN/TURN, below browser and application consumers. Genet owns conformance, its selected WPT and the qualified headed Chrome/Firefox receiving gate in `genet/design_docs/2026-11-01_webrtc_conformance_plan.md`. The [E0 probe](../testing/webrtc-evaluation/README.md) stays frozen; E1a uses an exact upstream DCEP fix found by real packet tests. The native host explicitly disables unsupported mDNS queries. Application-carrier cutover remains separate.
+WebRTC (2026-11-02): the [family move plan](archive_docs/2026-11-02/2026-10-13_murm_family_move_plan.md#2026-11-01-webrtc-provider-evaluation) records E0, the local E1a [murm-rtc provider](../wire/crates/rtc/README.md) and E1c UDP STUN/TURN, below browser and application consumers. Genet owns conformance, its selected WPT and the qualified headed Chrome/Firefox receiving gate in `genet/design_docs/2026-11-01_webrtc_conformance_plan.md`. The [E0 probe](../testing/webrtc-evaluation/README.md) stays frozen; E1a uses an exact upstream DCEP fix found by real packet tests. The native host explicitly disables unsupported mDNS queries. Application-carrier cutover remains separate.
+
+Successor for open work: [Murm family integration and RTC](2026-11-02_murm_family_move_plan.md).
 
 E1c adds resolved UDP STUN/TURN to the same driver, qualified against controlled
 coturn with relay privacy, local metadata, refresh, refusal and socket release.
@@ -42,11 +44,11 @@ history pass across two connections; seven captures are reviewed. Public keys
 share the existing identity/realm journal, with version-2 downgrade refusal and
 no replay of routes or pending work. This supersedes R6's host contact-restore
 gap below. The standalone slice above adds bounded MCU storage; broader
-endpoint/role parity remains open in the [parity plan](2026-10-16_protocol_parity_plan.md).
+endpoint/role parity remains open in the [parity plan](2026-11-02_protocol_parity_plan.md).
 
-Board names (2026-10-16): [the family-plan naming slice](2026-10-13_murm_family_move_plan.md#board-names-2026-10-16) adds persistent public labels, USB naming commands and boot/status titles. Both normal images are installed and all three names saved. SB1, SB2 and T114 all pass post-reboot readback with their original radio settings; SB2 required physical reconnection after its USB endpoint stalled. The [naming receipt](../testing/receipts/device-names/README.md) keeps failed attempts and successful checks distinct. The [direct-PC](../testing/receipts/usb-reboot/direct-pc/README.md) and [swapped-cable](../testing/receipts/usb-reboot/swapped-cables/README.md) controls each reproduce the timeout on their first reset; the later trace below resolves the startup cause. Batteries are connected, so USB-replug recovery does not establish a full power cycle. Tracing found a 20-second physical-claim wait on uncommissioned SB2. The firmware now preserves and replays a read-only USB query to select already-permitted ordinary service early; claim authority and pending/corrupt gates remain enforced. Software checks pass. The [recovery receipt](../testing/receipts/usb-reboot/recovery-fix/README.md) records five consecutive SB2 software reboots without a replug, followed by a final ROM read and two read-only sessions. Names, identity and preferences survive; bytes outside the settings pair are unchanged. SB2 now runs fixed firmware `c8e5eb9309e`; SB1/T114 retain `cb042329232`.
+Board names (2026-10-16): [the family-plan naming slice](archive_docs/2026-11-02/2026-10-13_murm_family_move_plan.md#board-names-2026-10-16) adds persistent public labels, USB naming commands and boot/status titles. Both normal images are installed and all three names saved. SB1, SB2 and T114 all pass post-reboot readback with their original radio settings; SB2 required physical reconnection after its USB endpoint stalled. The [naming receipt](../testing/receipts/device-names/README.md) keeps failed attempts and successful checks distinct. The [direct-PC](../testing/receipts/usb-reboot/direct-pc/README.md) and [swapped-cable](../testing/receipts/usb-reboot/swapped-cables/README.md) controls each reproduce the timeout on their first reset; the later trace below resolves the startup cause. Batteries are connected, so USB-replug recovery does not establish a full power cycle. Tracing found a 20-second physical-claim wait on uncommissioned SB2. The firmware now preserves and replays a read-only USB query to select already-permitted ordinary service early; claim authority and pending/corrupt gates remain enforced. Software checks pass. The [recovery receipt](../testing/receipts/usb-reboot/recovery-fix/README.md) records five consecutive SB2 software reboots without a replug, followed by a final ROM read and two read-only sessions. Names, identity and preferences survive; bytes outside the settings pair are unchanged. SB2 now runs fixed firmware `c8e5eb9309e`; SB1/T114 retain `cb042329232`.
 
-Protocol parity work (2026-10-16): [the three-family plan](2026-10-16_protocol_parity_plan.md)
+Protocol parity work (2026-10-16): [the three-family plan](archive_docs/2026-11-02/2026-10-16_protocol_parity_plan.md)
 separates pinned wire, device-role and firmware/product targets; ranks Tucket
 first, Retinue next and Sennet's full product surface last; records measured
 V4/T114 memory scopes and requires a current combined-image memory refresh
@@ -67,7 +69,7 @@ pressure and restoration. This closes the named memory profile; physical
 radio-failure, power-cut, deadline and unattended product acceptance remain open.
 
 Sennet directed carriage (2026-10-16):
-[R8](2026-10-13_murm_family_move_plan.md#r8--sennet-directed-text-and-delivery-acks-2026-10-16-functional-pass)
+[R8](archive_docs/2026-11-02/2026-10-13_murm_family_move_plan.md#r8--sennet-directed-text-and-delivery-acks-2026-10-16-functional-pass)
 records a [native PKI directed reconnect and automated restoration pass](../testing/receipts/sennet-directed/native-restoration/README.md):
 four exact texts and four correlated ACKs against pinned 2.7.26, exact history,
 disjoint text/control IDs and seven reviewed captures. Both boards restore in
@@ -76,7 +78,7 @@ remain preserved in their original receipt.
 Scoped custody and software gates pass. ACK proofs for 2.8, private-channel
 custody, personal-daemon integration and UI polish remain open. R7 stays frozen.
 
-Sennet carriage (2026-10-16): [R7](2026-10-13_murm_family_move_plan.md#r7--sennet-channel-text-over-tulle-2026-10-16-functional-pass)
+Sennet carriage (2026-10-16): [R7](archive_docs/2026-11-02/2026-10-13_murm_family_move_plan.md#r7--sennet-channel-text-over-tulle-2026-10-16-functional-pass)
 records a [Djinn-backed public LongFast reconnect pass](../testing/receipts/sennet-desktop/native-reconnect/README.md):
 four tagged texts across two connections, exact history, disjoint packet IDs,
 zero protocol ACK claims, seven reviewed captures and both boards restored.
@@ -84,16 +86,16 @@ The Sennet-only runtime and scoped custody pass their software gates. Directed
 text and protocol ACKs are qualified separately in R8; private-channel
 provisioning and UI polish remain open.
 
-Tucket carriage (2026-10-16): [R6 in the family plan](2026-10-13_murm_family_move_plan.md#r6--tucket-over-tulle-through-signalman-2026-10-15-in-progress) records a [Djinn-backed reconnect-send functional pass](../testing/receipts/tucket-desktop/custody/native-reconnect/README.md): four tagged texts with all four protocol ACKs against stock MeshCore across two connections, with exact history checked before fresh work after reconnect. Seven captures are reviewed, both boards restored, and owned helpers stopped. Scoped custody passes real-broker, policy and restored-fallback controls; the 300-execution core gate is unchanged, and 41 desktop tests plus strict Clippy/builds pass again. The fixture explicitly advertises after each commissioning; automatic contact restoration and UI polish remain open. Sennet has its separate R7/R8 receipts above.
+Tucket carriage (2026-10-16): [R6 in the family plan](archive_docs/2026-11-02/2026-10-13_murm_family_move_plan.md#r6--tucket-over-tulle-through-signalman-2026-10-15-in-progress) records a [Djinn-backed reconnect-send functional pass](../testing/receipts/tucket-desktop/custody/native-reconnect/README.md): four tagged texts with all four protocol ACKs against stock MeshCore across two connections, with exact history checked before fresh work after reconnect. Seven captures are reviewed, both boards restored, and owned helpers stopped. Scoped custody passes real-broker, policy and restored-fallback controls; the 300-execution core gate is unchanged, and 41 desktop tests plus strict Clippy/builds pass again. The fixture explicitly advertises after each commissioning; automatic contact restoration and UI polish remain open. Sennet has its separate R7/R8 receipts above.
 
-Radio-to-Comms integration (2026-10-15): [R1-R5 in the family plan](2026-10-13_murm_family_move_plan.md#6-post-cutover-application-integration) records Signalman LXMF, resident radio Comms and stock companion actors with separate identity/delivery scopes. R5 now records passing Meshtastic and MeshCore Windows native functional runs, six reviewed captures each, and stock-pair reconnect/history results. MeshCore passes the pair fixture with an explicit 500 ms reconnect delay; immediate reconnect remains unqualified. Both V4s were restored to verified Tulle and all owned processes closed. The [stock companion receipts](../testing/receipts/stock-companions/README.md) freeze software and Windows source/binary/evidence ledgers. UI cleanup and Sennet/Tucket stack legs remain separate gates.
+Radio-to-Comms integration (2026-10-15): [R1-R5 in the family plan](archive_docs/2026-11-02/2026-10-13_murm_family_move_plan.md#6-post-cutover-application-integration) records Signalman LXMF, resident radio Comms and stock companion actors with separate identity/delivery scopes. R5 now records passing Meshtastic and MeshCore Windows native functional runs, six reviewed captures each, and stock-pair reconnect/history results. MeshCore passes the pair fixture with an explicit 500 ms reconnect delay; immediate reconnect remains unqualified. Both V4s were restored to verified Tulle and all owned processes closed. The [stock companion receipts](../testing/receipts/stock-companions/README.md) freeze software and Windows source/binary/evidence ledgers. UI cleanup and Sennet/Tucket stack legs remain separate gates.
 
 Reusable wire engines (2026-10-14): MOVE5 publishes the independent `wire` workspace and preserves the original Genet ancestry. Genet's Netfetcher keeps its package/defaults/public policy APIs; Mere removes its duplicate crawler exchange and supplies explicit host trust/pooling. Source-bound receipts live in `testing/receipts/wire-engines`, with final receiving checks in the Genet and Mere plans.
 
 
 Murm family direction (2026-10-13): the owner authorized using this repository
 as the foundation for Murm while preserving crate names and history. The
-[Murm family move plan](2026-10-13_murm_family_move_plan.md) maps radio/native
+[Murm family move plan](archive_docs/2026-11-02/2026-10-13_murm_family_move_plan.md) maps radio/native
 workspaces, keeps Stickleback in Mere and Fetch policy in Genet, and sequences
 the implementation, consumer and repository cutovers. The native import and
 named application cutover are published. The existing repository is now
@@ -134,15 +136,19 @@ gate without its family is ambiguous and has already produced wrong readings.
 
 | Namespace | Family | Meaning |
 | --- | --- | --- |
-| `MOVE0`–`MOVE5` **(Murm family move)** | [Murm family move plan](2026-10-13_murm_family_move_plan.md) | Source/history qualification, native workspace, imports, consumers, repository cutover and later HTTP/WebSocket wire extraction. |
+| `MOVE0`–`MOVE5` **(Murm family move)** | [Murm family move plan](archive_docs/2026-11-02/2026-10-13_murm_family_move_plan.md) | Source/history qualification, native workspace, imports, consumers, repository cutover and later HTTP/WebSocket wire extraction. |
 | `G0`–`G4` **(ARDC)** | [ARDC lane](2026-07-31_ardc_application_lane.md) | Grant application gates. All unstarted; lane dormant by decision 2026-08-26. |
 | `G0`–`G5` **(Signalman desktop)** | [Cambium scope](2026-08-09_signalman_cambium_desktop_scope.md) | Desktop GUI adoption gates. G0–G4 complete, G5 partial. |
-| `S0`–`S9` **(Signalman management)** | [Management surface plan](2026-08-15_signalman_management_surface_implementation_plan.md) | Real gates. |
-| `S1`–`S7` **(Linkboy sidequests)** | [Public flashing plan](2026-08-08_linkboy_public_flashing_plan.md) | **Not gates.** Explicitly labelled future-work sidequests, separate from that document's F0–F7 trunk gates. |
-| `WN0`–`WN8` **(wall node)** | [Wall-node management plan](2026-08-30_wall_node_management_plan.md) | Standalone V4, control carriers, safe configuration, image selection, and resident adapter gates. |
+| `S0`–`S9` **(Signalman management)** | [Management surface plan](archive_docs/2026-11-02/2026-08-15_signalman_management_surface_implementation_plan.md) | Real gates. |
+| `S1`–`S7` **(Linkboy sidequests)** | [Public flashing plan](archive_docs/2026-11-02/2026-08-08_linkboy_public_flashing_plan.md) | **Not gates.** Explicitly labelled future-work sidequests, separate from that document's F0–F7 trunk gates. |
+| `WN0`–`WN8` **(wall node)** | [Wall-node management plan](archive_docs/2026-11-02/2026-08-30_wall_node_management_plan.md) | Standalone V4, control carriers, safe configuration, image selection, and resident adapter gates. |
 | `HW0`–`HW8` **(hardware family)** | [Hardware-family plan](2026-09-07_radio_hand_hardware_family_plan.md) | `radio-hand` platform admission, powered-edge and solar nodes, multi-radio ownership, autonomous power, and follow-on hardware gates. |
 
 ## Gate index
+
+The rows retain the original gate namespaces and their historical evidence.
+Use the [successors for open work](#current-open-work-successors-2026-11-02)
+for remaining execution and done-conditions.
 
 Status is what a document explicitly *states*, not what a receipt's existence
 implies. Several receipts in this repository say outright that they do not close
@@ -171,7 +177,7 @@ Historical H8 closure records observed runs, not approval for new Prns use.
 | Gate | Status | Where |
 | --- | --- | --- |
 | AIR0, AIR1, AIR2 | Closed | [Work lanes](2026-08-09_retinue_work_lanes.md), [AIR0/AIR1](2026-08-12_air0_air1_software_receipt.md), [AIR2](2026-08-12_air2_announce_ingress_receipt.md) |
-| TC0–TC7 | TC0 implemented; TC1 selected OpenRQ profile qualified locally. C incremental host core/persistent peer published in Retinue 73616a78/2ee6f0c. A/D resident admitted exact-inventory/QUIC composition published in Mere 26eb8038/abdf6d51, with separate-process durable reopen. B prepared retries pending. Intermittent existing transport-suite failure preserved; broad qualification deferred until stable contracts. | [Transport conformance plan](2026-10-11_transport_conformance_plan.md) and [retained-repair prototype](2026-10-11_retained_repair_simulation_profile.md) — canonical source/receipt pointers and owner/carrier/device/RF boundaries. |
+| TC0–TC7 | TC0 implemented; TC1 selected OpenRQ profile qualified locally. C incremental host core/persistent peer published in Retinue 73616a78/2ee6f0c. A/D resident admitted exact-inventory/QUIC composition published in Mere 26eb8038/abdf6d51, with separate-process durable reopen. B prepared retries pending. Intermittent existing transport-suite failure preserved; broad qualification deferred until stable contracts. | [Transport conformance plan](archive_docs/2026-11-02/2026-10-11_transport_conformance_plan.md) and [retained-repair prototype](2026-10-11_retained_repair_simulation_profile.md) — canonical source/receipt pointers and owner/carrier/device/RF boundaries. |
 | AIR3 | Closed, software and on-air | [software](2026-08-12_air3_bounded_transport_software_receipt.md), [T114 on-air](2026-08-13_air3_t114_on_air_receipt.md) |
 | AIR4, AIR5 | Open | [Work lanes](2026-08-09_retinue_work_lanes.md) |
 | FT1 | Open — needs modelled-versus-measured on-air airtime | [Mesh scaling](2026-08-09_mesh_scaling_and_asymmetric_routing.md) |
@@ -179,25 +185,25 @@ Historical H8 closure records observed runs, not approval for new Prns use.
 | FT3, FT4, FT5 | Open | [Mesh scaling](2026-08-09_mesh_scaling_and_asymmetric_routing.md) |
 | LE1, LE2, LE4, LE5 | Open, post-deadline | [Listener executive](2026-08-10_listener_executive_and_protocol_leases.md) |
 | LE3 | Partial — LE3a/LE3b complete; unattended scheduler open | [LE3 scan-physics receipt](2026-08-20_le3_t114_scan_physics_receipt.md) |
-| O1–O2 (observations) | Complete in software: bounded codec/recorder, literal replay and timeline model; ARM/Xtensa library checks pass | [Radio observation plan](2026-09-06_radio_observation_plan.md) |
-| O3 (observations) | Physical RX/TX, cursor loss, identical reads, pressured-session recovery, concurrent RF, power-cut reset, retune refusal and zero NVMC mutations verified; detailed CPU/IRQ/USB timing remains open | [Radio observation plan](2026-09-06_radio_observation_plan.md#2026-09-09-refusal-and-flash-cost-verification) · [Refusal/flash receipt](2026-09-09_t114_observation_refusal_receipt.json) · [Concurrent receipt](2026-09-08_t114_observation_pressure_receipt.json) |
-| O4 (observations) | `e7c972d` passes aggregate CI and a physical active-USB run after application reboot: 64 identical rereads, all 12 declared RX payloads during collection, TX lifecycle and explicit overflow loss. Initial startup and the strict unread-host test failed; clean-start reliability, retirement/RF continuation, quiet/sleep and detailed cost remain open. | [V4 receipt and failed trials](2026-09-06_radio_observation_plan.md#2026-09-10-v4-active-radio-usb-result) |
-| O5 (observations) | September 21: keyboard export/reload and overwrite refusal verified; identified V4/T114 desktop collection renders with automatic saving off. Board-switch association clearing is implemented. Clipboard/scrolled accessibility, physical cancellation and synchronized coverage remain open. | [Radio observation plan](2026-09-06_radio_observation_plan.md#o5-availability-view-and-export) · [Owner-flow receipt](../testing/receipts/signalman-owner-flow/README.md) |
-| O6 (observations) | Open: needs a validated second listener, including a V4 adapter with the current one-T114 bench. | [Radio observation plan](2026-09-06_radio_observation_plan.md#o6-murmuration-acceptance) |
+| O1–O2 (observations) | Complete in software: bounded codec/recorder, literal replay and timeline model; ARM/Xtensa library checks pass | [Radio observation plan](archive_docs/2026-11-02/2026-09-06_radio_observation_plan.md) |
+| O3 (observations) | Physical RX/TX, cursor loss, identical reads, pressured-session recovery, concurrent RF, power-cut reset, retune refusal and zero NVMC mutations verified; detailed CPU/IRQ/USB timing remains open | [Radio observation plan](archive_docs/2026-11-02/2026-09-06_radio_observation_plan.md#2026-09-09-refusal-and-flash-cost-verification) · [Refusal/flash receipt](2026-09-09_t114_observation_refusal_receipt.json) · [Concurrent receipt](2026-09-08_t114_observation_pressure_receipt.json) |
+| O4 (observations) | `e7c972d` passes aggregate CI and a physical active-USB run after application reboot: 64 identical rereads, all 12 declared RX payloads during collection, TX lifecycle and explicit overflow loss. Initial startup and the strict unread-host test failed; clean-start reliability, retirement/RF continuation, quiet/sleep and detailed cost remain open. | [V4 receipt and failed trials](archive_docs/2026-11-02/2026-09-06_radio_observation_plan.md#2026-09-10-v4-active-radio-usb-result) |
+| O5 (observations) | September 21: keyboard export/reload and overwrite refusal verified; identified V4/T114 desktop collection renders with automatic saving off. Board-switch association clearing is implemented. Clipboard/scrolled accessibility, physical cancellation and synchronized coverage remain open. | [Radio observation plan](archive_docs/2026-11-02/2026-09-06_radio_observation_plan.md#o5-availability-view-and-export) · [Owner-flow receipt](../testing/receipts/signalman-owner-flow/README.md) |
+| O6 (observations) | Open: needs a validated second listener, including a V4 adapter with the current one-T114 bench. | [Radio observation plan](archive_docs/2026-11-02/2026-09-06_radio_observation_plan.md#o6-murmuration-acceptance) |
 | PN0–PN8 (magnetic pocket node) | Active preparation; iOS probe builds and simulator receipt checked; NFC profile created, phone install awaits M4 signing-key access; every PN gate remains open | [Magnetic pocket-node plan](2026-09-07_magnetic_pocket_node_plan.md) |
 | HW0–HW8 (hardware family) | Planned; logical platform boundary and product priority are ruled, while every code and physical gate remains open | [Hardware-family plan](2026-09-07_radio_hand_hardware_family_plan.md) |
 | CM1 | Absorbed into LE2 | [Channel murmuration](2026-08-09_channel_murmuration.md) |
-| [Murmuration controller plan](2026-09-10_murmuration_controller_plan.md) | MC0–MC3e receipts, MC4a capacity and MC4b retained runtime; MC4c physical resident traffic, explicit loss and reset continuity. Full stack/fragmentation and fault acceptance remain open. September 26: owner confirms a PPK2, currently disconnected. September 20's non-detection was not evidence of non-ownership. Wiring, supply isolation and power qualification remain open; no power measurement receipt. |
+| [Murmuration controller plan](archive_docs/2026-11-02/2026-09-10_murmuration_controller_plan.md) | MC0–MC3e receipts, MC4a capacity and MC4b retained runtime; MC4c physical resident traffic, explicit loss and reset continuity. Full stack/fragmentation and fault acceptance remain open. September 26: owner confirms a PPK2, currently disconnected. September 20's non-detection was not evidence of non-ownership. Wiring, supply isolation and power qualification remain open; no power measurement receipt. |
 | [Murmuration resident build receipt](2026-09-13_murmuration_resident_receipt.json) | MC4b source/artifact hashes, host tests and actual V4 static layout; build-only, no installed or runtime memory claim. |
 | [Murmuration resident physical receipt](2026-09-13_murmuration_resident_physical_receipt.json) | MC4c exact V4 image, retained protocol traffic, home gaps, explicit loss, reset counter continuity and measured heap/stack samples; includes failed experiments and remaining physical gates. |
 | [Murmuration session receipt](2026-09-11_murmuration_session_receipt.md) | Retention, resource drain, explicit loss/fresh handshake, Sennet state and V4 return during host silence; exact-build evidence and preserved settings. |
 | [Murmuration physical receipt](2026-09-10_murmuration_physical_receipt.md) | Two V4/T114 runs: 32 exact receives, bounded returns, eight counted home receive gaps, pin refusal; V4 USB packet-boundary fix and preserved settings. |
 | CM2–CM5 | Open, sequenced after LE5 | Same, translated into the executive doc |
-| R0–R10 | All closed | [Retinue v0 plan](2026-07-06_retinue_v0_plan.md) |
-| N0 | Partial — power-loss unplug leg open | [Retinue Small plan](2026-07-31_retinue_small_plan.md) |
+| R0–R10 | All closed | [Retinue v0 plan](archive_docs/2026-11-02/2026-07-06_retinue_v0_plan.md) |
+| N0 | Partial — power-loss unplug leg open | [Retinue Small plan](archive_docs/2026-11-02/2026-07-31_retinue_small_plan.md) |
 | N1–N4, N6 | Closed | Same |
 | N5 | Partial — needs current figures, meter required | Same |
-| U0–U5 | All closed | [On-device UI plan](2026-07-28_on_device_ui_implementation_plan.md) |
+| U0–U5 | USB-first UI closed; metered power and deferred product states remain open in the successor | [On-device UI plan](archive_docs/2026-11-02/2026-07-28_on_device_ui_implementation_plan.md) |
 
 ### Assurance lane — validation, security, custody
 
@@ -210,7 +216,7 @@ Historical H8 closure records observed runs, not approval for new Prns use.
 | ASSURE6 | First green Linux fuzz result recorded at `045cb2f`; physical gates remain separate | [Assurance lane status](2026-08-10_assurance_lane_status.md) |
 | FS1 | UNKNOWN — defined, never statused | [Field node security posture](2026-08-09_field_node_security_posture.md) |
 | FS2 | Closed in software | [FS2 carrier decision](2026-08-10_fs2_command_carrier_decision.md) |
-| FS3 | Partial on V4: durable counter and replay refusal across power removal are physically recorded; mid-write interruption and erase-life budget remain open | [FS2 carrier decision](2026-08-10_fs2_command_carrier_decision.md), [wall-node plan](2026-08-30_wall_node_management_plan.md) |
+| FS3 | Partial on V4: durable counter and replay refusal across power removal are physically recorded; mid-write interruption and erase-life budget remain open | [FS2 carrier decision](2026-08-10_fs2_command_carrier_decision.md), [wall-node plan](archive_docs/2026-11-02/2026-08-30_wall_node_management_plan.md) |
 | FS4 | Partial — process half written, physical half not run | [FS4/FS5](2026-08-10_fs4_custody_and_fs5_seizure.md) |
 | FS5 | Closed with an enforced check | Same |
 | FS6 | Partial — same never-closed nuance as FT2 | [AIR3 software receipt](2026-08-12_air3_bounded_transport_software_receipt.md) |
@@ -220,7 +226,7 @@ Historical H8 closure records observed runs, not approval for new Prns use.
 
 | Gate | Status | Where |
 | --- | --- | --- |
-| F0, F1, F2 | Closed | [Public flashing plan](2026-08-08_linkboy_public_flashing_plan.md) |
+| F0, F1, F2 | Closed | [Public flashing plan](archive_docs/2026-11-02/2026-08-08_linkboy_public_flashing_plan.md) |
 | F3 | Partial — no factory as-shipped board receipt | Same |
 | F4 | Partial — V4 recovery via the board's own reset/boot controls open | Same |
 | F5 | Closed 2026-08-19 | Same; [F5 spike](2026-08-08_linkboy_public_flashing_f5_spike.md) |
@@ -236,15 +242,15 @@ Historical H8 closure records observed runs, not approval for new Prns use.
 | --- | --- | --- |
 | G0–G4 (desktop) | Closed | [Cambium scope](2026-08-09_signalman_cambium_desktop_scope.md) |
 | G5 (desktop) | **Partial.** G5.3 done; G5.1 and G5.2 open — two headed Windows runs remain unrecorded. Their accessibility conditions were met 2026-08-24 (`bd71ee1`). | Same |
-| S0, S1 (management) | Closed | [Management surface plan](2026-08-15_signalman_management_surface_implementation_plan.md) |
+| S0, S1 (management) | Closed | [Management surface plan](archive_docs/2026-11-02/2026-08-15_signalman_management_surface_implementation_plan.md) |
 | S2 | Partial — headed interactive judgement is owner-driven | Same |
 | S3 | Closed | Same |
 | S4 | Partial — process boundary closed, not a headed serial-radio receipt | Same |
 | S5 | Partial — file-backed and host-audio rungs done; headed two-site audible run remains | Same |
 | S6–S9 | UNKNOWN — defined, never statused | Same |
 | SP0–SP5 (survey and placement) | SP0 bounded GPX/capture import and source-preserving replay pass 11 focused tests and strict library Clippy. SP1–SP5 remain planned; Map and field acceptance are separate. | [Survey and placement plan](2026-09-06_signalman_survey_and_placement_plan.md) |
-| WN0 | **Partial** — deliberately revised to `RHC0` v2 with `transaction_sequence` before shipment; host and source-level target consumers exist, but target execution is unreceipted | [Wall-node management plan](2026-08-30_wall_node_management_plan.md) |
-| WN1 | **Partial** — portable durable authority, the pre-radio V4 USB first-write slice, and host `Inspect`/`Claim`/`Resume`/`Abandon` controller exist. The 2026-09-02 physical package was built from `0cbf558c76db52b57794138b82e2c9e088a32f0c`; the 5,918,136-byte release ELF hashes to `6df78fffa2adc006dcdb638b14ce3ebdb5a0e27b64bc447f80eff44a6d944894`, and the official `espflash` merged image is 390,544 bytes ending `0x05F590`, hash `c6244c9d25eb74a0ca0f2a347edfaa4f4f568e230d8d8374f3921d65709dbcab`. Guarded writes covered `0x0..0x3F0000` and preserved `0x3F0000..0x400000`; Linkboy completed COM6 on parent `USB\\VID_303A&PID_1001\\44:1B:F6:6A:FB:28` as Heltec V4 `0.0.1`, US915 modem. Host tests passed for `radio-hand` (2), `postilion` (2), and Signalman (1); the locked Xtensa check was green with two pre-existing warnings. The baseline nonce-bound read was exactly `auth=diagnostic-only transport=modem-only node=a4dbb760a85b3a2e38cb54c62ec6d4df control=valid pending=blank boot=known-good-applied known-good-generation=0 generation-watermark=0`; after true USB power removal/replug with both buttons untouched, the same parent/COM6 re-enumerated at local `2026-09-02 18:11:47` and returned the exact same second read. This closes durable claim/power-cut recovery evidence for ordinary control state, but the read is unauthenticated and the nonce supplies query freshness only. The current worktree adds the shared signed verifier/carrier: `retinue` has a default-on `alloc` feature so its allocation-free floor links into the core-only USB image, which restores the verifier from durable grants, keeps the runtime resident, and answers a signed WN0 `Status` only after journaling the outer counter inside the live quiet window. Physical receipt on the claimed board: `auth=verified-controller` at counters 1 through 5 from the Mere controller key, a replayed counter refused by silence both before and after a true USB power cut, the journaled counter surviving that cut, and the diagnostic still answering afterwards. The carrier now serves the configuration lifecycle (`ProvisionalApply` with a controller-chosen change id and bounded lifetime, `Commit` by board-minted token, `Revert`, and on-board expiry), host-model proven end to end; the image carrying it is flashed and re-verified on the claimed board, where an ungranted key's `apply` earns silence and the granted key still reads `Status`. Open: the applied-and-committed receipt under the Mere controller key, vault, native node, and every other carrier. The earlier clean-pinned init/physical Claim→Resume receipt remains recorded in the plan; WN2–WN8 remain Open. | [Wall-node management plan](2026-08-30_wall_node_management_plan.md) |
+| WN0 | **Partial** — deliberately revised to `RHC0` v2 with `transaction_sequence` before shipment; host and source-level target consumers exist, but target execution is unreceipted | [Wall-node management plan](archive_docs/2026-11-02/2026-08-30_wall_node_management_plan.md) |
+| WN1 | **Partial** — portable durable authority, the pre-radio V4 USB first-write slice, and host `Inspect`/`Claim`/`Resume`/`Abandon` controller exist. The 2026-09-02 physical package was built from `0cbf558c76db52b57794138b82e2c9e088a32f0c`; the 5,918,136-byte release ELF hashes to `6df78fffa2adc006dcdb638b14ce3ebdb5a0e27b64bc447f80eff44a6d944894`, and the official `espflash` merged image is 390,544 bytes ending `0x05F590`, hash `c6244c9d25eb74a0ca0f2a347edfaa4f4f568e230d8d8374f3921d65709dbcab`. Guarded writes covered `0x0..0x3F0000` and preserved `0x3F0000..0x400000`; Linkboy completed COM6 on parent `USB\\VID_303A&PID_1001\\44:1B:F6:6A:FB:28` as Heltec V4 `0.0.1`, US915 modem. Host tests passed for `radio-hand` (2), `postilion` (2), and Signalman (1); the locked Xtensa check was green with two pre-existing warnings. The baseline nonce-bound read was exactly `auth=diagnostic-only transport=modem-only node=a4dbb760a85b3a2e38cb54c62ec6d4df control=valid pending=blank boot=known-good-applied known-good-generation=0 generation-watermark=0`; after true USB power removal/replug with both buttons untouched, the same parent/COM6 re-enumerated at local `2026-09-02 18:11:47` and returned the exact same second read. This closes durable claim/power-cut recovery evidence for ordinary control state, but the read is unauthenticated and the nonce supplies query freshness only. The current worktree adds the shared signed verifier/carrier: `retinue` has a default-on `alloc` feature so its allocation-free floor links into the core-only USB image, which restores the verifier from durable grants, keeps the runtime resident, and answers a signed WN0 `Status` only after journaling the outer counter inside the live quiet window. Physical receipt on the claimed board: `auth=verified-controller` at counters 1 through 5 from the Mere controller key, a replayed counter refused by silence both before and after a true USB power cut, the journaled counter surviving that cut, and the diagnostic still answering afterwards. The carrier now serves the configuration lifecycle (`ProvisionalApply` with a controller-chosen change id and bounded lifetime, `Commit` by board-minted token, `Revert`, and on-board expiry), host-model proven end to end; the image carrying it is flashed and re-verified on the claimed board, where an ungranted key's `apply` earns silence and the granted key still reads `Status`. Open: the applied-and-committed receipt under the Mere controller key, vault, native node, and every other carrier. The earlier clean-pinned init/physical Claim→Resume receipt remains recorded in the plan; WN2–WN8 remain Open. | [Wall-node management plan](archive_docs/2026-11-02/2026-08-30_wall_node_management_plan.md) |
 | WN2–WN8 | Open | Same |
 
 ### Live-gate flake lane
@@ -339,6 +345,28 @@ supplying data-graph and identity crates.
 
 ## Document index
 
+### Current open-work successors (2026-11-02)
+
+Historical gate numbers and dated findings below cite the archived originals.
+**Successors for open work:**
+
+- [Announce timebase: remaining work](2026-11-02_announce_timebase_plan.md): Reservation recovery, guarded package and physical power-cut/on-air evidence; natural expiry and remaining reference corrections.
+- [Wire compatibility and ownership boundaries](2026-11-02_wire_compatibility_plan.md): Embedded IFAC, decoder peak allocation, stock/stress and image acceptance; optional v0 flag-mask evidence carried here.
+- [Retinue small node: remaining work](2026-11-02_retinue_small_plan.md): Actual power loss and current measurement, scheduling, RNode/client follow-ons and supervision.
+- [Wall node and carrier-agnostic management: remaining work](2026-11-02_wall_node_management_plan.md): WN0–WN8 open contract, durable lifecycle, native node, carriers and appliance profiles; preserves completed Claim/Resume evidence.
+- [Linkboy public flashing: remaining work](2026-11-02_linkboy_public_flashing_plan.md): Factory-device and V4 hardware recovery, authenticated catalog and optional update routes.
+- [On-device radio UI: remaining work](2026-11-02_on_device_ui_implementation_plan.md): Metered display/sleep energy and product states gated by their actual owners.
+- [Signalman management surface: remaining work](2026-11-02_signalman_management_surface_implementation_plan.md): Headed interaction, radio text, two-site voice, placement/telemetry, Browse and bounded guest acceptance.
+- [Radio observation and Signalman availability](2026-11-02_radio_observation_plan.md): O3/O4 physical cost and retirement, O5 desktop acceptance and O6 two-listener measurements.
+- [Murm family integration and RTC](2026-11-02_murm_family_move_plan.md): R1–R8 receiving and product follow-ons, supplier gates and RTC continuation; historical cutover and receiving evidence stays archived.
+- [Protocol and firmware feature parity](2026-11-02_protocol_parity_plan.md): Role-specific Retinue/Tucket/Sennet parity and exact-image resource/product acceptance.
+- [Transport standards and retained repair conformance](2026-11-02_transport_conformance_plan.md): Broader codec/corpus/carrier and retained-repair qualification, device/physical measurements and optional adapters.
+- [Murmuration controller and shared-radio measurements](2026-11-02_murmuration_controller_plan.md): Resident failure and control acceptance, cooperative schedules and MC5 measured shared-radio cost.
+- [Retinue I2P SAM seam](2026-11-02_i2p_sam_seam_plan.md): Identity fork, remaining current-cohort interoperability, conditional datagrams and upstream findings; 0.1.1 publication is complete.
+
+Retinue v0 and radio-mirror are archived without separate successors. Their
+historical alternatives and acceptance evidence remain intact.
+
 ### Governance and program
 
 | Document | What it is |
@@ -359,21 +387,19 @@ supplying data-graph and identity crates.
 
 ### Protocol core and wire compatibility
 
-Current execution: [wire compatibility plan](2026-09-27_wire_compatibility_plan.md)
-qualifies RNS 1.5.4 and audits host/core/firmware ownership. Current promotion
-status and residual gates are recorded there; historical receipts keep their pins.
-Phase 3 has software receipts for topology, bounded decoding and the stock
-reliable peer. Firmware IFAC now has both carrier integrations and Node MTU
-reservation; its software/target receipt is separate from still-open board
-provisioning and physical acceptance. Total decoder peak allocation remains unmeasured.
+Current execution: [wire compatibility successor](2026-11-02_wire_compatibility_plan.md)
+tracks embedded IFAC provisioning and physical acceptance, total decoder allocation,
+stock/stress and exact-image acceptance, plus the optional link-ID evidence question.
+The [original compatibility ledger](archive_docs/2026-11-02/2026-09-27_wire_compatibility_plan.md)
+retains the repins and completed software/target evidence at their named scopes.
 
 | Document | What it is |
 | --- | --- |
-| [I2P over SAMv3 plan](2026-10-21_i2p_sam_seam_plan.md) | Retained I2P3/I2P4 reconciled, 2026-10-26. Restores session lookup, fresh-session redial, router termination reporting and harnesses omitted during the history refresh; current `truchman` 0.1.1 pins remain. [Current qualification](../testing/receipts/i2p-reconciliation-20261026/qualification.json): 14 focused tests, native provider checks on Mac/Windows, and a passing Windows stock-RNS no-IFAC dial/restart check. The [I2P3](../testing/receipts/i2p3-external-router/README.md) and [I2P4](../testing/receipts/i2p4-stock-rns/README.md) receipts retain their original cohort scope, including the one RNS-sender Resource failure in 25 runs. |
+| [I2P over SAMv3 plan](archive_docs/2026-11-02/2026-10-21_i2p_sam_seam_plan.md) | Retained I2P3/I2P4 reconciled, 2026-10-26. Restores session lookup, fresh-session redial, router termination reporting and harnesses omitted during the history refresh; current `truchman` 0.1.1 pins remain. [Current qualification](../testing/receipts/i2p-reconciliation-20261026/qualification.json): 14 focused tests, native provider checks on Mac/Windows, and a passing Windows stock-RNS no-IFAC dial/restart check. The [I2P3](../testing/receipts/i2p3-external-router/README.md) and [I2P4](../testing/receipts/i2p4-stock-rns/README.md) receipts retain their original cohort scope, including the one RNS-sender Resource failure in 25 runs. |
 | [NomadNet resource interoperability receipts](2026-09-13_nomadnet_go_resource_compression_receipt.md) | Go/Python compression receipts and Rust nomadnet-rs qualification, including failed client self-control and multipart limits. |
-| [Retinue v0 plan](2026-07-06_retinue_v0_plan.md) | Historical protocol ledger. R0–R10 all closed. Its "next actions" block is not a queue. |
+| [Retinue v0 plan](archive_docs/2026-11-02/2026-07-06_retinue_v0_plan.md) | Historical protocol ledger. R0–R10 all closed; optional flag-mask capture question continues in the wire-compatibility successor. |
 | [RNS wire format reference](2026-07-13_rns_wire_format_reference.md) | Wire reference. Historical byte-fixture corpus is pinned at RNS 1.3.8; current announce and route probes use RNS 1.5.4. |
-| [Announce timebase plan](2026-08-25_announce_timebase_plan.md) | Active phased plan for the 5+5 announce blob, persistent stock-RNS decision probes, bounded receive freshness, and crash-monotonic firmware reservations. |
+| [Announce timebase plan](archive_docs/2026-11-02/2026-08-25_announce_timebase_plan.md) | Active phased plan for the 5+5 announce blob, persistent stock-RNS decision probes, bounded receive freshness, and crash-monotonic firmware reservations. |
 | [RNS 1.5.4 repin receipt](../testing/receipts/rns-1.5.4-repin/README.md) | Superseded live oracle (see the 1.5.6 and 1.5.7 receipts): Retinue, LXMF 1.1.1, repeated Resources, timebase and route decisions. Separate host/core boundary repair tests; physical scope remains historical. |
 | [RNS 1.5.6 repin receipt](../testing/receipts/rns-1.5.6-repin/README.md) | Superseded live oracle, 2026-10-03, Windows host: every gate passed in at least one run; `interop_ifac` intermittent on an RNS-side race also present on 1.5.4; route decisions identical to 1.5.4; V1 re-checks. |
 | [RNS 1.5.7 repin receipt](../testing/receipts/rns-1.5.7-repin/README.md) | Current live oracle, 2026-10-06, first macOS host (CPython 3.13): live 13/13, outrider 7/7, resource 12/12 and routing 3/3, each in a single run; routing and timebase identical to 1.5.6; `interop_ifac` 14/14 (host difference noted); V1 re-checks unchanged, both held RNS defects persist; harness needs Python 3.11+; preliminary 3.9 runs kept as evidence. |
@@ -410,12 +436,12 @@ provisioning and physical acceptance. Total decoder peak allocation remains unme
 
 | Document | What it is |
 | --- | --- |
-| [Retinue Small plan](2026-07-31_retinue_small_plan.md) | Native-node authority. N0–N6; unplug leg and current figures open. |
-| [Wall-node management plan](2026-08-30_wall_node_management_plan.md) | WN0–WN8 authority for standalone V4, management, safe configuration and adapter control; October 11 iroh host probe passes 16 scenarios over existing signed commands. Device integration and physical gates remain separate. |
+| [Retinue Small plan](archive_docs/2026-11-02/2026-07-31_retinue_small_plan.md) | Native-node authority. N0–N6; unplug leg and current figures open. |
+| [Wall-node management plan](archive_docs/2026-11-02/2026-08-30_wall_node_management_plan.md) | WN0–WN8 authority for standalone V4, management, safe configuration and adapter control; October 11 iroh host probe passes 16 scenarios over existing signed commands. Device integration and physical gates remain separate. |
 | [Magnetic pocket-node plan](2026-09-07_magnetic_pocket_node_plan.md) | PN0–PN8. Autonomous NFC-only and optional-Bluetooth nodes, LC0/AT0 attachment, durable custody, M4/iPhone probe, receiver-only charging, RF mechanics, and conditional phone-charging bridge. |
 | [Hardware-family plan](2026-09-07_radio_hand_hardware_family_plan.md) | HW0–HW8 platform/product qualification; October 10 source assessment separates host composition, full iroh, LAN-direct noq and bounded radio-device profiles. All HW gates remain open. |
-| [On-device UI plan](2026-07-28_on_device_ui_implementation_plan.md) | U0–U5, all closed. |
-| [radio-mirror plan](2026-10-01_radio_mirror_plan.md) | M1: radio-face in the browser (mer3ly S8). Landed on `main` in `fa4f925` (2026-10-02); forks F1–F8 ruled by site Rulings 31–38. wasm-bindgen `=0.2.129` under site Ruling 126 (2026-10-07, branch `radio-consumers`), superseding Ruling 35's `=0.2.127`. |
+| [On-device UI plan](archive_docs/2026-11-02/2026-07-28_on_device_ui_implementation_plan.md) | Historical USB-first U0–U5 ledger; metered display power and deferred product-state work remain in the successor. |
+| [radio-mirror plan](archive_docs/2026-11-02/2026-10-01_radio_mirror_plan.md) | M1: radio-face in the browser (mer3ly S8). Landed on `main` in `fa4f925` (2026-10-02); forks F1–F8 ruled by site Rulings 31–38. wasm-bindgen `=0.2.129` under site Ruling 126 (2026-10-07, branch `radio-consumers`), superseding Ruling 35's `=0.2.127`. |
 | [On-device UI direction](2026-07-25_on_device_ui.md) | PANEL×LEDGER face, accepted direction. |
 | [Mesh household](2026-07-20_mesh_household_tulle_tucket_sennet.md) | Crate topology and naming authority. **Its "no code exists yet" status line is false** — all three crates exist. |
 | [Heltec RNode and embedded Rust](2026-07-19_heltec_rnode_and_embedded_rust.md) | Donor, licensing and architecture record. |
@@ -435,7 +461,7 @@ provisioning and physical acceptance. Total decoder peak allocation remains unme
 | [Listener executive and protocol leases](2026-08-10_listener_executive_and_protocol_leases.md) | LE1–LE5 interruption/lease work and receipts; product framing superseded by the 2026-09-10 murmuration direction. |
 | [Channel murmuration](2026-08-09_channel_murmuration.md) | Current 2026-09-10 Tulle coordination direction: configurable home, excursions, pinning, independent third-party firmware; controller and MC3a physical receipts. Historical CM1–CM5 retained. |
 | [LE3 T114 scan-physics receipt](2026-08-20_le3_t114_scan_physics_receipt.md) | LE3a/LE3b complete. |
-| [Radio observation plan](2026-09-06_radio_observation_plan.md) | O1–O6. Shared bounded owner events, RAM recording, collection without control-journal writes, availability timeline and export. |
+| [Radio observation plan](archive_docs/2026-11-02/2026-09-06_radio_observation_plan.md) | O1–O6. Shared bounded owner events, RAM recording, collection without control-journal writes, availability timeline and export. |
 | [Field node security posture](2026-08-09_field_node_security_posture.md) | FS1–FS6 authority. Also owns the PD0 disclosure-tier ruling. |
 | [Position disclosure](2026-09-01_position_disclosure_plan.md) | PD0–PD6. PD0 is ruled; PD1/PD2 are software-complete; PD3's V4 UART/parser path is physically receipted but satellite fix remains unmeasured. Rides FS2's envelope as config authority. |
 | [Assurance lane status](2026-08-10_assurance_lane_status.md) | ASSURE1–ASSURE5. |
@@ -445,7 +471,7 @@ provisioning and physical acceptance. Total decoder peak allocation remains unme
 
 | Document | What it is |
 | --- | --- |
-| [Linkboy public flashing plan](2026-08-08_linkboy_public_flashing_plan.md) | F0–F7 trunk gates plus S1–S7 sidequests (**not gates**). |
+| [Linkboy public flashing plan](archive_docs/2026-11-02/2026-08-08_linkboy_public_flashing_plan.md) | F0–F7 trunk gates plus S1–S7 sidequests (**not gates**). |
 | [Linkboy F5 spike](2026-08-08_linkboy_public_flashing_f5_spike.md) | Helper-packaging evidence, complete. |
 | [Catalog auth and activation foundation](2026-08-20_catalog_auth_and_activation_foundation.md) | Host-side foundation for authenticated firmware delivery. DIST7. |
 | [FCC reselling research](2026-07-20_fcc_reselling_flashed_radios.md) | Findings and v1 posture for flash-and-resell lawfulness. |
@@ -494,7 +520,7 @@ their filenames says so — see the `result` column.
 | [Cambium desktop scope](2026-08-09_signalman_cambium_desktop_scope.md) | Desktop G0–G5 authority. G0–G4 complete, G5 partial. |
 | [G2 receipt](2026-08-09_signalman_desktop_g2_receipt.md) | Evidence, not a queue. **Its accessibility count is wrong** — see Known divergences. |
 | [Management surface direction](2026-08-15_signalman_management_surface_direction.md) | Ruling on the device-data mere. |
-| [Management surface plan](2026-08-15_signalman_management_surface_implementation_plan.md) | S0–S9 authority; also records Signalman's headless mixed-realization consumer receipt without changing S2's headed gate. |
+| [Management surface plan](archive_docs/2026-11-02/2026-08-15_signalman_management_surface_implementation_plan.md) | S0–S9 authority; also records Signalman's headless mixed-realization consumer receipt without changing S2's headed gate. |
 | [Survey and placement plan](2026-09-06_signalman_survey_and_placement_plan.md) | SP0–SP5. GPX/capture imports, directional evidence, candidate scenarios, terrain estimates, constrained placement and measured comparison. |
 | [S2 live station receipt](2026-08-20_signalman_s2_live_station_receipt.md) | Live bench leg complete, over-the-air announce. |
 | Graphical receipts | [V4 COM6 G4](2026-08-10_signalman_v4_com6_g4_receipt.md) · [V4 COM7 owner flow](2026-08-10_signalman_v4_com7_owner_flow_receipt.md) · [T114 graphical](2026-08-14_signalman_t114_graphical_receipt.md) · [COM6 N39](2026-08-14_com6_n39_signalman_graphical_receipt.md) · [N39 Hopspot](2026-08-14_com6_n39_hopspot_signalman_graphical_receipt.md) · [N39 Hopspot→Retinue restore](2026-08-14_com6_n39_hopspot_retinue_signalman_restore_receipt.md) · [Windows staged helper](2026-08-15_signalman_windows_v4_staged_helper_receipt.md) · [public F5 Windows](2026-08-19_signalman_public_f5_windows_receipt.md) |
@@ -534,7 +560,7 @@ provides the missing condition or explicitly asks to continue.
 
 ### Family placement preserves implementation contracts
 
-The [Murm move plan](2026-10-13_murm_family_move_plan.md) promotes the family,
+The [Murm move plan](archive_docs/2026-11-02/2026-10-13_murm_family_move_plan.md) promotes the family,
 not a mandatory aggregate dependency. Preserve published crate names and
 original history, radio dependency/target boundaries and protocol-specific
 semantics. The owner requires a shared current Rust toolchain (1.99.0 for the planned
@@ -778,6 +804,6 @@ FLK5 audit of the remaining documents that quote bare gate counts. The first
 `archive_docs/` checkpoint was created 2026-08-30 when the pre-decision
 Bluetooth capability brief was superseded by the wall-node plan.
 
-The [foundation supplier promotion (2026-10-19)](2026-10-13_murm_family_move_plan.md#2026-10-19-foundation-supplier-promotion) records the canonical Eidetic dependency cutover, native library tests and the separately open killed-peer gate.
+The [foundation supplier promotion (2026-10-19)](archive_docs/2026-11-02/2026-10-13_murm_family_move_plan.md#2026-10-19-foundation-supplier-promotion) records the canonical Eidetic dependency cutover, native library tests and the separately open killed-peer gate.
 
 Foundation source adoption (2026-10-19): canonical promoted-family revisions and consumer source validation are recorded in `mere/design_docs/mere_docs/implementation_strategy/2026-10-19_family_promotion_plan.md`. Existing application and domain authority remain with their owning components.

@@ -36,13 +36,13 @@ are complete. This section is the current coordination agreement for these
 specific slices; historical deadline ordering below does not gate them. The
 canonical document/status index remains `DOC_README.md`.
 
-- [Wall node](2026-08-30_wall_node_management_plan.md): finish the granted-key
+- [Wall node](2026-11-02_wall_node_management_plan.md): finish the granted-key
   USB lifecycle receipt, then V4 native LoRa forwarding without its controller;
   WiFi follows that appliance slice.
 - [Listener executive](2026-08-10_listener_executive_and_protocol_leases.md):
   static assignments and bounded leases, then a two-listener experiment and
   peer disappearance. The first model needs no board or new protocol adapter.
-- [Observations](2026-09-06_radio_observation_plan.md): one bounded vocabulary,
+- [Observations](2026-11-02_radio_observation_plan.md): one bounded vocabulary,
   collection without durable status writes, and an availability timeline.
 - [Survey and placement](2026-09-06_signalman_survey_and_placement_plan.md):
   saved GPX/capture imports, scenario comparison, terrain estimates and ranked
@@ -136,7 +136,7 @@ No board mutation is part of the first software foundation receipt.
   failed, and the strict unread-host runner failed on a serial write timeout;
   neither startup reliability nor physical retirement/RF continuation is closed.
   COM7 was recovered, its protected tail unchanged. The
-  [canonical receipt](2026-09-06_radio_observation_plan.md#2026-09-10-v4-active-radio-usb-result)
+  [canonical receipt](archive_docs/2026-11-02/2026-09-06_radio_observation_plan.md#2026-09-10-v4-active-radio-usb-result)
   keeps every failed trial and the remaining quiet, sleep and cost boundaries.
 
 - **2026-09-10 survey receipt:** SP0 now imports bounded GPX, the documented
@@ -223,7 +223,7 @@ No board mutation is part of the first software foundation receipt.
   transition witnesses and the bounded owner registry; Luna owns the opaque
   Selvage carrier codec, Tulle decoder and collection fixtures. The coordinator
   owns dispatch, USB retirement, Signalman collection and integration. The
-  [O3 software receipt](2026-09-06_radio_observation_plan.md#2026-09-07-o3-software-slice)
+  [O3 software receipt](archive_docs/2026-11-02/2026-09-06_radio_observation_plan.md#2026-09-07-o3-software-slice)
   records the exact limits and remaining physical procedure. T114 release image
   compilation passes; O3 remains partial until physical timing, journal-write
   measurements and broader slow-host acceptance. This does not advance O4/O5.
@@ -234,7 +234,7 @@ No board mutation is part of the first software foundation receipt.
   interleaved collection, explicit overwrite gaps, matched TX/return edges and
   pressured-session recovery. O3 stays partial for refusal, power-cycle and
   independent cost/journal measurements. Exact scope and the raw artifact are
-  in the [physical result](2026-09-06_radio_observation_plan.md#2026-09-08-physical-result).
+  in the [physical result](archive_docs/2026-11-02/2026-09-06_radio_observation_plan.md#2026-09-08-physical-result).
 
 ## Plan audit
 
@@ -243,17 +243,17 @@ current plan set sorts as follows.
 
 | Document | Present authority |
 | --- | --- |
-| [Retinue v0 plan](2026-07-06_retinue_v0_plan.md) | Historical protocol and receipt ledger. R9/R10 and the on-air milestone landed; its old R2/R3 next-actions block is not a current queue. |
+| [Retinue v0 plan](archive_docs/2026-11-02/2026-07-06_retinue_v0_plan.md) | Historical protocol and receipt ledger. R9/R10 and the on-air milestone landed; its old R2/R3 next-actions block is not a current queue. |
 | [Heltec RNode and embedded Rust](2026-07-19_heltec_rnode_and_embedded_rust.md) | Donor, licensing, and architecture record. Native-node execution moved to Retinue Small. |
 | [Modem, embedded, and Meshtastic research](2026-07-19_modem_embedded_and_meshtastic_research.md) | Research record, superseded in part by Retinue Small and the direct-PHY work. |
 | [Mesh household](2026-07-20_mesh_household_tulle_tucket_sennet.md) | Naming, component-boundary, and license authority. Its statement that the components do not exist is stale. |
 | [Outrider / LXMF founding](2026-07-25_outrider_lxmf_founding.md) | Closed ledger. Gates 1 through 8 have receipts. |
-| [On-device UI plan](2026-07-28_on_device_ui_implementation_plan.md) | Closed ledger. U0 through U5 are complete. |
+| [On-device UI plan](archive_docs/2026-11-02/2026-07-28_on_device_ui_implementation_plan.md) | Historical USB-first UI ledger; the metered power and deferred product-state gates remain open. [Successor for open work](2026-11-02_on_device_ui_implementation_plan.md). |
 | [ARDC application lane](2026-07-31_ardc_application_lane.md) | Active external lane. The 2026-09-01 intake deadline remains separate from engineering gates. |
-| [Retinue Small plan](2026-07-31_retinue_small_plan.md) | Current native-node authority. Software gates N0 through N6 are substantially closed. The unplug leg, current measurements, and the cheaper carrier-sense question remain owner or research work. |
+| [Retinue Small plan](archive_docs/2026-11-02/2026-07-31_retinue_small_plan.md) | Historical N0–N6 native-node ledger. Software gates N0 through N6 are substantially closed. The unplug leg, current measurements, and the cheaper carrier-sense question remain owner or research work. [Successor for open work](2026-11-02_retinue_small_plan.md). |
 | [Smolweb over Reticulum](2026-08-04_smolweb_over_reticulum_plan.md) | Active independent application bridge. R-A, R-B, and R-C remain serial within that program. |
 | [Signalman founding](2026-08-06_signalman_founding.md) | Historical founding note. Execution authority moved to the Cambium desktop scope and receipts. |
-| [Linkboy public flashing plan](2026-08-08_linkboy_public_flashing_plan.md) | Active installer authority. The 2026-08-20 audit closed F1 and F2 outright; F3 and F4 are complete except two physical claims (as-shipped-board plan and V4 reset/boot-control recovery). The paired V4 preservation fact closed on 2026-08-20. F5 is complete: V4 has official per-platform helper custody and physical Windows, Intel-macOS, Apple-silicon-macOS, and Linux receipts; public T114 uses built-in UF2 and has its graphical Windows real-device receipt. F7 is complete: the graphical Prns V4 and Meshtastic T114 install-and-Retinue-restore receipts landed, and the catalog was published 2026-08-20 (Retinue `05b3795`, Mer3ly `94a7d64`, live V4/T114 pages). |
+| [Linkboy public flashing plan](archive_docs/2026-11-02/2026-08-08_linkboy_public_flashing_plan.md) | Historical F0–F7 installer ledger. The 2026-08-20 audit closed F1 and F2 outright; F3 and F4 are complete except two physical claims (as-shipped-board plan and V4 reset/boot-control recovery). The paired V4 preservation fact closed on 2026-08-20. F5 is complete: V4 has official per-platform helper custody and physical Windows, Intel-macOS, Apple-silicon-macOS, and Linux receipts; public T114 uses built-in UF2 and has its graphical Windows real-device receipt. F7 is complete: the graphical Prns V4 and Meshtastic T114 install-and-Retinue-restore receipts landed, and the catalog was published 2026-08-20 (Retinue `05b3795`, Mer3ly `94a7d64`, live V4/T114 pages). [Successor for open work](2026-11-02_linkboy_public_flashing_plan.md). |
 | [Linkboy F5 spike](2026-08-08_linkboy_public_flashing_f5_spike.md) | Complete helper-packaging evidence. V4 selects and verifies official per-platform `espflash 4.5.0` artifacts; public T114 uses Linkboy's built-in stock-bootloader UF2 route. Ambient PATH is development-only. Cross-platform V4 receipts and the public T114 real-device receipt are recorded. |
 | [Signalman Cambium desktop scope](2026-08-09_signalman_cambium_desktop_scope.md) | Active GUI authority. G0 through G3 are complete. G4 has physical V4 and T114 cross-firmware-and-recovery receipts, and the owner supplied the manual screen-reader judgement for Windows. |
 | [Signalman G2 receipt](2026-08-09_signalman_desktop_g2_receipt.md) | Evidence, not a work queue. It proves the headed shell and automated accessibility surface, not a board flash. |
@@ -263,10 +263,10 @@ current plan set sorts as follows.
 | [Field node security posture](2026-08-09_field_node_security_posture.md) | Active security authority. FS1 through FS6 own ingest, command authorization, replay, custody, seizure, and bounded tables. |
 | [Prns harvest brief](archive_docs/2026-11-02/2026-08-09_prns_harvest_brief.md) | Historical donor and external-peer catalogue; donor/reference role withdrawn 2026-09-26. Current lane owners retain authority. |
 | [Assurance lane status](2026-08-10_assurance_lane_status.md), [FS2 carrier decision](2026-08-10_fs2_command_carrier_decision.md), and [FS4/FS5](2026-08-10_fs4_custody_and_fs5_seizure.md) | Current assurance evidence. ASSURE1, the unsafe audit and the first Linux fuzz smoke receipt pass; ASSURE3 through ASSURE5 are complete in software. FS3's remaining physical scope, on-metal command verification, physical FS4 and disclosure retain their own acceptance gates. |
-| [Wall-node management plan](2026-08-30_wall_node_management_plan.md) | Active WN0 through WN8 authority for the standalone V4, transport-agnostic management, safe configuration, firmware selection, and later resident adapter control. It replaces the retired LB pre-decision ladder without taking LE, Signalman, or Linkboy authority. |
+| [Wall-node management plan](archive_docs/2026-11-02/2026-08-30_wall_node_management_plan.md) | Historical WN0 through WN8 ledger for the standalone V4, transport-agnostic management, safe configuration, firmware selection, and later resident adapter control. It replaces the retired LB pre-decision ladder without taking LE, Signalman, or Linkboy authority. [Successor for open work](2026-11-02_wall_node_management_plan.md). |
 | [Civic deployment](2026-08-11_civic_deployment_prescribed_paths.md) | Phase-two program consuming FT/FS/LE/LB facts. CV1 through CV6 and D1 through D5 are not pilot-critical engineering gates. |
 | [Live-gate flake lane](2026-08-23_live_gate_flake_lane.md) | Active measurement lane, opened 2026-08-23. FLK1 through FLK5 own the per-gate failure rates of the live RNS/LXMF oracle gates and what a suite run is allowed to prove. Until it closes, a bare "twelve of twelve" count is not evidence. Does not cover the peer matrix, which never runs the flaking gates. |
-| [Signalman management surface plan](2026-08-15_signalman_management_surface_implementation_plan.md) | Active product authority for the Signalman desktop beyond flashing: Devices, Network, Messages, Map, and Browse. S0/S1 and the S2/S3 software slices are verified, and S2's live bench leg completed 2026-08-20 through Mere `1609cb90`'s lease-checked station getter and the desktop's live station actor. The owner-driven S2 headed interactive judgement, G5 hide/reopen receipt, and S5 headed two-site audible voice remain open. Presentation code takes no radio or flashing authority. |
+| [Signalman management surface plan](archive_docs/2026-11-02/2026-08-15_signalman_management_surface_implementation_plan.md) | Historical S0–S9 product ledger for the Signalman desktop beyond flashing: Devices, Network, Messages, Map, and Browse. S0/S1 and the S2/S3 software slices are verified, and S2's live bench leg completed 2026-08-20 through Mere `1609cb90`'s lease-checked station getter and the desktop's live station actor. The owner-driven S2 headed interactive judgement, G5 hide/reopen receipt, and S5 headed two-site audible voice remain open. Presentation code takes no radio or flashing authority. [Successor for open work](2026-11-02_signalman_management_surface_implementation_plan.md). |
 
 The low-power UART personality and first on-device UI design are inputs to the
 Retinue Small and UI ledgers, not separate queues. The 2026-07-21 through

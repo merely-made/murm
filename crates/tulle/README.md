@@ -26,7 +26,7 @@ Host-retained Retinue links, proof-dependent resource drain and Sennet duplicate
 [session receipt](../../design_docs/2026-09-11_murmuration_session_receipt.md).
 Explicit Retinue session loss and V4 board-timed PHY return are also verified.
 Resident firmware protocol adapters and physical fault-injection coverage remain open; the
-[controller plan](../../design_docs/2026-09-10_murmuration_controller_plan.md)
+[controller plan](../../design_docs/2026-11-02_murmuration_controller_plan.md)
 separates model tests from physical acceptance.
 
 The same feature now exposes `DirectPhySerialLink`, the reusable host wrapper

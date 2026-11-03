@@ -22,7 +22,7 @@ and freshness history remain separately configurable. Bound raw bytes before
 packet decoding and bound the caller's action queues too. The combined-capacity
 fixture builds with compression disabled; compressed-resource expansion requires
 its own budget. See the repository's
-[`MC4 plan`](../../design_docs/2026-09-10_murmuration_controller_plan.md).
+[`MC4 plan`](../../design_docs/archive_docs/2026-11-02/2026-09-10_murmuration_controller_plan.md).
 
 The layers below have recorded black-box RNS checks. Limited source review
 began later; each historical receipt retains its own evidence boundary. The committed byte fixtures under [`tests/fixtures/`](tests/fixtures/)

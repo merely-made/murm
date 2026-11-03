@@ -68,7 +68,7 @@ images, not a mandatory persistent interceptor. Keep devices controllable and
 reflashable without taking ownership of every external protocol's internals.
 
 The V4's [`cargo +esp` build](../firmware/heltec-v4-phy/README.md) and the
-[retinue-small toolchain investigation](2026-07-31_retinue_small_plan.md) concern
+[retinue-small toolchain investigation](archive_docs/2026-11-02/2026-07-31_retinue_small_plan.md) concern
 **espup developer toolchain provisioning**. Provisioning a compiler, flashing an
 image, and switching a running personality are three separate operations.
 
@@ -99,7 +99,7 @@ image, and switching a running personality are three separate operations.
 ### Controller slice and next hardware gate
 
 Implementation is tracked in the
-[2026-09-10 controller plan](2026-09-10_murmuration_controller_plan.md).
+[2026-09-10 controller plan](2026-11-02_murmuration_controller_plan.md).
 
 The implemented radio-free model at Tulle's coordination boundary uses two
 fake adapters in acceptance tests and caller-supplied monotonic time. It models
@@ -132,7 +132,7 @@ universal coverage, a lone-node stay-home rule, mandatory gateway duty and the
 old firmware-only ownership are superseded by the current direction above.
 
 Design doc, 2026-08-09. Lifts the question the
-[retinue-small plan](2026-07-31_retinue_small_plan.md) deliberately deferred.
+[retinue-small plan](archive_docs/2026-11-02/2026-07-31_retinue_small_plan.md) deliberately deferred.
 Structural decision 4 made personalities boot-selected channels behind the
 `Executive`, ruled switching by reboot, and noted "hot-switching is a later
 question if it ever matters." This is that question mattering, and the shape it
@@ -337,7 +337,7 @@ firmware version. MeshCore headed evidence is
 official companion 1.15.0 plus repeater 1.16.0. These are reference or peer
 pins, not claims that the resident image embeds those implementations.
 
-The next physical lane is [MC5](2026-09-10_murmuration_controller_plan.md#mc5-shared-radio-cost-and-missed-traffic-measurement):
+The next physical lane is [MC5](2026-11-02_murmuration_controller_plan.md#open-phases-and-done-conditions):
 inventory the Nordic PPK2 fixture, wiring and calibration, measure each
 protocol's own idle, RX, TX and workload baseline, then measure the extra
 energy and missed traffic that sharing one radio adds. Physical power-cut
@@ -365,7 +365,7 @@ Reception on a resident board is scoped by four configured facts:
 
 Dispatch after reception is therefore the only free sharing. Every other
 combination costs either a retune blackout, a window the peer must honor, or a
-second collision domain, and the [MC5 measurement plan](2026-09-10_murmuration_controller_plan.md#mc5-shared-radio-cost-and-missed-traffic-measurement)
+second collision domain, and the [MC5 measurement plan](2026-11-02_murmuration_controller_plan.md#open-phases-and-done-conditions)
 prices each of those against the single-protocol baseline before any default
 is chosen. A foreign or malformed packet remains an observation and never
 requests a role, a window, or a switch.

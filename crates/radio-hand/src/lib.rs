@@ -11,7 +11,7 @@
 //! persisted record that gives a board an identity surviving power loss; `service` and
 //! `dispatch`, the radio work and command loop that used to be duplicated in two `main.rs`
 //! files; and `executive` and `channel`, the hardware owner and the personality trait
-//! above it. See `design_docs/2026-07-31_retinue_small_plan.md`.
+//! above it. See `design_docs/archive_docs/2026-11-02/2026-07-31_retinue_small_plan.md`.
 //!
 //! Everything here is board-agnostic. Flash and entropy peripherals stay in the firmware
 //! crates, because the T114 reaches them through `embassy-nrf` and the V4 through `esp-hal`;

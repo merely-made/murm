@@ -127,7 +127,7 @@ here. Recorded rather than papered over.
 
 - **FS3, the durable counter.** The V4 wall-node USB carrier now journals the
   counter and physically rejects replay before and after a real power removal;
-  see the [wall-node receipt](2026-08-30_wall_node_management_plan.md). This is
+  see the [wall-node receipt](archive_docs/2026-11-02/2026-08-30_wall_node_management_plan.md). This is
   partial V4 acceptance. The owning FS3 gate still requires a power cut during
   the write and a documented command-rate/erase-life budget; it is not a T114
   or every-carrier receipt.

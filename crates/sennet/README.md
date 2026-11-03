@@ -21,7 +21,7 @@ native reconnect, with scoped transient custody, exact history and automated
 board restoration. The target is stock 2.7.26; channel ACKs are unauthenticated
 correlation facts. Current 2.8 security modes, broader role/module parity and
 current-image embedded memory qualification remain separate in the
-[parity proposal](../../design_docs/2026-10-16_protocol_parity_plan.md).
+[parity proposal](../../design_docs/2026-11-02_protocol_parity_plan.md).
 
 **Earlier comparison, September 30:** the stock target is Meshtastic
 `2.7.26.54e0d8d` beta, with `2.8.0.47db0e3` alpha kept as a separate comparison.

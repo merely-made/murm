@@ -15,7 +15,7 @@
 //!   Meshtastic personalities can ride the same seam rather than growing their own.
 //! - **No capability negotiation** until BLE lands and actually demands it.
 //!
-//! See `design_docs/2026-07-31_retinue_small_plan.md`, structural decision 3.
+//! See `design_docs/archive_docs/2026-11-02/2026-07-31_retinue_small_plan.md`, structural decision 3.
 
 /// Why a link operation could not complete.
 ///

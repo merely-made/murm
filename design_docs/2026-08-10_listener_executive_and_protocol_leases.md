@@ -15,7 +15,7 @@ The older LE scan and build-only snapshots below retain their original scope.
 > arbitrary third-party firmware runs independently.
 
 Design doc, 2026-08-10. Supersedes the channel-ownership clause of
-[retinue-small structural decision 4](2026-07-31_retinue_small_plan.md) and
+[retinue-small structural decision 4](archive_docs/2026-11-02/2026-07-31_retinue_small_plan.md) and
 reframes [channel murmuration](2026-08-09_channel_murmuration.md); both carry
 banners pointing here. The one-image ruling, the licensing edge, and the trunk
 guard stand, translated below.
@@ -31,7 +31,7 @@ receipt.
 
 **Scope correction, 2026-08-30:** this document governs resident adapters in
 one running image. The
-[wall-node management plan](2026-08-30_wall_node_management_plan.md) separately
+[wall-node management plan](2026-11-02_wall_node_management_plan.md) separately
 admits durable selection among verified firmware images on boards with measured
 slot and rollback capacity. A boot-selected adapter channel still dies; a
 rollbackable image choice does not. The shared board executive is
@@ -521,6 +521,6 @@ The executive may coordinate only our own installed implementations through a
 configured home, optional pin and explicit bounded excursion. It never infers
 a switch from arbitrary packets and never controls unmodified foreign
 firmware. The Nordic PPK2 lane, planned as
-[MC5](2026-09-10_murmuration_controller_plan.md#mc5-shared-radio-cost-and-missed-traffic-measurement),
+[MC5](2026-11-02_murmuration_controller_plan.md#open-phases-and-done-conditions),
 inventories fixture wiring and calibration, then measures each protocol's
 baseline and the shared-radio extra cost; power-cut proof is a separate gate.

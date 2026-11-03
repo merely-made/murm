@@ -37,7 +37,7 @@ pub mod desktop {
 }
 
 /// Sizes for the T114 profile: one link, a shallow window, and no room to be
-/// generous. See `design_docs/2026-07-31_retinue_small_plan.md`.
+/// generous. See `design_docs/archive_docs/2026-11-02/2026-07-31_retinue_small_plan.md`.
 pub mod small {
     /// Channel packets on the wire whose proof has not yet come back.
     ///

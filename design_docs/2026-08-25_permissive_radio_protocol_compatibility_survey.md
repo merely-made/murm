@@ -408,7 +408,7 @@ tests, not a missing universal protocol layer.
 
 Resident switching remains limited to our own implementations, configured home
 and bounded excursions. The Nordic PPK2 gate is planned as
-[MC5](2026-09-10_murmuration_controller_plan.md#mc5-shared-radio-cost-and-missed-traffic-measurement):
+[MC5](2026-11-02_murmuration_controller_plan.md#open-phases-and-done-conditions):
 fixture inventory, wiring and calibration, then per-protocol baselines and
 the shared-radio extra cost and missed traffic.
 Physical power-cut recovery remains pending. Protocol identities and delivery

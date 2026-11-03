@@ -11,7 +11,7 @@ remain open. No board or MCU runtime qualification was performed.
 Retinue now has two appliance plans with deliberately different physical
 assumptions:
 
-- the [wall node](2026-08-30_wall_node_management_plan.md), a powered Heltec V4
+- the [wall node](2026-11-02_wall_node_management_plan.md), a powered Heltec V4
   with WiFi, Bluetooth, USB, and later resident Reticulum;
 - the [magnetic pocket node](2026-09-07_magnetic_pocket_node_plan.md), an
   autonomous phone-attached node with NFC, receiver-only Qi, USB-C, and an
@@ -225,7 +225,7 @@ flashing mechanisms. New integration work must establish coexistence, bounded
 memory, restart/rollback, observed delivery, and explicit gateway provenance.
 
 The first experiments live in the
-[wall-node management probe](2026-08-30_wall_node_management_plan.md#proposed-iroh-management-carrier-2026-10-10)
+[wall-node management probe](archive_docs/2026-11-02/2026-08-30_wall_node_management_plan.md#proposed-iroh-management-carrier-2026-10-10)
 and [native canonical-operation probe](2026-08-25_compact_signed_feed_and_local_control_plan.md#mc0-separate-forcing-consumer-decision).
 They can begin with host controls independently of HW1/HW2; a physical result
 earns only the capability actually measured and does not close an appliance or

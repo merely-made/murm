@@ -266,7 +266,7 @@ the tests derived from them without copying firmware source.
 
 > **Superseded in part (2026-07-31).** This section's boundary is still right,
 > and the gates now live in
-> [`2026-07-31_retinue_small_plan.md`](2026-07-31_retinue_small_plan.md).
+> [`2026-07-31_retinue_small_plan.md`](archive_docs/2026-11-02/2026-07-31_retinue_small_plan.md).
 > Two corrections: the `std` claim below is scoped to `Endpoint`, since the
 > sans-io core is down to five `std` import sites and is otherwise alloc-only;
 > and the personality order has changed, with `retinue-small` now the trunk

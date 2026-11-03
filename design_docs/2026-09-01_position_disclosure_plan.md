@@ -173,7 +173,7 @@ The [Signalman survey and placement plan](2026-09-06_signalman_survey_and_placem
 owns import, correlation, map comparison and proposed placement analysis; PD6
 retains this board capture/disclosure receipt. Imported GPX can supply private
 positions independently of PD4/PD5. The
-[observation plan](2026-09-06_radio_observation_plan.md) supplies listening,
+[observation plan](2026-11-02_radio_observation_plan.md) supplies listening,
 transmission and collection-loss facts: a gap in received samples alone is not
 proof of lost RF coverage or a failed transmission.
 

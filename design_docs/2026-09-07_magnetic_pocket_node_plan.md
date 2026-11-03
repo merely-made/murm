@@ -18,14 +18,14 @@ absent. The phone is a temporary Signalman control and synchronization surface.
 Its NFC or Bluetooth session is never part of the node's routing liveness.
 
 This is separate from the
-[wall-node plan](2026-08-30_wall_node_management_plan.md), whose first appliance
+[wall-node plan](2026-11-02_wall_node_management_plan.md), whose first appliance
 is a wall-powered V4 with LoRa and WiFi. It consumes that plan's signed `RHC0`
 control, durable configuration, recovery, and carrier-independence decisions.
-It consumes the [Retinue Small plan](2026-07-31_retinue_small_plan.md) for a
+It consumes the [Retinue Small plan](archive_docs/2026-11-02/2026-07-31_retinue_small_plan.md) (remaining work: [small-node successor](2026-11-02_retinue_small_plan.md)) for a
 bounded native node, the
 [listener-executive plan](2026-08-10_listener_executive_and_protocol_leases.md)
 for radio ownership, and the
-[observation plan](2026-09-06_radio_observation_plan.md) for truthful gaps and
+[observation plan](2026-11-02_radio_observation_plan.md) for truthful gaps and
 collection. It does not reorder their active implementation slices.
 
 The [compact signed feed and local control plan](2026-08-25_compact_signed_feed_and_local_control_plan.md)

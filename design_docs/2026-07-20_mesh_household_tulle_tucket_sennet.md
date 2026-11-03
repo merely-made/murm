@@ -151,7 +151,7 @@ accordingly:
   exact profile at a time. The
   [listener executive](2026-08-10_listener_executive_and_protocol_leases.md)
   schedules resident protocol adapters within one image. The
-  [wall-node management plan](2026-08-30_wall_node_management_plan.md)
+  [wall-node management plan](2026-11-02_wall_node_management_plan.md)
   separately governs verified image slots, trial boot, durable selection, and
   rollback on boards that measure enough capacity. A board may support either
   mechanism or both. A remote change must preserve a management path or revert

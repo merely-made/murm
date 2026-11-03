@@ -4,7 +4,8 @@
 (2026-07-28)
 **Prototype:** interactive simulator and mockups in the "UI design for retinue
 radios" design project (Radio Simulator / Firmware UI Directions).
-**Execution plan:** `design_docs/2026-07-28_on_device_ui_implementation_plan.md`.
+**Historical execution ledger:** `design_docs/archive_docs/2026-11-02/2026-07-28_on_device_ui_implementation_plan.md`.
+Successor for open work: [on-device UI](2026-11-02_on_device_ui_implementation_plan.md).
 
 The prototype remains the visual and interaction reference. Its always-present
 node identity/peer pages, editable preset, pairing, OTA, breathing sleep LED,

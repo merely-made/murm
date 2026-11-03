@@ -5,7 +5,7 @@ This standalone executable composes iroh 1.3.0, Postilion's `ControlClient` and
 codec, and radio-hand's real `ControlRuntime`. Its separate workspace and lock
 leave the production dependency graph unchanged. The owning direction and
 remaining device work are in the
-[wall-node plan](../../design_docs/2026-08-30_wall_node_management_plan.md#proposed-iroh-management-carrier-2026-10-10).
+[wall-node plan](../../design_docs/archive_docs/2026-11-02/2026-08-30_wall_node_management_plan.md#proposed-iroh-management-carrier-2026-10-10).
 
 Run from the repository root:
 

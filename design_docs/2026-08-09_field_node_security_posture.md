@@ -85,7 +85,7 @@ personal daemon. The default relay's host-only contact policy remains unchanged.
 
 FCC v1 is stock hardware plus user-flash: there is no remote firmware
 authority today because linkboy runs at the owner's bench
-([flashing plan](2026-08-08_linkboy_public_flashing_plan.md),
+([flashing plan](archive_docs/2026-11-02/2026-08-08_linkboy_public_flashing_plan.md),
 [FCC posture](2026-07-20_fcc_reselling_flashed_radios.md)). A single remote
 update authority over N sold radios, compromised, is a recall plus an FCC
 problem. Therefore rule 5 is not one hardening item among many; it is the
