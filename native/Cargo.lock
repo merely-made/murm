@@ -3102,7 +3102,7 @@ checksum = "4050469837a6ff301cd14c1f8f24f88549e6d548f24f64e2148eb0f72cebc51f"
 [[package]]
 name = "luggage"
 version = "0.1.0"
-source = "git+https://github.com/merely-made/eidetic.git?rev=f599ffe93298025bf6d65ae310a7cb4270ea52e3#f599ffe93298025bf6d65ae310a7cb4270ea52e3"
+source = "git+https://www.github.com/merely-made/eidetic.git?rev=6f1256aaedf49b26c753f8338d0ba5ba99848959#6f1256aaedf49b26c753f8338d0ba5ba99848959"
 dependencies = [
  "semver",
  "serde",
@@ -3164,7 +3164,7 @@ dependencies = [
 [[package]]
 name = "mere-proofs"
 version = "0.1.0"
-source = "git+https://github.com/merely-made/eidetic.git?rev=f599ffe93298025bf6d65ae310a7cb4270ea52e3#f599ffe93298025bf6d65ae310a7cb4270ea52e3"
+source = "git+https://www.github.com/merely-made/eidetic.git?rev=6f1256aaedf49b26c753f8338d0ba5ba99848959#6f1256aaedf49b26c753f8338d0ba5ba99848959"
 dependencies = [
  "blake3",
  "serde",
@@ -3184,6 +3184,7 @@ dependencies = [
  "iroh-tickets",
  "mere-p2panda-net",
  "muniment",
+ "murm-sync",
  "n0-future",
  "notochord",
  "p2panda-core",
@@ -3192,7 +3193,6 @@ dependencies = [
  "serde_json",
  "sha2 0.11.0",
  "snow",
- "stickleback",
  "tempfile",
  "thiserror 1.0.69",
  "tokio",
@@ -3266,8 +3266,8 @@ dependencies = [
 
 [[package]]
 name = "muniment"
-version = "0.2.0"
-source = "git+https://github.com/merely-made/eidetic.git?rev=f599ffe93298025bf6d65ae310a7cb4270ea52e3#f599ffe93298025bf6d65ae310a7cb4270ea52e3"
+version = "0.2.1"
+source = "git+https://www.github.com/merely-made/eidetic.git?rev=6f1256aaedf49b26c753f8338d0ba5ba99848959#6f1256aaedf49b26c753f8338d0ba5ba99848959"
 dependencies = [
  "async-trait",
  "blake3",
@@ -3287,6 +3287,7 @@ dependencies = [
  "mere-proofs",
  "mere-transport",
  "muniment",
+ "murm-sync",
  "notochord",
  "p2panda-core",
  "p2panda-encryption",
@@ -3336,6 +3337,23 @@ dependencies = [
  "personae",
  "thiserror 1.0.69",
  "tokio",
+]
+
+[[package]]
+name = "murm-sync"
+version = "0.0.1"
+dependencies = [
+ "mere-p2panda-net",
+ "mere-transport",
+ "muniment",
+ "p2panda-core",
+ "p2panda-store",
+ "p2panda-sync",
+ "personae",
+ "serde",
+ "stickleback",
+ "tokio",
+ "tokio-stream",
 ]
 
 [[package]]
@@ -5601,26 +5619,23 @@ checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 
 [[package]]
 name = "stickleback"
-version = "0.1.1"
-source = "git+https://github.com/merely-made/eidetic.git?rev=f599ffe93298025bf6d65ae310a7cb4270ea52e3#f599ffe93298025bf6d65ae310a7cb4270ea52e3"
+version = "0.2.0"
+source = "git+https://www.github.com/merely-made/eidetic.git?rev=6f1256aaedf49b26c753f8338d0ba5ba99848959#6f1256aaedf49b26c753f8338d0ba5ba99848959"
 dependencies = [
  "blake3",
  "futures-util",
  "hex",
  "insigne",
- "mere-p2panda-net",
  "mere-proofs",
  "muniment",
  "p2panda-core",
  "p2panda-encryption",
  "p2panda-store",
- "p2panda-sync",
  "personae",
  "serde",
  "serde_bytes",
  "thiserror 1.0.69",
  "tokio",
- "tokio-stream",
 ]
 
 [[package]]

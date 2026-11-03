@@ -38,6 +38,7 @@ name = "transport"
 path = "src/lib.rs"
 
 [dependencies]
+murm-sync.workspace = true
 # Path + version: path is used during local workspace builds; version is
 # required for `cargo publish` to record the crates.io dependency.
 identity.workspace = true
@@ -65,9 +66,8 @@ n0-future = "0.3"
 # p2panda-net is the production endpoint authority (P2pandaTransport); it
 # pins iroh 1.0, unifying with the iroh/iroh-blobs deps above.
 muniment.workspace = true
-stickleback.workspace = true
 # Every p2panda-net feature except `sqlite`. The address book runs on
-# stickleback's muniment-backed store, so p2panda-store's bundled SQLite
+# murm-sync's muniment-backed address book, so p2panda-store's bundled SQLite
 # backend (and sqlx with it) stays out of the graph entirely. Feature
 # unification means EVERY consumer has to opt out, not just one.
 p2panda-net = { package = "mere-p2panda-net", version = "=0.7.5", default-features = false, features = [

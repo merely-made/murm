@@ -30,7 +30,7 @@
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
-use stickleback::JoinedSpace;
+use murm_sync::JoinedSpace;
 use tokio::task::JoinHandle;
 use tokio_stream::StreamExt;
 use transport::{GossipHandle, P2pandaTransport};
@@ -77,7 +77,7 @@ pub struct SyncRound {
 }
 
 /// The gossip live lane's own counters (posts received + last activity), merged
-/// with the shared LogSync drain's [`stickleback::SyncStatus`] in
+/// with the shared LogSync drain's [`murm_sync::SyncStatus`] in
 /// [`SyncedCabal::sync_status`]. The LogSync side has no notion of gossip posts,
 /// so murm tracks them here.
 #[derive(Default)]

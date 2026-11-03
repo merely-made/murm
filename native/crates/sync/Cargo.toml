@@ -1,0 +1,28 @@
+[package]
+name = "murm-sync"
+version = "0.0.1"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Shared peer sync sessions over injected endpoints and domain-validated operation stores."
+readme = "README.md"
+
+[dependencies]
+stickleback.workspace = true
+muniment = { workspace = true, features = ["json"] }
+p2panda-core = "0.7.0"
+p2panda-store = { version = "0.7.0", default-features = false }
+p2panda-sync = "0.7.0"
+p2panda-net = { package = "mere-p2panda-net", version = "=0.7.5", default-features = false, features = ["address_book", "iroh_endpoint", "iroh_mdns", "discovery", "gossip", "sync"] }
+serde = { version = "1", features = ["derive"] }
+tokio = { version = "1", features = ["rt", "sync", "time"] }
+tokio-stream = "0.1"
+
+[dev-dependencies]
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+identity.workspace = true
+transport = { workspace = true, features = ["test-identity"] }
+
+[lints]
+workspace = true

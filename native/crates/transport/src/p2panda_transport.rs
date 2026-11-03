@@ -75,7 +75,7 @@ pub use iroh::RelayUrl;
 use muniment::{JsonCodec, MemoryBackend};
 use p2panda_net::address_book::AddressBookStoreHandle;
 use p2panda_net::{AddressBook, Discovery, MdnsDiscovery};
-use stickleback::MunimentAddressBook;
+use murm_sync::MunimentAddressBook;
 use tokio::io::{AsyncRead, AsyncWrite, ReadBuf};
 use tokio::sync::{Mutex as TokioMutex, mpsc};
 
