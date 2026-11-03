@@ -1,6 +1,7 @@
 # Transport consolidation through Murm
 
-**Status:** 2026-11-01: in progress. T1 landed; T2 to T6 open. T6 (admitted
+**Status:** 2026-11-03: T7 in progress under Mark's instruction to continue
+with Stickleback after the Distillery extraction. T1 landed; T2 to T6 open. T6 (admitted
 services onto the secure setup gate), added from the 2026-10-31 survey, has
 its Murm piece landed: the session lane sets up through the gate.
 
@@ -32,12 +33,12 @@ family's other admitted services onto its setup gate.
   mesh, Knot, Djinn, Distillery and Moot use them in dozens of files and none of
   those files opens a connection. Routing them through Murm would put a data
   model behind a network crate.
-- **The join ceremony is Stickleback's.** `JoinedSpace` owns it (Mere's transport
-  ownership ruling (b), 2026-07-25). A host takes `(Endpoint, Gossip)` from
-  `P2pandaTransport::sync_parts()` and hands them to the domain's join helper,
-  which passes them to `JoinedSpace`. Stickleback re-exports both types "so a
-  domain crate can offer a join helper without importing a p2panda crate itself"
-  (eidetic `crates/stickleback/src/lib.rs`).
+- **Network sessions are Murm's.** T7 moves `JoinedSpace`, `SyncedSpace` and
+  the transport address book from Stickleback into `murm-sync`. A host injects
+  `(Endpoint, Gossip)` from `P2pandaTransport::sync_parts()`. Eidetic retains
+  its store and policy-before-insert processor; domain closures still decide
+  admission. This revises the source home of the earlier join ceremony while
+  preserving its single implementation and shutdown ordering.
 
 ## Phases
 
@@ -131,6 +132,34 @@ that admit peers on Murm endpoints each build their own setup (Findings,
 - Needs: each service's owner: Graphshell (host and the resident's browser
   door), Mesh, Distillery, the resident inference mesh and Gemot (commons call,
   when its A1 lands). Isonetry follows T2.
+
+### T7. Extract Stickleback's network sessions
+
+Mark, 2026-11-03: "continue with stickleback, then continue scoping mere
+extractions/directory structure cleanup". The family boundary map puts
+transport/discovery/sync sessions in Murm and validated storage in Eidetic.
+
+Move the address book and joined/synced-space implementation, including
+their tests, into `native/crates/sync` (`murm-sync`). Group-key admission and
+encryption stay in Stickleback; a receiver capability exposes the existing
+admission path without moving signing material into the network task.
+Murm's group-key extension owns joining/publishing over that receiver.
+Update actual domain/host callers directly, without an old network re-export.
+Stickleback's breaking public-path change advances it to 0.2.0.
+
+Done when: Eidetic's normal graph has no p2panda-net/sync dependency; moved
+sources have recorded donor hashes; core and receiving tests pass; a real
+two-peer caller preserves rejection-before-insert, convergence and shutdown;
+actual consumer roots check locked with one storage/network source; commits
+and source pins are pushed. Preserve existing protocol ids and stored formats.
+
+Required receipts: before/after module and Cargo-edge inventory, core tests,
+address-book tests, live session controls, real Gemot/mesh/Mere receiving
+checks, and exact pushed cohorts. Retain at most 100 MB under
+`Code/testing/murm/stickleback-extraction-20261103`; use stable repository
+targets and no isolated Cargo home. Existing unrelated physical and headed
+receipts keep their original scope. The separately authorized extraction-cache
+deletion was again rejected by automatic approval review as "blocked by policy".
 
 ## Findings
 

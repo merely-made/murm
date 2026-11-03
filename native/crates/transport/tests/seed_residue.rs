@@ -45,7 +45,7 @@ use p2panda_net::gossip::Gossip;
 use p2panda_net::iroh_mdns::MdnsDiscoveryMode;
 use p2panda_net::{AddressBook, Endpoint, MdnsDiscovery};
 use residue::*;
-use stickleback::MunimentAddressBook;
+use murm_sync::MunimentAddressBook;
 use transport::{P2pandaHostPolicy, P2pandaTransport, Transport};
 
 const RUNS: usize = 5;
