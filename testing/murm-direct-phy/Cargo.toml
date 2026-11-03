@@ -34,10 +34,10 @@ p2panda-stream = { git = "https://github.com/mark-ik/p2panda.git", tag = "mere-p
 p2panda-sync = { git = "https://github.com/mark-ik/p2panda.git", tag = "mere-p2panda-net-0.7.5-upstream-20261013" }
 # The storage family moved to eidetic; these match Murm's root pins so the
 # graph keeps one source for each.
-luggage = { git = "https://github.com/merely-made/eidetic.git", rev = "f599ffe93298025bf6d65ae310a7cb4270ea52e3" }
-muniment = { git = "https://github.com/merely-made/eidetic.git", rev = "f599ffe93298025bf6d65ae310a7cb4270ea52e3" }
-mere-proofs = { git = "https://github.com/merely-made/eidetic.git", rev = "f599ffe93298025bf6d65ae310a7cb4270ea52e3" }
-stickleback = { git = "https://github.com/merely-made/eidetic.git", rev = "f599ffe93298025bf6d65ae310a7cb4270ea52e3" }
+luggage = { git = "https://github.com/merely-made/eidetic.git", rev = "1014cf48e1882ff926b55f3509ac3dbf5a5aec8e" }
+muniment = { git = "https://github.com/merely-made/eidetic.git", rev = "1014cf48e1882ff926b55f3509ac3dbf5a5aec8e" }
+mere-proofs = { git = "https://github.com/merely-made/eidetic.git", rev = "1014cf48e1882ff926b55f3509ac3dbf5a5aec8e" }
+stickleback = { git = "https://github.com/merely-made/eidetic.git", rev = "1014cf48e1882ff926b55f3509ac3dbf5a5aec8e" }
 
 # Compatibility source keys for immutable suppliers published before the
 # repository rename. Targets and current direct dependencies use Murm.
@@ -57,3 +57,9 @@ too_many_lines = "warn"
 
 [lints]
 workspace = true
+
+[patch."https://github.com/merely-made/distillery.git"]
+esp = { git = "https://www.github.com/merely-made/distillery.git", rev = "66108581b3d2ca66eb42a282eccc8ec5d4039e4e" }
+esp-testkit = { git = "https://www.github.com/merely-made/distillery.git", rev = "66108581b3d2ca66eb42a282eccc8ec5d4039e4e" }
+distillery = { git = "https://www.github.com/merely-made/distillery.git", rev = "66108581b3d2ca66eb42a282eccc8ec5d4039e4e" }
+mere-mesh = { git = "https://www.github.com/merely-made/distillery.git", rev = "66108581b3d2ca66eb42a282eccc8ec5d4039e4e" }
