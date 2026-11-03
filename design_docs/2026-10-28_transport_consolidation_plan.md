@@ -201,6 +201,9 @@ deletion was again rejected by automatic approval review as "blocked by policy".
     - the fork crates published under fork names, the posture Bole, Vano and
       Didgeridoo already have, which would change p2panda from a personal
       patch-carrying fork into a family fork.
+  - 2026-11-03: Mark chose the second, as `mere2panda-*` with library names
+    unchanged; the migration is mere's release log plan, R1
+    (`mere/design_docs/mere_docs/implementation_strategy/2026-11-03_release_log_plan.md`).
 - 2026-10-28: consolidation does not remove lockfiles. Every application root
   keeps its own `Cargo.lock`. The rustls advisory touched 20 locks in 15 repos
   on 2026-10-28. Fewer direct transport rows mean fewer manifest edits on a
