@@ -442,7 +442,7 @@ The worker is Signalman application code, not Cambium infrastructure.
   add only minimal public action/event seams exposed by a real view gap.
 - `apps/signalman-desktop/`: app state, Cambium views, CSS theme, host adapter,
   worker bridge, and tests.
-- `design_docs/`: one executable receipt per hardware route after actual use.
+- `Code/testing/murm/design_docs/`: one executable receipt per hardware route after actual use.
 
 **Receipts:**
 
@@ -456,7 +456,7 @@ The worker is Signalman application code, not Cambium infrastructure.
 
 **Progress 2026-08-09: built, with one receipt owed.** `apps/signalman-desktop`
 exists, pinned to genet `398e4af60`. Full write-up in
-`2026-08-09_signalman_desktop_g2_receipt.md`; the parts that change this plan:
+`Code/testing/murm/design_docs/2026-08-09_signalman_desktop_g2_receipt.md`; the parts that change this plan:
 
 **It is `exclude`d from the retinue workspace rather than a non-default
 member.** Membership would still have forced this repository's root manifest to

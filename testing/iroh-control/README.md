@@ -7,10 +7,11 @@ leave the production dependency graph unchanged. The owning direction and
 remaining device work are in the
 [wall-node plan](../../design_docs/archive_docs/2026-11-02/2026-08-30_wall_node_management_plan.md#proposed-iroh-management-carrier-2026-10-10).
 
-Run from the repository root:
+Run from the repository root. Create the ignored output directory first and
+choose a new filename; the probe refuses to overwrite an existing file.
 
 ```sh
-cargo run --manifest-path testing/iroh-control/Cargo.toml --locked --offline -- --output testing/iroh-control/results/host-20261011.json
+cargo run --manifest-path testing/iroh-control/Cargo.toml --locked --offline -- --output testing/receipts/iroh-control/new-run.json
 cargo test --manifest-path testing/iroh-control/Cargo.toml --locked --offline
 cargo clippy --manifest-path testing/iroh-control/Cargo.toml --locked --offline --all-targets -- -D warnings
 cargo fmt --manifest-path testing/iroh-control/Cargo.toml --check
@@ -39,7 +40,7 @@ semantic-tag keys are test data; commissioning and production custody are not
 implemented. Only public identity and non-secret observations enter the
 receipt; the temporary journal and commit tokens are not retained.
 
-The [recorded run](results/host-20261011.json) passes 16 scenarios: signed status;
+The [recorded run](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/iroh-control/results/host-20261011.json) passes 16 scenarios: signed status;
 wrong command target; bad signature; transport identity versus command grant;
 outer replay; oversized stream input; verified malformed inner payload;
 apply/commit; explicit revert; conflicting armed transaction reuse; lost
@@ -47,7 +48,7 @@ response followed by a fresh-counter semantic retry; old mutation after cache
 replacement; committed reopen and replay rejection in a fresh process;
 autonomous expiry during an unfinished stream; reboot rollback; and wrong
 iroh endpoint key. The receipt identifies source and lock hashes and the
-[dependency graph](results/dependencies-20261011.txt).
+[dependency graph](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/iroh-control/results/dependencies-20261011.txt).
 
 The useful client finding is that the high-level mutation methods mint a new
 transaction each time. The lost-response probe retains a `Request` and uses

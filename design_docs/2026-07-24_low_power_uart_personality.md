@@ -5,7 +5,7 @@ hardware-proved.** A free functional proof established corrected ESP32-S3
 Light-sleep/resume, retained radio operation across timer wakes, and one
 direct-PHY DIO1 wake with a validated RF reply. Repeated RF-triggered sleep,
 physical UART wake, display restoration, current, and energy remain open. See
-`design_docs/2026-07-29_v4_light_sleep_rf_wake_acceptance.md` for the receipt.
+`Code/testing/murm/design_docs/2026-07-29_v4_light_sleep_rf_wake_acceptance.md` for the receipt.
 
 Plan: `mere/design_docs/mere_docs/implementation_strategy/2026-07-24_low_power_managed_network_plan.md`.
 

@@ -81,7 +81,7 @@ The explicit `memory-bench` feature includes `resident-protocols` and adds the
 `protocol memory` text command. A separate executor task runs the synthetic
 combined-state fixture, exercises fragmented heap/refusal behavior, and reports
 allocator occupancy plus stack samples. Ordinary builds do not expose it.
-The [October 16 physical receipt](../../testing/receipts/protocol-parity-memory/physical/README.md)
+The [October 16 physical receipt](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/receipts/protocol-parity-memory/physical/README.md)
 records the exact images, identified boards, failures and application/state
 restoration. The heap campaign passes on COM6; COM7's post-flash USB failure is
 separate. The tight main-stack sample is not accepted worst-case headroom.

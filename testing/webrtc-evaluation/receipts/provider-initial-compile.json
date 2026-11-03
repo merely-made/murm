@@ -1,8 +1,0 @@
-{
-  "schema": 1,
-  "gate": "E1a initial native compile",
-  "exit_code": 1,
-  "diagnostic": "E0599: rtc 0.21.1 has no public RTCPeerConnection::connection_state method; observe OnConnectionStateChangeEvent instead.",
-  "source_sha256": "361e303dd1bb57f38ebabab3afc85a3c0c01a75435d24035f8da599edc9556d5",
-  "status": "Preserved failed attempt before event-based closure tracking repair."
-}

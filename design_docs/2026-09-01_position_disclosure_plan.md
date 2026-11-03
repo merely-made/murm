@@ -369,4 +369,4 @@ started opportunistically.
   they do not establish a satellite position fix. The board was indoors and no
   `gnss=fix` was measured. PD3 therefore remains open pending an outdoor fix
   and loss-of-fix observation. Exact flash, preservation, probe, and control
-  facts are in [the receipt](2026-09-03_v4_gnss_rx_fix_receipt.json).
+  facts are in [the receipt](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/design_docs/2026-09-03_v4_gnss_rx_fix_receipt.json).

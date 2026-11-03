@@ -21,7 +21,7 @@ remain stock-capture work. Implementation-derived search summaries are excluded
 as provenance; no upstream firmware, schema or protocol-client source is used.
 
 The identified 2.7.26 receive in
-`testing/receipts/sennet-directed/receive-observed/` authenticates the exact
+`Code/testing/murm/testing/receipts/sennet-directed/receive-observed/` authenticates the exact
 tagged stock text with nonce `LE32(packet_id) | extra(4) | LE32(source) | 0`,
 using the four appended payload bytes as `extra` after the eight-byte tag.
 Its RF header discriminator is zero. `PeerSession` now encodes that observed

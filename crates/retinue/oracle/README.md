@@ -35,12 +35,12 @@ py -m venv .venv
 
 `requirements.txt` pins `rns==1.5.4`, Retinue's current compatibility target, and
 `lxmf==1.1.1`, which the Outrider oracle drives. Re-pin deliberately, not on every upstream
-release. The [September 27 repin receipt](../../../testing/receipts/rns-1.5.4-repin/README.md)
+release. The [September 27 repin receipt](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/receipts/rns-1.5.4-repin/README.md)
 records the local live, Outrider, Resource and route/timebase qualification. Open
 firmware, IFAC and buffering boundaries are tracked in the
 [wire compatibility plan](../../../design_docs/2026-11-02_wire_compatibility_plan.md).
 
-The separate [September 26 signed-artifact receipt](../../../testing/receipts/rns-1.5.4-signed-artifact/README.md)
+The separate [September 26 signed-artifact receipt](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/receipts/rns-1.5.4-signed-artifact/README.md)
 qualifies six project-input cases against `rnid 1.5.4`. All match the retained 1.5.2
 captures byte for byte; Rust replay covers both fixture files. This does not re-pin
 the broader live suite or establish 1.5.4 transport/radio compatibility. The capture
@@ -56,7 +56,7 @@ captures, and eight JSON records differed only in recorded version metadata afte
 normalisation. Other captures carry fresh entropy or require attached RNodes, so this is
 deliberately narrower than the old 18/18 byte-identity claim. Queue saturation, I2P,
 interface-discovery metadata, and physical RNode capture remain outside the measured scope.
-See the [historical 1.5.2 receipt](../../../design_docs/2026-08-29_rns_152_repin_receipt.md).
+See the [historical 1.5.2 receipt](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/design_docs/2026-08-29_rns_152_repin_receipt.md).
 
 The historical 2026-08-23 re-pin moved from `rns==1.4.2` / `lxmf==0.9.6` to RNS 1.5.0 /
 LXMF 1.1.1. Eighteen deterministic fixtures re-captured byte-identically and one live suite
@@ -69,7 +69,7 @@ the old document's “no public release notes” sentence is historical rather t
 
 LXMF 1.1.1 did move a wire shape: the delivery announce grew a third element, a
 supported-features array. Outrider refused it and had to be fixed; see
-`design_docs/2026-08-23_rns_150_lxmf_111_repin_receipt.md`.
+`Code/testing/murm/design_docs/2026-08-23_rns_150_lxmf_111_repin_receipt.md`.
 
 The committed fixture corpus otherwise stays labelled with the version that produced each
 file, because those files are historical byte observations; current compatibility is
@@ -121,7 +121,7 @@ The parent process removes the temporary RNS configuration after child exit.
 `radio-hand --features instances,replay` replays the committed fixture against
 the firmware carrier, including authentication negatives and the 255-byte
 physical limit. Type2 growth tests are local transformations, not stock captures.
-See the [software receipt](../../../testing/receipts/firmware-ifac/README.md);
+See the [software receipt](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/receipts/firmware-ifac/README.md);
 board provisioning and physical IFAC acceptance remain separate gates.
 
 ## What the oracle settled
@@ -183,7 +183,7 @@ verifies, and validates RNS's announce on the same connection.
 `interop_reliable_stream.py` uses two links: ordinary RNS Buffer reads/writes,
 then a public RNS Channel message carrying compressed data and EOF together.
 Each direction must deliver the exact bytes and EOF, and the Retinue process
-must exit successfully. The [phase 3 receipt](../../../testing/receipts/rns-1.5.4-lanes/README.md)
+must exit successfully. The [phase 3 receipt](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/receipts/rns-1.5.4-lanes/README.md)
 records these observations, including initial harness teardown errors.
 
 Reliable streams default to a 65,536-byte decoded compressed-frame ceiling.

@@ -15,9 +15,9 @@ image type in live status. Both installed V4s retain their original settings.
 The resident image starts in the persisted modem personality; one-shot resident
 setup uses volatile test channel material. Three Sennet and Tucket visits passed,
 but a final home link proof after cancellation timed out. It does not close the
-resident acceptance gate. See the [firmware receipt](../../testing/receipts/firmware-refresh/README.md).
+resident acceptance gate. See the [firmware receipt](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/receipts/firmware-refresh/README.md).
 
-The [follow-up receipt](../../testing/receipts/firmware-refresh/follow-up/README.md)
+The [follow-up receipt](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/receipts/firmware-refresh/follow-up/README.md)
 records T114 installation, original settings sequence and identity, native resource
 RF checks, guarded package admission and two signed announces advancing across
 soft resets. The loader backup omitted the settings pair; unchanged live sequence
@@ -42,7 +42,7 @@ own platform directory and keep that verified executable for the write:
   acknowledgement is recorded, but the package still requires an upstream interface check.
 
 Hopspot was retired from both catalogs and stage assembly on September 26.
-Its immutable artifacts and manifest remain in `testing/receipts/prns-retirement`
+Its immutable artifacts and manifest remain in `Code/testing/murm/testing/receipts/prns-retirement`
 as historical evidence, outside the active firmware offering. Retinue's V4
 recovery instructions continue to use its own package and the ROM loader.
 

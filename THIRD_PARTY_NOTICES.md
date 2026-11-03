@@ -29,9 +29,9 @@ Prns Authors.
   and license text: [`crates/retinue/NOTICE`](crates/retinue/NOTICE).
 - **Historical signed-artifact tests** quoted a 224-byte Prns constant.
   That comparison and donor-specific active fixture inputs were retired on
-  September 26. Old captures remain in `testing/receipts/prns-retirement`;
+  September 26. Old captures remain in `Code/testing/murm/testing/receipts/prns-retirement`;
   current captures use project-selected inputs and separately identified RNS 1.5.2
-  and 1.5.4 runs. The [1.5.4 receipt](testing/receipts/rns-1.5.4-signed-artifact/README.md)
+  and 1.5.4 runs. The [1.5.4 receipt](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/receipts/rns-1.5.4-signed-artifact/README.md)
   preserves the version comparison without changing the historical provenance.
 - **`validation/`, `fuzz/`** — the validation registry, evidence discipline,
   tier split, unsafe-policy audit shape, and whole-ingest fuzzing shape were
@@ -43,7 +43,7 @@ Prns Authors.
   state-machine design. September 26 replaces that implementation with virtual
   arrival budgets under Retinue's own documented policy. Public settings and
   their defaults remain compatible; historical attribution is retained.
-- **`testing/receipts/prns-retirement/hopspot-v4-0.3.4/`** — archives Prns's official
+- **`Code/testing/murm/testing/receipts/prns-retirement/hopspot-v4-0.3.4/`** — archives Prns's official
   Hopspot v0.3.4 release binaries unmodified (application, bootloader,
   partition table, signed manifests) for historical receipts. They are excluded
   from active catalogs and stage assembly; the repository still contains them. Prns's terms (MIT elected) apply;
@@ -104,7 +104,7 @@ The Reticulum protocol itself is public domain, as upstream states in
 [Brandolini's Reference](https://reticulum.network/manual/brandolinis.html).
 Historical oracle receipts keep their original evidence boundaries: black-box
 for the RNS 1.5.2 re-pin; see also the
-[September 27 qualification](testing/receipts/rns-1.5.4-repin/README.md).
+[September 27 qualification](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/receipts/rns-1.5.4-repin/README.md).
 Comparative reads from September 26 to October 4 are recorded under the
 source-review update in
 `design_docs/2026-08-25_permissive_radio_protocol_compatibility_survey.md`.

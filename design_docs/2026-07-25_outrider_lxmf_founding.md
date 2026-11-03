@@ -121,25 +121,25 @@ not). Ordered gates, capture first as always:
    at 240 bytes, while caller-selected larger limits degrade the response to a
    request-bound Resource. A 4 KiB message passed against stock clients in
    both directions. Receipt:
-   `2026-07-28_outrider_large_propagation_response.md`.
+   `Code/testing/murm/design_docs/2026-07-28_outrider_large_propagation_response.md`.
 6. **Opportunistic delivery:** complete. Stock omits the 16-byte LXMF
    destination from the encrypted single-packet plaintext because Reticulum's
    header already carries it; Outrider prepends it and reuses the ordinary
    signed codec. Fixed-fixture replay, cost-8 in-process enforcement, a
    transport-node hop, and live un-stamped stock delivery pass in both
-   directions. Receipt: `2026-07-28_outrider_opportunistic_delivery.md`.
+   directions. Receipt: `Code/testing/murm/design_docs/2026-07-28_outrider_opportunistic_delivery.md`.
 7. **Radio receipt:** complete. Gate 3 passed in both directions through the
    Tulle direct-PHY stack between a Heltec V4 and T114: cost-8 stamped Data
    and 4 KiB Resource messages arrived byte-exact and authenticated. Receipt:
-   `2026-07-28_outrider_direct_phy_delivery.md`. Opportunistic cost-8 messages
+   `Code/testing/murm/design_docs/2026-07-28_outrider_direct_phy_delivery.md`. Opportunistic cost-8 messages
    also passed in both directions as one 243-byte ratcheted RF packet. Receipt:
-   `2026-07-28_outrider_direct_phy_opportunistic.md`.
+   `Code/testing/murm/design_docs/2026-07-28_outrider_direct_phy_opportunistic.md`.
 8. **Host persistence:** complete. `PropagationStore` encodes versioned state;
    restore re-derives transient ids and byte counts and reapplies current
    capacity, expiry, duplicate, and owner-scoping rules. A filesystem host
    survived two real process starts against a stock client, while the
    in-process restart receipt also persisted owner-scoped acknowledgement.
-   Receipt: `2026-07-28_outrider_propagation_persistence.md`.
+   Receipt: `Code/testing/murm/design_docs/2026-07-28_outrider_propagation_persistence.md`.
 
 ## Licensing
 

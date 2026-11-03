@@ -8,7 +8,7 @@
 //! These drive two endpoints over raw interfaces with a tap on each direction, so a test can
 //! take any packet a side put on the wire and play it back as the relay would: a clone with
 //! hops+1. That is the shape lane V1 injected against RNS 1.5.4
-//! (`testing/receipts/rns-1.5.4-link-echo-corroboration/`, cases C2-C4).
+//! (`Code/testing/murm/testing/receipts/rns-1.5.4-link-echo-corroboration/`, cases C2-C4).
 
 use std::time::Duration;
 

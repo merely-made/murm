@@ -372,7 +372,7 @@ Findings from N1 to O3 that no open item needs are in the archived plan.
 - 2026-10-31: [`murm-ocapn`'s `session.rs`](../native/crates/ocapn/src/session.rs)
   is 1,771 lines and `security.rs` 739.
   [`validation/loc_limit.py`](../validation/loc_limit.py) checks `apps`,
-  `crates`, `firmware`, `testing` and `fuzz`, so its 600-line ceiling does not
+  `crates`, `firmware`, `Code/testing/murm/testing` and `fuzz`, so its 600-line ceiling does not
   reach `native/`.
 
 ## External design references

@@ -91,7 +91,7 @@ not alter the reservation record format.
 
 The September 30 [current package](../packages/t114-current.toml) identifies
 source `711816a8124bd58cd8cc314ec4de5009be7df166` and image `t114-native`
-in live status. Its [physical follow-up](../../testing/receipts/firmware-refresh/follow-up/README.md)
+in live status. Its [physical follow-up](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/receipts/firmware-refresh/follow-up/README.md)
 records installation, retained identity/settings sequence, a 1024-byte native
 resource exchange, guarded admission and signed announce ordinals advancing
 across soft resets. Same-image UF2 recovery and physical power-cut acceptance
@@ -117,14 +117,14 @@ after the SPIM0 correction, and the fitted button traversed every page and
 opened the menu. A headed Resource produced the intended brief green-LED double
 pulse. Exact P1.10-versus-P1.11 switch identification remains board
 bookkeeping; the dual-listened input behavior is accepted. See
-`design_docs/2026-07-28_t114_on_device_ui_acceptance.md`.
+`Code/testing/murm/design_docs/2026-07-28_t114_on_device_ui_acceptance.md`.
 
 The v15 production image added host-snapshot state to `ui\n`. With a fresh
 named fixture, the fitted button traversed STATUS, POWER, RADIO, TRAFFIC,
 IDENTITY, LINKS, and PEERS. After a five-second fixture expired, the host-only
 pages disappeared and TRAFFIC wrapped directly to STATUS.
 
-The October 16 [physical memory continuation](../../testing/receipts/protocol-parity-memory/physical/README.md)
+The October 16 [physical memory continuation](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/receipts/protocol-parity-memory/physical/README.md)
 adds an explicit `memory-bench` feature and a `protocol memory` text command.
 Synthetic retained protocol state runs in a separate executor task, with fixed
 heap accounting, oversize refusal and sampled stack checkpoints. These images

@@ -128,7 +128,7 @@ pub const LINK_ESTABLISHMENT_TIMEOUT_PER_HOP: u64 = 6_000;
 ///
 /// RNS 1.5.4 was observed to wait 12.001, 18.001, 24.001 and 30.001 s at zero to three
 /// relays on an unbounded TCP interface, sending the request once and never retrying
-/// (`testing/receipts/rns-1.5.4-link-echo-corroboration`, Q1). Without a deadline, unanswered
+/// (`Code/testing/murm/testing/receipts/rns-1.5.4-link-echo-corroboration`, Q1). Without a deadline, unanswered
 /// requests would hold their pending slots for good.
 pub const fn link_request_timeout(relays: u8) -> u64 {
     LINK_ESTABLISHMENT_TIMEOUT_PER_HOP * (relays as u64 + 2)

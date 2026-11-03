@@ -1,5 +1,0 @@
-{
-  "passed": false,
-  "error": "SerialTimeoutException('Write timeout')",
-  "dut_reset_required": false
-}

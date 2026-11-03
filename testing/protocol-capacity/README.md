@@ -4,7 +4,7 @@
 remain available. `--current` additionally retains actual Sennet/Tucket instances
 with PKI, a full 64-entry private seen window and outstanding ACK work. The
 adjacent `receipt.json` is the historical October 2 receipt; the new
-[memory refresh](../receipts/protocol-parity-memory/README.md) records current
+[memory refresh](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/receipts/protocol-parity-memory/README.md) records current
 sources, host allocator campaigns and both target images separately.
 
 This unpublished validation crate compiles Retinue, Sennet and Tucket together
@@ -106,7 +106,7 @@ It refuses an existing output path. ARM load segments must remain inside the
 current code region, clear of durable storage. Linker gaps are not measured
 stack high-water. Current output is cross-checked against GNU readelf sections.
 
-The [physical follow-up](../receipts/protocol-parity-memory/physical/README.md)
+The [physical follow-up](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/receipts/protocol-parity-memory/physical/README.md)
 uses `target_round::run` from a separate firmware task. The fixed-heap host bins
 accept `--target-rounds` to repeat that same fragmentation/refusal function sixteen
 times. Refusal calls the allocator directly because a global-shim allocation/free

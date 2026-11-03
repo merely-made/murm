@@ -92,7 +92,7 @@ T114 boards is in `firmware/`, with flashable packages in `firmware/packages/`.
   postilion 0.3.0 and seneschal 0.2.0 were published with them; they stay
   MPL-2.0 and move to retinue 0.3. Earlier releases are MPL-2.0.
 - **Reticulum.** The live oracle is pinned to RNS 1.5.7 and LXMF 1.2.0. The
-  [repin receipt](testing/receipts/rns-1.5.7-repin/README.md) passed every
+  [repin receipt](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/receipts/rns-1.5.7-repin/README.md) passed every
   lane in a single run: 13 live, 7 LXMF, 12 Resource and 3 routing gates.
   Routing decisions are identical to 1.5.6. The intermittent `interop_ifac`
   failure seen on 1.5.4 and 1.5.6 did not recur in 14 runs on the new macOS
@@ -101,15 +101,15 @@ T114 boards is in `firmware/`, with flashable packages in `firmware/packages/`.
   landed: route learning, `open_link(now)`, link-request expiry, and
   own-echo and duplicate filtering. These results cover the measured
   local-TCP scopes; they are not full upstream parity.
-- **Sennet and Tucket.** The [current receipt](testing/receipts/sennet-tucket-current/README.md)
+- **Sennet and Tucket.** The [current receipt](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/receipts/sennet-tucket-current/README.md)
   covers September 30 exchanges with identified stock radios. MeshCore 1.17.1
   passed endpoint traffic, ACKs, fallback and one-repeater routes at all three
   path widths. Meshtastic 2.7.26 passed bidirectional encrypted text,
   rebroadcast, node association and duplicate suppression. Maximum-size stock
   acceptance, multiple repeaters and broader roles remain open.
 - **Firmware.** T114 bounded transport has an on-air receipt from August 13.
-  The [firmware refresh](testing/receipts/firmware-refresh/README.md) and its
-  [follow-up](testing/receipts/firmware-refresh/follow-up/README.md) installed
+  The [firmware refresh](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/receipts/firmware-refresh/README.md) and its
+  [follow-up](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/receipts/firmware-refresh/follow-up/README.md) installed
   clean-pin V4 and T114 images with preserved settings. They passed selected
   RF traffic, a 1024-byte exchange and signed announces across soft resets.
   Resident cancellation is not yet reliable: one isolated run passed and one

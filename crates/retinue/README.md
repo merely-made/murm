@@ -28,8 +28,8 @@ The layers below have recorded black-box RNS checks. Limited source review
 began later; each historical receipt retains its own evidence boundary. The committed byte fixtures under [`tests/fixtures/`](tests/fixtures/)
 retain their recorded producer versions, including the historical RNS 1.3.8 corpus.
 Signed-artifact fixtures separately cover 1.5.2 and 1.5.4; see the
-[six-case comparison receipt](../../testing/receipts/rns-1.5.4-signed-artifact/README.md).
-The [live mixed-runtime receipt](../../testing/receipts/rns-1.5.4-repin/README.md)
+[six-case comparison receipt](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/receipts/rns-1.5.4-signed-artifact/README.md).
+The [live mixed-runtime receipt](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/receipts/rns-1.5.4-repin/README.md)
 qualifies the RNS 1.5.4 pin:
 
 - **Wire vocabulary** — identities, hashes, destination naming, the packet
@@ -77,7 +77,7 @@ Honest about what is *not* done, so nobody deploys it expecting more:
   2 KiB reliable stream and a 4 KiB Resource byte-exactly. A second headed
   exchange through the Tulle direct-PHY pair covers 4 KiB Resource publish and
   fetch in both endpoint directions; see
-  `design_docs/2026-07-23_direct_phy_resource_acceptance.md`. UDP and Unix
+  `Code/testing/murm/design_docs/2026-07-23_direct_phy_resource_acceptance.md`. UDP and Unix
   AutoInterface are now implemented in `src/iface/`; their platform and
   stock-peer acceptance scopes remain in the interface review.
 - **Radio MTU**: link MTU, reliable in-flight window, setup retry interval, and
@@ -104,7 +104,7 @@ Honest about what is *not* done, so nobody deploys it expecting more:
 - **Reliable interop**: both link directions use the captured IDENTIFY exchange,
   including bounded retransmission under loss. The complete reliable and Resource
   exchange through the Tulle radio pump passed on 2026-07-22; see
-  `design_docs/2026-07-22_tulle_headed_acceptance.md`.
+  `Code/testing/murm/design_docs/2026-07-22_tulle_headed_acceptance.md`.
 
 The runtime has had a first hardening pass (OS-CSPRNG link entropy, link-setup
 DoS and leak fixes, bounded network intake, cancellable teardown), but has not

@@ -33,7 +33,7 @@ units V1-V6 and the integrator's follow-ups), its adaptations listed in
 - **Not run on macOS:** the abstract AF_UNIX shared-instance path (a Linux-only
   test) and Backbone flap blocking against stock (a Rust test).
 - **Gates:** lanes `local` (2), `discovery` (1), `ingress` (2), `stream` (3),
-  `radio` (2, macOS) and `mtu` (3) in `testing/receipts/rns-1.5.7-repin/run.py`.
+  `radio` (2, macOS) and `mtu` (3) in `Code/testing/murm/testing/receipts/rns-1.5.7-repin/run.py`.
 
 **Status, 2026-10-09:** batch 1 landed on `main` (units U1-U4 and U6 after
 seam S0, then U5): A1, A2, A3, A5, A7-A11, A4 for announces, B1, B2, B3, B5 in

@@ -122,7 +122,7 @@ authenticated delivery in both directions for both transport forms:
 Receivers checked source identity, message id, title, content, transport
 mode, and stamp validity. The receipt and the carrier timing discovered while
 running it are recorded in
-`design_docs/2026-07-28_outrider_direct_phy_delivery.md`.
+`Code/testing/murm/design_docs/2026-07-28_outrider_direct_phy_delivery.md`.
 
 ### 2026-07-28: large propagation fetch responses
 
@@ -141,7 +141,7 @@ Live receipts then crossed the boundary in both directions with a fixed
 response, and a stock client submitted to Outrider, fetched Outrider's
 Resource response, and decoded the original title, content, and message id.
 The headed receipt is recorded in
-`design_docs/2026-07-28_outrider_large_propagation_response.md`.
+`Code/testing/murm/design_docs/2026-07-28_outrider_large_propagation_response.md`.
 
 ### 2026-07-28: opportunistic delivery and Retinue R9
 

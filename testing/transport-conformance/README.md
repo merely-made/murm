@@ -5,13 +5,13 @@ host core and changes no production protocol or radio behavior. Merely-owned cod
 MPL-2.0; imported BLAKE3 and RFC artifacts retain their separately recorded
 licenses and attribution in `vectors/manifest.json`.
 
-Run from this directory:
+Run from this directory after creating the ignored output directory:
 
 ```sh
 cargo test --locked
 cargo run --locked -- --list
-cargo run --locked -- --output receipt.json
-cargo run --locked -- --simulate --output exploration.json
+cargo run --locked -- --output ../receipts/transport-conformance/new-run.json
+cargo run --locked -- --simulate --output ../receipts/transport-conformance/new-exploration.json
 ```
 
 The output path must be new; the runner refuses to overwrite receipts. Without
@@ -55,7 +55,7 @@ The bounded peer can also carry externally supplied original bytes using
 Mere-owned `retained_receive` example passes those opaque bytes through its
 existing operation-record decoder and production MeshStore admission path.
 
-The selected [2026-10-11 exploration report](results/retained-repair-exploration-20261011.json)
+The selected [2026-10-11 exploration report](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/transport-conformance/results/retained-repair-exploration-20261011.json)
 is a historical design observation with compiled source/config fingerprints.
 Use small local checks and experiments while changing this shape; postpone
 broad qualification and regression machinery until behavior stabilizes.
@@ -121,12 +121,12 @@ python3 retained_live.py --peer target/debug/transport-conformance \
   --output /tmp/retained-live.json
 ```
 
-The selected [2026-10-12 report](results/retained-live-20261012/exploration.json)
+The selected [2026-10-12 report](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/transport-conformance/results/retained-live-20261012/exploration.json)
 records publication of B while A is incomplete, fast fresh reception of B,
 late channel-zero repair-only reconstruction of A, exact deferral, stale-token
 refusal, pre-codec signature refusal, full retention and expiry. It retains the
 process transcript and executing binary/compiled-source identity. The
-[validation record](results/retained-live-20261012/validation.json) binds the
+[validation record](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/transport-conformance/results/retained-live-20261012/validation.json) binds the
 selected Cargo artifact and 42 source/validation inputs to commit `73616a78`.
 These are
 host delivery opportunities; the report starts no sockets, radios or store.

@@ -12,6 +12,7 @@ to this runner. A real forbidden local-seed fallback is planted, observed to
 fail the same receipts, and restored byte-for-byte before the final green run.
 """
 
+import argparse
 import hashlib
 import json
 import os
@@ -27,12 +28,27 @@ def digest(path):
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--output", type=Path, required=True, help="new ignored or external evidence directory")
+    parser.add_argument("--target", type=Path, required=True, help="existing approved Cargo target")
+    parser.add_argument("--keeper", type=Path, required=True, help="qualified keeper executable")
+    parser.add_argument("--jobs", type=int, default=1, help="Cargo build jobs (default: 1)")
+    args = parser.parse_args()
+    if args.jobs < 1:
+        parser.error("--jobs must be positive")
     repo = Path(__file__).resolve().parents[1]
-    target = Path("C:/t/cargo-targets/retinue")
-    keeper = Path("C:/t/cargo-targets/mere/debug/dr-c-receipt-host.exe")
+    target = args.target.resolve(strict=True)
+    keeper = args.keeper.resolve(strict=True)
     runtime = target / "signalman-custody-runtime"
-    output = repo / "validation" / "signalman-custody"
-    output.mkdir(exist_ok=True)
+    output = args.output.resolve()
+    try:
+        relative = output.relative_to(repo)
+    except ValueError:
+        pass
+    else:
+        if subprocess.run(["git", "check-ignore", "-q", "--no-index", "--", relative.as_posix()], cwd=repo).returncode:
+            parser.error("output inside the repository must be Git-ignored")
+    output.mkdir(parents=True, exist_ok=False)
     if runtime.exists():
         raise RuntimeError("runtime exists; inspect its owner before cleanup")
     runtime.mkdir()
@@ -42,9 +58,11 @@ def main():
     records = []
     env = os.environ.copy()
     env["CARGO_PROFILE_TEST_DEBUG"] = "0"
-    base = ["cargo", "+1.99.0", "test", "--locked", "--offline",
+    build_dir = json.dumps(str(target / "build"))
+    base = ["cargo", "+1.99.0", "--config", f"build.build-dir={build_dir}",
+            "test", "--locked", "--offline",
             "--manifest-path", "apps/signalman-desktop/Cargo.toml",
-            "--target-dir", str(target), "-j4", "--lib"]
+            "--target-dir", str(target), "-j", str(args.jobs), "--lib"]
 
     def run(label, command, expected=0, child_env=None):
         log = output / (label + ".log")

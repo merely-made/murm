@@ -17,7 +17,7 @@ volume ejects and the application returns, status must identify
 `build=711816a8124bd58cd8cc314ec4de5009be7df166 image=t114-native`.
 Check the persisted identity and selected region/channel separately.
 
-The [fresh Windows receipt](../../testing/receipts/firmware-refresh/follow-up/README.md)
+The [fresh Windows receipt](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/receipts/firmware-refresh/follow-up/README.md)
 records installation, original settings sequence, guarded admission, and native
 RF checks. A retry of these same bytes after a failed application has not been
 exercised; the current catalog entry therefore remains `partial`. Historical

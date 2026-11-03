@@ -9,7 +9,7 @@ resources. An outrider rides ahead of the party to scout and carry word.
 Not affiliated with or endorsed by the Reticulum or LXMF projects.
 
 **Status: codec, opportunistic/direct delivery, and captured propagation lane implemented.**
-The [LXMF 1.1.1 / RNS 1.5.4 receipt](../../testing/receipts/rns-1.5.4-repin/README.md)
+The [LXMF 1.1.1 / RNS 1.5.4 receipt](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/receipts/rns-1.5.4-repin/README.md)
 qualifies seven local direct, opportunistic and propagation gates, including stock
 clients and Outrider's bounded server. Committed byte fixtures retain their original
 producer versions. Older physical receipts cover direct and opportunistic delivery

@@ -107,7 +107,7 @@ below remain a record of inputs, not descriptions of the current implementation.
 
 - Captured six fresh signed-artifact cases with pinned `rnid 1.5.2`, project
   identities and metadata; removed the copied constant/comparison test. Original
-  captures remain in `testing/receipts/prns-retirement/rns_signed_artifact_legacy.json`.
+  captures remain in `Code/testing/murm/testing/receipts/prns-retirement/rns_signed_artifact_legacy.json`.
 - Removed Hopspot from both catalogs and both Windows/public stage assemblers.
   Its three binaries, manifest and four descriptor/signature files were moved
   byte-identically into the receipt archive. The repository still retains these
@@ -135,7 +135,7 @@ compared byte-for-byte with the prior commit. No hardware was accessed. Reused
 `C:/t/cargo-targets/retinue` and `C:/t/cargo-targets/mere` remain ordinary reusable
 qualification targets; no isolated home or worktree was created.
 
-The subsequent [RNS 1.5.4 signed-artifact receipt](../testing/receipts/rns-1.5.4-signed-artifact/README.md)
+The subsequent [RNS 1.5.4 signed-artifact receipt](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/receipts/rns-1.5.4-signed-artifact/README.md)
 adds six fresh `rnid 1.5.4` captures using the same project inputs. All artifact
 bytes match 1.5.2; the original fixture remains byte-identical and both versions
 run through Rust reproduction/validation/rejection checks. This corroborates the

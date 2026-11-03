@@ -10,16 +10,6 @@ path = "testing/tucket_t114_ops.py"
 reason = "Attended exact-USB T114 application-only Tucket campaign; verifies package bounds and original live identity/profile restoration. Never an automatic hardware test."
 expires = "2027-01-20"
 
-[[asset_exemption]]
-path = "testing/receipts/tucket-t114/source/v4_ops.py"
-reason = "Frozen exact-USB SB1 peer application-only actions and before/after preservation checks for the attended T114 receipt."
-expires = "2027-01-20"
-
-[[asset_exemption]]
-path = "testing/receipts/tucket-t114/source/freeze_receipt.py"
-reason = "Frozen public evidence sealer; requires passing hardware, custody, memory and restoration results and excludes wallets and raw flash."
-expires = "2027-01-20"
-
 # This is an inventory and evidence registry, not a second assertion suite.
 # Assertions remain in the Rust tests, oracle scripts, and hardware procedures
 # that own them.  Discovery is deliberately derived from Git so that adding a
@@ -122,101 +112,6 @@ id = "tucket-firmware-contact-store"
 tier = "pr"
 command = ["cargo", "test", "-p", "radio-hand", "--features", "instances,tucket-endpoint,tucket-contact-store-bench", "--lib", "--test", "tucket_contacts", "--test", "instances"]
 
-[[asset_exemption]]
-path = "testing/receipts/tucket-firmware-contacts/source/prepare_boards.py"
-reason = "Frozen attended preflight evidence; exact USB identities and private recovery layout required."
-expires = "2027-01-17"
-
-[[asset_exemption]]
-path = "testing/receipts/tucket-firmware-contacts/source/prepare_corrected.py"
-reason = "Frozen attended preflight evidence; exact USB identities and private recovery layout required."
-expires = "2027-01-17"
-
-[[asset_exemption]]
-path = "testing/receipts/tucket-firmware-contacts/source/v4_storage_campaign.py"
-reason = "Frozen attended application-only flash/restoration campaign; standalone contact receipt owns execution."
-expires = "2027-01-17"
-
-[[asset_exemption]]
-path = "testing/receipts/tucket-firmware-contacts/source/v4_storage_retry.py"
-reason = "Frozen attended exact-identity memory/reset/restoration campaign; standalone contact receipt owns execution."
-expires = "2027-01-17"
-
-[[asset_exemption]]
-path = "testing/receipts/tucket-firmware-contacts/source/t114_storage_campaign.py"
-reason = "Frozen attended T114 application-only DFU evidence; requires exact hardware and receipt-owned recovery inputs."
-expires = "2027-01-17"
-
-[[asset_exemption]]
-path = "testing/receipts/tucket-firmware-contacts/source/t114_storage_worker.py"
-reason = "Frozen attended T114 application-only DFU evidence; requires exact hardware and receipt-owned recovery inputs."
-expires = "2027-01-17"
-
-[[asset_exemption]]
-path = "testing/receipts/tucket-firmware-contacts/source/live_ops.py"
-reason = "Frozen attended application-only RF/restoration evidence; exact identified hardware and private recovery inputs required."
-expires = "2027-01-17"
-
-[[asset_exemption]]
-path = "testing/receipts/tucket-firmware-contacts/source/live_ops_framing.py"
-reason = "Frozen attended application-only RF/restoration evidence; exact identified hardware and private recovery inputs required."
-expires = "2027-01-17"
-
-[[asset_exemption]]
-path = "testing/receipts/tucket-firmware-contacts/source/freeze_firmware_contacts.py"
-reason = "Frozen receipt assembly source; consumes completed attended campaigns and their historical private-input layout."
-expires = "2027-01-17"
-
-[[asset_exemption]]
-path = "testing/receipts/tucket-firmware-contacts/source/live_ops_trace.py"
-reason = "Frozen attended application-only flash/RF/restoration evidence; exact identified hardware and receipt-owned recovery inputs required."
-expires = "2027-01-17"
-
-[[asset_exemption]]
-path = "testing/receipts/tucket-firmware-contacts/source/live_ops_worker.py"
-reason = "Frozen attended application-only flash/RF/restoration evidence; exact identified hardware and receipt-owned recovery inputs required."
-expires = "2027-01-17"
-
-[[asset_exemption]]
-path = "testing/receipts/tucket-firmware-contacts/source/live_ops_ingress.py"
-reason = "Frozen attended application-only flash/RF/restoration evidence; exact identified hardware and receipt-owned recovery inputs required."
-expires = "2027-01-17"
-
-[[asset_exemption]]
-path = "testing/receipts/tucket-firmware-contacts/source/live_ops_retry.py"
-reason = "Frozen attended application-only flash/RF/restoration evidence; exact identified hardware and receipt-owned recovery inputs required."
-expires = "2027-01-17"
-
-[[asset_exemption]]
-path = "testing/receipts/tucket-firmware-contacts/source/v4_storage_boxed.py"
-reason = "Frozen attended eight-key storage and boxed-memory/reset campaign; identified hardware and receipt-owned recovery inputs required."
-expires = "2027-01-17"
-
-[[asset_exemption]]
-path = "testing/receipts/tucket-firmware-contacts/source/reset_owned_bench_cache.py"
-reason = "Frozen attended ROM reset of only this lane's newly created synthetic cache pair; exact scope/preimage/prefix guards and retained evidence required."
-expires = "2027-01-17"
-
-[[asset_exemption]]
-path = "testing/receipts/tucket-firmware-contacts/source/reset_owned_ingress_cache.py"
-reason = "Frozen attended ROM reset of only this lane's newly created synthetic cache pair; exact scope/preimage/prefix guards and retained evidence required."
-expires = "2027-01-17"
-
-[[asset_exemption]]
-path = "testing/receipts/tucket-firmware-contacts/source/verify_owned_cache_reset.py"
-reason = "Frozen read-only verification of the synthetic-cache reset after a checksum-format parser refusal; no erase operation."
-expires = "2027-01-17"
-
-[[asset_exemption]]
-path = "testing/receipts/tucket-firmware-contacts/source/live_ops_final.py"
-reason = "Frozen attended final-source application-only RF/restoration evidence; exact hardware and receipt-owned recovery inputs required."
-expires = "2027-01-17"
-
-[[asset_exemption]]
-path = "testing/receipts/tucket-firmware-contacts/source/reset_owned_final_cache.py"
-reason = "Frozen attended reset of only the lane-owned synthetic cache before final-source requalification; exact preimage/scope guards and retained evidence required."
-expires = "2027-01-17"
-
 [[suite]]
 id = "protocol-capacity"
 tier = "local"
@@ -262,8 +157,8 @@ command = ["cargo", "test", "-p", "sennet", "-p", "tucket", "--no-default-featur
 [[suite]]
 id = "sennet-tucket-current-reference"
 tier = "local"
-command = ["python3", "testing/receipts/sennet-tucket-current/run.py", "--output", "validation/results/sennet-tucket-current"]
-asset_globs = ["testing/receipts/sennet-tucket-current/*.py", "testing/receipts/sennet-tucket-current/*.json", "crates/tucket/tests/*.rs", "crates/sennet/tests/current_boundaries.rs"]
+command = ["python3", "testing/campaigns/sennet-tucket-current/run.py", "--output", "validation/results/sennet-tucket-current"]
+asset_globs = ["testing/campaigns/sennet-tucket-current/*.py", "testing/campaigns/sennet-tucket-current/tests/fixtures/sennet-stock-duplicate-settled.json", "testing/sennet_stock_bench.py", "crates/sennet/capture/capture_config.py", "crates/tucket/tests/*.rs", "crates/sennet/tests/current_boundaries.rs"]
 
 [[suite]]
 id = "t114-firmware"
@@ -279,25 +174,25 @@ command = ["cargo", "build", "-p", "outrider", "--no-default-features", "--targe
 id = "retinue-rns-live-oracle"
 tier = "local"
 command = ["python3", "-u", "crates/retinue/oracle/run_live.py"]
-asset_globs = ["crates/retinue/oracle/*.py", "testing/receipts/rns-1.5.4-repin/run.py", "testing/receipts/rns-1.5.6-repin/run.py", "testing/receipts/rns-1.5.7-repin/run.py", "testing/receipts/rns-1.5.7-repin/compare_routes.py"]
+asset_globs = ["crates/retinue/oracle/*.py", "testing/campaigns/rns-1.5.4-repin/run.py", "testing/campaigns/rns-1.5.6-repin/run.py", "testing/campaigns/rns-1.5.7-repin/run.py", "testing/campaigns/rns-1.5.7-repin/compare_routes.py"]
 
 [[suite]]
 id = "rns-154-corroboration-q1-link-timeout"
 tier = "local"
-command = ["python3", "-u", "testing/receipts/rns-1.5.4-link-echo-corroboration/q1_link_timeout.py", "--reps", "2"]
-asset_globs = ["testing/receipts/rns-1.5.4-link-echo-corroboration/q1_link_timeout.py", "testing/receipts/rns-1.5.4-link-echo-corroboration/harness.py", "testing/receipts/rns-1.5.4-link-echo-corroboration/node.py"]
+command = ["python3", "-u", "testing/campaigns/rns-1.5.4-link-echo-corroboration/q1_link_timeout.py", "--reps", "2"]
+asset_globs = ["testing/campaigns/rns-1.5.4-link-echo-corroboration/q1_link_timeout.py", "testing/campaigns/rns-1.5.4-link-echo-corroboration/harness.py", "testing/campaigns/rns-1.5.4-link-echo-corroboration/node.py"]
 
 [[suite]]
 id = "rns-154-corroboration-q2-link-echo"
 tier = "local"
-command = ["python3", "-u", "testing/receipts/rns-1.5.4-link-echo-corroboration/q2_link_echo.py"]
-asset_globs = ["testing/receipts/rns-1.5.4-link-echo-corroboration/q2_link_echo.py"]
+command = ["python3", "-u", "testing/campaigns/rns-1.5.4-link-echo-corroboration/q2_link_echo.py"]
+asset_globs = ["testing/campaigns/rns-1.5.4-link-echo-corroboration/q2_link_echo.py", "testing/campaigns/rns-1.5.4-link-echo-corroboration/harness.py", "testing/campaigns/rns-1.5.4-link-echo-corroboration/node.py"]
 
 [[suite]]
 id = "rns-154-corroboration-q3-announce-echo"
 tier = "local"
-command = ["python3", "-u", "testing/receipts/rns-1.5.4-link-echo-corroboration/q3_announce_echo.py"]
-asset_globs = ["testing/receipts/rns-1.5.4-link-echo-corroboration/q3_announce_echo.py"]
+command = ["python3", "-u", "testing/campaigns/rns-1.5.4-link-echo-corroboration/q3_announce_echo.py"]
+asset_globs = ["testing/campaigns/rns-1.5.4-link-echo-corroboration/q3_announce_echo.py", "testing/campaigns/rns-1.5.4-link-echo-corroboration/harness.py", "testing/campaigns/rns-1.5.4-link-echo-corroboration/node.py"]
 
 [[suite]]
 id = "outrider-lxmf-live-oracle"
@@ -329,16 +224,6 @@ expires = "2027-01-16"
 [[asset_exemption]]
 path = "testing/stock_tucket_bench.py"
 reason = "Attended identified-radio status/setup/restoration helper; the guarded native radio benches own physical execution."
-expires = "2027-01-16"
-
-[[asset_exemption]]
-path = "testing/receipts/sennet-directed/ack-wire/source/sennet_pki_stock.py"
-reason = "Immutable historical source snapshot in the ACK wire receipt, not an independent executable suite."
-expires = "2027-01-16"
-
-[[asset_exemption]]
-path = "testing/receipts/sennet-directed/routing-observed/source/sennet_pki_stock.py"
-reason = "Immutable historical source snapshot in the routing observation receipt, not an independent executable suite."
 expires = "2027-01-16"
 
 # This is a physical serial bridge helper, not an executable validation suite.
@@ -390,34 +275,9 @@ reason = "Guarded physical MC4c resident-protocol bench; exact-build V4/T114 rec
 expires = "2026-11-01"
 
 [[asset_exemption]]
-path = "testing/sennet_stock_bench.py"
-reason = "Physical Sennet stock-peer RF bench; current-reference receipt owns execution and requires separately identified/configured hardware."
-expires = "2026-11-01"
-
-[[asset_exemption]]
 path = "testing/protocol-capacity/board_probe.py"
 reason = "Attended target memory campaign; exact USB identities and separately installed bench-only firmware required. Physical receipt owns execution."
 expires = "2026-11-01"
-
-[[asset_exemption]]
-path = "testing/receipts/protocol-parity-memory/closure/source/t114_pinned_campaign.py"
-reason = "Frozen attended memory/DFU/restoration evidence; requires exact identified hardware and receipt-owned private recovery inputs."
-expires = "2027-01-17"
-
-[[asset_exemption]]
-path = "testing/receipts/protocol-parity-memory/closure/source/v4_pinned_campaign.py"
-reason = "Frozen attended memory/app-only restoration evidence; requires exact identified hardware and receipt-owned private recovery inputs."
-expires = "2027-01-17"
-
-[[asset_exemption]]
-path = "testing/receipts/tucket-contacts/source/stock_app_trial.py"
-reason = "Frozen attended application-only stock excursion; requires exact SB1 hardware and fresh ignored recovery inputs. Contact receipt owns execution."
-expires = "2027-01-17"
-
-[[asset_exemption]]
-path = "testing/receipts/tucket-contacts/source/freeze_contacts.py"
-reason = "Frozen contact receipt assembly source; consumes its historical private-input layout after attended native/restoration qualification."
-expires = "2027-01-17"
 
 [[asset_exemption]]
 path = "testing/device_names.py"
@@ -427,69 +287,4 @@ expires = "2027-01-16"
 [[asset_exemption]]
 path = "testing/usb_reboot.py"
 reason = "Attended SB2 settings-save/reboot campaign; requires identified hardware, writes one current-settings journal record per cycle, stops at first failed recovery."
-expires = "2027-01-16"
-
-[[asset_exemption]]
-path = "testing/receipts/protocol-parity-memory/physical/source/board_probe_t114.py"
-reason = "Frozen attended physical-memory evidence source; not an automatic hardware test."
-expires = "2027-01-16"
-
-[[asset_exemption]]
-path = "testing/receipts/protocol-parity-memory/physical/source/board_probe_v4.py"
-reason = "Frozen attended physical-memory evidence source; not an automatic hardware test."
-expires = "2027-01-16"
-
-[[asset_exemption]]
-path = "testing/receipts/protocol-parity-memory/physical/source/freeze_physical.py"
-reason = "Frozen attended physical-memory evidence source; not an automatic hardware test."
-expires = "2027-01-16"
-
-[[asset_exemption]]
-path = "testing/receipts/protocol-parity-memory/physical/source/t114_checkpoint_physical.py"
-reason = "Frozen attended physical-memory evidence source; not an automatic hardware test."
-expires = "2027-01-16"
-
-[[asset_exemption]]
-path = "testing/receipts/protocol-parity-memory/physical/source/t114_direct_physical.py"
-reason = "Frozen attended physical-memory evidence source; not an automatic hardware test."
-expires = "2027-01-16"
-
-[[asset_exemption]]
-path = "testing/receipts/protocol-parity-memory/physical/source/t114_fault_physical.py"
-reason = "Frozen attended physical-memory evidence source; not an automatic hardware test."
-expires = "2027-01-16"
-
-[[asset_exemption]]
-path = "testing/receipts/protocol-parity-memory/physical/source/t114_handoff_physical.py"
-reason = "Frozen attended physical-memory evidence source; not an automatic hardware test."
-expires = "2027-01-16"
-
-[[asset_exemption]]
-path = "testing/receipts/protocol-parity-memory/physical/source/t114_physical.py"
-reason = "Frozen attended physical-memory evidence source; not an automatic hardware test."
-expires = "2027-01-16"
-
-[[asset_exemption]]
-path = "testing/receipts/protocol-parity-memory/physical/source/t114_residue_physical.py"
-reason = "Frozen attended physical-memory evidence source; not an automatic hardware test."
-expires = "2027-01-16"
-
-[[asset_exemption]]
-path = "testing/receipts/protocol-parity-memory/physical/source/t114_worker_physical.py"
-reason = "Frozen attended physical-memory evidence source; not an automatic hardware test."
-expires = "2027-01-16"
-
-[[asset_exemption]]
-path = "testing/receipts/protocol-parity-memory/physical/source/v4_peer_physical.py"
-reason = "Frozen attended physical-memory evidence source; not an automatic hardware test."
-expires = "2027-01-16"
-
-[[asset_exemption]]
-path = "testing/receipts/protocol-parity-memory/physical/source/v4_physical.py"
-reason = "Frozen attended physical-memory evidence source; not an automatic hardware test."
-expires = "2027-01-16"
-
-[[asset_exemption]]
-path = "testing/receipts/protocol-parity-memory/physical/source/v4_watchdog_physical.py"
-reason = "Frozen attended physical-memory evidence source; not an automatic hardware test."
 expires = "2027-01-16"

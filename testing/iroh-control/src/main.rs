@@ -4,6 +4,7 @@
 mod board;
 mod campaign;
 mod carrier;
+mod output;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -16,10 +17,16 @@ async fn main() -> anyhow::Result<()> {
         arguments.is_empty() || (arguments.len() == 2 && arguments[0] == "--output"),
         "usage: iroh-control-probe [--output receipt.json]"
     );
+    let mut output = if arguments.len() == 2 {
+        Some(output::reserve(std::path::Path::new(&arguments[1]))?)
+    } else {
+        None
+    };
     let receipt = campaign::run().await?;
     let rendered = serde_json::to_string_pretty(&receipt)?;
-    if arguments.len() == 2 {
-        std::fs::write(&arguments[1], &rendered)?;
+    if let Some(output) = &mut output {
+        use std::io::Write;
+        output.write_all(rendered.as_bytes())?;
     }
     println!("{rendered}");
     Ok(())

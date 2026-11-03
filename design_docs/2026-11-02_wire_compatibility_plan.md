@@ -15,6 +15,8 @@ Credentials must not be appended to the identity/settings body or sent through a
 
 ## Deferred evidence question
 
+The relocated NomadNet interoperability record retains unsent upstream issue drafts for the named nomadnet-rs request-ID/response decoding and rns-rs activation observations. Keep their measured-version scope and diagnostic controls; owner review is required before any filing. The record is `Code/testing/murm/design_docs/2026-09-13_nomadnet_go_resource_compression_receipt.md`.
+
 **Link-ID flag-mask evidence.** The original two stock RNS request/link-ID captures both used flags `0x02`, so they establish payload clipping but do not independently distinguish `flags & 0x0f` from an unmasked flag. When this evidence question is pursued, capture an independently generated stock multi-hop or other applicable request with discriminating flag bits and its accepted link ID, and compare the exact preimages. Done when the observation either distinguishes the alternatives or identifies why the requested flag shape cannot be exercised; do not claim a presently demonstrated interoperability failure. The [original v0 plan](archive_docs/2026-11-02/2026-07-06_retinue_v0_plan.md) retains the historical context; the optional question is carried here instead of a separate v0 successor.
 
 ## Findings, 2026-11-02

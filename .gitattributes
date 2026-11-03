@@ -3,25 +3,15 @@
 # sha256 verification of these files.
 firmware/packages/** -text
 crates/tinyssb-core/fixtures/** -text
+apps/linkboy/tests/fixtures/hopspot-v4-0.3.4/** -text
+apps/signalman-desktop/tests/fixtures/t114_loader_snapshot.json -text
+testing/campaigns/sennet-tucket-current/tests/fixtures/sennet-stock-duplicate-settled.json -text
+testing/campaigns/sennet-desktop/tests/fixtures/custody-supplier.json -text
 
-# Retired release evidence retains exact signed bytes.
-testing/receipts/prns-retirement/** -text
 
-# Preserve the new capture and its receipt bytes across checkout platforms.
+# Preserve protocol capture fixture bytes across checkout platforms.
 crates/retinue/tests/fixtures/rns_signed_artifact_1_5_4.json -text whitespace=cr-at-eol
-testing/receipts/rns-1.5.4-signed-artifact/** -text whitespace=cr-at-eol,-blank-at-eof
 crates/retinue/oracle/capture_signed_artifact.py text eol=lf
 
-# Versioned repin logs and raw capture archive are immutable receipt bytes.
-testing/receipts/rns-1.5.4-repin/** -text whitespace=cr-at-eol,-blank-at-eof
-testing/receipts/rns-1.5.4-lanes/** -text whitespace=cr-at-eol,-blank-at-eof
-testing/receipts/firmware-ifac/** -text whitespace=cr-at-eol,-blank-at-eof
-testing/receipts/ifac-provisioning-preflight/** -text whitespace=cr-at-eol,-blank-at-eof
-testing/receipts/sennet-tucket-current/** -text whitespace=cr-at-eol,-blank-at-eof
-# Physical tool logs retain their emitted trailing spaces as receipt bytes.
-testing/receipts/sennet-tucket-current/physical/*.log -text whitespace=cr-at-eol,-blank-at-eof,-blank-at-eol
 crates/retinue/tests/fixtures/rns_ifac_1_5_4.json -text whitespace=cr-at-eol
 wire/crates/rtc/tests/coturn.sh text eol=lf
-testing/receipts/firmware-refresh/** -text whitespace=cr-at-eol,-blank-at-eof,-blank-at-eol
-testing/receipts/device-names/** -text whitespace=cr-at-eol,-blank-at-eof,-blank-at-eol
-testing/receipts/usb-reboot/** -text whitespace=cr-at-eol,-blank-at-eof,-blank-at-eol

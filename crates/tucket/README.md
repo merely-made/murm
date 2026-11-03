@@ -16,7 +16,7 @@ versions and transport-scoped packets are refused by the unscoped Node before
 contact/dedup changes. This is refusal, not region-scope support. TRACE packet
 hashing uses the reference's one-byte path metadata.
 
-The [current receipt](../../testing/receipts/sennet-tucket-current/README.md)
+The [current receipt](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/receipts/sennet-tucket-current/README.md)
 records fresh identified 1.17.1 endpoint adverts, text/ACKs, learned routes and
 fourth-attempt flood recovery, plus forced one-repeater routes at all three path
 widths. Multiple repeaters, scope, restart and broader role acceptance remain open.
@@ -106,7 +106,7 @@ A second headed acceptance passes through an official MeshCore repeater v1.16.0
 on a Heltec T114. Tucket and the stock companion were each given the repeater's
 one-hop source route. Encrypted text and acknowledgements crossed the named
 relay in both directions. The hardware receipt is in
-[`design_docs/2026-07-22_meshcore_relay_headed.md`](../../design_docs/2026-07-22_meshcore_relay_headed.md).
+[`design_docs/2026-07-22_meshcore_relay_headed.md`](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/design_docs/2026-07-22_meshcore_relay_headed.md).
 
 With the `hardware` feature, `meshcore_headed` configures an official MeshCore
 companion through its serial API while Tucket uses Tulle direct-PHY on the

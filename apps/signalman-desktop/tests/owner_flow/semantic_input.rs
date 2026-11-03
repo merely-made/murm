@@ -92,7 +92,7 @@ fn a_silent_device_offers_explicit_v4_and_t114_declarations() {
     });
     assert!(h.click_on(&Selector::role("button").containing("Use T114 revision 2.x")));
     let loader_record = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("../../design_docs/2026-08-12_t114_loader_snapshot.json");
+        .join("tests/fixtures/t114_loader_snapshot.json");
     h.update(|state| {
         state.t114_loader_record =
             cambium::TextInput::new(loader_record.to_string_lossy().into_owned());

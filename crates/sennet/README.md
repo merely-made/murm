@@ -14,8 +14,8 @@ A sennet is a ceremonial fanfare for a procession.
 **October 16 carriage:** the native Signalman public LongFast gate passes four
 exact channel texts over two connections with retained history, disjoint packet
 IDs, zero ACK claims and restored radios. See the
-[R7 receipt](../../testing/receipts/sennet-desktop/native-reconnect/README.md).
-The [R8 receipt](../../testing/receipts/sennet-directed/native-restoration/README.md)
+[R7 receipt](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/receipts/sennet-desktop/native-reconnect/README.md).
+The [R8 receipt](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/receipts/sennet-directed/native-restoration/README.md)
 now passes four exact PKI directed texts and four correlated protocol ACKs across
 native reconnect, with scoped transient custody, exact history and automated
 board restoration. The target is stock 2.7.26; channel ACKs are unauthenticated
@@ -30,7 +30,7 @@ node association and duplicate suppression. Both temporary stock radios are
 restored. Maximum-size stock acceptance remains unqualified after USB
 interruptions; alpha remains unqualified. The historical stock captures below
 do not identify an exact producer release and are not relabeled. The
-[current receipt](../../testing/receipts/sennet-tucket-current/README.md) records
+[current receipt](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/receipts/sennet-tucket-current/README.md) records
 destination, duplicate-state and envelope-boundary repairs and fresh RF evidence.
 
 `ManagedFlood::consider` handles broadcasts only. Directed traffic is returned

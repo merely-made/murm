@@ -36,8 +36,8 @@ the public catalog.
 
 The official Windows V4 executable and the generated T114 UF2 are assembled in
 the four-package Windows stage recorded by
-`2026-08-19_signalman_public_f5_windows_receipt.md`.
-`2026-08-19_linkboy_f5_macos_linux_v4_receipt.md` records V4 physical
+`Code/testing/murm/design_docs/2026-08-19_signalman_public_f5_windows_receipt.md`.
+`Code/testing/murm/design_docs/2026-08-19_linkboy_f5_macos_linux_v4_receipt.md` records V4 physical
 flash-and-recovery on Intel macOS, Apple-silicon macOS, and Linux. The full
 Windows stage receipt records the matching V4 loop on O-PC. A native ESP ROM
 adapter remains a possible later simplification, not an F5 dependency.

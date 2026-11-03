@@ -39,7 +39,7 @@ pub enum Action {
     ///
     /// Stricter than RNS 1.5.4, which reports the same TIMEOUT reason for a request that was
     /// never answered and for an established link later lost
-    /// (`testing/receipts/rns-1.5.4-link-echo-corroboration`, Q1).
+    /// (`Code/testing/murm/testing/receipts/rns-1.5.4-link-echo-corroboration`, Q1).
     LinkRequestTimedOut { link_id: AddressHash },
     /// Application bytes arrived on a link, already decrypted.
     Data {

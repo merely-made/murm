@@ -2,6 +2,14 @@
 # Exact-commit validation records are local evidence artifacts.  A record is
 # valid only for the clean commit it names, so it is never source-controlled.
 /validation/results/
+/testing/receipts/
+/testing/iroh-control/results/
+/testing/protocol-capacity/receipt.json
+/testing/transport-conformance/results/
+/testing/webrtc-evaluation/receipts/
+/validation/signalman-custody/
+/validation/signalman-refresh-*.json
+/validation/signalman-refresh-*.zip
 /validation/**/__pycache__/
 /fuzz/target/
 /fuzz/artifacts/

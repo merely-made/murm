@@ -1,5 +1,0 @@
-{
-  "passed": false,
-  "error": "RuntimeError('resident host probe failed')",
-  "dut_reset_required": true
-}
