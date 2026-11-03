@@ -32,12 +32,18 @@ p2panda-encryption = { git = "https://github.com/mark-ik/p2panda.git", tag = "me
 p2panda-store = { git = "https://github.com/mark-ik/p2panda.git", tag = "mere-p2panda-net-0.7.5-upstream-20261013" }
 p2panda-stream = { git = "https://github.com/mark-ik/p2panda.git", tag = "mere-p2panda-net-0.7.5-upstream-20261013" }
 p2panda-sync = { git = "https://github.com/mark-ik/p2panda.git", tag = "mere-p2panda-net-0.7.5-upstream-20261013" }
-# The storage family moved to eidetic; these match Murm's root pins so the
-# graph keeps one source for each.
-luggage = { git = "https://github.com/merely-made/eidetic.git", rev = "1014cf48e1882ff926b55f3509ac3dbf5a5aec8e" }
-muniment = { git = "https://github.com/merely-made/eidetic.git", rev = "1014cf48e1882ff926b55f3509ac3dbf5a5aec8e" }
-mere-proofs = { git = "https://github.com/merely-made/eidetic.git", rev = "1014cf48e1882ff926b55f3509ac3dbf5a5aec8e" }
-stickleback = { git = "https://github.com/merely-made/eidetic.git", rev = "1014cf48e1882ff926b55f3509ac3dbf5a5aec8e" }
+# The storage family uses the qualified Eidetic receiving cohort; the Git
+# source forwarders below keep Murm's older pins on that same source.
+luggage = { git = "https://www.github.com/merely-made/eidetic.git", rev = "1014cf48e1882ff926b55f3509ac3dbf5a5aec8e" }
+muniment = { git = "https://www.github.com/merely-made/eidetic.git", rev = "1014cf48e1882ff926b55f3509ac3dbf5a5aec8e" }
+mere-proofs = { git = "https://www.github.com/merely-made/eidetic.git", rev = "1014cf48e1882ff926b55f3509ac3dbf5a5aec8e" }
+stickleback = { git = "https://www.github.com/merely-made/eidetic.git", rev = "1014cf48e1882ff926b55f3509ac3dbf5a5aec8e" }
+
+[patch."https://github.com/merely-made/eidetic.git"]
+luggage = { git = "https://www.github.com/merely-made/eidetic.git", rev = "1014cf48e1882ff926b55f3509ac3dbf5a5aec8e" }
+muniment = { git = "https://www.github.com/merely-made/eidetic.git", rev = "1014cf48e1882ff926b55f3509ac3dbf5a5aec8e" }
+mere-proofs = { git = "https://www.github.com/merely-made/eidetic.git", rev = "1014cf48e1882ff926b55f3509ac3dbf5a5aec8e" }
+stickleback = { git = "https://www.github.com/merely-made/eidetic.git", rev = "1014cf48e1882ff926b55f3509ac3dbf5a5aec8e" }
 
 # Compatibility source keys for immutable suppliers published before the
 # repository rename. Targets and current direct dependencies use Murm.
