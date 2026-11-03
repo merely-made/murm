@@ -45,3 +45,6 @@ identity = { workspace = true }
 # Native adapter receipt uses real Murm handles over an in-process transport.
 # Keep this fixture outside the portable model's Wasm dependency cone.
 transport = { workspace = true }
+
+[lints]
+workspace = true
