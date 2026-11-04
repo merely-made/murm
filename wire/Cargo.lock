@@ -1252,9 +1252,10 @@ dependencies = [
  "getrandom 0.4.3",
  "hickory-proto",
  "ipconfig",
- "libc",
+ "network-interface",
  "rtc",
  "sha2",
+ "socket-pktinfo",
  "socket2",
  "thiserror 2.0.21",
  "tokio",
@@ -1283,6 +1284,18 @@ dependencies = [
  "tower-service",
  "url",
  "webpki-roots",
+]
+
+[[package]]
+name = "network-interface"
+version = "2.0.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4ddcb8865ad3d9950f22f42ffa0ef0aecbfbf191867b3122413602b0a360b2a6"
+dependencies = [
+ "cc",
+ "libc",
+ "thiserror 2.0.21",
+ "winapi",
 ]
 
 [[package]]
@@ -1758,7 +1771,7 @@ dependencies = [
 [[package]]
 name = "rtc"
 version = "0.21.1"
-source = "git+https://github.com/merely-made/rtc?rev=ab0f9d1d531299c30986e415bdcf6c69ee94510f#ab0f9d1d531299c30986e415bdcf6c69ee94510f"
+source = "git+https://github.com/merely-made/rtc?rev=c0e8e02dbbc0a4f0a9982842b351f244fae3a01f#c0e8e02dbbc0a4f0a9982842b351f244fae3a01f"
 dependencies = [
  "bytes",
  "hex",
@@ -1793,7 +1806,7 @@ dependencies = [
 [[package]]
 name = "rtc-crypto"
 version = "0.21.1"
-source = "git+https://github.com/merely-made/rtc?rev=ab0f9d1d531299c30986e415bdcf6c69ee94510f#ab0f9d1d531299c30986e415bdcf6c69ee94510f"
+source = "git+https://github.com/merely-made/rtc?rev=c0e8e02dbbc0a4f0a9982842b351f244fae3a01f#c0e8e02dbbc0a4f0a9982842b351f244fae3a01f"
 dependencies = [
  "aes",
  "aws-lc-rs",
@@ -1812,7 +1825,7 @@ dependencies = [
 [[package]]
 name = "rtc-datachannel"
 version = "0.21.1"
-source = "git+https://github.com/merely-made/rtc?rev=ab0f9d1d531299c30986e415bdcf6c69ee94510f#ab0f9d1d531299c30986e415bdcf6c69ee94510f"
+source = "git+https://github.com/merely-made/rtc?rev=c0e8e02dbbc0a4f0a9982842b351f244fae3a01f#c0e8e02dbbc0a4f0a9982842b351f244fae3a01f"
 dependencies = [
  "bytes",
  "log",
@@ -1824,7 +1837,7 @@ dependencies = [
 [[package]]
 name = "rtc-dtls"
 version = "0.21.1"
-source = "git+https://github.com/merely-made/rtc?rev=ab0f9d1d531299c30986e415bdcf6c69ee94510f#ab0f9d1d531299c30986e415bdcf6c69ee94510f"
+source = "git+https://github.com/merely-made/rtc?rev=c0e8e02dbbc0a4f0a9982842b351f244fae3a01f#c0e8e02dbbc0a4f0a9982842b351f244fae3a01f"
 dependencies = [
  "bytecheck",
  "byteorder",
@@ -1843,7 +1856,7 @@ dependencies = [
 [[package]]
 name = "rtc-ice"
 version = "0.21.1"
-source = "git+https://github.com/merely-made/rtc?rev=ab0f9d1d531299c30986e415bdcf6c69ee94510f#ab0f9d1d531299c30986e415bdcf6c69ee94510f"
+source = "git+https://github.com/merely-made/rtc?rev=c0e8e02dbbc0a4f0a9982842b351f244fae3a01f#c0e8e02dbbc0a4f0a9982842b351f244fae3a01f"
 dependencies = [
  "bytes",
  "crc",
@@ -1861,7 +1874,7 @@ dependencies = [
 [[package]]
 name = "rtc-interceptor"
 version = "0.21.1"
-source = "git+https://github.com/merely-made/rtc?rev=ab0f9d1d531299c30986e415bdcf6c69ee94510f#ab0f9d1d531299c30986e415bdcf6c69ee94510f"
+source = "git+https://github.com/merely-made/rtc?rev=c0e8e02dbbc0a4f0a9982842b351f244fae3a01f#c0e8e02dbbc0a4f0a9982842b351f244fae3a01f"
 dependencies = [
  "log",
  "rand 0.10.3",
@@ -1874,7 +1887,7 @@ dependencies = [
 [[package]]
 name = "rtc-mdns"
 version = "0.21.1"
-source = "git+https://github.com/merely-made/rtc?rev=ab0f9d1d531299c30986e415bdcf6c69ee94510f#ab0f9d1d531299c30986e415bdcf6c69ee94510f"
+source = "git+https://github.com/merely-made/rtc?rev=c0e8e02dbbc0a4f0a9982842b351f244fae3a01f#c0e8e02dbbc0a4f0a9982842b351f244fae3a01f"
 dependencies = [
  "bytes",
  "log",
@@ -1886,7 +1899,7 @@ dependencies = [
 [[package]]
 name = "rtc-media"
 version = "0.21.1"
-source = "git+https://github.com/merely-made/rtc?rev=ab0f9d1d531299c30986e415bdcf6c69ee94510f#ab0f9d1d531299c30986e415bdcf6c69ee94510f"
+source = "git+https://github.com/merely-made/rtc?rev=c0e8e02dbbc0a4f0a9982842b351f244fae3a01f#c0e8e02dbbc0a4f0a9982842b351f244fae3a01f"
 dependencies = [
  "byteorder",
  "bytes",
@@ -1899,7 +1912,7 @@ dependencies = [
 [[package]]
 name = "rtc-rtcp"
 version = "0.21.1"
-source = "git+https://github.com/merely-made/rtc?rev=ab0f9d1d531299c30986e415bdcf6c69ee94510f#ab0f9d1d531299c30986e415bdcf6c69ee94510f"
+source = "git+https://github.com/merely-made/rtc?rev=c0e8e02dbbc0a4f0a9982842b351f244fae3a01f#c0e8e02dbbc0a4f0a9982842b351f244fae3a01f"
 dependencies = [
  "bytes",
  "rtc-shared",
@@ -1908,7 +1921,7 @@ dependencies = [
 [[package]]
 name = "rtc-rtp"
 version = "0.21.1"
-source = "git+https://github.com/merely-made/rtc?rev=ab0f9d1d531299c30986e415bdcf6c69ee94510f#ab0f9d1d531299c30986e415bdcf6c69ee94510f"
+source = "git+https://github.com/merely-made/rtc?rev=c0e8e02dbbc0a4f0a9982842b351f244fae3a01f#c0e8e02dbbc0a4f0a9982842b351f244fae3a01f"
 dependencies = [
  "bytes",
  "memchr",
@@ -1920,7 +1933,7 @@ dependencies = [
 [[package]]
 name = "rtc-sctp"
 version = "0.21.1"
-source = "git+https://github.com/merely-made/rtc?rev=ab0f9d1d531299c30986e415bdcf6c69ee94510f#ab0f9d1d531299c30986e415bdcf6c69ee94510f"
+source = "git+https://github.com/merely-made/rtc?rev=c0e8e02dbbc0a4f0a9982842b351f244fae3a01f#c0e8e02dbbc0a4f0a9982842b351f244fae3a01f"
 dependencies = [
  "bytes",
  "crc32c",
@@ -1935,7 +1948,7 @@ dependencies = [
 [[package]]
 name = "rtc-sdp"
 version = "0.21.1"
-source = "git+https://github.com/merely-made/rtc?rev=ab0f9d1d531299c30986e415bdcf6c69ee94510f#ab0f9d1d531299c30986e415bdcf6c69ee94510f"
+source = "git+https://github.com/merely-made/rtc?rev=c0e8e02dbbc0a4f0a9982842b351f244fae3a01f#c0e8e02dbbc0a4f0a9982842b351f244fae3a01f"
 dependencies = [
  "rand 0.10.3",
  "rtc-shared",
@@ -1945,7 +1958,7 @@ dependencies = [
 [[package]]
 name = "rtc-shared"
 version = "0.21.1"
-source = "git+https://github.com/merely-made/rtc?rev=ab0f9d1d531299c30986e415bdcf6c69ee94510f#ab0f9d1d531299c30986e415bdcf6c69ee94510f"
+source = "git+https://github.com/merely-made/rtc?rev=c0e8e02dbbc0a4f0a9982842b351f244fae3a01f#c0e8e02dbbc0a4f0a9982842b351f244fae3a01f"
 dependencies = [
  "bitflags 1.3.2",
  "bytes",
@@ -1961,7 +1974,7 @@ dependencies = [
 [[package]]
 name = "rtc-srtp"
 version = "0.21.1"
-source = "git+https://github.com/merely-made/rtc?rev=ab0f9d1d531299c30986e415bdcf6c69ee94510f#ab0f9d1d531299c30986e415bdcf6c69ee94510f"
+source = "git+https://github.com/merely-made/rtc?rev=c0e8e02dbbc0a4f0a9982842b351f244fae3a01f#c0e8e02dbbc0a4f0a9982842b351f244fae3a01f"
 dependencies = [
  "byteorder",
  "bytes",
@@ -1974,7 +1987,7 @@ dependencies = [
 [[package]]
 name = "rtc-stun"
 version = "0.21.1"
-source = "git+https://github.com/merely-made/rtc?rev=ab0f9d1d531299c30986e415bdcf6c69ee94510f#ab0f9d1d531299c30986e415bdcf6c69ee94510f"
+source = "git+https://github.com/merely-made/rtc?rev=c0e8e02dbbc0a4f0a9982842b351f244fae3a01f#c0e8e02dbbc0a4f0a9982842b351f244fae3a01f"
 dependencies = [
  "base64 0.22.1",
  "bytes",
@@ -1990,7 +2003,7 @@ dependencies = [
 [[package]]
 name = "rtc-turn"
 version = "0.21.1"
-source = "git+https://github.com/merely-made/rtc?rev=ab0f9d1d531299c30986e415bdcf6c69ee94510f#ab0f9d1d531299c30986e415bdcf6c69ee94510f"
+source = "git+https://github.com/merely-made/rtc?rev=c0e8e02dbbc0a4f0a9982842b351f244fae3a01f#c0e8e02dbbc0a4f0a9982842b351f244fae3a01f"
 dependencies = [
  "bytes",
  "log",
@@ -2305,6 +2318,17 @@ name = "smallvec"
 version = "1.16.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5b3dc8af474f516a851ff4bd12db780f948b9250ad37211e4eec0bccea54e01b"
+
+[[package]]
+name = "socket-pktinfo"
+version = "0.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "612942246d0cc239cfd83af1dfd39be47f649208a3524e5e9da651910128e0ac"
+dependencies = [
+ "libc",
+ "socket2",
+ "windows-sys 0.61.2",
+]
 
 [[package]]
 name = "socket2"
