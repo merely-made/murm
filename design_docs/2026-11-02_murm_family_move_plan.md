@@ -39,15 +39,40 @@ Castellan/resident path migration; only its Station Custody paths changed here.
 - **R6–R8 native radio:** retain scoped Tucket contact-restore and Sennet public/directed text/ACK passes; qualify installed personal-daemon custody/UI, private-channel custody, 2.8 ACK proofs, broader mesh routing and remaining visual cleanup under their own profiles. Protocol ACK correlation is not authenticated read receipt. T114 endpoint and broader roles belong to [protocol parity](2026-11-02_protocol_parity_plan.md).
 - **Board names:** preserve labels and current identity/preferences when restoring or changing images. Physical screen pixels were not independently observed, and the SB2 five software-reboot recovery does not establish battery-disconnected power-cycle recovery; either is a separate qualification if needed.
 - **Supplier and receiving gates:** registry releases require their own decision and qualification. Resolve the filtered killed-peer shutdown test with bounded evidence and a positive control; Keep physical/live-network/headed gates and the Isocosm gameplay compiler/wing gates with their owners; source adoption is not a gameplay pass. Recheck current owning plans rather than assume the historical failure persists.
-- **RTC provider continuation:** the fixed-server ICE restart, explicit-port DNS and UDP service-discovery slices below are qualified; add and qualify mDNS, TCP/TLS TURN and server replacement as separately selected capabilities. Keep relay-only from direct candidates; host budgets and I/O remain caller-owned. Complete application-carrier adoption only when the real consumer passes binding, admission, backpressure, refusal and reconnect with the shared provider. Genet owns its browser/WPT/media gates and its selected headed direct/UDP-relay matrix does not prove cross-machine or application-carrier acceptance. Registry publication waits for an engine release containing the pinned DCEP and restart fixes.
+- **RTC provider continuation:** the fixed-server restart, explicit-port DNS, UDP service discovery and bounded remote IPv4 mDNS receiving slices below are qualified; native Firefox responder acceptance, local mDNS advertisement, IPv6 multicast, TCP/TLS TURN and server replacement retain separate gates. Keep relay-only from direct candidates; host budgets and I/O remain caller-owned. Complete application-carrier adoption only when the real consumer passes binding, admission, backpressure, refusal and reconnect with the shared provider. Genet owns its browser/WPT/media gates and its selected headed direct/UDP-relay matrix does not prove cross-machine or application-carrier acceptance. Registry publication waits for an engine release containing the pinned DCEP and restart fixes.
 
 ## Decisions and boundaries
+
+### Remote mDNS candidate continuation
+
+**Status (2026-11-04): E2m supplier and bounded Genet receiving qualified.**
+Genet's current mDNS plan owns remote-candidate receiving. Provider
+`bd8b6659a29c5e52ebe09b028ec3ef5a455d7e7f` pins core
+`896ae75de1c2673e98a7ebbf7058b2733786276e`. Its bounded, caller-polled
+one-shot resolver uses a selected IPv4 interface and actual multicast packet
+metadata; ordinary DNS keeps refusing `.local`. All 34 ordinary and three
+controlled coturn checks pass per working/MSRV toolchain, with strict Clippy
+and a host-only normal/build graph excluding Tokio. The core preserves names
+and IDs separately from numeric routes, excludes local TURN pairs with remote
+mDNS names, and waits for mutual restart credentials before replacing a retained
+full-peer route. Genet owns web-visible privacy, SDP/trickle ingestion and
+lifetime/generation cancellation. The receiving matrix keeps Chrome names
+untouched and explicitly uses controlled aliases for observed Firefox IPv4
+sockets. Firefox's own responder, local advertisement, IPv6 multicast and
+application carriers remain open. Receiving source
+`993fb879f3139bcd70048e277989f698c41caffc` passes 44 native checks and all
+48 controlled headed cases, with unchanged selected WPT maps. Its closed
+external E2m packet records 96 restarts, 48 interrupted cleanups, owned fixture
+shutdown and permission restoration; failed earlier cohorts remain distinct.
+New E2m supplier evidence is capped at 6 KB in the existing family receipt,
+within its 100 KB total; Genet's separate fresh packet is capped at 244 KB,
+including core gates. Earlier E2s and other RTC receipts remain closed.
 
 ### UDP service discovery continuation
 
 **Status (2026-11-04): provider and controlled Genet receiving qualified.**
 
-E2s in `genet/design_docs/2026-11-04_webrtc_conformance_plan.md` owns the new
+E2s in `genet/design_docs/2026-11-04_webrtc_mdns_plan.md` owns the new
 portless-URL receiving gate. Murm extends its independent resolver with bounded
 SRV/S-NAPTR endpoint batches and lazy backtracking, retaining caller-owned I/O,
 URI omission and existing TURN allocations. Keep the previous E2d evidence
@@ -70,7 +95,7 @@ TURN transport/authentication, public NAT, media or carrier acceptance.
 
 **Status (2026-11-04): provider and controlled Genet receiving gates qualified.**
 
-Genet's `genet/design_docs/2026-11-04_webrtc_conformance_plan.md`, E2d, owns the
+Genet's `genet/design_docs/2026-11-04_webrtc_mdns_plan.md`, E2d, owns the
 authorized DNS receiving slice. Murm supplies an optional caller-polled resolver
 and bounded per-URL address fallback while keeping the core and host-only
 numeric path runtime-free. Pending requests cancel on restart/close/drop;

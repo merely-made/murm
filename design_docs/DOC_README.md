@@ -11,7 +11,7 @@ Stickleback networking extraction landed (2026-11-03): T7 in the
 places the shared live sessions and address book in `murm-sync`. Eidetic
 retains validated history, group encryption and admission policy mechanisms.
 
-WebRTC (2026-11-04): the [family move plan](archive_docs/2026-11-02/2026-10-13_murm_family_move_plan.md#2026-11-01-webrtc-provider-evaluation) records E0, the local E1a [murm-rtc provider](../wire/crates/rtc/README.md) and E1c UDP STUN/TURN, below browser and application consumers. Genet owns conformance, its selected WPT and the qualified headed Chrome/Firefox receiving gate in `genet/design_docs/2026-11-04_webrtc_conformance_plan.md`. The [E0 probe](../testing/webrtc-evaluation/README.md) stays frozen; E1a uses an exact upstream DCEP fix found by real packet tests. The native host explicitly disables unsupported mDNS queries. Application-carrier cutover remains separate.
+WebRTC (2026-11-04): the [family move plan](archive_docs/2026-11-02/2026-10-13_murm_family_move_plan.md#2026-11-01-webrtc-provider-evaluation) records E0, the local E1a [murm-rtc provider](../wire/crates/rtc/README.md) and E1c UDP STUN/TURN, below browser and application consumers. Genet owns conformance, its selected WPT and the qualified headed Chrome/Firefox receiving gate in `genet/design_docs/2026-11-04_webrtc_mdns_plan.md`. The [E0 probe](../testing/webrtc-evaluation/README.md) stays frozen; E1a uses an exact upstream DCEP fix found by real packet tests. The native host disables the core multicast route and uses the optional bounded provider resolver for remote UUID mDNS candidates. Application-carrier cutover remains separate.
 
 Successor for open work: [Murm family integration and RTC](2026-11-02_murm_family_move_plan.md).
 
@@ -24,7 +24,12 @@ are applied; Genet's native/WPT and 48-case headed receiving gates pass on fixed
 numeric UDP servers and the same interface. Explicit-port hostname resolution
 also passes its controlled native/headed E2d gates; UDP SRV/S-NAPTR service
 discovery passes E2s with 38 native checks, unchanged selected WPT maps and
-48 headed Chrome/Firefox restart cases. mDNS, TCP/TLS, interface rebinding, server replacement and carrier cutover remain open.
+48 headed Chrome/Firefox restart cases. The remote mDNS provider passes its
+working/MSRV gates; Genet passes 44 native checks and 48 controlled headed cases
+with Firefox aliases and untouched Chrome names. Its E2m packet is closed after
+fixture shutdown and permission restoration. Firefox native responder acceptance,
+local mDNS advertisement, IPv6 multicast, TCP/TLS, interface rebinding, server
+replacement and carrier cutover remain open.
 Candidate signaling intentionally omits local gatherer metadata; the host
 observation retains the server URL separately.
 
