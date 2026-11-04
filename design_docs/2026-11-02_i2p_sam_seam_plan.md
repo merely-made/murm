@@ -20,3 +20,10 @@ The [crates.io registry](https://crates.io/api/v1/crates/truchman) reports `truc
 ## Progress
 
 - 2026-11-02: adopted the reviewed open-work successor; original archived whole. No new implementation or acceptance run.
+- 2026-11-03: Moot relay-pool P2 adds direct SAM carriage behind optional
+  `mere-transport/i2p` and `murm/relay-i2p`, using existing Truchman and secure
+  Noise/Notochord setup. It changes no Retinue identity default. Pool privacy,
+  public-router qualification and receipts belong to
+  `gemot/design_docs/moothold_docs/implementation_strategy/2026-11-03_moot_relay_pools_plan.md`;
+  its scripted and pool-specific public qualification does not close the
+  Retinue interoperability gates.
