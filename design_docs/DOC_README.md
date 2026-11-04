@@ -5,7 +5,7 @@ Stickleback networking extraction landed (2026-11-03): T7 in the
 places the shared live sessions and address book in `murm-sync`. Eidetic
 retains validated history, group encryption and admission policy mechanisms.
 
-WebRTC (2026-11-02): the [family move plan](archive_docs/2026-11-02/2026-10-13_murm_family_move_plan.md#2026-11-01-webrtc-provider-evaluation) records E0, the local E1a [murm-rtc provider](../wire/crates/rtc/README.md) and E1c UDP STUN/TURN, below browser and application consumers. Genet owns conformance, its selected WPT and the qualified headed Chrome/Firefox receiving gate in `genet/design_docs/2026-11-01_webrtc_conformance_plan.md`. The [E0 probe](../testing/webrtc-evaluation/README.md) stays frozen; E1a uses an exact upstream DCEP fix found by real packet tests. The native host explicitly disables unsupported mDNS queries. Application-carrier cutover remains separate.
+WebRTC (2026-11-02): the [family move plan](archive_docs/2026-11-02/2026-10-13_murm_family_move_plan.md#2026-11-01-webrtc-provider-evaluation) records E0, the local E1a [murm-rtc provider](../wire/crates/rtc/README.md) and E1c UDP STUN/TURN, below browser and application consumers. Genet owns conformance, its selected WPT and the qualified headed Chrome/Firefox receiving gate in `genet/design_docs/2026-11-03_webrtc_conformance_plan.md`. The [E0 probe](../testing/webrtc-evaluation/README.md) stays frozen; E1a uses an exact upstream DCEP fix found by real packet tests. The native host explicitly disables unsupported mDNS queries. Application-carrier cutover remains separate.
 
 Successor for open work: [Murm family integration and RTC](2026-11-02_murm_family_move_plan.md).
 

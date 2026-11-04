@@ -14,6 +14,18 @@
 
 ## Decisions and boundaries
 
+### Hostname ICE-server resolution
+
+Genet's `genet/design_docs/2026-11-03_webrtc_conformance_plan.md`, E2d, owns the
+authorized DNS receiving slice. Murm supplies an optional caller-polled resolver
+and bounded per-URL address fallback while keeping the core and host-only
+numeric path runtime-free. Pending requests cancel on restart/close/drop;
+successful TURN allocations retain their endpoint and socket. Retain at most
+**30 KB** of new supplier evidence in the existing family receipt (under its
+100 KB total); Genet owns the separate external receiving packet. A/AAAA with
+explicit UDP ports is the initial gate; SRV/NAPTR, mDNS and TURN TCP/TLS remain
+separate. Prior E2r receipts stay frozen at their original boundaries.
+
 ### RTC ICE restart slice
 
 **Status (2026-11-03): provider and Genet receiving qualified for fixed numeric UDP servers and unchanged interfaces.**
