@@ -65,10 +65,10 @@ too_many_lines = "warn"
 workspace = true
 
 [patch."https://github.com/merely-made/distillery.git"]
-esp = { git = "https://www.github.com/merely-made/distillery.git", rev = "52a4ca1704889638d8acb89f392ccb7e3c458c96" }
-esp-testkit = { git = "https://www.github.com/merely-made/distillery.git", rev = "52a4ca1704889638d8acb89f392ccb7e3c458c96" }
-distillery = { git = "https://www.github.com/merely-made/distillery.git", rev = "52a4ca1704889638d8acb89f392ccb7e3c458c96" }
-mere-mesh = { git = "https://www.github.com/merely-made/distillery.git", rev = "52a4ca1704889638d8acb89f392ccb7e3c458c96" }
+esp = { git = "https://www.github.com/merely-made/distillery.git", rev = "6346f087bb87d879cc9367dfb3d20fa00a8cbb9d" }
+esp-testkit = { git = "https://www.github.com/merely-made/distillery.git", rev = "6346f087bb87d879cc9367dfb3d20fa00a8cbb9d" }
+distillery = { git = "https://www.github.com/merely-made/distillery.git", rev = "6346f087bb87d879cc9367dfb3d20fa00a8cbb9d" }
+mere-mesh = { git = "https://www.github.com/merely-made/distillery.git", rev = "6346f087bb87d879cc9367dfb3d20fa00a8cbb9d" }
 
 [patch."https://github.com/merely-made/murm.git".mere-transport]
 git = "https://www.github.com/merely-made/murm.git"
