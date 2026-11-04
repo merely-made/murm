@@ -10,9 +10,32 @@
 - **R6–R8 native radio:** retain scoped Tucket contact-restore and Sennet public/directed text/ACK passes; qualify installed personal-daemon custody/UI, private-channel custody, 2.8 ACK proofs, broader mesh routing and remaining visual cleanup under their own profiles. Protocol ACK correlation is not authenticated read receipt. T114 endpoint and broader roles belong to [protocol parity](2026-11-02_protocol_parity_plan.md).
 - **Board names:** preserve labels and current identity/preferences when restoring or changing images. Physical screen pixels were not independently observed, and the SB2 five software-reboot recovery does not establish battery-disconnected power-cycle recovery; either is a separate qualification if needed.
 - **Supplier and receiving gates:** registry releases require their own decision and qualification. Resolve the filtered killed-peer shutdown test with bounded evidence and a positive control; Keep physical/live-network/headed gates and the Isocosm gameplay compiler/wing gates with their owners; source adoption is not a gameplay pass. Recheck current owning plans rather than assume the historical failure persists.
-- **RTC provider continuation:** add and qualify host DNS, mDNS, TCP/TLS TURN, ICE restart and server replacement as separately selected capabilities. Keep relay-only from direct candidates; host budgets and I/O remain caller-owned. Complete application-carrier adoption only when the real consumer passes binding, admission, backpressure, refusal and reconnect with the shared provider. Genet owns its browser/WPT/media gates and its selected headed direct/UDP-relay matrix does not prove cross-machine or application-carrier acceptance. Registry publication waits for an engine release containing the pinned DCEP fix.
+- **RTC provider continuation:** qualify the fixed-server ICE restart slice below; add and qualify host DNS, mDNS, TCP/TLS TURN and server replacement as separately selected capabilities. Keep relay-only from direct candidates; host budgets and I/O remain caller-owned. Complete application-carrier adoption only when the real consumer passes binding, admission, backpressure, refusal and reconnect with the shared provider. Genet owns its browser/WPT/media gates and its selected headed direct/UDP-relay matrix does not prove cross-machine or application-carrier acceptance. Registry publication waits for an engine release containing the pinned DCEP and restart fixes.
 
 ## Decisions and boundaries
+
+### RTC ICE restart slice
+
+**Status (2026-11-03): provider qualified; Genet receiving qualification in progress.**
+
+Mark authorized established data-channel ICE restart with configured STUN/TURN
+and automated native/browser tests. Retain the same physical socket and TURN
+allocations while credentials and connectivity checks move to a new generation;
+STUN restarts with fresh bounded transactions. Retired ICE checks must not enter
+the fresh generation, and relay-only keeps its no-direct-route guarantee.
+Close/drop releases the retained allocations once. A bounded previously nominated
+data path stays usable during negotiation and is retired on success/failure or
+its deadline. Authenticated old consent is answered only on that route, without
+changing fresh checks/roles or extending its expiry. The core repairs live in
+the pinned `merely-made/rtc` fork, including the same-identity DTLS answer role.
+
+Done: ordinary provider checks on working Rust and MSRV, controlled coturn,
+strict Clippy and Genet's unchanged WPT/native/headed receiving gates pass.
+Genet owns event ordering, sticky restart requests, candidate generation checks
+and browser lifetime. Server replacement, interface rebinding, DNS/mDNS, TCP/TLS,
+media and carrier adoption retain their own gates. Append at most **20 KB** to
+the existing family receipt; its total stays below **100 KB**. Genet's receiving
+plan owns its separate 1 MB total receipt budget and source/lock/binary evidence.
 
 Murm supplies communication engines; Dramatis/Personae and Djinn retain identity and custody, Gemot membership authority, and applications own their facts. The later foundation promotion places Stickleback in Eidetic; Genet owns Fetch/WebSocket policy. The generic RTC provider has no application admission, invitation, Luggage, radio or conversation dependency; the existing application carrier retains its own framing and trust. Keep original crate identities, ancestry and immutable historical evidence. Sennet retains its independent-source boundary: public documentation and identified black-box captures, excluding upstream firmware implementation and schemas. A host carrier handoff or unauthenticated protocol ACK does not establish recipient read or sender authentication. The stock companion queue read can consume device data before host persistence; do not claim exactly-once or power-loss safety.
 
