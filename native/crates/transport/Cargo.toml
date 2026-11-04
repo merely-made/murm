@@ -32,6 +32,9 @@ notochord = ["dep:notochord"]
 # `DerivedKeypair` through `builder_for`, so a master cannot reach a transport
 # (vault lock plan, ruling 96). Turn it on in dev-dependencies only.
 test-identity = []
+# Host-owned SAM STREAM sessions. I2P destinations are routing aliases, not
+# Personae identities; callers still authenticate application streams.
+i2p = ["dep:truchman"]
 
 [lib]
 name = "transport"
@@ -42,6 +45,7 @@ murm-sync.workspace = true
 # Path + version: path is used during local workspace builds; version is
 # required for `cargo publish` to record the crates.io dependency.
 identity.workspace = true
+truchman = { version = "0.1.1", path = "../../../crates/truchman", optional = true }
 # `time` paces `endpoint_addr`'s brief wait for iroh's interface discovery.
 tokio = { version = "1", features = ["io-util", "sync", "rt", "macros", "time"] }
 snow = { version = "0.10", optional = true }

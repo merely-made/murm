@@ -50,6 +50,8 @@ mod alpn;
 pub mod blobs;
 mod error;
 pub mod memory;
+#[cfg(feature = "i2p")]
+pub mod i2p;
 /// An encrypted session layer that composes *over* a carrier's stream, rather
 /// than being a carrier itself. See the module docs for the layering.
 #[cfg(feature = "noise")]

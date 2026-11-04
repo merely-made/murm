@@ -164,6 +164,44 @@ pub(crate) struct Reservation {
     _permit: OwnedSemaphorePermit,
 }
 
+/// Same pool/device reservation for every admitted carrier profile.
+pub(crate) struct PoolBudget {
+    pub device: DeviceBudget,
+    flow: FlowLimits,
+    slots: Arc<Semaphore>,
+}
+pub(crate) struct PoolReservation {
+    pub forwarding: Reservation,
+    _slot: OwnedSemaphorePermit,
+}
+impl PoolBudget {
+    pub fn new(device: DeviceBudget, flow: FlowLimits) -> Result<Self, RelayError> {
+        flow.validate()?;
+        Ok(Self {
+            device,
+            flow,
+            slots: Arc::new(Semaphore::new(flow.max_sessions)),
+        })
+    }
+    pub fn reserve(&self, granted: super::RelayGrant) -> Result<PoolReservation, RelayError> {
+        let slot = self
+            .slots
+            .clone()
+            .try_acquire_owned()
+            .map_err(|_| RelayError::Capacity)?;
+        if self.flow.max_sessions - self.slots.available_permits() > granted.max_sessions {
+            return Err(RelayError::Capacity);
+        }
+        let mut flow = self.flow;
+        flow.max_bytes = flow.max_bytes.min(granted.max_bytes);
+        flow.bytes_per_second = flow.bytes_per_second.min(granted.bytes_per_second);
+        Ok(PoolReservation {
+            forwarding: self.device.reserve(flow)?,
+            _slot: slot,
+        })
+    }
+}
+
 fn charge(counter: &AtomicU64, amount: u64, ceiling: u64) -> Result<(), RelayError> {
     let mut current = counter.load(Ordering::Acquire);
     loop {

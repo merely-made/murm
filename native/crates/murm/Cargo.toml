@@ -22,6 +22,7 @@ default = []
 # topic-shaped; this is what a bearer without a gossip overlay needs.
 session-lane = ["dep:notochord", "dep:insigne", "transport/notochord", "transport/noise"]
 relay = ["session-lane"]
+relay-i2p = ["relay", "transport/i2p"]
 
 [dependencies]
 murm-sync.workspace = true

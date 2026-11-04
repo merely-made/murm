@@ -3198,6 +3198,7 @@ dependencies = [
  "tokio",
  "tokio-stream",
  "tracing",
+ "truchman",
  "zeroize",
 ]
 

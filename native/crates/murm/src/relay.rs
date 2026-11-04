@@ -8,6 +8,9 @@
 //! host-location privacy claim: the I2P acceptance gate remains separate.
 
 mod budget;
+mod channel;
+#[cfg(feature = "relay-i2p")]
+pub mod i2p;
 mod pump;
 mod session;
 
@@ -34,6 +37,9 @@ pub enum RelayError {
     /// Carrier, security or admission failed. Details remain with that owner.
     #[error("relay session setup failed")]
     Setup,
+    /// Sanitized shared-gate facts: stage, capacity or peer/profile mismatch.
+    #[error("relay secure setup failed: {0}")]
+    SecureSetup(transport::security::SetupError),
     /// An established stream ended unexpectedly or failed.
     #[error("relay stream failed")]
     Io(#[from] std::io::Error),
