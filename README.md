@@ -8,7 +8,8 @@ repository is [merely-made/murm](https://github.com/merely-made/murm). See the
 receiving-build and consumer-cutover status.
 
 The radio workspace stays at the root. The separate `native/` workspace contains
-`murm`, `mere-transport`, `murm-webrtc`, and the separately optional
+`murm`, `mere-transport`, `murm-webrtc`, [`murm-sync`](native/crates/sync/README.md),
+and the separately optional
 [`murm-ocapn`](native/crates/ocapn/README.md) and
 [`murm-ocapn-transport`](native/crates/ocapn-transport/README.md) packages.
 The independent `wire/`
@@ -20,7 +21,9 @@ MSRV of 1.97.1. Build the native libraries with
 
 Original Genet source ancestry is preserved for the wire import. Netfetcher's
 browser policy and public crate identity stay in Genet, while hosts select
-trust, pooling and limits. Stickleback stays in Mere. Cross-target and live
+trust, pooling and limits. Stickleback's history, admission and group encryption
+live in Eidetic; `murm-sync` owns its live network sessions and address book.
+Cross-target and live
 network qualification retain their own lanes; see MOVE5 in the family plan.
 
 Signalman's desktop Messages face now routes its versioned text-over-LXMF

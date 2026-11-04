@@ -1,7 +1,8 @@
 # Transport consolidation through Murm
 
-**Status:** 2026-11-03: T7 in progress under Mark's instruction to continue
-with Stickleback after the Distillery extraction. T1 landed; T2 to T6 open. T6 (admitted
+**Status:** 2026-11-03: T1 and T7 landed. T2 to T6 retain their remaining gates.
+T7 follows Mark's instruction to continue with Stickleback after the Distillery
+extraction. T6 (admitted
 services onto the secure setup gate), added from the 2026-10-31 survey, has
 its Murm piece landed: the session lane sets up through the gate.
 
@@ -77,18 +78,19 @@ isonetry's manifest.
 
 isocosm `crates/isonetry/src/campaign_sync.rs` (`campaign-p2p-net`) drives
 p2panda-net's `LogSync` and `SyncHandle` directly instead of joining through
-Stickleback. That bypasses the shared policy-before-insert path that every
+Murm's `murm-sync` session. That bypasses the shared policy-before-insert path that every
 other domain's live intake goes through.
 
-- Done when: campaign sync joins through `JoinedSpace` (Isocosm calls Stickleback
-  `murm-replication`), and isonetry declares neither `p2panda-net` nor
+- Done when: campaign sync joins through `murm_sync::JoinedSpace`; Isocosm's
+  `murm-replication` alias continues to name the core Stickleback store.
+  Isonetry declares neither `p2panda-net` nor
   `p2panda-sync`.
 - Needs: Isocosm's owner.
 
 ### T4. Distillery's remote backend over a Murm endpoint
 
-Mere's Distillery `remote` feature enables `burn-remote`'s `iroh` transport,
-which binds its own endpoint. Mere already carries a patched `burn-remote`
+Distillery's `remote` feature enables `burn-remote`'s `iroh` transport,
+which binds its own endpoint. Distillery carries a patched `burn-remote`
 (`support/patches/burn-remote`, iroh in 20 files).
 
 - Done when: the remote backend takes a connection or endpoint from the host, and
@@ -150,7 +152,8 @@ Stickleback's breaking public-path change advances it to 0.2.0.
 Done when: Eidetic's normal graph has no p2panda-net/sync dependency; moved
 sources have recorded donor hashes; core and receiving tests pass; a real
 two-peer caller preserves rejection-before-insert, convergence and shutdown;
-actual consumer roots check locked with one storage/network source; commits
+actual consumer roots check locked with one source per storage/network package
+version (the producer contract minor lines are recorded below); commits
 and source pins are pushed. Preserve existing protocol ids and stored formats.
 
 Required receipts: before/after module and Cargo-edge inventory, core tests,
@@ -240,8 +243,66 @@ deletion was again rejected by automatic approval review as "blocked by policy".
   an encrypted protocol frame before the hello. The native Reticulum profile
   deferred in the secure-session plan would remove that layer.
 
+## T7 receiving evidence, 2026-11-03
+
+The code cohort is Eidetic `7a3453a` (Stickleback 0.2), Murm `ce53ceb`
+(`murm-sync` 0.0.1), Gemot `3766de4`, Distillery `6346f08` and Mere
+`ab37ca96f`. Knot's network/compute source is `402eb28`; subsequent receiving
+lock updates need no runtime-source change. Four moved donor files have exact
+Git-blob equality in Murm's import record. Eidetic removed them only after
+Murm's receiving commit was pushed.
+
+The compact lane receipt is
+`Code/testing/murm/stickleback-extraction-20261103`: `gates.jsonl` records
+commands and results; `consumer-source-audits.jsonl` records actual normal/build
+source identities, lock hashes, targets and selected feature profiles. Bootstrap
+entries are interim evidence only. The final inventory selects the latest
+non-bootstrap receiving root, with its exact published source equivalence.
+
+The core keeps 92 unit and five integration tests; the 13 address-book tests
+moved with their implementation. A new real two-peer group test checks rejection
+before durable insertion, stored welcome catch-up, live rotation, decryption and
+bounded leave/shutdown. Gemot's three Moot lane tests and Commons chat test,
+Distillery's four mesh sync tests, and Mere's feature-enabled partition/rejoin
+chronology test pass. Native Murm checks all features/targets; the receiving
+library also checks on Rust 1.97.1. Whole-workspace Mere and its staged/embedding
+inference profile check locked.
+
+Receiving locks must align every retained package from a Git workspace,
+including test and optional packages. Updating one package can leave another
+at an older commit. Intake Knot before Mere, then restore unrelated Genet and
+Netrender pins and check the complete retained set. Mer3ly's radio mirror is a
+separate frozen snapshot at `b49df894`: preserve its four radio package pins
+and exact copied fixture bytes while updating live transport packages.
+Turnstone's concurrent rendering/shutdown intake uses Genet `cbedf7b`,
+Netrender `6364e5d`, Vello `b4a5348` and Woodshed `e729fda`; preserve that
+cohort and recheck the combined source. Other receivers retain Genet `ad36272`
+and Netrender `58d80d8`. Source identity alignment retains original
+locks and is followed by Cargo resolution and locked compilation; it is not
+an acceptance substitute.
+Distillery's standalone producer fixtures retain the published Muniment 0.1.2
+and Chartulary 0.2.1 contracts alongside the domain's Muniment 0.2.1 and
+Chartulary 0.3.0. The source audit allows only those two declared version pairs
+in that producer scope.
+
+The Graphshell adapter selects `murm-sync` only on native targets through
+`personal-sync`, mirroring its former Stickleback dependency. Distillery's
+model journal selects its direct sync dependency through `inference-model`.
+The browser library, Genet web smoke and OPFS probe check on wasm32 as well.
+
+T2/T3 are still open: Isonetry's campaign still authors/runs its own LogSync
+path. T4/T5 and the remaining service-admission work in T6 also retain their
+own gates. These local peer and compile results do not replace headed, radio,
+remote-host or W3 recovery/two-host receipts. Mere's next extraction and directory
+scope is its refreshed source homes map; Station Custody is the first ready cut.
+
 ## Progress
 
+- 2026-11-03: T7 landed: Eidetic `7a3453a`, Murm `ce53ceb`, and the receiving
+  domain/application cohorts recorded above. The receipt retains exact pushed
+  revisions, current compiler profiles, source/lock equivalence and cleanup
+  blocks. Mere's remaining extraction and directory scope is recorded in its
+  source homes map; Station Custody is next.
 - 2026-10-28: plan opened from the family survey. T1 landed: Mere `29e11b3e4` (mesh) and Gemot `2fafd5d` (commons-spine, gemot, mien).
 - 2026-10-31: refreshed T2 (Isonetry's ALPN and peer keying); T6 opened from
   the admitted-services survey.

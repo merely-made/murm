@@ -1,8 +1,8 @@
 # Murm Documentation Index
 
-Stickleback networking extraction (2026-11-03): T7 in the
+Stickleback networking extraction landed (2026-11-03): T7 in the
 [transport consolidation plan](2026-10-28_transport_consolidation_plan.md)
-moves the shared live sessions and address book into `murm-sync`. Eidetic
+places the shared live sessions and address book in `murm-sync`. Eidetic
 retains validated history, group encryption and admission policy mechanisms.
 
 WebRTC (2026-11-02): the [family move plan](archive_docs/2026-11-02/2026-10-13_murm_family_move_plan.md#2026-11-01-webrtc-provider-evaluation) records E0, the local E1a [murm-rtc provider](../wire/crates/rtc/README.md) and E1c UDP STUN/TURN, below browser and application consumers. Genet owns conformance, its selected WPT and the qualified headed Chrome/Firefox receiving gate in `genet/design_docs/2026-11-01_webrtc_conformance_plan.md`. The [E0 probe](../testing/webrtc-evaluation/README.md) stays frozen; E1a uses an exact upstream DCEP fix found by real packet tests. The native host explicitly disables unsupported mDNS queries. Application-carrier cutover remains separate.
@@ -105,8 +105,10 @@ Reusable wire engines (2026-10-14): MOVE5 publishes the independent `wire` works
 Murm family direction (2026-10-13): the owner authorized using this repository
 as the foundation for Murm while preserving crate names and history. The
 [Murm family move plan](archive_docs/2026-11-02/2026-10-13_murm_family_move_plan.md) maps radio/native
-workspaces, keeps Stickleback in Mere and Fetch policy in Genet, and sequences
-the implementation, consumer and repository cutovers. The native import and
+workspaces and Fetch policy in Genet, and sequences the implementation,
+consumer and repository cutovers. T7 supersedes the original Stickleback
+placement: its core lives in Eidetic and its network sessions in Murm.
+The native import and
 named application cutover are published. The existing repository is now
 `merely-made/murm` with the same identity, refs and crate names. Canonical URL
 validation passed. Supplemental Isocosm dependency adoption is published;
@@ -381,7 +383,7 @@ historical alternatives and acceptance evidence remain intact.
 | Document | What it is |
 | --- | --- |
 | [`DOC_POLICY.md`](DOC_POLICY.md) | Documentation governance; canonical core plus Retinue addendum. |
-| [Transport consolidation plan](2026-10-28_transport_consolidation_plan.md) | Family transport boundary: endpoints, tickets, relays and carriers are Murm's; p2panda-core is replication vocabulary; Stickleback owns the join. T1 (domain crates name handles through Stickleback) landed 2026-10-28; Isonetry, Distillery remote, the relay fixture and admitted services onto the secure setup gate (T6) open; T6's Murm piece, the session lane, landed 2026-11-01. |
+| [Transport consolidation plan](2026-10-28_transport_consolidation_plan.md) | Family transport boundary: endpoints, tickets, relays, carriers and live sessions are Murm's; Stickleback in Eidetic owns validated history and admission. T1 and T7 landed; Isonetry, Distillery remote, the relay fixture and remaining admitted-services work retain their gates. T6's Murm session lane landed 2026-11-01. |
 | [Secure sessions and live interaction plan](2026-10-29_secure_sessions_and_live_interaction_plan.md) | Cut to open work 2026-10-31: N1–N3 (Noise and native iroh behind one setup gate) and O1–O3 (optional bounded CapTP runtime, Gemot/coop adapter, pinned interoperability subset) landed and are archived whole. Open: O4 handoffs, interoperability and carrier classes; native Reticulum profile, coop hosting and current-draft encoding deferred. |
 | [Reticulum License adoption](2026-10-05_reticulum_license_adoption.md) | Ruling, 2026-10-05: retinue and outrider move to the Reticulum License (0.3.0) so RNS/LXMF source can be adapted into those two crates only; RNode firmware stays unread; firmware images are no longer GPLv3. Review and adaptation rules, and upstream versions checked. Amended 2026-10-09: tulle (0.2.0) and radio-hand join, for the RNode host semantics. |
 | [RNS 1.5.7 comparative review](2026-10-07_rns_157_comparative_review.md) | First source review under the Reticulum License: Transport, Link, Resource, Identity/Packet/Channel against retinue. 39 ranked findings (11 P0 interop/safety, including the DATA-typed resource proof, unbounded bz2, wrong link-proof key, unauthenticated LINKCLOSE), provenance and lines read. P0 landed 2026-10-07 (live 17/17 on RNS 1.5.7); P1 and one-week route TTL landed 2026-10-08; P2 landed 2026-10-09. |
