@@ -26,6 +26,11 @@ live in Eidetic; `murm-sync` owns its live network sessions and address book.
 Cross-target and live
 network qualification retain their own lanes; see MOVE5 in the family plan.
 
+[Station Custody](crates/station-custody/README.md) is Murm's standalone
+Djinn-backed station commissioning adapter. Signalman's desktop uses it by
+path; Dramatis/Personae and Djinn retain credential and grant authority.
+The adapter stays outside the default radio workspace.
+
 Signalman's desktop Messages face now routes its versioned text-over-LXMF
 profile through the shared Comms adapter and the same durable application
 journal. With `SIGNALMAN_STATION_PORT` and the existing Djinn custody service,

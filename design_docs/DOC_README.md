@@ -1,8 +1,8 @@
 # Murm Documentation Index
 
-Station Custody extraction (2026-11-04): the
+Station Custody extraction (landed, 2026-11-04): the
 [family integration plan](2026-11-02_murm_family_move_plan.md) records the
-standalone adapter move from Mere, unchanged-source and receiving gates.
+standalone adapter move from Mere and its unchanged-source and receiving receipts.
 Dramatis/Personae and Djinn retain authority; physical qualification stays
 with its existing profiles.
 
