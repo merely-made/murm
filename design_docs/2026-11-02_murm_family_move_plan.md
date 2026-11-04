@@ -168,3 +168,11 @@ Murm supplies communication engines; Dramatis/Personae and Djinn retain identity
   and selected WPT receiving gates passed on that pin; the late-check repair
   and final headed receiving gate are recorded above.
 - 2026-11-02: adopted the reviewed open-work successor; original archived whole. No new implementation or acceptance run.
+
+- 2026-11-04: local IPv4 candidate registration is an opt-in, caller-owned
+  provider API using the core UUID responder at ba8e3c4. It owns selected-link
+  multicast receive and explicit-source UDP/5353 output, bounded polling and
+  best-effort goodbye on drop. Consumer peer quotas bound registration count.
+  Direct-unicast queries and IPv6 remain open. Genet owns exposure/projection
+  and the registration lifetime; its E2a plan and shared 20 KB evidence budget
+  own native acceptance, including failure privacy and cleanup.
