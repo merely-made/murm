@@ -28,6 +28,8 @@ data path stays usable during negotiation and is retired on success/failure or
 its deadline. Authenticated old consent is answered only on that route, without
 changing fresh checks/roles or extending its expiry. The core repairs live in
 the pinned `merely-made/rtc` fork, including the same-identity DTLS answer role.
+After fresh remote credentials arrive, the known nominated address is checked
+as a fresh candidate without inheriting prior nomination or transactions.
 
 Done: ordinary provider checks on working Rust and MSRV, controlled coturn,
 strict Clippy and Genet's unchanged WPT/native/headed receiving gates pass.
@@ -45,4 +47,9 @@ Murm supplies communication engines; Dramatis/Personae and Djinn retain identity
 
 ## Progress
 
+- 2026-11-03: fixed-server restart provider qualified at `377b9ca1b59f48b0c491e25b7d70bb57a23faedd`,
+  using core `235f02199a23f00df2c554ed669218eee9627a8e`. Provider working/MSRV,
+  controlled coturn, strict Clippy and 57 core ICE tests pass. Genet's native
+  and selected WPT receiving gates pass; full headed restart qualification is
+  in progress in its owning receipt.
 - 2026-11-02: adopted the reviewed open-work successor; original archived whole. No new implementation or acceptance run.
