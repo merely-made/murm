@@ -463,3 +463,10 @@ The fork retains the nominated data route and authenticated old consent under th
 ```
 
 For this independent wire-only pin, the unchanged root radio Clippy hook is skipped; the explicit wire all-target strict gate above passes. The isolated MSRV Cargo home remains marker-owned after automatic approval review blocked its removal.
+
+
+## 2026-11-03: final ICE restart receiving closure
+
+```json
+{"gate":"E2r-Genet-receiving-closure","utc":"2026-11-04T03:04:19.348312+00:00","provider":"2ff146629e17ce8e77fc56ffa26f7b13b8b8f83a","core":"479995928668d0db1f8cfb2aa26f818b9f03919f","GenetCode":"69c926551546fe5d7cdd4efaeb6b89e18e045adc","GenetReceiptCommit":"b2d93b898b6306547ac67100384c404011c37339","headedRun":"e53dd214-4156-4830-bbf5-23caa7a63288","headedCases":48,"completedRestarts":96,"interruptedRestarts":48,"failedAttempts":0,"nativeTests":22,"WPT":"Both data-channel restart assertions and closed-peer no-op pass on Boa/Vano; exact selected control maps and media failures retained.","receipt":"genet/design_docs/archive_docs/receipts/2026-11-01_webrtc_conformance_plan_receipts.md","audit":"Genet reverified all 48 unique declared cases and source/binary/lock identities; controlled coturn stopped, service inactive/disabled, zero owned test processes and fixture network grants. An old Nov 2 test-profile grant was restored through BiDi.","retainedMSRVCache":{"path":"C:/t/cargo-homes/rtc-restart","owner":"genet-rtc-ice-restart","ownLogicalBytes":16161390,"sharedRegistryJunctionExcluded":true,"liveOwner":false,"reason":"automatic approval review rejected deletion as blocked by policy"},"scope":"Unchanged Windows interface and fixed numeric UDP STUN/TURN servers. DNS/mDNS, server/interface replacement, TCP/TLS, media, broader early/triggered checks and application-carrier acceptance remain separate. No isolated target or worktree created."}
+```

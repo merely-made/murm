@@ -10,13 +10,13 @@
 - **R6–R8 native radio:** retain scoped Tucket contact-restore and Sennet public/directed text/ACK passes; qualify installed personal-daemon custody/UI, private-channel custody, 2.8 ACK proofs, broader mesh routing and remaining visual cleanup under their own profiles. Protocol ACK correlation is not authenticated read receipt. T114 endpoint and broader roles belong to [protocol parity](2026-11-02_protocol_parity_plan.md).
 - **Board names:** preserve labels and current identity/preferences when restoring or changing images. Physical screen pixels were not independently observed, and the SB2 five software-reboot recovery does not establish battery-disconnected power-cycle recovery; either is a separate qualification if needed.
 - **Supplier and receiving gates:** registry releases require their own decision and qualification. Resolve the filtered killed-peer shutdown test with bounded evidence and a positive control; Keep physical/live-network/headed gates and the Isocosm gameplay compiler/wing gates with their owners; source adoption is not a gameplay pass. Recheck current owning plans rather than assume the historical failure persists.
-- **RTC provider continuation:** qualify the fixed-server ICE restart slice below; add and qualify host DNS, mDNS, TCP/TLS TURN and server replacement as separately selected capabilities. Keep relay-only from direct candidates; host budgets and I/O remain caller-owned. Complete application-carrier adoption only when the real consumer passes binding, admission, backpressure, refusal and reconnect with the shared provider. Genet owns its browser/WPT/media gates and its selected headed direct/UDP-relay matrix does not prove cross-machine or application-carrier acceptance. Registry publication waits for an engine release containing the pinned DCEP and restart fixes.
+- **RTC provider continuation:** the fixed-server ICE restart slice below is qualified; add and qualify host DNS, mDNS, TCP/TLS TURN and server replacement as separately selected capabilities. Keep relay-only from direct candidates; host budgets and I/O remain caller-owned. Complete application-carrier adoption only when the real consumer passes binding, admission, backpressure, refusal and reconnect with the shared provider. Genet owns its browser/WPT/media gates and its selected headed direct/UDP-relay matrix does not prove cross-machine or application-carrier acceptance. Registry publication waits for an engine release containing the pinned DCEP and restart fixes.
 
 ## Decisions and boundaries
 
 ### RTC ICE restart slice
 
-**Status (2026-11-03): provider qualified with late-check repair; Genet receiving in progress.**
+**Status (2026-11-03): provider and Genet receiving qualified for fixed numeric UDP servers and unchanged interfaces.**
 
 Mark authorized established data-channel ICE restart with configured STUN/TURN
 and automated native/browser tests. Retain the same physical socket and TURN
@@ -53,10 +53,14 @@ Murm supplies communication engines; Dramatis/Personae and Djinn retain identity
 - 2026-11-03: provider requalified against core `479995928668d0db1f8cfb2aa26f818b9f03919f`:
   58 core ICE tests, nine ordinary checks on working Rust and MSRV, three
   controlled coturn checks and strict all-target wire Clippy pass. The delayed-answer
-  regression checks recovery only after fresh authentication. Genet receiving is open.
+  regression checks recovery only after fresh authentication. Genet source
+  `69c926551546fe5d7cdd4efaeb6b89e18e045adc` passes 22 native checks, the unchanged
+  selected WPT comparison and all 48 headed restart cases on provider
+  `2ff146629e17ce8e77fc56ffa26f7b13b8b8f83a`. Its receipt owns the fixture,
+  permission-restoration and retained-cache audit.
 - 2026-11-03: fixed-server restart provider qualified at `377b9ca1b59f48b0c491e25b7d70bb57a23faedd`,
   using core `235f02199a23f00df2c554ed669218eee9627a8e`. Provider working/MSRV,
   controlled coturn, strict Clippy and 57 core ICE tests pass. Genet's native
-  and selected WPT receiving gates pass; full headed restart qualification is
-  in progress in its owning receipt.
+  and selected WPT receiving gates passed on that pin; the late-check repair
+  and final headed receiving gate are recorded above.
 - 2026-11-02: adopted the reviewed open-work successor; original archived whole. No new implementation or acceptance run.

@@ -14,7 +14,8 @@ coturn with relay privacy, local metadata, refresh, refusal and socket release.
 Genet receives IP-literal UDP servers and fixed-server ICE restart through the
 same driver. The [restart slice](2026-11-02_murm_family_move_plan.md#rtc-ice-restart-slice)
 retains the nominated path and TURN allocations while new credentials/checks
-are applied; Genet owns the native/WPT/headed receiving gates. DNS/mDNS,
+are applied; Genet's native/WPT and 48-case headed receiving gates pass on fixed
+numeric UDP servers and the same interface. DNS/mDNS,
 TCP/TLS, interface rebinding, server replacement and carrier cutover remain open.
 Candidate signaling intentionally omits local gatherer metadata; the host
 observation retains the server URL separately.
