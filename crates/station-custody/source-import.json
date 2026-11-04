@@ -1,0 +1,80 @@
+{
+  "donor_repository": "https://github.com/merely-made/mere",
+  "donor_revision": "1942e8787e9542e3efa943f697deba989a362868",
+  "files": [
+    {
+      "donor_path": "crates/system/station-custody/examples/sennet_custody_receipt.rs",
+      "receiving_path": "examples/sennet_custody_receipt.rs",
+      "git_blob": "518e1f244eed7880194a4c65c8f15be7f2af69dd",
+      "sha256": "2739029236648cd3d45fd985f491f9850a2f4431fec415d002ca1d2ee77fb464"
+    },
+    {
+      "donor_path": "crates/system/station-custody/examples/tucket_custody_receipt.rs",
+      "receiving_path": "examples/tucket_custody_receipt.rs",
+      "git_blob": "f4ac1c759c569471cc29abf8549c8c072c099186",
+      "sha256": "7007596cfed3169364f7181da2a87fc1f61a77bdee772992935d9dcd9a8f1ac2"
+    },
+    {
+      "donor_path": "crates/system/station-custody/src/authority.rs",
+      "receiving_path": "src/authority.rs",
+      "git_blob": "7f6079afcc28e2ba8411996f7b6633ca44da43da",
+      "sha256": "8257952d1c0f914361c36796d074e5dd7ed497884d2fb3cfe33af8690ac93930"
+    },
+    {
+      "donor_path": "crates/system/station-custody/src/authority/sennet.rs",
+      "receiving_path": "src/authority/sennet.rs",
+      "git_blob": "eea76e3054b76393467265d9539866c252e57419",
+      "sha256": "808f7ef3bf229e290a224c61a482c88dda2dd3b72b5b94ec40f90beff27e8982"
+    },
+    {
+      "donor_path": "crates/system/station-custody/src/authority/tucket.rs",
+      "receiving_path": "src/authority/tucket.rs",
+      "git_blob": "53384bd7fea0ad14951187f2624f145502565216",
+      "sha256": "aa14d7bb6610cb7eb57557a2e475024ea5d75a4c83acbf3f9cb53475bb8bab25"
+    },
+    {
+      "donor_path": "crates/system/station-custody/src/bin/station-claim.rs",
+      "receiving_path": "src/bin/station-claim.rs",
+      "git_blob": "29efa0d318954e27b8e49fb7faf62c879cd83ae6",
+      "sha256": "b52fbbf8a12a57e70043fce9df1c6a366875e8edf6544fe26f9927f6a3331f87"
+    },
+    {
+      "donor_path": "crates/system/station-custody/src/bin/station-provision.rs",
+      "receiving_path": "src/bin/station-provision.rs",
+      "git_blob": "f161e050e8103198a6ad6c20aecc4358138cb604",
+      "sha256": "1800215e6043b692ad20d37ed87aaa2c2f12800abee4575c00096e82bb7e926b"
+    },
+    {
+      "donor_path": "crates/system/station-custody/src/control.rs",
+      "receiving_path": "src/control.rs",
+      "git_blob": "e1592308503ef2e0476f2a14f2c00b9459378abf",
+      "sha256": "d1ba75769b3bd4e14f21947bd2dfdc583cafab3bbc29cb08cf47adda2f18f37b"
+    },
+    {
+      "donor_path": "crates/system/station-custody/src/head.rs",
+      "receiving_path": "src/head.rs",
+      "git_blob": "b5c9beb639fcc344493c93169ffbf78b3a831df6",
+      "sha256": "65ff685e3c09a1f82c008ac018fd75ac250fa0aadfcf9cdd4a5a29345a79f410"
+    },
+    {
+      "donor_path": "crates/system/station-custody/src/lease.rs",
+      "receiving_path": "src/lease.rs",
+      "git_blob": "5e0630d2ce4cd017ebd5a4abc31cee116d4259ac",
+      "sha256": "7af73d6d3a6098b772f26643fd30194ef5a9c0ae8950a4897a50dc31c6e6e062"
+    },
+    {
+      "donor_path": "crates/system/station-custody/src/lib.rs",
+      "receiving_path": "src/lib.rs",
+      "git_blob": "042fd2183e6771b90b921e514a79949c5ffd11cd",
+      "sha256": "f636cbf68321fc2b0c82ac5f427f60666288bad11806d750c4ab945f8a25a0e6"
+    },
+    {
+      "donor_path": "crates/system/station-custody/tests/dr_c_pending.rs",
+      "receiving_path": "tests/dr_c_pending.rs",
+      "git_blob": "8b237b18e85f0d34e4eee86fe61ab70c27e4b959",
+      "sha256": "09f85544ffa14d1ce01563f0140f8b26eb65779502c45fb50504e0151e8fac0e"
+    }
+  ],
+  "unchanged": "All twelve Rust source/test/example files and their MPL notices; API, salts, signed control formats and custody behavior",
+  "line_ceiling": "Three existing bounded exceptions transferred with the unchanged source"
+}

@@ -48,6 +48,8 @@ exclude = [
     "apps/signalman-desktop",
     # Bounded retained-repair host prototype has its own pinned codec graph.
     "crates/retained-repair",
+    # Private Djinn-backed native adapter; qualified by its standalone root.
+    "crates/station-custody",
     "vendor/embedded-graphics",
     "vendor/embedded-graphics-core",
     "vendor/lora-phy",

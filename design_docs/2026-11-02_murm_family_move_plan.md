@@ -4,6 +4,22 @@
 
 ## Open phases and done conditions
 
+- **Station Custody extraction (2026-11-04, in progress):** move Mere's private
+  adapter to the standalone `crates/station-custody` workspace. Keep it out of
+  the default radio build and preserve all twelve Rust files, MPL notices,
+  API, derivation salts, control encodings, first-owner behavior and lease
+  expiry/revocation. Dramatis/Personae and Djinn retain authority; Murm owns
+  the radio-specific adapter. Signalman's desktop takes the local path.
+  Done after standalone all-target tests and MSRV library check, actual
+  Signalman station/resident tests and all-target receiving, and Mere's locked
+  workspace/graph without the donor. Push the receiver and verify donor blobs
+  before deleting Mere's copy. Required evidence is retained under
+  `Code/testing/murm/station-custody-extraction-20261104`, at most **100 MB**:
+  source equality, commands/results, lock/source identities and pushed commits.
+  Reuse stable Murm/Mere Cargo targets; no isolated Cargo home. Existing
+  physical/headed receipts remain frozen; this move does not claim a board
+  claim, provisioning, serial/RF or installed-daemon qualification. Transfer
+  the three existing source-size exceptions with their unchanged files.
 - **R1–R3 application integration:** qualify the actual Signalman LXMF path on its named physical/headed profile and extend operator diagnostics to peer, path, sync and standards-profile facts without inventing delivery. Sennet and Tucket have distinct native semantics; broader LXMF bodies, voice and multi-station selection remain separate capabilities. TinySSB verification does not itself provide chat.
 - **LXMF interoperability and radio diagnostics:** qualify desktop Signalman with ordinary stock LXMF/MeshChatX content, since its versioned titles are narrower than generic chat. Surface held messages while sender identity is unresolved without asserting authenticated identity, and investigate remaining V4 frame loss, the unexplained RNode error 04 and post-timeout path discovery on an identified bench. The terminal single-send failure was repaired; delivery in each direction did not establish reliable RF.
 - **R4–R5 companions:** complete selected serial/RF, BLE and headed/pixel acceptance, including the immediate MeshCore reconnect variant separately from the passing 500 ms fixture, plus journal power-loss behavior. Name stock versions and device identities and restore profiles. Stock-pair functional acceptance is not full application or platform parity.

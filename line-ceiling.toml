@@ -92,3 +92,15 @@ reason = "The live session: the handles an application holds, and the state they
 [[exception]]
 path = "native/crates/webrtc-carrier/tests/native_loopback.rs"
 reason = "The native C1 receipts: two str0m peers, one loopback UDP pair, real DTLS. Existing source-size debt; a responsibility split must preserve SurvivorReport, Binds, EchoRun and existing module visibility."
+
+[[exception]]
+path = "crates/station-custody/src/control.rs"
+reason = "Signed low-bandwidth control frames for a sited station. Existing source-size debt; a responsibility split must preserve SitedStationControlSigner, SitedStationControl, SitedStationControlBody and existing module visibility."
+
+[[exception]]
+path = "crates/station-custody/src/head.rs"
+reason = "The unattended sited-station host. Existing source-size debt; a responsibility split must preserve SitedStationHead, SitedStationHeadCore, HeadPersistence and existing module visibility."
+
+[[exception]]
+path = "crates/station-custody/src/lib.rs"
+reason = "Persona-backed custody adapter for Djinn-managed Retinue stations. Existing source-size debt; a responsibility split must preserve FirstOwnerCredential, ControllerStatusError, FirstOwnerCredentialError and existing module visibility."

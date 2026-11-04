@@ -1,5 +1,11 @@
 # Murm Documentation Index
 
+Station Custody extraction (2026-11-04): the
+[family integration plan](2026-11-02_murm_family_move_plan.md) records the
+standalone adapter move from Mere, unchanged-source and receiving gates.
+Dramatis/Personae and Djinn retain authority; physical qualification stays
+with its existing profiles.
+
 Stickleback networking extraction landed (2026-11-03): T7 in the
 [transport consolidation plan](2026-10-28_transport_consolidation_plan.md)
 places the shared live sessions and address book in `murm-sync`. Eidetic
