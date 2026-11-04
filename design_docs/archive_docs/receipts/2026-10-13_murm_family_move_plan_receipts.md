@@ -477,3 +477,10 @@ For this independent wire-only pin, the unchanged root radio Clippy hook is skip
 ```json
 {"gate":"E2d-provider-initial","utc":"2026-11-04T04:23:04.923193+00:00","core":"479995928668d0db1f8cfb2aa26f818b9f03919f","workingRust":"1.99.1","msrv":"1.97.1","checks":{"working":{"ordinaryPassed":19,"controlledIgnored":3},"msrv":{"ordinaryPassed":19,"controlledIgnored":3},"strictClippyAllTargets":"pass","productionDnsGraphContainsTokio":false},"command":"cargo [+1.97.1] test --manifest-path wire/Cargo.toml -p murm-rtc --features dns,udp --locked --offline -j1; cargo clippy same package/features --all-targets -- -D warnings","lockSHA256":"bc4df135554dd570f72f4caf4418817c8c73dfbcb9191e3a143b170ccaff05ab","bounds":{"servers":32,"addressesPerUrl":32,"defaultPendingDns":32,"defaultDnsSeconds":2,"dnsBytes":16384,"aliasDepth":8},"correctedAttempts":["Initial library compile used obsolete Hickory Record accessors; corrected to 0.26 public fields.","Initial test fixtures used unsupported CNAME From conversion; corrected to tuple constructor.","Six DNS wire tests exposed missing absolute-root identity on original query; canonicalized query names, all pass.","New discovery test needed explicit SocketAddr parse type; corrected.","Strict Clippy nested-if findings corrected."],"scope":"Native provider only. Genet receiving, controlled coturn and headed checks remain pending."}
 ```
+
+
+### E2d immediate refusal ordering
+
+```json
+{"gate":"E2d-ordering-repair","utc":"2026-11-04T04:45:33.320365+00:00","predecessor":"c59b530ff8da2703d58657c6339c8d5eb4e873d5","receivingFault":"Genet Boa/Vano immediate resolver failure delivered complete,complete,null,error,error,error before repair. Receiving packet retains the failed checks.","change":"Defer core gathering completion until the terminal URL error queue is empty. Added public UdpPeer refusal/completion ordering regression.","checks":{"ordinaryWorkingRustPassed":20,"ordinaryMsrvPassed":20,"controlledCoturnPassed":3,"strictWireClippyAllTargets":"pass"},"rust":["1.99.1","1.97.1"],"scope":"Provider; receiving engine regression and headed qualification follow on the published pin."}
+```
