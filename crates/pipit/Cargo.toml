@@ -1,0 +1,30 @@
+[package]
+rust-version = "1.97.1"
+name = "pipit"
+version = "0.2.0"
+edition = "2024"
+license = "MIT OR Apache-2.0"
+description = "A small speech codec for voices that travel light: an LPC vocoder at 1.6 or 2.5 kbps plus framed IMA ADPCM, in self-describing clips. no_std, zero dependencies."
+repository = "https://github.com/merely-made/murm"
+readme = "README.md"
+keywords = ["audio", "codec", "speech", "adpcm", "no-std"]
+categories = ["multimedia::audio", "no-std", "embedded"]
+exclude = ["design_docs/"]
+
+[features]
+# `alloc` buys the whole-clip conveniences (`encode_clip` / `decode_clip`).
+# Firmware turns it off and drives the frame API over its own buffers.
+default = ["alloc"]
+alloc = []
+
+[dependencies]
+
+[lints.clippy]
+missing_errors_doc = "warn"
+missing_panics_doc = "warn"
+missing_safety_doc = "warn"
+undocumented_unsafe_blocks = "warn"
+too_many_lines = "warn"
+
+[workspace]
+resolver = "2"

@@ -176,3 +176,11 @@ Murm supplies communication engines; Dramatis/Personae and Djinn retain identity
   Direct-unicast queries and IPv6 remain open. Genet owns exposure/projection
   and the registration lifetime; its E2a plan and shared 20 KB evidence budget
   own native acceptance, including failure privacy and cleanup.
+
+## Pipit consolidation, 2026-11-04
+
+Pipit 0.2.0 moves from standalone revision `1281de0901bf47bf3e9edc8f78b122ce60a44389` to `crates/pipit`. Outrider's optional voice feature and Signalman use the local codec. The independent workspace preserves no_std, optional allocation, zero dependencies, codec/frame/clip bytes and MIT/Apache notices. Original source blobs are enumerated in `crates/pipit/source-import.json`; the receiving commit retains donor ancestry. Registry publication remains a separate release gate.
+
+Done conditions: original and receiving 48 codec tests agree; Rust 1.97.1 allocation-free compilation passes; Outrider voice and Signalman voice tests and all-target checks pass with one codec source; line ceiling and Clippy pass. These are native in-process gates, not radio, audio-device or headed qualification. Bounded summaries share `Code/testing/subsystem-extractions-20261104` and its aggregate 100 MB cap.
+
+Receiving result: 48 codec, 14 Outrider voice and 2 Signalman voice tests pass; both consumer all-target checks, allocation-free MSRV, codec Clippy and root hooks pass. The only root lock package change is Pipit registry-to-local source; published codec version and clip identities stay 0.2.0.
