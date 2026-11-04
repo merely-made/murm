@@ -16,6 +16,8 @@
 
 ### Hostname ICE-server resolution
 
+**Status (2026-11-04): provider and controlled Genet receiving gates qualified.**
+
 Genet's `genet/design_docs/2026-11-03_webrtc_conformance_plan.md`, E2d, owns the
 authorized DNS receiving slice. Murm supplies an optional caller-polled resolver
 and bounded per-URL address fallback while keeping the core and host-only
@@ -23,7 +25,7 @@ numeric path runtime-free. Pending requests cancel on restart/close/drop;
 successful TURN allocations retain their endpoint and socket. Retain at most
 **30 KB** of new supplier evidence in the existing family receipt (under its
 100 KB total); Genet owns the separate external receiving packet. A/AAAA with
-explicit UDP ports is the initial gate; SRV/NAPTR, mDNS and TURN TCP/TLS remain
+explicit UDP ports is the qualified address-lookup gate; SRV/NAPTR, mDNS and TURN TCP/TLS remain
 separate. Prior E2r receipts stay frozen at their original boundaries.
 
 ### RTC ICE restart slice
@@ -49,10 +51,11 @@ triggered-check scheduling and requests before remote credentials remain separat
 Done: ordinary provider checks on working Rust and MSRV, controlled coturn,
 strict Clippy and Genet's unchanged WPT/native/headed receiving gates pass.
 Genet owns event ordering, sticky restart requests, candidate generation checks
-and browser lifetime. Server replacement, interface rebinding, DNS/mDNS, TCP/TLS,
+and browser lifetime. Server replacement, interface rebinding, SRV/NAPTR/mDNS, TCP/TLS,
 media and carrier adoption retain their own gates. Append at most **20 KB** to
 the existing family receipt; its total stays below **100 KB**. Genet's receiving
-plan owns its separate 1 MB total receipt budget and source/lock/binary evidence.
+predecessor packet is frozen under its separate 1 MB cap; new E2d evidence uses
+its external 220 KB receiving cap and source/lock/binary audit.
 
 Murm supplies communication engines; Dramatis/Personae and Djinn retain identity and custody, Gemot membership authority, and applications own their facts. The later foundation promotion places Stickleback in Eidetic; Genet owns Fetch/WebSocket policy. The generic RTC provider has no application admission, invitation, Luggage, radio or conversation dependency; the existing application carrier retains its own framing and trust. Keep original crate identities, ancestry and immutable historical evidence. Sennet retains its independent-source boundary: public documentation and identified black-box captures, excluding upstream firmware implementation and schemas. A host carrier handoff or unauthenticated protocol ACK does not establish recipient read or sender authentication. The stock companion queue read can consume device data before host persistence; do not claim exactly-once or power-loss safety.
 
@@ -62,6 +65,18 @@ Murm supplies communication engines; Dramatis/Personae and Djinn retain identity
 
 ## Progress
 
+- 2026-11-04: E2d provider `c018fee13f417867cd3bbfe3ebca167257e34dc0`
+  passes 20 ordinary checks on working Rust 1.99.1 and MSRV 1.97.1, three
+  coturn checks, strict wire Clippy and host-only compile. Native DNS uses an
+  established wire codec with caller-polled UDP/TCP and owned cancellation;
+  the production graph has no Tokio. Immediate refusal now drains terminal
+  errors before gathering completes. Genet source
+  `d9f402446c7651ddad37014799fdb13c65c9f243` passes 30 native checks,
+  unchanged selected WPT maps and all 48 headed hostname/direct restart cases
+  (96 completed and 48 interrupted restarts). Its external packet owns the
+  exact binary/lock identities, 16 pending-DNS cleanups, permission restoration,
+  fixture shutdown and prior retained-cache exception. This does not qualify
+  portless service discovery, mDNS, TURN TCP/TLS, media or application carriers.
 - 2026-11-03: provider requalified against core `479995928668d0db1f8cfb2aa26f818b9f03919f`:
   58 core ICE tests, nine ordinary checks on working Rust and MSRV, three
   controlled coturn checks and strict all-target wire Clippy pass. The delayed-answer
