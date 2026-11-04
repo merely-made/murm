@@ -21,6 +21,7 @@ default = []
 # secure v2 admission. Off by default because the ordinary peer runtime is
 # topic-shaped; this is what a bearer without a gossip overlay needs.
 session-lane = ["dep:notochord", "dep:insigne", "transport/notochord", "transport/noise"]
+relay = ["session-lane"]
 
 [dependencies]
 murm-sync.workspace = true

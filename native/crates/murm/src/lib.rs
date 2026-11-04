@@ -62,6 +62,8 @@ mod post;
 mod post_hash;
 mod post_sign;
 mod post_wire;
+#[cfg(feature = "relay")]
+pub mod relay;
 #[cfg(feature = "session-lane")]
 mod session_lane;
 

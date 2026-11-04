@@ -123,8 +123,45 @@ where
         A: FnMut(Operation<E>) -> Fut + Send + 'static,
         Fut: Future<Output = bool> + Send,
     {
+        Self::join_with_hooks::<S, L, A, Fut, _>(
+            lane,
+            store,
+            endpoint,
+            gossip,
+            topic,
+            accept,
+            crate::SyncHooksList::<Topic>::new(),
+        )
+        .await
+    }
+
+    /// Join with upstream peer/topic authorization hooks, before any history
+    /// is exchanged. Existing joins retain their ordinary permissive behavior.
+    pub async fn join_with_hooks<S, L, A, Fut, H>(
+        lane: impl AsRef<[u8]>,
+        store: S,
+        endpoint: Endpoint,
+        gossip: Gossip,
+        topic: impl Into<Topic>,
+        accept: A,
+        hooks: H,
+    ) -> Result<Self, JoinError>
+    where
+        S: LogStore<AnyOperation, VerifyingKey, L, SeqNum, Hash>
+            + TopicStore<Topic, VerifyingKey, L>
+            + Clone
+            + Send
+            + Sync
+            + 'static,
+        L: LogId + Debug + Send + Sync + 'static,
+        E: Sync,
+        A: FnMut(Operation<E>) -> Fut + Send + 'static,
+        Fut: Future<Output = bool> + Send,
+        H: crate::SyncHooks<Handshake = Topic> + Clone + 'static,
+    {
         let log_sync = LogSync::<S, L, E>::builder(store, endpoint, gossip)
             .protocol_id(lane)
+            .hooks(hooks)
             .spawn()
             .await
             .map_err(|e| JoinError::Spawn(e.to_string()))?;

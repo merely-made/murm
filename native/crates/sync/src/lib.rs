@@ -19,5 +19,6 @@ pub use address_book::MunimentAddressBook;
 pub use group_key::GroupKeySync;
 pub use joined_space::JoinedSpace;
 pub use p2panda_net::{Endpoint, Gossip};
+pub use p2panda_net::sync::hooks::{AfterHandshakeOutcome, SyncHooks, SyncHooksList};
 pub use stickleback::JoinError;
 pub use synced_space::{SyncRound, SyncStatus, SyncedSpace};
