@@ -39,15 +39,38 @@ Castellan/resident path migration; only its Station Custody paths changed here.
 - **R6–R8 native radio:** retain scoped Tucket contact-restore and Sennet public/directed text/ACK passes; qualify installed personal-daemon custody/UI, private-channel custody, 2.8 ACK proofs, broader mesh routing and remaining visual cleanup under their own profiles. Protocol ACK correlation is not authenticated read receipt. T114 endpoint and broader roles belong to [protocol parity](2026-11-02_protocol_parity_plan.md).
 - **Board names:** preserve labels and current identity/preferences when restoring or changing images. Physical screen pixels were not independently observed, and the SB2 five software-reboot recovery does not establish battery-disconnected power-cycle recovery; either is a separate qualification if needed.
 - **Supplier and receiving gates:** registry releases require their own decision and qualification. Resolve the filtered killed-peer shutdown test with bounded evidence and a positive control; Keep physical/live-network/headed gates and the Isocosm gameplay compiler/wing gates with their owners; source adoption is not a gameplay pass. Recheck current owning plans rather than assume the historical failure persists.
-- **RTC provider continuation:** the fixed-server ICE restart slice below is qualified; add and qualify host DNS, mDNS, TCP/TLS TURN and server replacement as separately selected capabilities. Keep relay-only from direct candidates; host budgets and I/O remain caller-owned. Complete application-carrier adoption only when the real consumer passes binding, admission, backpressure, refusal and reconnect with the shared provider. Genet owns its browser/WPT/media gates and its selected headed direct/UDP-relay matrix does not prove cross-machine or application-carrier acceptance. Registry publication waits for an engine release containing the pinned DCEP and restart fixes.
+- **RTC provider continuation:** the fixed-server ICE restart, explicit-port DNS and UDP service-discovery slices below are qualified; add and qualify mDNS, TCP/TLS TURN and server replacement as separately selected capabilities. Keep relay-only from direct candidates; host budgets and I/O remain caller-owned. Complete application-carrier adoption only when the real consumer passes binding, admission, backpressure, refusal and reconnect with the shared provider. Genet owns its browser/WPT/media gates and its selected headed direct/UDP-relay matrix does not prove cross-machine or application-carrier acceptance. Registry publication waits for an engine release containing the pinned DCEP and restart fixes.
 
 ## Decisions and boundaries
+
+### UDP service discovery continuation
+
+**Status (2026-11-04): provider and controlled Genet receiving qualified.**
+
+E2s in `genet/design_docs/2026-11-04_webrtc_conformance_plan.md` owns the new
+portless-URL receiving gate. Murm extends its independent resolver with bounded
+SRV/S-NAPTR endpoint batches and lazy backtracking, retaining caller-owned I/O,
+URI omission and existing TURN allocations. Keep the previous E2d evidence
+closed. New supplier evidence is capped at **30 KB** in the existing family
+receipt, under its 100 KB total; Genet has a fresh external 220 KB packet.
+UDP-only service resolution does not qualify mDNS, TURN TCP/TLS or carriers.
+Provider `ef2d18fadbbdca3847ad99040af14f2bc7693a47` passes 29 ordinary and
+three controlled coturn checks on Rust 1.99.1 and MSRV 1.97.1, strict wire
+all-target Clippy, and the host-only DNS compile/tree without Tokio. The
+source/commands and limits are in the appended E2s family receipt. Genet product
+source `ff958976f2a904d250d00ee10335696c62f749b1` passes 38 native checks;
+recorder `7abebdda633bac2d91bd05b4976f2bf65ea525cb` passes all 48 headed
+Chrome/Firefox restart cases. Native URLs are portless and discover nondefault
+UDP ports; browsers use equivalent numeric endpoints on fixed-interface IPv4.
+The seven selected WPT maps remain unchanged. Genet's external Nov 4 packet is
+closed after fixture shutdown and permission restoration. This is not full
+TURN transport/authentication, public NAT, media or carrier acceptance.
 
 ### Hostname ICE-server resolution
 
 **Status (2026-11-04): provider and controlled Genet receiving gates qualified.**
 
-Genet's `genet/design_docs/2026-11-03_webrtc_conformance_plan.md`, E2d, owns the
+Genet's `genet/design_docs/2026-11-04_webrtc_conformance_plan.md`, E2d, owns the
 authorized DNS receiving slice. Murm supplies an optional caller-polled resolver
 and bounded per-URL address fallback while keeping the core and host-only
 numeric path runtime-free. Pending requests cancel on restart/close/drop;
