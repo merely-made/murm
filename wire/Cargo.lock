@@ -1758,7 +1758,7 @@ dependencies = [
 [[package]]
 name = "rtc"
 version = "0.21.1"
-source = "git+https://github.com/merely-made/rtc?rev=479995928668d0db1f8cfb2aa26f818b9f03919f#479995928668d0db1f8cfb2aa26f818b9f03919f"
+source = "git+https://github.com/merely-made/rtc?rev=579edfe9ac1453b3875649d7afa5cf25608ae9fa#579edfe9ac1453b3875649d7afa5cf25608ae9fa"
 dependencies = [
  "bytes",
  "hex",
@@ -1793,7 +1793,7 @@ dependencies = [
 [[package]]
 name = "rtc-crypto"
 version = "0.21.1"
-source = "git+https://github.com/merely-made/rtc?rev=479995928668d0db1f8cfb2aa26f818b9f03919f#479995928668d0db1f8cfb2aa26f818b9f03919f"
+source = "git+https://github.com/merely-made/rtc?rev=579edfe9ac1453b3875649d7afa5cf25608ae9fa#579edfe9ac1453b3875649d7afa5cf25608ae9fa"
 dependencies = [
  "aes",
  "aws-lc-rs",
@@ -1812,7 +1812,7 @@ dependencies = [
 [[package]]
 name = "rtc-datachannel"
 version = "0.21.1"
-source = "git+https://github.com/merely-made/rtc?rev=479995928668d0db1f8cfb2aa26f818b9f03919f#479995928668d0db1f8cfb2aa26f818b9f03919f"
+source = "git+https://github.com/merely-made/rtc?rev=579edfe9ac1453b3875649d7afa5cf25608ae9fa#579edfe9ac1453b3875649d7afa5cf25608ae9fa"
 dependencies = [
  "bytes",
  "log",
@@ -1824,7 +1824,7 @@ dependencies = [
 [[package]]
 name = "rtc-dtls"
 version = "0.21.1"
-source = "git+https://github.com/merely-made/rtc?rev=479995928668d0db1f8cfb2aa26f818b9f03919f#479995928668d0db1f8cfb2aa26f818b9f03919f"
+source = "git+https://github.com/merely-made/rtc?rev=579edfe9ac1453b3875649d7afa5cf25608ae9fa#579edfe9ac1453b3875649d7afa5cf25608ae9fa"
 dependencies = [
  "bytecheck",
  "byteorder",
@@ -1843,7 +1843,7 @@ dependencies = [
 [[package]]
 name = "rtc-ice"
 version = "0.21.1"
-source = "git+https://github.com/merely-made/rtc?rev=479995928668d0db1f8cfb2aa26f818b9f03919f#479995928668d0db1f8cfb2aa26f818b9f03919f"
+source = "git+https://github.com/merely-made/rtc?rev=579edfe9ac1453b3875649d7afa5cf25608ae9fa#579edfe9ac1453b3875649d7afa5cf25608ae9fa"
 dependencies = [
  "bytes",
  "crc",
@@ -1861,7 +1861,7 @@ dependencies = [
 [[package]]
 name = "rtc-interceptor"
 version = "0.21.1"
-source = "git+https://github.com/merely-made/rtc?rev=479995928668d0db1f8cfb2aa26f818b9f03919f#479995928668d0db1f8cfb2aa26f818b9f03919f"
+source = "git+https://github.com/merely-made/rtc?rev=579edfe9ac1453b3875649d7afa5cf25608ae9fa#579edfe9ac1453b3875649d7afa5cf25608ae9fa"
 dependencies = [
  "log",
  "rand 0.10.3",
@@ -1874,7 +1874,7 @@ dependencies = [
 [[package]]
 name = "rtc-mdns"
 version = "0.21.1"
-source = "git+https://github.com/merely-made/rtc?rev=479995928668d0db1f8cfb2aa26f818b9f03919f#479995928668d0db1f8cfb2aa26f818b9f03919f"
+source = "git+https://github.com/merely-made/rtc?rev=579edfe9ac1453b3875649d7afa5cf25608ae9fa#579edfe9ac1453b3875649d7afa5cf25608ae9fa"
 dependencies = [
  "bytes",
  "log",
@@ -1886,7 +1886,7 @@ dependencies = [
 [[package]]
 name = "rtc-media"
 version = "0.21.1"
-source = "git+https://github.com/merely-made/rtc?rev=479995928668d0db1f8cfb2aa26f818b9f03919f#479995928668d0db1f8cfb2aa26f818b9f03919f"
+source = "git+https://github.com/merely-made/rtc?rev=579edfe9ac1453b3875649d7afa5cf25608ae9fa#579edfe9ac1453b3875649d7afa5cf25608ae9fa"
 dependencies = [
  "byteorder",
  "bytes",
@@ -1899,7 +1899,7 @@ dependencies = [
 [[package]]
 name = "rtc-rtcp"
 version = "0.21.1"
-source = "git+https://github.com/merely-made/rtc?rev=479995928668d0db1f8cfb2aa26f818b9f03919f#479995928668d0db1f8cfb2aa26f818b9f03919f"
+source = "git+https://github.com/merely-made/rtc?rev=579edfe9ac1453b3875649d7afa5cf25608ae9fa#579edfe9ac1453b3875649d7afa5cf25608ae9fa"
 dependencies = [
  "bytes",
  "rtc-shared",
@@ -1908,7 +1908,7 @@ dependencies = [
 [[package]]
 name = "rtc-rtp"
 version = "0.21.1"
-source = "git+https://github.com/merely-made/rtc?rev=479995928668d0db1f8cfb2aa26f818b9f03919f#479995928668d0db1f8cfb2aa26f818b9f03919f"
+source = "git+https://github.com/merely-made/rtc?rev=579edfe9ac1453b3875649d7afa5cf25608ae9fa#579edfe9ac1453b3875649d7afa5cf25608ae9fa"
 dependencies = [
  "bytes",
  "memchr",
@@ -1920,7 +1920,7 @@ dependencies = [
 [[package]]
 name = "rtc-sctp"
 version = "0.21.1"
-source = "git+https://github.com/merely-made/rtc?rev=479995928668d0db1f8cfb2aa26f818b9f03919f#479995928668d0db1f8cfb2aa26f818b9f03919f"
+source = "git+https://github.com/merely-made/rtc?rev=579edfe9ac1453b3875649d7afa5cf25608ae9fa#579edfe9ac1453b3875649d7afa5cf25608ae9fa"
 dependencies = [
  "bytes",
  "crc32c",
@@ -1935,7 +1935,7 @@ dependencies = [
 [[package]]
 name = "rtc-sdp"
 version = "0.21.1"
-source = "git+https://github.com/merely-made/rtc?rev=479995928668d0db1f8cfb2aa26f818b9f03919f#479995928668d0db1f8cfb2aa26f818b9f03919f"
+source = "git+https://github.com/merely-made/rtc?rev=579edfe9ac1453b3875649d7afa5cf25608ae9fa#579edfe9ac1453b3875649d7afa5cf25608ae9fa"
 dependencies = [
  "rand 0.10.3",
  "rtc-shared",
@@ -1945,7 +1945,7 @@ dependencies = [
 [[package]]
 name = "rtc-shared"
 version = "0.21.1"
-source = "git+https://github.com/merely-made/rtc?rev=479995928668d0db1f8cfb2aa26f818b9f03919f#479995928668d0db1f8cfb2aa26f818b9f03919f"
+source = "git+https://github.com/merely-made/rtc?rev=579edfe9ac1453b3875649d7afa5cf25608ae9fa#579edfe9ac1453b3875649d7afa5cf25608ae9fa"
 dependencies = [
  "bitflags 1.3.2",
  "bytes",
@@ -1961,7 +1961,7 @@ dependencies = [
 [[package]]
 name = "rtc-srtp"
 version = "0.21.1"
-source = "git+https://github.com/merely-made/rtc?rev=479995928668d0db1f8cfb2aa26f818b9f03919f#479995928668d0db1f8cfb2aa26f818b9f03919f"
+source = "git+https://github.com/merely-made/rtc?rev=579edfe9ac1453b3875649d7afa5cf25608ae9fa#579edfe9ac1453b3875649d7afa5cf25608ae9fa"
 dependencies = [
  "byteorder",
  "bytes",
@@ -1974,7 +1974,7 @@ dependencies = [
 [[package]]
 name = "rtc-stun"
 version = "0.21.1"
-source = "git+https://github.com/merely-made/rtc?rev=479995928668d0db1f8cfb2aa26f818b9f03919f#479995928668d0db1f8cfb2aa26f818b9f03919f"
+source = "git+https://github.com/merely-made/rtc?rev=579edfe9ac1453b3875649d7afa5cf25608ae9fa#579edfe9ac1453b3875649d7afa5cf25608ae9fa"
 dependencies = [
  "base64 0.22.1",
  "bytes",
@@ -1990,7 +1990,7 @@ dependencies = [
 [[package]]
 name = "rtc-turn"
 version = "0.21.1"
-source = "git+https://github.com/merely-made/rtc?rev=479995928668d0db1f8cfb2aa26f818b9f03919f#479995928668d0db1f8cfb2aa26f818b9f03919f"
+source = "git+https://github.com/merely-made/rtc?rev=579edfe9ac1453b3875649d7afa5cf25608ae9fa#579edfe9ac1453b3875649d7afa5cf25608ae9fa"
 dependencies = [
  "bytes",
  "log",
