@@ -16,7 +16,7 @@
 
 ### RTC ICE restart slice
 
-**Status (2026-11-03): provider qualified; Genet receiving qualification in progress.**
+**Status (2026-11-03): provider qualified with late-check repair; Genet receiving in progress.**
 
 Mark authorized established data-channel ICE restart with configured STUN/TURN
 and automated native/browser tests. Retain the same physical socket and TURN
@@ -30,6 +30,9 @@ changing fresh checks/roles or extending its expiry. The core repairs live in
 the pinned `merely-made/rtc` fork, including the same-identity DTLS answer role.
 After fresh remote credentials arrive, the known nominated address is checked
 as a fresh candidate without inheriting prior nomination or transactions.
+Authenticated current-generation requests also schedule a fresh check when
+the controlling pair exhausted its checks before the answer arrived. Broader
+triggered-check scheduling and requests before remote credentials remain separate gates.
 
 Done: ordinary provider checks on working Rust and MSRV, controlled coturn,
 strict Clippy and Genet's unchanged WPT/native/headed receiving gates pass.
@@ -47,6 +50,10 @@ Murm supplies communication engines; Dramatis/Personae and Djinn retain identity
 
 ## Progress
 
+- 2026-11-03: provider requalified against core `479995928668d0db1f8cfb2aa26f818b9f03919f`:
+  58 core ICE tests, nine ordinary checks on working Rust and MSRV, three
+  controlled coturn checks and strict all-target wire Clippy pass. The delayed-answer
+  regression checks recovery only after fresh authentication. Genet receiving is open.
 - 2026-11-03: fixed-server restart provider qualified at `377b9ca1b59f48b0c491e25b7d70bb57a23faedd`,
   using core `235f02199a23f00df2c554ed669218eee9627a8e`. Provider working/MSRV,
   controlled coturn, strict Clippy and 57 core ICE tests pass. Genet's native
