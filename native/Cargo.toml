@@ -20,37 +20,37 @@ sha2 = "0.11"
 identity = { package = "personae", version = "0.3.0", git = "https://github.com/merely-made/dramatis.git", branch = "main" }
 insigne = { package = "insigne", version = "0.0.2", git = "https://github.com/merely-made/dramatis.git", branch = "main" }
 notochord = { package = "notochord", version = "0.1.1", git = "https://github.com/merely-made/dramatis.git", branch = "main" }
-muniment = { package = "muniment", version = "0.2", git = "https://www.github.com/merely-made/eidetic.git", rev = "7a3453a02bc7dea391ef18814c1bfa1a46e67160" }
-stickleback = { package = "stickleback", version = "0.2.0", git = "https://www.github.com/merely-made/eidetic.git", rev = "7a3453a02bc7dea391ef18814c1bfa1a46e67160" }
-proofs = { package = "mere-proofs", version = "0.1.0", git = "https://www.github.com/merely-made/eidetic.git", rev = "7a3453a02bc7dea391ef18814c1bfa1a46e67160" }
-luggage = { package = "luggage", version = "0.1.0", default-features = false, git = "https://www.github.com/merely-made/eidetic.git", rev = "7a3453a02bc7dea391ef18814c1bfa1a46e67160" }
+muniment = { package = "muniment", version = "0.2", git = "https://www.github.com/merely-made/eidetic.git", rev = "a7a1458a22c80ef83e64f75d7cff8a77ee1d31eb" }
+stickleback = { package = "stickleback", version = "0.2.0", git = "https://www.github.com/merely-made/eidetic.git", rev = "a7a1458a22c80ef83e64f75d7cff8a77ee1d31eb" }
+proofs = { package = "mere-proofs", version = "0.1.0", git = "https://www.github.com/merely-made/eidetic.git", rev = "a7a1458a22c80ef83e64f75d7cff8a77ee1d31eb" }
+luggage = { package = "luggage", version = "0.1.0", default-features = false, git = "https://www.github.com/merely-made/eidetic.git", rev = "a7a1458a22c80ef83e64f75d7cff8a77ee1d31eb" }
 
 # Root patches keep one supplier source and type identity across the graph.
 [patch.crates-io]
 # Promoted sources shared with immutable older Mere suppliers.
 # Canonical promoted families; keep registry and Git consumers type-identical.
-luggage = { git = "https://www.github.com/merely-made/eidetic.git", rev = "7a3453a02bc7dea391ef18814c1bfa1a46e67160" }
-stickleback = { git = "https://www.github.com/merely-made/eidetic.git", rev = "7a3453a02bc7dea391ef18814c1bfa1a46e67160" }
+luggage = { git = "https://www.github.com/merely-made/eidetic.git", rev = "a7a1458a22c80ef83e64f75d7cff8a77ee1d31eb" }
+stickleback = { git = "https://www.github.com/merely-made/eidetic.git", rev = "a7a1458a22c80ef83e64f75d7cff8a77ee1d31eb" }
 mere-p2panda-net = { git = "https://github.com/mark-ik/p2panda.git", tag = "mere-p2panda-net-0.7.5-upstream-20261013" }
 p2panda-core = { git = "https://github.com/mark-ik/p2panda.git", tag = "mere-p2panda-net-0.7.5-upstream-20261013" }
 p2panda-discovery = { git = "https://github.com/mark-ik/p2panda.git", tag = "mere-p2panda-net-0.7.5-upstream-20261013" }
 p2panda-encryption = { git = "https://github.com/mark-ik/p2panda.git", tag = "mere-p2panda-net-0.7.5-upstream-20261013" }
 p2panda-store = { git = "https://github.com/mark-ik/p2panda.git", tag = "mere-p2panda-net-0.7.5-upstream-20261013" }
 p2panda-sync = { git = "https://github.com/mark-ik/p2panda.git", tag = "mere-p2panda-net-0.7.5-upstream-20261013" }
-muniment = { git = "https://www.github.com/merely-made/eidetic.git", rev = "7a3453a02bc7dea391ef18814c1bfa1a46e67160" }
-mere-proofs = { git = "https://www.github.com/merely-made/eidetic.git", rev = "7a3453a02bc7dea391ef18814c1bfa1a46e67160" }
+muniment = { git = "https://www.github.com/merely-made/eidetic.git", rev = "a7a1458a22c80ef83e64f75d7cff8a77ee1d31eb" }
+mere-proofs = { git = "https://www.github.com/merely-made/eidetic.git", rev = "a7a1458a22c80ef83e64f75d7cff8a77ee1d31eb" }
 
 [patch."https://github.com/merely-made/mere.git"]
-luggage = { git = "https://www.github.com/merely-made/eidetic.git", rev = "7a3453a02bc7dea391ef18814c1bfa1a46e67160" }
-mere-proofs = { git = "https://www.github.com/merely-made/eidetic.git", rev = "7a3453a02bc7dea391ef18814c1bfa1a46e67160" }
-muniment = { git = "https://www.github.com/merely-made/eidetic.git", rev = "7a3453a02bc7dea391ef18814c1bfa1a46e67160" }
-stickleback = { git = "https://www.github.com/merely-made/eidetic.git", rev = "7a3453a02bc7dea391ef18814c1bfa1a46e67160" }
+luggage = { git = "https://www.github.com/merely-made/eidetic.git", rev = "a7a1458a22c80ef83e64f75d7cff8a77ee1d31eb" }
+mere-proofs = { git = "https://www.github.com/merely-made/eidetic.git", rev = "a7a1458a22c80ef83e64f75d7cff8a77ee1d31eb" }
+muniment = { git = "https://www.github.com/merely-made/eidetic.git", rev = "a7a1458a22c80ef83e64f75d7cff8a77ee1d31eb" }
+stickleback = { git = "https://www.github.com/merely-made/eidetic.git", rev = "a7a1458a22c80ef83e64f75d7cff8a77ee1d31eb" }
 
 [patch."https://www.github.com/merely-made/mere.git"]
-luggage = { git = "https://www.github.com/merely-made/eidetic.git", rev = "7a3453a02bc7dea391ef18814c1bfa1a46e67160" }
-mere-proofs = { git = "https://www.github.com/merely-made/eidetic.git", rev = "7a3453a02bc7dea391ef18814c1bfa1a46e67160" }
-muniment = { git = "https://www.github.com/merely-made/eidetic.git", rev = "7a3453a02bc7dea391ef18814c1bfa1a46e67160" }
-stickleback = { git = "https://www.github.com/merely-made/eidetic.git", rev = "7a3453a02bc7dea391ef18814c1bfa1a46e67160" }
+luggage = { git = "https://www.github.com/merely-made/eidetic.git", rev = "a7a1458a22c80ef83e64f75d7cff8a77ee1d31eb" }
+mere-proofs = { git = "https://www.github.com/merely-made/eidetic.git", rev = "a7a1458a22c80ef83e64f75d7cff8a77ee1d31eb" }
+muniment = { git = "https://www.github.com/merely-made/eidetic.git", rev = "a7a1458a22c80ef83e64f75d7cff8a77ee1d31eb" }
+stickleback = { git = "https://www.github.com/merely-made/eidetic.git", rev = "a7a1458a22c80ef83e64f75d7cff8a77ee1d31eb" }
 
 # Preserve the I2P3 mitigation: emissary-core 0.4.0 can reach debug_assert!(false)
 # from a peer's message. Release builds reject that message; dev/test hosts must
@@ -66,7 +66,7 @@ undocumented_unsafe_blocks = "warn"
 too_many_lines = "warn"
 
 [patch."https://github.com/merely-made/eidetic.git"]
-muniment = { git = "https://www.github.com/merely-made/eidetic.git", rev = "7a3453a02bc7dea391ef18814c1bfa1a46e67160" }
-stickleback = { git = "https://www.github.com/merely-made/eidetic.git", rev = "7a3453a02bc7dea391ef18814c1bfa1a46e67160" }
-mere-proofs = { git = "https://www.github.com/merely-made/eidetic.git", rev = "7a3453a02bc7dea391ef18814c1bfa1a46e67160" }
-luggage = { git = "https://www.github.com/merely-made/eidetic.git", rev = "7a3453a02bc7dea391ef18814c1bfa1a46e67160" }
+muniment = { git = "https://www.github.com/merely-made/eidetic.git", rev = "a7a1458a22c80ef83e64f75d7cff8a77ee1d31eb" }
+stickleback = { git = "https://www.github.com/merely-made/eidetic.git", rev = "a7a1458a22c80ef83e64f75d7cff8a77ee1d31eb" }
+mere-proofs = { git = "https://www.github.com/merely-made/eidetic.git", rev = "a7a1458a22c80ef83e64f75d7cff8a77ee1d31eb" }
+luggage = { git = "https://www.github.com/merely-made/eidetic.git", rev = "a7a1458a22c80ef83e64f75d7cff8a77ee1d31eb" }
