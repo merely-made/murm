@@ -22,9 +22,9 @@ async fn insert_reports_new_then_update() {
     let book = book();
     let info = node();
 
-    assert!(book.insert_node_info(info.clone()).await.unwrap());
+    assert!(book.insert_node_info_tx(info.clone()).await.unwrap());
     // Same node again is an update, not an insert.
-    assert!(!book.insert_node_info(info.clone()).await.unwrap());
+    assert!(!book.insert_node_info_tx(info.clone()).await.unwrap());
     assert_eq!(book.all_nodes_len().await.unwrap(), 1);
     assert_eq!(book.node_info(&info.node_id).await.unwrap(), Some(info));
 }
@@ -45,7 +45,7 @@ async fn insert_if_absent_keeps_a_record_already_there() {
     let book = book();
     let mut known = node();
     known.bootstrap = true;
-    book.insert_node_info(known.clone()).await.unwrap();
+    book.insert_node_info_tx(known.clone()).await.unwrap();
 
     let bare = NodeInfo::new(known.node_id);
     assert!(!book.insert_node_info_if_absent(bare).await.unwrap());
@@ -57,9 +57,9 @@ async fn remove_reports_whether_it_existed() {
     let book = book();
     let info = node();
 
-    assert!(!book.remove_node_info(&info.node_id).await.unwrap());
-    book.insert_node_info(info.clone()).await.unwrap();
-    assert!(book.remove_node_info(&info.node_id).await.unwrap());
+    assert!(!book.remove_node_info_tx(&info.node_id).await.unwrap());
+    book.insert_node_info_tx(info.clone()).await.unwrap();
+    assert!(book.remove_node_info_tx(&info.node_id).await.unwrap());
     assert_eq!(book.node_info(&info.node_id).await.unwrap(), None);
 }
 
@@ -69,11 +69,11 @@ async fn removing_a_node_takes_its_topics() {
     let info = node();
     let topic = Topic::random();
 
-    book.insert_node_info(info.clone()).await.unwrap();
-    book.set_topics(info.node_id, HashSet::from([topic]))
+    book.insert_node_info_tx(info.clone()).await.unwrap();
+    book.set_topics_tx(info.node_id, HashSet::from([topic]))
         .await
         .unwrap();
-    book.remove_node_info(&info.node_id).await.unwrap();
+    book.remove_node_info_tx(&info.node_id).await.unwrap();
 
     assert!(book.node_topics(&info.node_id).await.unwrap().is_empty());
 }
@@ -84,11 +84,11 @@ async fn set_topics_overwrites_rather_than_extends() {
     let info = node();
     let (a, b) = (Topic::random(), Topic::random());
 
-    book.insert_node_info(info.clone()).await.unwrap();
-    book.set_topics(info.node_id, HashSet::from([a]))
+    book.insert_node_info_tx(info.clone()).await.unwrap();
+    book.set_topics_tx(info.node_id, HashSet::from([a]))
         .await
         .unwrap();
-    book.set_topics(info.node_id, HashSet::from([b]))
+    book.set_topics_tx(info.node_id, HashSet::from([b]))
         .await
         .unwrap();
 
@@ -104,13 +104,13 @@ async fn lookup_by_topic_matches_any_of_them() {
     let (weather, sport) = (Topic::random(), Topic::random());
 
     let subscriber = node();
-    book.insert_node_info(subscriber.clone()).await.unwrap();
-    book.set_topics(subscriber.node_id, HashSet::from([weather]))
+    book.insert_node_info_tx(subscriber.clone()).await.unwrap();
+    book.set_topics_tx(subscriber.node_id, HashSet::from([weather]))
         .await
         .unwrap();
 
     let bystander = node();
-    book.insert_node_info(bystander.clone()).await.unwrap();
+    book.insert_node_info_tx(bystander.clone()).await.unwrap();
 
     let found = book.node_infos_by_topics(&[weather, sport]).await.unwrap();
     assert_eq!(found.len(), 1);
@@ -123,8 +123,8 @@ async fn bootstrap_nodes_are_counted_and_pickable() {
 
     let mut boot = node();
     boot.bootstrap = true;
-    book.insert_node_info(boot.clone()).await.unwrap();
-    book.insert_node_info(node()).await.unwrap();
+    book.insert_node_info_tx(boot.clone()).await.unwrap();
+    book.insert_node_info_tx(node()).await.unwrap();
 
     assert_eq!(book.all_nodes_len().await.unwrap(), 2);
     assert_eq!(book.all_bootstrap_nodes_len().await.unwrap(), 1);
@@ -144,12 +144,12 @@ async fn random_node_skips_stale_ones() {
     let mut stale = node();
     stale.metrics.report_failed_connection();
     assert!(stale.is_stale(), "fixture must actually be stale");
-    book.insert_node_info(stale).await.unwrap();
+    book.insert_node_info_tx(stale).await.unwrap();
 
     assert_eq!(book.random_node().await.unwrap(), None);
 
     let fresh = node();
-    book.insert_node_info(fresh.clone()).await.unwrap();
+    book.insert_node_info_tx(fresh.clone()).await.unwrap();
     assert_eq!(
         book.random_node().await.unwrap().map(|i| i.node_id),
         Some(fresh.node_id)
@@ -162,7 +162,7 @@ async fn selected_node_infos_skips_unknown_ids() {
     let known = node();
     let unknown = node();
 
-    book.insert_node_info(known.clone()).await.unwrap();
+    book.insert_node_info_tx(known.clone()).await.unwrap();
     let found = book
         .selected_node_infos(&[known.node_id, unknown.node_id])
         .await
@@ -198,12 +198,12 @@ async fn remove_older_than_ages_by_local_stamp() {
     let fresh = node();
     let old = node();
 
-    book.insert_node_info(fresh.clone()).await.unwrap();
+    book.insert_node_info_tx(fresh.clone()).await.unwrap();
     insert_aged(&book, old.clone(), Duration::from_secs(7200)).await;
     assert_eq!(book.all_nodes_len().await.unwrap(), 2);
 
     assert_eq!(
-        book.remove_older_than(Duration::from_secs(3600))
+        book.remove_older_than_tx(Duration::from_secs(3600))
             .await
             .unwrap(),
         1
@@ -221,12 +221,12 @@ async fn remove_older_than_ages_by_local_stamp() {
 #[tokio::test]
 async fn remove_older_than_keeps_same_second_entries() {
     let book = book();
-    book.insert_node_info(node()).await.unwrap();
+    book.insert_node_info_tx(node()).await.unwrap();
 
     // The comparison is strict, matching the SQLite backend's
     // `updated_at < UNIXEPOCH() - ?`, so an entry written this second
     // survives even a zero-length window.
-    assert_eq!(book.remove_older_than(Duration::ZERO).await.unwrap(), 0);
+    assert_eq!(book.remove_older_than_tx(Duration::ZERO).await.unwrap(), 0);
     assert_eq!(book.all_nodes_len().await.unwrap(), 1);
 }
 
@@ -237,12 +237,12 @@ async fn remove_older_than_takes_topics_with_it() {
     let topic = Topic::random();
 
     insert_aged(&book, old.clone(), Duration::from_secs(7200)).await;
-    book.set_topics(old.node_id, HashSet::from([topic]))
+    book.set_topics_tx(old.node_id, HashSet::from([topic]))
         .await
         .unwrap();
 
     assert_eq!(
-        book.remove_older_than(Duration::from_secs(3600))
+        book.remove_older_than_tx(Duration::from_secs(3600))
             .await
             .unwrap(),
         1

@@ -12,10 +12,10 @@ readme = "README.md"
 getrandom = "0.4"
 stickleback.workspace = true
 muniment = { workspace = true, features = ["json"] }
-p2panda-core = { package = "p2mere-core", version = "0.8" }
-p2panda-store = { package = "p2mere-store", version = "0.8", default-features = false }
-p2panda-sync = { package = "p2mere-sync", version = "0.8" }
-p2panda-net = { package = "p2mere-net", version = "0.8", default-features = false, features = ["address_book", "iroh_endpoint", "iroh_mdns", "discovery", "gossip", "sync"] }
+p2panda-core = { package = "p2mere-core", version = "0.9" }
+p2panda-store = { package = "p2mere-store", version = "0.9", default-features = false }
+p2panda-sync = { package = "p2mere-sync", version = "0.9" }
+p2panda-net = { package = "p2mere-net", version = "0.9", default-features = false, features = ["address_book", "iroh_endpoint", "iroh_mdns", "discovery", "gossip", "sync"] }
 serde = { version = "1", features = ["derive"] }
 tokio = { version = "1", features = ["io-util", "rt", "sync", "time"] }
 tokio-stream = "0.1"

@@ -20,22 +20,22 @@ serde_json = "1"
 tokio = { version = "1", features = ["macros", "rt-multi-thread", "net", "io-util", "sync", "time"] }
 
 [patch.crates-io]
-luggage = { git = "https://github.com/merely-made/eidetic.git", rev = "1fcdb359e72ac6309a96823c3ab5558eaaa3ec31" }
-stickleback = { git = "https://github.com/merely-made/eidetic.git", rev = "1fcdb359e72ac6309a96823c3ab5558eaaa3ec31" }
-muniment = { git = "https://github.com/merely-made/eidetic.git", rev = "1fcdb359e72ac6309a96823c3ab5558eaaa3ec31" }
-mere-proofs = { git = "https://github.com/merely-made/eidetic.git", rev = "1fcdb359e72ac6309a96823c3ab5558eaaa3ec31" }
+luggage = { git = "https://github.com/merely-made/eidetic.git", rev = "4aaa64d169daa1990e8833e7abb931336f0d0a32" }
+stickleback = { git = "https://github.com/merely-made/eidetic.git", rev = "4aaa64d169daa1990e8833e7abb931336f0d0a32" }
+muniment = { git = "https://github.com/merely-made/eidetic.git", rev = "4aaa64d169daa1990e8833e7abb931336f0d0a32" }
+mere-proofs = { git = "https://github.com/merely-made/eidetic.git", rev = "4aaa64d169daa1990e8833e7abb931336f0d0a32" }
 
 [patch."https://github.com/merely-made/mere.git"]
-luggage = { git = "https://github.com/merely-made/eidetic.git", rev = "1fcdb359e72ac6309a96823c3ab5558eaaa3ec31" }
-stickleback = { git = "https://github.com/merely-made/eidetic.git", rev = "1fcdb359e72ac6309a96823c3ab5558eaaa3ec31" }
-muniment = { git = "https://github.com/merely-made/eidetic.git", rev = "1fcdb359e72ac6309a96823c3ab5558eaaa3ec31" }
-mere-proofs = { git = "https://github.com/merely-made/eidetic.git", rev = "1fcdb359e72ac6309a96823c3ab5558eaaa3ec31" }
+luggage = { git = "https://github.com/merely-made/eidetic.git", rev = "4aaa64d169daa1990e8833e7abb931336f0d0a32" }
+stickleback = { git = "https://github.com/merely-made/eidetic.git", rev = "4aaa64d169daa1990e8833e7abb931336f0d0a32" }
+muniment = { git = "https://github.com/merely-made/eidetic.git", rev = "4aaa64d169daa1990e8833e7abb931336f0d0a32" }
+mere-proofs = { git = "https://github.com/merely-made/eidetic.git", rev = "4aaa64d169daa1990e8833e7abb931336f0d0a32" }
 
 [patch."https://www.github.com/merely-made/mere.git"]
-luggage = { git = "https://github.com/merely-made/eidetic.git", rev = "1fcdb359e72ac6309a96823c3ab5558eaaa3ec31" }
-stickleback = { git = "https://github.com/merely-made/eidetic.git", rev = "1fcdb359e72ac6309a96823c3ab5558eaaa3ec31" }
-muniment = { git = "https://github.com/merely-made/eidetic.git", rev = "1fcdb359e72ac6309a96823c3ab5558eaaa3ec31" }
-mere-proofs = { git = "https://github.com/merely-made/eidetic.git", rev = "1fcdb359e72ac6309a96823c3ab5558eaaa3ec31" }
+luggage = { git = "https://github.com/merely-made/eidetic.git", rev = "4aaa64d169daa1990e8833e7abb931336f0d0a32" }
+stickleback = { git = "https://github.com/merely-made/eidetic.git", rev = "4aaa64d169daa1990e8833e7abb931336f0d0a32" }
+muniment = { git = "https://github.com/merely-made/eidetic.git", rev = "4aaa64d169daa1990e8833e7abb931336f0d0a32" }
+mere-proofs = { git = "https://github.com/merely-made/eidetic.git", rev = "4aaa64d169daa1990e8833e7abb931336f0d0a32" }
 
 [workspace.lints.clippy]
 missing_errors_doc = "warn"

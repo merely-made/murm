@@ -226,13 +226,13 @@ impl<B: Backend, C: Codec> MunimentAddressBook<B, C> {
 impl<B: Backend, C: Codec> AddressBookStore<VerifyingKey, NodeInfo> for MunimentAddressBook<B, C> {
     type Error = StoreError;
 
-    async fn insert_node_info(&self, info: NodeInfo) -> Result<bool, Self::Error> {
+    async fn insert_node_info_tx(&self, info: NodeInfo) -> Result<bool, Self::Error> {
         let is_new = self.backend.get(&node_key(&info.node_id)).await?.is_none();
         self.write_record(info).await?;
         Ok(is_new)
     }
 
-    async fn remove_node_info(&self, id: &VerifyingKey) -> Result<bool, Self::Error> {
+    async fn remove_node_info_tx(&self, id: &VerifyingKey) -> Result<bool, Self::Error> {
         if self.backend.get(&node_key(id)).await?.is_none() {
             return Ok(false);
         }
@@ -248,7 +248,7 @@ impl<B: Backend, C: Codec> AddressBookStore<VerifyingKey, NodeInfo> for Muniment
         Ok(true)
     }
 
-    async fn remove_older_than(&self, duration: Duration) -> Result<usize, Self::Error> {
+    async fn remove_older_than_tx(&self, duration: Duration) -> Result<usize, Self::Error> {
         let cutoff = now_secs().saturating_sub(duration.as_secs());
         let stale: Vec<VerifyingKey> = self
             .all_records()
@@ -320,7 +320,7 @@ impl<B: Backend, C: Codec> AddressBookStore<VerifyingKey, NodeInfo> for Muniment
         Ok(infos)
     }
 
-    async fn set_topics(
+    async fn set_topics_tx(
         &self,
         id: VerifyingKey,
         topics: HashSet<Topic>,

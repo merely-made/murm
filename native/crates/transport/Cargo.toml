@@ -79,7 +79,7 @@ muniment.workspace = true
 # murm-sync's muniment-backed address book, so p2panda-store's bundled SQLite
 # backend (and sqlx with it) stays out of the graph entirely. Feature
 # unification means EVERY consumer has to opt out, not just one.
-p2panda-net = { package = "p2mere-net", version = "0.8", default-features = false, features = [
+p2panda-net = { package = "p2mere-net", version = "0.9", default-features = false, features = [
   "address_book",
   "iroh_endpoint",
   "iroh_mdns",
@@ -87,7 +87,7 @@ p2panda-net = { package = "p2mere-net", version = "0.8", default-features = fals
   "gossip",
   "sync",
 ] }
-p2panda-core = { package = "p2mere-core", version = "0.8" }
+p2panda-core = { package = "p2mere-core", version = "0.9" }
 # The builder's held seed is cleared on drop (vault lock ruling 51).
 zeroize = "1"
 # Reticulum mesh-networking backend (optional, see [features]). `retinue` is
@@ -124,7 +124,7 @@ zeroize = "1"
 notochord = { workspace = true, features = ["tokio"] }
 # The seed residue test's iroh-level mDNS baseline (vault lock ruling 60), the
 # version p2panda-net's `iroh_mdns` already locks.
-iroh-mdns-address-lookup = "=0.6.0"
+iroh-mdns-address-lookup = "=0.6.1"
 # A scratch root for the disk-backed blob store's reopen test.
 tempfile = "3"
 tokio = { version = "1", features = ["io-util", "sync", "macros", "rt", "rt-multi-thread", "time"] }

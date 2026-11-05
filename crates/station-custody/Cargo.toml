@@ -21,7 +21,7 @@ castellan-client = { workspace = true, features = ["client"] }
 personae.workspace = true
 # The check conclusions and faults, named directly (insigne proofs plan, B).
 insigne = { workspace = true, features = ["verify"] }
-p2panda-core = { package = "p2mere-core", version = "0.8" }
+p2panda-core = { package = "p2mere-core", version = "0.9" }
 # Radio dependencies are in this repository; Signalman shares these exact
 # path identities with the adapter.
 outrider.workspace = true
@@ -71,9 +71,9 @@ too_many_lines = "warn"
 
 [patch."crates-io"]
 ostiary = { version = "0.0.1", git = "https://www.github.com/merely-made/armillary.git", rev = "08ebbc44f5d391bd263fcc26b6053edf72741954" }
-chartulary = { git = "https://www.github.com/merely-made/eidetic.git", rev = "1fcdb359e72ac6309a96823c3ab5558eaaa3ec31" }
-eidetic = { git = "https://www.github.com/merely-made/eidetic.git", rev = "1fcdb359e72ac6309a96823c3ab5558eaaa3ec31" }
-muniment = { git = "https://www.github.com/merely-made/eidetic.git", rev = "1fcdb359e72ac6309a96823c3ab5558eaaa3ec31" }
+chartulary = { git = "https://www.github.com/merely-made/eidetic.git", rev = "4aaa64d169daa1990e8833e7abb931336f0d0a32" }
+eidetic = { git = "https://www.github.com/merely-made/eidetic.git", rev = "4aaa64d169daa1990e8833e7abb931336f0d0a32" }
+muniment = { git = "https://www.github.com/merely-made/eidetic.git", rev = "4aaa64d169daa1990e8833e7abb931336f0d0a32" }
 
 [patch."https://github.com/merely-made/armillary.git"]
 ostiary = { version = "0.0.1", git = "https://www.github.com/merely-made/armillary.git", rev = "08ebbc44f5d391bd263fcc26b6053edf72741954" }
