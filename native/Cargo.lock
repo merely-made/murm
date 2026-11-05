@@ -3102,7 +3102,7 @@ checksum = "4050469837a6ff301cd14c1f8f24f88549e6d548f24f64e2148eb0f72cebc51f"
 [[package]]
 name = "luggage"
 version = "0.1.0"
-source = "git+https://www.github.com/merely-made/eidetic.git?rev=7a3453a02bc7dea391ef18814c1bfa1a46e67160#7a3453a02bc7dea391ef18814c1bfa1a46e67160"
+source = "git+https://www.github.com/merely-made/eidetic.git?rev=a7a1458a22c80ef83e64f75d7cff8a77ee1d31eb#a7a1458a22c80ef83e64f75d7cff8a77ee1d31eb"
 dependencies = [
  "semver",
  "serde",
@@ -3164,7 +3164,7 @@ dependencies = [
 [[package]]
 name = "mere-proofs"
 version = "0.1.0"
-source = "git+https://www.github.com/merely-made/eidetic.git?rev=7a3453a02bc7dea391ef18814c1bfa1a46e67160#7a3453a02bc7dea391ef18814c1bfa1a46e67160"
+source = "git+https://www.github.com/merely-made/eidetic.git?rev=a7a1458a22c80ef83e64f75d7cff8a77ee1d31eb#a7a1458a22c80ef83e64f75d7cff8a77ee1d31eb"
 dependencies = [
  "blake3",
  "serde",
@@ -3268,7 +3268,7 @@ dependencies = [
 [[package]]
 name = "muniment"
 version = "0.2.1"
-source = "git+https://www.github.com/merely-made/eidetic.git?rev=7a3453a02bc7dea391ef18814c1bfa1a46e67160#7a3453a02bc7dea391ef18814c1bfa1a46e67160"
+source = "git+https://www.github.com/merely-made/eidetic.git?rev=a7a1458a22c80ef83e64f75d7cff8a77ee1d31eb#a7a1458a22c80ef83e64f75d7cff8a77ee1d31eb"
 dependencies = [
  "async-trait",
  "blake3",
@@ -5622,7 +5622,7 @@ checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 [[package]]
 name = "stickleback"
 version = "0.2.0"
-source = "git+https://www.github.com/merely-made/eidetic.git?rev=7a3453a02bc7dea391ef18814c1bfa1a46e67160#7a3453a02bc7dea391ef18814c1bfa1a46e67160"
+source = "git+https://www.github.com/merely-made/eidetic.git?rev=a7a1458a22c80ef83e64f75d7cff8a77ee1d31eb#a7a1458a22c80ef83e64f75d7cff8a77ee1d31eb"
 dependencies = [
  "blake3",
  "futures-util",
@@ -5636,6 +5636,7 @@ dependencies = [
  "personae",
  "serde",
  "serde_bytes",
+ "serde_json",
  "thiserror 1.0.69",
  "tokio",
 ]
