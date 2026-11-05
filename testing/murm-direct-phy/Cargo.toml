@@ -14,45 +14,37 @@ publish = false
 [dependencies]
 insigne = { git = "https://github.com/merely-made/dramatis.git", branch = "main", features = ["verify"] }
 identity = { package = "personae", git = "https://github.com/merely-made/dramatis.git", branch = "main" }
-murm = { git = "https://www.github.com/merely-made/murm.git", rev = "ce53cebb2ae9f420de5a0dcaa5a9768c639910af", features = ["session-lane"] }
+murm = { git = "https://www.github.com/merely-made/murm.git", rev = "bc82e1aa92e4076bd12b1910b3fe3ab992b7acb8", features = ["session-lane"] }
 notochord = { git = "https://github.com/merely-made/dramatis.git", branch = "main", features = ["tokio"] }
-retinue = { git = "https://www.github.com/merely-made/murm.git", rev = "ce53cebb2ae9f420de5a0dcaa5a9768c639910af", features = ["tulle-radio"] }
-transport = { package = "mere-transport", git = "https://www.github.com/merely-made/murm.git", rev = "ce53cebb2ae9f420de5a0dcaa5a9768c639910af", features = ["noise", "notochord", "reticulum"] }
-tulle = { git = "https://www.github.com/merely-made/murm.git", rev = "ce53cebb2ae9f420de5a0dcaa5a9768c639910af", features = ["serial-async"] }
+retinue = { git = "https://www.github.com/merely-made/murm.git", rev = "bc82e1aa92e4076bd12b1910b3fe3ab992b7acb8", features = ["tulle-radio"] }
+transport = { package = "mere-transport", git = "https://www.github.com/merely-made/murm.git", rev = "bc82e1aa92e4076bd12b1910b3fe3ab992b7acb8", features = ["noise", "notochord", "reticulum"] }
+tulle = { git = "https://www.github.com/merely-made/murm.git", rev = "bc82e1aa92e4076bd12b1910b3fe3ab992b7acb8", features = ["serial-async"] }
 tokio = { version = "1", features = ["io-util", "macros", "rt", "rt-multi-thread", "sync", "time"] }
 
 [workspace]
 
 [patch.crates-io]
-mere-p2panda-net = { git = "https://github.com/mark-ik/p2panda.git", tag = "mere-p2panda-net-0.7.5-upstream-20261013" }
-p2panda-auth = { git = "https://github.com/mark-ik/p2panda.git", tag = "mere-p2panda-net-0.7.5-upstream-20261013" }
-p2panda-core = { git = "https://github.com/mark-ik/p2panda.git", tag = "mere-p2panda-net-0.7.5-upstream-20261013" }
-p2panda-discovery = { git = "https://github.com/mark-ik/p2panda.git", tag = "mere-p2panda-net-0.7.5-upstream-20261013" }
-p2panda-encryption = { git = "https://github.com/mark-ik/p2panda.git", tag = "mere-p2panda-net-0.7.5-upstream-20261013" }
-p2panda-store = { git = "https://github.com/mark-ik/p2panda.git", tag = "mere-p2panda-net-0.7.5-upstream-20261013" }
-p2panda-stream = { git = "https://github.com/mark-ik/p2panda.git", tag = "mere-p2panda-net-0.7.5-upstream-20261013" }
-p2panda-sync = { git = "https://github.com/mark-ik/p2panda.git", tag = "mere-p2panda-net-0.7.5-upstream-20261013" }
 # The storage family uses the qualified Eidetic receiving cohort; the Git
 # source forwarders below keep Murm's older pins on that same source.
-luggage = { git = "https://www.github.com/merely-made/eidetic.git", rev = "7a3453a02bc7dea391ef18814c1bfa1a46e67160" }
-muniment = { git = "https://www.github.com/merely-made/eidetic.git", rev = "7a3453a02bc7dea391ef18814c1bfa1a46e67160" }
-mere-proofs = { git = "https://www.github.com/merely-made/eidetic.git", rev = "7a3453a02bc7dea391ef18814c1bfa1a46e67160" }
-stickleback = { git = "https://www.github.com/merely-made/eidetic.git", rev = "7a3453a02bc7dea391ef18814c1bfa1a46e67160" }
+luggage = { git = "https://www.github.com/merely-made/eidetic.git", rev = "1fcdb359e72ac6309a96823c3ab5558eaaa3ec31" }
+muniment = { git = "https://www.github.com/merely-made/eidetic.git", rev = "1fcdb359e72ac6309a96823c3ab5558eaaa3ec31" }
+mere-proofs = { git = "https://www.github.com/merely-made/eidetic.git", rev = "1fcdb359e72ac6309a96823c3ab5558eaaa3ec31" }
+stickleback = { git = "https://www.github.com/merely-made/eidetic.git", rev = "1fcdb359e72ac6309a96823c3ab5558eaaa3ec31" }
 
 [patch."https://github.com/merely-made/eidetic.git"]
-luggage = { git = "https://www.github.com/merely-made/eidetic.git", rev = "7a3453a02bc7dea391ef18814c1bfa1a46e67160" }
-muniment = { git = "https://www.github.com/merely-made/eidetic.git", rev = "7a3453a02bc7dea391ef18814c1bfa1a46e67160" }
-mere-proofs = { git = "https://www.github.com/merely-made/eidetic.git", rev = "7a3453a02bc7dea391ef18814c1bfa1a46e67160" }
-stickleback = { git = "https://www.github.com/merely-made/eidetic.git", rev = "7a3453a02bc7dea391ef18814c1bfa1a46e67160" }
+luggage = { git = "https://www.github.com/merely-made/eidetic.git", rev = "1fcdb359e72ac6309a96823c3ab5558eaaa3ec31" }
+muniment = { git = "https://www.github.com/merely-made/eidetic.git", rev = "1fcdb359e72ac6309a96823c3ab5558eaaa3ec31" }
+mere-proofs = { git = "https://www.github.com/merely-made/eidetic.git", rev = "1fcdb359e72ac6309a96823c3ab5558eaaa3ec31" }
+stickleback = { git = "https://www.github.com/merely-made/eidetic.git", rev = "1fcdb359e72ac6309a96823c3ab5558eaaa3ec31" }
 
 # Compatibility source keys for immutable suppliers published before the
 # repository rename. Targets and current direct dependencies use Murm.
 [patch."https://github.com/merely-made/retinue.git"]
-mere-transport = { git = "https://www.github.com/merely-made/murm.git", rev = "ce53cebb2ae9f420de5a0dcaa5a9768c639910af" }
-murm = { git = "https://www.github.com/merely-made/murm.git", rev = "ce53cebb2ae9f420de5a0dcaa5a9768c639910af" }
-retinue = { git = "https://www.github.com/merely-made/murm.git", rev = "ce53cebb2ae9f420de5a0dcaa5a9768c639910af" }
-selvage = { git = "https://www.github.com/merely-made/murm.git", rev = "ce53cebb2ae9f420de5a0dcaa5a9768c639910af" }
-tulle = { git = "https://www.github.com/merely-made/murm.git", rev = "ce53cebb2ae9f420de5a0dcaa5a9768c639910af" }
+mere-transport = { git = "https://www.github.com/merely-made/murm.git", rev = "bc82e1aa92e4076bd12b1910b3fe3ab992b7acb8" }
+murm = { git = "https://www.github.com/merely-made/murm.git", rev = "bc82e1aa92e4076bd12b1910b3fe3ab992b7acb8" }
+retinue = { git = "https://www.github.com/merely-made/murm.git", rev = "bc82e1aa92e4076bd12b1910b3fe3ab992b7acb8" }
+selvage = { git = "https://www.github.com/merely-made/murm.git", rev = "bc82e1aa92e4076bd12b1910b3fe3ab992b7acb8" }
+tulle = { git = "https://www.github.com/merely-made/murm.git", rev = "bc82e1aa92e4076bd12b1910b3fe3ab992b7acb8" }
 
 [workspace.lints.clippy]
 missing_errors_doc = "warn"
@@ -65,31 +57,31 @@ too_many_lines = "warn"
 workspace = true
 
 [patch."https://github.com/merely-made/distillery.git"]
-esp = { git = "https://www.github.com/merely-made/distillery.git", rev = "6346f087bb87d879cc9367dfb3d20fa00a8cbb9d" }
-esp-testkit = { git = "https://www.github.com/merely-made/distillery.git", rev = "6346f087bb87d879cc9367dfb3d20fa00a8cbb9d" }
-distillery = { git = "https://www.github.com/merely-made/distillery.git", rev = "6346f087bb87d879cc9367dfb3d20fa00a8cbb9d" }
-mere-mesh = { git = "https://www.github.com/merely-made/distillery.git", rev = "6346f087bb87d879cc9367dfb3d20fa00a8cbb9d" }
+esp = { git = "https://www.github.com/merely-made/distillery.git", rev = "3e97257215969fb856de9c57a3158c6609ed4e6f" }
+esp-testkit = { git = "https://www.github.com/merely-made/distillery.git", rev = "3e97257215969fb856de9c57a3158c6609ed4e6f" }
+distillery = { git = "https://www.github.com/merely-made/distillery.git", rev = "3e97257215969fb856de9c57a3158c6609ed4e6f" }
+mere-mesh = { git = "https://www.github.com/merely-made/distillery.git", rev = "3e97257215969fb856de9c57a3158c6609ed4e6f" }
 
 [patch."https://github.com/merely-made/murm.git".mere-transport]
 git = "https://www.github.com/merely-made/murm.git"
-rev = "ce53cebb2ae9f420de5a0dcaa5a9768c639910af"
+rev = "bc82e1aa92e4076bd12b1910b3fe3ab992b7acb8"
 
 [patch."https://github.com/merely-made/murm.git".murm]
 git = "https://www.github.com/merely-made/murm.git"
-rev = "ce53cebb2ae9f420de5a0dcaa5a9768c639910af"
+rev = "bc82e1aa92e4076bd12b1910b3fe3ab992b7acb8"
 
 [patch."https://github.com/merely-made/murm.git".murm-sync]
 git = "https://www.github.com/merely-made/murm.git"
-rev = "ce53cebb2ae9f420de5a0dcaa5a9768c639910af"
+rev = "bc82e1aa92e4076bd12b1910b3fe3ab992b7acb8"
 
 [patch."https://github.com/merely-made/murm.git".retinue]
 git = "https://www.github.com/merely-made/murm.git"
-rev = "ce53cebb2ae9f420de5a0dcaa5a9768c639910af"
+rev = "bc82e1aa92e4076bd12b1910b3fe3ab992b7acb8"
 
 [patch."https://github.com/merely-made/murm.git".selvage]
 git = "https://www.github.com/merely-made/murm.git"
-rev = "ce53cebb2ae9f420de5a0dcaa5a9768c639910af"
+rev = "bc82e1aa92e4076bd12b1910b3fe3ab992b7acb8"
 
 [patch."https://github.com/merely-made/murm.git".tulle]
 git = "https://www.github.com/merely-made/murm.git"
-rev = "ce53cebb2ae9f420de5a0dcaa5a9768c639910af"
+rev = "bc82e1aa92e4076bd12b1910b3fe3ab992b7acb8"
