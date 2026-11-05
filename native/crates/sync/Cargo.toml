@@ -10,6 +10,7 @@ readme = "README.md"
 
 [dependencies]
 getrandom = "0.4"
+identity.workspace = true
 stickleback.workspace = true
 muniment = { workspace = true, features = ["json"] }
 p2panda-core = { package = "p2mere-core", version = "0.9" }
@@ -27,7 +28,6 @@ tokio-util = { version = "0.7", default-features = false, features = ["codec"] }
 
 [dev-dependencies]
 tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
-identity.workspace = true
 transport = { workspace = true, features = ["test-identity"] }
 
 [lints]
