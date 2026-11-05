@@ -186,3 +186,9 @@ Done conditions: original and receiving 48 codec tests agree; Rust 1.97.1 alloca
 Receiving result: 48 codec, 14 Outrider voice and 2 Signalman voice tests pass; both consumer all-target checks, allocation-free MSRV, codec Clippy and root hooks pass. The only root lock package change is Pipit registry-to-local source; published codec version and clip identities stay 0.2.0.
 
 Signalman Desktop receiving follow-up: its independent lock now selects the same local Pipit 0.2.0. The locked offline all-target desktop check passes; the only lock change removes Pipit's registry source/checksum. Existing Mere/Genet source cohorts are preserved. This is compilation, not headed/audio-device qualification.
+
+- E2ah shared-port acceptance: the native registration adapter now requests
+  paced multicast replies for QU questions. Multiple local 5353 listeners can
+  consume unicast answers unpredictably; QU queriers accept multicast too.
+  Legacy ephemeral-port answers remain unicast and the default core profile
+  remains unchanged. Genet's E2ah packet owns headed acceptance/failure evidence.
