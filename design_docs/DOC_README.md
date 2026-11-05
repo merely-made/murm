@@ -851,3 +851,5 @@ Bluetooth capability brief was superseded by the wall-node plan.
 The [foundation supplier promotion (2026-10-19)](archive_docs/2026-11-02/2026-10-13_murm_family_move_plan.md#2026-10-19-foundation-supplier-promotion) records the canonical Eidetic dependency cutover, native library tests and the separately open killed-peer gate.
 
 Foundation source adoption (2026-10-19): canonical promoted-family revisions and consumer source validation are recorded in `mere/design_docs/mere_docs/implementation_strategy/2026-10-19_family_promotion_plan.md`. Existing application and domain authority remain with their owning components.
+
+Catalogue discovery carrier (2026-11-04): the [transport consolidation plan](2026-10-28_transport_consolidation_plan.md#catalogue-advertisement-carrier-2026-11-04) records bounded opaque advertisements in `murm-sync`. Gemot owns catalogue semantics and authority; Turnstone owns disclosure and app UI.

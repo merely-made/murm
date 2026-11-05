@@ -308,3 +308,16 @@ scope is its refreshed source homes map; Station Custody is the first ready cut.
   the admitted-services survey.
 - 2026-11-01: T6's Murm piece landed: the session lane on the gate (murm
   `4fd77e5d78b`), Mere's direct-PHY probe moved with it (mere `c6d1d19f9`).
+
+### Catalogue advertisement carrier, 2026-11-04
+
+Murm `murm-sync::advertisements` carries bounded opaque hints over the existing
+gossip endpoint. Host-set message/queue ceilings, overflow counters and receive
+task cancellation belong here. Gemot owns signed catalogue hints, expiry,
+watermarks and current collection/reader authority. Turnstone owns disclosure
+intent, UI and navigation. Topic equality is not semantic classification or
+permission; public descriptions require explicit publication, and protected
+advertisements require their own audience protection. Required receipts and the
+100 MB retained-byte cap are in `Code/testing/gemot/discovery-ui-20261104`.
+The native two-endpoint gossip/budget gate passes; remote-machine and UI gates
+remain distinct.

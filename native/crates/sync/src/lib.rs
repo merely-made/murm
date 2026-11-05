@@ -11,6 +11,7 @@
 //! joining, receive-task lifetime, resync observation and transport addresses.
 
 pub mod address_book;
+pub mod advertisements;
 mod group_key;
 mod joined_space;
 mod synced_space;
