@@ -55,13 +55,17 @@ impl Advertisements {
             while let Some(message) = receiver.next().await {
                 let mut state = output.lock().expect("advertisement inbox");
                 match message {
-                    Ok(bytes) if bytes.len() <= limits.max_bytes => {
+                    Ok(bytes)
+                        if bytes.len() >= 21
+                            && &bytes[..4] == b"MAD1"
+                            && bytes.len() - 20 <= limits.max_bytes =>
+                    {
                         state.status.received = state.status.received.saturating_add(1);
                         if state.messages.len() == limits.pending {
                             state.messages.pop_front();
                             state.status.dropped = state.status.dropped.saturating_add(1);
                         }
-                        state.messages.push_back(bytes);
+                        state.messages.push_back(bytes[20..].to_vec());
                     },
                     Ok(_) => state.status.oversized = state.status.oversized.saturating_add(1),
                     Err(_) => state.status.dropped = state.status.dropped.saturating_add(1),
@@ -79,7 +83,15 @@ impl Advertisements {
         if bytes.is_empty() || bytes.len() > self.limits.max_bytes {
             return Err("advertisement byte ceiling".into());
         }
-        self.handle.publish(bytes).await.map_err(|e| e.to_string())
+        // Fresh transport nonce lets a still-valid signed hint be repeated after
+        // its first copy arrived before authority/history, or before a peer joined.
+        // Application sequence numbers and expiry still reject replayed content.
+        let mut frame = b"MAD1".to_vec();
+        let mut nonce = [0; 16];
+        getrandom::fill(&mut nonce).map_err(|e| e.to_string())?;
+        frame.extend(nonce);
+        frame.extend(bytes);
+        self.handle.publish(frame).await.map_err(|e| e.to_string())
     }
     pub fn drain(&self) -> Vec<Vec<u8>> {
         self.inbox
@@ -157,5 +169,20 @@ mod tests {
         .await
         .unwrap();
         assert!(receiver.status().received > 0);
+        let before = receiver.status().received;
+        tokio::time::timeout(Duration::from_secs(5), async {
+            loop {
+                sender
+                    .publish(b"signed domain hint".to_vec())
+                    .await
+                    .unwrap();
+                tokio::time::sleep(Duration::from_millis(100)).await;
+                if receiver.status().received > before {
+                    break;
+                }
+            }
+        })
+        .await
+        .expect("same signed content can be reannounced after first delivery");
     }
 }

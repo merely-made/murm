@@ -28,3 +28,9 @@ rendezvous requires an unpredictable topic and its own audience protection.
 
 Qualified by the real two-endpoint gossip/budget test; this is a local transport
 gate, separate from app UI or remote-machine acceptance.
+
+Repeated hints use a fresh 16-byte delivery nonce inside a versioned bounded
+carrier frame, so gossip deduplication does not suppress reannouncement after
+late history or a new peer. The application signature, sequence and deadline
+remain unchanged and authoritative. The real gossip test covers a second
+delivery of identical application bytes.

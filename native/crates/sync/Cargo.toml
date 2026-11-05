@@ -9,6 +9,7 @@ description = "Shared peer sync sessions over injected endpoints and domain-vali
 readme = "README.md"
 
 [dependencies]
+getrandom = "0.4"
 stickleback.workspace = true
 muniment = { workspace = true, features = ["json"] }
 p2panda-core = "0.7.0"
