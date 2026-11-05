@@ -152,11 +152,47 @@ impl SyncLane {
         expected: PeerID,
         session: impl StreamSession,
     ) -> Result<StreamSyncOutcome, SyncLaneError> {
-        let guard = self.gate.reserve(&self.noise_policy(Some(expected)))?;
+        self.dial_noise_any(carrier, server, key, Some(expected), session)
+            .await
+    }
+
+    /// [`dial_noise`](Self::dial_noise) with the responder's Noise key optional.
+    ///
+    /// `None` encrypts and gates the stream without naming who answers. That is
+    /// right when the bytes authenticate themselves, as a release log does
+    /// against its key: a holder is any peer with a copy, and the reader has no
+    /// key to expect.
+    pub async fn dial_noise_any<T: Transport>(
+        &self,
+        carrier: &T,
+        server: PeerID,
+        key: &Ed25519Keypair,
+        expected: Option<PeerID>,
+        session: impl StreamSession,
+    ) -> Result<StreamSyncOutcome, SyncLaneError> {
+        let guard = self.gate.reserve(&self.noise_policy(expected))?;
         let outbound = guard
             .run(carrier.connect_session(server, self.protocol.clone()))
             .await??;
         let secured = guard.noise_initiator(key, outbound.stream).await?;
+        admit_and_run(secured, |_| true, session).await
+    }
+
+    /// Run Noise as `key` over a stream the caller opened (an I2P or onion
+    /// stream, for instance), optionally require the responder to prove
+    /// `expected`, then sync.
+    pub async fn dial_noise_stream<S>(
+        &self,
+        stream: S,
+        key: &Ed25519Keypair,
+        expected: Option<PeerID>,
+        session: impl StreamSession,
+    ) -> Result<StreamSyncOutcome, SyncLaneError>
+    where
+        S: AsyncRead + AsyncWrite + Unpin,
+    {
+        let guard = self.gate.reserve(&self.noise_policy(expected))?;
+        let secured = guard.noise_initiator(key, stream).await?;
         admit_and_run(secured, |_| true, session).await
     }
 

@@ -1702,6 +1702,11 @@ dependencies = [
 ]
 
 [[package]]
+name = "gemot-address"
+version = "0.1.0"
+source = "git+https://www.github.com/merely-made/gemot.git?rev=cd795b0a0ad877e65e2d2534fe1f106a03bb7a11#cd795b0a0ad877e65e2d2534fe1f106a03bb7a11"
+
+[[package]]
 name = "genawaiter"
 version = "0.99.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3309,6 +3314,20 @@ dependencies = [
  "murm-ocapn",
  "notochord",
  "personae",
+ "thiserror 1.0.69",
+ "tokio",
+]
+
+[[package]]
+name = "murm-resolve"
+version = "0.0.1"
+dependencies = [
+ "gemot-address",
+ "mere-transport",
+ "muniment",
+ "murm-sync",
+ "personae",
+ "stickleback",
  "thiserror 1.0.69",
  "tokio",
 ]

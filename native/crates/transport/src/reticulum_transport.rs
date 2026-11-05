@@ -95,6 +95,7 @@ pub enum ReticulumInterface {
 pub struct ReticulumTransportBuilder<'a> {
     master: &'a Ed25519Keypair,
     alpns: Vec<Alpn>,
+    watched: Vec<Alpn>,
     interfaces: Vec<ReticulumInterface>,
     announce_interval: Duration,
     connect_timeout: Duration,
@@ -110,6 +111,7 @@ impl<'a> ReticulumTransportBuilder<'a> {
         Self {
             master,
             alpns: Vec::new(),
+            watched: Vec::new(),
             interfaces: Vec::new(),
             announce_interval: ANNOUNCE_INTERVAL,
             connect_timeout: CONNECT_TIMEOUT,
@@ -123,6 +125,14 @@ impl<'a> ReticulumTransportBuilder<'a> {
     /// ALPN protocols this transport will accept and announce.
     pub fn alpns(mut self, alpns: Vec<Alpn>) -> Self {
         self.alpns = alpns;
+        self
+    }
+
+    /// ALPNs whose announces this transport learns peers from without serving
+    /// or announcing them itself, so a reader can find holders of a name
+    /// (see [`ReticulumTransport::announced_peers`]) and not look like one.
+    pub fn watch_alpns(mut self, alpns: Vec<Alpn>) -> Self {
+        self.watched = alpns;
         self
     }
 
@@ -182,6 +192,7 @@ impl<'a> ReticulumTransportBuilder<'a> {
         ReticulumTransport::bind_inner(
             self.master,
             self.alpns,
+            self.watched,
             self.interfaces,
             self.announce_interval,
             self.connect_timeout,
@@ -239,6 +250,7 @@ impl ReticulumTransport {
     async fn bind_inner(
         master: &Ed25519Keypair,
         alpns: Vec<Alpn>,
+        watched: Vec<Alpn>,
         interfaces: Vec<ReticulumInterface>,
         announce_interval: Duration,
         connect_timeout: Duration,
@@ -297,6 +309,13 @@ impl ReticulumTransport {
             inbound.insert(alpn.clone(), Arc::new(TokioMutex::new(rx)));
             names.insert(alpn.clone(), name);
             app_data.insert(alpn.clone(), data);
+        }
+
+        // Watched names are matched against announces but never registered.
+        for alpn in watched {
+            names
+                .entry(alpn.clone())
+                .or_insert_with(|| destination_name_for_alpn(&alpn));
         }
 
         let endpoint = Arc::new(endpoint);
@@ -361,6 +380,20 @@ impl ReticulumTransport {
                 self.endpoint.announce(name, data);
             }
         }
+    }
+
+    /// Peers whose verified announces named `alpn`, in no particular order.
+    ///
+    /// Only ALPNs this transport registered or watched are learned. A peer
+    /// that announced a name proved the destination, not that it serves
+    /// anything under it: the caller verifies what the peer then sends.
+    pub fn announced_peers(&self, alpn: &Alpn) -> Vec<PeerID> {
+        let peers = self.peers.lock().expect("peers mutex poisoned");
+        peers
+            .iter()
+            .filter(|(_, by_alpn)| by_alpn.contains_key(alpn))
+            .map(|(peer, _)| *peer)
+            .collect()
     }
 
     /// Stop the Retinue endpoint after allowing already-written link bytes to

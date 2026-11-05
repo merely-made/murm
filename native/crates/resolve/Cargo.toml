@@ -1,0 +1,31 @@
+[package]
+name = "murm-resolve"
+version = "0.0.1"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Resolve a knot:// release-log address to a verified edition chain over any enabled carrier."
+publish = false
+
+[features]
+# Each carrier adapter is opt-in. Memory and Noise-over-TCP need nothing more.
+p2panda = []
+reticulum = ["transport/reticulum"]
+
+[dependencies]
+gemot-address = { version = "0.1.0", git = "https://www.github.com/merely-made/gemot.git", rev = "cd795b0a0ad877e65e2d2534fe1f106a03bb7a11" }
+murm-sync.workspace = true
+transport = { workspace = true, features = ["sync-lane"] }
+identity.workspace = true
+stickleback.workspace = true
+muniment.workspace = true
+tokio = { version = "1", features = ["io-util", "time"] }
+thiserror = "1"
+
+[dev-dependencies]
+transport = { workspace = true, features = ["sync-lane", "test-identity"] }
+tokio = { version = "1", features = ["io-util", "macros", "rt-multi-thread", "time", "net"] }
+
+[lints]
+workspace = true
