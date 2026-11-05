@@ -14,12 +14,18 @@ pub mod address_book;
 pub mod advertisements;
 mod group_key;
 mod joined_space;
+mod stream_codec;
+mod stream_sync;
 mod synced_space;
 
 pub use address_book::MunimentAddressBook;
 pub use group_key::GroupKeySync;
 pub use joined_space::JoinedSpace;
-pub use p2panda_net::{Endpoint, Gossip};
 pub use p2panda_net::sync::hooks::{AfterHandshakeOutcome, SyncHooks, SyncHooksList};
+pub use p2panda_net::{Endpoint, Gossip};
 pub use stickleback::JoinError;
+pub use stream_sync::{
+    MAX_DEADLINE, MAX_FRAME_BYTES, MAX_SESSION_BYTES, StreamSession, StreamSync, StreamSyncError,
+    StreamSyncLimits, StreamSyncOutcome, processor_accept,
+};
 pub use synced_space::{SyncRound, SyncStatus, SyncedSpace};

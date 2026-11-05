@@ -17,8 +17,13 @@ p2panda-store = { version = "0.7.0", default-features = false }
 p2panda-sync = "0.7.0"
 p2panda-net = { package = "mere-p2panda-net", version = "=0.7.5", default-features = false, features = ["address_book", "iroh_endpoint", "iroh_mdns", "discovery", "gossip", "sync"] }
 serde = { version = "1", features = ["derive"] }
-tokio = { version = "1", features = ["rt", "sync", "time"] }
+tokio = { version = "1", features = ["io-util", "rt", "sync", "time"] }
 tokio-stream = "0.1"
+# Framing and sink/stream adapters for the carrier-neutral LogSync session.
+bytes = "1"
+futures-util = { version = "0.3", default-features = false, features = ["sink"] }
+thiserror = "1"
+tokio-util = { version = "0.7", default-features = false, features = ["codec"] }
 
 [dev-dependencies]
 tokio = { version = "1", features = ["macros", "rt-multi-thread"] }

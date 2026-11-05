@@ -8,10 +8,11 @@
 //!
 //! [`ReticulumTransport`] runs Mere's bilateral peer-to-peer lane over Reticulum
 //! links, using [`retinue`] — Mark's from-scratch Rust implementation of the
-//! Reticulum Network Stack, wire-compatible with RNS 1.3.x. It is feature-gated
-//! behind the `reticulum` cargo feature and is default-off. Sync (gossip / RBSR /
-//! LogSync) and blob transfer remain iroh-only; this is the bilateral stream lane
-//! only.
+//! Reticulum Network Stack, qualified against RNS 1.5.7 within the interoperability
+//! scope recorded in `crates/retinue/README.md`. It is feature-gated behind the
+//! `reticulum` cargo feature and is default-off. This is the bilateral stream
+//! lane: gossip and blob transfer remain iroh-only, and catch-up sync rides the
+//! stream through `sync_lane`.
 //!
 //! ## Identity
 //!

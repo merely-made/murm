@@ -16,6 +16,18 @@ Moved from Eidetic's Stickleback networking feature at
 formats. The canonical scope and qualification live in Murm's transport
 consolidation plan, T7.
 
+## Catch-up over any stream
+
+`StreamSync` runs p2panda-sync's `TopicLogSync` (catch-up only) over any
+`AsyncRead + AsyncWrite`, for carriers that are not p2panda-net: it frames with
+its own bounds (frame ceiling, read budget, one deadline) and hands each
+received operation to the caller's `accept`, usually `processor_accept` over a
+stickleback `OperationProcessor`. The caller secures and admits the stream
+first; `transport::sync_lane::SyncLane` (feature `sync-lane` on `mere-transport`)
+does that through the shared setup gate for p2panda, Noise over a carrier's
+stream and Noise over TCP. It sits in `mere-transport` because that crate
+already depends on this one; the reverse edge would be a cycle.
+
 ## Catalogue advertisement carrier
 
 `advertisements::Advertisements` joins caller-selected gossip over the existing

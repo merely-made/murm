@@ -68,6 +68,8 @@ pub mod reticulum_transport;
 /// Owner-selected session security with bounded setup and admission leases.
 #[cfg(feature = "noise")]
 pub mod security;
+#[cfg(feature = "sync-lane")]
+pub mod sync_lane;
 mod transport;
 
 pub use crate::accepted::{AcceptedSession, IngressContext, IngressInterfaceId, TransportKind};

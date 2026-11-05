@@ -32,6 +32,11 @@ notochord = ["dep:notochord"]
 # `DerivedKeypair` through `builder_for`, so a master cannot reach a transport
 # (vault lock plan, ruling 96). Turn it on in dev-dependencies only.
 test-identity = []
+# Catch-up sync over any carrier's stream (`murm_sync::StreamSync`), set up
+# through the shared security gate. Needs no carrier of its own; it composes
+# with whichever of `reticulum`, `i2p` and the always-present memory and
+# p2panda carriers the host enables, and with Noise over TCP.
+sync-lane = ["noise"]
 # Host-owned SAM STREAM sessions. I2P destinations are routing aliases, not
 # Personae identities; callers still authenticate application streams.
 i2p = ["dep:truchman"]
@@ -98,6 +103,11 @@ sha2 = { workspace = true, optional = true }
 name = "notochord"
 required-features = ["notochord"]
 
+# The lane tests pair real carriers; Reticulum is its own opt-in on top.
+[[test]]
+name = "sync_lane"
+required-features = ["sync-lane", "test-identity"]
+
 # Vault lock ruling 51: what a bind leaves of its seed. Personae's tracker
 # installs its own global allocator, so this runs outside libtest.
 [[test]]
@@ -106,6 +116,7 @@ path = "tests/seed_residue.rs"
 harness = false
 
 [dev-dependencies]
+stickleback.workspace = true
 insigne = { workspace = true, features = ["verify"] }
 # The seed residue test's tracker (personae's) runs its own positive control.
 serde_json.workspace = true
