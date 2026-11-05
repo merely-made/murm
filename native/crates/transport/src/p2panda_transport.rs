@@ -52,7 +52,7 @@ use std::sync::{Arc, Mutex as StdMutex};
 use std::task::{Context, Poll};
 use std::time::Duration;
 
-use identity::DerivedKeypair;
+use identity::CarrierKeypair;
 #[cfg(any(test, feature = "test-identity"))]
 use identity::Ed25519Keypair;
 use iroh::EndpointAddr;
@@ -73,9 +73,9 @@ pub use p2panda_net::iroh_mdns::MdnsDiscoveryMode;
 // dependency of its own.
 pub use iroh::RelayUrl;
 use muniment::{JsonCodec, MemoryBackend};
+use murm_sync::MunimentAddressBook;
 use p2panda_net::address_book::AddressBookStoreHandle;
 use p2panda_net::{AddressBook, Discovery, MdnsDiscovery};
-use murm_sync::MunimentAddressBook;
 use tokio::io::{AsyncRead, AsyncWrite, ReadBuf};
 use tokio::sync::{Mutex as TokioMutex, mpsc};
 
@@ -635,11 +635,12 @@ impl P2pandaTransport {
         builder
     }
 
-    /// Start a transport from a key personae derived. The production
-    /// constructor: a master cannot be passed here (vault lock plan, ruling
-    /// 96), and the keypair builder is for tests only.
-    pub fn builder_for(key: &DerivedKeypair) -> P2pandaTransportBuilder<'static> {
-        let mut seed = key.to_seed();
+    /// Start a transport from a custodied key: a derived persona key or an
+    /// unassociated one (release log D3). The production constructor: a
+    /// master cannot be passed here (vault lock plan, ruling 96), and the
+    /// keypair builder is for tests only.
+    pub fn builder_for(key: &impl CarrierKeypair) -> P2pandaTransportBuilder<'static> {
+        let mut seed = key.keypair().to_seed();
         let builder = Self::builder_from_seed_ref(&seed);
         seed.zeroize();
         builder

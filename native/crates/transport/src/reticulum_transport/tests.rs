@@ -51,6 +51,27 @@ async fn derived_identity_is_stable_and_peer_id_matches() {
     assert_eq!(a.local_peer_id(), b.local_peer_id());
 }
 
+#[test]
+fn unassociated_identity_shares_no_half_with_the_persona() {
+    use identity::{IdentityProvider, InMemoryProvider, UnassociatedKeypair};
+
+    let provider = InMemoryProvider::from_seed([10u8; 32]);
+    let persona = super::keys::derive_identity(&provider.derived_keypair(b"anon").unwrap());
+    let master = super::keys::derive_identity(provider.master_keypair());
+    let key = UnassociatedKeypair::generate();
+    let anon = super::keys::derive_identity(&key);
+
+    for known in [&persona, &master] {
+        let (a, k) = (
+            anon.public().to_public_bytes(),
+            known.public().to_public_bytes(),
+        );
+        assert_ne!(a[..32], k[..32], "x25519 half");
+        assert_ne!(a[32..], k[32..], "ed25519 half");
+    }
+    assert_eq!(anon.public().ed25519_bytes(), &key.public_key().to_bytes());
+}
+
 #[tokio::test]
 async fn announce_identity_is_the_peer_and_fits_a_direct_phy_frame() {
     let alpn = Alpn::new("mere/murm/v1");

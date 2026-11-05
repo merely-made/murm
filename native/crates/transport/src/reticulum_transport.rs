@@ -48,7 +48,7 @@ use std::net::SocketAddr;
 use std::sync::{Arc, Mutex as StdMutex};
 use std::time::Duration;
 
-use identity::Ed25519Keypair;
+use identity::{CarrierKeypair, Ed25519Keypair};
 use tokio::sync::{Mutex as TokioMutex, mpsc};
 use tokio::task::JoinHandle;
 use tokio::time::{Instant, interval, sleep, timeout};
@@ -224,6 +224,13 @@ impl ReticulumTransport {
     /// Construct a builder for a `ReticulumTransport`.
     pub fn builder(master: &Ed25519Keypair) -> ReticulumTransportBuilder<'_> {
         ReticulumTransportBuilder::new(master)
+    }
+
+    /// Construct a builder from a custodied key: a derived persona key or an
+    /// unassociated one. An unassociated key yields a Reticulum identity (and
+    /// `PeerID`) that shares nothing with the persona's plain identity.
+    pub fn builder_for(key: &impl CarrierKeypair) -> ReticulumTransportBuilder<'_> {
+        ReticulumTransportBuilder::new(key.keypair())
     }
 
     // This is the builder's one-to-one handoff; a parameter bundle here would

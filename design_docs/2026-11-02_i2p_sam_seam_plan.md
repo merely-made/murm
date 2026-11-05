@@ -4,7 +4,7 @@
 
 ## Open phases and done conditions
 
-- **Identity fork:** decide whether non-transport nodes keep Retinue's stable I2P destination or mirror RNS's ephemeral identity unless the host requests static identity. Record the privacy and interoperability consequences before changing behavior.
+- **Identity fork:** decide whether non-transport nodes keep Retinue's stable I2P destination or mirror RNS's ephemeral identity unless the host requests static identity. Record the privacy and interoperability consequences before changing behavior. Decided 2026-11-05 for anonymous carriers: see the identity decision below; the stable-destination versus ephemeral question for non-transport nodes stays open.
 - **Current-cohort interop:** repeat the other stock-RNS dial/IFAC variants, cross-router and restart cases against the actual receiving revision with a TCP positive control. Identify stock versions, keyfile/b32, route retention, redial cadence and recovery separately. Current Windows reconciliation reran only Retinue-dials-RNS without IFAC; retained earlier receipts remain historical cohort evidence.
 - **SAM datagrams:** implement and qualify Datagram2/3 only when a consumer needs them; this is a deferred feature, not a prerequisite for the present stream seam.
 - **Upstream findings:** preserve the original upstream ledger and bring any filing to the owner first. The emissary debug assertion mitigation and termination reporting do not establish absence of the underlying condition; i2pd split HELLO, RNS lookup failure and IFAC default behavior retain their exact observed scopes.
@@ -27,3 +27,15 @@ The [crates.io registry](https://crates.io/api/v1/crates/truchman) reports `truc
   `gemot/design_docs/moothold_docs/implementation_strategy/2026-11-03_moot_relay_pools_plan.md`;
   its scripted and pool-specific public qualification does not close the
   Retinue interoperability gates.
+
+## Decision, 2026-11-05: I2P identity is unassociated by default
+
+Release log decision D3 (2026-11-03, Mark, asked which key roots a site's address):
+
+> you want all three; root, associated, unassociated addresses. unassociated first and foremost is the most secure and can be associated in a layer above at convenience, but deriving disposable personas from root for permission management is a legitimate benefit when you need to manage other people's identities without owning them (kids, biz, orgs, hierarchy). anonymity is important and manageable identity is important.
+
+For an anonymous carrier, including I2P, the destination keys come from a Personae `UnassociatedKeypair` (fresh Ed25519, no derivation from any root, dramatis `crates/personae/src/unassociated.rs`), never from `derive_keypair` or the persona's plain identity. Consequences:
+
+- A destination published for an unassociated identity links to no persona unless its holder signs an `AssociationClaim` (insigne `association`), a layer above the key. Associated destinations (derived personae) and root destinations stay available when the holder or a managing party picks them.
+- Interoperability: Retinue's stable keyfile destination is unchanged for hosts that ask for a static identity. The unassociated key is a stored, custodied static key, so it survives restarts without being derived from anything; a host that wants an ephemeral destination simply generates a new one.
+- Transport binding: `P2pandaTransport::builder_for` and `ReticulumTransport::builder_for` take any `CarrierKeypair` (derived or unassociated); a master key still cannot reach a transport. Direct SAM destination keys are not yet fed from this type; that wiring, and the stable-versus-ephemeral question for non-transport nodes, remain open.
