@@ -3394,6 +3394,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "murm-holder"
+version = "0.0.1"
+dependencies = [
+ "getrandom 0.4.3",
+ "mere-transport",
+ "muniment",
+ "murm-resolve",
+ "murm-sync",
+ "personae",
+ "stickleback",
+ "thiserror 1.0.69",
+ "tokio",
+]
+
+[[package]]
 name = "murm-i2p"
 version = "0.0.1"
 dependencies = [

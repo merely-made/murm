@@ -20,7 +20,10 @@ use murm_sync::{
     StreamSession, StreamSync, StreamSyncError, StreamSyncLimits, StreamSyncOutcome,
     processor_accept,
 };
-use stickleback::edition::{EditionExt, EditionPolicy, VerifyingKey, edition_topic};
+use stickleback::edition::{
+    EditionChain, EditionError, EditionExt, EditionLimits, EditionOperation, EditionPolicy,
+    VerifyingKey, edition_topic, verify_edition_chain,
+};
 use stickleback::{MunimentStore, OperationProcessor};
 use tokio::io::{AsyncRead, AsyncReadExt, AsyncWrite, AsyncWriteExt};
 use transport::Alpn;
@@ -131,6 +134,41 @@ impl<B: Backend + Clone + Send + Sync + 'static> Holder<B> {
         stored
     }
 
+    /// The verified chain held for `key`, or `None` when nothing is held.
+    ///
+    /// # Errors
+    /// The held operations do not verify as one log under the key.
+    pub async fn chain(&self, key: &[u8; 32]) -> Result<Option<EditionChain>, EditionError> {
+        let Ok(author) = VerifyingKey::from_bytes(key) else {
+            return Ok(None);
+        };
+        let held = self
+            .store
+            .get_log_entries(&author, &0u64, None, None)
+            .await
+            .map_err(|error| EditionError::Invalid(error.to_string()))?;
+        let Some(held) = held else { return Ok(None) };
+        let operations: Vec<EditionOperation> = held.into_iter().map(|(op, _)| op).collect();
+        verify_edition_chain(key, &operations, EditionLimits::default()).map(Some)
+    }
+
+    /// Drop every held edition of `key`. Returns how many were removed.
+    pub async fn forget(&self, key: &[u8; 32]) -> usize {
+        let Ok(Some(held)) = self.chain(key).await else {
+            return 0;
+        };
+        let mut removed = 0;
+        for operation in held.operations() {
+            removed += usize::from(
+                self.store
+                    .delete_operation(&operation.hash)
+                    .await
+                    .unwrap_or(false),
+            );
+        }
+        removed
+    }
+
     /// The session to hand a lane for one accepted stream.
     pub fn session(&self) -> HolderSession<B> {
         HolderSession {
@@ -159,14 +197,36 @@ impl<B: Backend + Clone + Send + Sync + 'static> StreamSession for HolderSession
         }
         let mut key = [0u8; 32];
         key.copy_from_slice(&request[2..]);
-        let held = match VerifyingKey::from_bytes(&key) {
-            Ok(author) => self
-                .store
-                .get_latest_entry(&author, &0u64)
-                .await
-                .is_ok_and(|latest| latest.is_some()),
-            Err(_) => false,
-        };
+        self.serve_key(stream, key, true).await
+    }
+}
+
+impl<B: Backend + Clone + Send + Sync + 'static> HolderSession<B> {
+    /// Answer a request for `key` already read off the stream: reply held or
+    /// not, then sync. `allowed` false answers not held whatever the store has,
+    /// so a holder that serves only logs it agreed to hold can gate here.
+    ///
+    /// # Errors
+    /// The stream failed or the sync did not finish.
+    pub async fn serve_key<St>(
+        self,
+        mut stream: St,
+        key: [u8; 32],
+        allowed: bool,
+    ) -> Result<StreamSyncOutcome, StreamSyncError>
+    where
+        St: AsyncRead + AsyncWrite + Unpin,
+    {
+        let deadline = self.limits.deadline();
+        let held = allowed
+            && match VerifyingKey::from_bytes(&key) {
+                Ok(author) => self
+                    .store
+                    .get_latest_entry(&author, &0u64)
+                    .await
+                    .is_ok_and(|latest| latest.is_some()),
+                Err(_) => false,
+            };
         bounded(deadline, async {
             stream.write_all(&[u8::from(held)]).await?;
             stream.flush().await
