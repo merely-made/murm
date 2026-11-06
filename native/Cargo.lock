@@ -1493,7 +1493,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "39cab71617ae0d63f51a36d69f866391735b51691dbda63cf6f96d042b63efeb"
 dependencies = [
  "libc",
- "windows-sys 0.52.0",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
@@ -1755,7 +1755,7 @@ dependencies = [
 [[package]]
 name = "gemot-address"
 version = "0.1.0"
-source = "git+https://www.github.com/merely-made/gemot.git?rev=cd795b0a0ad877e65e2d2534fe1f106a03bb7a11#cd795b0a0ad877e65e2d2534fe1f106a03bb7a11"
+source = "git+https://github.com/merely-made/gemot.git?branch=main#864de8a6b5ef2a12ca8677d6afdb814d277b2d88"
 
 [[package]]
 name = "genawaiter"
@@ -3218,7 +3218,7 @@ checksum = "4050469837a6ff301cd14c1f8f24f88549e6d548f24f64e2148eb0f72cebc51f"
 [[package]]
 name = "luggage"
 version = "0.1.0"
-source = "git+https://www.github.com/merely-made/eidetic.git?rev=98f2c6977d7210d2149b80ee8be0b3e0f724d44b#98f2c6977d7210d2149b80ee8be0b3e0f724d44b"
+source = "git+https://github.com/merely-made/eidetic.git?branch=main#5e85e6ec0c395b9c2971d571841d446403ebbe12"
 dependencies = [
  "semver",
  "serde",
@@ -3252,7 +3252,7 @@ checksum = "cf8baf1c55e62ffcace7a9f06f4bd9cd3f0c4beb022d3b367256b91b87513d98"
 [[package]]
 name = "mere-proofs"
 version = "0.1.0"
-source = "git+https://www.github.com/merely-made/eidetic.git?rev=98f2c6977d7210d2149b80ee8be0b3e0f724d44b#98f2c6977d7210d2149b80ee8be0b3e0f724d44b"
+source = "git+https://github.com/merely-made/eidetic.git?branch=main#5e85e6ec0c395b9c2971d571841d446403ebbe12"
 dependencies = [
  "blake3",
  "serde",
@@ -3358,7 +3358,7 @@ dependencies = [
 [[package]]
 name = "muniment"
 version = "0.2.1"
-source = "git+https://www.github.com/merely-made/eidetic.git?rev=98f2c6977d7210d2149b80ee8be0b3e0f724d44b#98f2c6977d7210d2149b80ee8be0b3e0f724d44b"
+source = "git+https://github.com/merely-made/eidetic.git?branch=main#5e85e6ec0c395b9c2971d571841d446403ebbe12"
 dependencies = [
  "async-trait",
  "blake3",
@@ -5289,7 +5289,7 @@ dependencies = [
  "errno",
  "libc",
  "linux-raw-sys",
- "windows-sys 0.52.0",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
@@ -5347,7 +5347,7 @@ dependencies = [
  "security-framework",
  "security-framework-sys",
  "webpki-root-certs",
- "windows-sys 0.52.0",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
@@ -5852,7 +5852,7 @@ checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 [[package]]
 name = "stickleback"
 version = "0.2.0"
-source = "git+https://www.github.com/merely-made/eidetic.git?rev=98f2c6977d7210d2149b80ee8be0b3e0f724d44b#98f2c6977d7210d2149b80ee8be0b3e0f724d44b"
+source = "git+https://github.com/merely-made/eidetic.git?branch=main#5e85e6ec0c395b9c2971d571841d446403ebbe12"
 dependencies = [
  "blake3",
  "cbor-core",
@@ -6090,7 +6090,7 @@ dependencies = [
  "getrandom 0.4.3",
  "once_cell",
  "rustix",
- "windows-sys 0.52.0",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
@@ -6848,7 +6848,7 @@ version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c2a7b1c03c876122aa43f3020e6c3c3ee5c05081c9a00739faf7503aeba10d22"
 dependencies = [
- "windows-sys 0.52.0",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]

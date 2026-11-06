@@ -157,7 +157,7 @@ dependencies = [
 [[package]]
 name = "castellan-client"
 version = "0.0.2"
-source = "git+https://github.com/merely-made/dramatis.git?branch=main#e8d4487ab4b1fc27bbde0ea6c681c68c84b33e06"
+source = "git+https://github.com/merely-made/dramatis.git?branch=main#b2ab8bf8dccb95e5b4f5aa53cbcf9c6bf7a6e137"
 dependencies = [
  "base64",
  "chatelaine",
@@ -237,7 +237,7 @@ dependencies = [
 [[package]]
 name = "chartulary"
 version = "0.3.0"
-source = "git+https://www.github.com/merely-made/eidetic.git?rev=98f2c6977d7210d2149b80ee8be0b3e0f724d44b#98f2c6977d7210d2149b80ee8be0b3e0f724d44b"
+source = "git+https://github.com/merely-made/eidetic.git?branch=main#5e85e6ec0c395b9c2971d571841d446403ebbe12"
 dependencies = [
  "muniment",
  "petgraph",
@@ -251,7 +251,7 @@ dependencies = [
 [[package]]
 name = "chatelaine"
 version = "0.0.3"
-source = "git+https://github.com/merely-made/dramatis.git?branch=main#e8d4487ab4b1fc27bbde0ea6c681c68c84b33e06"
+source = "git+https://github.com/merely-made/dramatis.git?branch=main#b2ab8bf8dccb95e5b4f5aa53cbcf9c6bf7a6e137"
 dependencies = [
  "serde",
  "uuid",
@@ -423,7 +423,7 @@ dependencies = [
 [[package]]
 name = "dramatis"
 version = "0.0.5"
-source = "git+https://github.com/merely-made/dramatis.git?branch=main#e8d4487ab4b1fc27bbde0ea6c681c68c84b33e06"
+source = "git+https://github.com/merely-made/dramatis.git?branch=main#b2ab8bf8dccb95e5b4f5aa53cbcf9c6bf7a6e137"
 dependencies = [
  "gaz",
  "personae",
@@ -457,7 +457,7 @@ dependencies = [
 [[package]]
 name = "eidetic"
 version = "0.0.3"
-source = "git+https://www.github.com/merely-made/eidetic.git?rev=98f2c6977d7210d2149b80ee8be0b3e0f724d44b#98f2c6977d7210d2149b80ee8be0b3e0f724d44b"
+source = "git+https://github.com/merely-made/eidetic.git?branch=main#5e85e6ec0c395b9c2971d571841d446403ebbe12"
 dependencies = [
  "async-trait",
  "blake3",
@@ -592,7 +592,7 @@ dependencies = [
 [[package]]
 name = "gaz"
 version = "0.0.3"
-source = "git+https://github.com/merely-made/dramatis.git?branch=main#e8d4487ab4b1fc27bbde0ea6c681c68c84b33e06"
+source = "git+https://github.com/merely-made/dramatis.git?branch=main#b2ab8bf8dccb95e5b4f5aa53cbcf9c6bf7a6e137"
 dependencies = [
  "insigne",
  "serde",
@@ -869,7 +869,7 @@ dependencies = [
 [[package]]
 name = "insigne"
 version = "0.0.2"
-source = "git+https://github.com/merely-made/dramatis.git?branch=main#e8d4487ab4b1fc27bbde0ea6c681c68c84b33e06"
+source = "git+https://github.com/merely-made/dramatis.git?branch=main#b2ab8bf8dccb95e5b4f5aa53cbcf9c6bf7a6e137"
 dependencies = [
  "blake3",
  "ed25519-dalek",
@@ -978,7 +978,7 @@ dependencies = [
 [[package]]
 name = "muniment"
 version = "0.2.1"
-source = "git+https://www.github.com/merely-made/eidetic.git?rev=98f2c6977d7210d2149b80ee8be0b3e0f724d44b#98f2c6977d7210d2149b80ee8be0b3e0f724d44b"
+source = "git+https://github.com/merely-made/eidetic.git?branch=main#5e85e6ec0c395b9c2971d571841d446403ebbe12"
 dependencies = [
  "async-trait",
  "blake3",
@@ -989,7 +989,7 @@ dependencies = [
 [[package]]
 name = "notochord"
 version = "0.1.1"
-source = "git+https://github.com/merely-made/dramatis.git?branch=main#e8d4487ab4b1fc27bbde0ea6c681c68c84b33e06"
+source = "git+https://github.com/merely-made/dramatis.git?branch=main#b2ab8bf8dccb95e5b4f5aa53cbcf9c6bf7a6e137"
 dependencies = [
  "blake3",
  "insigne",
@@ -1017,7 +1017,7 @@ checksum = "9f7c3e4beb33f85d45ae3e3a1792185706c8e16d043238c593331cc7cd313b50"
 [[package]]
 name = "ostiary"
 version = "0.0.1"
-source = "git+https://www.github.com/merely-made/armillary.git?rev=08ebbc44f5d391bd263fcc26b6053edf72741954#08ebbc44f5d391bd263fcc26b6053edf72741954"
+source = "git+https://github.com/merely-made/armillary.git?branch=main#c27d3bfeb96faf750c0cb6be9dc167815a3083be"
 dependencies = [
  "base64",
  "rand_core 0.6.4",
@@ -1066,7 +1066,7 @@ checksum = "9b4f627cb1b25917193a259e49bdad08f671f8d9708acfd5fe0a8c1455d87220"
 [[package]]
 name = "personae"
 version = "0.3.1"
-source = "git+https://github.com/merely-made/dramatis.git?branch=main#e8d4487ab4b1fc27bbde0ea6c681c68c84b33e06"
+source = "git+https://github.com/merely-made/dramatis.git?branch=main#b2ab8bf8dccb95e5b4f5aa53cbcf9c6bf7a6e137"
 dependencies = [
  "blake3",
  "chacha20poly1305",
@@ -1559,7 +1559,7 @@ dependencies = [
 [[package]]
 name = "sporran"
 version = "0.0.1"
-source = "git+https://github.com/merely-made/dramatis.git?branch=main#e8d4487ab4b1fc27bbde0ea6c681c68c84b33e06"
+source = "git+https://github.com/merely-made/dramatis.git?branch=main#b2ab8bf8dccb95e5b4f5aa53cbcf9c6bf7a6e137"
 dependencies = [
  "async-trait",
  "blake3",

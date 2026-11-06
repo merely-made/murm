@@ -20,13 +20,11 @@ serde_json = "1"
 tokio = { version = "1", features = ["macros", "rt-multi-thread", "net", "io-util", "sync", "time"] }
 
 [patch.crates-io]
-luggage = { git = "https://github.com/merely-made/eidetic.git", branch = "main" }
 stickleback = { git = "https://github.com/merely-made/eidetic.git", branch = "main" }
 muniment = { git = "https://github.com/merely-made/eidetic.git", branch = "main" }
 mere-proofs = { git = "https://github.com/merely-made/eidetic.git", branch = "main" }
 
 [patch."https://github.com/merely-made/mere.git"]
-luggage = { git = "https://github.com/merely-made/eidetic.git", branch = "main" }
 stickleback = { git = "https://github.com/merely-made/eidetic.git", branch = "main" }
 muniment = { git = "https://github.com/merely-made/eidetic.git", branch = "main" }
 mere-proofs = { git = "https://github.com/merely-made/eidetic.git", branch = "main" }
