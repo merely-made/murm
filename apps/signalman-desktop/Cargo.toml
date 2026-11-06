@@ -59,9 +59,9 @@ cpal = "=0.18.2"
 # The radio-specific custody adapter shares this repository's radio types.
 # Its wallet authority remains behind Dramatis and Djinn.
 station-custody = { path = "../../crates/station-custody" }
-chartulary = { git = "https://github.com/merely-made/eidetic.git", rev = "98f2c6977d7210d2149b80ee8be0b3e0f724d44b" }
+chartulary = { git = "https://github.com/merely-made/eidetic.git", branch = "main" }
 gaz = { git = "https://github.com/merely-made/dramatis.git", branch = "main" }
-muniment = { features = ["redb"], git = "https://github.com/merely-made/eidetic.git", rev = "98f2c6977d7210d2149b80ee8be0b3e0f724d44b" }
+muniment = { features = ["redb"], git = "https://github.com/merely-made/eidetic.git", branch = "main" }
 sceno = { git = "https://github.com/merely-made/mere.git", branch = "main" }
 scenomise = { git = "https://github.com/merely-made/mere.git", branch = "main" }
 seiche = { git = "https://github.com/merely-made/mere.git", branch = "main" }
@@ -108,17 +108,16 @@ getrandom = "0.3"
 # with Stylo at genet 55c05d11; ipc-channel left this graph by genet 15713014).
 [patch.crates-io]
 # The custody adapter and Castellan client exchange one declaration type.
-ostiary = { git = "https://github.com/merely-made/armillary.git", rev = "08ebbc44f5d391bd263fcc26b6053edf72741954" }
+ostiary = { git = "https://github.com/merely-made/armillary.git", branch = "main" }
 # Registry Webcue and native Genet sessions share one canonical input vocabulary.
 document-session-api = { git = "https://github.com/merely-made/genet.git", branch = "main" }
 # Canonical promoted families; keep registry and Git consumers type-identical.
-eidetic = { git = "https://www.github.com/merely-made/eidetic.git", rev = "98f2c6977d7210d2149b80ee8be0b3e0f724d44b" }
+eidetic = { git = "https://github.com/merely-made/eidetic.git", branch = "main" }
 # Gaz and Mere exchange one Muniment family.
-muniment = { git = "https://www.github.com/merely-made/eidetic.git", rev = "98f2c6977d7210d2149b80ee8be0b3e0f724d44b" }
+muniment = { git = "https://github.com/merely-made/eidetic.git", branch = "main" }
 # No `parley` row: since genet 5ae30cad the fork is published as
 # `genet-parley`, nothing in genet answers to `parley`, and a patch row would
 # fail resolution (mere's own [patch.crates-io] says the same).
-
 
 [workspace.package]
 rust-version = "1.99"
@@ -128,15 +127,8 @@ rustix = { version = "1", features = ["termios"] }
 
 # Keep the actor and apparatus-core on one published Armillary source identity
 # when Mere and other Git suppliers refer to its canonical URL.
-[patch."https://github.com/merely-made/armillary.git"]
-armillary = { git = "https://www.github.com/merely-made/armillary.git", rev = "864f107d44bf759111ad2ea3c9036b2cfbf03f4c" }
-apparatus-core = { git = "https://www.github.com/merely-made/armillary.git", rev = "06340b08327b29c3485ecb0089bb5cafed20fd80" }
-
 # Keep admitted store and graph types identical across the local native crates
 # and the current Mere Git consumer while the answer cohort advances.
-[patch."https://github.com/merely-made/eidetic.git"]
-chartulary = { git = "https://www.github.com/merely-made/eidetic.git", rev = "98f2c6977d7210d2149b80ee8be0b3e0f724d44b" }
-muniment = { git = "https://www.github.com/merely-made/eidetic.git", rev = "98f2c6977d7210d2149b80ee8be0b3e0f724d44b" }
 
 [workspace.lints.clippy]
 missing_errors_doc = "warn"

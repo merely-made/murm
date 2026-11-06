@@ -14,7 +14,7 @@ p2panda = []
 reticulum = ["transport/reticulum"]
 
 [dependencies]
-gemot-address = { version = "0.1.0", git = "https://www.github.com/merely-made/gemot.git", rev = "cd795b0a0ad877e65e2d2534fe1f106a03bb7a11" }
+gemot-address = { version = "0.1.0", git = "https://github.com/merely-made/gemot.git", branch = "main" }
 murm-sync.workspace = true
 transport = { workspace = true, features = ["sync-lane"] }
 identity.workspace = true

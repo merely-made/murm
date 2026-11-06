@@ -20,22 +20,16 @@ serde_json = "1"
 tokio = { version = "1", features = ["macros", "rt-multi-thread", "net", "io-util", "sync", "time"] }
 
 [patch.crates-io]
-luggage = { git = "https://github.com/merely-made/eidetic.git", rev = "86e78dd37914fd61f8ca336bf0ab2da716356fca" }
-stickleback = { git = "https://github.com/merely-made/eidetic.git", rev = "86e78dd37914fd61f8ca336bf0ab2da716356fca" }
-muniment = { git = "https://github.com/merely-made/eidetic.git", rev = "86e78dd37914fd61f8ca336bf0ab2da716356fca" }
-mere-proofs = { git = "https://github.com/merely-made/eidetic.git", rev = "86e78dd37914fd61f8ca336bf0ab2da716356fca" }
+luggage = { git = "https://github.com/merely-made/eidetic.git", branch = "main" }
+stickleback = { git = "https://github.com/merely-made/eidetic.git", branch = "main" }
+muniment = { git = "https://github.com/merely-made/eidetic.git", branch = "main" }
+mere-proofs = { git = "https://github.com/merely-made/eidetic.git", branch = "main" }
 
 [patch."https://github.com/merely-made/mere.git"]
-luggage = { git = "https://github.com/merely-made/eidetic.git", rev = "86e78dd37914fd61f8ca336bf0ab2da716356fca" }
-stickleback = { git = "https://github.com/merely-made/eidetic.git", rev = "86e78dd37914fd61f8ca336bf0ab2da716356fca" }
-muniment = { git = "https://github.com/merely-made/eidetic.git", rev = "86e78dd37914fd61f8ca336bf0ab2da716356fca" }
-mere-proofs = { git = "https://github.com/merely-made/eidetic.git", rev = "86e78dd37914fd61f8ca336bf0ab2da716356fca" }
-
-[patch."https://www.github.com/merely-made/mere.git"]
-luggage = { git = "https://github.com/merely-made/eidetic.git", rev = "86e78dd37914fd61f8ca336bf0ab2da716356fca" }
-stickleback = { git = "https://github.com/merely-made/eidetic.git", rev = "86e78dd37914fd61f8ca336bf0ab2da716356fca" }
-muniment = { git = "https://github.com/merely-made/eidetic.git", rev = "86e78dd37914fd61f8ca336bf0ab2da716356fca" }
-mere-proofs = { git = "https://github.com/merely-made/eidetic.git", rev = "86e78dd37914fd61f8ca336bf0ab2da716356fca" }
+luggage = { git = "https://github.com/merely-made/eidetic.git", branch = "main" }
+stickleback = { git = "https://github.com/merely-made/eidetic.git", branch = "main" }
+muniment = { git = "https://github.com/merely-made/eidetic.git", branch = "main" }
+mere-proofs = { git = "https://github.com/merely-made/eidetic.git", branch = "main" }
 
 [workspace.lints.clippy]
 missing_errors_doc = "warn"

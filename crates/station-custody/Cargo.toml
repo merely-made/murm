@@ -48,7 +48,7 @@ resolver = "2"
 [workspace.dependencies]
 dramatis = { version = "0.0.5", git = "https://github.com/merely-made/dramatis.git", branch = "main" }
 blake3 = "1"
-ostiary = { version = "0.0.1", git = "https://github.com/merely-made/armillary.git", rev = "08ebbc44f5d391bd263fcc26b6053edf72741954", default-features = false }
+ostiary = { version = "0.0.1", git = "https://github.com/merely-made/armillary.git", branch = "main", default-features = false }
 castellan-client = { version = "0.0.2", git = "https://github.com/merely-made/dramatis.git", branch = "main", default-features = false }
 personae = { version = "0.3.1", git = "https://github.com/merely-made/dramatis.git", branch = "main" }
 insigne = { version = "0.0.2", git = "https://github.com/merely-made/dramatis.git", branch = "main" }
@@ -70,10 +70,8 @@ undocumented_unsafe_blocks = "warn"
 too_many_lines = "warn"
 
 [patch."crates-io"]
-ostiary = { version = "0.0.1", git = "https://www.github.com/merely-made/armillary.git", rev = "08ebbc44f5d391bd263fcc26b6053edf72741954" }
-chartulary = { git = "https://www.github.com/merely-made/eidetic.git", rev = "98f2c6977d7210d2149b80ee8be0b3e0f724d44b" }
-eidetic = { git = "https://www.github.com/merely-made/eidetic.git", rev = "98f2c6977d7210d2149b80ee8be0b3e0f724d44b" }
-muniment = { git = "https://www.github.com/merely-made/eidetic.git", rev = "98f2c6977d7210d2149b80ee8be0b3e0f724d44b" }
+ostiary = { version = "0.0.1", git = "https://github.com/merely-made/armillary.git", branch = "main" }
+chartulary = { git = "https://github.com/merely-made/eidetic.git", branch = "main" }
+eidetic = { git = "https://github.com/merely-made/eidetic.git", branch = "main" }
+muniment = { git = "https://github.com/merely-made/eidetic.git", branch = "main" }
 
-[patch."https://github.com/merely-made/armillary.git"]
-ostiary = { version = "0.0.1", git = "https://www.github.com/merely-made/armillary.git", rev = "08ebbc44f5d391bd263fcc26b6053edf72741954" }
