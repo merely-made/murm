@@ -220,6 +220,7 @@ fn focused_export_path_accepts_injected_text_before_export() {
         accept_live_capture(supplied.source, supplied.stored, &DurableCapture::Disabled).unwrap();
     state.adopt_availability(projected);
     let hooks: HostHooks<DesktopState, Logic, Child> = HostHooks {
+        prepare_presentation: Box::new(|_, _| None),
         focused_text: Box::new(signalman_desktop::focused_revision_field),
         ..inert_hooks()
     };

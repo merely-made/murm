@@ -45,6 +45,7 @@ fn launch(selection: &std::path::Path, library: &std::path::Path) -> Host {
     let sheet = state.appearance.take_stylesheet_change().unwrap();
     let mut previews = signalman_desktop::appearance_host::PreviewBindings::default();
     let hooks: HostHooks<DesktopState, Logic, Child> = HostHooks {
+        prepare_presentation: Box::new(|_, _| None),
         frame: Box::new(move |ctx| {
             previews.frame(ctx);
             false

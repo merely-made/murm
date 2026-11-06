@@ -155,8 +155,8 @@ fn facts(
         .count();
     (connected, ack, rx)
 }
-pub fn from_env() -> Option<mesquite::Lane<Product>> {
-    let config = mesquite::LaneConfig::from_env("SIGNALMAN_COMPANION")?;
+pub fn from_env() -> Option<mandrake::Lane<Product>> {
+    let config = mandrake::LaneConfig::from_env("SIGNALMAN_COMPANION")?;
     let tag = std::env::var("SIGNALMAN_COMPANION_TAG")
         .expect("native companion scenario requires its explicit bench tag");
     assert!(
@@ -199,7 +199,7 @@ pub fn from_env() -> Option<mesquite::Lane<Product>> {
             ),
         });
     Some(
-        mesquite::Lane::from_config(
+        mandrake::Lane::from_config(
             config,
             Product {
                 sheet: crate::theme::sheet(),
@@ -221,11 +221,11 @@ pub fn from_env() -> Option<mesquite::Lane<Product>> {
         .with_frame_limit(Some(7200)),
     )
 }
-pub fn drive(lane: &mut mesquite::Lane<Product>, ctx: &mut Context<'_>) {
+pub fn drive(lane: &mut mandrake::Lane<Product>, ctx: &mut Context<'_>) {
     lane.product_mut().sheet = ctx.runner.state().appearance.stylesheet();
     lane.after_frame(ctx);
 }
-impl mesquite::Product for Product {
+impl mandrake::Product for Product {
     type State = DesktopState;
     type Logic = Logic;
     type View = Child;
@@ -286,7 +286,7 @@ impl mesquite::Product for Product {
     fn app_step(
         &mut self,
         ctx: &mut Context<'_>,
-        _: mesquite::Checkpoints<'_>,
+        _: mandrake::Checkpoints<'_>,
         line: &str,
     ) -> Result<(), String> {
         if line == "begin companion reconnect exchange" {
@@ -493,7 +493,7 @@ impl mesquite::Product for Product {
         }
         Ok(())
     }
-    fn receipt_checks(&self, captures: &[mesquite::CaptureRecord]) -> Vec<String> {
+    fn receipt_checks(&self, captures: &[mandrake::CaptureRecord]) -> Vec<String> {
         let required = if self.previous_exchange.is_some() {
             7
         } else {

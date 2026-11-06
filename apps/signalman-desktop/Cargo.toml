@@ -50,9 +50,9 @@ cambium = { git = "https://github.com/merely-made/mere.git", branch = "main", ve
 cambium-desktop = { git = "https://github.com/merely-made/mere.git", branch = "main", version = "0.1.0" }
 sprigging = { git = "https://github.com/merely-made/mere.git", branch = "main", version = "0.3.0" }
 # Renamed `taproot` at genet 7baa554c; the alias keeps the `genet_probe` paths.
-genet-probe = { package = "taproot", version = "0.1.0", git = "https://github.com/merely-made/genet.git", branch = "main" }
-genet-scripted-dom = { git = "https://github.com/merely-made/genet.git", branch = "main", version = "=0.1.2" }
-layout-dom-api = { git = "https://github.com/merely-made/genet.git", branch = "main", version = "=0.1.1" }
+genet-probe = { package = "taproot", version = "0.1.0", git = "https://www.github.com/merely-made/genet.git", rev = "ceb5a9795a8f26ffe3c6fba25a55bfce3dd0a15d" }
+genet-scripted-dom = { git = "https://www.github.com/merely-made/genet.git", rev = "ceb5a9795a8f26ffe3c6fba25a55bfce3dd0a15d", version = "=0.1.2" }
+layout-dom-api = { git = "https://www.github.com/merely-made/genet.git", rev = "ceb5a9795a8f26ffe3c6fba25a55bfce3dd0a15d", version = "=0.1.1" }
 winit = "0.30"
 cpal = "=0.18.2"
 
@@ -85,7 +85,7 @@ personae = { git = "https://github.com/merely-made/dramatis.git", branch = "main
 tabard = { git = "https://github.com/merely-made/mere.git", branch = "main" }
 tabard-workshop = { git = "https://github.com/merely-made/mere.git", branch = "main", features = ["native-host"] }
 directories = "6"
-mesquite = { git = "https://github.com/merely-made/mere.git", branch = "main" }
+mandrake = { git = "https://github.com/merely-made/mere.git", branch = "main" }
 serde_json = "1"
 tempfile = "3"
 tokio = { version = "1", features = ["rt", "time"] }
@@ -110,18 +110,11 @@ getrandom = "0.3"
 # The custody adapter and Castellan client exchange one declaration type.
 ostiary = { git = "https://github.com/merely-made/armillary.git", rev = "08ebbc44f5d391bd263fcc26b6053edf72741954" }
 # Registry Webcue and native Genet sessions share one canonical input vocabulary.
-document-session-api = { git = "https://github.com/merely-made/genet.git", branch = "main" }
-# Mere's patched AccessKit (support/patches/accesskit): its cambium hosts call
-# methods only the patched copy has, so the same copy, from mere at this lock.
-accesskit = { git = "https://github.com/merely-made/mere.git", branch = "main" }
+document-session-api = { git = "https://www.github.com/merely-made/genet.git", rev = "ceb5a9795a8f26ffe3c6fba25a55bfce3dd0a15d" }
 # Canonical promoted families; keep registry and Git consumers type-identical.
 eidetic = { git = "https://www.github.com/merely-made/eidetic.git", rev = "86e78dd37914fd61f8ca336bf0ab2da716356fca" }
 # Gaz and Mere exchange one Muniment family.
 muniment = { git = "https://www.github.com/merely-made/eidetic.git", rev = "86e78dd37914fd61f8ca336bf0ab2da716356fca" }
-# Genet renamed its vendored Taffy package to `genet-taffy` after the revision
-# this workspace used to pin, so the patch must name the package explicitly
-# while keeping the `taffy` dependency alias Cargo expects.
-taffy = { package = "genet-taffy", version = "=0.14.0", git = "https://github.com/merely-made/genet.git", branch = "main" }
 # No `parley` row: since genet 5ae30cad the fork is published as
 # `genet-parley`, nothing in genet answers to `parley`, and a patch row would
 # fail resolution (mere's own [patch.crates-io] says the same).
@@ -154,3 +147,11 @@ too_many_lines = "warn"
 
 [lints]
 workspace = true
+
+# Mere names netrender through the www URL at a revision; Genet names it through
+# the canonical URL. One source for both.
+[patch."https://github.com/merely-made/netrender.git"]
+netrender = { git = "https://www.github.com/merely-made/netrender.git", rev = "f8811186cd82b0d4b6758b15c6bcecd415273d52", version = "=0.1.2" }
+netrender_device = { git = "https://www.github.com/merely-made/netrender.git", rev = "f8811186cd82b0d4b6758b15c6bcecd415273d52", version = "=0.1.2" }
+paint_list_api = { git = "https://www.github.com/merely-made/netrender.git", rev = "f8811186cd82b0d4b6758b15c6bcecd415273d52", version = "=0.1.2" }
+paint_list_render = { git = "https://www.github.com/merely-made/netrender.git", rev = "f8811186cd82b0d4b6758b15c6bcecd415273d52", version = "=0.1.2" }

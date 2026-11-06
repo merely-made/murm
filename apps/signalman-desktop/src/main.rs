@@ -205,6 +205,7 @@ fn main() {
     );
     let offline_appearance_receipt = appearance_lane.is_some();
     let hooks: HostHooks<DesktopState, Logic, Child> = HostHooks {
+        prepare_presentation: Box::new(|_, _| None),
         // Installation progress is event-driven: a Signalman worker calls the
         // host's Armillary-shaped wake callback, and the host grants this UI
         // thread a drain turn. Idle apps therefore stay asleep.

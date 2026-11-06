@@ -30,6 +30,7 @@ fn harness() -> App {
         known: true,
     }]);
     let hooks: HostHooks<DesktopState, Logic, Child> = HostHooks {
+        prepare_presentation: Box::new(|_, _| None),
         focused_text: Box::new(signalman_desktop::focused_revision_field),
         ..inert_hooks()
     };
@@ -59,6 +60,7 @@ fn silent_harness() -> App {
     }]);
     state.select_device(0);
     let hooks: HostHooks<DesktopState, Logic, Child> = HostHooks {
+        prepare_presentation: Box::new(|_, _| None),
         focused_text: Box::new(signalman_desktop::focused_revision_field),
         ..inert_hooks()
     };

@@ -58,6 +58,7 @@ fn silent_state() -> DesktopState {
 /// binary's rather than a stub's.
 fn harness(state: DesktopState) -> App {
     let hooks: HostHooks<DesktopState, Logic, Child> = HostHooks {
+        prepare_presentation: Box::new(|_, _| None),
         focused_text: Box::new(signalman_desktop::focused_revision_field),
         close_request: Box::new(|ctx, _| {
             let mut disposition = None;

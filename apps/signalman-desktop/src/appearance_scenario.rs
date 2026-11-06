@@ -53,10 +53,10 @@ fn focus_name(ctx: &Context<'_>) -> String {
     "other".into()
 }
 
-pub fn from_env() -> Option<mesquite::Lane<Product>> {
-    let config = mesquite::LaneConfig::from_env("SIGNALMAN_APPEARANCE")?;
+pub fn from_env() -> Option<mandrake::Lane<Product>> {
+    let config = mandrake::LaneConfig::from_env("SIGNALMAN_APPEARANCE")?;
     Some(
-        mesquite::Lane::from_config(
+        mandrake::Lane::from_config(
             config,
             Product {
                 sheet: crate::theme::sheet(),
@@ -69,7 +69,7 @@ pub fn from_env() -> Option<mesquite::Lane<Product>> {
     )
 }
 
-pub fn drive(lane: &mut mesquite::Lane<Product>, ctx: &mut Context<'_>) {
+pub fn drive(lane: &mut mandrake::Lane<Product>, ctx: &mut Context<'_>) {
     let product = lane.product_mut();
     product.sheet = ctx.runner.state().appearance.stylesheet();
     if product.authority.is_none() {
@@ -78,7 +78,7 @@ pub fn drive(lane: &mut mesquite::Lane<Product>, ctx: &mut Context<'_>) {
     lane.after_frame(ctx);
 }
 
-impl mesquite::Product for Product {
+impl mandrake::Product for Product {
     type State = DesktopState;
     type Logic = Logic;
     type View = Child;
@@ -120,7 +120,7 @@ impl mesquite::Product for Product {
     fn app_step(
         &mut self,
         ctx: &mut Context<'_>,
-        _: mesquite::Checkpoints<'_>,
+        _: mandrake::Checkpoints<'_>,
         line: &str,
     ) -> Result<(), String> {
         if let Some(target) = line.strip_prefix("key tab-until ") {

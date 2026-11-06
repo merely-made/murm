@@ -65,6 +65,7 @@ fn harness() -> App {
     state.t114_uf2_volume = cambium::TextInput::new("E:\\");
     state.t114_loader_record = cambium::TextInput::new("C:\\fixtures\\t114-loader.json");
     let hooks: HostHooks<DesktopState, Logic, Child> = HostHooks {
+        prepare_presentation: Box::new(|_, _| None),
         focused_text: Box::new(signalman_desktop::focused_revision_field),
         ..inert_hooks()
     };
