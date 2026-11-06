@@ -4312,9 +4312,9 @@ dependencies = [
 
 [[package]]
 name = "p2mere-net"
-version = "0.9.0"
+version = "0.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "482b106cfd96135463a88ffdf9acfa329dee9cd6d4ae092d64f6120355a94b74"
+checksum = "12a5ae68357f318d7133b4ecfb36f2e3f78f65f8c637bcc6929d252b83666fbe"
 dependencies = [
  "futures-channel",
  "futures-util",
