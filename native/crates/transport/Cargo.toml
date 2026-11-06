@@ -39,7 +39,7 @@ test-identity = []
 sync-lane = ["noise"]
 # Host-owned SAM STREAM sessions. I2P destinations are routing aliases, not
 # Personae identities; callers still authenticate application streams.
-i2p = ["dep:truchman"]
+i2p = ["dep:truchman", "dep:hkdf", "dep:sha2", "dep:x25519-dalek"]
 
 [lib]
 name = "transport"
@@ -95,6 +95,8 @@ zeroize = "1"
 retinue = { workspace = true, optional = true }
 notochord = { workspace = true, optional = true }
 hkdf = { workspace = true, optional = true }
+# The anonymous I2P destination's X25519 half (opt-in with `i2p`).
+x25519-dalek = { version = "3", optional = true }
 sha2 = { workspace = true, optional = true }
 
 # The notochord integration test imports feature-gated items; without this

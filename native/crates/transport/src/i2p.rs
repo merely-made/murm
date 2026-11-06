@@ -11,6 +11,8 @@ use std::sync::Arc;
 use std::task::{Context, Poll};
 use std::time::Duration;
 use tokio::io::{AsyncRead, AsyncWrite, ReadBuf};
+mod anonymous;
+pub use anonymous::anonymous_i2p_key;
 pub use truchman::{Bridge, Key};
 use truchman::{SessionOptions, StreamSession};
 
