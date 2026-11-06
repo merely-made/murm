@@ -869,7 +869,7 @@ version = "0.6.1"
 source = "git+https://github.com/merely-made/mere.git?branch=main#19bce7f4f3b821731e426f7527d34a391a21ac5a"
 dependencies = [
  "backstep",
- "chartulary",
+ "chartulary 0.3.0 (git+https://www.github.com/merely-made/eidetic.git?rev=86e78dd37914fd61f8ca336bf0ab2da716356fca)",
  "genet-events",
  "genet-scripted-dom",
  "genet-text",
@@ -1074,7 +1074,21 @@ name = "chartulary"
 version = "0.3.0"
 source = "git+https://www.github.com/merely-made/eidetic.git?rev=86e78dd37914fd61f8ca336bf0ab2da716356fca#86e78dd37914fd61f8ca336bf0ab2da716356fca"
 dependencies = [
- "muniment",
+ "muniment 0.2.1 (git+https://www.github.com/merely-made/eidetic.git?rev=86e78dd37914fd61f8ca336bf0ab2da716356fca)",
+ "petgraph",
+ "rkyv",
+ "serde",
+ "serde_json",
+ "slotmap",
+ "uuid",
+]
+
+[[package]]
+name = "chartulary"
+version = "0.3.0"
+source = "git+https://www.github.com/merely-made/eidetic.git?rev=98f2c6977d7210d2149b80ee8be0b3e0f724d44b#98f2c6977d7210d2149b80ee8be0b3e0f724d44b"
+dependencies = [
+ "muniment 0.2.1 (git+https://www.github.com/merely-made/eidetic.git?rev=98f2c6977d7210d2149b80ee8be0b3e0f724d44b)",
  "petgraph",
  "rkyv",
  "serde",
@@ -1677,15 +1691,16 @@ dependencies = [
 [[package]]
 name = "eidetic"
 version = "0.0.3"
-source = "git+https://www.github.com/merely-made/eidetic.git?rev=86e78dd37914fd61f8ca336bf0ab2da716356fca#86e78dd37914fd61f8ca336bf0ab2da716356fca"
+source = "git+https://www.github.com/merely-made/eidetic.git?rev=98f2c6977d7210d2149b80ee8be0b3e0f724d44b#98f2c6977d7210d2149b80ee8be0b3e0f724d44b"
 dependencies = [
  "async-trait",
  "blake3",
- "chartulary",
- "muniment",
+ "chartulary 0.3.0 (git+https://www.github.com/merely-made/eidetic.git?rev=98f2c6977d7210d2149b80ee8be0b3e0f724d44b)",
+ "muniment 0.2.1 (git+https://www.github.com/merely-made/eidetic.git?rev=98f2c6977d7210d2149b80ee8be0b3e0f724d44b)",
  "serde",
  "serde_json",
  "url",
+ "uuid",
  "zeroize",
 ]
 
@@ -3485,6 +3500,16 @@ dependencies = [
 name = "muniment"
 version = "0.2.1"
 source = "git+https://www.github.com/merely-made/eidetic.git?rev=86e78dd37914fd61f8ca336bf0ab2da716356fca#86e78dd37914fd61f8ca336bf0ab2da716356fca"
+dependencies = [
+ "async-trait",
+ "blake3",
+ "serde",
+]
+
+[[package]]
+name = "muniment"
+version = "0.2.1"
+source = "git+https://www.github.com/merely-made/eidetic.git?rev=98f2c6977d7210d2149b80ee8be0b3e0f724d44b#98f2c6977d7210d2149b80ee8be0b3e0f724d44b"
 dependencies = [
  "async-trait",
  "blake3",
@@ -5658,7 +5683,7 @@ dependencies = [
  "accesskit",
  "cambium",
  "cambium-desktop",
- "chartulary",
+ "chartulary 0.3.0 (git+https://www.github.com/merely-made/eidetic.git?rev=98f2c6977d7210d2149b80ee8be0b3e0f724d44b)",
  "cpal",
  "directories",
  "euclid",
@@ -5669,7 +5694,7 @@ dependencies = [
  "layout-dom-api",
  "linkboy",
  "mandrake",
- "muniment",
+ "muniment 0.2.1 (git+https://www.github.com/merely-made/eidetic.git?rev=98f2c6977d7210d2149b80ee8be0b3e0f724d44b)",
  "outrider",
  "personae",
  "pollster 0.4.0",
@@ -5878,7 +5903,7 @@ dependencies = [
  "getrandom 0.3.4",
  "hex",
  "insigne",
- "muniment",
+ "muniment 0.2.1 (git+https://www.github.com/merely-made/eidetic.git?rev=98f2c6977d7210d2149b80ee8be0b3e0f724d44b)",
  "notochord",
  "personae",
  "serde",
