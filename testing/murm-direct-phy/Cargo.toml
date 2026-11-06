@@ -26,19 +26,14 @@ tokio = { version = "1", features = ["io-util", "macros", "rt", "rt-multi-thread
 [patch.crates-io]
 # The storage family uses the qualified Eidetic receiving cohort; the Git
 # source forwarders below keep Murm's older pins on that same source.
-luggage = { git = "https://www.github.com/merely-made/eidetic.git", rev = "98f2c6977d7210d2149b80ee8be0b3e0f724d44b" }
-muniment = { git = "https://www.github.com/merely-made/eidetic.git", rev = "98f2c6977d7210d2149b80ee8be0b3e0f724d44b" }
-mere-proofs = { git = "https://www.github.com/merely-made/eidetic.git", rev = "98f2c6977d7210d2149b80ee8be0b3e0f724d44b" }
-stickleback = { git = "https://www.github.com/merely-made/eidetic.git", rev = "98f2c6977d7210d2149b80ee8be0b3e0f724d44b" }
-
-[patch."https://github.com/merely-made/eidetic.git"]
-luggage = { git = "https://www.github.com/merely-made/eidetic.git", rev = "98f2c6977d7210d2149b80ee8be0b3e0f724d44b" }
-muniment = { git = "https://www.github.com/merely-made/eidetic.git", rev = "98f2c6977d7210d2149b80ee8be0b3e0f724d44b" }
-mere-proofs = { git = "https://www.github.com/merely-made/eidetic.git", rev = "98f2c6977d7210d2149b80ee8be0b3e0f724d44b" }
-stickleback = { git = "https://www.github.com/merely-made/eidetic.git", rev = "98f2c6977d7210d2149b80ee8be0b3e0f724d44b" }
+luggage = { git = "https://github.com/merely-made/eidetic.git", branch = "main" }
+muniment = { git = "https://github.com/merely-made/eidetic.git", branch = "main" }
+mere-proofs = { git = "https://github.com/merely-made/eidetic.git", branch = "main" }
+stickleback = { git = "https://github.com/merely-made/eidetic.git", branch = "main" }
 
 # Compatibility source keys for immutable suppliers published before the
 # repository rename. Targets and current direct dependencies use Murm.
+
 [patch."https://github.com/merely-made/retinue.git"]
 mere-transport = { git = "https://github.com/merely-made/murm.git", branch = "main" }
 murm = { git = "https://github.com/merely-made/murm.git", branch = "main" }
@@ -55,10 +50,4 @@ too_many_lines = "warn"
 
 [lints]
 workspace = true
-
-[patch."https://github.com/merely-made/distillery.git"]
-esp = { git = "https://www.github.com/merely-made/distillery.git", rev = "01268ae2373859489284a00f1447699fadb9442f" }
-esp-testkit = { git = "https://www.github.com/merely-made/distillery.git", rev = "01268ae2373859489284a00f1447699fadb9442f" }
-distillery = { git = "https://www.github.com/merely-made/distillery.git", rev = "01268ae2373859489284a00f1447699fadb9442f" }
-mere-mesh = { git = "https://www.github.com/merely-made/distillery.git", rev = "01268ae2373859489284a00f1447699fadb9442f" }
 
