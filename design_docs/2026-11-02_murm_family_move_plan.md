@@ -142,6 +142,14 @@ Murm supplies communication engines; Dramatis/Personae and Djinn retain identity
 
 ## Progress
 
+- 2026-11-06: cycle_breaks P5 (D3, Mere `design_docs/mere_docs/implementation_strategy/2026-11-06_cycle_breaks_plan.md`):
+  `murm-resolve` defines `ReleaseAddress` (host, collection, pin, path), `AddressHost`,
+  `MootCollection` and a plain `LogAddress`, and no longer depends on `gemot-address`; the
+  `knot://` grammar stays Gemot's, which implements the trait in `gemot-site-host`.
+  `Resolver::resolve` takes `&impl ReleaseAddress`; `murm-holder` builds a `LogAddress`.
+  `native/Cargo.lock` names no Gemot package. Murm's resolve tests now run on fixtures,
+  not Gemot's parser.
+
 - 2026-11-04: E2d provider `c018fee13f417867cd3bbfe3ebca167257e34dc0`
   passes 20 ordinary checks on working Rust 1.99.1 and MSRV 1.97.1, three
   coturn checks, strict wire Clippy and host-only compile. Native DNS uses an

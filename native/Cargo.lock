@@ -1753,11 +1753,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "gemot-address"
-version = "0.1.0"
-source = "git+https://github.com/merely-made/gemot.git?branch=main#d222235732c8042c1c392d507c4d3b22a81e716c"
-
-[[package]]
 name = "genawaiter"
 version = "0.99.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3449,7 +3444,6 @@ dependencies = [
 name = "murm-resolve"
 version = "0.0.1"
 dependencies = [
- "gemot-address",
  "mere-transport",
  "muniment",
  "murm-sync",

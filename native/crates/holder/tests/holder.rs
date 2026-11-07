@@ -15,7 +15,9 @@ use murm_holder::{
     NoiseTcpDialer, Planned, Pool, PoolId, PoolRoute, PoolSetting, Reach, Replication,
     ReplicationStatus, Resolution, Retention, RoundError, TransportDialer, request_acks,
 };
-use murm_resolve::{Hint, Holder, NoiseTcpAdapter, Resolver, TransportAdapter, release_alpn};
+use murm_resolve::{
+    Hint, Holder, LogAddress, NoiseTcpAdapter, Resolver, TransportAdapter, release_alpn,
+};
 use stickleback::edition::{
     ContentRef, EditionBody, EditionId, EditionKind, EditionOperation, EditionWriter, Provenance,
     SigningKey,
@@ -255,7 +257,7 @@ async fn holder_serves_what_it_holds_and_only_what_it_agreed_to() {
                 TransportAdapter::new("memory", reader_t, key(123))
                     .with_peers(vec![holder_t.local_peer_id()]),
             );
-            let address = format!("knot://{}/index.gmi", hex(&log)).parse().unwrap();
+            let address = LogAddress::new(log, "index.gmi");
             let (read, ()) = tokio::join!(
                 resolver.resolve(&address, &[]),
                 holder_serves(holder, &holder_t, key(2))

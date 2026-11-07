@@ -13,6 +13,9 @@
 //! target) serving another log is refused, never believed. `@<hash>` pins an
 //! edition the chain must contain.
 //!
+//! The address grammar is not here: the resolver takes any [`ReleaseAddress`],
+//! which Gemot implements for its parsed `knot://` address.
+//!
 //! The governed `.moot` form is not resolved here: [`ResolveError::Governed`]
 //! hands back the Moot, collection and page for Gemot's reader verification
 //! (`ReaderTrust::for_address`), which also needs the founder the reader
@@ -22,6 +25,7 @@
 //! that exists. Carriers are opt-in features; memory and Noise over TCP need
 //! none.
 
+mod address;
 mod carrier;
 mod hint;
 #[cfg(feature = "p2panda")]
@@ -30,7 +34,6 @@ mod p2panda;
 mod reticulum;
 mod wire;
 
-use gemot_address::{AddressHost, KnotAddress};
 use muniment::MemoryBackend;
 use murm_sync::{StreamSyncError, StreamSyncLimits, StreamSyncOutcome};
 use stickleback::OperationProcessor;
@@ -40,6 +43,7 @@ use stickleback::edition::{
 };
 use transport::sync_lane::SyncLaneError;
 
+pub use address::{AddressHost, LogAddress, MootCollection, ReleaseAddress};
 pub use carrier::{Ask, Carrier, Local, NoiseTcpAdapter, PullError, Route, TransportAdapter};
 pub use hint::{Hint, HintError};
 #[cfg(feature = "p2panda")]
@@ -153,17 +157,17 @@ impl Resolver {
     /// (holding the pin, when the address has one).
     pub async fn resolve(
         &self,
-        address: &KnotAddress,
+        address: &(impl ReleaseAddress + ?Sized),
         hints: &[Hint],
     ) -> Result<Resolved, ResolveError> {
-        let AddressHost::LogKey(key) = address.host else {
+        let AddressHost::LogKey(key) = address.host() else {
             let parts = address
                 .collection()
                 .expect("governed addresses name a collection");
             return Err(ResolveError::Governed {
                 moot_id: parts.moot_id,
                 collection_id: parts.collection_id,
-                page: parts.page.to_string(),
+                page: parts.page,
             });
         };
         let store = EditionStore::<MemoryBackend>::new(MemoryBackend::new());
@@ -184,7 +188,7 @@ impl Resolver {
                     limits: self.sync,
                 };
                 let result = match carrier.pull(&route, &ask, session).await {
-                    Ok(outcome) => self.judge(&store, &key, address.pin, outcome).await,
+                    Ok(outcome) => self.judge(&store, &key, address.pin(), outcome).await,
                     Err(error) => Err(classify(error)),
                 };
                 let verified = result.is_ok();
@@ -243,7 +247,7 @@ impl Resolver {
         &self,
         store: &EditionStore,
         key: &[u8; 32],
-        address: &KnotAddress,
+        address: &(impl ReleaseAddress + ?Sized),
         via: Option<(&'static str, String)>,
         attempts: Vec<Attempt>,
     ) -> Result<Resolved, ResolveError> {
@@ -251,7 +255,7 @@ impl Resolver {
             Ok(chain) => chain,
             Err(_) => return Err(ResolveError::Unresolved { attempts }),
         };
-        let selected = match address.pin {
+        let selected = match address.pin() {
             Some(pin) => chain.get(&EditionId(pin)).cloned(),
             None => Some(chain.head().clone()),
         };
@@ -259,7 +263,7 @@ impl Resolver {
             (Some(selected), Some(via)) => Ok(Resolved {
                 chain,
                 selected,
-                path: address.path.clone(),
+                path: address.path().to_owned(),
                 via,
                 attempts,
             }),

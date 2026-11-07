@@ -19,7 +19,7 @@ use std::sync::{Arc, Mutex, MutexGuard};
 
 use identity::Ed25519Keypair;
 use muniment::{Backend, MemoryBackend};
-use murm_resolve::{Hint, Holder, ResolveError, Resolver};
+use murm_resolve::{Hint, Holder, LogAddress, ResolveError, Resolver};
 use stickleback::edition::{EditionError, EditionLimits, verify_edition_chain};
 
 use crate::service::HolderService;
@@ -165,10 +165,7 @@ impl<B: Backend + Clone + Send + Sync + 'static> HolderNode<B> {
         let retention = *lock(&self.agreements)
             .get(&key)
             .ok_or(HolderError::NotAgreed)?;
-        let text: String = key.iter().map(|b| format!("{b:02x}")).collect();
-        let address = format!("knot://{text}/index.gmi")
-            .parse()
-            .expect("a log key and a path make an address");
+        let address = LogAddress::new(key, "index.gmi");
         let fetched = resolver
             .resolve(&address, hints)
             .await

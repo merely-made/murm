@@ -11,11 +11,11 @@
 
 use std::time::Duration;
 
-use gemot_address::KnotAddress;
 use identity::Ed25519Keypair;
 use muniment::MemoryBackend;
 use murm_resolve::{
-    Failure, Hint, Holder, NoiseTcpAdapter, ResolveError, Resolver, TransportAdapter, release_alpn,
+    AddressHost, Failure, Hint, Holder, LogAddress, MootCollection, NoiseTcpAdapter,
+    ReleaseAddress, ResolveError, Resolver, TransportAdapter, release_alpn,
 };
 use stickleback::edition::{
     ContentRef, EditionBody, EditionId, EditionKind, EditionOperation, EditionWriter, Provenance,
@@ -72,12 +72,12 @@ fn log(editions: u8) -> Log {
 }
 
 impl Log {
-    fn address(&self, pin: Option<usize>) -> KnotAddress {
-        let mut text = format!("knot://{}/index.gmi", hex(&self.key));
-        if let Some(index) = pin {
-            text += &format!("@{}", hex(self.editions[index].hash.as_bytes()));
+    fn address(&self, pin: Option<usize>) -> LogAddress {
+        let address = LogAddress::new(self.key, "index.gmi");
+        match pin {
+            Some(index) => address.pinned(*self.editions[index].hash.as_bytes()),
+            None => address,
         }
-        text.parse().unwrap()
     }
 }
 
@@ -160,13 +160,7 @@ async fn a_pinned_hash_returns_that_edition() {
 
     // An edition the holder lacks refuses; it is not replaced by the head.
     let other = log(2);
-    let missing: KnotAddress = format!(
-        "knot://{}/index.gmi@{}",
-        hex(&site.key),
-        hex(other.editions[1].hash.as_bytes())
-    )
-    .parse()
-    .unwrap();
+    let missing = LogAddress::new(site.key, "index.gmi").pinned(*other.editions[1].hash.as_bytes());
     let (reader_t, holder_t) = memory_pair();
     let resolver = Resolver::new().with(
         TransportAdapter::new("memory", reader_t, key(1))
@@ -324,9 +318,27 @@ async fn noise_tcp_holder_from_a_hint_resolves_and_the_wrong_key_refuses() {
 
 #[tokio::test]
 async fn the_governed_form_is_handed_to_gemot_not_resolved() {
-    let address: KnotAddress = format!("knot://{}.moot/{}/index.gmi", hex(&[7; 32]), hex(&[8; 32]))
-        .parse()
-        .unwrap();
+    /// A governed address as a grammar crate would hand it over.
+    struct Governed;
+    impl ReleaseAddress for Governed {
+        fn host(&self) -> AddressHost {
+            AddressHost::MootId([7; 32])
+        }
+        fn collection(&self) -> Option<MootCollection> {
+            Some(MootCollection {
+                moot_id: [7; 32],
+                collection_id: [8; 32],
+                page: "index.gmi".to_owned(),
+            })
+        }
+        fn pin(&self) -> Option<[u8; 32]> {
+            None
+        }
+        fn path(&self) -> &str {
+            "8888/index.gmi"
+        }
+    }
+    let address = Governed;
     let refused = Resolver::new().resolve(&address, &[]).await;
     let Err(ResolveError::Governed {
         moot_id,
