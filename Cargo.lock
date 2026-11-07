@@ -1857,7 +1857,7 @@ dependencies = [
 [[package]]
 name = "mere-comms"
 version = "0.0.1"
-source = "git+https://github.com/merely-made/mere.git?branch=main#eb8d88d9216982dc0e869487c60fcbddf829eb03"
+source = "git+https://github.com/merely-made/mere.git?branch=main#86942e5303d8479783cd2faa1af92016baa38f39"
 dependencies = [
  "async-trait",
  "serde",
@@ -1866,7 +1866,7 @@ dependencies = [
 [[package]]
 name = "mere-curation"
 version = "0.1.1"
-source = "git+https://github.com/merely-made/mere.git?branch=main#eb8d88d9216982dc0e869487c60fcbddf829eb03"
+source = "git+https://github.com/merely-made/mere.git?branch=main#86942e5303d8479783cd2faa1af92016baa38f39"
 dependencies = [
  "serde",
 ]
@@ -2371,7 +2371,7 @@ checksum = "9774ba4a74de5f7b1c1451ed6cd5285a32eddb5cccb8cc655a4e50009e06477f"
 [[package]]
 name = "sceno"
 version = "0.0.7"
-source = "git+https://github.com/merely-made/mere.git?branch=main#eb8d88d9216982dc0e869487c60fcbddf829eb03"
+source = "git+https://github.com/merely-made/mere.git?branch=main#86942e5303d8479783cd2faa1af92016baa38f39"
 dependencies = [
  "serde",
  "serde_json",
@@ -2380,7 +2380,7 @@ dependencies = [
 [[package]]
 name = "scenograph"
 version = "0.0.6"
-source = "git+https://github.com/merely-made/mere.git?branch=main#eb8d88d9216982dc0e869487c60fcbddf829eb03"
+source = "git+https://github.com/merely-made/mere.git?branch=main#86942e5303d8479783cd2faa1af92016baa38f39"
 dependencies = [
  "mere-curation",
  "sceno",
@@ -2391,7 +2391,7 @@ dependencies = [
 [[package]]
 name = "scenomise"
 version = "0.0.7"
-source = "git+https://github.com/merely-made/mere.git?branch=main#eb8d88d9216982dc0e869487c60fcbddf829eb03"
+source = "git+https://github.com/merely-made/mere.git?branch=main#86942e5303d8479783cd2faa1af92016baa38f39"
 dependencies = [
  "libm",
  "sceno",
