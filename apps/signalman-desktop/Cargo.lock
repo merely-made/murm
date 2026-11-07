@@ -972,7 +972,7 @@ dependencies = [
 [[package]]
 name = "castellan-client"
 version = "0.0.2"
-source = "git+https://github.com/merely-made/dramatis.git?branch=main#5ff7b6f8d2c7d9a24c88797522f8ae5d3347bfdd"
+source = "git+https://github.com/merely-made/dramatis.git?branch=main#044b2d579ec36259b13adca0b041acb029dbab4f"
 dependencies = [
  "base64",
  "chatelaine",
@@ -1086,7 +1086,7 @@ dependencies = [
 [[package]]
 name = "chatelaine"
 version = "0.0.3"
-source = "git+https://github.com/merely-made/dramatis.git?branch=main#5ff7b6f8d2c7d9a24c88797522f8ae5d3347bfdd"
+source = "git+https://github.com/merely-made/dramatis.git?branch=main#044b2d579ec36259b13adca0b041acb029dbab4f"
 dependencies = [
  "serde",
  "uuid",
@@ -1628,7 +1628,7 @@ checksum = "d8b14ccef22fc6f5a8f4d7d768562a182c04ce9a3b3157b91390b52ddfdf1a76"
 [[package]]
 name = "dramatis"
 version = "0.0.5"
-source = "git+https://github.com/merely-made/dramatis.git?branch=main#5ff7b6f8d2c7d9a24c88797522f8ae5d3347bfdd"
+source = "git+https://github.com/merely-made/dramatis.git?branch=main#044b2d579ec36259b13adca0b041acb029dbab4f"
 dependencies = [
  "gaz",
  "personae",
@@ -2104,7 +2104,7 @@ dependencies = [
 [[package]]
 name = "gaz"
 version = "0.0.3"
-source = "git+https://github.com/merely-made/dramatis.git?branch=main#5ff7b6f8d2c7d9a24c88797522f8ae5d3347bfdd"
+source = "git+https://github.com/merely-made/dramatis.git?branch=main#044b2d579ec36259b13adca0b041acb029dbab4f"
 dependencies = [
  "insigne",
  "serde",
@@ -2920,7 +2920,7 @@ dependencies = [
 [[package]]
 name = "insigne"
 version = "0.0.2"
-source = "git+https://github.com/merely-made/dramatis.git?branch=main#5ff7b6f8d2c7d9a24c88797522f8ae5d3347bfdd"
+source = "git+https://github.com/merely-made/dramatis.git?branch=main#044b2d579ec36259b13adca0b041acb029dbab4f"
 dependencies = [
  "blake3",
  "ed25519-dalek",
@@ -3596,10 +3596,10 @@ dependencies = [
 [[package]]
 name = "netrender"
 version = "0.1.2"
-source = "git+https://github.com/merely-made/netrender.git?branch=main#f8811186cd82b0d4b6758b15c6bcecd415273d52"
+source = "git+https://github.com/merely-made/netrender.git?branch=main#ad4be200e997faf680cbc516c2427db222e7d3b6"
 dependencies = [
  "log",
- "netrender-vello",
+ "netrender-vello 0.11.0 (git+https://github.com/mark-ik/vello?rev=7784613985d58823bb27b6274916009299cbee46)",
  "netrender_device",
  "peniko",
  "postcard",
@@ -3614,12 +3614,12 @@ dependencies = [
 [[package]]
 name = "netrender-vello"
 version = "0.11.0"
-source = "git+https://github.com/mark-ik/vello?rev=dfb9b53b315561887761deff319afed08cc33ff0#dfb9b53b315561887761deff319afed08cc33ff0"
+source = "git+https://github.com/mark-ik/vello?rev=7784613985d58823bb27b6274916009299cbee46#7784613985d58823bb27b6274916009299cbee46"
 dependencies = [
  "bytemuck",
  "futures-intrusive",
  "log",
- "netrender-vello-encoding",
+ "netrender-vello-encoding 0.11.0 (git+https://github.com/mark-ik/vello?rev=7784613985d58823bb27b6274916009299cbee46)",
  "netrender-vello-shaders",
  "peniko",
  "png 0.18.1",
@@ -3627,6 +3627,33 @@ dependencies = [
  "static_assertions",
  "thiserror 2.0.20",
  "wgpu",
+]
+
+[[package]]
+name = "netrender-vello"
+version = "0.11.0"
+source = "git+https://github.com/mark-ik/vello?rev=dfb9b53b315561887761deff319afed08cc33ff0#dfb9b53b315561887761deff319afed08cc33ff0"
+dependencies = [
+ "bytemuck",
+ "log",
+ "netrender-vello-encoding 0.11.0 (git+https://github.com/mark-ik/vello?rev=dfb9b53b315561887761deff319afed08cc33ff0)",
+ "peniko",
+ "png 0.18.1",
+ "skrifa",
+ "static_assertions",
+ "thiserror 2.0.20",
+]
+
+[[package]]
+name = "netrender-vello-encoding"
+version = "0.11.0"
+source = "git+https://github.com/mark-ik/vello?rev=7784613985d58823bb27b6274916009299cbee46#7784613985d58823bb27b6274916009299cbee46"
+dependencies = [
+ "bytemuck",
+ "guillotiere",
+ "peniko",
+ "skrifa",
+ "smallvec",
 ]
 
 [[package]]
@@ -3644,19 +3671,19 @@ dependencies = [
 [[package]]
 name = "netrender-vello-shaders"
 version = "0.11.0"
-source = "git+https://github.com/mark-ik/vello?rev=dfb9b53b315561887761deff319afed08cc33ff0#dfb9b53b315561887761deff319afed08cc33ff0"
+source = "git+https://github.com/mark-ik/vello?rev=7784613985d58823bb27b6274916009299cbee46#7784613985d58823bb27b6274916009299cbee46"
 dependencies = [
  "bytemuck",
  "log",
  "naga",
- "netrender-vello-encoding",
+ "netrender-vello-encoding 0.11.0 (git+https://github.com/mark-ik/vello?rev=7784613985d58823bb27b6274916009299cbee46)",
  "thiserror 2.0.20",
 ]
 
 [[package]]
 name = "netrender_device"
 version = "0.1.2"
-source = "git+https://github.com/merely-made/netrender.git?branch=main#f8811186cd82b0d4b6758b15c6bcecd415273d52"
+source = "git+https://github.com/merely-made/netrender.git?branch=main#ad4be200e997faf680cbc516c2427db222e7d3b6"
 dependencies = [
  "log",
  "pollster 1.0.1",
@@ -3698,7 +3725,7 @@ checksum = "0676bb32a98c1a483ce53e500a81ad9c3d5b3f7c920c28c24e9cb0980d0b5bc8"
 [[package]]
 name = "notochord"
 version = "0.1.1"
-source = "git+https://github.com/merely-made/dramatis.git?branch=main#5ff7b6f8d2c7d9a24c88797522f8ae5d3347bfdd"
+source = "git+https://github.com/merely-made/dramatis.git?branch=main#044b2d579ec36259b13adca0b041acb029dbab4f"
 dependencies = [
  "blake3",
  "insigne",
@@ -4338,7 +4365,7 @@ dependencies = [
 [[package]]
 name = "paint_list_api"
 version = "0.1.2"
-source = "git+https://github.com/merely-made/netrender.git?branch=main#f8811186cd82b0d4b6758b15c6bcecd415273d52"
+source = "git+https://github.com/merely-made/netrender.git?branch=main#ad4be200e997faf680cbc516c2427db222e7d3b6"
 dependencies = [
  "euclid",
  "serde",
@@ -4347,7 +4374,7 @@ dependencies = [
 [[package]]
 name = "paint_list_render"
 version = "0.1.2"
-source = "git+https://github.com/merely-made/netrender.git?branch=main#f8811186cd82b0d4b6758b15c6bcecd415273d52"
+source = "git+https://github.com/merely-made/netrender.git?branch=main#ad4be200e997faf680cbc516c2427db222e7d3b6"
 dependencies = [
  "log",
  "netrender",
@@ -4464,7 +4491,7 @@ checksum = "9b4f627cb1b25917193a259e49bdad08f671f8d9708acfd5fe0a8c1455d87220"
 [[package]]
 name = "personae"
 version = "0.3.1"
-source = "git+https://github.com/merely-made/dramatis.git?branch=main#5ff7b6f8d2c7d9a24c88797522f8ae5d3347bfdd"
+source = "git+https://github.com/merely-made/dramatis.git?branch=main#044b2d579ec36259b13adca0b041acb029dbab4f"
 dependencies = [
  "blake3",
  "chacha20poly1305",
@@ -5869,7 +5896,7 @@ dependencies = [
 [[package]]
 name = "sporran"
 version = "0.0.1"
-source = "git+https://github.com/merely-made/dramatis.git?branch=main#5ff7b6f8d2c7d9a24c88797522f8ae5d3347bfdd"
+source = "git+https://github.com/merely-made/dramatis.git?branch=main#044b2d579ec36259b13adca0b041acb029dbab4f"
 dependencies = [
  "async-trait",
  "blake3",
@@ -5893,7 +5920,7 @@ version = "0.3.0"
 source = "git+https://github.com/merely-made/mere.git?branch=main#86942e5303d8479783cd2faa1af92016baa38f39"
 dependencies = [
  "accesskit",
- "netrender-vello",
+ "netrender-vello 0.11.0 (git+https://github.com/mark-ik/vello?rev=dfb9b53b315561887761deff319afed08cc33ff0)",
  "paint_list_api",
 ]
 
