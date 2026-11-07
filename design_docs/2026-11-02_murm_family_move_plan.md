@@ -142,6 +142,12 @@ Murm supplies communication engines; Dramatis/Personae and Djinn retain identity
 
 ## Progress
 
+- 2026-11-06: cycle_breaks D17 / P6 closed F1: `portable-scenes` takes `sceno-backdrops` (merely-made/graphshell,
+  `backdrops` and `template` moved out of Mere's `scenomise`) and drops `scenomise`, `scenograph` and
+  `mere-curation`. `Cargo.lock` now names no `mere.git` package, nor does any other Murm lock except
+  `apps/signalman-desktop`, the one declared isolated Mere-using root. Signalman `--features
+  comms,portable-scenes`: 77 lib tests pass, all-targets check clean.
+
 - 2026-11-06: cycle_breaks P6 (D4, Mere `design_docs/mere_docs/implementation_strategy/2026-11-06_cycle_breaks_plan.md`),
   first half: `mere-comms` (package `mere-comms`, lib `comms`) now lives at `native/crates/comms`, a
   member of the native workspace beside `murm`, whose adapter it wraps. History came with it

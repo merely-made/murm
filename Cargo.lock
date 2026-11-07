@@ -1758,12 +1758,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "68ab91017fe16c622486840e4c83c9a37afeff978bd239b5293d61ece587de66"
 
 [[package]]
-name = "libm"
-version = "0.2.16"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b6d2cec3eae94f9f509c767b45932f1ada8350c4bdb85af2fcab4a3c14807981"
-
-[[package]]
 name = "linkboy"
 version = "0.1.0"
 dependencies = [
@@ -1859,14 +1853,6 @@ name = "mere-comms"
 version = "0.0.1"
 dependencies = [
  "async-trait",
- "serde",
-]
-
-[[package]]
-name = "mere-curation"
-version = "0.1.1"
-source = "git+https://github.com/merely-made/mere.git?branch=main#18c0f24a55a842f6204a5a4012c9fd203481947a"
-dependencies = [
  "serde",
 ]
 
@@ -2370,31 +2356,18 @@ checksum = "9774ba4a74de5f7b1c1451ed6cd5285a32eddb5cccb8cc655a4e50009e06477f"
 [[package]]
 name = "sceno"
 version = "0.0.7"
-source = "git+https://github.com/merely-made/graphshell.git?branch=main#7cd9ca53882d5a6debd502b5ba068a14fd3efef4"
+source = "git+https://github.com/merely-made/graphshell.git?branch=main#2f7718135c152cb7712eccdd0ab6caafb44627d9"
 dependencies = [
  "serde",
  "serde_json",
 ]
 
 [[package]]
-name = "scenograph"
-version = "0.0.6"
-source = "git+https://github.com/merely-made/mere.git?branch=main#18c0f24a55a842f6204a5a4012c9fd203481947a"
+name = "sceno-backdrops"
+version = "0.0.1"
+source = "git+https://github.com/merely-made/graphshell.git?branch=main#2f7718135c152cb7712eccdd0ab6caafb44627d9"
 dependencies = [
- "mere-curation",
  "sceno",
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "scenomise"
-version = "0.0.7"
-source = "git+https://github.com/merely-made/mere.git?branch=main#18c0f24a55a842f6204a5a4012c9fd203481947a"
-dependencies = [
- "libm",
- "sceno",
- "scenograph",
  "serde",
  "serde_json",
 ]
@@ -2614,7 +2587,7 @@ dependencies = [
  "retinue",
  "rustix",
  "sceno",
- "scenomise",
+ "sceno-backdrops",
  "selvage",
  "sennet",
  "serde",

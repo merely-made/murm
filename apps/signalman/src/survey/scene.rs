@@ -5,7 +5,7 @@
 //! remain unplaced until an owner supplies an actual position association.
 use super::{Survey, export_survey, import_survey};
 use sceno::{Size2, SourceRef, Vec2};
-use scenomise::backdrops::{
+use sceno_backdrops::{
     BACKDROP_SCENE_VERSION, RadioDevice, SceneFacts, SceneInput, TerrainCoverage,
 };
 use sha2::{Digest, Sha256};
