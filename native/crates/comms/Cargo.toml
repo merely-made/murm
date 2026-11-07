@@ -5,7 +5,7 @@ version.workspace = true
 edition.workspace = true
 license.workspace = true
 repository.workspace = true
-description = "Mere's portable comms model: conversations, messages, identities and local drafts, with opt-in Misfin and Murm adapters and a Moot Commons-chat consumer."
+description = "The portable comms model: conversations, messages, identities and local drafts, with opt-in Misfin and Murm adapters and a Moot Commons-chat consumer."
 documentation = "https://docs.rs/comms"
 keywords = ["graphshell", "comms", "messaging", "mere", "domain"]
 categories = ["gui"]
@@ -27,16 +27,16 @@ murm-adapter = ["dep:murm"]
 misfin-adapter = ["dep:misfin"]
 
 [dependencies]
-serde = { workspace = true }
+serde = { version = "1", features = ["derive"] }
 async-trait = "0.1"
-murm = { workspace = true, optional = true }
+murm = { version = "0.0.1", path = "../murm", optional = true }
 # The misfin adapter reads the receive server's mailbox, so it needs the
-# `server` feature (MailboxStore + ReceivedMessage).
-misfin = { workspace = true, optional = true, features = ["server"] }
+# `server` feature (MailboxStore + ReceivedMessage). Errand owns misfin.
+misfin = { version = "0.0.4", git = "https://github.com/merely-made/errand.git", branch = "main", optional = true, features = ["ring", "server"] }
 
 [dev-dependencies]
 tokio = { version = "1", features = ["rt", "macros"] }
-serde_json = { workspace = true }
+serde_json = "1"
 # Build canned signed posts for the murm-adapter tests (keypairs + sign_post).
 # Light (ed25519 + blake3), no transport/iroh.
 identity = { workspace = true }

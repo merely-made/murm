@@ -142,6 +142,16 @@ Murm supplies communication engines; Dramatis/Personae and Djinn retain identity
 
 ## Progress
 
+- 2026-11-06: cycle_breaks P6 (D4, Mere `design_docs/mere_docs/implementation_strategy/2026-11-06_cycle_breaks_plan.md`),
+  first half: `mere-comms` (package `mere-comms`, lib `comms`) now lives at `native/crates/comms`, a
+  member of the native workspace beside `murm`, whose adapter it wraps. History came with it
+  (`git filter-branch --index-filter` on a fresh Mere clone at `016927d79`, 128 commits; the exported tree
+  equals the donor's, `69dbd66fc`). Tests: 28 default, 38 with all features, and one doctest each,
+  as in Mere. `misfin` is taken from Errand's git source; the crate keeps Mere's name for its consumers.
+  Signalman's `comms` feature takes it by path (`../../native/crates/comms`) and no longer names
+  `mere.git`; Signalman Desktop's lock follows. F1 is open: `portable-scenes` and
+  `signalman-desktop` still name Mere (measurement in the Mere plan's Findings).
+
 - 2026-11-06: cycle_breaks P5 (D3, Mere `design_docs/mere_docs/implementation_strategy/2026-11-06_cycle_breaks_plan.md`):
   `murm-resolve` defines `ReleaseAddress` (host, collection, pin, path), `AddressHost`,
   `MootCollection` and a plain `LogAddress`, and no longer depends on `gemot-address`; the
