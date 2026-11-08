@@ -31,7 +31,8 @@ use std::sync::Arc;
 use async_trait::async_trait;
 use bytes::Bytes;
 use iroh_blobs::api::Store;
-use iroh_blobs::protocol::{ChunkRanges, Request};
+pub use iroh_blobs::protocol::ChunkRanges;
+use iroh_blobs::protocol::Request;
 use n0_future::StreamExt;
 
 use crate::blobs::{BlobHash, BlobReadAuthorizer, BlobScope, BlobStore};
