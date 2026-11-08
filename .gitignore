@@ -54,5 +54,3 @@ cargo-home-*/
 
 # Standalone native consumer build output.
 /native/target/
-# The independent wire workspace's build output.
-/wire/target/

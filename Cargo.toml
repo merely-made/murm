@@ -46,7 +46,6 @@ exclude = [
     # Dependency-free codec keeps its own no_std/MSRV workspace.
     "crates/pipit",
     "native",
-    "wire",
     "apps/signalman-desktop",
     # Bounded retained-repair host prototype has its own pinned codec graph.
     "crates/retained-repair",
