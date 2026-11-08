@@ -14,4 +14,3 @@ crates/retinue/tests/fixtures/rns_signed_artifact_1_5_4.json -text whitespace=cr
 crates/retinue/oracle/capture_signed_artifact.py text eol=lf
 
 crates/retinue/tests/fixtures/rns_ifac_1_5_4.json -text whitespace=cr-at-eol
-wire/crates/rtc/tests/coturn.sh text eol=lf

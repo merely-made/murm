@@ -12,16 +12,16 @@ The radio workspace stays at the root. The separate `native/` workspace contains
 and the separately optional
 [`murm-ocapn`](native/crates/ocapn/README.md) and
 [`murm-ocapn-transport`](native/crates/ocapn-transport/README.md) packages.
-The independent `wire/`
-workspace provides `murm-wire`, the reusable one-hop HTTP/1-2-3 and raw
-WebSocket engines. All use Rust 1.99.1 for development and declare a shared
-MSRV of 1.97.1. Build the native libraries with
-`cargo test --manifest-path native/Cargo.toml --lib` and the wire engine with
-`cargo test --manifest-path wire/Cargo.toml`.
+All use Rust 1.99.1 for development and declare a shared MSRV of 1.97.1. Build
+the native libraries with `cargo test --manifest-path native/Cargo.toml --lib`.
 
-Original Genet source ancestry is preserved for the wire import. Netfetcher's
-browser policy and public crate identity stay in Genet, while hosts select
-trust, pooling and limits. Stickleback's history, admission and group encryption
+The HTTP and WebSocket wire engine (`murm-wire`) and the WebRTC protocol leaf
+(`murm-rtc`) that this repository once held in `wire/` moved to Genet on
+2026-11-08 as `genet-wire` and `genet-rtc` (`components/genet-wire`,
+`components/genet-rtc`, history kept; Mere cycle-breaks D20). Genet was their
+only consumer, and they are web-platform protocols rather than mesh carriage.
+Netfetcher's browser policy and public crate identity are in Genet beside them,
+while hosts select trust, pooling and limits. Stickleback's history, admission and group encryption
 live in Eidetic; `murm-sync` owns its live network sessions and address book.
 Cross-target and live
 network qualification retain their own lanes; see MOVE5 in the family plan.
