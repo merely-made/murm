@@ -1261,6 +1261,141 @@ mod tests {
         assert!(owner_blobs.has(revoked).await.unwrap());
     }
 
+    /// A source that is not a store in the serving process: it forwards to a
+    /// store the provider never sees (as a resident's custody is), counts what
+    /// it was asked, and can be cut off.
+    struct ForwardingSource {
+        inner: crate::blob_source::StoreBlobSource,
+        cut: std::sync::atomic::AtomicBool,
+        exports: std::sync::atomic::AtomicUsize,
+    }
+
+    #[async_trait::async_trait]
+    impl crate::blob_source::BlobSource for ForwardingSource {
+        async fn allows(&self, scope: BlobScope, peer: &[u8; 32], hash: BlobHash) -> bool {
+            !self.cut.load(std::sync::atomic::Ordering::SeqCst)
+                && self.inner.allows(scope, peer, hash).await
+        }
+
+        async fn children(&self, hash: BlobHash) -> std::io::Result<Vec<BlobHash>> {
+            self.inner.children(hash).await
+        }
+
+        async fn export_bao(
+            &self,
+            scope: BlobScope,
+            peer: &[u8; 32],
+            hash: BlobHash,
+            ranges: iroh_blobs::protocol::ChunkRanges,
+        ) -> std::io::Result<Box<dyn crate::blob_source::BaoReader>> {
+            self.exports
+                .fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+            self.inner.export_bao(scope, peer, hash, ranges).await
+        }
+    }
+
+    #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+    async fn a_source_serves_verified_streams_without_a_store_in_the_provider() {
+        use crate::{P2pandaTransport, PeerID};
+        use identity::{IdentityProvider, InMemoryProvider};
+        use std::sync::atomic::Ordering;
+
+        let alice = InMemoryProvider::from_seed([61; 32]);
+        let bob = InMemoryProvider::from_seed([62; 32]);
+        let mallory = InMemoryProvider::from_seed([63; 32]);
+        let custody = BlobStore::new();
+        let bob_blobs = BlobStore::new();
+        let mallory_blobs = BlobStore::new();
+        let authority = BlobReadAuthorizer::new();
+        let scope = BlobScope::new([0xc3; 32]);
+        let bob_id = PeerID::from_public_key(bob.master_public_key());
+        let alice_id = PeerID::from_public_key(alice.master_public_key());
+        authority.allow_reader(scope, bob_id.to_bytes());
+
+        // Several 16 KiB groups, so the stream has hash pairs and many leaves.
+        let big: Vec<u8> = (0..200_000u32).map(|index| (index % 253) as u8).collect();
+        let big_hash = custody.put_bytes(big.clone()).await.unwrap();
+        let small_hash = custody
+            .put_bytes(Bytes::from_static(b"served through a source"))
+            .await
+            .unwrap();
+        let other_hash = custody
+            .put_bytes(Bytes::from_static(b"held but never retained"))
+            .await
+            .unwrap();
+        authority.retain(scope, big_hash);
+        authority.retain(scope, small_hash);
+
+        let source = std::sync::Arc::new(ForwardingSource {
+            inner: crate::blob_source::StoreBlobSource::new(&custody, authority.clone()),
+            cut: Default::default(),
+            exports: Default::default(),
+        });
+        // The provider binds with no BlobStore of its own.
+        let provider = P2pandaTransport::builder(alice.master_keypair())
+            .scoped_source(source.clone(), scope)
+            .bind()
+            .await
+            .unwrap();
+        let bob_transport =
+            P2pandaTransport::bind_with_blobs(bob.master_keypair(), vec![], Some(&bob_blobs))
+                .await
+                .unwrap();
+        let mallory_transport = P2pandaTransport::bind_with_blobs(
+            mallory.master_keypair(),
+            vec![],
+            Some(&mallory_blobs),
+        )
+        .await
+        .unwrap();
+        let addr = provider.endpoint_addr().await.unwrap();
+        bob_transport.add_peer(addr.clone()).await.unwrap();
+        mallory_transport.add_peer(addr).await.unwrap();
+
+        // Bob verifies the stream against the hash he asked for: the bytes
+        // that arrive are the bytes that were stored.
+        bob_blobs
+            .fetch_from(&bob_transport, alice_id, big_hash)
+            .await
+            .expect("a reader fetches a retained multi-leaf blob through the source");
+        assert_eq!(bob_blobs.get_bytes(big_hash).await.unwrap().to_vec(), big);
+        bob_blobs
+            .fetch_from(&bob_transport, alice_id, small_hash)
+            .await
+            .expect("and a small one");
+        assert!(source.exports.load(Ordering::SeqCst) >= 2);
+
+        // Held in custody but not retained in the scope: refused, nothing sent.
+        assert!(
+            bob_blobs
+                .fetch_from(&bob_transport, alice_id, other_hash)
+                .await
+                .is_err()
+        );
+        assert!(!bob_blobs.has(other_hash).await.unwrap());
+
+        // A peer that is not a reader is refused.
+        assert!(
+            mallory_blobs
+                .fetch_from(&mallory_transport, alice_id, small_hash)
+                .await
+                .is_err()
+        );
+        assert!(!mallory_blobs.has(small_hash).await.unwrap());
+
+        // The source cuts serving: the next request is refused although the
+        // authorizer still lists Bob, and no stream is requested of the source.
+        let before = source.exports.load(Ordering::SeqCst);
+        source.cut.store(true, Ordering::SeqCst);
+        let fresh_bob_blobs = BlobStore::new();
+        let fresh = fresh_bob_blobs
+            .fetch_from(&bob_transport, alice_id, small_hash)
+            .await;
+        assert!(fresh.is_err());
+        assert!(!fresh_bob_blobs.has(small_hash).await.unwrap());
+        assert_eq!(source.exports.load(Ordering::SeqCst), before);
+    }
+
     #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
     async fn read_range_walks_a_blob_without_rereading_it() {
         let blobs = BlobStore::new();

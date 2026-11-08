@@ -90,7 +90,8 @@ mod open_connections;
 
 use open_connections::OpenConnections;
 
-use crate::blobs::{BlobHash, BlobPeerAuthorizer, BlobReadAuthorizer, BlobScope, BlobStore};
+use crate::blob_source::{SharedBlobSource, StoreBlobSource, plan_request};
+use crate::blobs::{BlobPeerAuthorizer, BlobReadAuthorizer, BlobScope, BlobStore};
 use crate::peer_route::{PeerPath, peer_addr};
 use crate::{AcceptedSession, Alpn, PeerID, Transport, TransportError};
 
@@ -247,28 +248,30 @@ struct AuthorizedBlobsProtocol {
     authorizer: BlobPeerAuthorizer,
 }
 
-/// Hash-scoped wrapper around the ordinary iroh-blobs request handlers.
+/// Hash-scoped provider for iroh-blobs requests.
 ///
 /// iroh authenticates the remote endpoint and parses each request. Murm asks
-/// the domain authorizer about every named hash before delegating the allowed
-/// request to iroh-blobs' public provider implementation.
+/// the [`BlobSource`](crate::blob_source::BlobSource) about every named hash
+/// before any byte is written, then writes the source's verified stream for
+/// each blob in wire order.
 struct ScopedBlobsProtocol {
-    store: iroh_blobs::api::Store,
+    source: SharedBlobSource,
     scope: BlobScope,
-    authorizer: BlobReadAuthorizer,
 }
 
 impl std::fmt::Debug for ScopedBlobsProtocol {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("ScopedBlobsProtocol")
             .field("scope", &self.scope)
-            .field("readers", &self.authorizer.readers(self.scope).len())
             .finish_non_exhaustive()
     }
 }
 
 impl ProtocolHandler for ScopedBlobsProtocol {
     async fn accept(&self, connection: Connection) -> Result<(), AcceptError> {
+        use iroh_blobs::protocol::Request;
+        use iroh_blobs::util::SendStream as _;
+
         let peer = *connection.remote_id().as_bytes();
         while let Ok(mut pair) = iroh_blobs::provider::StreamPair::accept(
             &connection,
@@ -280,81 +283,44 @@ impl ProtocolHandler for ScopedBlobsProtocol {
                 Ok(request) => request,
                 Err(_) => continue,
             };
-            if !scoped_request_allowed(&self.store, &self.authorizer, self.scope, &peer, &request)
-                .await
-            {
+            let Some(wanted) = plan_request(&*self.source, self.scope, &peer, &request).await
+            else {
                 connection.close(
                     iroh_blobs::protocol::ERR_PERMISSION,
                     b"hash is not authorized in this blob scope",
                 );
                 break;
-            }
-            let store = self.store.clone();
+            };
+            let source = self.source.clone();
+            let scope = self.scope;
             tokio::spawn(async move {
-                match request {
-                    iroh_blobs::protocol::Request::Get(request) => {
-                        let _ = iroh_blobs::provider::handle_get(pair, store, request).await;
-                    },
-                    iroh_blobs::protocol::Request::GetMany(request) => {
-                        let _ = iroh_blobs::provider::handle_get_many(pair, store, request).await;
-                    },
-                    iroh_blobs::protocol::Request::Observe(request) => {
-                        let _ = iroh_blobs::provider::handle_observe(pair, store, request).await;
-                    },
-                    _ => {},
+                let tracker = match &request {
+                    Request::Get(get) => pair.get_request(|| get.clone()).await,
+                    Request::GetMany(many) => pair.get_many_request(|| many.clone()).await,
+                    _ => return,
+                };
+                let Ok(tracker) = tracker else { return };
+                let Ok(mut writer) = pair.into_writer(tracker).await else {
+                    return;
+                };
+                let sent: std::io::Result<()> = async {
+                    for item in wanted {
+                        let mut stream = source
+                            .export_bao(scope, &peer, item.hash, item.ranges)
+                            .await?;
+                        while let Some(piece) = stream.next().await? {
+                            writer.inner.send_bytes(piece).await?;
+                        }
+                    }
+                    writer.inner.sync().await
+                }
+                .await;
+                if sent.is_err() {
+                    let _ = writer.inner.reset(iroh_blobs::protocol::ERR_INTERNAL);
                 }
             });
         }
         Ok(())
-    }
-}
-
-async fn scoped_request_allowed(
-    store: &iroh_blobs::api::Store,
-    authorizer: &BlobReadAuthorizer,
-    scope: BlobScope,
-    peer: &[u8; 32],
-    request: &iroh_blobs::protocol::Request,
-) -> bool {
-    use iroh_blobs::protocol::Request;
-
-    match request {
-        Request::Get(request) => {
-            if !authorizer.allows(scope, peer, BlobHash::from(request.hash)) {
-                return false;
-            }
-            if request.ranges.is_blob() {
-                return true;
-            }
-            let Ok(bytes) = store.get_bytes(request.hash).await else {
-                return false;
-            };
-            let Ok(children) = iroh_blobs::hashseq::HashSeq::try_from(bytes) else {
-                return false;
-            };
-            request
-                .ranges
-                .iter_infinite()
-                .take(children.len() + 1)
-                .enumerate()
-                .skip(1)
-                .filter(|(_, ranges)| !ranges.is_empty())
-                .all(|(offset, _)| {
-                    children
-                        .get(offset - 1)
-                        .map(|hash| authorizer.allows(scope, peer, BlobHash::from(hash)))
-                        .unwrap_or(false)
-                })
-        },
-        Request::GetMany(request) => request
-            .hashes
-            .iter()
-            .zip(request.ranges.iter_infinite())
-            .filter(|(_, ranges)| !ranges.is_empty())
-            .all(|(hash, _)| authorizer.allows(scope, peer, BlobHash::from(*hash))),
-        Request::Observe(request) => authorizer.allows(scope, peer, BlobHash::from(request.hash)),
-        // Scoped serving is read-only. Unknown slots and pushes are refused.
-        _ => false,
     }
 }
 
@@ -445,6 +411,9 @@ enum BlobServing<'a> {
     Authorized(&'a BlobStore, BlobPeerAuthorizer),
     /// Serve only hashes retained by one scope, to that scope's readers.
     Scoped(&'a BlobStore, BlobScope, BlobReadAuthorizer),
+    /// Serve only what a source allows for one scope, with no store in this
+    /// process.
+    Source(SharedBlobSource, BlobScope),
 }
 
 /// The seed a builder holds (vault lock ruling 51): boxed, so moving the
@@ -513,6 +482,18 @@ impl<'a> P2pandaTransportBuilder<'a> {
         authorizer: BlobReadAuthorizer,
     ) -> P2pandaTransportBuilder<'b> {
         self.serving(BlobServing::Scoped(store, scope, authorizer))
+    }
+
+    /// Serve `scope` from a [`BlobSource`](crate::blob_source::BlobSource)
+    /// instead of a store held here: the provider asks the source who may
+    /// read what and takes each blob's verified stream from it. This is how a
+    /// supervised child serves blobs whose custody is another process's.
+    pub fn scoped_source<'b>(
+        self,
+        source: SharedBlobSource,
+        scope: BlobScope,
+    ) -> P2pandaTransportBuilder<'b> {
+        self.serving(BlobServing::Source(source, scope))
     }
 
     /// Rebind the builder to one blob-serving choice, replacing any earlier
@@ -858,15 +839,15 @@ impl P2pandaTransport {
                     })?;
             },
             BlobServing::Scoped(store, scope, authorizer) => {
+                let source: SharedBlobSource = Arc::new(StoreBlobSource::new(store, authorizer));
                 endpoint
-                    .accept(
-                        iroh_blobs::ALPN,
-                        ScopedBlobsProtocol {
-                            store: store.store().clone(),
-                            scope,
-                            authorizer,
-                        },
-                    )
+                    .accept(iroh_blobs::ALPN, ScopedBlobsProtocol { source, scope })
+                    .await
+                    .map_err(|e| TransportError::Backend(format!("scoped blobs register: {e}")))?;
+            },
+            BlobServing::Source(source, scope) => {
+                endpoint
+                    .accept(iroh_blobs::ALPN, ScopedBlobsProtocol { source, scope })
                     .await
                     .map_err(|e| TransportError::Backend(format!("scoped blobs register: {e}")))?;
             },

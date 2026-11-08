@@ -3272,6 +3272,8 @@ dependencies = [
 name = "mere-transport"
 version = "0.0.2"
 dependencies = [
+ "async-trait",
+ "bao-tree",
  "bytes",
  "hkdf 0.13.0",
  "insigne",

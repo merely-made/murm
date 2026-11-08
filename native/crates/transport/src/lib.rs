@@ -47,6 +47,7 @@
 
 mod accepted;
 mod alpn;
+pub mod blob_source;
 pub mod blobs;
 mod error;
 pub mod memory;
