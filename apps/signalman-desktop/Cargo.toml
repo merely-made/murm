@@ -83,7 +83,7 @@ zeroize = "1"
 personae = { git = "https://github.com/merely-made/dramatis.git", branch = "main" }
 # Application choice and authoring use the existing shared stack.
 tabard = { git = "https://github.com/merely-made/mere.git", branch = "main" }
-tabard-workshop = { git = "https://github.com/merely-made/mere.git", branch = "main", features = ["native-host"] }
+tabard-workshop = { git = "https://github.com/merely-made/graphshell.git", branch = "main", features = ["native-host"] }
 directories = "6"
 mandrake = { git = "https://github.com/merely-made/mere.git", branch = "main" }
 serde_json = "1"
