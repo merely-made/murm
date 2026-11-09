@@ -51,8 +51,8 @@ cambium-desktop = { git = "https://github.com/merely-made/mere.git", branch = "m
 sprigging = { git = "https://github.com/merely-made/mere.git", branch = "main", version = "0.3.0" }
 # Renamed `taproot` at genet 7baa554c; the alias keeps the `genet_probe` paths.
 genet-probe = { package = "taproot", version = "0.1.0", git = "https://github.com/merely-made/genet.git", branch = "main" }
-genet-scripted-dom = { git = "https://github.com/merely-made/genet.git", branch = "main", version = "=0.1.2" }
-layout-dom-api = { git = "https://github.com/merely-made/genet.git", branch = "main", version = "=0.1.1" }
+genet-scripted-dom = { git = "https://github.com/merely-made/genet.git", branch = "main", version = "0.1.2" }
+layout-dom-api = { git = "https://github.com/merely-made/genet.git", branch = "main", version = "0.1.1" }
 winit = "0.30"
 cpal = "=0.18.2"
 
