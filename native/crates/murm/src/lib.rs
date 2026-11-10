@@ -219,6 +219,7 @@ pub const STAGE: &str = "pre-alpha";
 
 #[cfg(test)]
 mod tests {
+    mod drop_carriage;
     use super::*;
     use identity::InMemoryProvider;
     use p2panda_core::Topic;

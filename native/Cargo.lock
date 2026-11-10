@@ -3413,6 +3413,7 @@ dependencies = [
  "p2mere-core",
  "p2mere-encryption",
  "personae",
+ "retinue",
  "serde",
  "serde_bytes",
  "stickleback",
