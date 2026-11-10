@@ -1079,7 +1079,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c54e03a951783e8b327515db3f2a2fd0e3bed362a96b066f341ce66ed49b4ead"
 dependencies = [
  "data-encoding",
- "syn 1.0.109",
+ "syn 3.0.6",
 ]
 
 [[package]]
@@ -1493,7 +1493,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "39cab71617ae0d63f51a36d69f866391735b51691dbda63cf6f96d042b63efeb"
 dependencies = [
  "libc",
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -3213,7 +3213,7 @@ checksum = "4050469837a6ff301cd14c1f8f24f88549e6d548f24f64e2148eb0f72cebc51f"
 [[package]]
 name = "luggage"
 version = "0.1.0"
-source = "git+https://github.com/merely-made/eidetic.git?branch=main#8e903bf15936935bd1369547310877d52429ab63"
+source = "git+https://github.com/merely-made/eidetic.git?branch=main#aa713228e8814f3637ffea0f8b4784da72687c9b"
 dependencies = [
  "semver",
  "serde",
@@ -3261,7 +3261,7 @@ dependencies = [
 [[package]]
 name = "mere-proofs"
 version = "0.1.0"
-source = "git+https://github.com/merely-made/eidetic.git?branch=main#8e903bf15936935bd1369547310877d52429ab63"
+source = "git+https://github.com/merely-made/eidetic.git?branch=main#aa713228e8814f3637ffea0f8b4784da72687c9b"
 dependencies = [
  "blake3",
  "serde",
@@ -3388,7 +3388,7 @@ dependencies = [
 [[package]]
 name = "muniment"
 version = "0.2.1"
-source = "git+https://github.com/merely-made/eidetic.git?branch=main#8e903bf15936935bd1369547310877d52429ab63"
+source = "git+https://github.com/merely-made/eidetic.git?branch=main#aa713228e8814f3637ffea0f8b4784da72687c9b"
 dependencies = [
  "async-trait",
  "blake3",
@@ -4285,9 +4285,9 @@ dependencies = [
 
 [[package]]
 name = "p2mere-core"
-version = "0.9.0"
+version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c15b784917e4ce22c172cc440493a9feb9053571f6823dc08f094dee88b02faf"
+checksum = "1a67d1f1973733b0fb3d56762c9bdba4cab9f940f5f5cac0d6069d4a9e6d6106"
 dependencies = [
  "blake3",
  "cbor-core",
@@ -4301,9 +4301,9 @@ dependencies = [
 
 [[package]]
 name = "p2mere-discovery"
-version = "0.9.0"
+version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "72f25f2a75377f8358f6abea798c1cce809cd429f0cd9c16d56d7fff0d6c8f39"
+checksum = "5ca9fbc5ad0b2f5d326715f48f3401f99c9e827a853323d232e739517b071a47"
 dependencies = [
  "blake3",
  "futures-util",
@@ -4317,9 +4317,9 @@ dependencies = [
 
 [[package]]
 name = "p2mere-encryption"
-version = "0.9.0"
+version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4cd68e2e46efeb84e1a6a5ae3cb33d870b6f86ebbaeca6a03cc9298caf3e2e99"
+checksum = "66f89e7e0b84d4153ba9a3ffb2e940c62b1ca2b94e6ca413aae0ae8ed826edbc"
 dependencies = [
  "chacha20poly1305 0.10.1",
  "curve25519-dalek 5.0.0",
@@ -4341,9 +4341,9 @@ dependencies = [
 
 [[package]]
 name = "p2mere-net"
-version = "0.9.1"
+version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "12a5ae68357f318d7133b4ecfb36f2e3f78f65f8c637bcc6929d252b83666fbe"
+checksum = "800308b8899c30bef6dc980eade61a68fa7575910450573678a4a0a9f9fb30bb"
 dependencies = [
  "futures-channel",
  "futures-util",
@@ -4370,9 +4370,9 @@ dependencies = [
 
 [[package]]
 name = "p2mere-store"
-version = "0.9.0"
+version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cc97eccd1875ea2c6ec6a99b89ec545266556e11262bfe35d06164174b0268f8"
+checksum = "6bb5772a4d6fce7323f81803fff06eb9d6ead8b22b0f92ea36f872067873b0c1"
 dependencies = [
  "async-stream",
  "futures-util",
@@ -4381,9 +4381,9 @@ dependencies = [
 
 [[package]]
 name = "p2mere-sync"
-version = "0.9.0"
+version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c9fa1b92205033f7d222a6a9a2949ceb0a9a1d94e85b53afb32e8dc9a40823a6"
+checksum = "01292ae797b2df7df27f914368f471538f76b2d4551030c27bb70013b83dbd62"
 dependencies = [
  "futures-channel",
  "futures-util",
@@ -5332,7 +5332,7 @@ dependencies = [
  "errno",
  "libc",
  "linux-raw-sys",
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -5390,7 +5390,7 @@ dependencies = [
  "security-framework",
  "security-framework-sys",
  "webpki-root-certs",
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -5895,7 +5895,7 @@ checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 [[package]]
 name = "stickleback"
 version = "0.2.0"
-source = "git+https://github.com/merely-made/eidetic.git?branch=main#8e903bf15936935bd1369547310877d52429ab63"
+source = "git+https://github.com/merely-made/eidetic.git?branch=main#aa713228e8814f3637ffea0f8b4784da72687c9b"
 dependencies = [
  "blake3",
  "cbor-core",
@@ -6133,7 +6133,7 @@ dependencies = [
  "getrandom 0.4.3",
  "once_cell",
  "rustix",
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -6891,7 +6891,7 @@ version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c2a7b1c03c876122aa43f3020e6c3c3ee5c05081c9a00739faf7503aeba10d22"
 dependencies = [
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]

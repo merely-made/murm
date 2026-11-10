@@ -21,7 +21,7 @@ castellan-client = { workspace = true, features = ["client"] }
 personae.workspace = true
 # The check conclusions and faults, named directly (insigne proofs plan, B).
 insigne = { workspace = true, features = ["verify"] }
-p2panda-core = { package = "p2mere-core", version = "0.9" }
+p2panda-core = { package = "p2mere-core", version = "0.10" }
 # Radio dependencies are in this repository; Signalman shares these exact
 # path identities with the adapter.
 outrider.workspace = true
