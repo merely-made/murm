@@ -4362,9 +4362,9 @@ dependencies = [
 
 [[package]]
 name = "p2mere-core"
-version = "0.9.0"
+version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c15b784917e4ce22c172cc440493a9feb9053571f6823dc08f094dee88b02faf"
+checksum = "1a67d1f1973733b0fb3d56762c9bdba4cab9f940f5f5cac0d6069d4a9e6d6106"
 dependencies = [
  "blake3",
  "cbor-core",
