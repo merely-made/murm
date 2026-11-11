@@ -46,9 +46,9 @@ linkboy = { version = "0.1.0", path = "../linkboy" }
 
 # First-party family sources follow their canonical main branches. Cargo.lock
 # records the exact qualified cohort; keep one source per type-bearing family.
-cambium = { git = "https://github.com/merely-made/mere.git", branch = "main", version = "0.6.0" }
-cambium-desktop = { git = "https://github.com/merely-made/mere.git", branch = "main", version = "0.1.0" }
-sprigging = { git = "https://github.com/merely-made/mere.git", branch = "main", version = "0.3.0" }
+cambium = { git = "https://github.com/merely-made/graphshell.git", branch = "main", version = "0.6.0" }
+cambium-desktop = { git = "https://github.com/merely-made/graphshell.git", branch = "main", version = "0.1.0" }
+sprigging = { git = "https://github.com/merely-made/graphshell.git", branch = "main", version = "0.3.0" }
 # Renamed `taproot` at genet 7baa554c; the alias keeps the `genet_probe` paths.
 genet-probe = { package = "taproot", version = "0.1.0", git = "https://github.com/merely-made/genet.git", branch = "main" }
 genet-scripted-dom = { git = "https://github.com/merely-made/genet.git", branch = "main", version = "0.1.2" }
@@ -63,7 +63,7 @@ chartulary = { git = "https://github.com/merely-made/eidetic.git", branch = "mai
 gaz = { git = "https://github.com/merely-made/dramatis.git", branch = "main" }
 muniment = { features = ["redb"], git = "https://github.com/merely-made/eidetic.git", branch = "main" }
 sceno = { git = "https://github.com/merely-made/graphshell.git", branch = "main" }
-scenomise = { git = "https://github.com/merely-made/mere.git", branch = "main" }
+scenomise = { git = "https://github.com/merely-made/graphshell.git", branch = "main" }
 seiche = { git = "https://github.com/merely-made/seiche.git", branch = "main" }
 euclid = "0.22"
 pollster = "0.4"
@@ -82,10 +82,10 @@ serde = { version = "1", features = ["derive"] }
 zeroize = "1"
 personae = { git = "https://github.com/merely-made/dramatis.git", branch = "main" }
 # Application choice and authoring use the existing shared stack.
-tabard = { git = "https://github.com/merely-made/mere.git", branch = "main" }
+tabard = { git = "https://github.com/merely-made/graphshell.git", branch = "main" }
 tabard-workshop = { git = "https://github.com/merely-made/graphshell.git", branch = "main", features = ["native-host"] }
 directories = "6"
-mandrake = { git = "https://github.com/merely-made/mere.git", branch = "main" }
+mandrake = { git = "https://github.com/merely-made/graphshell.git", branch = "main" }
 serde_json = "1"
 tempfile = "3"
 tokio = { version = "1", features = ["rt", "time"] }
