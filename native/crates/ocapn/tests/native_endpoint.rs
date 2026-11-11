@@ -9,11 +9,11 @@ use identity::{IdentityProvider, InMemoryProvider};
 use insigne::delegation::{
     CapabilityScope, DelegationCertificate, DelegationParent, SignedDelegationCertificate,
 };
+use murm_ocapn::native::{CONNECT, Credentials, GEMOT_DOMAIN, GEMOT_SERVICE, NativeService};
 use murm_ocapn::{
     Bootstrap, BoxFuture, CallContext, CallError, HostObject, PeerLocator, SessionAuthority,
     SessionConfig, Value, attach,
 };
-use murm_ocapn_transport::{CONNECT, Credentials, GEMOT_DOMAIN, GEMOT_SERVICE, NativeService};
 use notochord::{
     AdmittedPrincipal, LocalNetworkPolicy, NetworkId, ProfileRef, RevocationLedger, ServiceAccess,
     ServiceRule, TrustedRoot,

@@ -3457,22 +3457,13 @@ dependencies = [
  "ed25519-dalek",
  "futures-util",
  "getrandom 0.4.3",
- "thiserror 1.0.69",
- "tokio",
- "zeroize",
-]
-
-[[package]]
-name = "murm-ocapn-transport"
-version = "0.1.0"
-dependencies = [
  "insigne",
  "mere-transport",
- "murm-ocapn",
  "notochord",
  "personae",
  "thiserror 1.0.69",
  "tokio",
+ "zeroize",
 ]
 
 [[package]]

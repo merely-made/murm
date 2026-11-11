@@ -9,9 +9,13 @@
 //! The supported wire profile is explicitly pinned to the independent OCapN
 //! test suite at 31f0b806, rather than claiming the evolving latest draft.
 //! This crate owns no endpoint, router, admission policy, or domain authority.
+//! The non-default `native` feature adds [`native`], which admits OCapN onto a
+//! host's existing native endpoint; it still owns no endpoint, discovery or keys.
 
 mod host;
 mod limits;
+#[cfg(feature = "native")]
+pub mod native;
 mod session;
 mod syrup;
 mod value;

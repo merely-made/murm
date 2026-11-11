@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["crates/murm", "crates/murm-i2p", "crates/holder", "crates/resolve", "crates/comms", "crates/sync", "crates/transport", "crates/webrtc-carrier", "crates/ocapn", "crates/ocapn-transport"]
+members = ["crates/murm", "crates/murm-i2p", "crates/holder", "crates/resolve", "crates/comms", "crates/sync", "crates/transport", "crates/webrtc-carrier", "crates/ocapn"]
 
 [workspace.package]
 version = "0.0.1"

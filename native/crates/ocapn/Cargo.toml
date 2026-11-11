@@ -10,6 +10,7 @@ description = "Bounded two-party CapTP sessions on already admitted ordered stre
 [features]
 default = []
 suite-fixture = ["tokio/net"]
+native = ["dep:transport", "dep:identity", "dep:insigne", "dep:notochord"]
 
 [dependencies]
 tokio = { version = "1", features = ["io-util", "sync", "rt", "macros", "time"] }
@@ -18,6 +19,10 @@ ed25519-dalek = "3"
 getrandom = "0.4"
 zeroize = "1"
 thiserror = "1"
+transport = { workspace = true, features = ["noise", "notochord"], optional = true }
+identity = { workspace = true, optional = true }
+insigne = { workspace = true, optional = true }
+notochord = { workspace = true, features = ["tokio"], optional = true }
 
 [dev-dependencies]
 tokio = { version = "1", features = ["io-util", "sync", "rt", "rt-multi-thread", "macros", "time"] }
@@ -25,6 +30,10 @@ tokio = { version = "1", features = ["io-util", "sync", "rt", "rt-multi-thread",
 [[example]]
 name = "suite_server"
 required-features = ["suite-fixture"]
+
+[[test]]
+name = "native_endpoint"
+required-features = ["native"]
 
 [lints]
 workspace = true

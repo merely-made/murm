@@ -7,7 +7,7 @@
 //! Native secure admission for an optional OCapN service on an existing endpoint.
 //!
 //! The host registers a bounded service route on its existing `P2pandaTransport`.
-//! This crate borrows that transport; it owns no endpoint, discovery or keys.
+//! This module borrows that transport; it owns no endpoint, discovery or keys.
 //! Native iroh TLS supplies confidentiality and a stream-specific exporter
 //! binding. Notochord proves the application principal before CapTP starts.
 
