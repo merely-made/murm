@@ -34,12 +34,6 @@ stickleback = { git = "https://github.com/merely-made/eidetic.git", branch = "ma
 muniment = { git = "https://github.com/merely-made/eidetic.git", branch = "main" }
 mere-proofs = { git = "https://github.com/merely-made/eidetic.git", branch = "main" }
 
-[patch."https://github.com/merely-made/mere.git"]
-luggage = { git = "https://github.com/merely-made/eidetic.git", branch = "main" }
-mere-proofs = { git = "https://github.com/merely-made/eidetic.git", branch = "main" }
-muniment = { git = "https://github.com/merely-made/eidetic.git", branch = "main" }
-stickleback = { git = "https://github.com/merely-made/eidetic.git", branch = "main" }
-
 # Preserve the I2P3 mitigation: emissary-core 0.4.0 can reach debug_assert!(false)
 # from a peer's message. Release builds reject that message; dev/test hosts must
 # do the same. The I2P plan records the original failure and the owner's decision.

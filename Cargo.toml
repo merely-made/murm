@@ -99,8 +99,6 @@ codegen-units = 1
 [patch.crates-io]
 # Canonical promoted families; keep registry and Git consumers type-identical.
 
-[patch."https://github.com/merely-made/mere.git"]
-
 [workspace.lints.clippy]
 missing_errors_doc = "warn"
 missing_panics_doc = "warn"
