@@ -56,6 +56,10 @@ dedup, and forwarding mechanics. Full notice and license text:
 [`crates/tucket/NOTICE`](crates/tucket/NOTICE). How that implementation was
 built: [`crates/sennet/PROVENANCE.md`](crates/sennet/PROVENANCE.md).
 
+Ruled 2026-08-27, on the brief's substantial-derivative precedent: tucket keeps
+MeshCore's MIT notice. Both MIT and Apache-2.0 permit relicensing a derivative so long
+as the notice travels with it.
+
 ## lora-phy (MIT OR Apache-2.0)
 
 `vendor/lora-phy` is a vendored third-party fork and keeps its own terms. See
