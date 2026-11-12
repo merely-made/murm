@@ -1,5 +1,6 @@
 # mere/design_docs/mere_docs/implementation_strategy/2026-10-30_house_style_plan.md
 fail_fast: true
+default_install_hook_types: [pre-commit, post-commit, pre-push]
 repos:
   - repo: local
     hooks:
@@ -12,7 +13,23 @@ repos:
         additional_dependencies: ["cli:https://github.com/merely-made/eidetic:line-ceiling-v0.0.2:line-ceiling"]
       - id: clippy
         name: clippy
-        entry: cargo clippy --locked -p postilion -p retinue -p tulle -p tinyssb-core -p selvage -p seneschal -p sennet -p tucket -p outrider -p radio-face -p radio-hand -p radio-mirror -p retinue-sim -p truchman --all-targets
+        entry: cargo clippy -p postilion -p retinue -p tulle -p tinyssb-core -p selvage -p seneschal -p sennet -p tucket -p outrider -p radio-face -p radio-hand -p radio-mirror -p retinue-sim -p truchman --all-targets
         language: system
-        files: '(^|/)(Cargo\.(toml|lock)|[^/]+\.rs)$'
+        files: '(^|/)(Cargo\.toml|[^/]+\.rs)$'
         pass_filenames: false
+      # No Cargo.lock is tracked; what cargo resolved rides on each commit as a
+      # git note (scripts/record-resolved.sh).
+      - id: record-resolved
+        name: record resolved versions
+        entry: bash scripts/record-resolved.sh record
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [post-commit]
+      - id: push-resolved
+        name: push resolved versions
+        entry: bash scripts/record-resolved.sh push
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]
