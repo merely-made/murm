@@ -1,16 +1,20 @@
-# mere/design_docs/mere_docs/implementation_strategy/2026-10-30_house_style_plan.md
+# house hooks --no-decisions --clippy-base '-p postilion -p retinue -p tulle -p tinyssb-core -p selvage -p seneschal -p sennet -p tucket -p outrider -p radio-face -p radio-hand -p radio-mirror -p retinue-sim -p truchman --all-targets'
+# Written by `house hooks` (eidetic, crates/house); `house hooks --check` fails when this file drifts from it.
+# `house` is on the PATH: cargo install --git https://github.com/merely-made/eidetic house
 fail_fast: true
 default_install_hook_types: [pre-commit, post-commit, pre-push]
+# Hooks without stages run at pre-commit only, so the notes push inside
+# `house resolved push` reruns nothing but that hook.
+default_stages: [pre-commit]
 repos:
   - repo: local
     hooks:
       - id: line-ceiling
         name: line ceiling
-        entry: line-ceiling
-        language: rust
+        entry: house line-ceiling
+        language: system
         types: [text]
         always_run: true
-        additional_dependencies: ["cli:https://github.com/merely-made/eidetic:line-ceiling-v0.0.2:line-ceiling"]
       - id: clippy
         name: clippy
         entry: cargo clippy -p postilion -p retinue -p tulle -p tinyssb-core -p selvage -p seneschal -p sennet -p tucket -p outrider -p radio-face -p radio-hand -p radio-mirror -p retinue-sim -p truchman --all-targets
@@ -18,17 +22,17 @@ repos:
         files: '(^|/)(Cargo\.toml|[^/]+\.rs)$'
         pass_filenames: false
       # No Cargo.lock is tracked; what cargo resolved rides on each commit as a
-      # git note (scripts/record-resolved.sh).
+      # git note under refs/notes/resolved (`house resolved show <commit>`).
       - id: record-resolved
         name: record resolved versions
-        entry: bash scripts/record-resolved.sh record
+        entry: house resolved record
         language: system
         pass_filenames: false
         always_run: true
         stages: [post-commit]
       - id: push-resolved
         name: push resolved versions
-        entry: bash scripts/record-resolved.sh push
+        entry: house resolved push
         language: system
         pass_filenames: false
         always_run: true
