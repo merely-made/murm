@@ -104,3 +104,15 @@ reason = "The unattended sited-station host. Existing source-size debt; a respon
 [[exception]]
 path = "crates/station-custody/src/lib.rs"
 reason = "Persona-backed custody adapter for Djinn-managed Retinue stations. Existing source-size debt; a responsibility split must preserve FirstOwnerCredential, ControllerStatusError, FirstOwnerCredentialError and existing module visibility."
+
+[[exception]]
+path = "testing/webrtc-ping/src/bin/answerer.rs"
+reason = "The C1 headed-receipt answerer, moved in unmodified from its former home. Existing source-size debt; a responsibility split must preserve the signalling fixture, the receipt line and the answerer's module paths."
+
+[[exception]]
+path = "testing/webrtc-ping/src/bin/answerer/turn_client.rs"
+reason = "The probe's TURN client, moved in unmodified from its former home. Existing source-size debt; a responsibility split must preserve its credential minting and module visibility."
+
+[[exception]]
+path = "testing/webrtc-ping/src/lib.rs"
+reason = "The browser-side initiator of the C1 receipt, moved in unmodified from its former home. Existing source-size debt; a responsibility split must preserve the wasm-bindgen exports and the receipt fields."
