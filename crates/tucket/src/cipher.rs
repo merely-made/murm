@@ -23,9 +23,8 @@
 
 use alloc::vec::Vec;
 
-use aes::Aes128;
-use aes::cipher::generic_array::GenericArray;
-use aes::cipher::{BlockDecrypt, BlockEncrypt, KeyInit};
+use aes::cipher::{BlockCipherDecrypt, BlockCipherEncrypt, KeyInit};
+use aes::{Aes128, Block};
 use hmac::{Hmac, Mac};
 use sha2::Sha256;
 use subtle::ConstantTimeEq;
@@ -46,7 +45,7 @@ pub fn encrypt_then_mac(secret: &[u8; 32], plaintext: &[u8]) -> Vec<u8> {
         plaintext.len() <= MAX_CIPHER_PLAINTEXT,
         "ciphertext exceeds one MeshCore frame"
     );
-    let cipher = Aes128::new(GenericArray::from_slice(&secret[..CIPHER_KEY_SIZE]));
+    let cipher = aes128(secret);
 
     let mut ciphertext = plaintext.to_vec();
     let rem = ciphertext.len() % BLOCK;
@@ -54,7 +53,7 @@ pub fn encrypt_then_mac(secret: &[u8; 32], plaintext: &[u8]) -> Vec<u8> {
         ciphertext.resize(ciphertext.len() + (BLOCK - rem), 0);
     }
     for chunk in ciphertext.chunks_mut(BLOCK) {
-        cipher.encrypt_block(GenericArray::from_mut_slice(chunk));
+        cipher.encrypt_block(block_mut(chunk));
     }
 
     let mac = mac2(secret, &ciphertext);
@@ -89,19 +88,29 @@ pub fn mac_then_decrypt(secret: &[u8; 32], blob: &[u8]) -> Option<Vec<u8>> {
         return None;
     }
 
-    let cipher = Aes128::new(GenericArray::from_slice(&secret[..CIPHER_KEY_SIZE]));
+    let cipher = aes128(secret);
     let mut plaintext = ciphertext.to_vec();
     for chunk in plaintext.chunks_mut(BLOCK) {
-        cipher.decrypt_block(GenericArray::from_mut_slice(chunk));
+        cipher.decrypt_block(block_mut(chunk));
     }
     Some(plaintext)
+}
+
+/// AES-128 keyed with the first [`CIPHER_KEY_SIZE`] bytes of `secret`.
+fn aes128(secret: &[u8; 32]) -> Aes128 {
+    Aes128::new_from_slice(&secret[..CIPHER_KEY_SIZE]).expect("AES-128 key is 16 bytes")
+}
+
+/// One whole 16-byte chunk as an AES block.
+fn block_mut(chunk: &mut [u8]) -> &mut Block {
+    chunk.try_into().expect("chunk is one AES block")
 }
 
 /// The 2-byte MAC: the leftmost [`CIPHER_MAC_SIZE`] bytes of `HMAC-SHA256(secret, ciphertext)`,
 /// keyed with the full 32-byte secret.
 fn mac2(secret: &[u8; 32], ciphertext: &[u8]) -> [u8; CIPHER_MAC_SIZE] {
     let mut mac =
-        <Hmac<Sha256> as Mac>::new_from_slice(secret).expect("HMAC accepts any key length");
+        <Hmac<Sha256> as KeyInit>::new_from_slice(secret).expect("HMAC accepts any key length");
     mac.update(ciphertext);
     let full = mac.finalize().into_bytes();
     let mut out = [0u8; CIPHER_MAC_SIZE];

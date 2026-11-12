@@ -48,7 +48,7 @@ serial2-tokio = { version = "0.1.24", optional = true }
 # The shared presentation vocabulary lives in this repository's native workspace.
 comms = { package = "mere-comms", version = "0.0.1", path = "../../native/crates/comms", optional = true }
 hex = "0.4"
-getrandom = { version = "0.3", optional = true }
+getrandom = { version = "0.4", optional = true }
 linkboy = { version = "0.1.0", path = "../linkboy" }
 outrider = { version = "0.3.0", path = "../../crates/outrider", features = ["voice"] }
 pipit = { version = "0.2", path = "../../crates/pipit" }

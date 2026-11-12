@@ -25,6 +25,45 @@
 # feature flag.
 all-features = true
 
+# Two versions of one crate in a build are a defect: move the older version's
+# holder forward. Each skip below is a duplicate that cannot be removed from
+# here yet, with the holder that keeps it and what would remove it.
+#
+#   cargo deny check bans
+[bans]
+multiple-versions = "deny"
+wildcards = "allow"
+skip = [
+  { crate = "bitfield@0.13.2", reason = "cortex-m 0.7.10 requires it; cortex-m 0.7.10 (latest) under embassy-executor (heltec firmware via esp-rtos 0.3) holds it; goes when cortex-m moves to bitfield 0.19" },
+  { crate = "bitflags@1.3.2", reason = "defmt 1.2.0 requires it; defmt 1.2.0 (firmware) holds it; goes when defmt moves to bitflags 2" },
+  { crate = "block-buffer@0.10.4", reason = "digest 0.10.7 requires it; digest 0.10 under esp-hal 1.1.2 (heltec firmware) holds it; goes with esp-hal 1.2" },
+  { crate = "crypto-common@0.1.7", reason = "digest 0.10.7 requires it; digest 0.10 under esp-hal 1.1.2 (heltec firmware) holds it; goes with esp-hal 1.2" },
+  { crate = "darling@0.20.11", reason = "embassy-executor-macros 0.8.0 requires it; embassy-executor-macros 0.8 and enumset_derive 0.15 (firmware) hold it; goes as they move to darling 0.24" },
+  { crate = "darling@0.21.3", reason = "enumset_derive 0.15.1 requires it; embassy-executor-macros 0.8 and enumset_derive 0.15 (firmware) hold it; goes as they move to darling 0.24" },
+  { crate = "darling_core@0.20.11", reason = "darling 0.20.11, darling_macro 0.20.11 require it; darling of the same line (embassy-executor-macros, enumset_derive) holds it; goes with darling 0.24" },
+  { crate = "darling_core@0.21.3", reason = "darling 0.21.3, darling_macro 0.21.3 require it; darling of the same line (embassy-executor-macros, enumset_derive) holds it; goes with darling 0.24" },
+  { crate = "darling_macro@0.20.11", reason = "darling 0.20.11 requires it; darling of the same line holds it; goes with darling 0.24" },
+  { crate = "darling_macro@0.21.3", reason = "darling 0.21.3 requires it; darling of the same line holds it; goes with darling 0.24" },
+  { crate = "digest@0.10.7", reason = "esp-hal 1.1.2 requires it; esp-hal 1.1.2 (heltec firmware; esp-rtos 0.3 keeps it below 1.2.2) holds it; goes when the firmware's ESP stack moves to esp-hal 1.2 (needs the xtensa toolchain to check, not available here)" },
+  { crate = "embassy-hal-internal@0.4.0", reason = "embassy-embedded-hal 0.6.0 requires it; embassy-embedded-hal 0.6.0 under embassy-nrf 0.11 (t114 firmware) holds it; goes when embassy-embedded-hal moves to 0.5" },
+  { crate = "embassy-sync@0.6.2", reason = "esp-sync 0.2.1 requires it; esp-sync 0.2.1 (heltec firmware) holds it; goes with the ESP 1.2 line" },
+  { crate = "embassy-sync@0.7.2", reason = "esp-sync 0.2.1 requires it; esp-sync 0.2.1 (heltec firmware) holds it; goes with the ESP 1.2 line" },
+  { crate = "embedded-hal@0.2.7", reason = "cortex-m 0.7.10, embassy-embedded-hal 0.6.0, embassy-nrf 0.11.0, embassy-time 0.5.1 and others require it; cortex-m 0.7, embassy-embedded-hal 0.6, embassy-nrf 0.11, embassy-time 0.5 and esp-synopsys-usb-otg (firmware) hold it; goes as they drop embedded-hal 0.2" },
+  { crate = "embedded-io@0.6.1", reason = "embedded-io-async 0.6.1, esp-hal 1.1.2 require it; embedded-io-async 0.6 and esp-hal 1.1.2 (heltec firmware) hold it; goes with the ESP 1.2 line" },
+  { crate = "embedded-io-async@0.6.1", reason = "embassy-sync 0.6.2, embassy-sync 0.7.2, embassy-usb-driver 0.2.2, esp-hal 1.1.2 require it; embassy-sync 0.6/0.7, embassy-usb-driver 0.2 and esp-hal 1.1.2 (firmware) hold it; goes with the ESP 1.2 line" },
+  { crate = "esp-metadata-generated@0.4.0", reason = "esp-config 0.7.0, esp-backtrace 0.19.0, esp-bootloader-esp-idf 0.5.0, esp-hal 1.1.2 and others require it; esp-hal 1.1.2, esp-rtos 0.3, esp-sync 0.2 and the other ESP 1.1-line crates (heltec firmware) hold it; goes when the firmware's ESP stack moves to the 1.2 line" },
+  { crate = "esp32s3@0.35.2", reason = "esp-hal 1.1.2, tulle-heltec-v4-phy 0.0.1 require it; esp-hal 1.1.2 and the heltec firmware hold it while esp-rom-sys 0.1.5 takes 0.36; goes when the firmware moves to esp-hal 1.2 and esp32s3 0.36 together (not checkable on this host)" },
+  { crate = "heapless@0.8.0", reason = "embassy-sync 0.6.2, embassy-sync 0.7.2, usb-device 0.3.2 require it; embassy-sync 0.6/0.7 (esp-sync) and usb-device 0.3.2 (firmware) hold it; goes when they move to heapless 0.9" },
+  { crate = "miniz_oxide@0.8.9", reason = "png 0.18.1 requires it; png 0.18.1 (latest; radio-face, radio-mirror) holds it; goes when png moves to miniz_oxide 0.9" },
+  { crate = "nb@0.1.3", reason = "embedded-hal 0.2.7 requires it; embedded-hal 0.2 (firmware) holds it; goes with embedded-hal 1" },
+  { crate = "rand_core@0.6.4", reason = "embassy-nrf 0.11.0, esp-hal 1.1.2 require it; embassy-nrf 0.11 (t114 firmware) and esp-hal 1.1.2 (heltec firmware) hold it; goes when both move to rand_core 0.10" },
+  { crate = "rand_core@0.9.5", reason = "embassy-nrf 0.11.0, esp-hal 1.1.2 require it; embassy-nrf 0.11 and esp-hal 1.1.2 (firmware) hold it; goes when both move to rand_core 0.10" },
+  { crate = "rustc_version@0.2.3", reason = "bare-metal 0.2.5 requires it; bare-metal 0.2.5 under cortex-m 0.7 (firmware) holds it; goes when cortex-m drops bare-metal 0.2" },
+  { crate = "semver@0.9.0", reason = "rustc_version 0.2.3 requires it; rustc_version 0.2 under bare-metal 0.2.5 (cortex-m) holds it; goes with it" },
+  { crate = "syn@2.0.119", reason = "cortex-m-macros 0.7.8, curve25519-dalek-derive 0.1.1, darling_core 0.20.11, darling_core 0.21.3 and others require it; most proc-macros still on syn 2; goes as they move to syn 3" },
+  { crate = "windows-link@0.2.1", reason = "windows-sys 0.61.2 requires it; windows-sys 0.61.2 (latest) holds it; goes when windows-sys moves to the windows-link 0.100 line" },
+]
+
 [licenses]
 version = 2
 # Exactly the licenses currently in the tree — kept tight on purpose. A new dependency that

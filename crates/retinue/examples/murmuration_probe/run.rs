@@ -26,7 +26,7 @@ pub(super) async fn run(
     events: &mut Vec<Value>,
 ) -> Result<()> {
     let mut random = [0u8; 32];
-    getrandom::getrandom(&mut random).map_err(|e| format!("bench entropy: {e}"))?;
+    getrandom::fill(&mut random).map_err(|e| format!("bench entropy: {e}"))?;
     let run_id = hex::encode(&random[16..24]);
     let key: [u8; 16] = random[..16].try_into()?;
     let source_dut = u32::from_le_bytes(random[24..28].try_into()?);

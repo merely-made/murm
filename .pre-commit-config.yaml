@@ -1,4 +1,4 @@
-# house hooks --no-decisions --clippy-base '-p postilion -p retinue -p tulle -p tinyssb-core -p selvage -p seneschal -p sennet -p tucket -p outrider -p radio-face -p radio-hand -p radio-mirror -p retinue-sim -p truchman --all-targets'
+# house hooks --no-decisions --deny --clippy-base '-p postilion -p retinue -p tulle -p tinyssb-core -p selvage -p seneschal -p sennet -p tucket -p outrider -p radio-face -p radio-hand -p radio-mirror -p retinue-sim -p truchman --all-targets'
 # Written by `house hooks` (eidetic, crates/house); `house hooks --check` fails when this file drifts from it.
 # `house` is on the PATH: cargo install --git https://github.com/merely-made/eidetic house
 fail_fast: true
@@ -19,8 +19,14 @@ repos:
         name: clippy
         entry: cargo clippy -p postilion -p retinue -p tulle -p tinyssb-core -p selvage -p seneschal -p sennet -p tucket -p outrider -p radio-face -p radio-hand -p radio-mirror -p retinue-sim -p truchman --all-targets
         language: system
-        files: '(^|/)(Cargo\.toml|[^/]+\.rs)$'
+        files: '(^|/)(Cargo\.toml|rust-toolchain\.toml|[^/]+\.rs)$'
         pass_filenames: false
+      - id: dependency-bans
+        name: dependency bans
+        entry: cargo deny check bans
+        language: system
+        pass_filenames: false
+        always_run: true
       # No Cargo.lock is tracked; what cargo resolved rides on each commit as a
       # git note under refs/notes/resolved (`house resolved show <commit>`).
       - id: record-resolved

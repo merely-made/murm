@@ -15,7 +15,7 @@ type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 fn random<const N: usize>() -> Result<[u8; N]> {
     let mut bytes = [0; N];
-    getrandom::getrandom(&mut bytes).map_err(|e| format!("host entropy: {e}"))?;
+    getrandom::fill(&mut bytes).map_err(|e| format!("host entropy: {e}"))?;
     Ok(bytes)
 }
 

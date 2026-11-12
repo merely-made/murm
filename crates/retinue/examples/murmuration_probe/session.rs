@@ -18,7 +18,7 @@ use tulle::personality_serial::PersonalitySerialRuntime;
 
 fn random<const N: usize>() -> Result<[u8; N]> {
     let mut bytes = [0; N];
-    getrandom::getrandom(&mut bytes).map_err(|e| format!("session entropy: {e}"))?;
+    getrandom::fill(&mut bytes).map_err(|e| format!("session entropy: {e}"))?;
     Ok(bytes)
 }
 fn send_packet(actions: &Actions<8>) -> Result<Packet> {

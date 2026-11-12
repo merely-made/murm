@@ -8,7 +8,7 @@
 #[path = "resident/retinue.rs"]
 mod resident_retinue;
 
-use getrandom::getrandom;
+use getrandom::fill as getrandom;
 use radio_hand::resident_command::Command;
 use radio_hand::resident_wire::{ResidentSetup, SennetKey};
 use selvage::PhyProfile;
