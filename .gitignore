@@ -6,7 +6,6 @@
 /testing/iroh-control/results/
 /testing/protocol-capacity/receipt.json
 /testing/transport-conformance/results/
-/testing/webrtc-evaluation/receipts/
 /validation/signalman-custody/
 /validation/signalman-refresh-*.json
 /validation/signalman-refresh-*.zip

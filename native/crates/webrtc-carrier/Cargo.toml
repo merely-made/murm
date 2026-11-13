@@ -142,7 +142,8 @@ wasm-bindgen-test = "0.3"
 # str0m, 0.25.0 since 2026-11-12. 0.23.1 was chosen in the August bake-off against the then-current
 # webrtc-rs: 89 crates against 212, and 214 MB of added compiled artifacts
 # against 329 MB. Those historical counts do not measure rtc/webrtc 0.21.1;
-# see testing/webrtc-evaluation and Genet's 2026-11-01 conformance plan.
+# see Genet's 2026-11-01 conformance plan (the testing/webrtc-evaluation probe
+# was removed on 2026-11-13).
 # The deciding argument was not size, though: str0m is Sans-IO, and this codebase
 # already runs that way — Notochord's handshake core and this carrier's own
 # core are both deliberately I/O-free, so the WebRTC engine being I/O-free too
