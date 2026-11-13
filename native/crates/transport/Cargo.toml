@@ -81,7 +81,7 @@ muniment.workspace = true
 # murm-sync's muniment-backed address book, so p2panda-store's bundled SQLite
 # backend (and sqlx with it) stays out of the graph entirely. Feature
 # unification means EVERY consumer has to opt out, not just one.
-p2panda-net = { package = "p2mere-net", version = "0.10", default-features = false, features = [
+p2panda-net = { package = "p2mere-net", version = "0.11", default-features = false, features = [
   "address_book",
   "iroh_endpoint",
   "iroh_mdns",
@@ -89,7 +89,7 @@ p2panda-net = { package = "p2mere-net", version = "0.10", default-features = fal
   "gossip",
   "sync",
 ] }
-p2panda-core = { package = "p2mere-core", version = "0.10" }
+p2panda-core = { package = "p2mere-core", version = "0.11" }
 # The builder's held seed is cleared on drop (vault lock ruling 51).
 zeroize = "1"
 # Reticulum mesh-networking backend (optional, see [features]). `retinue` is
