@@ -63,7 +63,7 @@ path = "src/lib.rs"
 # one link-derivation discipline in the repo, not two. Pure Rust, builds for
 # `wasm32-unknown-unknown` with no feature coaxing.
 blake3.workspace = true
-thiserror = "1"
+thiserror = "2"
 
 # Release identity has one definition in this workspace, and it is Luggage's.
 # `default-features = false` takes the release-identity core only — no feed

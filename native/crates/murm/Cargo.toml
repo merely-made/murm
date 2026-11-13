@@ -53,7 +53,7 @@ zeroize = "1"
 # the gossip subscription stream (the LogSync one is the drain's now).
 tokio = { version = "1", features = ["io-util", "rt", "time", "sync"] }
 tokio-stream = "0.1"
-thiserror = "1"
+thiserror = "2"
 
 [dev-dependencies]
 # Tests and examples bind throwaway identities (vault lock plan, ruling 96).

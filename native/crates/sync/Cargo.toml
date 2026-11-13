@@ -23,7 +23,7 @@ tokio-stream = "0.1"
 # Framing and sink/stream adapters for the carrier-neutral LogSync session.
 bytes = "1"
 futures-util = { version = "0.3", default-features = false, features = ["sink"] }
-thiserror = "1"
+thiserror = "2"
 tokio-util = { version = "0.7", default-features = false, features = ["codec"] }
 
 [dev-dependencies]

@@ -18,7 +18,7 @@ futures-util = "0.3"
 ed25519-dalek = "3"
 getrandom = "0.4"
 zeroize = "1"
-thiserror = "1"
+thiserror = "2"
 transport = { workspace = true, features = ["noise", "notochord"], optional = true }
 identity = { workspace = true, optional = true }
 insigne = { workspace = true, optional = true }
