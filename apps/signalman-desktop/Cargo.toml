@@ -59,7 +59,7 @@ cpal = "=0.18.2"
 # The radio-specific custody adapter shares this repository's radio types.
 # Its wallet authority remains behind Dramatis and Djinn.
 station-custody = { path = "../../crates/station-custody" }
-chartulary = { git = "https://github.com/merely-made/eidetic.git", branch = "main" }
+portolan = { git = "https://github.com/merely-made/eidetic.git", branch = "main" }
 gaz = { git = "https://github.com/merely-made/dramatis.git", branch = "main" }
 muniment = { features = ["redb"], git = "https://github.com/merely-made/eidetic.git", branch = "main" }
 sceno = { git = "https://github.com/merely-made/graphshell.git", branch = "main" }
