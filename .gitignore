@@ -1,4 +1,6 @@
-/target
+# Unanchored: native, crates/station-custody, apps/signalman-desktop and the
+# other excluded crates are their own workspaces and build beside themselves.
+target/
 # Exact-commit validation records are local evidence artifacts.  A record is
 # valid only for the clean commit it names, so it is never source-controlled.
 /validation/results/
