@@ -81,8 +81,8 @@ Each crate has its own README with more detail, and here's a generated overview.
 | `seneschal` | Board-management contract: signed control requests and replies, owner and configuration journal. | published |
 | `tulle` | Radio interface layer: serial modem control, direct PHY, medium access. | published |
 | `selvage` | LoRa PHY profiles shared by host and firmware. | published |
-| `sennet` | Meshtastic-compatible mesh. | published |
-| `tucket` | MeshCore interop. | published |
+| `sennet` | Protobuf wire reader for a stock Meshtastic-compatible radio's client stream. | published |
+| `tucket` | MeshCore companion frame types for a stock MeshCore radio. | published |
 | `radio-face`, `radio-hand`, `radio-mirror` | On-device UI, board runtime, and the UI's browser (wasm) realization. | workspace only |
 | `retinue-sim` | In-process multi-node route-trace harness. | workspace only |
 | `tinyssb-core` | Allocation-free tinySSB v0 feed verifier. | workspace only |
@@ -108,12 +108,11 @@ T114 boards is in `firmware/`, with flashable packages in `firmware/packages/`.
   landed: route learning, `open_link(now)`, link-request expiry, and
   own-echo and duplicate filtering. These results cover the measured
   local-TCP scopes; they are not full upstream parity.
-- **Sennet and Tucket.** The [current receipt](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/receipts/sennet-tucket-current/README.md)
-  covers September 30 exchanges with identified stock radios. MeshCore 1.17.1
-  passed endpoint traffic, ACKs, fallback and one-repeater routes at all three
-  path widths. Meshtastic 2.7.26 passed bidirectional encrypted text,
-  rebroadcast, node association and duplicate suppression. Maximum-size stock
-  acceptance, multiple repeaters and broader roles remain open.
+- **Sennet and Tucket.** Since 2026-11-14 MeshCore and Meshtastic meshes are
+  reached through a stock companion radio that holds the keys (Mark: "Stock
+  radios only"); the crates keep only the frame types Signalman's companion
+  client uses. The September 30 native exchanges in the [historical receipt](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/receipts/sennet-tucket-current/README.md)
+  describe code that has since been removed.
 - **Firmware.** T114 bounded transport has an on-air receipt from August 13.
   The [firmware refresh](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/receipts/firmware-refresh/README.md) and its
   [follow-up](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/receipts/firmware-refresh/follow-up/README.md) installed

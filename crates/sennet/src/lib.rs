@@ -1,14 +1,12 @@
 #![forbid(unsafe_code)]
 #![no_std]
 
-//! Sennet: an independent, permissively licensed mesh radio protocol
-//! implementation in the retinue family.
+//! Sennet: the schema-free protobuf wire reader Signalman's stock-companion
+//! client uses to talk to a Meshtastic-compatible radio's client stream.
 //!
-//! Sennet targets interoperability with existing LoRa messaging meshes as a
-//! sibling of [retinue](https://github.com/merely-made/murm) on the shared
-//! tulle radio layer. It is an independent implementation, developed from
-//! wire observation and public documentation, and is not affiliated with or
-//! endorsed by any existing mesh project.
+//! A stock radio holds its keys and runs the mesh. Since 2026-11-14 this crate
+//! carries no transport, cipher, routing or packet-ID allocator of its own
+//! (Mark: "Stock radios only").
 //!
 //! A sennet is a ceremonial fanfare for a procession.
 //!
@@ -21,14 +19,8 @@
 
 extern crate alloc;
 
-pub mod application;
-pub mod flood;
-pub mod instance;
-pub mod node;
-pub mod node_info;
-pub mod packet_id;
-pub mod pki;
 pub mod protobuf;
-pub mod routing;
-pub mod stream;
-pub mod transport;
+
+/// Largest text payload a Meshtastic-compatible radio carries in one packet: the
+/// 237-byte radio payload less five bytes of text-port envelope.
+pub const MAX_APPLICATION_PAYLOAD: usize = 237 - 5;

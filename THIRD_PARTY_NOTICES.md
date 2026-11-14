@@ -51,8 +51,10 @@ Prns Authors.
 
 ## MeshCore (MIT)
 
-`crates/tucket` ports MeshCore wire formats, cryptographic construction,
-dedup, and forwarding mechanics. Full notice and license text:
+`crates/tucket` ported MeshCore wire formats, cryptographic construction,
+dedup, and forwarding mechanics; since 2026-11-14 it keeps only the companion
+`DEVICE_INFO` frame type, pinned to MeshCore's published companion protocol
+document. Full notice and license text:
 [`crates/tucket/NOTICE`](crates/tucket/NOTICE). How that implementation was
 built: [`crates/sennet/PROVENANCE.md`](crates/sennet/PROVENANCE.md).
 

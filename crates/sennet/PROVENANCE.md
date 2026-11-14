@@ -1,5 +1,9 @@
 # Sennet provenance
 
+**2026-11-14:** the crate now keeps only the protobuf wire reader (Mark: "Stock
+radios only"). The records below describe code that has since been removed and are
+kept as its provenance.
+
 ## Pairwise primitive continuation (2026-10-16)
 
 The official public security reference describes X25519 followed by SHA-256,

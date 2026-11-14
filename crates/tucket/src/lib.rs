@@ -1,23 +1,13 @@
 #![forbid(unsafe_code)]
 #![no_std]
 
-//! Tucket: MeshCore interop for the retinue radio family.
+//! Tucket: the MeshCore companion frame types Signalman's stock-companion
+//! client reads.
 //!
-//! Node management and text interop with MeshCore mesh networks, as a sibling
-//! of [retinue](https://github.com/merely-made/murm) on the shared tulle radio
-//! layer.
+//! A stock MeshCore radio holds its keys and runs the mesh; the host speaks the
+//! public companion serial API to it. Since 2026-11-14 this crate carries no
+//! MeshCore node, cipher or identity of its own (Mark: "Stock radios only").
 //!
 //! A tucket is a trumpet flourish announcing a single arrival.
 
-extern crate alloc;
-
-pub mod advert;
-pub mod cipher;
 pub mod companion;
-pub mod identity;
-pub mod instance;
-pub mod mesh;
-pub mod message;
-pub mod node;
-pub mod packet;
-pub mod path;

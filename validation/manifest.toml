@@ -5,11 +5,6 @@
 
 version = 1
 
-[[asset_exemption]]
-path = "testing/tucket_t114_ops.py"
-reason = "Attended exact-USB T114 application-only Tucket campaign; verifies package bounds and original live identity/profile restoration. Never an automatic hardware test."
-expires = "2027-01-20"
-
 # This is an inventory and evidence registry, not a second assertion suite.
 # Assertions remain in the Rust tests, oracle scripts, and hardware procedures
 # that own them.  Discovery is deliberately derived from Git so that adding a
@@ -143,12 +138,6 @@ tier = "pr"
 command = ["cargo", "test", "-p", "sennet", "-p", "tucket", "--no-default-features"]
 
 [[suite]]
-id = "sennet-tucket-current-reference"
-tier = "local"
-command = ["python3", "testing/campaigns/sennet-tucket-current/run.py", "--output", "validation/results/sennet-tucket-current"]
-asset_globs = ["testing/campaigns/sennet-tucket-current/*.py", "testing/campaigns/sennet-tucket-current/tests/fixtures/sennet-stock-duplicate-settled.json", "testing/sennet_stock_bench.py", "crates/sennet/capture/capture_config.py", "crates/tucket/tests/*.rs", "crates/sennet/tests/current_boundaries.rs"]
-
-[[suite]]
 id = "t114-firmware"
 tier = "pr"
 command = ["cargo", "build", "-p", "tulle-t114-phy", "--release", "--target", "thumbv7em-none-eabihf"]
@@ -193,21 +182,6 @@ id = "sennet-capture-tooling"
 tier = "local"
 command = ["python3", "-u", "crates/sennet/capture/capture_airmsg.py"]
 asset_globs = ["crates/sennet/capture/*.py"]
-
-[[asset_exemption]]
-path = "testing/sennet_pki_stock.py"
-reason = "Attended stock PKI contact/send helper; the guarded Sennet wire/native bench owns physical execution and restoration."
-expires = "2027-01-16"
-
-[[asset_exemption]]
-path = "testing/setup_sennet_stock.py"
-reason = "Attended stock-radio setup/readback helper; the guarded Sennet bench owns physical execution and restoration."
-expires = "2027-01-16"
-
-[[asset_exemption]]
-path = "testing/stock_tucket_bench.py"
-reason = "Attended identified-radio status/setup/restoration helper; the guarded native radio benches own physical execution."
-expires = "2027-01-16"
 
 # This is a physical serial bridge helper, not an executable validation suite.
 # It is intentionally registered as an expiring exemption rather than silently

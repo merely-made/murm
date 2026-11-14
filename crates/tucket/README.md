@@ -1,156 +1,30 @@
 # tucket
 
-MeshCore interop for the [retinue](https://github.com/merely-made/murm) radio
-family: node management and text interop with MeshCore mesh networks, on the
-shared [tulle](https://github.com/merely-made/murm) radio layer.
+MeshCore companion serial frame types, for a host talking to a **stock MeshCore
+radio** that holds its own keys and runs the mesh.
 
-A tucket is a trumpet flourish announcing a single arrival.
+Today that is one type, `companion::DeviceInfo`: the public companion
+`DEVICE_INFO` response, pinned to MeshCore 1.17.1's
+`docs/companion_protocol.md` at `d92964352441e53b93e8667b802e04f6e072b39e`. It
+keeps the firmware release separate from the serial API version and never
+retains the BLE PIN. Signalman's stock-companion client
+(`apps/signalman/src/radio_comms/companion.rs`) is its user.
 
-**Current comparison, September 30:** MeshCore companion/repeater 1.17.1 at
-`d92964352441e53b93e8667b802e04f6e072b39e`. Software routing supports one-,
-two- and three-byte public-key prefixes, including complete next-hop matching
-and caller-configurable `Node::set_flood_hash_size`. V1 payload identity hashes
-remain one byte, with collision refusal. `mesh::route_recv` now takes an
-`&Identity` so it has the complete prefix to match/append. Unsupported payload
-versions and transport-scoped packets are refused by the unscoped Node before
-contact/dedup changes. This is refusal, not region-scope support. TRACE packet
-hashing uses the reference's one-byte path metadata.
+## What this crate no longer is
 
-The [current receipt](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/receipts/sennet-tucket-current/README.md)
-records fresh identified 1.17.1 endpoint adverts, text/ACKs, learned routes and
-fourth-attempt flood recovery, plus forced one-repeater routes at all three path
-widths. Multiple repeaters, scope, restart and broader role acceptance remain open.
+Until 2026-11-14 Tucket was a native MeshCore participant: identity, adverts,
+private and group text, the ECB cipher with its 2-byte MAC, routing, retries and
+a retained instance for the resident firmware image. Mark ruled that out:
 
-## Embedded core and capacities
+> considering the stack, tucket and sennet are not so important nowadays ...
+> reticulum covers what the other two don't and what they do. the only value
+> would be interoperation with existing non reticulum nodes, and for that, a
+> thinner layer is possible.
 
-The default library is `#![no_std]` with `alloc`. The `hardware` feature is
-only for the headed serial/Tulle example and does not change the core protocol
-API. It is the board owner's job to provide an allocator and choose concrete
-capacities from its target memory budget.
-
-`Node::with_capacity` takes a `NodeCapacity { contacts, dedup }`. Both tables
-allocate once at construction and do not grow while a frame is handled. A new
-advert when the contact table is full is refused by `try_add_contact` with
-`CapacityError::ContactsFull`; it never evicts an unrelated contact. Dedup
-uses exactly `dedup * 8` bytes for packet hashes. Contact backing storage is
-at most `contacts * size_of::<(u8, Contact)>()`, plus at most 64 path bytes for
-each learned direct route and allocator bookkeeping. `Contact` is deliberately
-private, so firmware should measure the final target image rather than relying
-on a host ABI size.
-
-Pending texts remain caller-owned, because the caller also owns retry timing,
-TX completion, and departure assessment. `PendingTexts::new(n)` is a small
-bounded collection if one is useful: it limits only that caller's outstanding
-sends, never the number of installed Tucket instances. One `PendingText` has a
-text body of at most `MAX_TEXT_BYTES` (171 UTF-8 bytes) and stores at most four
-ACK values, matching the four attempts the current wire control field supports.
-`try_begin_text` accepts a borrowed `str`, validates it before copying, and
-returns `TextTooLong`, `InvalidRetryPolicy`, or `UnknownContact`; `PendingTexts::push`
-returns `PendingFull` rather than growing. The compatibility `begin_text`
-wrapper still returns `Option`. `TextMessage::try_encode`,
-`GroupText::try_encode`, and `try_encrypt_then_mac` provide the same
-pre-allocation refusal at their lower-level boundaries; compatibility `encode`
-helpers reject an oversize input before allocating.
-`TextMessage::try_plain`, `GroupText::try_new`, `AdvertData::try_chat`, and
-`Node::try_advert_frame` are the checked borrowed-input constructors for those
-same wire fields.
-
-At the radio boundary, `PacketRef::decode` validates a raw frame without an
-allocation and `PacketRef::encode_into` writes into caller storage without a
-partial result. `Node::on_frame` uses that borrowed parse before it materializes
-an owned packet. One accepted input can create at most one app event and two
-outbound frames. The conservative working-set formula for a single text is:
-
-```text
-resident = dedup * 8 + contact backing + learned-route bytes + pending collection
-text working bytes <= plaintext(5 + 171) + encrypted blob(2 + 176)
-frame bytes <= header/transport/path(70) + payload(184) = 254
-```
-
-The formula excludes allocator metadata, stack frames, crypto implementation
-scratch space, and board radio buffers. Measure those on the selected firmware
-target before advertising an installed Tucket capability.
-
-## Retained instance
-
-`instance::Instance` retains one `Node` and a configured bounded operation
-list across a radio absence. `begin_send` gives each text an `OperationId` with
-retry, total-expiry, and caller-allowed-until deadlines; `next_retry` produces
-only a candidate frame. The radio owner separately owns queueing, cancellation,
-and TX results, so pausing or interrupting Tucket never claims an issued frame
-was revoked. `assess_pause(now, return_by)` reports `Ready`, the earliest
-`Busy` retry, or the exact operations that `RequiresLoss`. `resume` expires
-elapsed obligations and reports them without reconnect traffic. `interrupt`
-requires `LossPermission::Allow` and returns every discarded operation.
-`pause` and `resume` are strict transitions. The radio runtime calls
-`advance(now)` while active or paused to collect expiry reports; scheduling an
-operation at its expiry boundary returns `AdvanceRequired` until it does so.
-
-**Status:** authenticated adverts, flood text and acknowledgements, forwarding,
-and reciprocal direct-path learning are implemented. A successful flooded
-exchange teaches both endpoints a route; later text and acknowledgements select
-the learned hop path. Private text sends now expose a caller-timed retry state:
-attempt numbers are authenticated, delayed acknowledgements remain valid, and
-the default fourth transmission clears a failed direct path and floods to learn
-a replacement. Attempt count and flood fallback are settings. The in-memory
-three-node acceptance covers discovery, reply, direct delivery, and fallback
-through a repeater.
-
-The headed acceptance passes against the official MeshCore companion v1.15.0
-firmware on a Heltec WiFi LoRa 32 v4. Current structured chat adverts were
-imported and exchanged over RF; a stock-origin flood established reciprocal
-paths, then Tucket and stock MeshCore each selected that direct route for text
-and received the other's acknowledgement.
-
-A second headed acceptance passes through an official MeshCore repeater v1.16.0
-on a Heltec T114. Tucket and the stock companion were each given the repeater's
-one-hop source route. Encrypted text and acknowledgements crossed the named
-relay in both directions. The hardware receipt is in
-[`design_docs/2026-07-22_meshcore_relay_headed.md`](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/design_docs/2026-07-22_meshcore_relay_headed.md).
-
-With the `hardware` feature, `meshcore_headed` configures an official MeshCore
-companion through its serial API while Tucket uses Tulle direct-PHY on the
-other radio. The acceptance requires authenticated adverts and encrypted text
-in both directions, then checks that both implementations select the reciprocal
-direct route and acknowledge it over RF.
-
-Before changing settings, the harness checks the reported firmware release
-against `MESHCORE_EXPECTED_VERSION` (default `1.17.1`). Serial API version is
-recorded separately; it cannot substitute for a firmware version. To identify
-a companion without changing its settings or opening the Tulle radio:
-
-```text
-cargo run -p tucket --features hardware --example meshcore_headed -- --probe COM8
-```
-
-The probe displays model, build, release and API version, excluding the BLE PIN.
-The existing exchange harness changes radio/name/time/contact settings. Save
-and restore those settings for any physical qualification; its software build
-does not establish physical acceptance or a settings-restoration receipt.
-
-An optional fourth argument is a repeater's one-byte hash in hexadecimal:
-
-```text
-cargo run --features hardware --example meshcore_headed -- COM6 COM8 915000000 ab
-```
-
-In that mode the harness installs the same one-hop source route on Tucket and
-the stock companion. Each endpoint ignores the other's original RF
-transmission because the repeater is the named next hop. The acceptance passes
-only after encrypted text and its acknowledgement cross that repeater in both
-directions.
+and chose "Stock radios only": a stock MeshCore radio holds the keys, we hold
+none and compose no crypto. The removed code and its receipts remain in git
+history. See `design_docs/2026-11-02_protocol_parity_plan.md` (protocol_parity D1).
 
 ## License
 
-Licensed under the Mozilla Public License, Version 2.0 ([LICENSE](LICENSE)).
-
-MPL-2.0 is file-level copyleft: you may use this crate in a larger work under
-any license, including a proprietary one, but modifications to *these files*
-must be published under the MPL. It is GPL-compatible. The firmware images
-this project ships combine it with Reticulum-licensed `retinue`, so the images
-themselves are not GPLv3.
-
-Portions were ported from the upstream [MeshCore](https://github.com/ripplebiz/MeshCore)
-project, which is MIT licensed. MIT permits relicensing a derivative work and
-requires the original notice be retained; it is reproduced in [NOTICE](NOTICE)
-and applies to those portions.
+MPL-2.0 (see `LICENSE`). `NOTICE` carries the MIT notice of the MeshCore project.

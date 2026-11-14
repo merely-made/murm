@@ -4,38 +4,12 @@ version = "0.0.2"
 edition = "2024"
 
 rust-version = "1.97.1"
-description = "Independent, permissively licensed mesh radio protocol implementation in the retinue family."
+description = "Schema-free protobuf wire reader for a stock Meshtastic-compatible radio's client stream."
 license = "MPL-2.0"
 repository = "https://github.com/merely-made/murm"
 readme = "README.md"
 keywords = ["lora", "mesh", "radio", "reticulum"]
 categories = ["network-programming", "embedded"]
-
-[features]
-default = []
-hardware = ["dep:tokio", "dep:tulle"]
-
-[dependencies]
-aes = { version = "0.9", features = ["zeroize"] }
-ctr = "0.10"
-ccm = { version = "0.6", default-features = false, features = ["alloc"] }
-sha2 = { version = "0.11", default-features = false }
-x25519-dalek = { version = "3", default-features = false, features = ["static_secrets", "zeroize"] }
-zeroize = "1"
-tokio = { version = "1", features = ["macros", "rt", "time"], optional = true }
-tulle = { version = "0.2.0", path = "../tulle", features = ["serial-async"], optional = true }
-
-[[example]]
-name = "direct_phy_text"
-required-features = ["hardware"]
-
-[[example]]
-name = "direct_phy_receive"
-required-features = ["hardware"]
-
-[[example]]
-name = "direct_phy_pair"
-required-features = ["hardware"]
 
 [lints]
 workspace = true
