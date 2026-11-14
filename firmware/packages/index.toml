@@ -1,6 +1,6 @@
 schema = "retinue.package-index/v1"
 publisher = "Merely Made"
-version = "5"
+version = "6"
 
 [[packages]]
 package_id = "retinue.heltec-v4"
@@ -13,17 +13,6 @@ recovery_url = "https://github.com/merely-made/murm/blob/main/firmware/packages/
 installer_receipts = ["https://github.com/merely-made/murm/blob/c332e9c528d8505564ba54b2453463cf062ae9f9/testing/receipts/firmware-refresh/README.md"]
 recovery_receipts = ["https://github.com/merely-made/murm/blob/c332e9c528d8505564ba54b2453463cf062ae9f9/testing/receipts/firmware-refresh/README.md"]
 receipt_hosts = ["windows-x86_64"]
-
-[[packages]]
-package_id = "retinue.heltec-v4-resident"
-release_sequence = 1
-manifest = "heltec-v4-resident.toml"
-firmware_publisher = "Merely Made"
-state = "partial"
-instructions_url = "https://github.com/merely-made/murm/blob/main/firmware/packages/README.md"
-recovery_url = "https://github.com/merely-made/murm/blob/main/firmware/packages/heltec-v4-current-recovery.md"
-installer_receipts = []
-recovery_receipts = []
 
 [[packages]]
 package_id = "retinue.t114"

@@ -24,9 +24,6 @@ use core::sync::atomic::{AtomicUsize, Ordering};
 
 use embedded_alloc::LlffHeap;
 
-#[cfg(feature = "memory-bench")]
-pub mod memory_bench;
-
 #[global_allocator]
 static HEAP: TrackingHeap = TrackingHeap::empty();
 
@@ -109,9 +106,6 @@ static mut HEAP_MEMORY: [u8; HEAP_SIZE] = [0; HEAP_SIZE];
 pub unsafe fn init(spawner: embassy_executor::Spawner) {
     let start = &raw const HEAP_MEMORY as usize;
     unsafe { HEAP.init(start, HEAP_SIZE) };
-    #[cfg(feature = "memory-bench")]
-    spawner.spawn(memory_bench::worker().expect("one memory worker"));
-    #[cfg(not(feature = "memory-bench"))]
     let _ = spawner;
 }
 
@@ -136,19 +130,4 @@ pub fn high_water() -> usize {
 /// Failed allocation calls since boot, including a failed realloc's new allocation.
 pub fn allocation_failures() -> usize {
     HEAP.allocation_failures.load(Ordering::Relaxed)
-}
-
-/// Direct bench-only refusal, bypassing the optimizer's global allocation shim.
-#[cfg(feature = "memory-bench")]
-#[inline(never)]
-pub fn bench_refuse_oversize() -> bool {
-    let layout = Layout::from_size_align(HEAP_SIZE * 2, 16).unwrap();
-    // SAFETY: initialized allocator, valid layout. A successful allocation is
-    // released with the exact same layout before reporting the failed test.
-    let pointer = unsafe { HEAP.alloc(layout) };
-    if !pointer.is_null() {
-        // SAFETY: this is the live allocation returned immediately above.
-        unsafe { HEAP.dealloc(pointer, layout) };
-    }
-    pointer.is_null()
 }

@@ -34,10 +34,6 @@ path = "firmware/heltec-v4-phy/src/radio_owner.rs"
 reason = "The V4's single owner for live radio and durable board state. Existing source-size debt; a responsibility split must preserve V4RadioOwner, V4BootOwner, RxSetupFault and existing module visibility."
 
 [[exception]]
-path = "firmware/heltec-v4-phy/src/store.rs"
-reason = "Board glue for the radio-hand settings store, ESP32-S3 side. Existing source-size debt; a responsibility split must preserve Outcome, Error, ReservationError and existing module visibility."
-
-[[exception]]
 path = "native/crates/murm/src/conversation_engine.rs"
 reason = "Native conversation runtime over [crate::ConversationStore]. Existing source-size debt; a responsibility split must preserve ConversationRefresh, CabalHistory, ConversationEngine and existing module visibility."
 

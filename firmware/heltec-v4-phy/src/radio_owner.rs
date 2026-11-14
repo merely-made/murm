@@ -21,8 +21,6 @@ use radio_hand::store::Slot;
 
 use crate::{channels, control_store, power, store, wake_input};
 mod quiet_store;
-#[cfg(feature = "resident-protocols")]
-mod resident;
 
 /// The non-copy custody boundary for one V4 image.
 ///

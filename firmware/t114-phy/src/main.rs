@@ -18,12 +18,9 @@ use embassy_usb::{Builder, Config, UsbDevice};
 use embedded_hal_bus::spi::ExclusiveDevice;
 use lora_phy::LoRa;
 use lora_phy::sx126x::{Config as Sx126xConfig, Sx126x, Sx1262, TcxoCtrlVoltage};
-#[cfg(not(feature = "tucket-endpoint"))]
 use radio_hand::channel::Personality;
 use radio_hand::channel::modem::ModemChannel;
-#[cfg(not(feature = "tucket-endpoint"))]
 use radio_hand::channel::node::NodeChannel;
-#[cfg(not(feature = "tucket-endpoint"))]
 use radio_hand::channel::rnode::RNodeChannel;
 use radio_hand::channel::{Channel, ChannelInfo, Event};
 use radio_hand::executive::{Executive, Face, Heartbeat, RadioState};
@@ -37,11 +34,6 @@ use boot_report::{publish_fault, publish_online};
 
 mod board;
 mod boot_report;
-#[cfg(feature = "contact-store-bench")]
-#[path = "../../contact_store_bench.rs"]
-mod contact_bench;
-#[cfg(feature = "contact-store-bench")]
-mod contact_worker;
 mod control_fixture;
 mod crash;
 mod heap;
@@ -50,12 +42,7 @@ mod le3;
 mod lxmf;
 mod probes;
 mod radio;
-#[cfg(feature = "memory-bench")]
-#[path = "../../stack_watermark.rs"]
-mod stack_watermark;
 mod store;
-#[cfg(feature = "tucket-endpoint")]
-mod tucket_service;
 mod ui;
 
 bind_interrupts!(struct Irqs {
@@ -81,8 +68,6 @@ async fn main(spawner: Spawner) {
     // First statement: everything after this may allocate.
     // SAFETY: called once, before any allocation.
     unsafe { heap::init(spawner) };
-    #[cfg(feature = "tucket-endpoint")]
-    tucket_service::start_builder(spawner);
 
     // Crash residue first: reset reason, crash count, and whether to distrust the channel.
     let boot_crash = crash::on_boot();
@@ -111,11 +96,7 @@ async fn main(spawner: Spawner) {
     // Settings first: a first boot erases and writes a flash page, stalling the CPU for
     // tens of milliseconds, which must stay clear of live traffic. The store lives for the
     // whole run because the executive owns its flash and entropy.
-    let store = store::SettingsStore::new(p.NVMC, p.RNG);
-    #[cfg(feature = "contact-store-bench")]
-    let mut store = contact_worker::run(store, spawner).await;
-    #[cfg(not(feature = "contact-store-bench"))]
-    let mut store = store;
+    let mut store = store::SettingsStore::new(p.NVMC, p.RNG);
     let mut identity_line = [0_u8; 48];
     let (mut settings, identity_line_len) = match store.load_or_create() {
         Ok((settings, outcome)) => (Some(settings), store::describe(outcome, &mut identity_line)),
@@ -132,7 +113,6 @@ async fn main(spawner: Spawner) {
     let mut native_guard_fault = false;
     if let Some(current) = settings
         && current.channel == BootChannel::LegacyNode
-        && !cfg!(feature = "tucket-endpoint")
     {
         let guarded = radio_hand::settings::Settings {
             channel: BootChannel::Node,
@@ -144,9 +124,6 @@ async fn main(spawner: Spawner) {
         }
     }
 
-    #[cfg(feature = "tucket-endpoint")]
-    let node: Option<retinue::node::Node<32, 8, 4>> = None;
-    #[cfg(not(feature = "tucket-endpoint"))]
     let node = settings
         .map(|settings| {
             retinue::node::Node::<32, 8, 4>::new(
@@ -184,7 +161,6 @@ async fn main(spawner: Spawner) {
     #[allow(unused_mut)] // The native constructor can latch a fault in other profiles.
     let mut timebase_fault = native_node_requested && (native_guard_fault || lease.is_err());
     let _lease = lease.ok().flatten();
-    #[cfg(not(feature = "tucket-endpoint"))]
     let native_channel = node.zip(_lease).and_then(|(node, lease)| {
         NodeChannel::new(node, lease)
             .map_err(|_| timebase_fault = true)
@@ -415,9 +391,6 @@ async fn main(spawner: Spawner) {
     // plan supersedes structural decision 4, but is not wired into this loop yet.
     // No readable identity, or three consecutive crash boots, selects the modem: it needs
     // only a radio and a host. The crash count clears after a clean minute.
-    #[cfg(feature = "tucket-endpoint")]
-    let mut channel = ModemChannel::new(Sx126xDiagnostics);
-    #[cfg(not(feature = "tucket-endpoint"))]
     let mut channel = match (
         settings.map(|s| s.channel),
         native_channel,
@@ -433,8 +406,6 @@ async fn main(spawner: Spawner) {
 
     // Outside the session loop so announce cadence survives attach and detach.
     let mut heartbeat = Heartbeat::new(channel.heartbeat());
-    #[cfg(feature = "tucket-endpoint")]
-    let mut setup_stream = radio_hand::resident_wire::ResidentSetupStream::new();
 
     loop {
         radio_hand::channel::await_host_with_listening(
@@ -538,20 +509,6 @@ async fn main(spawner: Spawner) {
                     status.last_wake = radio_face::WakeSource::Host;
                     exec.publish(radio_face::LedSignal::Idle);
                     let packet = &usb_packet[..length];
-                    #[cfg(feature = "tucket-endpoint")]
-                    let packet = setup_stream.strip_wake_prefix(channel.at_boundary(), packet);
-                    #[cfg(feature = "tucket-endpoint")]
-                    if tucket_service::accept_setup(
-                        &mut setup_stream,
-                        channel.at_boundary(),
-                        packet,
-                        &mut exec,
-                        &mut host,
-                    )
-                    .await
-                    {
-                        continue;
-                    }
                     let at_boundary = channel.at_boundary();
                     match probes::handle(
                         packet,
@@ -578,10 +535,6 @@ async fn main(spawner: Spawner) {
             }
         }
         channel.stop(&mut exec, &mut host).await;
-        #[cfg(feature = "tucket-endpoint")]
-        {
-            setup_stream = radio_hand::resident_wire::ResidentSetupStream::new();
-        }
         // DTR drops slightly after the failed I/O that ended the session. Require that edge
         // before the next attach, or a latched DTR can hang the banner write on a vanished
         // host. The unattached loop keeps servicing the radio meanwhile; never block here.

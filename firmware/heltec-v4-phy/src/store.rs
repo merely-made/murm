@@ -35,7 +35,6 @@ use radio_hand::announce_reservation::{
     ReservationPlan, ReservationState, VerifyBodyError,
 };
 use radio_hand::executive::{BoardStore, StoreFault};
-use radio_hand::packet_reservation::{self, ReservationError as PacketReservationError};
 use radio_hand::settings::{self, Settings};
 use radio_hand::store::{self, HEADER_LEN, Slot, SlotError};
 
@@ -52,8 +51,9 @@ pub(crate) const STORE_ORIGIN: u32 = 0x3F_0000;
 /// be allowed to damage the identity record during recovery or downgrade.
 pub(crate) const ANNOUNCE_RESERVATION_ORIGIN: u32 = 0x3F_2000;
 
-/// Independent Sennet packet-ID reservation pair. This is deliberately after
-/// every existing settings, announce, control, and commissioning pair.
+/// Formerly the Sennet packet-ID reservation pair (withdrawn with the resident
+/// image, 2026-11-14). The two sectors stay reserved so no later pair inherits
+/// a board's stale counter bytes.
 pub(crate) const PACKET_RESERVATION_ORIGIN: u32 = 0x3F_8000;
 
 /// The flash sector size the ESP32-S3 erases in.
@@ -79,9 +79,6 @@ const ANNOUNCE_RESERVATION_SLOT_READ_LEN: usize =
 /// Bytes read out of each slot: the header, the largest body this build writes, and room for
 /// a longer body a later firmware might have left.
 const SLOT_READ_LEN: usize = HEADER_LEN + settings::ENCODED_LEN + 32;
-// Fresh packet-ID state requires both complete sectors to be erased. A short
-// header read cannot rule out nonblank data left beyond that header.
-const PACKET_RESERVATION_SLOT_READ_LEN: usize = SECTOR as usize;
 
 /// What the boot path found in flash. Mirrors the T114's vocabulary deliberately: the two
 /// boards should describe the same situations with the same words.
@@ -123,11 +120,6 @@ pub enum ReservationError {
     CorruptBody(ReservationDecodeError),
     Plan(ReservationPlanError),
     Readback(VerifyBodyError),
-    PacketRead,
-    PacketErase,
-    PacketWrite,
-    PacketVerify,
-    PacketBody(PacketReservationError),
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -313,61 +305,6 @@ impl SettingsStore {
         }
         plan.verify_body(Some(record.body))
             .map_err(ReservationError::Readback)
-    }
-
-    /// Reserve a globally monotonic Sennet packet-ID interval.
-    ///
-    /// The pair is independent of Retinue announce state. A valid record beside
-    /// a nonblank invalid record is treated as corruption, so a torn newer write
-    /// never causes the board to reuse a possible prior interval.
-    pub fn reserve_packet_ids(
-        &mut self,
-        count: u32,
-    ) -> Result<radio_hand::packet_reservation::Lease, ReservationError> {
-        let mut a = [0_u8; PACKET_RESERVATION_SLOT_READ_LEN];
-        let mut b = [0_u8; PACKET_RESERVATION_SLOT_READ_LEN];
-        self.flash
-            .read(PACKET_RESERVATION_ORIGIN, &mut a)
-            .map_err(|_| ReservationError::PacketRead)?;
-        self.flash
-            .read(PACKET_RESERVATION_ORIGIN + SECTOR, &mut b)
-            .map_err(|_| ReservationError::PacketRead)?;
-
-        let snapshot =
-            packet_reservation::snapshot(&a, &b).map_err(ReservationError::PacketBody)?;
-        if snapshot.sequence == u32::MAX {
-            return Err(ReservationError::PacketBody(
-                PacketReservationError::Exhausted,
-            ));
-        }
-        let plan = snapshot
-            .state
-            .plan(count)
-            .map_err(ReservationError::PacketBody)?;
-        let body = plan.body();
-        let slot = snapshot.next;
-        let sequence = snapshot.sequence;
-        let offset = match slot {
-            Slot::A => PACKET_RESERVATION_ORIGIN,
-            Slot::B => PACKET_RESERVATION_ORIGIN + SECTOR,
-        };
-        let mut encoded = [0_u8; store::encoded_len(packet_reservation::BODY_LEN)];
-        let written = store::encode(sequence, &body, &mut encoded)
-            .map_err(|_| ReservationError::PacketWrite)?;
-        self.flash
-            .erase(offset, offset + SECTOR)
-            .map_err(|_| ReservationError::PacketErase)?;
-        self.flash
-            .write(offset, &encoded[..written])
-            .map_err(|_| ReservationError::PacketWrite)?;
-        self.flash
-            .read(PACKET_RESERVATION_ORIGIN, &mut a)
-            .map_err(|_| ReservationError::PacketVerify)?;
-        self.flash
-            .read(PACKET_RESERVATION_ORIGIN + SECTOR, &mut b)
-            .map_err(|_| ReservationError::PacketVerify)?;
-        packet_reservation::verify_pair(plan, &a, &b, slot, sequence)
-            .map_err(ReservationError::PacketBody)
     }
 
     fn read_reservation_snapshot(&mut self) -> Result<ReservationSnapshot, ReservationError> {

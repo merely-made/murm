@@ -1,21 +1,11 @@
 #![no_std]
 #![no_main]
 #![deny(unsafe_op_in_unsafe_fn)]
-#![cfg_attr(
-    all(target_arch = "xtensa", feature = "resident-protocols"),
-    feature(asm_experimental_arch)
-)]
 
 #[cfg(all(feature = "host-usb", feature = "host-uart-low-power"))]
 compile_error!("select exactly one V4 host transport: host-usb or host-uart-low-power");
 #[cfg(not(any(feature = "host-usb", feature = "host-uart-low-power")))]
 compile_error!("select exactly one V4 host transport: host-usb or host-uart-low-power");
-#[cfg(all(feature = "resident-protocols", not(feature = "host-usb")))]
-compile_error!("resident-protocols requires the USB host transport");
-#[cfg(all(feature = "resident-protocols", feature = "host-uart-low-power"))]
-compile_error!("resident-protocols is unavailable in the low-power UART image");
-#[cfg(all(feature = "resident-protocols", feature = "rf-sleep-proof"))]
-compile_error!("resident-protocols is incompatible with the low-power RF sleep proof image");
 
 #[cfg(all(feature = "host-uart-low-power", feature = "rf-sleep-proof"))]
 use core::future::{Future, poll_fn};
@@ -57,7 +47,6 @@ use lora_phy::sx126x::{Config as Sx126xConfig, Sx126x, Sx1262, TcxoCtrlVoltage};
 use radio_hand::dispatch;
 use radio_hand::executive::{ChipDiagnostics, Face, RadioState};
 use radio_hand::link::HostLink;
-#[cfg(not(feature = "resident-protocols"))]
 use selvage::WAKE_BYTE;
 use selvage::{
     CommandStream, EVENT_DIAGNOSTIC, EVENT_EXCURSION, EVENT_RX, ExcursionByte, ExcursionStream,
@@ -67,11 +56,6 @@ use selvage::{
 mod board;
 mod channels;
 mod commissioning_store;
-#[cfg(feature = "contact-store-bench")]
-#[path = "../../contact_store_bench.rs"]
-mod contact_bench;
-#[cfg(feature = "resident-contact-store")]
-mod contact_store;
 mod control_boot;
 #[cfg(all(feature = "host-usb", not(feature = "host-uart-low-power")))]
 mod control_carrier;
@@ -85,21 +69,12 @@ mod murmuration;
 mod physical_presence;
 mod power;
 mod radio_owner;
-#[cfg(feature = "resident-protocols")]
-mod resident;
 #[cfg(feature = "rf-sleep-proof")]
 mod sleep_proof;
-#[cfg(feature = "memory-bench")]
-#[path = "../../stack_watermark.rs"]
-mod stack_watermark;
 mod store;
 mod ui;
 mod wake_input;
 
-/// The optional retained protocol cores are constructed only after USB setup
-/// validates every caller-supplied bound. The direct-PHY default has no heap.
-#[cfg(feature = "resident-protocols")]
-mod heap;
 mod wake_lease;
 
 esp_bootloader_esp_idf::esp_app_desc!();
@@ -152,18 +127,9 @@ async fn ignore_host<R: embedded_io_async::Read>(
     core::future::pending().await
 }
 
-#[cfg_attr(not(feature = "memory-bench"), esp_rtos::main)]
-#[cfg_attr(feature = "memory-bench", embassy_executor::task)]
+#[esp_rtos::main]
 async fn main(spawner: Spawner) {
     control_fixture::verify();
-    #[cfg(feature = "resident-protocols")]
-    // Safety: startup initializes this exact static once, before any retained
-    // protocol state or task is constructed.
-    unsafe {
-        heap::init(spawner);
-    }
-    #[cfg(feature = "resident-protocols")]
-    resident::start_builder(spawner);
     let peripherals = esp_hal::init(Config::default());
     #[cfg(feature = "rf-sleep-proof")]
     let proof_reset_reason = esp_hal::system::reset_reason()
@@ -175,8 +141,6 @@ async fn main(spawner: Spawner) {
     // holds the ADC entropy source for the life of the board — see `store.rs` for why the
     // obvious `Rng` would have minted a predictable identity key.
     let mut store = store::SettingsStore::new(peripherals.FLASH, peripherals.RNG, peripherals.ADC1);
-    #[cfg(feature = "contact-store-bench")]
-    contact_bench::run(&mut store);
     let mut identity_line = [0_u8; 48];
     let (settings, identity_line_len) = match store.load_or_create() {
         Ok((settings, outcome)) => (Some(settings), store::describe(outcome, &mut identity_line)),
@@ -379,9 +343,7 @@ async fn main(spawner: Spawner) {
         "tulle/heltec-v4 phy online; version={}; sx1262 online; sync=2b reg=24b4; longfast=906875000; build={}; image={}\r\n",
         env!("CARGO_PKG_VERSION"),
         option_env!("RETINUE_FIRMWARE_REVISION").unwrap_or("unidentified"),
-        if cfg!(feature = "resident-protocols") {
-            "v4-resident-usb"
-        } else if cfg!(feature = "host-uart-low-power") {
+        if cfg!(feature = "host-uart-low-power") {
             "v4-modem-uart"
         } else {
             "v4-modem-usb"
@@ -510,8 +472,6 @@ async fn main(spawner: Spawner) {
     host.boot_status(online, &identity_line[..identity_line_len])
         .await;
     let mut command_stream = CommandStream::new();
-    #[cfg(feature = "resident-protocols")]
-    let mut resident_stream = radio_hand::resident_wire::ResidentSetupStream::new();
     let mut excursion_stream = ExcursionStream::new();
     let mut usb_command = [0_u8; MAX_COMMAND_LEN];
     let mut control_stream = channels::ControlFrameStream::new();
@@ -813,28 +773,16 @@ async fn main(spawner: Spawner) {
                     && !excursion_stream.pending()
                     && !control_stream.in_frame()
                 {
-                    #[cfg(feature = "resident-protocols")]
-                    {
-                        packet = resident_stream.strip_wake_prefix(true, packet);
-                    }
-                    #[cfg(not(feature = "resident-protocols"))]
-                    {
-                        let skip = packet
-                            .iter()
-                            .position(|byte| *byte != WAKE_BYTE)
-                            .unwrap_or(packet.len());
-                        packet = &packet[skip..];
-                    }
+                    let skip = packet
+                        .iter()
+                        .position(|byte| *byte != WAKE_BYTE)
+                        .unwrap_or(packet.len());
+                    packet = &packet[skip..];
                     if packet.is_empty() {
                         continue;
                     }
                 }
                 let at_boundary = command_stream.is_boundary();
-                #[cfg(feature = "resident-protocols")]
-                let resident_pending = resident_stream.pending()
-                    || packet.contains(&radio_hand::resident_wire::CMD_RESIDENT_SETUP);
-                #[cfg(not(feature = "resident-protocols"))]
-                let resident_pending = false;
                 if murmuration.is_active() {
                     continue;
                 }
@@ -844,92 +792,12 @@ async fn main(spawner: Spawner) {
                 // direct-PHY parser immediately, so bytes before and after a
                 // KISS request in one USB read are never discarded and a FEND
                 // inside an ordinary command remains ordinary payload.
-                if resident_pending
-                    || excursion_stream.pending()
+                if excursion_stream.pending()
                     || packet.contains(&selvage::CMD_EXCURSION)
                     || control_stream.in_frame()
                     || packet.contains(&selvage::kiss::FEND)
                 {
-                    for (_resident_byte_index, &byte) in packet.iter().enumerate() {
-                        #[cfg(feature = "resident-protocols")]
-                        match resident_stream.push(
-                            command_stream.is_boundary()
-                                && !control_stream.in_frame()
-                                && !excursion_stream.pending(),
-                            byte,
-                        ) {
-                            radio_hand::resident_wire::ResidentSetupByte::Ordinary(byte) => {
-                                // Continue through the regular direct-PHY demux below.
-                                let _ = byte;
-                            }
-                            radio_hand::resident_wire::ResidentSetupByte::Pending => continue,
-                            radio_hand::resident_wire::ResidentSetupByte::Complete(setup) => {
-                                if setup.frame_ttl_ms <= setup.tx_budget_ms
-                                    || !setup
-                                        .profiles
-                                        .iter()
-                                        .all(|profile| owner.excursion_profile_admitted(profile))
-                                {
-                                    let _ = host.write_all(b"resident refused\r\n").await;
-                                    continue;
-                                }
-                                // Runtime construction asserts that the selected home has
-                                // already been applied and RX re-armed. This bounded owner
-                                // operation also resets rather than leaving a cancelled
-                                // profile switch uncertain.
-                                let home = setup.profiles[usize::from(setup.home)];
-                                if !matches!(
-                                    embassy_time::with_timeout(
-                                        Duration::from_millis(setup.transition_timeout_ms),
-                                        owner.apply_excursion_profile(&home)
-                                    )
-                                    .await,
-                                    Ok(Ok(()))
-                                ) {
-                                    esp_hal::system::software_reset();
-                                }
-                                #[cfg(feature = "memory-bench")]
-                                resident::setup_progress(&mut host, "building").await;
-                                let mut state = match owner
-                                    .build_resident(Instant::now().as_millis(), setup)
-                                    .await
-                                {
-                                    Ok(state) => state,
-                                    Err(error) => {
-                                        // Profile and durable reservations may have changed.
-                                        // Report only the public error, then reset custody.
-                                        resident::setup_refused(&mut host, &error).await;
-                                        esp_hal::system::software_reset();
-                                    }
-                                };
-                                #[cfg(feature = "memory-bench")]
-                                resident::setup_progress(&mut host, "built").await;
-                                let _ = embassy_time::with_timeout(
-                                    Duration::from_millis(20),
-                                    host.write_diagnostic(b"resident ready\r\n"),
-                                )
-                                .await;
-                                // Resident setup permanently replaces this direct-PHY loop.
-                                // `serve` owns every later host byte, deadline, RX collection,
-                                // profile transition, and physical transmit through Runtime.
-                                resident::serve(
-                                    &mut state,
-                                    &mut owner,
-                                    &mut host,
-                                    &packet[_resident_byte_index + 1..],
-                                )
-                                .await;
-                            }
-                            radio_hand::resident_wire::ResidentSetupByte::Rejected(reason) => {
-                                let mut line = heapless::String::<192>::new();
-                                let _ = core::fmt::write(
-                                    &mut line,
-                                    format_args!("resident setup refused: {reason:?}\r\n"),
-                                );
-                                let _ = host.write_all(line.as_bytes()).await;
-                                continue;
-                            }
-                        }
+                    for &byte in packet {
                         // An admitted excursion owns this read's remaining bytes too.
                         if murmuration.is_active() {
                             break;

@@ -4,8 +4,9 @@ This directory contains Linkboy package manifests, one-file payloads or ordered 
 recovery instructions, and the public package index. Every part has its own digest; sparse ESP
 parts also name their write offset. The index is the publishable installer evidence artifact:
 `retinue.heltec-v4` is the September 30 modem build, with fresh Windows installation
-and ROM-loader retry evidence. `retinue.heltec-v4-resident` is a separate, partial
-commissioning image. T114 now offers the installed native `711816a` image as
+and ROM-loader retry evidence. The partial `retinue.heltec-v4-resident` commissioning
+image was withdrawn on 2026-11-14: foreign LoRa meshes are reached through a stock
+companion radio instead. T114 now offers the installed native `711816a` image as
 `partial`, pending a recovery retry of those same bytes. Historical v51 artifacts
 and receipts remain retained outside the current offering. The retained
 Meshtastic T114 package remains `partial` until its own interface check is recorded.
@@ -85,7 +86,6 @@ Inspect the catalog and a package before connecting a board:
 ```text
 linkboy catalog firmware/packages/index.toml
 linkboy inspect firmware/packages/heltec-v4-current.toml
-linkboy inspect firmware/packages/heltec-v4-resident.toml
 linkboy inspect firmware/packages/t114-current.toml
 linkboy inspect firmware/packages/meshtastic-t114-2.7.26.54e0d8d.toml
 ```

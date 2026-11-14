@@ -254,40 +254,6 @@ pub async fn probe<L: HostLink>(
         name::serve(command, settings, store, host).await;
         return Outcome::Served;
     }
-    #[cfg(feature = "contact-store-bench")]
-    if packet == b"contacts bench\n" || packet == b"contacts bench\r\n" {
-        let reply = crate::contact_bench::report();
-        let _ = host.write_all(reply.as_str().as_bytes()).await;
-        return Outcome::Served;
-    }
-    #[cfg(feature = "memory-bench")]
-    if packet == b"protocol memory\n" || packet == b"protocol memory\r\n" {
-        use core::fmt::Write as _;
-        let values = crate::heap::memory_bench::measure().await;
-        let (stack, stack_region, valid) = crate::heap::sampled_stack_usage();
-        let (stack_free, stack_total) = crate::stack_watermark::measure();
-        let mut reply = radio_face::Text::<400>::empty();
-        let _ = write!(
-            &mut reply,
-            "memory initial={} fragmented={} retained={} final={} peak={} capacity={} failures={} expected_refusals=1 stack_sample={} stack_region={} stack_valid={} worker_min_sp_sample={} stack_free={} stack_total={} boxed_state_bytes={}\r\n",
-            values[0],
-            values[1],
-            values[2],
-            values[3],
-            crate::heap::allocator_used_peak(),
-            crate::heap::capacity(),
-            crate::heap::allocation_failures(),
-            stack,
-            stack_region,
-            valid,
-            crate::heap::memory_bench::sampled_min_sp(),
-            stack_free,
-            stack_total,
-            crate::heap::memory_bench::boxed_state_bytes()
-        );
-        let _ = host.write_all(reply.as_str().as_bytes()).await;
-        return Outcome::Served;
-    }
     if packet == b"status\n" || packet == b"status\r\n" {
         let _ = host.write_all(online).await;
         let _ = host.write_all(identity_line).await;

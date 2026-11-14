@@ -125,12 +125,10 @@ IDENTITY, LINKS, and PEERS. After a five-second fixture expired, the host-only
 pages disappeared and TRAFFIC wrapped directly to STATUS.
 
 The October 16 [physical memory continuation](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/receipts/protocol-parity-memory/physical/README.md)
-adds an explicit `memory-bench` feature and a `protocol memory` text command.
-Synthetic retained protocol state runs in a separate executor task, with fixed
-heap accounting, oversize refusal and sampled stack checkpoints. These images
-are attended diagnostics; their fixture identities never drive the radio.
-The feature is absent from ordinary builds and does not qualify scheduling or
-worst-case stack use.
+measured an attended `memory-bench` image with synthetic retained Retinue,
+Sennet and Tucket state. That feature, the Tucket-only `tucket-endpoint` service
+and its contact store were withdrawn on 2026-11-14 with the resident protocols;
+the receipt stays as history. The contact flash pair in `memory.x` stays reserved.
 
 For the measured large serial DFU transfer, the inherited eight-second watchdog
 outlasted a software reset and interrupted the helper's erase wait. The tiny
