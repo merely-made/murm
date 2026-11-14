@@ -12,6 +12,7 @@ use core::fmt;
 use ed25519_dalek::{Signer, SigningKey};
 use hkdf::Hkdf;
 use sha2::{Digest, Sha256};
+use subtle::ConstantTimeEq;
 
 use crate::{Error, Result};
 
@@ -234,14 +235,7 @@ impl Ifac {
         logical.push(unmasked[1]);
         logical.extend_from_slice(&unmasked[2 + self.size..]);
 
-        let expected = self.code(&logical);
-        let different = expected
-            .iter()
-            .zip(ifac)
-            .fold(0_u8, |difference, (left, right)| {
-                difference | (left ^ right)
-            });
-        if different != 0 {
+        if !bool::from(self.code(&logical).as_slice().ct_eq(ifac)) {
             return Err(Error::BadIfac);
         }
         Ok(logical)

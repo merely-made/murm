@@ -59,6 +59,8 @@ serial2-tokio = { version = "0.1.24", optional = true }
 sha2 = { version = "0.11", default-features = false }
 # Socket options std and tokio do not expose: keepalive timing and TCP_USER_TIMEOUT.
 socket2 = { version = "0.6", features = ["all"], optional = true }
+# Constant-time IFAC code comparison; already in the graph through the dalek crates.
+subtle = { version = "2", default-features = false }
 tokio = { version = "1", features = ["net", "io-util", "sync", "rt", "time", "macros"], optional = true }
 tulle = { version = "0.2.0", path = "../tulle", features = ["serial-async"], optional = true }
 truchman = { version = "0.1.1", path = "../truchman", optional = true }

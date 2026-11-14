@@ -46,6 +46,8 @@ seneschal = { path = "../seneschal" }
 sennet = { path = "../sennet", default-features = false, optional = true }
 tucket = { path = "../tucket", default-features = false, optional = true }
 sha2 = { version = "0.11", default-features = false }
+# Constant-time tag comparison; already in the graph through digest's MAC support.
+subtle = { version = "2", default-features = false }
 
 [dev-dependencies]
 futures = { version = "0.3", default-features = false, features = ["executor"] }

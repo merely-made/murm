@@ -20,6 +20,7 @@ use core::fmt;
 
 use hmac::{Hmac, KeyInit, Mac};
 use sha2::Sha256;
+use subtle::ConstantTimeEq;
 
 /// Schema byte preceding every [`PositionAclV1`] wire encoding.
 pub const POSITION_ACL_V1_VERSION: u8 = 1;
@@ -377,7 +378,7 @@ impl<const N: usize> BlindedPositionAcl<N> {
     ) -> Resolved {
         let tag = blind(secret, asker);
         for (stored, tier) in self.tags[..self.len].iter().flatten() {
-            if constant_time_eq(stored, &tag) {
+            if bool::from(stored.ct_eq(&tag)) {
                 return Resolved::Tier(*tier);
             }
         }
@@ -402,14 +403,6 @@ fn blind(
     let mut tag = [0u8; POSITION_ACL_TAG_LEN];
     tag.copy_from_slice(&full[..POSITION_ACL_TAG_LEN]);
     tag
-}
-
-fn constant_time_eq(a: &[u8; POSITION_ACL_TAG_LEN], b: &[u8; POSITION_ACL_TAG_LEN]) -> bool {
-    let mut diff = 0u8;
-    for (x, y) in a.iter().zip(b) {
-        diff |= x ^ y;
-    }
-    diff == 0
 }
 
 #[cfg(test)]
