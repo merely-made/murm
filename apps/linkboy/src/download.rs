@@ -168,6 +168,17 @@ impl FirmwareCache {
         Ok((path, bytes))
     }
 
+    /// Keep bytes a person qualified by hand under `<sha256 of bytes>/<url's file name>`.
+    /// Nothing trusts the entry for that: every load verifies it against a manifest again.
+    pub fn insert(&self, url: &str, bytes: &[u8]) -> Result<PathBuf, DownloadError> {
+        if !crate::package::is_download_url(url) {
+            return Err(DownloadError::NotHttps { url: url.into() });
+        }
+        let path = self.root.join(sha256_hex(bytes)).join(file_name(url));
+        store(&path, bytes)?;
+        Ok(path)
+    }
+
     fn forget(&self, part: &PackagePart) {
         if let Ok(path) = self.entry_path(part) {
             let _ = fs::remove_file(path);

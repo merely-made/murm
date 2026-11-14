@@ -1,15 +1,19 @@
 //! `linkboy qualify URL --file PATH [--out DRAFT]`.
 
-use linkboy::Error;
 use linkboy::package::sha256_hex;
 use linkboy::qualify::{draft, today};
+use linkboy::{Error, FirmwareCache};
 
 use super::bad_usage;
 
 /// Draft an entry for a vendor release. This build carries no HTTPS client yet (the client
 /// choice is open in protocol_parity D5), so the person downloads the file from `URL` and
-/// passes it with `--file`; Linkboy records the URL, length, sha256 and detected layout.
-pub(super) fn run(mut args: impl Iterator<Item = String>) -> Result<(), Error> {
+/// passes it with `--file`; Linkboy records the URL, length, sha256 and detected layout, and
+/// keeps the bytes in the cache so the finished entry can be inspected and flashed offline.
+pub(super) fn run(
+    mut args: impl Iterator<Item = String>,
+    cache: &FirmwareCache,
+) -> Result<(), Error> {
     let url = args
         .next()
         .ok_or_else(|| bad_usage("qualify needs a URL"))?;
@@ -41,6 +45,7 @@ pub(super) fn run(mut args: impl Iterator<Item = String>) -> Result<(), Error> {
     println!("byte_length: {}", entry.byte_length);
     println!("sha256: {}", entry.sha256);
     println!("layout: {}", entry.layout.describe());
+    println!("cached: {}", cache.insert(&url, &bytes)?.display());
     match out {
         Some(path) => {
             use std::io::Write as _;

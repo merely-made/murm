@@ -459,3 +459,18 @@ fn qualify_drafts_a_merged_esp_image_as_a_part_at_zero_to_be_confirmed() {
     assert!(value.get("payload").is_none());
     assert!(draft.toml.contains("confirm it from the vendor"));
 }
+
+#[test]
+fn bytes_inserted_by_hand_serve_a_matching_manifest_and_nothing_else() {
+    let scratch = Scratch::new("insert");
+    let bytes = uf2();
+    let index = catalog(&scratch, &download_manifest(&bytes));
+    scratch.cache().insert(URL, &bytes).unwrap();
+    load(&scratch, &index, None).expect("the inserted file verifies against the manifest");
+    assert!(
+        scratch
+            .cache()
+            .insert("http://release.example/a.uf2", &bytes)
+            .is_err()
+    );
+}

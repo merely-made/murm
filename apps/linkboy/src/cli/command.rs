@@ -17,7 +17,7 @@ pub(crate) fn run_command() -> Result<(), Error> {
     let mut args = args.into_iter();
     match args.next().as_deref() {
         Some("list") => list(),
-        Some("qualify") => super::qualify::run(args),
+        Some("qualify") => super::qualify::run(args, &cache),
         Some("inspect") => {
             let package = args
                 .next()
