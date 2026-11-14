@@ -370,3 +370,9 @@ started opportunistically.
   `gnss=fix` was measured. PD3 therefore remains open pending an outdoor fix
   and loss-of-fix observation. Exact flash, preservation, probe, and control
   facts are in [the receipt](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/design_docs/2026-09-03_v4_gnss_rx_fix_receipt.json).
+- **2026-11-14. PD1/PD2 code removed.** Mark, selecting the uncalled
+  position ACL for removal: "Eh, it's all in git history. If needed, it'll be
+  there." `radio-hand::control::position_disclosure` and its nine tests were
+  exported but never called, and are gone; they are in git history before this
+  date. PD0's ruling in the field-node security posture and every gate status
+  here are unchanged; PD3 to PD6 would start by restoring or rewriting PD1/PD2.

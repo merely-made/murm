@@ -30,7 +30,6 @@ control-retinue = ["dep:retinue", "seneschal/retinue"]
 
 [dependencies]
 heapless = "0.9"
-hmac = "0.13"
 lora-modulation = "0.1.5"
 lora-phy = { path = "../../vendor/lora-phy", optional = true }
 embassy-futures = { version = "0.1.2", optional = true }
@@ -40,8 +39,6 @@ retinue = { path = "../retinue", default-features = false, optional = true }
 selvage = { path = "../selvage" }
 seneschal = { path = "../seneschal" }
 sha2 = { version = "0.11", default-features = false }
-# Constant-time tag comparison; already in the graph through digest's MAC support.
-subtle = { version = "2", default-features = false }
 
 [dev-dependencies]
 futures = { version = "0.3", default-features = false, features = ["executor"] }
