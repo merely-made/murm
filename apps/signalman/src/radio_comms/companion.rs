@@ -12,6 +12,7 @@ pub mod protobuf;
 mod tests;
 
 use super::*;
+use crate::firmware::{FirmwareVendor, RadioFirmware};
 use frame::{Frames, invalid};
 use meshtastic::{nested, uint};
 use std::{collections::BTreeMap, io, time::Duration};
@@ -67,6 +68,7 @@ pub struct CompanionSession<T: AsyncRead + AsyncWrite + Unpin> {
     pending: BTreeMap<u32, Pending>,
     meshcore_sync: bool,
     fault: bool,
+    firmware: Option<RadioFirmware>,
 }
 impl<T: AsyncRead + AsyncWrite + Unpin> CompanionSession<T> {
     /// Handshake before exposing an adapter. An existing journal must match the
@@ -80,6 +82,7 @@ impl<T: AsyncRead + AsyncWrite + Unpin> CompanionSession<T> {
         let mut frames = Frames::new(io, protocol == CompanionProtocol::MeshCore);
         let mut startup_packets = Vec::new();
         let mut device_summary = None;
+        let mut firmware = None;
         let scope = timeout(Duration::from_secs(10), async {
             match protocol {
                 CompanionProtocol::Meshtastic { channel } => {
@@ -102,10 +105,16 @@ impl<T: AsyncRead + AsyncWrite + Unpin> CompanionSession<T> {
                         if let Some(metadata) = nested(&frame, 13)?
                             && let Some(version) = nested(metadata, 1)?
                         {
-                            device_summary = Some(format!(
-                                "Meshtastic firmware {}",
-                                std::str::from_utf8(version).map_err(as_io)?
-                            ));
+                            let version = std::str::from_utf8(version).map_err(as_io)?;
+                            device_summary = Some(format!("Meshtastic firmware {version}"));
+                            // DeviceMetadata.hw_model = 9; zero is UNSET.
+                            let hw_model = uint(metadata, 9)?;
+                            firmware = Some(RadioFirmware {
+                                vendor: FirmwareVendor::Meshtastic,
+                                version: version.into(),
+                                hw_model: (hw_model != 0).then_some(hw_model),
+                                model: None,
+                            });
                         }
                         if let Some(info) = nested(&frame, 3)? {
                             let value = uint(info, 1)?;
@@ -164,6 +173,12 @@ impl<T: AsyncRead + AsyncWrite + Unpin> CompanionSession<T> {
                         "MeshCore firmware {}, model {}, build {}, companion API {}",
                         device.version, device.model, device.build, device.protocol_version
                     ));
+                    firmware = Some(RadioFirmware {
+                        vendor: FirmwareVendor::MeshCore,
+                        version: device.version.into(),
+                        hw_model: None,
+                        model: Some(device.model.into()),
+                    });
                     if device.protocol_version < 3 {
                         return Err(invalid("MeshCore companion API requires version >=3"));
                     }
@@ -191,6 +206,7 @@ impl<T: AsyncRead + AsyncWrite + Unpin> CompanionSession<T> {
             pending: BTreeMap::new(),
             meshcore_sync: protocol == CompanionProtocol::MeshCore,
             fault: false,
+            firmware,
         };
         if protocol == CompanionProtocol::MeshCore {
             session.refresh_contacts().await?;
@@ -206,6 +222,10 @@ impl<T: AsyncRead + AsyncWrite + Unpin> CompanionSession<T> {
     }
     pub fn owner(&self) -> RadioComms {
         self.owner.clone()
+    }
+    /// The firmware the radio reported at connect, for `FirmwareCatalog::standing`.
+    pub fn firmware(&self) -> Option<&RadioFirmware> {
+        self.firmware.as_ref()
     }
     async fn refresh_contacts(&mut self) -> io::Result<()> {
         self.frames.send(&[4]).await?;

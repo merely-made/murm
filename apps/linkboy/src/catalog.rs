@@ -500,6 +500,7 @@ pub enum CatalogError {
 }
 
 mod listing;
+pub mod newest;
 mod stage;
 #[cfg(test)]
 mod tests;

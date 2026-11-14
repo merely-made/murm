@@ -7,11 +7,15 @@
 // cold path where truncated evidence costs more than a wide Err.
 #![allow(clippy::result_large_err)]
 
+mod catalog;
 mod device;
 mod installer;
 #[cfg(test)]
 mod tests;
 
+pub use catalog::{
+    FirmwareCatalog, FirmwareOffer, FirmwareStanding, FirmwareVendor, RadioFirmware,
+};
 pub use device::{
     DeviceCandidate, capture_t114_uf2_volume, describe_event, event_progress, observe_device,
     observe_device_with_board_selection_and_t114_loader_snapshot,
@@ -19,7 +23,7 @@ pub use device::{
     observe_t114_uf2_volume, refusal_lines, survey_devices, survey_ports,
 };
 pub use installer::{
-    FirmwareCatalog, FirmwareError, FirmwareInstallNotice, FirmwareInstallRecovery,
-    FirmwareInstallStage, FirmwareInstallUpdate, FirmwareInstallWorker, FirmwareInstaller,
-    FirmwareReview, FirmwareView, InstallerWake,
+    FirmwareError, FirmwareInstallNotice, FirmwareInstallRecovery, FirmwareInstallStage,
+    FirmwareInstallUpdate, FirmwareInstallWorker, FirmwareInstaller, FirmwareReview, FirmwareView,
+    InstallerWake,
 };

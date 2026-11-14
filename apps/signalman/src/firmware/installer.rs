@@ -1,14 +1,15 @@
 //! The owner flow, its install worker, and the package catalog.
 
-use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::sync::mpsc::{Receiver, TryRecvError};
 use std::thread::JoinHandle;
 
 use linkboy::{
-    CatalogError, CatalogPackage, DeviceObservation, FlashEvent, FlashPackage, FlashPlan,
-    FlashRange, FlowError, OwnerFlow, OwnerStage, PackageIndex, ReceiptResult, StateImpact,
+    CatalogError, DeviceObservation, FlashEvent, FlashPackage, FlashPlan, FlashRange, FlowError,
+    OwnerFlow, OwnerStage, PartSource, ReceiptResult, StateImpact,
 };
+
+use super::FirmwareCatalog;
 
 use super::{describe_event, event_progress};
 
@@ -35,6 +36,10 @@ pub struct FirmwareReview {
     pub write_ranges: Vec<FlashRange>,
     pub preserved_ranges: Vec<FlashRange>,
     pub state_impact: StateImpact,
+    /// The package erases all of flash before writing.
+    pub full_erase: bool,
+    /// Where each downloaded part came from; empty for a package beside its manifest.
+    pub downloaded_from: Vec<String>,
     pub recovery_before_write: String,
     pub recovery_after_failure: String,
 }
@@ -54,11 +59,6 @@ pub struct FirmwareView {
 
 pub struct FirmwareInstaller {
     flow: OwnerFlow,
-}
-
-pub struct FirmwareCatalog {
-    index_path: PathBuf,
-    index: PackageIndex,
 }
 
 /// A host-neutral request to drain a product-owned worker (the Armillary actor callback shape).
@@ -213,27 +213,6 @@ impl FirmwareInstallWorker {
     /// Whether the install has not yet emitted its terminal worker message.
     pub fn running(&self) -> bool {
         self.channel.is_some()
-    }
-}
-
-impl FirmwareCatalog {
-    pub fn load(path: impl AsRef<Path>) -> Result<Self, CatalogError> {
-        let index_path = path.as_ref().to_path_buf();
-        let index = PackageIndex::load(&index_path)?;
-        index.verify_packages(&index_path)?;
-        Ok(Self { index_path, index })
-    }
-
-    pub fn packages(&self) -> &[CatalogPackage] {
-        &self.index.packages
-    }
-
-    pub fn package(&self, package_id: &str) -> Option<&CatalogPackage> {
-        self.index.package(package_id)
-    }
-
-    pub fn load_package(&self, package_id: &str) -> Result<FlashPackage, CatalogError> {
-        self.index.load_package(&self.index_path, package_id)
     }
 }
 
@@ -472,6 +451,15 @@ fn review(plan: &FlashPlan, package: &FlashPackage) -> FirmwareReview {
         write_ranges: plan.write_ranges().to_vec(),
         preserved_ranges: plan.preserved_ranges().to_vec(),
         state_impact: plan.state_impact().clone(),
+        full_erase: manifest.full_erase,
+        downloaded_from: manifest
+            .declared_parts()
+            .iter()
+            .filter_map(|part| match part.source() {
+                Some(PartSource::Download(url)) => Some(url.to_string()),
+                _ => None,
+            })
+            .collect(),
         recovery_before_write: plan.recovery_before_write().to_string(),
         recovery_after_failure: plan.recovery_after_failure().to_string(),
     }
