@@ -171,7 +171,7 @@ Five different things must stay different:
 
 | Kind | Examples | Ownership |
 | --- | --- | --- |
-| Resident radio adapter | Reticulum, Tucket/MeshCore, Sennet/Meshtastic, later UMSH | Adapter borrows admitted radio leases from `radio-hand`. |
+| Resident radio adapter | Reticulum, later UMSH (Tucket/MeshCore and Sennet/Meshtastic withdrawn 2026-11-14, reached through stock companion radios: [protocol_parity D1](2026-11-02_protocol_parity_plan.md#protocol_parity-d1--foreign-meshes-through-stock-radios)) | Adapter borrows admitted radio leases from `radio-hand`. |
 | Reticulum bearer | Ethernet/IP, WiFi/IP, cellular/IP, perhaps Wi-Fi HaLow/IP | Retinue interface with its own link, cost, availability, and metering facts. |
 | Management carrier | USB, NFC, BLE, local IP, Reticulum | Carries the same signed control semantics; transport access grants no authority. |
 | Local gateway facet | RS-485/Modbus, CAN, dry contact, environmental sensors | Parses a local application protocol and re-originates typed events under an explicit gateway identity. |
@@ -191,7 +191,7 @@ microcontroller are separate claims. Source inspection at Retinue
 | Capability | Current boundary | Device implication |
 | --- | --- | --- |
 | Retinue | Allocation-free identity/hash/command floor; `no_std + alloc` protocol core; optional Tokio shell in `crates/retinue/Cargo.toml`. | Select a verifier, bounded endpoint, or routing profile and measure the complete image. |
-| Sennet and Tucket | Default `no_std + alloc` cores with bounded retained state; hardware examples are optional. | The board supplies allocation, time, persistence, and radio execution. |
+| Sennet and Tucket | Since 2026-11-14 only companion frame types (protobuf reader, `DeviceInfo`); no protocol cores. | Foreign meshes are reached through a stock companion radio. |
 | Seneschal, Selvage, radio-face | Radio-free or presentation/profile `no_std` leaves; Seneschal's management grammar and journal are allocation-free. | Reuse these contracts across carriers and board-specific firmware. |
 | radio-hand | Portable board decisions plus an Embassy/concrete `lora-phy` live path. | A new IP runtime still needs board ownership, quiet-window, clock, and recovery integration. |
 | Outrider | Portable LXMF codec/stamps/ticket subset; full host delivery and propagation use `std`. | Select the portable subset explicitly. |

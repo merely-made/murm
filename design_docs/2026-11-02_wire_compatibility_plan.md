@@ -9,6 +9,8 @@
 - **Stock and stress:** separately qualify queue pressure, natural route expiry, discovery metadata and applicable public-network behavior. For selected Sennet and Tucket profiles test identified stock releases, maximum lengths/refusals, restart and packet-ID continuity, retries, routing and role-specific behavior. Later native Tucket/Sennet and T114 passes are bounded profiles; use [protocol parity](2026-11-02_protocol_parity_plan.md) as owner for broader roles. Keep maximum-size Sennet stock acceptance open after interrupted USB trials.
 - **Image acceptance:** complete the exact resident image's full visit/cancellation proof, fault, memory-high-water and unattended gates, and release-52 same-image recovery retry; preserve firmware and identity. See the controller and parity plans for subsequent qualified scopes.
 
+**Withdrawal note, 2026-11-14 ([protocol_parity D1](2026-11-02_protocol_parity_plan.md#protocol_parity-d1--foreign-meshes-through-stock-radios)).** Mark: "Stock radios only": a stock radio holds the keys, we hold none and compose no crypto, and the resident-protocols image is withdrawn. The Sennet and Tucket clauses of **Stock and stress** and all of **Image acceptance** concern native code and an image that are removed; the Retinue clauses of Stock and stress are unaffected.
+
 ## Constraints and decisions
 
 Credentials must not be appended to the identity/settings body or sent through an incompatible fixed-length resident message. A signature alone is not confidentiality. Existing settled topology, IFAC and stream behavior remains; keep historical failure and peer provenance distinct. Full protocol roles and private-channel decisions are not implied by a text exchange.

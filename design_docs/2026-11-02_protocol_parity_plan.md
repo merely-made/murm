@@ -5,10 +5,24 @@
 ## Open phases and done conditions
 
 - **Parity matrix:** reconcile current Retinue interfaces/shared-instance and management coverage against the review; inventory pinned reference releases and each endpoint, relay/server, management and optional product feature, with owner, applicability and software/physical/firmware status.
-- **Tucket:** extend from bounded endpoint/contact-restore profiles to selected multiple-hop/scoped routes, companion/management and current-release differences; qualify repeater, room-server persistence and sensor roles separately against stock peers, including restart, retry, failure and bounded state on the named image.
+- **Tucket:** *Withdrawn 2026-11-14 ([protocol_parity D1](#protocol_parity-d1--foreign-meshes-through-stock-radios)): MeshCore is reached through a stock companion radio; native Tucket roles are no longer built.* Extend from bounded endpoint/contact-restore profiles to selected multiple-hop/scoped routes, companion/management and current-release differences; qualify repeater, room-server persistence and sensor roles separately against stock peers, including restart, retry, failure and bounded state on the named image.
 - **Retinue:** complete selected host interface, service and platform cases and bounded embedded transport/resource/restart/hostile-traffic cases. Compare against the named RNS reference and keep host, embedded node and modem roles distinct.
-- **Sennet:** extend selected routing, channel, discovery/configuration and standalone PKI/counter behavior; independently qualify chosen security, position, telemetry and module roles against public specifications and stock captures, including malformed input, restart and board memory. Meshtastic 2.8 ACK proof is not established by earlier correlated ACKs.
+- **Sennet:** *Withdrawn 2026-11-14 ([protocol_parity D1](#protocol_parity-d1--foreign-meshes-through-stock-radios)): Meshtastic is reached through a stock companion radio; native Sennet roles are no longer built.* Extend selected routing, channel, discovery/configuration and standalone PKI/counter behavior; independently qualify chosen security, position, telemetry and module roles against public specifications and stock captures, including malformed input, restart and board memory. Meshtastic 2.8 ACK proof is not established by earlier correlated ACKs.
 - **Product acceptance:** for each advertised image/role measure full workload and resource reserves and qualify applicable USB, BLE/Wi-Fi, display, GNSS/sensors, persistent configuration, upgrades/recovery, sleep, unattended behavior, power-cut and driver/deadline faults. Shared-radio missed windows are a separate controller gate. Requalify when the workload or image changes.
+
+## Decisions
+
+### protocol_parity D1 — foreign meshes through stock radios
+
+**2026-11-14 · new.** Mark, on MeshCore (tucket) and Meshtastic (sennet):
+
+> considering the stack, tucket and sennet are not so important nowadays ... reticulum covers what the other two don't and what they do. the only value would be interoperation with existing non reticulum nodes, and for that, a thinner layer is possible.
+
+Card answer, "Stock radios only": interoperation goes through the existing stock-companion client; a stock MeshCore or Meshtastic radio holds the keys, we hold none and compose no crypto. tucket and sennet shrink to the frame types that client uses; the resident-protocols firmware image and WN7's foreign-adapter condition are withdrawn. It costs one stock radio per foreign mesh. Standing rule: "We should remain strictly consumers, not forking standards."
+
+Links: area radio · plans Tucket, Sennet, Product acceptance · governs crates/tucket, crates/sennet, apps/signalman/src/radio_comms/companion.rs · summary foreign LoRa meshes are reached through stock companion radios; native Tucket/Sennet and the resident image are withdrawn
+
+Landed 2026-11-14: the desktop stations, Signalman's resident journal, the resident image and the T114 Tucket service, radio-hand's resident runtime and the native protocol code are removed; tucket keeps `companion::DeviceInfo`, sennet keeps `protobuf` and the text-payload limit. Whether a Reticulum-only resident runtime is wanted again is not decided here.
 
 ## Constraints
 
@@ -21,3 +35,4 @@ Keep device role, protocol feature and firmware-product acceptance separate; one
 ## Progress
 
 - 2026-11-02: adopted the reviewed open-work successor; original archived whole. No new implementation or acceptance run.
+- 2026-11-14: D1 recorded; the Tucket and Sennet phases are withdrawn and the native code removed. Product acceptance no longer includes the resident image. Retinue and the parity matrix are unchanged.

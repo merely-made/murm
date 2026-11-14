@@ -14,6 +14,8 @@ the receipt linked above.
 
 ## Current direction: coordinated runtime personalities
 
+**Note, 2026-11-14 ([protocol_parity D1](2026-11-02_protocol_parity_plan.md#protocol_parity-d1--foreign-meshes-through-stock-radios)).** Mark: "Stock radios only": interoperation with MeshCore and Meshtastic goes through a stock companion radio that holds the keys; "the resident-protocols firmware image and WN7's foreign-adapter condition are withdrawn." Sennet and Tucket are no longer installable personalities, so one firmware hosting foreign protocols side by side is withdrawn. What Murmuration means for Reticulum-only profiles is not decided by this note.
+
 **Murmuration** is the cooperative capability for deliberate runtime switching
 among our own protocol implementations on Tulle. The repository names are
 **Retinue** (Reticulum implementation), **Sennet** (independent mesh messaging
