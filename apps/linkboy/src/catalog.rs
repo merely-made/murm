@@ -276,35 +276,10 @@ impl PackageIndex {
         Self::load(path)?.authenticate(trust)
     }
 
-    /// Load and verify every manifest named by this index.
+    /// Validate every manifest named by this index and verify every local payload. A qualified
+    /// download is validated from its manifest and verified when it is fetched.
     pub fn verify_packages(&self, index_path: impl AsRef<Path>) -> Result<(), CatalogError> {
-        self.validate()?;
-        let index_path = index_path.as_ref();
-        let parent = index_path.parent().unwrap_or_else(|| Path::new("."));
-        for entry in &self.packages {
-            let manifest_path = parent.join(&entry.manifest);
-            let package =
-                FlashPackage::load(&manifest_path).map_err(|source| CatalogError::Package {
-                    package_id: entry.package_id.clone(),
-                    source,
-                })?;
-            if package.manifest().package_id != entry.package_id {
-                return Err(CatalogError::Invalid(format!(
-                    "catalog package {:?} names manifest package {:?}",
-                    entry.package_id,
-                    package.manifest().package_id
-                )));
-            }
-            if package.manifest().publisher != entry.firmware_publisher {
-                return Err(CatalogError::Invalid(format!(
-                    "catalog package {:?} names firmware publisher {:?}, but its manifest says {:?}",
-                    entry.package_id,
-                    entry.firmware_publisher,
-                    package.manifest().publisher
-                )));
-            }
-        }
-        Ok(())
+        self.listings(index_path).map(drop)
     }
 
     pub fn package(&self, package_id: &str) -> Option<&CatalogPackage> {
@@ -516,10 +491,18 @@ pub enum CatalogError {
         #[source]
         source: PackageError,
     },
+    #[error("package {package_id:?} could not be fetched and verified: {source}")]
+    Download {
+        package_id: String,
+        #[source]
+        source: crate::download::DownloadError,
+    },
 }
 
+mod listing;
 mod stage;
 #[cfg(test)]
 mod tests;
 
+pub use listing::{Availability, PackageListing};
 pub use stage::{StagedPayload, stage_catalog, template_path};

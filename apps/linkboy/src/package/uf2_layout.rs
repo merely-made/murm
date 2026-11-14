@@ -49,7 +49,7 @@ pub(super) fn validate_uf2_layout(
 
 /// Checks every block and returns the payload bytes the blocks carry and their merged target
 /// ranges. Staging derives a manifest's `write_bytes` and `write_ranges` from this same walk.
-pub(super) fn uf2_extent(
+pub(crate) fn uf2_extent(
     bytes: &[u8],
     nrf52840_target: bool,
 ) -> Result<(u64, Vec<FlashRange>), PackageError> {

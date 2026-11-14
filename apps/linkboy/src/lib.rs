@@ -30,11 +30,13 @@ use serial2::SerialPort;
 pub mod catalog;
 pub mod device;
 pub mod discovery;
+pub mod download;
 pub mod executor;
 pub mod flow;
 pub mod helper;
 pub mod package;
 pub mod plan;
+pub mod qualify;
 pub mod receipt;
 pub mod route;
 pub mod uf2;
@@ -42,9 +44,9 @@ pub mod update;
 pub mod verify;
 
 pub use catalog::{
-    AuthenticatedPackageIndex, CatalogError, CatalogPackage, CatalogSignature,
-    CatalogSignatureFormat, CatalogState, CatalogTrust, PackageIndex, StagedPayload,
-    TrustedCatalogKey, stage_catalog, template_path,
+    AuthenticatedPackageIndex, Availability, CatalogError, CatalogPackage, CatalogSignature,
+    CatalogSignatureFormat, CatalogState, CatalogTrust, PackageIndex, PackageListing,
+    StagedPayload, TrustedCatalogKey, stage_catalog, template_path,
 };
 pub use device::{
     BoardSelection, BoardSelectionEvidence, BootloaderObservation, DeviceObservation,
@@ -54,6 +56,7 @@ pub use discovery::{
     DiscoveryError, T114LoaderSnapshot, is_first_flash, needs_esp_rom_probe, stock_device,
     t114_loader_snapshot_from_volume, t114_uf2_observation, unique_new_port,
 };
+pub use download::{DownloadError, Fetch, FetchResponse, FirmwareCache};
 pub use executor::{
     DeviceFailure, DeviceRunner, ExecutionError, ExecutionStage, FlashEvent, LiveDeviceRunner,
     ProcessFailure, ProcessRunner, SystemProcessRunner, execute_plan,
@@ -63,8 +66,8 @@ pub use helper::verify_installed as verify_helper;
 pub use package::{
     BoardFamily, FirmwarePartKind, FlashPackage, FlashRange, FlashRoute, HelperArtifact,
     HelperRequirement, NODE_TIMEBASE_GUARD, NODE_TIMEBASE_PRESERVED_RANGE, PERSISTENT_STATE_SCHEMA,
-    PackagePart, PersistentStateCompatibility, ProcessorKind, PublisherSignature,
-    PublisherSignatureFormat, StateImpact, VerifiedPackagePart, helper_platform,
+    PackagePart, PartSource, PersistentStateCompatibility, ProcessorKind, PublisherSignature,
+    PublisherSignatureFormat, Qualification, StateImpact, VerifiedPackagePart, helper_platform,
 };
 pub use package::{BuildFacts, PackageTemplate};
 pub use plan::{FlashPlan, PackagePartIdentity, Refusal, RefusalReason, plan_flash};
@@ -198,6 +201,8 @@ pub enum Error {
     Package(#[from] package::PackageError),
     #[error(transparent)]
     Catalog(#[from] catalog::CatalogError),
+    #[error(transparent)]
+    Download(#[from] download::DownloadError),
     #[error(transparent)]
     Receipt(#[from] receipt::ReceiptError),
     #[error("{0}")]

@@ -31,7 +31,8 @@ fn package() -> FlashPackage {
             notice: "Test helper notice".into(),
         }],
         payload: Some(PackagePayload {
-            path: "payload".into(),
+            path: Some("payload".into()),
+            url: None,
             format: PayloadFormat::EspflashElf,
             byte_length: bytes.len() as u64,
             sha256: crate::package::sha256_hex(&bytes),
@@ -73,6 +74,7 @@ fn package() -> FlashPackage {
             after_failure: "Use ROM entry.".into(),
         },
         persistent_state: None,
+        qualification: None,
     };
     FlashPackage::from_parts(manifest, "manifest", "payload", bytes).unwrap()
 }
@@ -96,7 +98,8 @@ fn t114_package() -> FlashPackage {
             notice: "Test helper notice".into(),
         }],
         payload: Some(PackagePayload {
-            path: "payload".into(),
+            path: Some("payload".into()),
+            url: None,
             format: PayloadFormat::NrfDfuZip,
             byte_length: bytes.len() as u64,
             sha256: crate::package::sha256_hex(&bytes),
@@ -145,6 +148,7 @@ fn t114_package() -> FlashPackage {
             native_node_guard: true,
             preserved_range: NODE_TIMEBASE_PRESERVED_RANGE,
         }),
+        qualification: None,
     };
     FlashPackage::from_parts(manifest, "manifest", "payload", bytes).unwrap()
 }
@@ -194,7 +198,8 @@ fn sparse_package() -> FlashPackage {
             .iter()
             .map(|(path, kind, offset, bytes)| PackagePart {
                 kind: kind.clone(),
-                path: (*path).into(),
+                path: Some((*path).into()),
+                url: None,
                 format: PayloadFormat::RawBinary,
                 offset: Some(*offset),
                 byte_length: bytes.len() as u64,
@@ -234,6 +239,7 @@ fn sparse_package() -> FlashPackage {
             after_failure: "Use ROM entry.".into(),
         },
         persistent_state: None,
+        qualification: None,
     };
     FlashPackage::from_verified_parts(
         manifest,

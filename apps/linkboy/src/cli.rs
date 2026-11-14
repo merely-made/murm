@@ -2,6 +2,7 @@
 
 mod command;
 mod flash;
+mod qualify;
 mod render;
 
 use std::time::Duration;
@@ -27,7 +28,9 @@ fn usage() -> &'static str {
      linkboy stage-catalog INDEX DEST REVISION [--payload PACKAGE_ID PATH]... [--write-bytes PACKAGE_ID N]...\n  \
      linkboy verify-recovery PORT PACKAGE BOARD@REVISION RECOVERY --loader-snapshot PATH [--receipt PATH]\n  \
      linkboy flash-raw PORT IMAGE [t114|v4]\n  \
-     linkboy bootloader PORT"
+     linkboy bootloader PORT\n  \
+     linkboy qualify URL --file PATH [--out DRAFT]\n\
+     Every command takes --cache-dir PATH (default: Signalman's firmware cache)."
 }
 
 fn bad_usage(what: &str) -> Error {

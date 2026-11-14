@@ -58,7 +58,13 @@ pub fn helper_platform() -> String {
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct PackagePayload {
-    pub path: String,
+    /// A file beside the manifest. Exactly one of `path` and `url` is present.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub path: Option<String>,
+    /// A vendor release fetched on demand and verified against `byte_length` and `sha256`
+    /// (protocol_parity D5). The tracked manifest is the only thing that vouches for the bytes.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub url: Option<String>,
     pub format: PayloadFormat,
     pub byte_length: u64,
     pub sha256: String,
@@ -76,7 +82,10 @@ pub struct PackagePayload {
 #[serde(deny_unknown_fields)]
 pub struct PackagePart {
     pub kind: FirmwarePartKind,
-    pub path: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub path: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub url: Option<String>,
     pub format: PayloadFormat,
     pub offset: Option<u32>,
     pub byte_length: u64,
@@ -190,9 +199,79 @@ pub struct FlashPackageManifest {
     /// accidentally claim support for the guarded Retinue native-node state.
     #[serde(default)]
     pub persistent_state: Option<PersistentStateCompatibility>,
+    /// Required for a package with a downloaded part: what was checked before it was listed.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub qualification: Option<Qualification>,
+}
+
+/// What was checked before a vendor release was listed (protocol_parity D5).
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct Qualification {
+    /// Where the pinned length and sha256 came from.
+    pub hash_source: String,
+    /// The date (`YYYY-MM-DD`) the hash was recorded.
+    pub hash_recorded_on: String,
+    /// The structure checks the bytes passed.
+    pub structure_checks: String,
+    /// Whether Signalman's stock-companion client was checked against this release on a real
+    /// board. True needs the date and a receipt URL.
+    pub companion_checked: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub companion_checked_on: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub companion_receipt: Option<String>,
+}
+
+/// Where a part's bytes come from.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum PartSource<'a> {
+    /// A path relative to the manifest.
+    Local(&'a str),
+    /// An https URL, fetched on demand.
+    Download(&'a str),
+}
+
+impl PackagePart {
+    /// The declared source, once validation has established that exactly one is present.
+    pub fn source(&self) -> Option<PartSource<'_>> {
+        match (&self.path, &self.url) {
+            (Some(path), None) => Some(PartSource::Local(path)),
+            (None, Some(url)) => Some(PartSource::Download(url)),
+            _ => None,
+        }
+    }
+
+    /// The name a part keeps on disk: a local path, or a URL's last segment.
+    pub fn label(&self) -> &str {
+        match self.source() {
+            Some(PartSource::Local(path)) => path,
+            Some(PartSource::Download(url)) => url.rsplit('/').next().unwrap_or(url),
+            None => "",
+        }
+    }
 }
 
 impl FlashPackageManifest {
+    /// Parse and validate a manifest without reading any part.
+    pub fn load(path: impl AsRef<std::path::Path>) -> Result<Self, super::PackageError> {
+        let manifest: Self = toml::from_str(&std::fs::read_to_string(path)?)?;
+        manifest.validate()?;
+        Ok(manifest)
+    }
+
+    /// The structural checks every package passes before any byte is read.
+    pub fn validate(&self) -> Result<(), super::PackageError> {
+        super::validate::validate_manifest(self)
+    }
+
+    /// Whether any part is fetched on demand rather than read beside the manifest.
+    pub fn has_downloads(&self) -> bool {
+        self.declared_parts()
+            .iter()
+            .any(|part| matches!(part.source(), Some(PartSource::Download(_))))
+    }
+
     pub fn helper_for(&self, route: &FlashRoute) -> Option<&HelperRequirement> {
         self.helpers.iter().find(|helper| &helper.route == route)
     }
@@ -213,11 +292,12 @@ impl FlashPackageManifest {
         }
     }
 
-    pub(super) fn declared_parts(&self) -> Vec<PackagePart> {
+    pub fn declared_parts(&self) -> Vec<PackagePart> {
         match &self.payload {
             Some(payload) => vec![PackagePart {
                 kind: FirmwarePartKind::Application,
                 path: payload.path.clone(),
+                url: payload.url.clone(),
                 format: payload.format.clone(),
                 offset: None,
                 byte_length: payload.byte_length,

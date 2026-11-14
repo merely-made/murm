@@ -2,7 +2,8 @@
 //!
 //! For each index entry with a `<name>.template.toml` beside the index, the caller supplies the
 //! built payload and staging writes the payload and its completed manifest. Entries without a
-//! template are full manifests (third-party releases) and are copied with their verified parts.
+//! template are full manifests and are copied with their verified parts; a qualified vendor
+//! download is copied as its manifest alone.
 //! The staged index is then verified as a whole, so a stage that Linkboy would refuse fails here.
 
 use std::collections::BTreeMap;
@@ -11,7 +12,7 @@ use std::io::Write as _;
 use std::path::{Component, Path, PathBuf};
 
 use super::{CatalogError, PackageIndex};
-use crate::package::{BuildFacts, FlashPackage, PackageTemplate};
+use crate::package::{BuildFacts, FlashPackage, FlashPackageManifest, PackageTemplate};
 
 /// A built image for one templated package.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -83,12 +84,19 @@ pub fn stage_catalog(
             write_new(&manifest_out, toml::to_string(&manifest)?.as_bytes())?;
         } else {
             let source = index_dir.join(&entry.manifest);
-            let package = FlashPackage::load(&source).map_err(package_error(&entry.package_id))?;
-            for part in package.parts() {
-                write_new(
-                    &contained(destination, &part.declaration().path)?,
-                    part.bytes(),
-                )?;
+            let manifest =
+                FlashPackageManifest::load(&source).map_err(package_error(&entry.package_id))?;
+            // A qualified download is complete as tracked: the stage carries its manifest and
+            // no bytes, which are fetched on demand (protocol_parity D5).
+            if !manifest.has_downloads() {
+                let package =
+                    FlashPackage::load(&source).map_err(package_error(&entry.package_id))?;
+                for part in package.parts() {
+                    write_new(
+                        &contained(destination, part.declaration().label())?,
+                        part.bytes(),
+                    )?;
+                }
             }
             write_new(&manifest_out, &fs::read(&source)?)?;
         }

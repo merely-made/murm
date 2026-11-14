@@ -150,11 +150,14 @@ fn package_with_manual_check(route: FlashRoute, manual_check: Option<String>) ->
             notice: "Test helper notice".into(),
         }],
         payload: Some(PackagePayload {
-            path: match route {
-                FlashRoute::Uf2MassStorage => "payload.uf2",
-                FlashRoute::AdafruitDfu | FlashRoute::EspRom => "payload",
-            }
-            .into(),
+            path: Some(
+                match route {
+                    FlashRoute::Uf2MassStorage => "payload.uf2",
+                    FlashRoute::AdafruitDfu | FlashRoute::EspRom => "payload",
+                }
+                .into(),
+            ),
+            url: None,
             format,
             byte_length: bytes.len() as u64,
             sha256: crate::package::sha256_hex(&bytes),
@@ -214,6 +217,7 @@ fn package_with_manual_check(route: FlashRoute, manual_check: Option<String>) ->
             after_failure: "Use bootloader recovery.".into(),
         },
         persistent_state: None,
+        qualification: None,
     };
     let payload_path = match route {
         FlashRoute::Uf2MassStorage => "payload.uf2",
@@ -285,7 +289,8 @@ fn sparse_esp_package() -> FlashPackage {
             .iter()
             .map(|(path, kind, offset, bytes)| PackagePart {
                 kind: kind.clone(),
-                path: (*path).into(),
+                path: Some((*path).into()),
+                url: None,
                 format: PayloadFormat::RawBinary,
                 offset: Some(*offset),
                 byte_length: bytes.len() as u64,
@@ -325,6 +330,7 @@ fn sparse_esp_package() -> FlashPackage {
             after_failure: "Enter the ROM loader again.".into(),
         },
         persistent_state: None,
+        qualification: None,
     };
     FlashPackage::from_verified_parts(
         manifest,

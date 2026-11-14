@@ -148,7 +148,8 @@ impl PackageTemplate {
             publisher: self.publisher.clone(),
             helpers: self.helpers.clone(),
             payload: Some(PackagePayload {
-                path: self.payload.path.clone(),
+                path: Some(self.payload.path.clone()),
+                url: None,
                 format: self.payload.format.clone(),
                 byte_length: payload.len() as u64,
                 sha256: sha256_hex(payload),
@@ -177,6 +178,7 @@ impl PackageTemplate {
             publisher_signature: None,
             recovery: self.recovery.clone(),
             persistent_state: self.persistent_state.clone(),
+            qualification: None,
         };
         FlashPackage::from_parts(
             manifest.clone(),

@@ -1,8 +1,9 @@
 //! Subcommand dispatch.
 
 use linkboy::{
-    Board, BoardFamily, DeviceObservation, Error, FlashEvent, FlashPackage, LiveDeviceRunner,
-    SystemProcessRunner, converse, enter_bootloader, execute_plan, identify, plan_flash,
+    Board, BoardFamily, DeviceObservation, Error, FirmwareCache, FlashEvent, FlashPackage,
+    LiveDeviceRunner, SystemProcessRunner, converse, enter_bootloader, execute_plan, identify,
+    plan_flash,
 };
 
 use super::flash::{
@@ -12,9 +13,11 @@ use super::render::render_event;
 use super::{BOOTLOADER_PATIENCE, bad_usage, parse_board_selection, parse_u32, usage};
 
 pub(crate) fn run_command() -> Result<(), Error> {
-    let mut args = std::env::args().skip(1);
+    let (cache, args) = take_cache_dir(std::env::args().skip(1).collect())?;
+    let mut args = args.into_iter();
     match args.next().as_deref() {
         Some("list") => list(),
+        Some("qualify") => super::qualify::run(args),
         Some("inspect") => {
             let package = args
                 .next()
@@ -22,7 +25,7 @@ pub(crate) fn run_command() -> Result<(), Error> {
             if args.next().is_some() {
                 return Err(bad_usage("inspect accepts one PACKAGE"));
             }
-            println!("{}", FlashPackage::load(package)?.describe());
+            println!("{}", load_package(&cache, package)?.describe());
             Ok(())
         }
         Some("catalog") => {
@@ -68,7 +71,7 @@ pub(crate) fn run_command() -> Result<(), Error> {
             if args.next().is_some() {
                 return Err(bad_usage("plan accepts DEVICE PACKAGE [BOARD@REVISION]"));
             }
-            let package = FlashPackage::load(package_path)?;
+            let package = load_package(&cache, package_path)?;
             let found = identify(&device);
             let mut observation = DeviceObservation::from_found(&found);
             let mut process = SystemProcessRunner::default();
@@ -119,7 +122,7 @@ pub(crate) fn run_command() -> Result<(), Error> {
                     ));
                 }
             }
-            let package = FlashPackage::load(package_path)?;
+            let package = load_package(&cache, package_path)?;
             let found = identify(&device);
             let mut observation = DeviceObservation::from_found(&found);
             let mut process = SystemProcessRunner::default();
@@ -226,7 +229,7 @@ pub(crate) fn run_command() -> Result<(), Error> {
                     ));
                 }
             }
-            let package = FlashPackage::load(package_path)?;
+            let package = load_package(&cache, package_path)?;
             let observation =
                 uf2_volume_observation(&volume)?.confirm_board(selection.0, selection.1);
             let plan = match plan_flash(&observation, &package) {
@@ -418,7 +421,7 @@ pub(crate) fn run_command() -> Result<(), Error> {
             let snapshot_path = snapshot_path.ok_or_else(|| {
                 bad_usage("verify-recovery requires the captured --loader-snapshot PATH")
             })?;
-            let package = FlashPackage::load(package_path)?;
+            let package = load_package(&cache, package_path)?;
             let snapshot =
                 linkboy::T114LoaderSnapshot::from_json(snapshot_path).map_err(|error| {
                     Error::ToolFailed {
@@ -527,4 +530,23 @@ pub(crate) fn run_command() -> Result<(), Error> {
             Ok(())
         }
     }
+}
+
+/// Pull the global `--cache-dir PATH` out of the arguments, defaulting to Signalman's cache.
+fn take_cache_dir(mut args: Vec<String>) -> Result<(FirmwareCache, Vec<String>), Error> {
+    let Some(at) = args.iter().position(|arg| arg == "--cache-dir") else {
+        return Ok((FirmwareCache::new(FirmwareCache::default_dir()), args));
+    };
+    if at + 1 >= args.len() {
+        return Err(bad_usage("--cache-dir needs a PATH"));
+    }
+    let path = args.remove(at + 1);
+    args.remove(at);
+    Ok((FirmwareCache::new(path), args))
+}
+
+/// A package beside its manifest, or a qualified download already in the cache. The CLI
+/// fetches nothing here: `qualify` is its only network step.
+fn load_package(cache: &FirmwareCache, path: String) -> Result<FlashPackage, Error> {
+    Ok(linkboy::download::load_package(path, cache, None)?)
 }

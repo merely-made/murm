@@ -3,7 +3,7 @@
 use super::{
     ESP_FLASH_SECTOR_SIZE, FirmwarePartKind, FlashPackageManifest, FlashRange, FlashRoute,
     NODE_TIMEBASE_PRESERVED_RANGE, PACKAGE_SCHEMA, PERSISTENT_STATE_SCHEMA, PackageError,
-    PackagePart, PayloadFormat,
+    PackagePart, PartSource, PayloadFormat,
 };
 
 pub(super) fn validate_manifest(manifest: &FlashPackageManifest) -> Result<(), PackageError> {
@@ -185,6 +185,7 @@ pub(super) fn validate_manifest(manifest: &FlashPackageManifest) -> Result<(), P
     {
         return Err(PackageError::ProtectedRangeOverlap);
     }
+    validate_qualification(manifest)?;
     if let Some(signature) = &manifest.publisher_signature
         && (signature.key_id.trim().is_empty()
             || !signature.signed_manifest_url.starts_with("https://")
@@ -199,8 +200,23 @@ pub(super) fn validate_manifest(manifest: &FlashPackageManifest) -> Result<(), P
 }
 
 fn validate_part(part: &PackagePart) -> Result<(), PackageError> {
-    if part.path.trim().is_empty()
-        || part.byte_length == 0
+    match part.source() {
+        None => {
+            return Err(PackageError::InvalidField(
+                "a package part needs exactly one of path and url".to_string(),
+            ));
+        }
+        Some(PartSource::Local(path)) if path.trim().is_empty() => {
+            return Err(PackageError::InvalidField("package part path".to_string()));
+        }
+        Some(PartSource::Download(url)) if !is_download_url(url) => {
+            return Err(PackageError::InvalidField(format!(
+                "download url {url:?} must be https and end in a plain file name"
+            )));
+        }
+        Some(_) => {}
+    }
+    if part.byte_length == 0
         || part.write_bytes == 0
         || part.write_bytes > part.byte_length
         || !is_sha256(&part.sha256)
@@ -281,7 +297,7 @@ fn validate_parts_for_route(parts: &[PackagePart], route: &FlashRoute) -> Result
             "sparse ESP part offset is not erase-sector aligned".to_string(),
         ));
     }
-    let mut paths = parts.iter().map(|part| &part.path).collect::<Vec<_>>();
+    let mut paths = parts.iter().map(PackagePart::label).collect::<Vec<_>>();
     paths.sort();
     if paths.windows(2).any(|pair| pair[0] == pair[1]) {
         return Err(PackageError::InvalidField(
@@ -317,6 +333,70 @@ fn fully_covers(container: &FlashRange, required: &FlashRange) -> bool {
         }
         _ => false,
     }
+}
+
+/// A download payload is listed only with the record of what qualified it, and only a
+/// download payload carries one: our own images are vouched for by their stage.
+fn validate_qualification(manifest: &FlashPackageManifest) -> Result<(), PackageError> {
+    let Some(record) = &manifest.qualification else {
+        return if manifest.has_downloads() {
+            Err(PackageError::InvalidField(
+                "a downloaded package needs a qualification record".to_string(),
+            ))
+        } else {
+            Ok(())
+        };
+    };
+    let invalid = |what: &str| Err(PackageError::InvalidField(format!("qualification {what}")));
+    if !manifest.has_downloads() {
+        return invalid("belongs only to a downloaded package");
+    }
+    if record.hash_source.trim().is_empty() || record.structure_checks.trim().is_empty() {
+        return invalid("needs its hash source and structure checks");
+    }
+    if !is_date(&record.hash_recorded_on) {
+        return invalid("hash_recorded_on must be YYYY-MM-DD");
+    }
+    match (
+        record.companion_checked,
+        record.companion_checked_on.as_deref(),
+        record.companion_receipt.as_deref(),
+    ) {
+        (false, None, None) => Ok(()),
+        (true, Some(date), Some(receipt)) if is_date(date) && receipt.starts_with("https://") => {
+            Ok(())
+        }
+        _ => invalid("companion check needs both a date and an https receipt, or neither"),
+    }
+}
+
+/// `https://host/.../name` with a plain last segment, which becomes the cached file's name.
+pub fn is_download_url(url: &str) -> bool {
+    let Some(rest) = url.strip_prefix("https://") else {
+        return false;
+    };
+    let Some((host, path)) = rest.split_once('/') else {
+        return false;
+    };
+    let name = path.rsplit('/').next().unwrap_or_default();
+    !host.is_empty()
+        && !url.contains(['?', '#', '\\'])
+        && !name.starts_with('.')
+        && !name.is_empty()
+        && name
+            .bytes()
+            .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'.' | b'-' | b'_'))
+}
+
+fn is_date(value: &str) -> bool {
+    let bytes = value.as_bytes();
+    bytes.len() == 10
+        && bytes[4] == b'-'
+        && bytes[7] == b'-'
+        && bytes
+            .iter()
+            .enumerate()
+            .all(|(index, byte)| matches!(index, 4 | 7) || byte.is_ascii_digit())
 }
 
 fn is_sha256(value: &str) -> bool {

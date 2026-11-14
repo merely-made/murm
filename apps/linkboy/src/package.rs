@@ -10,7 +10,9 @@ mod template;
 #[cfg(test)]
 mod tests;
 mod uf2_layout;
+pub(crate) use uf2_layout::uf2_extent;
 mod validate;
+pub use validate::is_download_url;
 mod verified;
 
 use std::io;
@@ -22,8 +24,8 @@ pub use kinds::{
 };
 pub use manifest::{
     ExpectedApplication, FlashPackageManifest, HelperArtifact, HelperRequirement, PackagePart,
-    PackagePayload, PackageTarget, PersistentStateCompatibility, PublisherSignature,
-    PublisherSignatureFormat, RecoveryInstructions, helper_platform,
+    PackagePayload, PackageTarget, PartSource, PersistentStateCompatibility, PublisherSignature,
+    PublisherSignatureFormat, Qualification, RecoveryInstructions, helper_platform,
 };
 pub use template::{
     BuildFacts, PACKAGE_TEMPLATE_SCHEMA, PackageTemplate, TemplateApplication, TemplatePayload,
@@ -65,6 +67,8 @@ pub enum PackageError {
         expected: u64,
         actual: u64,
     },
+    #[error("package part {url} has not been downloaded")]
+    NotFetched { url: String },
     #[error(
         "package part hash mismatch for {}: manifest says {expected}, bytes hash to {actual}",
         path.display()
