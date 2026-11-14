@@ -24,6 +24,14 @@ Links: area radio · plans Tucket, Sennet, Product acceptance · governs crates/
 
 Landed 2026-11-14: the desktop stations, Signalman's resident journal, the resident image and the T114 Tucket service, radio-hand's resident runtime and the native protocol code are removed; tucket keeps `companion::DeviceInfo`, sennet keeps `protobuf` and the text-payload limit. Whether a Reticulum-only resident runtime is wanted again is not decided here.
 
+### protocol_parity D2 — the IFAC mask keeps its own expand loop
+
+**2026-11-14 · new.** Card answer, "Keep the loop as is": `mask` in `crates/retinue/src/ifac.rs` stays, the one hand-written primitive that does. It is HKDF-SHA256 as RNS's `HKDF.py` computes it, which past RFC 5869's 255 blocks (a link MTU above 8 KiB) wraps its one-byte block counter instead of refusing; the `hkdf` crate refuses there, so a library call would break wire compatibility on those links. No code change; the function's comment says so.
+
+Coverage, checked 2026-11-14: the RNS 1.4.2-captured vector (`crates/retinue/tests/fixtures/ifac_packet.json`, a 47-byte frame) and `matches_pinned_rns_wire_bytes` pin the path below 255 blocks, where the loop equals the `hkdf` crate. The wrap itself is pinned by `the_mask_is_hkdf_and_wraps_its_counter_past_255_blocks`, written from `HKDF.py`, not by a captured RNS frame of that length.
+
+Links: area retinue · governs crates/retinue/src/ifac.rs · summary the IFAC mask's hand-written HKDF-Expand stays because RNS wraps the block counter past 255 blocks
+
 ## Constraints
 
 Keep device role, protocol feature and firmware-product acceptance separate; one endpoint exchange does not prove a router. Named 16 KiB untouched-stack and 25% free-heap reserves apply to the qualified memory profile, not all future images. Public contact storage contains pseudonymous associations, excludes secrets, labels, routes and pending operations, and requires its own scoped opt-in. Its commit is last, malformed or mismatched committed state refuses before erasure, and an uncertain readback is not a rollback promise. V4 live writes use the board quiet guard and make their listening blackout explicit. The current T114 endpoint uses volatile private setup; power cuts and installed daemon/UI remain unqualified.
@@ -36,3 +44,4 @@ Keep device role, protocol feature and firmware-product acceptance separate; one
 
 - 2026-11-02: adopted the reviewed open-work successor; original archived whole. No new implementation or acceptance run.
 - 2026-11-14: D1 recorded; the Tucket and Sennet phases are withdrawn and the native code removed. Product acceptance no longer includes the resident image. Retinue and the parity matrix are unchanged.
+- 2026-11-14: D2 recorded; the IFAC mask's expand loop is documented as kept, no code change.
