@@ -73,10 +73,8 @@ thiserror = "2"
 # consumes. Djinn releases station-scoped keys and signs grants; Personae
 # supplies the public device id.
 postilion = { version = "0.3.0", path = "../../crates/postilion" }
-radio-hand = { version = "0.0.1", path = "../../crates/radio-hand", features = ["instances"] }
+radio-hand = { version = "0.0.1", path = "../../crates/radio-hand" }
 retinue = { version = "0.3.0", path = "../../crates/retinue" }
-sennet = { version = "0.0.2", path = "../../crates/sennet" }
-tucket = { version = "0.0.2", path = "../../crates/tucket" }
 selvage = { version = "0.1.0", path = "../../crates/selvage" }
 serde = { version = "1", features = ["derive"] }
 zeroize = "1"

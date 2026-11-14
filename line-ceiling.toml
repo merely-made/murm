@@ -6,10 +6,6 @@ path = "vendor/"
 reason = "Vendored upstream sources; their module layout is maintained with the imported dependency."
 
 [[exception]]
-path = "apps/signalman-desktop/src/companion_scenario.rs"
-reason = "Native companion acceptance over real controls and actual journal facts. Existing source-size debt; a responsibility split must preserve Product, Reconnect, Condition and existing module visibility."
-
-[[exception]]
 path = "apps/signalman-desktop/src/main.rs"
 reason = "The window. Existing source-size debt; a responsibility split must preserve Ctx and existing module visibility."
 

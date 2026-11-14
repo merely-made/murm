@@ -31,7 +31,6 @@ pub mod device_mere;
 pub mod flow;
 pub mod messages;
 pub mod network;
-pub mod resident;
 pub mod state;
 pub mod station;
 pub mod survey;

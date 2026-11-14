@@ -490,14 +490,13 @@ fn radio_page(state: &DesktopState) -> Child {
         el("label", (el("div", text("Public message journal path")), el("div", cambium::lens(|input: &mut cambium::TextInput| cambium::text_field(input), |s: &mut DesktopState| &mut s.companion_journal)).attr("data-text-field", "companion-journal").attr("class", "companion-journal"))).attr("class", "revision-label"),
         el("label", (el("div", text("Meshtastic channel index (0–7; ignored for MeshCore)")), el("div", cambium::lens(|input: &mut cambium::TextInput| cambium::text_field(input), |s: &mut DesktopState| &mut s.companion_channel)).attr("data-text-field", "companion-channel").attr("class", "companion-channel"))).attr("class", "revision-label"),
         button("Connect companion", |s: &mut DesktopState, _| s.request_companion_connection()).attr("class", "primary"),
-        Box::new(button("Connect Tulle", |s: &mut DesktopState, _| s.request_resident_connection()).attr("class", "primary")) as Child,
         button("Disconnect companion", |s: &mut DesktopState, _| s.disconnect_companion()).attr("class", "primary secondary"),
         el("div", text(diagnostics)).attr("data-comms-diagnostics", label),
         el("label", (el("div", text(if protocol == ProtocolKind::Meshtastic {"Recipient node number (8 hex digits; ffffffff broadcasts)"} else {"Recipient public key (64 hex digits)"})),
             el("div", cambium::lens(|input: &mut cambium::TextInput| cambium::text_field(input), |s: &mut DesktopState| &mut s.message_recipient)).attr("data-text-field", "message-recipient").attr("class", "message-recipient"))).attr("class", "revision-label"),
         el("label", (el("div", text("Text message")), el("div", cambium::lens(|input: &mut cambium::TextInput| cambium::text_field(input), |s: &mut DesktopState| &mut s.message_draft)).attr("data-text-field", "message-draft").attr("class", "message-draft"))).attr("class", "revision-label"),
         button("Queue text", |s: &mut DesktopState, _| s.queue_message()).attr("class", "primary"),
-        el("div", text(state.message_notice.clone().unwrap_or_else(|| "Queued intents wait for a connected companion or authorized resident owner.".into()))).attr("role", "status"),
+        el("div", text(state.message_notice.clone().unwrap_or_else(|| "Queued intents wait for a connected companion.".into()))).attr("role", "status"),
         el("div", rows).attr("role", "list"),
     )).attr("class", "messages-page").attr("role", "main").attr("aria-label", format!("{label} Messages")))
 }

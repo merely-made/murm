@@ -21,7 +21,7 @@ pub fn perform(
     worker: &mut Option<Worker>,
     wake: InstallerWake,
 ) {
-    if state.resident_connecting || !state.companion_settings.is_empty() {
+    if !state.companion_settings.is_empty() {
         state.refuse_with(vec![
             "Disconnect the active radio before surveying or installing firmware.".into(),
         ]);
