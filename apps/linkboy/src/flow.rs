@@ -279,6 +279,7 @@ mod tests {
                 after_failure: "Use the ROM loader.".into(),
             },
             persistent_state: None,
+            full_erase: false,
             qualification: None,
         };
         FlashPackage::from_parts(manifest, "manifest", "payload", bytes).unwrap()

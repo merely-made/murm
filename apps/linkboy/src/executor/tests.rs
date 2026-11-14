@@ -217,6 +217,7 @@ fn package_with_manual_check(route: FlashRoute, manual_check: Option<String>) ->
             after_failure: "Use bootloader recovery.".into(),
         },
         persistent_state: None,
+        full_erase: false,
         qualification: None,
     };
     let payload_path = match route {
@@ -330,6 +331,7 @@ fn sparse_esp_package() -> FlashPackage {
             after_failure: "Enter the ROM loader again.".into(),
         },
         persistent_state: None,
+        full_erase: false,
         qualification: None,
     };
     FlashPackage::from_verified_parts(

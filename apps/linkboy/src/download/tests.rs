@@ -445,3 +445,17 @@ fn qualify_drafts_an_entry_from_fetched_bytes() {
     // A draft is not a package until a person fills it in.
     assert!(draft.toml.contains("FILL"));
 }
+
+#[test]
+fn qualify_drafts_a_merged_esp_image_as_a_part_at_zero_to_be_confirmed() {
+    let mut merged = vec![0x5a; 4096];
+    merged[0] = 0xE9;
+    let url = "https://release.example/v1/board-merged.bin";
+    let draft = crate::qualify::draft(url, &merged, &sha256_hex(&merged), "2026-11-14");
+    assert_eq!(draft.layout, crate::qualify::DetectedLayout::EspImage);
+    let value: toml::Value = toml::from_str(&draft.toml).unwrap();
+    assert_eq!(value["parts"][0]["kind"].as_str(), Some("merged-image"));
+    assert_eq!(value["parts"][0]["offset"].as_integer(), Some(0));
+    assert!(value.get("payload").is_none());
+    assert!(draft.toml.contains("confirm it from the vendor"));
+}

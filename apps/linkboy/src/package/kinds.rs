@@ -106,6 +106,12 @@ pub enum FirmwarePartKind {
     Bootloader,
     PartitionTable,
     Application,
+    /// A vendor's merged ESP32-S3 image (bootloader, partition table and application in one
+    /// file), written at flash offset 0.
+    MergedImage,
+    /// A further vendor image written after a merged image at an offset the manifest states,
+    /// such as Meshtastic's OTA and filesystem images.
+    AdditionalImage,
 }
 
 impl fmt::Display for FirmwarePartKind {
@@ -114,6 +120,8 @@ impl fmt::Display for FirmwarePartKind {
             Self::Bootloader => "bootloader",
             Self::PartitionTable => "partition table",
             Self::Application => "application",
+            Self::MergedImage => "merged image",
+            Self::AdditionalImage => "additional image",
         })
     }
 }

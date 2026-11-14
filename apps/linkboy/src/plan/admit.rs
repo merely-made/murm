@@ -153,6 +153,12 @@ pub fn plan_flash(
     }
 
     let mut warnings = Vec::new();
+    if manifest.full_erase {
+        warnings.push(PlanWarning {
+            message: "this package erases all of flash before writing: the board's identity, keys, settings and any other firmware's data are lost".into(),
+            requires_confirmation: true,
+        });
+    }
     if manifest.state_impact == StateImpact::Unknown {
         warnings.push(PlanWarning {
             message: "persistent identity and settings impact is unknown; owner confirmation is required before writing".into(),

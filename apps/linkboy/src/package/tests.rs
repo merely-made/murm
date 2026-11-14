@@ -1,3 +1,5 @@
+mod merged;
+
 use super::*;
 
 fn manifest(payload: &[u8]) -> FlashPackageManifest {
@@ -61,6 +63,7 @@ fn manifest(payload: &[u8]) -> FlashPackageManifest {
             after_failure: "Enter the ROM loader again.".into(),
         },
         persistent_state: None,
+        full_erase: false,
         qualification: None,
     }
 }

@@ -178,6 +178,7 @@ impl PackageTemplate {
             publisher_signature: None,
             recovery: self.recovery.clone(),
             persistent_state: self.persistent_state.clone(),
+            full_erase: false,
             qualification: None,
         };
         FlashPackage::from_parts(

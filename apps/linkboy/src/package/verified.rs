@@ -133,6 +133,7 @@ impl FlashPackage {
             })
             .collect::<Result<Vec<_>, PackageError>>()?;
         validate_uf2_layout(&manifest, &parts)?;
+        super::esp_layout::validate_esp_merged(&parts)?;
         Ok(Self {
             manifest,
             manifest_path: manifest_path.into(),

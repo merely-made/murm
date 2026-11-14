@@ -3,7 +3,7 @@
 use super::{
     ESP_FLASH_SECTOR_SIZE, FirmwarePartKind, FlashPackageManifest, FlashRange, FlashRoute,
     NODE_TIMEBASE_PRESERVED_RANGE, PACKAGE_SCHEMA, PERSISTENT_STATE_SCHEMA, PackageError,
-    PackagePart, PartSource, PayloadFormat,
+    PackagePart, PartSource, PayloadFormat, StateImpact,
 };
 
 pub(super) fn validate_manifest(manifest: &FlashPackageManifest) -> Result<(), PackageError> {
@@ -186,6 +186,7 @@ pub(super) fn validate_manifest(manifest: &FlashPackageManifest) -> Result<(), P
         return Err(PackageError::ProtectedRangeOverlap);
     }
     validate_qualification(manifest)?;
+    validate_full_erase(manifest)?;
     if let Some(signature) = &manifest.publisher_signature
         && (signature.key_id.trim().is_empty()
             || !signature.signed_manifest_url.starts_with("https://")
@@ -281,13 +282,14 @@ fn validate_parts_for_route(parts: &[PackagePart], route: &FlashRoute) -> Result
             ]
         )
     );
-    if !container && !sparse_esp {
+    let merged_esp = route == &FlashRoute::EspRom && is_merged_esp(parts);
+    if !container && !sparse_esp && !merged_esp {
         return Err(PackageError::InvalidField(format!(
             "parts do not form a supported {} package",
             route
         )));
     }
-    if sparse_esp
+    if (sparse_esp || merged_esp)
         && parts.iter().any(|part| {
             part.offset
                 .is_some_and(|offset| offset % ESP_FLASH_SECTOR_SIZE != 0)
@@ -302,6 +304,38 @@ fn validate_parts_for_route(parts: &[PackagePart], route: &FlashRoute) -> Result
     if paths.windows(2).any(|pair| pair[0] == pair[1]) {
         return Err(PackageError::InvalidField(
             "package parts cannot repeat a path".to_string(),
+        ));
+    }
+    Ok(())
+}
+
+/// A vendor merged ESP32-S3 image at offset 0, then any further raw images at the offsets the
+/// manifest states. `write-bin` writes each whole file, so each writes all of its bytes.
+pub(super) fn is_merged_esp(parts: &[PackagePart]) -> bool {
+    let Some((first, rest)) = parts.split_first() else {
+        return false;
+    };
+    first.kind == FirmwarePartKind::MergedImage
+        && first.offset == Some(0)
+        && rest.iter().all(|part| {
+            part.kind == FirmwarePartKind::AdditionalImage && part.offset.is_some_and(|o| o > 0)
+        })
+        && parts.iter().all(|part| {
+            part.format == PayloadFormat::RawBinary && part.write_bytes == part.byte_length
+        })
+}
+
+/// Erasing everything is stated, never implied, and only a vendor's merged image may state it:
+/// it then preserves nothing and replaces the device's state.
+fn validate_full_erase(manifest: &FlashPackageManifest) -> Result<(), PackageError> {
+    if manifest.full_erase
+        && (!is_merged_esp(&manifest.parts)
+            || !manifest.preserved_ranges.is_empty()
+            || manifest.state_impact != StateImpact::Replaced)
+    {
+        return Err(PackageError::InvalidField(
+            "full_erase needs a merged ESP image, no preserved ranges and state_impact = replaced"
+                .to_string(),
         ));
     }
     Ok(())

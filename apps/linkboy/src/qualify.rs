@@ -37,7 +37,7 @@ impl DetectedLayout {
                 };
             }
         }
-        if bytes.first() == Some(&0xE9) {
+        if bytes.first() == Some(&crate::package::ESP_IMAGE_MAGIC) {
             Self::EspImage
         } else {
             Self::Unknown
@@ -103,7 +103,13 @@ pub fn draft(url: &str, bytes: &[u8], sha256: &str, recorded_on: &str) -> Draft 
                 }
             ),
         ),
-        _ => ("FILL", byte_length, Vec::new(), "FILL".to_string()),
+        DetectedLayout::EspImage => (
+            "raw-binary",
+            byte_length,
+            Vec::new(),
+            "ESP image magic 0xE9 at byte 0 of the merged image; parts in flash and not overlapping".to_string(),
+        ),
+        DetectedLayout::Unknown => ("FILL", byte_length, Vec::new(), "FILL".to_string()),
     };
     let mut toml = format!(
         "# Draft written by `linkboy qualify` on {recorded_on}. It is not a package until a\n\
@@ -121,15 +127,34 @@ pub fn draft(url: &str, bytes: &[u8], sha256: &str, recorded_on: &str) -> Draft 
          notices = \"FILL\"\n\
          source_revision = \"FILL\"\n\
          source_url = \"FILL\"\n\
-         origin_url = \"FILL\"\n\n\
-         [payload]\n\
-         url = \"{url}\"\n\
-         format = \"{format}\"\n\
-         byte_length = {byte_length}\n\
-         sha256 = \"{sha256}\"\n\
-         write_bytes = {write_bytes}\n",
+         origin_url = \"FILL\"\n",
         layout.describe()
     );
+    if layout == DetectedLayout::EspImage {
+        // The offset and the erase are vendor facts the person confirms from the vendor's own
+        // flasher; Linkboy writes only what the finished manifest states.
+        toml.push_str(&format!(
+            "# full_erase = true   # only if the vendor's flasher erases all of flash\n\n\
+             # Offset 0 is the draft's assumption for a merged image: confirm it from the vendor.\n\
+             [[parts]]\n\
+             kind = \"merged-image\"\n\
+             url = \"{url}\"\n\
+             format = \"raw-binary\"\n\
+             offset = 0x0\n\
+             byte_length = {byte_length}\n\
+             sha256 = \"{sha256}\"\n\
+             write_bytes = {byte_length}\n"
+        ));
+    } else {
+        toml.push_str(&format!(
+            "\n[payload]\n\
+             url = \"{url}\"\n\
+             format = \"{format}\"\n\
+             byte_length = {byte_length}\n\
+             sha256 = \"{sha256}\"\n\
+             write_bytes = {write_bytes}\n"
+        ));
+    }
     for range in &ranges {
         toml.push_str(&format!(
             "\n[[write_ranges]]\nstart = {:#x}\nlength = {:#x}\n",

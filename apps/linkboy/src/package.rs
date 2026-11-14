@@ -4,15 +4,26 @@
 //! future executor receive this verified object, never an image path whose contents may have
 //! changed since the decision was made.
 
+mod esp_layout;
 mod kinds;
 mod manifest;
 mod template;
 #[cfg(test)]
 mod tests;
 mod uf2_layout;
+pub(crate) use esp_layout::ESP_IMAGE_MAGIC;
 pub(crate) use uf2_layout::uf2_extent;
 mod validate;
 pub use validate::is_download_url;
+
+/// Whether verified parts form a vendor merged ESP32-S3 image and its additional images.
+pub(crate) fn is_merged_esp_layout(parts: &[VerifiedPackagePart]) -> bool {
+    let declared = parts
+        .iter()
+        .map(|part| part.declaration().clone())
+        .collect::<Vec<_>>();
+    validate::is_merged_esp(&declared)
+}
 mod verified;
 
 use std::io;

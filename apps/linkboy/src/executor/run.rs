@@ -98,6 +98,16 @@ pub fn execute_plan<P: ProcessRunner, D: DeviceRunner>(
                 .map(|part| part.declaration().write_bytes)
                 .collect(),
         ),
+        (FlashRoute::EspRom, ExecutableLayout::MergedEsp(parts)) => {
+            let full_erase = package.manifest().full_erase;
+            let mut bytes = Vec::from(if full_erase { &[0][..] } else { &[] });
+            bytes.extend(parts.iter().map(|part| part.declaration().write_bytes));
+            (
+                port.clone(),
+                esp_rom::merged_commands(&port, parts, full_erase),
+                bytes,
+            )
+        }
         _ => return Err(ExecutionError::UnsupportedPackageLayout),
     };
 
@@ -235,6 +245,8 @@ pub fn execute_plan<P: ProcessRunner, D: DeviceRunner>(
 pub(super) enum ExecutableLayout<'a> {
     Container(&'a VerifiedPackagePart),
     SparseEsp(&'a [VerifiedPackagePart]),
+    /// A vendor merged image at 0 and its additional images, each at its manifest offset.
+    MergedEsp(&'a [VerifiedPackagePart]),
     Uf2(&'a VerifiedPackagePart),
 }
 
@@ -269,6 +281,9 @@ fn executable_layout<'a>(
                 }) =>
         {
             Ok(ExecutableLayout::SparseEsp(parts))
+        }
+        (FlashRoute::EspRom, parts) if crate::package::is_merged_esp_layout(parts) => {
+            Ok(ExecutableLayout::MergedEsp(parts))
         }
         _ => Err(ExecutionError::UnsupportedPackageLayout),
     }

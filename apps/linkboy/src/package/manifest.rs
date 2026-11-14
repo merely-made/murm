@@ -199,6 +199,10 @@ pub struct FlashPackageManifest {
     /// accidentally claim support for the guarded Retinue native-node state.
     #[serde(default)]
     pub persistent_state: Option<PersistentStateCompatibility>,
+    /// The package erases all of flash before writing, preserved state included. Only a vendor
+    /// merged image states this, with no preserved ranges; the confirmation screen shows it.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub full_erase: bool,
     /// Required for a package with a downloaded part: what was checked before it was listed.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub qualification: Option<Qualification>,

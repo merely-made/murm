@@ -56,6 +56,42 @@ pub(crate) fn sparse_commands(port: &str, parts: &[VerifiedPackagePart]) -> Vec<
         .collect()
 }
 
+/// A vendor merged image and its additional images, one `write-bin` each at its manifest
+/// offset. A package that states `full_erase` first erases all of flash, as the vendors' own
+/// flashers do for a clean install; the erase enters the ROM loader and keeps it for the writes.
+pub(crate) fn merged_commands(
+    port: &str,
+    parts: &[VerifiedPackagePart],
+    full_erase: bool,
+) -> Vec<Vec<String>> {
+    let mut commands = sparse_commands(port, parts);
+    if full_erase {
+        if let Some(first) = commands.first_mut()
+            && let Some(before) = first.iter().position(|argument| argument == "--before")
+        {
+            first[before + 1] = "no-reset".into();
+        }
+        commands.insert(
+            0,
+            [
+                "erase-flash",
+                "--port",
+                port,
+                "--chip",
+                "esp32s3",
+                "--before",
+                "usb-reset",
+                "--after",
+                "no-reset",
+                "--non-interactive",
+            ]
+            .map(String::from)
+            .to_vec(),
+        );
+    }
+    commands
+}
+
 /// Query the ESP ROM loader and return the board to its application afterward.
 pub fn board_info_command(port: &str) -> Vec<String> {
     vec![

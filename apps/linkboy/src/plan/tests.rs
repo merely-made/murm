@@ -74,6 +74,7 @@ fn package() -> FlashPackage {
             after_failure: "Use ROM entry.".into(),
         },
         persistent_state: None,
+        full_erase: false,
         qualification: None,
     };
     FlashPackage::from_parts(manifest, "manifest", "payload", bytes).unwrap()
@@ -148,6 +149,7 @@ fn t114_package() -> FlashPackage {
             native_node_guard: true,
             preserved_range: NODE_TIMEBASE_PRESERVED_RANGE,
         }),
+        full_erase: false,
         qualification: None,
     };
     FlashPackage::from_parts(manifest, "manifest", "payload", bytes).unwrap()
@@ -239,6 +241,7 @@ fn sparse_package() -> FlashPackage {
             after_failure: "Use ROM entry.".into(),
         },
         persistent_state: None,
+        full_erase: false,
         qualification: None,
     };
     FlashPackage::from_verified_parts(
