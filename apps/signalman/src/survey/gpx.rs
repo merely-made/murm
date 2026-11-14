@@ -112,7 +112,7 @@ pub fn import_gpx(bytes: &[u8], limits: ImportLimits) -> Result<ImportedTrack, I
         match reader.read_event_into(&mut buffer) {
             Ok(Event::DocType(_)) => return Err(ImportError::Doctype),
             Ok(Event::Start(element)) => {
-                let name = element.name().as_ref().to_vec();
+                let name = element.name().as_ref().as_bytes().to_vec();
                 if name.as_slice() == b"trkpt" && current.is_some() {
                     return Err(ImportError::NestedTrackPoint);
                 }
@@ -131,7 +131,7 @@ pub fn import_gpx(bytes: &[u8], limits: ImportLimits) -> Result<ImportedTrack, I
                 if depth > limits.max_xml_depth {
                     return Err(ImportError::TooDeep);
                 }
-                match element.name().as_ref() {
+                match element.name().as_ref().as_bytes() {
                     b"trkseg" => {
                         if current_segment.is_some() || current.is_some() {
                             return Err(ImportError::MalformedXml);
@@ -151,9 +151,9 @@ pub fn import_gpx(bytes: &[u8], limits: ImportLimits) -> Result<ImportedTrack, I
                         let mut longitude = None;
                         for attribute in element.attributes() {
                             let attribute = attribute.map_err(|_| ImportError::MalformedXml)?;
-                            match attribute.key.as_ref() {
-                                b"lat" => latitude = Some(attribute.value.as_ref().to_vec()),
-                                b"lon" => longitude = Some(attribute.value.as_ref().to_vec()),
+                            match attribute.key.as_ref().as_bytes() {
+                                b"lat" => latitude = Some(attribute.value.as_ref().as_bytes().to_vec()),
+                                b"lon" => longitude = Some(attribute.value.as_ref().as_bytes().to_vec()),
                                 _ => {}
                             }
                         }
@@ -193,8 +193,7 @@ pub fn import_gpx(bytes: &[u8], limits: ImportLimits) -> Result<ImportedTrack, I
                     if scalar_value_seen {
                         return Err(ImportError::MalformedXml);
                     }
-                    let value = std::str::from_utf8(text.as_ref())
-                        .map_err(|_| ImportError::MalformedXml)?;
+                    let value: &str = text.as_ref();
                     match field {
                         "ele" => {
                             let elevation = value
@@ -220,7 +219,7 @@ pub fn import_gpx(bytes: &[u8], limits: ImportLimits) -> Result<ImportedTrack, I
                 return Err(ImportError::MalformedXml);
             }
             Ok(Event::Empty(element)) => {
-                let name = element.name().as_ref().to_vec();
+                let name = element.name().as_ref().as_bytes().to_vec();
                 if name.as_slice() == b"trkpt" && current.is_some() {
                     return Err(ImportError::NestedTrackPoint);
                 }
@@ -238,7 +237,7 @@ pub fn import_gpx(bytes: &[u8], limits: ImportLimits) -> Result<ImportedTrack, I
                 if depth.checked_add(1).ok_or(ImportError::TooDeep)? > limits.max_xml_depth {
                     return Err(ImportError::TooDeep);
                 }
-                if element.name().as_ref() == b"trkpt" {
+                if element.name().as_ref().as_bytes() == b"trkpt" {
                     if current.is_some() {
                         return Err(ImportError::NestedTrackPoint);
                     }
@@ -250,9 +249,9 @@ pub fn import_gpx(bytes: &[u8], limits: ImportLimits) -> Result<ImportedTrack, I
                     let mut longitude = None;
                     for attribute in element.attributes() {
                         let attribute = attribute.map_err(|_| ImportError::MalformedXml)?;
-                        match attribute.key.as_ref() {
-                            b"lat" => latitude = Some(attribute.value.as_ref().to_vec()),
-                            b"lon" => longitude = Some(attribute.value.as_ref().to_vec()),
+                        match attribute.key.as_ref().as_bytes() {
+                            b"lat" => latitude = Some(attribute.value.as_ref().as_bytes().to_vec()),
+                            b"lon" => longitude = Some(attribute.value.as_ref().as_bytes().to_vec()),
                             _ => {}
                         }
                     }
@@ -264,25 +263,25 @@ pub fn import_gpx(bytes: &[u8], limits: ImportLimits) -> Result<ImportedTrack, I
                         source_time: None,
                     });
                 } else if current_point_depth == Some(depth)
-                    && matches!(element.name().as_ref(), b"ele" | b"time")
+                    && matches!(element.name().as_ref().as_bytes(), b"ele" | b"time")
                 {
                     return Err(ImportError::MalformedXml);
                 }
             }
             Ok(Event::End(element)) => {
-                if stack.pop().as_deref() != Some(element.name().as_ref()) {
+                if stack.pop().as_deref() != Some(element.name().as_ref().as_bytes()) {
                     return Err(ImportError::MalformedXml);
                 }
-                if element.name().as_ref() == b"trkpt" {
+                if element.name().as_ref().as_bytes() == b"trkpt" {
                     points.push(current.take().ok_or(ImportError::EmptyTrackPoint)?);
                     current_point_depth = None;
                 }
-                if element.name().as_ref() == b"trkseg"
+                if element.name().as_ref().as_bytes() == b"trkseg"
                     && (current.is_some() || current_segment.take().is_none())
                 {
                     return Err(ImportError::MalformedXml);
                 }
-                if matches!(element.name().as_ref(), b"ele" | b"time") {
+                if matches!(element.name().as_ref().as_bytes(), b"ele" | b"time") {
                     if !scalar_value_seen {
                         return Err(ImportError::MalformedXml);
                     }

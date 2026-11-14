@@ -53,7 +53,7 @@ linkboy = { version = "0.1.0", path = "../linkboy" }
 outrider = { version = "0.3.0", path = "../../crates/outrider", features = ["voice"] }
 pipit = { version = "0.2", path = "../../crates/pipit" }
 postilion = { version = "0.3.0", path = "../../crates/postilion" }
-quick-xml = "0.39.4"
+quick-xml = "0.42"
 radio-hand = { version = "0.0.1", path = "../../crates/radio-hand" }
 retinue = { version = "0.3.0", path = "../../crates/retinue", features = ["tulle-radio"] }
 serde = { version = "1", features = ["derive"] }
