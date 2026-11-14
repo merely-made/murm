@@ -93,7 +93,27 @@ Not carried out, back to the owner:
 
 What a reviewer can verify from the repository alone: the manifest shapes and their refusals; that loading a catalog fetches nothing; each fetch refusal, through an injected fetcher with no network; the merged-image checks and espflash command sequence; the version ordering against the vendors' own strings; and that the Meshtastic entry's pinned length and sha256 are the tracked file's. What they cannot: that the vendors' hosts still serve those bytes, or how the companion client behaves on a T114.
 
-Links: area firmware · draws on protocol_parity D4 · governs apps/linkboy/src/download.rs, apps/linkboy/src/catalog/listing.rs, apps/linkboy/src/catalog/newest.rs, apps/linkboy/src/qualify.rs, apps/linkboy/src/package, apps/signalman/src/firmware/catalog.rs, firmware/packages/QUALIFYING.md · summary vendor releases are listed by tracked manifests with pinned hashes and fetched only when the owner installs; the HTTPS client is not yet chosen
+**2026-11-14 · refines.** The driver, under the family's one-version ruling (engine-split D144: a duplicate held by a third-party crate at its latest release is carried as a skip row naming the holder and what removes it, a stopgap rather than an end state), chose ring, "exactly as ruled", over aws-lc-rs, whose C library built with cmake is against the owner's "Pure rust", and lifted this lane's "no new skip rows" for exactly these rows:
+
+```text
+deny.toml
+  { crate = "getrandom@0.2.17", reason = "ring 0.17.14 requires it; ring 0.17.14 (latest) under rustls 0.23 and rustls-webpki 0.103 via ureq 3.5 in linkboy holds it; goes when ring moves to getrandom 0.4 or the family ports ring" },
+  { crate = "windows-sys@0.52.0", reason = "ring 0.17.14 requires it; ring 0.17.14 (latest) under rustls 0.23 and rustls-webpki 0.103 via ureq 3.5 in linkboy holds it; goes when ring moves to windows-sys 0.61 or the family ports ring" },
+apps/signalman-desktop/deny.toml
+  { crate = "getrandom@0.2.17", reason = "ring 0.17.14 requires it; ring 0.17.14 (latest) under rustls 0.23 and rustls-webpki 0.103 via ureq 3.5 in linkboy holds it; goes when ring moves to getrandom 0.4 or the family ports ring" },
+```
+
+Signalman Desktop already skipped `windows-sys@0.52.0` for winit; that row's reason does not yet name ring as a second holder. No other duplicate appeared.
+
+Landed 2026-11-14, after that:
+
+- `HttpsFetcher` (ureq 3.5.2, rustls 0.23.46, webpki-roots 1.0.12) implements `Fetch`: https only on the first request and every redirect hop, at most five redirects. `linkboy qualify URL` fetches when a person runs it.
+- The Meshtastic T114 entry is a download: `https://release.meshtastic.org/2.7.26.54e0d8d/firmware-heltec-mesh-node-t114-2.7.26.54e0d8d.uf2`, composed from the assessment's per-version directory pattern and per-board file name, with the pinned length and sha256 unchanged and the `[qualification]` record above; state `partial`. The UF2 (1,467,392 bytes) and `LICENSE.GPL-3.0` (35,149 bytes) left the tree; `THIRD_PARTY_NOTICES.md` says nothing is redistributed. Only `apps/linkboy/tests/meshtastic_release.rs` had to change; Signalman's catalog test and Desktop's owner-flow tests already stage synthetic catalogs and now carry the entry as its manifest alone.
+- Signalman Desktop downloads a release that is not cached when the owner reviews it, on Signalman's worker thread drained in the host's `after_wake` turn; the review page is the one confirmation (vendor, version, size, SHA-256, source). Beside a connected companion it shows the firmware standing, with a button that chooses a newer listed release for review.
+
+Still open, for the owner: whether a newer release of a listed vendor and board replaces the entry or is listed beside it under its own `package_id`.
+
+Links: area firmware · draws on protocol_parity D4 · governs apps/linkboy/src/download.rs, apps/linkboy/src/download/https.rs, apps/linkboy/src/catalog/listing.rs, apps/linkboy/src/catalog/newest.rs, apps/linkboy/src/qualify.rs, apps/linkboy/src/package, apps/signalman/src/firmware/catalog.rs, apps/signalman-desktop/src/state/download.rs, firmware/packages/QUALIFYING.md · summary vendor releases are listed by tracked manifests with pinned hashes and fetched over https only when the owner installs; the repository keeps no vendor binary
 
 ## Constraints
 
@@ -113,3 +133,4 @@ Keep device role, protocol feature and firmware-product acceptance separate; one
 - 2026-11-14: D4 refined to a build-and-stage step and assessed; V4 and T114 builds reproduce locally (V4 only with `SOURCE_DATE_EPOCH`). Not carried out: the manifest form and the tests' catalog went back to the owner. No code change.
 - 2026-11-14: D4 landed; package templates, `linkboy stage-catalog` and `stage-firmware.ps1`, synthetic-catalog tests, and 104 built files (25,657,523 bytes) removed. v47 and the Meshtastic release stay tracked.
 - 2026-11-14: D5 in part; download payloads with qualification records, on-demand fetch and a sha256-keyed cache behind a `Fetch` trait, vendor merged V4 images, the firmware standing of a connected radio, `linkboy qualify` and `QUALIFYING.md`. The HTTPS client (ureq's ring adds duplicates) and the Meshtastic T114 conversion went back to the owner.
+- 2026-11-14: D5 landed; ureq on ring with three skip rows, `HttpsFetcher`, the Meshtastic T114 entry as a download with its UF2 and licence removed, and Signalman Desktop's off-thread download and companion firmware standing. Replace-or-list-beside stays open.
