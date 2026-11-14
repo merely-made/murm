@@ -42,6 +42,16 @@ Still pending: `crates/station-custody/src/authority/tucket.rs` and `sennet.rs` 
 
 Links: area radio · draws on protocol_parity D1 · governs apps/signalman/src/radio_comms/companion · summary tucket's and sennet's remaining frame types live in Signalman's companion module; both crates are removed from the workspace
 
+### protocol_parity D4 — built V4 images leave the tree
+
+**2026-11-14 · new.** Card answer, "Remove both", under the standing rule that build output is not kept in repositories: the two built Heltec V4 images under `firmware/heltec-v4-phy/` leave the tree.
+
+Carried out for `tulle-heltec-v4-resident` (10,833,608 bytes, the withdrawn resident-protocols image): its package entry went on 2026-11-14 with D1, and nothing else read it. The blob stays in git history.
+
+Not carried out for `tulle-heltec-v4-phy` (6,933,912 bytes), which is the payload of the live `retinue.heltec-v4` package. `firmware/packages/heltec-v4-current.toml` names it by `[payload] path = "../heltec-v4-phy/tulle-heltec-v4-phy"` with its `byte_length` and `sha256` and `source_revision = 711816a`; Linkboy (`apps/linkboy/src/package/verified.rs`) loads the payload from beside the manifest and refuses a hash mismatch; `index.toml` and `windows-v4-staging-index.toml` list the package; Signalman Desktop reads `index.toml` at run time; both `apps/signalman-desktop/tools/assemble-*-stage.ps1` scripts copy the file. The manifest format has no field for a payload outside the tree (no URL, no build step), and `cargo +esp build` writes to `target/`, so a fresh build at main neither lands at that path nor matches the pinned hash. Removing it needs a format or offering decision (a release-artefact URL in the manifest, a build-and-stage step that rewrites the hash, or withdrawing the V4 package): open, for the owner.
+
+Links: area firmware · governs firmware/heltec-v4-phy · summary built V4 images leave the tree; the resident image is removed, the packaged modem image waits on a package-format decision
+
 ## Constraints
 
 Keep device role, protocol feature and firmware-product acceptance separate; one endpoint exchange does not prove a router. Named 16 KiB untouched-stack and 25% free-heap reserves apply to the qualified memory profile, not all future images. Public contact storage contains pseudonymous associations, excludes secrets, labels, routes and pending operations, and requires its own scoped opt-in. Its commit is last, malformed or mismatched committed state refuses before erasure, and an uncertain readback is not a rollback promise. V4 live writes use the board quiet guard and make their listening blackout explicit. The current T114 endpoint uses volatile private setup; power cuts and installed daemon/UI remain unqualified.
@@ -56,3 +66,4 @@ Keep device role, protocol feature and firmware-product acceptance separate; one
 - 2026-11-14: D1 recorded; the Tucket and Sennet phases are withdrawn and the native code removed. Product acceptance no longer includes the resident image. Retinue and the parity matrix are unchanged.
 - 2026-11-14: D2 recorded; the IFAC mask's expand loop is documented as kept, no code change.
 - 2026-11-14: D3 landed; tucket and sennet folded into Signalman's companion module and removed from the workspace. The validation suite `sennet-tucket-sans-io` became `signalman-comms`, and `sennet-capture-tooling` became `meshtastic-capture-tooling`.
+- 2026-11-14: D4 in part; the resident V4 image is no longer tracked. The packaged `tulle-heltec-v4-phy` image stays until its package format is decided.
