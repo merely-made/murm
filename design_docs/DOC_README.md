@@ -345,9 +345,8 @@ boundary crate: message codec, delivery state machines, propagation
 client/server. `postilion` — shared radio-host library; a Station wraps one
 identity, one board, an announce cadence and a peer table behind an event
 stream. `selvage` — clean-room LoRa PHY profiles shared by host and firmware.
-`sennet` — clean-room Meshtastic-compatible mesh protocol. `tucket` — MeshCore
-interop. `tulle` — the shared radio interface layer beneath retinue, sennet and
-tucket. `radio-face` — firmware crate rendering bounded on-device UI status.
+`tulle` — the shared radio interface layer beneath retinue (`sennet` and
+`tucket` were folded into Signalman's stock-companion client on 2026-11-14). `radio-face` — firmware crate rendering bounded on-device UI status.
 `radio-mirror` — unpublished browser realization of radio-face: RGBA
 framebuffer, the firmware's `Controller`, wasm exports.
 `retinue-sim` — unpublished in-process route-trace harness over Retinue nodes;

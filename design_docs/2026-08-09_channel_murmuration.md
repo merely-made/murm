@@ -92,7 +92,7 @@ image, and switching a running personality are three separate operations.
 - [`V4RadioOwner`](../firmware/heltec-v4-phy/src/radio_owner.rs) supplies completed
   event checks, collection protection and quiet-window restore/reset behavior.
   This is an interruption foundation, not a three-stack hot-switch receipt.
-- [Sennet provenance](../crates/sennet/PROVENANCE.md) remains authoritative:
+- [Sennet provenance](../apps/signalman/capture/PROVENANCE.md) remains authoritative:
   public descriptions and black-box serial/RF captures supply protocol facts;
   prohibited third-party source, schemas and generated clients are not inputs.
   GPL/AGPL material remains license-report-only for this work. No external

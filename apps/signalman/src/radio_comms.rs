@@ -400,7 +400,7 @@ impl ProtocolAdapter for RadioAdapter {
         self.owner.lock()?.book.scope.peer(target)?;
         let author = self.identity();
         let limit = if self.protocol == ProtocolKind::Meshtastic {
-            sennet::MAX_APPLICATION_PAYLOAD
+            companion::meshtastic::MAX_APPLICATION_PAYLOAD
         } else {
             133
         };

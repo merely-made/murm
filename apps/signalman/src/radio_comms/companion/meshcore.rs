@@ -2,6 +2,7 @@
 //! `docs/companion_protocol.md` at d92964352441e53b93e8667b802e04f6e072b39e.
 //! This names the firmware release separately from the serial API version.
 //! The BLE PIN field is intentionally neither retained nor displayed.
+//! Formerly the `tucket` crate; MeshCore's MIT notice travels in `apps/signalman/NOTICE`.
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct DeviceInfo<'a> {

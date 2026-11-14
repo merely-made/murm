@@ -1,13 +1,13 @@
 //! Structural analysis of a real captured Meshtastic-compatible config stream.
 //!
-//! Proves Sennet's stream deframer and protobuf reader parse genuine device output, and
+//! Proves the stock-companion protobuf reader parses genuine device output, and
 //! records the *structure* the device emits — the field numbers and wire types present in the
 //! FromRadio stream. Named application behavior is reconstructed separately through documented
-//! radio-bench experiments (see PROVENANCE.md).
+//! radio-bench experiments (see capture/PROVENANCE.md).
 
 use std::collections::BTreeMap;
 
-use sennet::protobuf::{Reader, Value};
+use signalman::radio_comms::companion::protobuf::{Reader, Value};
 
 fn fixture_frames() -> Vec<Vec<u8>> {
     load_frames("meshtastic_config.json")
@@ -113,7 +113,7 @@ fn exactly_one_scalar_completion_variant_marks_the_config_end() {
 
 /// Live over-the-air packets a node received share one top-level variant number (the
 /// received-packet variant), distinct from the config variants, and nest an envelope several
-/// levels deep. Sennet's reader parses all of them; the shape is recorded as fact, unnamed.
+/// levels deep. The reader parses all of them; the shape is recorded as fact, unnamed.
 #[test]
 fn over_the_air_packets_share_one_deeply_nested_variant() {
     let frames = load_frames("meshtastic_airmsg.json");
@@ -164,10 +164,10 @@ fn decoded_tag_and_payload(frame: &[u8]) -> Option<(u64, Vec<u8>)> {
     Some((tag, payload))
 }
 
-/// A real over-the-air text message, captured black-box, is walked to its payload by Sennet's
+/// A real over-the-air text message, captured black-box, is walked to its payload by the
 /// reader, and that payload is the readable UTF-8 that was sent. This records the one directly
 /// observed semantic fact, the port under which a readable message rode, as a test. Other fields
-/// remain numbered until experiments give them useful names (PROVENANCE.md).
+/// remain numbered until experiments give them useful names (capture/PROVENANCE.md).
 #[test]
 fn a_captured_text_message_decodes_to_readable_utf8() {
     let frames = load_frames("meshtastic_textmsg.json");

@@ -32,6 +32,16 @@ Coverage, checked 2026-11-14: the RNS 1.4.2-captured vector (`crates/retinue/tes
 
 Links: area retinue · governs crates/retinue/src/ifac.rs · summary the IFAC mask's hand-written HKDF-Expand stays because RNS wraps the block counter past 255 blocks
 
+### protocol_parity D3 — the carrier crates fold into Signalman
+
+**2026-11-14 · new.** After D1's cut `crates/tucket` was 45 counted lines (`DeviceInfo`) and `crates/sennet` 118 (the protobuf reader and `MAX_APPLICATION_PAYLOAD = 232`). Card answer, "Fold into Signalman, drop the crates": Signalman's stock-companion client owns those types and both crates leave the workspace.
+
+They now live in `apps/signalman/src/radio_comms/companion/`: `meshcore.rs` (`DeviceInfo`), `protobuf.rs` (the reader) and `meshtastic::MAX_APPLICATION_PAYLOAD`, all public under `signalman::radio_comms::companion` with names and shapes unchanged. The structural-capture test, its three fixtures and the capture scripts moved with them (`apps/signalman/tests/`, `apps/signalman/capture/`), as did MeshCore's MIT notice (`apps/signalman/NOTICE`) and Sennet's clean-room record (`apps/signalman/capture/PROVENANCE.md`, now scoped to the reader, test, fixtures and scripts). The names remain published on crates.io at 0.0.2 and are no longer built from this repository; whether to yank or keep them is the owner's.
+
+Still pending: `crates/station-custody/src/authority/tucket.rs` and `sennet.rs` have no caller in Murm but are half of a Djinn grant contract with Dramatis (`djinn-grants.json.in`); they leave in a joint removal with Dramatis.
+
+Links: area radio · draws on protocol_parity D1 · governs apps/signalman/src/radio_comms/companion · summary tucket's and sennet's remaining frame types live in Signalman's companion module; both crates are removed from the workspace
+
 ## Constraints
 
 Keep device role, protocol feature and firmware-product acceptance separate; one endpoint exchange does not prove a router. Named 16 KiB untouched-stack and 25% free-heap reserves apply to the qualified memory profile, not all future images. Public contact storage contains pseudonymous associations, excludes secrets, labels, routes and pending operations, and requires its own scoped opt-in. Its commit is last, malformed or mismatched committed state refuses before erasure, and an uncertain readback is not a rollback promise. V4 live writes use the board quiet guard and make their listening blackout explicit. The current T114 endpoint uses volatile private setup; power cuts and installed daemon/UI remain unqualified.
@@ -45,3 +55,4 @@ Keep device role, protocol feature and firmware-product acceptance separate; one
 - 2026-11-02: adopted the reviewed open-work successor; original archived whole. No new implementation or acceptance run.
 - 2026-11-14: D1 recorded; the Tucket and Sennet phases are withdrawn and the native code removed. Product acceptance no longer includes the resident image. Retinue and the parity matrix are unchanged.
 - 2026-11-14: D2 recorded; the IFAC mask's expand loop is documented as kept, no code change.
+- 2026-11-14: D3 landed; tucket and sennet folded into Signalman's companion module and removed from the workspace. The validation suite `sennet-tucket-sans-io` became `signalman-comms`, and `sennet-capture-tooling` became `meshtastic-capture-tooling`.

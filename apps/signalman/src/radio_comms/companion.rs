@@ -5,7 +5,9 @@
 //! flashes a device. Dropping the session retires all unresolved commands; it
 //! never retries a command whose serial write may have reached the firmware.
 mod frame;
-mod meshtastic;
+pub mod meshcore;
+pub mod meshtastic;
+pub mod protobuf;
 #[cfg(test)]
 mod tests;
 
@@ -156,7 +158,7 @@ impl<T: AsyncRead + AsyncWrite + Unpin> CompanionSession<T> {
                     }
                     frames.send(&[22, 3]).await?;
                     let info = reply(&mut frames, 13).await?;
-                    let device = tucket::companion::DeviceInfo::decode(&info)
+                    let device = meshcore::DeviceInfo::decode(&info)
                         .ok_or_else(|| invalid("invalid MeshCore device-info"))?;
                     device_summary = Some(format!(
                         "MeshCore firmware {}, model {}, build {}, companion API {}",

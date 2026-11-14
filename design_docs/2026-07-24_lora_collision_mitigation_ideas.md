@@ -9,7 +9,7 @@ maintained implementation to consult and none was consulted; the licensing on
 what does exist is unfavourable, so this stays at the level of physics and
 method. Techniques are not copyrightable, only expression is, so implementing
 any of this independently from public description is clean — the same discipline
-`crates/sennet/PROVENANCE.md` already runs on.
+`apps/signalman/capture/PROVENANCE.md` already runs on.
 
 ## The idea underneath all of them
 

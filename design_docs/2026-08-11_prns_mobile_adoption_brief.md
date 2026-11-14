@@ -199,7 +199,7 @@ Donor rules:
 7. offer generally useful fixes upstream even if the final integration remains
    local.
 
-Retinue already has a precedent in `crates/tucket/NOTICE`: permitted source
+Retinue already has a precedent in `apps/signalman/NOTICE`: permitted source
 adaptation is made visible instead of being hidden behind a vague claim of
 compatibility. A Prns adaptation should meet at least that standard. Because
 Retinue's default license is MPL-2.0 and Prns offers MIT or Apache-2.0, the

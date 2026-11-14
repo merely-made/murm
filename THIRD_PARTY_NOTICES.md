@@ -51,15 +51,16 @@ Prns Authors.
 
 ## MeshCore (MIT)
 
-`crates/tucket` ported MeshCore wire formats, cryptographic construction,
-dedup, and forwarding mechanics; since 2026-11-14 it keeps only the companion
-`DEVICE_INFO` frame type, pinned to MeshCore's published companion protocol
-document. Full notice and license text:
-[`crates/tucket/NOTICE`](crates/tucket/NOTICE). How that implementation was
-built: [`crates/sennet/PROVENANCE.md`](crates/sennet/PROVENANCE.md).
+The former `crates/tucket` ported MeshCore wire formats, cryptographic
+construction, dedup, and forwarding mechanics; since 2026-11-14 only the
+companion `DEVICE_INFO` frame type remains, pinned to MeshCore's published
+companion protocol document, in
+`apps/signalman/src/radio_comms/companion/meshcore.rs`. Full notice and license
+text: [`apps/signalman/NOTICE`](apps/signalman/NOTICE). How that implementation
+was built: [`apps/signalman/capture/PROVENANCE.md`](apps/signalman/capture/PROVENANCE.md).
 
 Ruled 2026-08-27, on the brief's substantial-derivative precedent: tucket keeps
-MeshCore's MIT notice. Both MIT and Apache-2.0 permit relicensing a derivative so long
+MeshCore's MIT notice; it moved with the code into Signalman on 2026-11-14. Both MIT and Apache-2.0 permit relicensing a derivative so long
 as the notice travels with it.
 
 ## lora-phy (MIT OR Apache-2.0)

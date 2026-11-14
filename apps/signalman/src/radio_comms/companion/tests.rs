@@ -425,7 +425,7 @@ async fn meshtastic_queue_rejection_and_routing_requests_are_not_acknowledgement
     assert_eq!(delivery(&session.owner, &id), DeliveryStatus::Unknown);
     let mut queue = var_field(4, correlation);
     queue.push(8);
-    sennet::protobuf::write_varint(u64::MAX, &mut queue);
+    protobuf::write_varint(u64::MAX, &mut queue);
     emit(&mut peer, &message_field(11, &queue), false).await;
     session.poll().await.unwrap();
     assert!(matches!(

@@ -39,8 +39,8 @@ independent project needs an independent name and non-endorsement language
 > and the standalone repos archived. Reason 1 below argued for separate repos on
 > provenance grounds; the merge does not abandon that discipline, it relocates
 > it. The auditable artifacts are now: each crate's preserved pre-merge history,
-> `crates/sennet/PROVENANCE.md` (the front door for the clean-room story),
-> `crates/tucket/NOTICE` (the MIT derivation record), and the fact that sennet's
+> `apps/signalman/capture/PROVENANCE.md` (the front door for the clean-room story),
+> `apps/signalman/NOTICE` (the MIT derivation record), and the fact that sennet's
 > history demonstrably contains no GPL-schema contact before or after the merge.
 > A reviewer follows the per-crate paper trail, not the repo boundary. Reasons 2
 > and 3 stand unchanged; "separate crates" survives, "separate repos" does not.

@@ -4,6 +4,17 @@
 radios only"). The records below describe code that has since been removed and are
 kept as its provenance.
 
+**2026-11-14, later:** the sennet crate was folded into Signalman ("Fold into
+Signalman, drop the crates"). This record now covers
+`apps/signalman/src/radio_comms/companion/protobuf.rs`, the structural-capture
+test `apps/signalman/tests/structural_capture.rs`, its three fixtures and the
+scripts in this directory. Signalman's stock Stream API client
+(`companion/meshtastic.rs`) is not part of it: that client consulted the public
+Meshtastic protobuf field contract, as the R4 record in
+`design_docs/archive_docs/2026-11-02/2026-10-13_murm_family_move_plan.md` says.
+Paths such as `src/protobuf.rs` and `tests/` below are the crate's former
+layout.
+
 ## Pairwise primitive continuation (2026-10-16)
 
 The official public security reference describes X25519 followed by SHA-256,

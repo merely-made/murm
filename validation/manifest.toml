@@ -43,7 +43,7 @@ validation_asset_globs = [
     "testing/transport-conformance/interop/OpenRQ-LICENSE.txt",
     "crates/retinue/oracle/*.py",
     "crates/outrider/oracle/*.py",
-    "crates/sennet/capture/*.py",
+    "apps/signalman/capture/*.py",
 ]
 
 [[suite]]
@@ -133,9 +133,9 @@ tier = "pr"
 command = ["cargo", "test", "-p", "retinue", "--no-default-features"]
 
 [[suite]]
-id = "sennet-tucket-sans-io"
+id = "signalman-comms"
 tier = "pr"
-command = ["cargo", "test", "-p", "sennet", "-p", "tucket", "--no-default-features"]
+command = ["cargo", "test", "-p", "signalman", "--features", "comms"]
 
 [[suite]]
 id = "t114-firmware"
@@ -178,10 +178,10 @@ command = ["python3", "-u", "crates/outrider/oracle/interop_propagation_stock.py
 asset_globs = ["crates/outrider/oracle/*.py"]
 
 [[suite]]
-id = "sennet-capture-tooling"
+id = "meshtastic-capture-tooling"
 tier = "local"
-command = ["python3", "-u", "crates/sennet/capture/capture_airmsg.py"]
-asset_globs = ["crates/sennet/capture/*.py"]
+command = ["python3", "-u", "apps/signalman/capture/capture_airmsg.py"]
+asset_globs = ["apps/signalman/capture/*.py"]
 
 # This is a physical serial bridge helper, not an executable validation suite.
 # It is intentionally registered as an expiring exemption rather than silently

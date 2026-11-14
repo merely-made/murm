@@ -15,8 +15,8 @@
 //! | 1 | I64 | 8 fixed bytes (fixed64, double) |
 //! | 2 | LEN | a varint length, then that many bytes (string, bytes, message, packed) |
 //! | 5 | I32 | 4 fixed bytes (fixed32, float) |
-
-use alloc::vec::Vec;
+//!
+//! Formerly the `sennet` crate's clean-room reader; its record is `capture/PROVENANCE.md`.
 
 /// A decoded field value, tagged by its wire type but not its meaning.
 #[derive(Debug, Clone, PartialEq)]
@@ -163,7 +163,6 @@ pub fn structure(buf: &[u8]) -> Vec<(u32, u8)> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use alloc::vec;
 
     #[test]
     fn reads_a_varint_field() {

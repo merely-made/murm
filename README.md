@@ -81,8 +81,6 @@ Each crate has its own README with more detail, and here's a generated overview.
 | `seneschal` | Board-management contract: signed control requests and replies, owner and configuration journal. | published |
 | `tulle` | Radio interface layer: serial modem control, direct PHY, medium access. | published |
 | `selvage` | LoRa PHY profiles shared by host and firmware. | published |
-| `sennet` | Protobuf wire reader for a stock Meshtastic-compatible radio's client stream. | published |
-| `tucket` | MeshCore companion frame types for a stock MeshCore radio. | published |
 | `radio-face`, `radio-hand`, `radio-mirror` | On-device UI, board runtime, and the UI's browser (wasm) realization. | workspace only |
 | `retinue-sim` | In-process multi-node route-trace harness. | workspace only |
 
@@ -109,8 +107,9 @@ T114 boards is in `firmware/`, with flashable packages in `firmware/packages/`.
   local-TCP scopes; they are not full upstream parity.
 - **Sennet and Tucket.** Since 2026-11-14 MeshCore and Meshtastic meshes are
   reached through a stock companion radio that holds the keys (Mark: "Stock
-  radios only"); the crates keep only the frame types Signalman's companion
-  client uses. The September 30 native exchanges in the [historical receipt](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/receipts/sennet-tucket-current/README.md)
+  radios only"); the frame types Signalman's companion client uses live in
+  `apps/signalman/src/radio_comms/companion`, and the two crates left the
+  workspace on 2026-11-14 (their names stay published at 0.0.2). The September 30 native exchanges in the [historical receipt](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/receipts/sennet-tucket-current/README.md)
   describe code that has since been removed.
 - **Firmware.** T114 bounded transport has an on-air receipt from August 13.
   The [firmware refresh](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/receipts/firmware-refresh/README.md) and its
@@ -207,7 +206,8 @@ its documentation, and the reference implementations. See the
 ## History
 
 `tulle`, `sennet`, and `tucket` merged into this workspace on 2026-07-23 with
-history preserved; their standalone repositories are archived.
+history preserved; their standalone repositories are archived. `sennet` and `tucket` were folded into
+Signalman and removed from the workspace on 2026-11-14.
 
 Retinue was first built from the public-domain Reticulum protocol using two v4s and a T114, 
 the manual, and packet captures from the reference implementations, which were run as

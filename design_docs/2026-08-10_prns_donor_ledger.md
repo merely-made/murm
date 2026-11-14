@@ -338,7 +338,7 @@ defect approached from the other side.
 
 ## 6. Where the notices live
 
-- `crates/retinue/NOTICE`, following the `crates/tucket/NOTICE` precedent, with
+- `crates/retinue/NOTICE`, following the `apps/signalman/NOTICE` precedent, with
   the MIT text in full.
 - `THIRD_PARTY_NOTICES.md` at the repository root, aggregating this and the
   existing MeshCore and lora-phy notices.
