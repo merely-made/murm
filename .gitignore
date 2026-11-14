@@ -6,7 +6,6 @@ target/
 /validation/results/
 /testing/receipts/
 /testing/iroh-control/results/
-/testing/protocol-capacity/receipt.json
 /testing/transport-conformance/results/
 /validation/signalman-custody/
 /validation/signalman-refresh-*.json

@@ -105,18 +105,6 @@ id = "host-workspace"
 tier = "pr"
 command = ["cargo", "test"]
 
-# The default relay keeps host-only contacts. Exercise the explicit standalone
-# journal feature so its interruption/refusal cases cannot disappear from PRs.
-[[suite]]
-id = "tucket-firmware-contact-store"
-tier = "pr"
-command = ["cargo", "test", "-p", "radio-hand", "--features", "instances,tucket-endpoint,tucket-contact-store-bench", "--lib", "--test", "tucket_contacts", "--test", "instances"]
-
-[[suite]]
-id = "protocol-capacity"
-tier = "local"
-command = ["cargo", "run", "-p", "protocol-capacity-probe", "--features", "host"]
-
 # Portable offline corpus tests. Imported vector provenance and the independent
 # peer's generated fixture are verified by this isolated workspace, which does
 # not build the production protocol/firmware workspaces.
@@ -207,11 +195,6 @@ command = ["python3", "-u", "crates/sennet/capture/capture_airmsg.py"]
 asset_globs = ["crates/sennet/capture/*.py"]
 
 [[asset_exemption]]
-path = "testing/protocol-capacity/measure_elf.py"
-reason = "Offline ELF measurement CLI requires a named built target artifact; the protocol parity memory receipt owns its actual input paths, tool comparison and results."
-expires = "2027-01-16"
-
-[[asset_exemption]]
 path = "testing/sennet_pki_stock.py"
 reason = "Attended stock PKI contact/send helper; the guarded Sennet wire/native bench owns physical execution and restoration."
 expires = "2027-01-16"
@@ -260,23 +243,8 @@ reason = "Physical V4 unread-observation retirement helper; board receipt owns e
 expires = "2026-11-01"
 
 [[asset_exemption]]
-path = "testing/mc3_personality_bench.py"
-reason = "Guarded physical MC3 host-personality bench; named board receipt owns execution."
-expires = "2026-11-01"
-
-[[asset_exemption]]
 path = "testing/mc3_board_excursion_bench.py"
 reason = "Guarded physical MC3e V4 board-timer bench; exact-build receipt owns execution."
-expires = "2026-11-01"
-
-[[asset_exemption]]
-path = "testing/mc4_resident_bench.py"
-reason = "Guarded physical MC4c resident-protocol bench; exact-build V4/T114 receipt owns execution."
-expires = "2026-11-01"
-
-[[asset_exemption]]
-path = "testing/protocol-capacity/board_probe.py"
-reason = "Attended target memory campaign; exact USB identities and separately installed bench-only firmware required. Physical receipt owns execution."
 expires = "2026-11-01"
 
 [[asset_exemption]]

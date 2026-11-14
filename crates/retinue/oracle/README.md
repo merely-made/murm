@@ -118,7 +118,7 @@ signature, placement, and mask hypotheses against stock RNS output.
 239, 240, 255 and 256 wire bytes, using public APIs and a local TCP socket.
 Supply `--output` with a new path: retained captures cannot be overwritten.
 The parent process removes the temporary RNS configuration after child exit.
-`radio-hand --features instances,replay` replays the committed fixture against
+`radio-hand --features replay` replays the committed fixture against
 the firmware carrier, including authentication negatives and the 255-byte
 physical limit. Type2 growth tests are local transformations, not stock captures.
 See the [software receipt](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/receipts/firmware-ifac/README.md);

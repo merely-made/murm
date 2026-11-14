@@ -35,28 +35,19 @@ pub mod dispatch;
 pub mod executive;
 pub mod front_end;
 pub mod gnss;
-#[cfg(feature = "instances")]
-pub mod instances;
 pub mod link;
 pub mod observation;
-pub mod packet_reservation;
 pub mod phy;
 pub mod profiles;
 #[cfg(feature = "replay")]
 pub mod replay;
-pub mod resident_command;
-pub mod resident_wire;
-#[cfg(any(feature = "replay", feature = "instances"))]
+#[cfg(feature = "replay")]
 pub mod retinue_carrier;
 pub mod rnode;
 pub mod scheduler;
 #[cfg(feature = "radio")]
 pub mod service;
 pub mod settings;
-#[cfg(feature = "tucket-contact-store")]
-pub mod tucket_contacts;
-#[cfg(feature = "tucket-endpoint")]
-pub mod tucket_endpoint;
 pub mod work;
 
 pub use seneschal::{region, store};
