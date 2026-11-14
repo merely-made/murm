@@ -1,4 +1,4 @@
-//! `linkboy qualify URL --file PATH [--out DRAFT]`.
+//! `linkboy qualify URL [--file PATH] [--out DRAFT]`.
 
 use linkboy::package::sha256_hex;
 use linkboy::qualify::{draft, today};
@@ -6,10 +6,9 @@ use linkboy::{Error, FirmwareCache};
 
 use super::bad_usage;
 
-/// Draft an entry for a vendor release. This build carries no HTTPS client yet (the client
-/// choice is open in protocol_parity D5), so the person downloads the file from `URL` and
-/// passes it with `--file`; Linkboy records the URL, length, sha256 and detected layout, and
-/// keeps the bytes in the cache so the finished entry can be inspected and flashed offline.
+/// Draft an entry for a vendor release: fetch `URL` once (or read `--file`, a copy the person
+/// downloaded), record the URL, length, sha256 and detected layout, and keep the bytes in the
+/// cache so the finished entry can be inspected and flashed without a second download.
 pub(super) fn run(
     mut args: impl Iterator<Item = String>,
     cache: &FirmwareCache,
@@ -25,7 +24,7 @@ pub(super) fn run(
         match flag.as_str() {
             "--file" => file = Some(value),
             "--out" => out = Some(value),
-            _ => return Err(bad_usage("qualify accepts URL --file PATH [--out DRAFT]")),
+            _ => return Err(bad_usage("qualify accepts URL [--file PATH] [--out DRAFT]")),
         }
     }
     if !linkboy::package::is_download_url(&url) {
@@ -33,13 +32,18 @@ pub(super) fn run(
             "qualify needs an https URL ending in a plain file name",
         ));
     }
-    let file = file.ok_or_else(|| Error::ToolFailed {
-        tool: "linkboy",
-        message: "this build has no HTTPS client (protocol_parity D5 leaves its choice open); \
-                  download URL yourself and pass it with --file PATH"
-            .into(),
-    })?;
-    let bytes = std::fs::read(&file)?;
+    // Without --file this is the one network step a person runs by hand: one capped GET.
+    let bytes = match file {
+        Some(path) => std::fs::read(path)?,
+        None => {
+            linkboy::download::fetch_capped(
+                &linkboy::download::HttpsFetcher::new(),
+                &url,
+                linkboy::qualify::QUALIFY_LIMIT,
+            )?
+            .bytes
+        }
+    };
     let entry = draft(&url, &bytes, &sha256_hex(&bytes), &today());
     println!("url: {}", entry.url);
     println!("byte_length: {}", entry.byte_length);

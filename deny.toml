@@ -66,6 +66,7 @@ skip = [
   { crate = "embedded-io-async@0.6.1", reason = "embassy-sync 0.6.2, embassy-sync 0.7.2, embassy-usb-driver 0.2.2, esp-hal 1.1.2 require it; embassy-sync 0.6/0.7, embassy-usb-driver 0.2 and esp-hal 1.1.2 (firmware) hold it; goes with the ESP 1.2 line" },
   { crate = "esp-metadata-generated@0.4.0", reason = "esp-config 0.7.0, esp-backtrace 0.19.0, esp-bootloader-esp-idf 0.5.0, esp-hal 1.1.2 and others require it; esp-hal 1.1.2, esp-rtos 0.3, esp-sync 0.2 and the other ESP 1.1-line crates (heltec firmware) hold it; goes when the firmware's ESP stack moves to the 1.2 line" },
   { crate = "esp32s3@0.35.2", reason = "esp-hal 1.1.2, tulle-heltec-v4-phy 0.0.1 require it; esp-hal 1.1.2 and the heltec firmware hold it while esp-rom-sys 0.1.5 takes 0.36; goes when the firmware moves to esp-hal 1.2 and esp32s3 0.36 together (not checkable on this host)" },
+  { crate = "getrandom@0.2.17", reason = "ring 0.17.14 requires it; ring 0.17.14 (latest) under rustls 0.23 and rustls-webpki 0.103 via ureq 3.5 in linkboy holds it; goes when ring moves to getrandom 0.4 or the family ports ring" },
   { crate = "heapless@0.8.0", reason = "embassy-sync 0.6.2, embassy-sync 0.7.2, usb-device 0.3.2 require it; embassy-sync 0.6/0.7 (esp-sync) and usb-device 0.3.2 (firmware) hold it; goes when they move to heapless 0.9" },
   { crate = "miniz_oxide@0.8.9", reason = "png 0.18.1 requires it; png 0.18.1 (latest; radio-face, radio-mirror) holds it; goes when png moves to miniz_oxide 0.9" },
   { crate = "nb@0.1.3", reason = "embedded-hal 0.2.7 requires it; embedded-hal 0.2 (firmware) holds it; goes with embedded-hal 1" },
@@ -75,6 +76,7 @@ skip = [
   { crate = "semver@0.9.0", reason = "rustc_version 0.2.3 requires it; rustc_version 0.2 under bare-metal 0.2.5 (cortex-m) holds it; goes with it" },
   { crate = "syn@2.0.119", reason = "cortex-m-macros 0.7.8, curve25519-dalek-derive 0.1.1, darling_core 0.20.11, darling_core 0.21.3 and others require it; most proc-macros still on syn 2; goes as they move to syn 3" },
   { crate = "windows-link@0.2.1", reason = "windows-sys 0.61.2 requires it; windows-sys 0.61.2 (latest) holds it; goes when windows-sys moves to the windows-link 0.100 line" },
+  { crate = "windows-sys@0.52.0", reason = "ring 0.17.14 requires it; ring 0.17.14 (latest) under rustls 0.23 and rustls-webpki 0.103 via ureq 3.5 in linkboy holds it; goes when ring moves to windows-sys 0.61 or the family ports ring" },
 ]
 
 [licenses]

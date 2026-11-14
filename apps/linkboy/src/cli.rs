@@ -29,7 +29,7 @@ fn usage() -> &'static str {
      linkboy verify-recovery PORT PACKAGE BOARD@REVISION RECOVERY --loader-snapshot PATH [--receipt PATH]\n  \
      linkboy flash-raw PORT IMAGE [t114|v4]\n  \
      linkboy bootloader PORT\n  \
-     linkboy qualify URL --file PATH [--out DRAFT]\n\
+     linkboy qualify URL [--file PATH] [--out DRAFT]\n\
      Every command takes --cache-dir PATH (default: Signalman's firmware cache)."
 }
 

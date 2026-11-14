@@ -312,5 +312,8 @@ fn store(path: &Path, bytes: &[u8]) -> Result<(), DownloadError> {
     Ok(written?)
 }
 
+mod https;
 #[cfg(test)]
 mod tests;
+
+pub use https::{HttpsFetcher, MAX_REDIRECTS};
