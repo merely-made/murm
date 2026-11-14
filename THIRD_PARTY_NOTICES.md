@@ -70,16 +70,15 @@ the license files in that directory.
 
 ## Meshtastic firmware (GPL-3.0)
 
-`firmware/packages/meshtastic-t114-2.7.26.54e0d8d/` redistributes the official
-unmodified Meshtastic release binary
-`firmware-heltec-mesh-node-t114-2.7.26.54e0d8d.uf2`, Copyright Meshtastic LLC
-and the Meshtastic firmware contributors, licensed GPL-3.0. It is carried as a
-restore package for boards this project tests against, not linked into any
-Retinue artifact; the license gate in CI exists precisely to keep GPL code out
-of the linked firmware. The full license text accompanies the binary as
-`LICENSE.GPL-3.0` in the same directory. Complete corresponding source for
-exactly this build:
-<https://github.com/meshtastic/firmware/tree/54e0d8d> (release v2.7.26).
+This repository no longer redistributes Meshtastic firmware (protocol_parity D5,
+2026-11-14). `firmware/packages/meshtastic-t114-2.7.26.54e0d8d.toml` pins the
+official unmodified release file
+`firmware-heltec-mesh-node-t114-2.7.26.54e0d8d.uf2` (Copyright Meshtastic LLC
+and the Meshtastic firmware contributors, GPL-3.0) by URL, length and sha256;
+Linkboy downloads it from the vendor when an owner installs it, and it is never
+linked into any Retinue artifact. Complete corresponding source for exactly
+this build: <https://github.com/meshtastic/firmware/tree/54e0d8d> (release
+v2.7.26). Earlier commits carried the file and its license text in git history.
 
 ## Reticulum
 

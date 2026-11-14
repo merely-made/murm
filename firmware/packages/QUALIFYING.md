@@ -19,11 +19,11 @@ its files and a file replaced upstream must be refused.
      Note the `sha256:` digest GitHub shows beside the asset.
    - Name the publisher exactly `Meshtastic` or `MeshCore`: the radio's reported version is
      compared with entries of that publisher.
-2. **Download it and draft the entry.** Linkboy has no HTTPS client yet (D5), so download
-   the file yourself into an empty scratch directory, then run
+2. **Download it and draft the entry.**
    ```text
-   linkboy qualify URL --file PATH --out DRAFT.toml
+   linkboy qualify URL --out DRAFT.toml
    ```
+   fetches the file once over https (or pass `--file PATH` for a copy downloaded by hand).
    It prints the length, sha256 and the layout Linkboy detects, keeps the bytes in the
    firmware cache under their sha256, and writes a draft whose human fields say FILL.
 3. **Cross-check the hash against the vendor.** MeshCore: the printed sha256 must equal
@@ -69,10 +69,7 @@ entries with one `MAJOR.MINOR.PATCH` are refused as ambiguous.
 
 | Vendor / board | Version | Hash | Structure | Companion client on this board |
 |---|---|---|---|---|
-| Meshtastic / T114 | 2.7.26.54e0d8d | sha256 `e038b106…02b9`, 1,467,392 bytes, taken from the copy tracked in this repository; its md5 equals the vendor's `.mt.json` md5 (read 2026-11-14) | UF2 layout check passes | No. The capture fixture is Meshtastic 2.7.26 on a V4 |
-
-That entry is still a tracked file in this repository, not yet a download: converting it
-waits for the HTTPS client decision in D5.
+| Meshtastic / T114 | 2.7.26.54e0d8d, `https://release.meshtastic.org/2.7.26.54e0d8d/firmware-heltec-mesh-node-t114-2.7.26.54e0d8d.uf2` | sha256 `e038b106…02b9`, 1,467,392 bytes, taken from the copy this repository tracked until 2026-11-14; its md5 equals the vendor's `.mt.json` md5 (read 2026-11-14) | UF2 layout check passes | No. The capture fixture is Meshtastic 2.7.26 on a V4 |
 
 ## Not yet qualified
 

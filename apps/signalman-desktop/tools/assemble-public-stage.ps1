@@ -94,7 +94,8 @@ if ($binaryPath) {
 Copy-Item -LiteralPath $linkboyPath -Destination (Join-Path $stageRoot.FullName $linkboyName)
 Copy-Item -LiteralPath $espflashPath -Destination (Join-Path $helperRoot.FullName $artifact.executable)
 # Builds the templated images from HEAD and stages a catalog that verifies; the
-# Meshtastic release package is copied as it is (protocol_parity D4).
+# qualified Meshtastic release is copied as its manifest alone and downloaded on demand
+# (protocol_parity D5).
 & (Join-Path $PSScriptRoot 'stage-firmware.ps1') -Index (Join-Path $repoRoot 'firmware\packages\index.toml') `
     -Destination $firmwareRoot -LinkboyBinary $linkboyPath -Espflash $espflashPath `
     -AllowDirty:$AllowDirty -IgnoreRustVersion:$IgnoreRustVersion

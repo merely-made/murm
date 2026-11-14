@@ -4,9 +4,8 @@ This directory contains the public package index, recovery instructions, and pac
 templates. Built images are not kept in the repository (protocol_parity D4): a template
 (`*.template.toml`) carries a package's identity, devices, helpers, preserved ranges and
 recovery instructions, and the staging step below builds the image and writes the full
-manifest beside it. Linkboy refuses a template as a package. The exceptions are the
-unmodified Meshtastic release (`meshtastic-t114-2.7.26.54e0d8d.toml` and its UF2), staged as
-it is, and the serial-DFU recovery package `t114-v47.toml` with
+manifest beside it. Linkboy refuses a template as a package. The exception is the
+serial-DFU recovery package `t114-v47.toml` with
 `../t114-phy/tulle-t114-phy-v47.zip`, kept because a recovery image must exist before
 anything can be built. The index is the publishable installer evidence artifact:
 `retinue.heltec-v4` is the September 30 modem build, with fresh Windows installation
@@ -17,9 +16,9 @@ companion radio instead. T114 offered the installed native `711816a` image as
 historical v51 artifacts left the tree on 2026-11-14 and remain in git history; receipts
 for them qualify those bytes only, not a later staged build. The retained
 Meshtastic T114 package remains `partial` until its own interface check is recorded.
-Vendor releases are to be listed as [qualified downloads](#qualified-vendor-releases)
-instead of tracked files (protocol_parity D5); the Meshtastic UF2 stays tracked until the
-download path has an HTTPS client.
+Vendor releases are listed as [qualified downloads](#qualified-vendor-releases), not tracked
+files (protocol_parity D5): the Meshtastic T114 entry pins the vendor's UF2 by URL, length
+and sha256, and its file left the tree on 2026-11-14.
 
 The V4 images identify source `711816a8124bd58cd8cc314ec4de5009be7df166` and their
 image type in live status. Both installed V4s retain their original settings.
@@ -47,8 +46,9 @@ own platform directory and keep that verified executable for the write:
 - Heltec T114: Linkboy's built-in application-only UF2 writer through the stock `HT-n5262`
   mass-storage bootloader. The retained serial-DFU package remains an expert recovery route,
   outside the public catalog.
-- Meshtastic T114: Linkboy's built-in, explicit UF2-volume writer. The retained official
-  release file is GPL-3.0 external firmware, not a Retinue capability claim. A UF2 volume can
+- Meshtastic T114: Linkboy's built-in, explicit UF2-volume writer. The official release file,
+  downloaded from the vendor on demand, is GPL-3.0 external firmware, not a Retinue
+  capability claim. A UF2 volume can
   disappear while Linkboy flushes a complete file: that expected Windows device-removal
   acknowledgement is recorded, but the package still requires an upstream interface check.
 
@@ -127,9 +127,9 @@ version the list does not have (nothing is offered), or unknown. Versions order 
 numeric `MAJOR.MINOR.PATCH`; a build commit never orders. The install itself is the owner
 flow's one review and approval, which shows the vendor, version, size, sha256 and source.
 
-This build has no HTTPS client yet (protocol_parity D5 leaves the choice open), so a
-download is installable only once its file is in the cache, which `linkboy qualify --file`
-puts there.
+Fetching uses ureq 3.5 on rustls with bundled webpki roots. Linkboy's CLI fetches only in
+`linkboy qualify`; its other commands read a download from the cache. Signalman Desktop
+fetches when the owner reviews a release, on a worker thread.
 
 ## Building and staging packages
 
@@ -166,8 +166,11 @@ Inspect a staged catalog and package before connecting a board:
 linkboy catalog STAGE/firmware/packages/index.toml
 linkboy inspect STAGE/firmware/packages/heltec-v4-current.toml
 linkboy inspect STAGE/firmware/packages/t114-current.toml
-linkboy inspect firmware/packages/meshtastic-t114-2.7.26.54e0d8d.toml
+linkboy inspect STAGE/firmware/packages/meshtastic-t114-2.7.26.54e0d8d.toml --cache-dir CACHE
 ```
+
+A qualified download inspects only once its file is in the cache (`linkboy qualify URL`
+puts it there).
 
 The accepted plan is the only path that may write. Use the board-specific selection when a
 loader can prove the processor but cannot name the carrier revision:
