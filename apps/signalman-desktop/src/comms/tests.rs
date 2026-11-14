@@ -289,6 +289,7 @@ fn companion_identity_events_use_one_adapter_per_protocol_and_disconnect_preserv
         stop: stop.clone(),
         port: "sim-mt".into(),
         source: "test companion",
+        firmware: None,
     });
     state.apply_companion_event(crate::companion::CompanionEvent::Connected {
         protocol: comms::ProtocolKind::MeshCore,
@@ -296,6 +297,7 @@ fn companion_identity_events_use_one_adapter_per_protocol_and_disconnect_preserv
         stop: std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false)),
         port: "sim-mc".into(),
         source: "test companion",
+        firmware: None,
     });
     assert_eq!(state.comms().unwrap().identities().len(), 2);
     state.select_message_protocol(comms::ProtocolKind::Meshtastic);

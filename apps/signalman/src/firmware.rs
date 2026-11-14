@@ -14,7 +14,8 @@ mod installer;
 mod tests;
 
 pub use catalog::{
-    FirmwareCatalog, FirmwareOffer, FirmwareStanding, FirmwareVendor, RadioFirmware,
+    FirmwareCatalog, FirmwareDownloadWorker, FirmwareOffer, FirmwareStanding, FirmwareVendor,
+    RadioFirmware,
 };
 pub use device::{
     DeviceCandidate, capture_t114_uf2_volume, describe_event, event_progress, observe_device,

@@ -141,7 +141,13 @@ impl DesktopState {
                 stop,
                 port,
                 source,
+                firmware,
             } => {
+                self.companion_firmware
+                    .retain(|(kind, _)| *kind != protocol);
+                if let Some(firmware) = firmware {
+                    self.companion_firmware.push((protocol, firmware));
+                }
                 self.companion_comms.retain(|(kind, _)| *kind != protocol);
                 self.companion_comms.push((protocol, owner));
                 self.companion_stops.retain(|(p, _)| *p != protocol);
@@ -151,6 +157,8 @@ impl DesktopState {
                     .push((protocol, format!("Connected on {port}. {source}")));
             }
             CompanionEvent::Stopped { protocol, detail } => {
+                self.companion_firmware
+                    .retain(|(kind, _)| *kind != protocol);
                 self.companion_settings
                     .retain(|s| s.protocol.kind() != protocol);
                 self.companion_stops.retain(|(p, _)| *p != protocol);
@@ -277,7 +285,8 @@ impl DesktopState {
         match result {
             Ok(_) => {
                 self.message_draft = cambium::TextInput::default();
-                self.message_notice = Some("Text persisted. The connected companion carries queued intents.".into());
+                self.message_notice =
+                    Some("Text persisted. The connected companion carries queued intents.".into());
             }
             Err(error) => self.message_notice = Some(format!("Message was not queued: {error}")),
         }

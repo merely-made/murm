@@ -7,12 +7,16 @@
 //! goes through the owner flow's single review and approval.
 
 use std::path::{Path, PathBuf};
+use std::sync::Arc;
+use std::thread::JoinHandle;
 
 use linkboy::catalog::newest::{self, Standing};
 use linkboy::{
-    BoardFamily, CatalogError, CatalogPackage, Fetch, FirmwareCache, FlashPackage, PackageIndex,
-    PackageListing, PartSource,
+    Availability, BoardFamily, CatalogError, CatalogPackage, Fetch, FirmwareCache, FlashPackage,
+    PackageIndex, PackageListing, PartSource,
 };
+
+use super::InstallerWake;
 
 /// A stock firmware vendor the companion client speaks to.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -111,7 +115,43 @@ pub struct FirmwareCatalog {
     index: PackageIndex,
     listings: Vec<PackageListing>,
     cache: FirmwareCache,
-    fetcher: Option<Box<dyn Fetch>>,
+    fetcher: Option<Arc<dyn Fetch>>,
+}
+
+/// One qualified release being fetched and verified off the UI thread.
+///
+/// The worker owns copies of the index, cache and fetcher, and calls the host's wake when it
+/// ends; the face then polls [`finished`] and [`take`]s the verified package, as for an install.
+///
+/// [`finished`]: FirmwareDownloadWorker::finished
+/// [`take`]: FirmwareDownloadWorker::take
+pub struct FirmwareDownloadWorker {
+    package_id: String,
+    handle: Option<JoinHandle<Result<FlashPackage, String>>>,
+}
+
+impl FirmwareDownloadWorker {
+    pub fn package_id(&self) -> &str {
+        &self.package_id
+    }
+
+    /// Whether the fetch and verification have ended. Never blocks.
+    pub fn finished(&self) -> bool {
+        self.handle.as_ref().is_none_or(JoinHandle::is_finished)
+    }
+
+    /// The verified package or the refusal, once finished; `None` while running or after.
+    pub fn take(&mut self) -> Option<Result<FlashPackage, String>> {
+        if !self.finished() {
+            return None;
+        }
+        let handle = self.handle.take()?;
+        Some(
+            handle
+                .join()
+                .unwrap_or_else(|_| Err("the download worker panicked".into())),
+        )
+    }
 }
 
 impl FirmwareCatalog {
@@ -137,9 +177,64 @@ impl FirmwareCatalog {
 
     /// Fetch a qualified release with `fetcher` when the owner asks to install it. Without
     /// one, only a release already in the cache can be installed.
-    pub fn with_fetcher(mut self, fetcher: Box<dyn Fetch>) -> Self {
+    pub fn with_fetcher(mut self, fetcher: Arc<dyn Fetch>) -> Self {
         self.fetcher = Some(fetcher);
         self
+    }
+
+    /// Fetch qualified releases over https (ureq on rustls), for an installed application.
+    pub fn with_https(self) -> Self {
+        self.with_fetcher(Arc::new(linkboy::download::HttpsFetcher::new()))
+    }
+
+    /// Whether installing `package_id` needs a download first: an on-demand package with a
+    /// part not validly in the cache. Reads the cache; never fetches.
+    pub fn needs_download(&self, package_id: &str) -> bool {
+        self.listings
+            .iter()
+            .find(|listing| listing.entry.package_id == package_id)
+            .is_some_and(|listing| {
+                listing.availability == Availability::OnDemand
+                    && listing.manifest.declared_parts().iter().any(|part| {
+                        matches!(part.source(), Some(PartSource::Download(_)))
+                            && !matches!(self.cache.cached(part), Ok(Some(_)))
+                    })
+            })
+    }
+
+    /// Fetch and verify `package_id` on a worker thread, calling `wake` when it ends. Refused
+    /// without a fetcher. The result is the package [`load_package`] would return.
+    ///
+    /// [`load_package`]: FirmwareCatalog::load_package
+    pub fn start_download(
+        &self,
+        package_id: &str,
+        wake: InstallerWake,
+    ) -> Result<FirmwareDownloadWorker, String> {
+        let fetcher = self
+            .fetcher
+            .clone()
+            .ok_or_else(|| "this catalog has no HTTPS client to download with".to_string())?;
+        let (index, index_path, cache) = (
+            self.index.clone(),
+            self.index_path.clone(),
+            self.cache.clone(),
+        );
+        let id = package_id.to_string();
+        let handle = std::thread::Builder::new()
+            .name("signalman-firmware-download".into())
+            .spawn(move || {
+                let result = index
+                    .load_package_with(&index_path, &id, &cache, Some(fetcher.as_ref()))
+                    .map_err(|error| error.to_string());
+                (wake)();
+                result
+            })
+            .map_err(|error| error.to_string())?;
+        Ok(FirmwareDownloadWorker {
+            package_id: package_id.to_string(),
+            handle: Some(handle),
+        })
     }
 
     pub fn packages(&self) -> &[CatalogPackage] {

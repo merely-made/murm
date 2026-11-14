@@ -259,7 +259,9 @@ fn main() {
                 events
             };
             let fixture_events: Vec<_> = wake_fixtures.borrow().try_iter().collect();
-            if messages.is_empty()
+            let download_done = ctx.runner.state().firmware_download_finished();
+            if !download_done
+                && messages.is_empty()
                 && layout.is_none()
                 && audio_events.is_empty()
                 && station_events.is_empty()
@@ -273,6 +275,9 @@ fn main() {
             ctx.runner.update(|state| {
                 for message in messages {
                     state.apply_install_update(message);
+                }
+                if download_done {
+                    state.finish_firmware_download();
                 }
                 if let Some(layout) = layout {
                     state.adopt_network_layout(layout);
@@ -462,6 +467,11 @@ fn main() {
         options,
         move |_window, _commands, wake| {
             let mut state = DesktopState::new(&default_catalog_path());
+            // The installed application fetches qualified releases when the owner reviews one.
+            state.catalog = state
+                .catalog
+                .take()
+                .map(signalman::FirmwareCatalog::with_https);
             signalman_desktop::appearance_host::load(&mut state);
             let settings_path = default_availability_settings_path();
             if settings_path.exists() {

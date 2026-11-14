@@ -17,7 +17,14 @@ pub(super) fn choose_firmware(state: &DesktopState) -> Child {
             .attr("class", "empty")
             .attr("role", "alert"),
         ),
-        (Some(_), None) => Box::new(el("div", ()).attr("class", "empty-none")),
+        (Some(_), None) => match &state.firmware_download_note {
+            Some(note) => Box::new(
+                el("div", text(note.clone()))
+                    .attr("role", "status")
+                    .attr("data-firmware-download", "running"),
+            ),
+            None => Box::new(el("div", ()).attr("class", "empty-none")),
+        },
         (None, None) => {
             Box::new(el("div", text("No package catalog is loaded.")).attr("class", "empty"))
         }

@@ -485,6 +485,7 @@ fn radio_page(state: &DesktopState) -> Child {
     Box::new(el("main", (
         heading(label, "Text history belongs to the commissioned radio realm."),
         el("div", text(state.companion_notices.iter().find(|(p,_)| *p == protocol).map(|(_,s)| s.clone()).unwrap_or_else(|| "No stock companion connected.".into()))).attr("role", "status"),
+        super::standing::companion_standing(state, protocol),
         el("label", (el("div", text("Radio serial port")), el("div", cambium::lens(|input: &mut cambium::TextInput| cambium::text_field(input), |s: &mut DesktopState| &mut s.companion_port)).attr("data-text-field", "companion-port").attr("class", "companion-port"))).attr("class", "revision-label"),
         el("label", (el("div", text("Radio realm name")), el("div", cambium::lens(|input: &mut cambium::TextInput| cambium::text_field(input), |s: &mut DesktopState| &mut s.companion_realm)).attr("data-text-field", "companion-realm").attr("class", "companion-realm"))).attr("class", "revision-label"),
         el("label", (el("div", text("Public message journal path")), el("div", cambium::lens(|input: &mut cambium::TextInput| cambium::text_field(input), |s: &mut DesktopState| &mut s.companion_journal)).attr("data-text-field", "companion-journal").attr("class", "companion-journal"))).attr("class", "revision-label"),

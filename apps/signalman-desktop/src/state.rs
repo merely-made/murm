@@ -9,6 +9,7 @@
 //! elsewhere and hand their results in, which is what lets the whole six-page
 //! flow be driven in a headless test with no board plugged in.
 
+mod download;
 mod firmware;
 mod messages;
 mod network;
@@ -260,6 +261,14 @@ pub struct DesktopState {
     /// The verified package catalog, or why it could not be loaded.
     pub catalog: Option<FirmwareCatalog>,
     pub catalog_error: Option<String>,
+    /// A qualified release being fetched and verified before review, and what it is.
+    pub firmware_download: Option<signalman::FirmwareDownloadWorker>,
+    pub firmware_download_note: Option<String>,
+    /// What each connected stock companion reported about its firmware.
+    pub companion_firmware: Vec<(
+        signalman::comms_adapter::comms::ProtocolKind,
+        signalman::RadioFirmware,
+    )>,
 
     pub devices: Vec<DeviceCandidate>,
     pub survey: SurveyState,
@@ -367,6 +376,9 @@ impl DesktopState {
             installer: FirmwareInstaller::new(),
             catalog,
             catalog_error,
+            firmware_download: None,
+            firmware_download_note: None,
+            companion_firmware: Vec::new(),
             devices: Vec::new(),
             survey: SurveyState::default(),
             selected_device: None,

@@ -33,7 +33,7 @@ pub mod survey;
 pub mod voice;
 
 pub use firmware::{
-    DeviceCandidate, FirmwareCatalog, FirmwareError, FirmwareInstallNotice,
+    DeviceCandidate, FirmwareCatalog, FirmwareDownloadWorker, FirmwareError, FirmwareInstallNotice,
     FirmwareInstallRecovery, FirmwareInstallStage, FirmwareInstallUpdate, FirmwareInstallWorker,
     FirmwareInstaller, FirmwareOffer, FirmwareReview, FirmwareStanding, FirmwareVendor,
     FirmwareView, InstallerWake, RadioFirmware, capture_t114_uf2_volume, describe_event,

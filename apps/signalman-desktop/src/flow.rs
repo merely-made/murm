@@ -34,7 +34,7 @@ pub fn perform(
         Request::ConfirmDevice => confirm_device(state),
         Request::ConfirmMountedT114 => confirm_mounted_t114(state),
         Request::ConfirmT114Dfu => confirm_t114_dfu(state),
-        Request::ConfirmFirmware => confirm_firmware(state),
+        Request::ConfirmFirmware => confirm_firmware(state, wake),
         Request::ApproveChanges => {
             if let Err(error) = state.installer.approve_changes() {
                 state.refuse(&error);
@@ -178,7 +178,11 @@ fn confirm_t114_dfu(state: &mut DesktopState) {
     }
 }
 
-fn confirm_firmware(state: &mut DesktopState) {
+fn confirm_firmware(state: &mut DesktopState, wake: InstallerWake) {
+    if state.firmware_download.is_some() {
+        state.refuse_with(vec!["A firmware download is already running.".into()]);
+        return;
+    }
     let Some(catalog) = state.catalog.as_ref() else {
         state.refuse_with(vec![
             state
@@ -192,6 +196,27 @@ fn confirm_firmware(state: &mut DesktopState) {
         state.refuse_with(vec!["Choose a firmware package first.".into()]);
         return;
     };
+    // A qualified vendor release not yet in the cache is fetched and verified on Signalman's
+    // worker; the review page that follows is the owner's one confirmation.
+    if catalog.needs_download(&package) {
+        let note = catalog
+            .offer(&package)
+            .map(|offer| {
+                format!(
+                    "Downloading {} {} ({} bytes) from {}; it is checked against the pinned SHA-256 before review.",
+                    offer.publisher,
+                    offer.version,
+                    offer.byte_length,
+                    offer.download_urls.join(", ")
+                )
+            })
+            .unwrap_or_default();
+        match catalog.start_download(&package, wake) {
+            Ok(worker) => state.begin_firmware_download(worker, note),
+            Err(error) => state.refuse_with(vec![error]),
+        }
+        return;
+    }
     let loaded = match catalog.load_package(&package) {
         Ok(loaded) => loaded,
         Err(error) => {
