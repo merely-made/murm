@@ -87,7 +87,8 @@ Each crate has its own README with more detail, and here's a generated overview.
 Apps: `linkboy` (inspects, plans and flashes firmware packages), `signalman`
 (runs a household radio from a serial port), and `signalman-desktop` (its
 desktop face, rooted in its own workspace). Firmware for Heltec V4 and Heltec
-T114 boards is in `firmware/`, with flashable packages in `firmware/packages/`.
+T114 boards is in `firmware/`; `firmware/packages/` holds package templates and the
+index, and a staging step builds the flashable packages (see its README).
 
 ## Status (2026-10-06)
 

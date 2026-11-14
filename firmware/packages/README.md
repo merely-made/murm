@@ -1,14 +1,21 @@
 # Retinue firmware packages
 
-This directory contains Linkboy package manifests, one-file payloads or ordered sparse parts,
-recovery instructions, and the public package index. Every part has its own digest; sparse ESP
-parts also name their write offset. The index is the publishable installer evidence artifact:
+This directory contains the public package index, recovery instructions, and package
+templates. Built images are not kept in the repository (protocol_parity D4): a template
+(`*.template.toml`) carries a package's identity, devices, helpers, preserved ranges and
+recovery instructions, and the staging step below builds the image and writes the full
+manifest beside it. Linkboy refuses a template as a package. The exceptions are the
+unmodified Meshtastic release (`meshtastic-t114-2.7.26.54e0d8d.toml` and its UF2), staged as
+it is, and the serial-DFU recovery package `t114-v47.toml` with
+`../t114-phy/tulle-t114-phy-v47.zip`, kept because a recovery image must exist before
+anything can be built. The index is the publishable installer evidence artifact:
 `retinue.heltec-v4` is the September 30 modem build, with fresh Windows installation
 and ROM-loader retry evidence. The partial `retinue.heltec-v4-resident` commissioning
 image was withdrawn on 2026-11-14: foreign LoRa meshes are reached through a stock
-companion radio instead. T114 now offers the installed native `711816a` image as
-`partial`, pending a recovery retry of those same bytes. Historical v51 artifacts
-and receipts remain retained outside the current offering. The retained
+companion radio instead. T114 offered the installed native `711816a` image as
+`partial`, pending a recovery retry of those same bytes. The `711816a` images and the
+historical v51 artifacts left the tree on 2026-11-14 and remain in git history; receipts
+for them qualify those bytes only, not a later staged build. The retained
 Meshtastic T114 package remains `partial` until its own interface check is recorded.
 
 The V4 images identify source `711816a8124bd58cd8cc314ec4de5009be7df166` and their
@@ -81,12 +88,41 @@ preserved/guard declaration begins at `0xE8000`, so it does not contractually co
 `0xE6000..0xE8000` control pair. The installed current T114 package reserves all
 three A/B pairs at `0xE6000..0xEC000` and writes only `0x26000..0x72100`.
 
-Inspect the catalog and a package before connecting a board:
+## Building and staging packages
+
+`apps/signalman-desktop/tools/stage-firmware.ps1` builds every image an index templates from
+HEAD and stages a catalog that verifies. It refuses a dirty tree unless given `-AllowDirty`,
+and refuses a destination inside the repository. Nothing is downloaded.
 
 ```text
-linkboy catalog firmware/packages/index.toml
-linkboy inspect firmware/packages/heltec-v4-current.toml
-linkboy inspect firmware/packages/t114-current.toml
+pwsh apps/signalman-desktop/tools/stage-firmware.ps1 -Index firmware/packages/index.toml `
+  -Destination STAGE/firmware -LinkboyBinary LINKBOY -Espflash ESPFLASH [-IgnoreRustVersion]
+```
+
+- Heltec V4: `cargo +esp build -p tulle-heltec-v4-phy --release --target xtensa-esp32s3-none-elf
+  -Zbuild-std=core` with `SOURCE_DATE_EPOCH` set to HEAD's commit time; `write_bytes` is the
+  application image `espflash save-image` reports plus its `0x10000` offset; the write range
+  runs from 0 to the first preserved range. espflash must be 4.5.0, the helper the template
+  names. `-IgnoreRustVersion` is for an esp toolchain older than the declared rust-version.
+- Heltec T114: `cargo build -p tulle-t114-phy --release --target thumbv7em-none-eabihf`,
+  `rust-objcopy -O binary`, then `linkboy make-uf2 BIN UF2 0x26000 0xADA52840`; the write range
+  and `write_bytes` come from the UF2 blocks.
+
+Both builds set `RETINUE_FIRMWARE_REVISION` to HEAD. `linkboy stage-catalog` then writes each
+manifest with `version` (`<expected version>-<short revision>`), `source_revision`, the
+payload's `byte_length`, `sha256` and `write_bytes`, `write_ranges`, and the `build=` check, and
+verifies the whole staged catalog before it returns. The assemble scripts beside it call it.
+
+On one machine and checkout, two builds of the same commit are byte-identical. Builds from
+another checkout path or machine are not expected to match: both images embed absolute paths.
+A staged hash is therefore evidence about that stage, not a value the repository pins.
+
+Inspect a staged catalog and package before connecting a board:
+
+```text
+linkboy catalog STAGE/firmware/packages/index.toml
+linkboy inspect STAGE/firmware/packages/heltec-v4-current.toml
+linkboy inspect STAGE/firmware/packages/t114-current.toml
 linkboy inspect firmware/packages/meshtastic-t114-2.7.26.54e0d8d.toml
 ```
 
@@ -94,8 +130,8 @@ The accepted plan is the only path that may write. Use the board-specific select
 loader can prove the processor but cannot name the carrier revision:
 
 ```text
-linkboy plan PORT firmware/packages/heltec-v4-current.toml v4@REVISION
-linkboy plan PORT firmware/packages/t114-current.toml t114@REVISION
+linkboy plan PORT STAGE/firmware/packages/heltec-v4-current.toml v4@REVISION
+linkboy plan PORT STAGE/firmware/packages/t114-current.toml t114@REVISION
 ```
 
 Do not identify a board from a COM number, USB identifier, or processor alone. Read the plan's

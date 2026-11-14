@@ -56,8 +56,8 @@ Run the two-board hardware acceptance with:
 cargo run --features serial-async --example rnode_roundtrip -- COM5 COM6
 ```
 
-The current T114 DFU package is produced at
-`firmware/t114-phy/tulle-t114-phy-v14.zip`.
+Flashable T114 and V4 packages are built and staged by
+`apps/signalman-desktop/tools/stage-firmware.ps1`; see `firmware/packages/README.md`.
 
 Build and flash the v4 target with:
 

@@ -6,6 +6,7 @@
 
 mod kinds;
 mod manifest;
+mod template;
 #[cfg(test)]
 mod tests;
 mod uf2_layout;
@@ -23,6 +24,9 @@ pub use manifest::{
     ExpectedApplication, FlashPackageManifest, HelperArtifact, HelperRequirement, PackagePart,
     PackagePayload, PackageTarget, PersistentStateCompatibility, PublisherSignature,
     PublisherSignatureFormat, RecoveryInstructions, helper_platform,
+};
+pub use template::{
+    BuildFacts, PACKAGE_TEMPLATE_SCHEMA, PackageTemplate, TemplateApplication, TemplatePayload,
 };
 pub use verified::{FlashPackage, VerifiedPackagePart, sha256_hex};
 

@@ -13,10 +13,34 @@ fn installer_starts_with_the_first_owner_page() {
     assert_eq!(view.result, None);
 }
 
+/// The repository's index staged with synthetic images: the checkout holds templates, not
+/// built firmware, so the catalog under test is staged the way a release stage is.
+fn synthetic_catalog() -> (tempfile::TempDir, std::path::PathBuf) {
+    let index = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../../firmware/packages/index.toml");
+    let uf2 = linkboy::encode_application(&[3; 2048], 0x26000, linkboy::NRF52840_FAMILY_ID)
+        .expect("synthetic UF2");
+    let payloads = [
+        ("retinue.heltec-v4", vec![0x5a; 8192], Some(4096)),
+        ("retinue.t114", uf2, None),
+    ]
+    .into_iter()
+    .map(|(id, bytes, write_bytes)| {
+        (
+            id.to_string(),
+            linkboy::StagedPayload { bytes, write_bytes },
+        )
+    })
+    .collect();
+    let stage = tempfile::tempdir().expect("stage directory");
+    let packages = stage.path().join("firmware/packages");
+    linkboy::stage_catalog(&index, &packages, &"ab".repeat(20), payloads).expect("stage verifies");
+    (stage, packages.join("index.toml"))
+}
+
 #[test]
 fn catalog_loads_and_resolves_verified_packages() {
-    let index_path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("../../firmware/packages/index.toml");
+    let (_stage, index_path) = synthetic_catalog();
     let catalog = FirmwareCatalog::load(index_path).expect("package catalog should load");
     assert!(
         catalog.packages().len() >= 2,

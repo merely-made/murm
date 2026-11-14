@@ -8,6 +8,8 @@
 
 mod page_states;
 mod semantic_input;
+#[path = "../support/mod.rs"]
+mod support;
 
 use cambium_genet_winit_host::{Harness, HostHooks, Init, inert_hooks};
 use linkboy::device::{BoardSelection, DeviceTransport, EvidenceConfidence, FirmwareState};
@@ -15,17 +17,17 @@ use linkboy::package::ProcessorKind;
 use linkboy::{BoardFamily, DeviceObservation, HardwareFacts};
 use signalman_desktop::state::{DesktopState, Request};
 use signalman_desktop::views::{Child, Logic};
-use signalman_desktop::{default_catalog_path, root, sheet};
+use signalman_desktop::{root, sheet};
 
 type App = Harness<DesktopState, Logic, Child>;
 
 const SIZE: (f32, f32) = (1100.0, 800.0);
 
 fn state() -> DesktopState {
-    let mut state = DesktopState::new(&default_catalog_path());
+    let mut state = DesktopState::new(&support::synthetic_catalog());
     assert!(
         state.catalog_error.is_none(),
-        "the repository's own package catalog must verify: {:?}",
+        "the repository index, staged with synthetic images, must verify: {:?}",
         state.catalog_error,
     );
     // A survey result, handed in rather than read off a port.
@@ -41,7 +43,7 @@ fn state() -> DesktopState {
 }
 
 fn silent_state() -> DesktopState {
-    let mut state = DesktopState::new(&default_catalog_path());
+    let mut state = DesktopState::new(&support::synthetic_catalog());
     assert!(state.catalog_error.is_none());
     state.adopt_survey(vec![signalman::DeviceCandidate {
         port: "COM9".into(),

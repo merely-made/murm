@@ -43,7 +43,8 @@ pub mod verify;
 
 pub use catalog::{
     AuthenticatedPackageIndex, CatalogError, CatalogPackage, CatalogSignature,
-    CatalogSignatureFormat, CatalogState, CatalogTrust, PackageIndex, TrustedCatalogKey,
+    CatalogSignatureFormat, CatalogState, CatalogTrust, PackageIndex, StagedPayload,
+    TrustedCatalogKey, stage_catalog, template_path,
 };
 pub use device::{
     BoardSelection, BoardSelectionEvidence, BootloaderObservation, DeviceObservation,
@@ -65,6 +66,7 @@ pub use package::{
     PackagePart, PersistentStateCompatibility, ProcessorKind, PublisherSignature,
     PublisherSignatureFormat, StateImpact, VerifiedPackagePart, helper_platform,
 };
+pub use package::{BuildFacts, PackageTemplate};
 pub use plan::{FlashPlan, PackagePartIdentity, Refusal, RefusalReason, plan_flash};
 pub use receipt::{ApplicationVerification, FlashReceipt, ReceiptResult, ReceiptStage};
 pub use uf2::{NRF52840_FAMILY_ID, Uf2EncodeError, encode_application};

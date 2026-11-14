@@ -28,6 +28,11 @@ Build it with the Espressif Rust toolchain:
 cargo +esp build -p tulle-heltec-v4-phy --release --target xtensa-esp32s3-none-elf -Zbuild-std=core
 ```
 
+The image is not kept in the repository. A flashable package (image plus its
+manifest) is produced by the staging step described in
+[the packages README](../packages/README.md), which runs this build from HEAD with
+`RETINUE_FIRMWARE_REVISION` and `SOURCE_DATE_EPOCH` set.
+
 ## On-device status face
 
 `name` reports the public device label. `name set SB1` saves up to 16 printable

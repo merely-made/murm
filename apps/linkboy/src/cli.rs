@@ -24,6 +24,7 @@ fn usage() -> &'static str {
      linkboy flash-volume VOLUME PACKAGE BOARD@REVISION [--receipt PATH]\n  \
      linkboy capture-t114-loader VOLUME PATH\n  \
      linkboy make-uf2 BIN UF2 BASE FAMILY\n  \
+     linkboy stage-catalog INDEX DEST REVISION [--payload PACKAGE_ID PATH]... [--write-bytes PACKAGE_ID N]...\n  \
      linkboy verify-recovery PORT PACKAGE BOARD@REVISION RECOVERY --loader-snapshot PATH [--receipt PATH]\n  \
      linkboy flash-raw PORT IMAGE [t114|v4]\n  \
      linkboy bootloader PORT"

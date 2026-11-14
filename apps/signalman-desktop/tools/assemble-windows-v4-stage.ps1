@@ -10,7 +10,11 @@ param(
     [string]$Espflash,
 
     [Parameter(Mandatory = $true)]
-    [string]$Destination
+    [string]$Destination,
+
+    # Forwarded to stage-firmware.ps1.
+    [switch]$AllowDirty,
+    [switch]$IgnoreRustVersion
 )
 
 $ErrorActionPreference = 'Stop'
@@ -31,16 +35,16 @@ if ($actualHash -ne $expectedEspflashSha256) {
 
 $stageRoot = New-Item -ItemType Directory -Path $Destination
 $helperRoot = New-Item -ItemType Directory -Path (Join-Path $stageRoot.FullName 'helpers\windows-x86_64') -Force
-$firmwareRoot = New-Item -ItemType Directory -Path (Join-Path $stageRoot.FullName 'firmware') -Force
-$packagesRoot = New-Item -ItemType Directory -Path (Join-Path $firmwareRoot.FullName 'packages') -Force
-$v4Root = New-Item -ItemType Directory -Path (Join-Path $firmwareRoot.FullName 'heltec-v4-phy') -Force
+$firmwareRoot = Join-Path $stageRoot.FullName 'firmware'
 
 Copy-Item -LiteralPath $binaryPath -Destination (Join-Path $stageRoot.FullName 'signalman-desktop.exe')
 Copy-Item -LiteralPath $linkboyPath -Destination (Join-Path $stageRoot.FullName 'linkboy.exe')
 Copy-Item -LiteralPath $espflashPath -Destination (Join-Path $helperRoot.FullName 'espflash.exe')
-Copy-Item -LiteralPath (Join-Path $repoRoot 'firmware\packages\windows-v4-staging-index.toml') -Destination (Join-Path $packagesRoot.FullName 'index.toml')
-Copy-Item -LiteralPath (Join-Path $repoRoot 'firmware\packages\heltec-v4-current.toml') -Destination $packagesRoot.FullName
-Copy-Item -LiteralPath (Join-Path $repoRoot 'firmware\heltec-v4-phy\tulle-heltec-v4-phy') -Destination $v4Root.FullName
+# Builds the V4 image from HEAD and stages a catalog that verifies (protocol_parity D4).
+& (Join-Path $PSScriptRoot 'stage-firmware.ps1') -Index (Join-Path $repoRoot 'firmware\packages\windows-v4-staging-index.toml') `
+    -Destination $firmwareRoot -LinkboyBinary $linkboyPath -Espflash $espflashPath `
+    -AllowDirty:$AllowDirty -IgnoreRustVersion:$IgnoreRustVersion
+Copy-Item -LiteralPath (Join-Path $repoRoot 'firmware\packages\heltec-v4-current-recovery.md') -Destination (Join-Path $firmwareRoot 'packages')
 Copy-Item -LiteralPath (Join-Path $repoRoot 'apps\linkboy\NOTICES.md') -Destination (Join-Path $stageRoot.FullName 'NOTICES.md')
 Copy-Item -LiteralPath (Join-Path $repoRoot 'LICENSE') -Destination (Join-Path $stageRoot.FullName 'LICENSE')
 
@@ -55,7 +59,7 @@ Copy-Item -LiteralPath (Join-Path $repoRoot 'LICENSE') -Destination (Join-Path $
     }
     recovery_cli = 'linkboy.exe'
     catalog = 'firmware/packages/index.toml'
-    packages = @('retinue.heltec-v4', 'prns.hopspot.heltec-v4')
+    packages = @('retinue.heltec-v4')
     excluded = @('retinue.t114', 'meshtastic.heltec-mesh-node-t114')
 } | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath (Join-Path $stageRoot.FullName 'stage.json') -Encoding utf8NoBOM
 

@@ -518,5 +518,8 @@ pub enum CatalogError {
     },
 }
 
+mod stage;
 #[cfg(test)]
 mod tests;
+
+pub use stage::{StagedPayload, stage_catalog, template_path};

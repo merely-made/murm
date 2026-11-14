@@ -15,12 +15,14 @@ use linkboy::package::ProcessorKind;
 use linkboy::{BoardFamily, DeviceObservation, FlashEvent, HardwareFacts};
 use signalman_desktop::state::{DesktopState, Request};
 use signalman_desktop::views::{Child, Logic};
-use signalman_desktop::{default_catalog_path, root, sheet};
+use signalman_desktop::{root, sheet};
+
+mod support;
 
 type App = Harness<DesktopState, Logic, Child>;
 
 fn harness() -> App {
-    let mut state = DesktopState::new(&default_catalog_path());
+    let mut state = DesktopState::new(&support::synthetic_catalog());
     state.adopt_survey(vec![signalman::DeviceCandidate {
         port: "COM7".into(),
         board: Some("HeltecV4".into()),
@@ -49,7 +51,7 @@ fn harness() -> App {
 }
 
 fn silent_harness() -> App {
-    let mut state = DesktopState::new(&default_catalog_path());
+    let mut state = DesktopState::new(&support::synthetic_catalog());
     state.adopt_survey(vec![signalman::DeviceCandidate {
         port: "COM9".into(),
         board: None,

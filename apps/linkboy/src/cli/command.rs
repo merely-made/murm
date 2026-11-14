@@ -286,6 +286,48 @@ pub(crate) fn run_command() -> Result<(), Error> {
             println!("captured T114 loader record from {volume} into {path}");
             Ok(())
         }
+        Some("stage-catalog") => {
+            let (Some(index), Some(destination), Some(revision)) =
+                (args.next(), args.next(), args.next())
+            else {
+                return Err(bad_usage("stage-catalog needs INDEX DEST REVISION"));
+            };
+            let mut payloads = std::collections::BTreeMap::new();
+            let mut write_bytes = std::collections::BTreeMap::new();
+            while let Some(flag) = args.next() {
+                let (Some(package_id), Some(value)) = (args.next(), args.next()) else {
+                    return Err(bad_usage(&format!("{flag} needs a PACKAGE_ID and a value")));
+                };
+                match flag.as_str() {
+                    "--payload" => {
+                        payloads.insert(package_id, std::fs::read(&value)?);
+                    }
+                    "--write-bytes" => {
+                        let count = value
+                            .parse::<u64>()
+                            .map_err(|_| bad_usage("--write-bytes takes a decimal count"))?;
+                        write_bytes.insert(package_id, count);
+                    }
+                    _ => return Err(bad_usage("stage-catalog takes --payload and --write-bytes")),
+                }
+            }
+            if let Some(package_id) = write_bytes.keys().find(|id| !payloads.contains_key(*id)) {
+                return Err(bad_usage(&format!(
+                    "--write-bytes {package_id} has no --payload"
+                )));
+            }
+            let payloads = payloads
+                .into_iter()
+                .map(|(package_id, bytes)| {
+                    let write_bytes = write_bytes.get(&package_id).copied();
+                    (package_id, linkboy::StagedPayload { bytes, write_bytes })
+                })
+                .collect();
+            let staged = linkboy::stage_catalog(&index, &destination, &revision, payloads)?;
+            println!("staged and verified {destination}");
+            println!("{}", staged.describe());
+            Ok(())
+        }
         Some("make-uf2") => {
             let input = args
                 .next()

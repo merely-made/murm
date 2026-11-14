@@ -28,7 +28,31 @@ pub(super) fn validate_uf2_layout(
             "UF2 package needs exactly one verified part".into(),
         ));
     };
-    let bytes = part.bytes();
+    let nrf52840_target = manifest
+        .targets
+        .iter()
+        .any(|target| target.processor == ProcessorKind::Nrf52840);
+    let (total_payload, merged) = uf2_extent(part.bytes(), nrf52840_target)?;
+    if total_payload != part.declaration().write_bytes {
+        return Err(PackageError::InvalidField(format!(
+            "UF2 write_bytes is {}, but blocks carry {total_payload}",
+            part.declaration().write_bytes
+        )));
+    }
+    if merged != manifest.write_ranges {
+        return Err(PackageError::InvalidField(
+            "UF2 target ranges do not match package write_ranges".into(),
+        ));
+    }
+    Ok(())
+}
+
+/// Checks every block and returns the payload bytes the blocks carry and their merged target
+/// ranges. Staging derives a manifest's `write_bytes` and `write_ranges` from this same walk.
+pub(super) fn uf2_extent(
+    bytes: &[u8],
+    nrf52840_target: bool,
+) -> Result<(u64, Vec<FlashRange>), PackageError> {
     if bytes.is_empty() || bytes.len() % UF2_BLOCK_SIZE != 0 {
         return Err(PackageError::InvalidField(
             "UF2 payload is not a non-empty sequence of 512-byte blocks".into(),
@@ -52,10 +76,6 @@ pub(super) fn validate_uf2_layout(
         let block_total = word(24);
         let flags = word(8);
         let family_id = word(28);
-        let nrf52840_target = manifest
-            .targets
-            .iter()
-            .any(|target| target.processor == ProcessorKind::Nrf52840);
         if nrf52840_target
             && (flags & UF2_FLAG_FAMILY_ID == 0 || family_id != crate::uf2::NRF52840_FAMILY_ID)
         {
@@ -91,12 +111,6 @@ pub(super) fn validate_uf2_layout(
             "UF2 block numbers are not a complete sequence".into(),
         ));
     }
-    if total_payload != part.declaration().write_bytes {
-        return Err(PackageError::InvalidField(format!(
-            "UF2 write_bytes is {}, but blocks carry {total_payload}",
-            part.declaration().write_bytes
-        )));
-    }
 
     blocks.sort_by_key(|range| range.start);
     let mut merged = Vec::<FlashRange>::new();
@@ -114,10 +128,5 @@ pub(super) fn validate_uf2_layout(
         }
         merged.push(block);
     }
-    if merged != manifest.write_ranges {
-        return Err(PackageError::InvalidField(
-            "UF2 target ranges do not match package write_ranges".into(),
-        ));
-    }
-    Ok(())
+    Ok((total_payload, merged))
 }
