@@ -17,6 +17,9 @@ companion radio instead. T114 offered the installed native `711816a` image as
 historical v51 artifacts left the tree on 2026-11-14 and remain in git history; receipts
 for them qualify those bytes only, not a later staged build. The retained
 Meshtastic T114 package remains `partial` until its own interface check is recorded.
+Vendor releases are to be listed as [qualified downloads](#qualified-vendor-releases)
+instead of tracked files (protocol_parity D5); the Meshtastic UF2 stays tracked until the
+download path has an HTTPS client.
 
 The V4 images identify source `711816a8124bd58cd8cc314ec4de5009be7df166` and their
 image type in live status. Both installed V4s retain their original settings.
@@ -88,6 +91,46 @@ preserved/guard declaration begins at `0xE8000`, so it does not contractually co
 `0xE6000..0xE8000` control pair. The installed current T114 package reserves all
 three A/B pairs at `0xE6000..0xEC000` and writes only `0x26000..0x72100`.
 
+## Qualified vendor releases
+
+A stock Meshtastic or MeshCore release is listed by a complete, tracked manifest whose
+payload names an https `url` instead of a `path`, with the file's `byte_length` and
+`sha256` and a `[qualification]` record of what was checked: where the hash came from and
+when, the structure checks it passed, and whether Signalman's stock-companion client was
+checked against it on a real board (with a date and receipt) or not. Only listed releases
+are offered. [QUALIFYING.md](QUALIFYING.md) is the bench procedure and lists the candidates
+that are not yet qualified.
+
+- **Nothing is downloaded until an owner asks to install.** Loading a catalog lists a
+  download as on-demand and touches no network; neither do the tests.
+- **The pinned hash is what vouches.** Neither vendor signs its files or marks its releases
+  immutable, and Meshtastic's per-board host publishes only md5. A file replaced upstream no
+  longer matches the pinned `sha256` and is refused.
+- **What Linkboy checks.** An https URL only, and no redirect off https; a body no longer
+  than the pinned length; then length, sha256 and layout exactly as for a local package
+  (`FlashPackage::from_verified_parts`): for a UF2 the family id, block sequence, payload
+  size and block span against `write_ranges`; for a V4 merged image the ESP image magic,
+  sector-aligned non-overlapping parts inside the flash size and clear of preserved ranges.
+  A refused download leaves nothing in the cache.
+- **The cache** is `%LOCALAPPDATA%\Merely\Signalman\firmware\<sha256>\<file name>`
+  (`SIGNALMAN_FIRMWARE_CACHE` overrides it; Linkboy's commands take `--cache-dir`). A cached
+  file is verified again before every use and deleted if it no longer matches.
+- **V4 images.** A vendor's merged ESP32-S3 image is a `merged-image` part at offset 0;
+  Meshtastic's OTA and filesystem images are `additional-image` parts at the offsets the
+  manifest states. `full_erase = true` says the package erases all of flash first; only a
+  merged image may say so, with no preserved ranges and `state_impact = "replaced"`, and the
+  plan asks the owner to confirm it.
+
+When a radio is connected through Signalman's stock-companion client, the version it reports
+is compared with the list: on a listed release (and whether a newer one is listed), on a
+version the list does not have (nothing is offered), or unknown. Versions order by their
+numeric `MAJOR.MINOR.PATCH`; a build commit never orders. The install itself is the owner
+flow's one review and approval, which shows the vendor, version, size, sha256 and source.
+
+This build has no HTTPS client yet (protocol_parity D5 leaves the choice open), so a
+download is installable only once its file is in the cache, which `linkboy qualify --file`
+puts there.
+
 ## Building and staging packages
 
 `apps/signalman-desktop/tools/stage-firmware.ps1` builds every image an index templates from
@@ -141,6 +184,22 @@ state-impact and recovery sections before accepting a write.
 
 - [Heltec V4 recovery](heltec-v4-current-recovery.md)
 - [T114 recovery](t114-current-recovery.md)
+- [Meshtastic T114](#meshtastic-t114), below.
+
+### Meshtastic T114
+
+The Meshtastic package writes only `0x26000..0xD9200`; the S140 SoftDevice below it and the
+Adafruit UF2 bootloader above it are not written, so the bootloader survives whatever the
+application does. Double-tap the T114's reset button: the `HT-n5262` volume mounts. Select
+it explicitly and write the verified package again:
+
+```text
+linkboy flash-volume VOLUME firmware/packages/meshtastic-t114-2.7.26.54e0d8d.toml t114@2.x --receipt RECEIPT.json
+```
+
+To return to Retinue instead, write a staged `retinue.t114` package the same way (see
+[T114 recovery](t114-current-recovery.md)) and record its own receipt. The v51 recovery page
+this entry used to name described a removed image and left the tree on 2026-11-14.
 
 The recovery page remains part of each package's public evidence. The index may use
 `proven-recipe` only when installer and recovery receipts link to reproducible public runs and

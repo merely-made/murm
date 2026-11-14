@@ -32,6 +32,6 @@ manifest = "meshtastic-t114-2.7.26.54e0d8d.toml"
 firmware_publisher = "Meshtastic"
 state = "partial"
 instructions_url = "https://github.com/merely-made/murm/blob/main/firmware/packages/README.md"
-recovery_url = "https://github.com/merely-made/murm/blob/main/firmware/packages/t114-v51-recovery.md"
+recovery_url = "https://github.com/merely-made/murm/blob/main/firmware/packages/README.md#meshtastic-t114"
 installer_receipts = []
 recovery_receipts = []

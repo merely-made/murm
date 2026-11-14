@@ -99,7 +99,7 @@ Copy-Item -LiteralPath $espflashPath -Destination (Join-Path $helperRoot.FullNam
     -Destination $firmwareRoot -LinkboyBinary $linkboyPath -Espflash $espflashPath `
     -AllowDirty:$AllowDirty -IgnoreRustVersion:$IgnoreRustVersion
 $packagesRoot = Join-Path $firmwareRoot 'packages'
-foreach ($recovery in 'heltec-v4-current-recovery.md', 't114-current-recovery.md', 't114-v51-recovery.md') {
+foreach ($recovery in 'heltec-v4-current-recovery.md', 't114-current-recovery.md') {
     Copy-Item -LiteralPath (Join-Path $repoRoot "firmware\packages\$recovery") -Destination $packagesRoot
 }
 Copy-Item -LiteralPath (Join-Path $repoRoot 'apps\linkboy\NOTICES.md') -Destination (Join-Path $stageRoot.FullName 'NOTICES.md')
