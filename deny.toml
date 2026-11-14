@@ -27,9 +27,22 @@ all-features = true
 
 # Two versions of one crate in a build are a defect: move the older version's
 # holder forward. Each skip below is a duplicate that cannot be removed from
-# here yet, with the holder that keeps it and what would remove it.
+# here yet, with the holder that keeps it and what would remove it, in the form
+# { crate = "name@version", reason = "<holder> <version> (latest) requires it,
+# via <path>; goes when <what>" }. A holder that is our own manifest is updated,
+# not skipped; a skip is a stopgap, never an end state.
 #
-#   cargo deny check bans
+#   cargo deny --workspace --all-features check -D unmatched-skip bans
+#
+# The hook runs that here and in each nested workspace that ships, each against
+# its own deny.toml: native, apps/signalman-desktop, crates/station-custody,
+# crates/pipit and crates/retained-repair. A skip that matches nothing fails.
+# Not gated:
+#   fuzz                           a validation-manifest instrument (fuzz runs)
+#   testing/transport-conformance  a validation-manifest instrument (vectors)
+#   testing/iroh-control           a kept probe
+#   apps/pocket-nfc-probe          a kept probe, and an Xcode project, not a workspace
+#   vendor/*                       vendored upstream trees, not workspaces
 [bans]
 multiple-versions = "deny"
 wildcards = "allow"
