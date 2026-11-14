@@ -1,0 +1,1 @@
+Correction to the message: the root deny.toml carries 29 skips (not 28) and apps/signalman-desktop/deny.toml 27 (not 25); native 105, station-custody 4, pipit and retained-repair 0 are right.
