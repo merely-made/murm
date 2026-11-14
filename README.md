@@ -85,7 +85,6 @@ Each crate has its own README with more detail, and here's a generated overview.
 | `tucket` | MeshCore companion frame types for a stock MeshCore radio. | published |
 | `radio-face`, `radio-hand`, `radio-mirror` | On-device UI, board runtime, and the UI's browser (wasm) realization. | workspace only |
 | `retinue-sim` | In-process multi-node route-trace harness. | workspace only |
-| `tinyssb-core` | Allocation-free tinySSB v0 feed verifier. | workspace only |
 
 Apps: `linkboy` (inspects, plans and flashes firmware packages), `signalman`
 (runs a household radio from a serial port), and `signalman-desktop` (its

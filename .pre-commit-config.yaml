@@ -1,4 +1,4 @@
-# house hooks --no-decisions --bans . --bans native --bans apps/signalman-desktop --bans crates/station-custody --bans crates/pipit --bans crates/retained-repair --clippy-base '-p postilion -p retinue -p tulle -p tinyssb-core -p selvage -p seneschal -p sennet -p tucket -p outrider -p radio-face -p radio-hand -p radio-mirror -p retinue-sim -p truchman --all-targets'
+# house hooks --no-decisions --bans . --bans native --bans apps/signalman-desktop --bans crates/station-custody --bans crates/pipit --bans crates/retained-repair --clippy-base '-p postilion -p retinue -p tulle -p selvage -p seneschal -p sennet -p tucket -p outrider -p radio-face -p radio-hand -p radio-mirror -p retinue-sim -p truchman --all-targets'
 # Written by `house hooks` (eidetic, crates/house); `house hooks --check` fails when this file drifts from it.
 # `house` is on the PATH: cargo install --git https://github.com/merely-made/eidetic house
 fail_fast: true
@@ -17,7 +17,7 @@ repos:
         always_run: true
       - id: clippy
         name: clippy
-        entry: cargo clippy -p postilion -p retinue -p tulle -p tinyssb-core -p selvage -p seneschal -p sennet -p tucket -p outrider -p radio-face -p radio-hand -p radio-mirror -p retinue-sim -p truchman --all-targets
+        entry: cargo clippy -p postilion -p retinue -p tulle -p selvage -p seneschal -p sennet -p tucket -p outrider -p radio-face -p radio-hand -p radio-mirror -p retinue-sim -p truchman --all-targets
         language: system
         files: '(^|/)(Cargo\.toml|rust-toolchain\.toml|[^/]+\.rs)$'
         pass_filenames: false
