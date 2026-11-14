@@ -1,17 +1,12 @@
-//! Comms presentation and public journals for resident and stock radio owners.
+//! Comms presentation and public journals for stock radio companions.
 //!
 //! Journals contain text and observed wire facts, never channel keys or private
-//! identity seeds. A resident host supplies its authorized runtime and durable
-//! packet-ID reservations. Stock companion hosts supply an exclusive byte link;
-//! firmware owns keys and RF execution. Both paths use a host-owned realm name.
-//! The companion client cannot attach its journal to a resident PHY runtime.
-pub mod carriage;
+//! identity seeds. Stock companion hosts supply an exclusive byte link; the
+//! radio's firmware owns keys and RF execution. Journals use a host-owned realm
+//! name.
 pub mod companion;
-mod contacts;
 mod journal;
-mod resident;
 mod scope;
-pub mod sennet_ids;
 #[cfg(test)]
 mod tests;
 
@@ -22,7 +17,6 @@ use comms::{
     Draft, Identity, Message, MessageBody, MessageId, ProtocolAdapter, ProtocolKind,
 };
 pub use journal::{FileJournal, RadioJournal};
-pub use resident::ResidentSession;
 use serde::{Deserialize, Serialize};
 use std::{
     collections::BTreeMap,
@@ -31,8 +25,8 @@ use std::{
 
 const MAX_RECORDS: usize = 2048;
 
-use scope::Scope;
-pub use scope::{CompanionScope, RadioScope};
+pub use scope::CompanionScope;
+use scope::CompanionScope as Scope;
 
 /// Native protocol facts remain available alongside the portable projection.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -112,8 +106,6 @@ struct Book {
     records: Vec<RadioRecord>,
     #[serde(default)]
     notices: Vec<String>,
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
-    meshcore_contacts: Vec<[u8; 32]>,
 }
 struct Inner {
     book: Book,
@@ -122,7 +114,7 @@ struct Inner {
     fault: Option<String>,
 }
 /// Cloneable handle to one durable public journal, shared by Comms and the
-/// resident owner. A failed write leaves the previous published book intact.
+/// companion connection. A failed write leaves the previous published book intact.
 #[derive(Clone)]
 pub struct RadioComms {
     inner: Arc<Mutex<Inner>>,
@@ -131,13 +123,6 @@ fn backend(error: impl std::fmt::Display) -> AdapterError {
     AdapterError::Backend(error.to_string())
 }
 impl RadioComms {
-    pub fn open(
-        scope: RadioScope,
-        mut journal: impl RadioJournal + 'static,
-    ) -> Result<Self, AdapterError> {
-        let bytes = journal.load().map_err(backend)?;
-        Self::open_loaded(Scope::Resident(scope), journal, bytes)
-    }
     /// Reopen a pre-existing public journal; this never creates a local identity.
     pub fn reopen(mut journal: impl RadioJournal + 'static) -> Result<Self, AdapterError> {
         let bytes = journal
@@ -165,23 +150,14 @@ impl RadioComms {
                 next_id: 1,
                 records: Vec::new(),
                 notices: Vec::new(),
-                meshcore_contacts: Vec::new(),
             },
         };
-        if !matches!(book.version, 1 | 2)
+        if book.version != 1
             || book.scope != scope
             || book.records.len() > MAX_RECORDS
             || book.next_id == 0
         {
             return Err(backend("radio journal scope/version/bounds mismatch"));
-        }
-        contacts::validate_book(&scope, &book.meshcore_contacts)?;
-        if (book.version == 1 && !book.meshcore_contacts.is_empty())
-            || (book.version == 2 && !matches!(scope, Scope::Resident(_)))
-        {
-            return Err(backend(
-                "contact cache requires a version-2 resident journal",
-            ));
         }
         let mut ids = std::collections::HashSet::new();
         for record in &mut book.records {
@@ -236,7 +212,7 @@ impl RadioComms {
         if let Err(error) = inner.journal.commit(&bytes) {
             if inner.attached {
                 inner.fault = Some(format!(
-                    "resident journal write failed; stop carriage: {error}"
+                    "radio journal write failed; stop carriage: {error}"
                 ));
             }
             return Err(backend(error));
@@ -244,18 +220,12 @@ impl RadioComms {
         inner.book = candidate;
         Ok(result)
     }
-    pub fn scope(&self) -> Result<RadioScope, AdapterError> {
-        match &self.lock()?.book.scope {
-            Scope::Resident(scope) => Ok(scope.clone()),
-            _ => Err(backend("this is a stock companion scope")),
-        }
-    }
     pub fn open_companion(
         scope: CompanionScope,
         mut journal: impl RadioJournal + 'static,
     ) -> Result<Self, AdapterError> {
         let bytes = journal.load().map_err(backend)?;
-        Self::open_loaded(Scope::Companion(scope), journal, bytes)
+        Self::open_loaded(scope, journal, bytes)
     }
     pub fn supports(&self, protocol: ProtocolKind) -> bool {
         self.inner
@@ -276,9 +246,7 @@ impl RadioComms {
     pub fn diagnostics(&self) -> Result<Vec<String>, AdapterError> {
         let inner = self.lock()?;
         let mut lines = vec!["Meshtastic channel senders are unauthenticated; MeshCore private text uses a 16-bit pairwise MAC; ACKs are unencrypted 32-bit matches.".into()];
-        if matches!(inner.book.scope, Scope::Companion(_)) {
-            lines.push("Stock companion observations are device-reported. Signalman does not verify PKI proofs or treat protocol ACKs as authenticated/read receipts.".into());
-        }
+        lines.push("Stock companion observations are device-reported. Signalman does not verify PKI proofs or treat protocol ACKs as authenticated/read receipts.".into());
         if let Some(fault) = &inner.fault {
             lines.push(fault.clone());
         }
@@ -434,11 +402,7 @@ impl ProtocolAdapter for RadioAdapter {
         let limit = if self.protocol == ProtocolKind::Meshtastic {
             sennet::application::MAX_APPLICATION_PAYLOAD
         } else {
-            if matches!(self.owner.lock()?.book.scope, Scope::Companion(_)) {
-                133
-            } else {
-                tucket::node::MAX_TEXT_BYTES
-            }
+            133
         };
         if draft.subject.is_some()
             || draft.body.trim().is_empty()
