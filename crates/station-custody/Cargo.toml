@@ -46,19 +46,19 @@ workspace = true
 resolver = "2"
 
 [workspace.dependencies]
-dramatis = { version = "0.0.5", git = "https://github.com/merely-made/dramatis.git", branch = "main" }
+dramatis = { version = ">=0.0.5", git = "https://github.com/merely-made/dramatis.git", branch = "main" }
 blake3 = "1"
-ostiary = { version = "0.0.1", git = "https://github.com/merely-made/armillary.git", branch = "main", default-features = false }
-castellan-client = { version = "0.0.2", git = "https://github.com/merely-made/dramatis.git", branch = "main", default-features = false }
+ostiary = { version = ">=0.0.1", git = "https://github.com/merely-made/armillary.git", branch = "main", default-features = false }
+castellan-client = { version = ">=0.0.2", git = "https://github.com/merely-made/dramatis.git", branch = "main", default-features = false }
 personae = { version = "0.3.1", git = "https://github.com/merely-made/dramatis.git", branch = "main" }
-insigne = { version = "0.0.2", git = "https://github.com/merely-made/dramatis.git", branch = "main" }
+insigne = { version = ">=0.0.2", git = "https://github.com/merely-made/dramatis.git", branch = "main" }
 outrider = { version = "=0.3.0", path = "../outrider" }
 postilion = { version = "=0.3.0", path = "../postilion" }
 radio-hand = { version = "=0.0.1", path = "../radio-hand" }
 retinue = { version = "0.3.0", path = "../retinue" }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-sporran = { version = "0.0.1", git = "https://github.com/merely-made/dramatis.git", branch = "main" }
+sporran = { version = ">=0.0.1", git = "https://github.com/merely-made/dramatis.git", branch = "main" }
 uuid = { version = "1", features = ["serde", "v4"] }
 
 [workspace.lints.clippy]
@@ -70,7 +70,7 @@ undocumented_unsafe_blocks = "warn"
 too_many_lines = "warn"
 
 [patch."crates-io"]
-ostiary = { version = "0.0.1", git = "https://github.com/merely-made/armillary.git", branch = "main" }
+ostiary = { version = ">=0.0.1", git = "https://github.com/merely-made/armillary.git", branch = "main" }
 hodograph = { git = "https://github.com/merely-made/eidetic.git", branch = "main" }
 portolan = { git = "https://github.com/merely-made/eidetic.git", branch = "main" }
 eidetic = { git = "https://github.com/merely-made/eidetic.git", branch = "main" }
