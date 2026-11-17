@@ -104,9 +104,24 @@ async fn resource_session_carries_a_matching_request_and_response() {
             let mut accepted = server.accept_resource().await.unwrap();
             let received = accepted.session.receive_request().await.unwrap();
             assert_eq!(received.request.data, b"ping");
-            accepted
-                .session
-                .respond(received.request_id, b"pong".to_vec());
+            assert_eq!(
+                accepted
+                    .session
+                    .respond_auto(received.request_id, b"pong".to_vec())
+                    .await
+                    .unwrap(),
+                PayloadMode::Data
+            );
+            // The same payload still fits the link after the host disables egress.
+            // A fit alone must not count as a locally queued response.
+            assert!(server.set_interface_outgoing(server.interface_ids()[0], false));
+            assert!(
+                accepted
+                    .session
+                    .respond_auto(received.request_id, b"pong".to_vec())
+                    .await
+                    .is_err()
+            );
         }
     });
     let request = Request::new(b"/echo", b"ping".to_vec(), 1_753_603_206.5);

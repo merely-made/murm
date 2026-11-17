@@ -13,6 +13,7 @@ use crate::resource::FLAG_REQUEST;
 use crate::resource_transfer::{ResourceKind, ResourceReceiveLimits};
 
 use super::entropy::next_iv;
+use super::queue::TrafficClass;
 use super::resource_session::{Pace, PayloadMode, ResourceSession, resource_receive_ended};
 use super::stream::write_chunk_for_mtu;
 
@@ -220,8 +221,13 @@ impl ResourceSession {
     ) -> io::Result<PayloadMode> {
         let packed = Response::pack_value(request_id, packed_value);
         if packed.len() <= write_chunk_for_mtu(self.link.mtu()) {
-            self.shared
-                .send_on(self.iface, self.link.response_packet(&packed, &next_iv()));
+            let packet = self.link.response_packet(&packed, &next_iv());
+            if !self
+                .shared
+                .try_send_on_class(self.iface, packet, TrafficClass::Interactive)
+            {
+                return Err(io::Error::other("interface refused inline response"));
+            }
             Ok(PayloadMode::Data)
         } else {
             self.publish_response_value(request_id, &packed).await?;
