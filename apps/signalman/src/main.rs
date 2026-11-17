@@ -4,11 +4,15 @@
 //!
 //! ```text
 //! signalman PORT [NAME] [BW_KHZ] [phy|rnode]
+//! signalman ratspeak PROGRAM LXMF_DIR RNS_DIR relay|receive
+//! signalman ratspeak PROGRAM LXMF_DIR RNS_DIR send DEST BODY_FILE
 //! ```
 //!
 //! One operator, one radio, a prompt. The radio work is [`postilion`]'s; the vocabulary is
 //! [`signalman`]'s; what is here is only the glass: reading lines, printing events, and
 //! keeping the prompt where a person expects it.
+
+mod ratspeak;
 
 use std::io::{BufRead, Write};
 use std::time::Duration;
@@ -62,6 +66,10 @@ fn station_identity_from_env() -> Result<PrivateIdentity, Box<dyn std::error::Er
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let mut backend_args = std::env::args_os().skip(1);
+    if backend_args.next().as_deref() == Some(std::ffi::OsStr::new("ratspeak")) {
+        return ratspeak::run(backend_args);
+    }
     let mut args = std::env::args().skip(1);
     let port = args
         .next()
