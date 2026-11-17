@@ -26,7 +26,9 @@ import threading
 import time
 from pathlib import Path
 
-from library_gate import CONFIG_ENV, EXPECTED_RNS, REPO, verdict
+from oracle_version import require_rns
+
+from library_gate import CONFIG_ENV, REPO, verdict
 
 TITLE = "PATH REQUEST INTEROP"
 RUN_SECONDS = 40
@@ -85,8 +87,7 @@ class Oracle:
 def start_rns(port_a: int, port_b: int):
     import RNS
 
-    if RNS.__version__ != EXPECTED_RNS:
-        raise RuntimeError(f"expected stock RNS {EXPECTED_RNS}, got {RNS.__version__}")
+    require_rns(RNS.__version__)
     print(f"RNS {RNS.__version__}", flush=True)
     config_dir = Path(os.environ[CONFIG_ENV])
     interfaces = "".join(

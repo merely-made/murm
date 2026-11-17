@@ -23,13 +23,14 @@ import threading
 import time
 from pathlib import Path
 
+from oracle_version import require_rns
+
 from library_gate import RESOURCE_STATUS, payload, verdict
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parent
 EXAMPLE = "ifac_resource"
 CONFIG_ENV = "RETINUE_IFAC_GATE_CONFIG_DIR"
-EXPECTED_RNS = "1.5.7"
 NETWORK_NAME = "retinue-ifac-carrier"  # examples/ifac_resource.rs
 PASSPHRASE = "full-size-frames"
 RESOURCE_LEN = 64 * 1024
@@ -93,8 +94,7 @@ def start_stock_server(port: int, ifac_bits: int | None):
     """A fresh stock RNS whose only interface is an IFAC TCPServerInterface on `port`."""
     import RNS
 
-    if RNS.__version__ != EXPECTED_RNS:
-        raise RuntimeError(f"expected stock RNS {EXPECTED_RNS}, got {RNS.__version__}")
+    require_rns(RNS.__version__)
     config_dir = Path(os.environ[CONFIG_ENV])
     (config_dir / "storage" / "resources").mkdir(parents=True, exist_ok=True)
     size_line = f"    ifac_size = {ifac_bits}\n" if ifac_bits is not None else ""
@@ -121,6 +121,8 @@ def peer(bits: int) -> int:
     try:
         state: dict[str, object] = {}
         sent_done, back_done = threading.Event(), threading.Event()
+        link_lock = threading.Lock()
+        send_lock = threading.Lock()
 
         def inbound_concluded(resource):
             data = resource.data.read() if hasattr(resource.data, "read") else bytes(resource.data or b"")
@@ -130,22 +132,30 @@ def peer(bits: int) -> int:
             back_done.set()
 
         def established(link):
-            link.set_resource_strategy(RNS.Link.ACCEPT_ALL)
-            link.set_resource_concluded_callback(inbound_concluded)
-            print(f"  RNS: link up, sending {RESOURCE_LEN}-byte Resource", flush=True)
-            state["resource"] = RNS.Resource(payload(RESOURCE_LEN, SEED), link,
-                                             callback=lambda r: sent_done.set())
+            # The gate sends one Resource, even if stock reports link establishment twice.
+            with send_lock:
+                if state.get("resource") is not None:
+                    print(f"  RNS: additional link-established notification {link.link_id.hex()}",
+                          flush=True)
+                    return
+                link.set_resource_strategy(RNS.Link.ACCEPT_ALL)
+                link.set_resource_concluded_callback(inbound_concluded)
+                state["active_link"] = link
+                print(f"  RNS: link {link.link_id.hex()} up, sending {RESOURCE_LEN}-byte Resource",
+                      flush=True)
+                state["resource"] = RNS.Resource(payload(RESOURCE_LEN, SEED), link,
+                                                 callback=lambda r: sent_done.set())
 
         class Linker:
             aspect_filter = "retinue.ifac-resource"
 
             def received_announce(self, destination_hash, announced_identity, app_data):
-                if state.get("link"):
-                    return
-                remote = RNS.Destination(announced_identity, RNS.Destination.OUT,
-                                         RNS.Destination.SINGLE, "retinue", "ifac-resource")
-                state["link"] = link = RNS.Link(remote)
-                link.set_link_established_callback(established)
+                with link_lock:
+                    if state.get("link"):
+                        return
+                    remote = RNS.Destination(announced_identity, RNS.Destination.OUT,
+                                             RNS.Destination.SINGLE, "retinue", "ifac-resource")
+                    state["link"] = RNS.Link(remote, established_callback=established)
 
         RNS.Transport.register_announce_handler(Linker())
         sent_done.wait(timeout=90)
@@ -153,7 +163,7 @@ def peer(bits: int) -> int:
         sent_status = getattr(resource, "status", None)
 
         receipt = None
-        link = state.get("link")
+        link = state.get("active_link")
         if sent_status == RNS.Resource.COMPLETE:
             packet = RNS.Packet(link, payload(LINK_MDU, SEED + 1))
             print(f"  RNS: sending a {LINK_MDU}-byte link packet", flush=True)

@@ -1,4 +1,3 @@
-rns==1.5.7
-# LXMF rides on RNS and is what the outrider oracle drives; the field
-# registry capture imports it directly.
-lxmf==1.2.0
+# Wheels from the publisher's signed Reticulum releases. See README.md.
+rns==1.6.0 --hash=sha256:fcf2d07eebafea7e56a94542bd74646e451b0f33bb3efb5f914bbbba38b39f36
+lxmf==1.3.0 --hash=sha256:bd26a8f7218519365b1a1940dd0fd1d3a4785aa4970d2de85807c3f846acd382

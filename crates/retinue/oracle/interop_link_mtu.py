@@ -24,11 +24,12 @@ import threading
 import time
 from pathlib import Path
 
+from oracle_version import require_rns
+
 from ingress_harness import Child, REPO, free_port, tcp, verdict
 from library_gate import RESOURCE_STATUS, payload
 
 EXAMPLE = "link_mtu_peer"
-EXPECTED_RNS = "1.5.7"
 RESOURCE_LEN = 1024 * 1024
 SEED = 0x4D7  # examples/link_mtu_peer.rs: stock sends SEED, retinue sends SEED + 1
 TCP_MTU = 16384
@@ -43,7 +44,7 @@ def binary() -> Path:
 def case(initiator: str, ceiling: int | None) -> int:
     import RNS
 
-    assert RNS.__version__ == EXPECTED_RNS, RNS.__version__
+    require_rns(RNS.__version__)
     port = free_port()
     config = Path(os.environ["RETINUE_LINK_MTU_CONFIG"])
     iface = (tcp("client", "mtu", port) if initiator == "stock" else tcp("server", "mtu", port))

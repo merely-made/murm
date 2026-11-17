@@ -18,10 +18,11 @@ import threading
 import time
 from pathlib import Path
 
+from oracle_version import require_rns
+
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parent
 CONFIG_ENV = "RETINUE_LIBRARY_ORACLE_CONFIG_DIR"
-EXPECTED_RNS = "1.5.7"
 
 # RNS.Resource.status values, for readable verdicts.
 RESOURCE_STATUS = {
@@ -121,8 +122,7 @@ def start_rns(port: int):
     """Point a fresh stock RNS instance at Retinue's relay port."""
     import RNS
 
-    if RNS.__version__ != EXPECTED_RNS:
-        raise RuntimeError(f"expected stock RNS {EXPECTED_RNS}, got {RNS.__version__}")
+    require_rns(RNS.__version__)
     print(f"RNS {RNS.__version__}", flush=True)
     config_dir = Path(os.environ[CONFIG_ENV])
     (config_dir / "storage" / "resources").mkdir(parents=True, exist_ok=True)

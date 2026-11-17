@@ -96,12 +96,11 @@ index, and a staging step builds the flashable packages (see its README).
   first releases under the Reticulum License (see [License](#license)).
   postilion 0.3.0 and seneschal 0.2.0 were published with them; they stay
   MPL-2.0 and move to retinue 0.3. Earlier releases are MPL-2.0.
-- **Reticulum.** The live oracle is pinned to RNS 1.5.7 and LXMF 1.2.0. The
-  [repin receipt](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/receipts/rns-1.5.7-repin/README.md) passed every
-  lane in a single run: 13 live, 7 LXMF, 12 Resource and 3 routing gates.
-  Routing decisions are identical to 1.5.6. The intermittent `interop_ifac`
-  failure seen on 1.5.4 and 1.5.6 did not recur in 14 runs on the new macOS
-  host. Two held RNS-side defects persist. The 0.2.0
+- **Reticulum.** The live oracle is pinned to RNS 1.6.0 and LXMF 1.3.0.
+  The wheels came over Reticulum and were checked against the publisher's
+  signing identity. The Windows loopback qualification passed 35 Retinue
+  and 18 Outrider gates. See the [wire compatibility plan](design_docs/2026-11-02_wire_compatibility_plan.md)
+  for the receipt and the open network stamp and fractional LXMF cost work. The 0.2.0
   [link lifecycle](design_docs/archive_docs/2026-11-02/2026-10-02_node_link_lifecycle_plan.md) work
   landed: route learning, `open_link(now)`, link-request expiry, and
   own-echo and duplicate filtering. These results cover the measured
