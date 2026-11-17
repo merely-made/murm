@@ -25,6 +25,7 @@ mod rebroadcast;
 mod recovery;
 mod resources;
 mod routes;
+mod stamps;
 mod transit;
 
 const IFACE: InterfaceId = 0;

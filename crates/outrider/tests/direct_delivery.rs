@@ -1,3 +1,4 @@
+use outrider::StampCost;
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -14,6 +15,7 @@ async fn round_trip(
     content: Vec<u8>,
     expected_mode: PayloadMode,
     resource_config: Option<ResourceTransferConfig>,
+    cost: StampCost,
 ) {
     let sender_identity = PrivateIdentity::from_secret_bytes(&[0x31; 64]);
     let receiver_identity = PrivateIdentity::from_secret_bytes(&[0x42; 64]);
@@ -33,7 +35,7 @@ async fn round_trip(
         &receiver,
         &DeliveryAnnounce {
             display_name: Some(b"Receiver".to_vec()),
-            stamp_cost: Some(8),
+            stamp_cost: Some(cost),
         },
     )
     .unwrap();
@@ -61,7 +63,7 @@ async fn round_trip(
                     accepted,
                     &DeliveredCache::default(),
                     64 * 1024,
-                    Some(8),
+                    Some(cost),
                     config,
                 )
                 .await
@@ -71,7 +73,7 @@ async fn round_trip(
                     accepted,
                     &DeliveredCache::default(),
                     64 * 1024,
-                    Some(8),
+                    Some(cost),
                 )
                 .await
                 .unwrap(),
@@ -120,7 +122,13 @@ async fn round_trip(
 
 #[tokio::test]
 async fn direct_delivery_uses_one_data_packet_when_the_message_fits() {
-    round_trip(b"small body".to_vec(), PayloadMode::Data, None).await;
+    round_trip(
+        b"small body".to_vec(),
+        PayloadMode::Data,
+        None,
+        StampCost::from_integer(8),
+    )
+    .await;
 }
 
 #[tokio::test]
@@ -136,6 +144,7 @@ async fn direct_delivery_uses_a_resource_when_the_message_does_not_fit() {
             retry_interval: Duration::from_millis(100),
             request_window: 1,
         }),
+        StampCost::from_integer(8),
     )
     .await;
 }
@@ -543,4 +552,15 @@ async fn an_unanswered_offer_is_made_again_on_a_fresh_link() {
     assert_eq!(receipt.mode, PayloadMode::Resource);
     assert_eq!(received.message.message_id, receipt.message_id);
     assert_eq!(received.message.payload.content, content);
+}
+
+#[tokio::test]
+async fn direct_delivery_mints_and_enforces_a_fractional_cost() {
+    round_trip(
+        b"fractional body".to_vec(),
+        PayloadMode::Data,
+        None,
+        StampCost::from_f64(8.5).unwrap(),
+    )
+    .await;
 }

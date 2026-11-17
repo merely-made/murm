@@ -9,10 +9,13 @@ resources. An outrider rides ahead of the party to scout and carry word.
 Not affiliated with or endorsed by the Reticulum or LXMF projects.
 
 **Status: codec, opportunistic/direct delivery, and captured propagation lane implemented.**
-The [LXMF 1.1.1 / RNS 1.5.4 receipt](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/receipts/rns-1.5.4-repin/README.md)
-qualifies seven local direct, opportunistic and propagation gates, including stock
-clients and Outrider's bounded server. Committed byte fixtures retain their original
-producer versions. Older physical receipts cover direct and opportunistic delivery
+The current oracle uses signed LXMF 1.3.0 and RNS 1.6.0 wheels. The
+[protocol refresh](../../design_docs/2026-11-17_reticulum_protocol_refresh.md)
+adds fractional delivery and propagation costs, with reciprocal stock exchanges.
+Public delivery cost fields use `StampCost`; configured propagation amounts
+retain the precision needed to subtract flexibility before quantization.
+Committed byte fixtures retain their original producer versions.
+Older physical receipts cover direct and opportunistic delivery
 over V4-to-T114 direct-PHY RF and Resource-backed propagation over that protected
 pair; they were not rerun as part of the 1.5.4 qualification. The
 founding scope, provenance discipline, and ordered gates are recorded in

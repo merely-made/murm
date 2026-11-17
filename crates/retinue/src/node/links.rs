@@ -46,6 +46,20 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
         ephemeral_seed: &[u8; 64],
         now: u64,
     ) -> Option<Actions<ACTIONS>> {
+        self.open_link_cancellable(destination, interface, ephemeral_seed, now, || false)
+    }
+
+    /// Open as in Self::open_link, checking a shell-supplied cancellation condition
+    /// between stamp candidates. The shell may supply its own clock or stop signal;
+    /// this layer does not acquire either. Cancellation creates no pending handshake.
+    pub fn open_link_cancellable(
+        &mut self,
+        destination: AddressHash,
+        interface: InterfaceId,
+        ephemeral_seed: &[u8; 64],
+        now: u64,
+        should_cancel: impl FnMut() -> bool,
+    ) -> Option<Actions<ACTIONS>> {
         let peer = self.book.resolve(destination)?.identity;
         let mut actions = Actions::new();
         for link_id in self.expire_link_requests(now) {
@@ -58,10 +72,11 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
             return None;
         }
 
+        let stamped_seed = self.link_seed(destination, ephemeral_seed, now, should_cancel)?;
         let (attempt, mut request) = PendingLink::open(
             destination,
             peer,
-            ephemeral_seed,
+            &stamped_seed,
             LinkTrailer {
                 mode: LinkMode::Aes256Cbc,
                 mtu: self.logical_mtu,

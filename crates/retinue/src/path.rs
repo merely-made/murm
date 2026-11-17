@@ -104,6 +104,8 @@ pub struct PathRequest {
     pub requestor: Option<AddressHash>,
     tag: [u8; TAG_LEN],
     tag_len: u8,
+    /// Detached RNS 1.6 path stamp, if the fixed-length extension is present.
+    pub stamp: Option<[u8; crate::network_stamp::STAMP_LEN]>,
 }
 
 impl PathRequest {
@@ -118,6 +120,11 @@ impl PathRequest {
         }
         let data = &packet.payload;
         let target = AddressHash::from_slice(data)?;
+        let stamp = if data.len() == 64 && data[48] == crate::network_stamp::EXT_MARKER {
+            Some(data[50..64].try_into().ok()?)
+        } else {
+            None
+        };
         let hash_len = crate::hash::ADDRESS_HASH_LEN;
         let (requestor, tag) = if data.len() > 2 * hash_len {
             (
@@ -136,7 +143,20 @@ impl PathRequest {
             requestor,
             tag: bytes,
             tag_len: tag.len() as u8,
+            stamp,
         })
+    }
+
+    /// Verify a detached path stamp bound to exactly the target and tag.
+    pub fn stamp_valid(&self, cost: crate::stamp::StampCost) -> bool {
+        match (self.stamp, self.tag()) {
+            (Some(stamp), Some(tag)) => crate::stamp::detached_valid(
+                &crate::network_stamp::path_material(self.target, tag),
+                &stamp,
+                cost,
+            ),
+            _ => false,
+        }
     }
 
     /// The request tag, or `None` for a tagless request.
@@ -259,4 +279,20 @@ mod tests {
             "the same tag for another target is another request"
         );
     }
+}
+
+/// Build the stamped RNS 1.6 three-field path request, naming the requester
+/// even when it is not a transport. Forwarders preserve the original tag/stamp.
+pub fn stamped_path_request(
+    target: AddressHash,
+    requestor: AddressHash,
+    tag: &[u8; TAG_LEN],
+    stamp: &[u8; crate::network_stamp::STAMP_LEN],
+) -> Packet {
+    let mut packet = path_request_via(target, Some(requestor), tag);
+    packet
+        .payload
+        .extend_from_slice(&[crate::network_stamp::EXT_MARKER, 0]);
+    packet.payload.extend_from_slice(stamp);
+    packet
 }

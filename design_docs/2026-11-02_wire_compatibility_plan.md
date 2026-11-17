@@ -40,27 +40,33 @@ checks passed. UDP's Unix test dependency and a shared instance restart
 failure reproduced with the old pins on Windows. Physical radios and RF
 did not participate in qualification.
 
-The same upstream signing identity verified the LXST 0.6.0 manifest; its
-wheel transfer did not complete. LXST is outside the Retinue and Outrider
-oracle. The firmware catalog used by stock `rnodeconf` still names RNode
-1.86, already the stock radio comparison point.
+The [protocol refresh](2026-11-17_reticulum_protocol_refresh.md) implements
+network stamps on destination announces, path requests and link requests in
+Retinue, and fractional delivery and propagation costs in Outrider. Operator
+policy controls emission, enforcement, costs and bounded generation. The
+new mixed-runtime tests include enforcement on/off, authenticated app data and
+ratchets, stamped cold path discovery, reciprocal links, insufficient-work
+refusal and valid retry, and integer/fractional LXMF exchanges.
 
-RNS 1.6.0 adds network stamps on destination announces, path requests and link
-requests. Its defaults leave destination and path request emission and stamp
-enforcement off; a destination can already ask for a stamped link request.
-An ordinary interop pass cannot qualify those cases. Compare stock and Retinue
-with emission enabled and enforcement both off and on. Require authenticated
-app data and ratchets to survive stamped announces, path discovery through a
-stock transport, and a link opening at the advertised cost. Exercise unstamped
-legacy traffic under both policies. Use the current released peer to revisit
-defaults before claiming public network compatibility.
+The shared `StampCost` uses stock's exact 1/256 quantization and digest
+thresholds. Configured propagation values retain precision through
+subtraction of flexibility before the resulting floor is quantized.
+Legacy cost fields remain encoded and validated during the transition.
+Existing integer utilities and tickets keep their prior behavior.
 
-LXMF 1.3.0 uses RNS's fractional stamp calculations. Outrider's delivery
-announce currently represents an integer stamp cost. Qualify fractional costs
-for delivery and propagation separately, including costs immediately above and
-below a threshold and existing integer costs and tickets. Keep the change to
-the stock storage backend separate from the Rust wire target.
+The signed LXST 0.6.0 manifest arrived through Reticulum; its complete wheel
+was fetched through HTTPS after bounded Reticulum failures, then verified
+against that manifest. LXST remains outside these implementations. Its
+assessment and the fresh signed RNS 1.6.0 release query are under
+`Code/testing/murm/testing/receipts/reticulum-refresh-stock`.
+The stock RNode updater still names 1.86.
+
+Destination stamp caches are process-local; durable host/shell provisioning
+is separate. Physical RF, public-network scale and LXST media remain open
+qualification scopes. Recheck signed release identity and on-network defaults
+when qualifying a newer RNS peer.
 
 ## Progress
 
+- 2026-11-17: implemented the RNS 1.6 network stamp and LXMF 1.3 fractional-cost slice; see the linked protocol refresh and software receipts.
 - 2026-11-02: adopted the reviewed open-work successor; original archived whole. No new implementation or acceptance run.

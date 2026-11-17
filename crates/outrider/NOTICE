@@ -16,7 +16,24 @@ upstream revision, file and line range, and target file.
 
 ### Adapted from LXMF
 
-All entries were read from LXMF 1.2.0 (PyPI wheel `lxmf-1.2.0-py3-none-any.whl`,
+LXMF 1.3.0 fractional stamp costs (2026-11-17) were read from the
+publisher-signed `lxmf-1.3.0-py3-none-any.whl`, SHA-256
+`bd26a8f7218519365b1a1940dd0fd1d3a4785aa4970d2de85807c3f846acd382`,
+obtained over Reticulum. Copyright Mark Qvist, Reticulum License.
+
+- Transitional delivery announces prefer the fourth fractional value and
+  retain a rounded-up legacy cost: `LXMF/LXMF.py` 183-198 and
+  `LXMF/LXMRouter.py` 1163-1183. Target: `src/announce.rs`.
+- Propagation announces prefer the eighth fractional cost triplet and retain
+  the legacy triplet: `LXMF/LXMF.py` 229-276 and
+  `LXMF/LXMRouter.py` 387-402. Target: `src/propagation/wire.rs`.
+- Exact cost comparison uses Retinue's shared `stamp::StampCost`, adapted from
+  RNS 1.6.0 `RNS/Stamps.py` 104-196 and 763-866; see Retinue's NOTICE.
+  Targets: `src/stamp.rs`, `src/stamp/parallel.rs`, `src/ticket.rs`,
+  `src/direct.rs`, `src/opportunistic.rs`, `src/inbound.rs`, and
+  `src/propagation/`.
+
+The earlier entries below were read from LXMF 1.2.0 (PyPI wheel `lxmf-1.2.0-py3-none-any.whl`,
 SHA-256 805f053e61082f585efc6d09beffd039fd921174c5e1547a2e690bc479d75b85), with
 RNS 1.5.7 for the encryption paths. The behaviour was adopted and the Rust is
 written for this crate; no Python was translated line by line. The findings are

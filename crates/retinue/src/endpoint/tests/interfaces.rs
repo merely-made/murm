@@ -370,6 +370,9 @@ async fn an_unreachable_hub_is_retried_then_given_up() {
         .attach_tcp(TcpClient {
             reconnect_wait: Duration::from_millis(20),
             max_reconnect_tries: Some(2),
+            // Windows may wait about a second before refusing loopback. Keep each
+            // attempt inside the test's two-second retry budget on every host.
+            connect_timeout: Duration::from_millis(100),
             ..TcpClient::new("127.0.0.1", port)
         })
         .await

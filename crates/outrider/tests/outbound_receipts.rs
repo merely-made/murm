@@ -1,6 +1,7 @@
 //! Outbound receipts: what a send learns about its delivery, and stamping that costs no
 //! more than it must.
 
+use outrider::StampCost;
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -73,7 +74,7 @@ async fn an_opportunistic_receipt_is_delivered_once_the_recipient_proves() {
 async fn an_oversized_stamped_message_is_refused_before_minting() {
     let pair = pair(DeliveryAnnounce {
         display_name: Some(b"Costly".to_vec()),
-        stamp_cost: Some(250),
+        stamp_cost: Some(StampCost::from_integer(250)),
     })
     .await;
     // Content that fits one packet bare, but not with the 34 bytes a stamp adds.

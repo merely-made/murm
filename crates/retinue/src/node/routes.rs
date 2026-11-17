@@ -183,6 +183,7 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
                 hops,
                 learned: now,
                 mode,
+                link_cost: None,
             };
             return;
         }
@@ -206,6 +207,7 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
             hops,
             learned: now,
             mode,
+            link_cost: None,
         });
     }
 

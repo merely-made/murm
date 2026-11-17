@@ -211,6 +211,10 @@ pub struct Announce {
     /// The peer's current ratchet public key, if it advertised one.
     pub ratchet: Option<[u8; RATCHET_LEN]>,
     pub app_data: Vec<u8>,
+    /// Authenticated RNS 1.6 destination stamp and announced link cost.
+    pub network_stamp: Option<crate::network_stamp::NetworkStamp>,
+    // Retain unknown flags exactly if policy later treats this suffix as application data.
+    stamp_extension: Option<[u8; crate::network_stamp::ANNOUNCE_EXT_LEN]>,
 }
 
 impl Announce {
@@ -328,13 +332,60 @@ impl Announce {
             }
         }
 
+        // Parse only after checking the signature: the extension and cost are signed.
+        let network_stamp = crate::network_stamp::NetworkStamp::decode(&app_data);
+        let stamp_extension = network_stamp.map(|_| {
+            app_data[app_data.len() - crate::network_stamp::ANNOUNCE_EXT_LEN..]
+                .try_into()
+                .expect("extension length")
+        });
+        let app_data = if network_stamp.is_some() {
+            app_data[..app_data.len() - crate::network_stamp::ANNOUNCE_EXT_LEN].to_vec()
+        } else {
+            app_data
+        };
         Ok(Self {
+            network_stamp,
+            stamp_extension,
             identity,
             destination,
             name_hash,
             rand_hash,
             ratchet,
             app_data,
+        })
+    }
+
+    /// Apply operator admission policy after signature verification. Like stock RNS,
+    /// a suffix with insufficient work remains application data when enforcement is
+    /// disabled, and its link cost must not be cached. Unknown flags remain byte exact.
+    pub fn apply_stamp_policy(&mut self, cost: crate::stamp::StampCost, enforce: bool) -> bool {
+        if self.stamp_valid(cost) {
+            return true;
+        }
+        if enforce {
+            return false;
+        }
+        if let Some(extension) = self.stamp_extension.take() {
+            self.app_data.extend_from_slice(&extension);
+            self.network_stamp = None;
+        }
+        true
+    }
+
+    /// Check a destination stamp against operator policy. Signature validation is
+    /// independent: a stamp does not authenticate the key or application data.
+    pub fn stamp_valid(&self, cost: crate::stamp::StampCost) -> bool {
+        self.network_stamp.is_some_and(|ext| {
+            crate::stamp::detached_valid(
+                &crate::network_stamp::destination_material(
+                    self.destination,
+                    &self.identity,
+                    self.name_hash,
+                ),
+                &ext.stamp,
+                cost,
+            )
         })
     }
 
@@ -496,4 +547,19 @@ mod tests {
         assert_eq!(decoded.timebase(), 0x00_6a_55_a7_8a);
         assert_eq!(decoded.into_bytes(), wire);
     }
+}
+
+/// Build and sign a destination announce carrying a previously generated stamp.
+/// The extension is authenticated along with application data and ratchet.
+pub fn build_stamped(
+    identity: &PrivateIdentity,
+    name_hash: NameHash,
+    blob: &AnnounceBlob,
+    ratchet: Option<&[u8; RATCHET_LEN]>,
+    app_data: &[u8],
+    stamp: crate::network_stamp::NetworkStamp,
+) -> Packet {
+    let mut data = app_data.to_vec();
+    data.extend_from_slice(&stamp.encode());
+    build(identity, name_hash, blob, ratchet, &data)
 }

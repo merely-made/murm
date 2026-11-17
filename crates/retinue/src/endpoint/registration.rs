@@ -138,7 +138,17 @@ impl Shared {
     ) -> Packet {
         let destination = name.destination_hash(self.identity.public());
         let blob = self.next_announce_blob(destination, source_seconds);
-        announce::build(&self.identity, name.name_hash(), &blob, ratchet, app_data)
+        match self.own_network_stamp(destination) {
+            Some(stamp) => announce::build_stamped(
+                &self.identity,
+                name.name_hash(),
+                &blob,
+                ratchet,
+                app_data,
+                stamp,
+            ),
+            None => announce::build(&self.identity, name.name_hash(), &blob, ratchet, app_data),
+        }
     }
 
     fn next_announce_blob(&self, destination: AddressHash, source_seconds: u64) -> AnnounceBlob {
@@ -334,6 +344,9 @@ impl Endpoint {
 
     /// Emit an announce for a destination on every interface.
     pub fn announce(&self, name: &DestinationName, app_data: &[u8]) {
+        if super::network_stamps::announce_stamped(self, name, app_data) {
+            return;
+        }
         let pkt = self.build_announce_at(name, app_data, host_announce_seconds());
         self.shared.broadcast(pkt);
     }

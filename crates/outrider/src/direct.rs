@@ -1,5 +1,6 @@
 //! Direct LXMF delivery over Retinue links and Resources.
 
+use crate::stamp::StampCost;
 use retinue::endpoint::{
     AcceptedResource, Endpoint, InterfaceId, LinkDelivery, PayloadMode, PeerAnnounce,
     ProofStrategy, ReceivedPayload, ResourceTransferConfig, is_link_setup_timeout,
@@ -15,7 +16,7 @@ use crate::codec::{
 };
 use crate::delivered::DeliveredCache;
 use crate::inbound::{Verification, check_stamp, unix_now, verify};
-use crate::stamp::{MESSAGE_WORKBLOCK_ROUNDS, STAMP_LEN, find_parallel, valid_streamed};
+use crate::stamp::{MESSAGE_WORKBLOCK_ROUNDS, STAMP_LEN, find_parallel_cost, valid_streamed_cost};
 use crate::ticket::{StampFault, StampOutcome, TICKET_LEN, is_ticket_stamp};
 
 /// Link setups a direct send tries before giving up, as LXMF tries a delivery five times.
@@ -108,11 +109,11 @@ pub async fn send_with_resource_config(
         else {
             return Err(DirectError::StampRequired(target));
         };
-        if !valid_streamed(
+        if !valid_streamed_cost(
             &prepared.message_id,
             MESSAGE_WORKBLOCK_ROUNDS,
             stamp,
-            u16::from(target),
+            target,
         ) {
             return Err(DirectError::InvalidStamp);
         }
@@ -157,10 +158,10 @@ pub async fn send_stamped_with_resource_config(
     let ticketed = is_ticket_stamp(payload.stamp.as_deref());
     let prepared = match announce.stamp_cost.filter(|_| !ticketed) {
         Some(target) => {
-            let (stamp, _) = find_parallel(
+            let (stamp, _) = find_parallel_cost(
                 &prepared.message_id,
                 MESSAGE_WORKBLOCK_ROUNDS,
-                u16::from(target),
+                target,
                 stamp_seed,
                 max_stamp_attempts,
             )
@@ -277,7 +278,7 @@ pub async fn receive_with_stamp_cost(
     accepted: AcceptedResource,
     delivered: &DeliveredCache,
     max_message_bytes: usize,
-    stamp_cost: Option<u8>,
+    stamp_cost: Option<StampCost>,
 ) -> Result<ReceivedDirect, DirectError> {
     receive_with_stamp_cost_and_resource_config(
         endpoint,
@@ -303,7 +304,7 @@ pub async fn receive_with_stamp_cost_and_resource_config(
     accepted: AcceptedResource,
     delivered: &DeliveredCache,
     max_message_bytes: usize,
-    stamp_cost: Option<u8>,
+    stamp_cost: Option<StampCost>,
     resource_config: ResourceTransferConfig,
 ) -> Result<ReceivedDirect, DirectError> {
     let no_tickets = |_: &AddressHash| Vec::new();
@@ -327,7 +328,7 @@ pub async fn receive_with_tickets(
     mut accepted: AcceptedResource,
     delivered: &DeliveredCache,
     max_message_bytes: usize,
-    stamp_cost: Option<u8>,
+    stamp_cost: Option<StampCost>,
     inbound_tickets: impl Fn(&AddressHash) -> Vec<[u8; TICKET_LEN]>,
     resource_config: ResourceTransferConfig,
 ) -> Result<ReceivedDirect, DirectError> {
@@ -393,7 +394,7 @@ pub enum DirectError {
     #[error("the message was already delivered here")]
     Duplicate([u8; 32]),
     #[error("the peer requires a direct-delivery stamp with cost {0}")]
-    StampRequired(u8),
+    StampRequired(StampCost),
     #[error("the direct-delivery stamp is invalid")]
     InvalidStamp,
     #[error("the configured proof-of-work attempt budget was exhausted")]

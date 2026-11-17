@@ -1,5 +1,6 @@
 //! A ticket issued in one opportunistic message pays for the reply in place of proof of work.
 
+use outrider::StampCost;
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -47,7 +48,7 @@ async fn a_held_ticket_replaces_proof_of_work_on_the_reply() {
         register_opportunistic(&alice, &DeliveryAnnounce::named(b"Alice"), ratchets()).unwrap();
     let costly = DeliveryAnnounce {
         display_name: Some(b"Bob".to_vec()),
-        stamp_cost: Some(8),
+        stamp_cost: Some(StampCost::from_integer(8)),
     };
     let bob_destination = register_opportunistic(&bob, &costly, ratchets()).unwrap();
     let to_bob = peer(&alice, bob_destination).await;
@@ -78,11 +79,15 @@ async fn a_held_ticket_replaces_proof_of_work_on_the_reply() {
     let receipt =
         send_opportunistic_stamped(&alice, &alice_identity, &to_bob, &reply, [0; 32], 0).unwrap();
     let packet = single(&bob).await;
-    let accepted =
-        receive_opportunistic_with_tickets(&bob, packet.clone(), &delivered, 4096, Some(8), |s| {
-            bob_book.inbound(s, NOW)
-        })
-        .unwrap();
+    let accepted = receive_opportunistic_with_tickets(
+        &bob,
+        packet.clone(),
+        &delivered,
+        4096,
+        Some(StampCost::from_integer(8)),
+        |s| bob_book.inbound(s, NOW),
+    )
+    .unwrap();
     assert_eq!(accepted.message.message_id, receipt.message_id);
 
     // Without Bob's book the same stamp is no stamp at all.
@@ -92,7 +97,7 @@ async fn a_held_ticket_replaces_proof_of_work_on_the_reply() {
             packet,
             &DeliveredCache::default(),
             4096,
-            Some(8)
+            Some(StampCost::from_integer(8))
         ),
         Err(OpportunisticError::InvalidStamp)
     ));

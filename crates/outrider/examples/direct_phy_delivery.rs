@@ -4,6 +4,7 @@
 //! Resource-backed message. The receiver authenticates the sender and enforces
 //! the cost advertised by its `lxmf.delivery` destination.
 
+use outrider::StampCost;
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -73,7 +74,7 @@ async fn transfer(spec: Transfer<'_>) -> Result<(), Box<dyn std::error::Error>> 
             accepted,
             &outrider::DeliveredCache::default(),
             DEFAULT_MAX_MESSAGE_BYTES,
-            Some(STAMP_COST),
+            Some(StampCost::from_integer(STAMP_COST as u16)),
             spec.resource_config,
         )
         .await
@@ -180,7 +181,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         &left,
         &DeliveryAnnounce {
             display_name: Some(b"Outrider RF Left".to_vec()),
-            stamp_cost: Some(STAMP_COST),
+            stamp_cost: Some(StampCost::from_integer((STAMP_COST).into())),
         },
     )?;
     let left_announce =
@@ -189,7 +190,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         &right,
         &DeliveryAnnounce {
             display_name: Some(b"Outrider RF Right".to_vec()),
-            stamp_cost: Some(STAMP_COST),
+            stamp_cost: Some(StampCost::from_integer((STAMP_COST).into())),
         },
     )?;
     let right_announce =

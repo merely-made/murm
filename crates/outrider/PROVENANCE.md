@@ -8,7 +8,7 @@ the crate encodes names its source class here.
 
 ## Source boundary
 
-Implementation facts come from three places only:
+Before the 2026-10-05 license adoption, implementation facts came from three places:
 
 1. The public LXMF specification prose and diagrams, and the Reticulum
    manual's public documentation.
@@ -40,6 +40,17 @@ are committed as fixtures so CI replays them with no Python. Release notes
 pin the stock baseline being matched.
 
 ## Record
+
+### 2026-11-17: fractional stamp costs
+
+The publisher-signed LXMF 1.3.0 and RNS 1.6.0 wheels obtained over Reticulum
+supplied the source adaptations listed in NOTICE. Independent stock API
+observations cover quantization, exact threshold boundaries, delivery fourth
+and propagation eighth item precedence, and malformed legacy shapes.
+Mixed-runtime tests separately exercise integer and fractional delivery and
+propagation in both directions. Receipts:
+`Code/testing/murm/testing/receipts/lxmf-fractional-costs` and
+`Code/testing/murm/testing/receipts/reticulum-refresh-stock`.
 
 ### 2026-07-27: message object
 

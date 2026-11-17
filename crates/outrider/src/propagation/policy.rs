@@ -5,6 +5,7 @@ use std::collections::{HashMap, HashSet};
 use std::sync::{Mutex, MutexGuard};
 use std::time::Duration;
 
+use crate::stamp::StampCost;
 use rmpv::Value;
 
 use super::msgpack::GetRequest;
@@ -49,12 +50,10 @@ impl NodePolicy {
         }
     }
 
-    pub fn stamp_floor(&self) -> u16 {
-        u16::from(
-            self.costs
-                .propagation
-                .saturating_sub(self.costs.flexibility),
-        )
+    pub fn stamp_floor(&self) -> StampCost {
+        // Stock subtracts raw flexibility before quantizing the resulting target.
+        let floor = (self.costs.propagation.to_f64() - self.costs.flexibility.to_f64()).max(0.0);
+        StampCost::from_f64(floor).unwrap_or(StampCost::MAX)
     }
 
     pub fn allows(&self, identity_hash: &[u8; 16]) -> bool {
@@ -160,14 +159,14 @@ impl PropagationNode {
 /// Seconds of CPU for a large batch, so hosts run it off the executor.
 pub(super) fn score_stamps(
     entries: Vec<PropagationEntry>,
-    floor: u16,
+    floor: StampCost,
 ) -> (Vec<(PropagationEntry, u16)>, usize) {
     let total = entries.len();
     let valid: Vec<_> = entries
         .into_iter()
         .filter_map(|entry| {
-            let value = entry.stamp_value();
-            (value >= floor).then_some((entry, value))
+            let (value, valid) = entry.score_stamp_cost(floor);
+            valid.then_some((entry, value))
         })
         .collect();
     let invalid = total - valid.len();

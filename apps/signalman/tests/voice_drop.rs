@@ -158,9 +158,9 @@ async fn file_backed_voice_crosses_a_propagation_node_once_and_retains_receipts(
         transfer_limit_kb: 256.0,
         sync_limit_kb: 10_240.0,
         costs: PropagationCosts {
-            propagation: 0,
-            flexibility: 0,
-            peering: 0,
+            propagation: outrider::PropagationCost::from_integer(0),
+            flexibility: outrider::PropagationCost::from_integer(0),
+            peering: outrider::PropagationCost::from_integer(0),
         },
         metadata: Vec::new(),
     };
@@ -220,7 +220,7 @@ async fn file_backed_voice_crosses_a_propagation_node_once_and_retains_receipts(
         &payload,
         &PropagationStamps {
             delivery_cost: None,
-            propagation_cost: 0,
+            propagation_cost: retinue::stamp::StampCost::from_integer(0),
             seed: [0; 32],
             max_attempts: 100_000,
         },
@@ -240,9 +240,9 @@ async fn file_backed_voice_crosses_a_propagation_node_once_and_retains_receipts(
         }),
         NodePolicy {
             costs: PropagationCosts {
-                propagation: 0,
-                flexibility: 0,
-                peering: 0,
+                propagation: outrider::PropagationCost::from_integer(0),
+                flexibility: outrider::PropagationCost::from_integer(0),
+                peering: outrider::PropagationCost::from_integer(0),
             },
             max_transfer_bytes: 64 * 1024,
             allowed: None,

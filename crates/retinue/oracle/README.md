@@ -60,6 +60,28 @@ and a local Rust/Python wire test are separate pieces of evidence. Set explicit
 config directories even for `rngit release --offline`: some versions start the
 Reticulum instance before doing the local verification.
 
+### Network stamps and fractional costs
+
+The stock stamp matrices use isolated loopback profiles and already built Rust
+peers. Run from the repository root and choose new receipt directories:
+
+```powershell
+$env:CARGO_TARGET_DIR = 'C:/t/cargo-targets/murm'
+$env:CARGO_BUILD_BUILD_DIR = 'C:/t/cargo-targets/murm/build'
+$python = './crates/retinue/oracle/.venv/Scripts/python.exe'
+cargo build -p retinue -p outrider --examples
+cargo build -p outrider --release --example stock_propagation_server
+& $python ./crates/retinue/oracle/interop_network_stamps.py --example "$env:CARGO_TARGET_DIR/debug/examples/network_stamps.exe" --output $network_receipt
+& $python ./crates/outrider/oracle/capture_fractional_stamps.py --example "$env:CARGO_TARGET_DIR/debug/examples/fractional_stamps.exe" --output $cost_receipt
+& $python ./crates/outrider/oracle/interop_fractional_costs.py --target $env:CARGO_TARGET_DIR --output $delivery_receipt
+```
+
+The Unix executables omit `.exe`. The network matrix covers emission and
+enforcement, preserved app data and ratchets, cold path discovery, reciprocal
+links, and rejected requests followed by valid retries. The cost capture
+compares exact stock thresholds and transition announce shapes; the delivery
+matrix separately exchanges integer and fractional stamped messages.
+
 The separate [September 26 signed-artifact receipt](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/receipts/rns-1.5.4-signed-artifact/README.md)
 qualifies six project-input cases against `rnid 1.5.4`. All match the retained 1.5.2
 captures byte for byte; Rust replay covers both fixture files. This does not re-pin

@@ -16,7 +16,7 @@ use crate::link::{self, Link, LinkMode, LinkTrailer};
 use crate::link_liveness::Liveness;
 use crate::request::{Request, Response};
 
-use super::entropy::{ephemeral_seed, next_iv};
+use super::entropy::next_iv;
 use super::facts::{LinkDirection, LinkRemoteFact};
 use super::interface::InterfaceId;
 use super::reliable_driver::register_reliable_stream;
@@ -246,7 +246,7 @@ impl Endpoint {
         if !self.shared.is_running() {
             return Err(endpoint_closed());
         }
-        let ephemeral = ephemeral_seed();
+        let ephemeral = super::network_stamps::link_seed(&self.shared, dest).await?;
         // The next hop's signalled MTU, or the protocol MTU for want of a route (`Link.py`
         // 304-310), under the configured ceiling.
         let link_mtu = self.shared.link_mtu.load(Ordering::Relaxed).min(

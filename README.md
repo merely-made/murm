@@ -100,7 +100,9 @@ index, and a staging step builds the flashable packages (see its README).
   The wheels came over Reticulum and were checked against the publisher's
   signing identity. The Windows loopback qualification passed 35 Retinue
   and 18 Outrider gates. See the [wire compatibility plan](design_docs/2026-11-02_wire_compatibility_plan.md)
-  for the receipt and the open network stamp and fractional LXMF cost work. The 0.2.0
+  for the receipt. The [protocol refresh](design_docs/2026-11-17_reticulum_protocol_refresh.md)
+  adds configurable network stamps and fractional LXMF costs, qualified against
+  stock over loopback. The 0.2.0
   [link lifecycle](design_docs/archive_docs/2026-11-02/2026-10-02_node_link_lifecycle_plan.md) work
   landed: route learning, `open_link(now)`, link-request expiry, and
   own-echo and duplicate filtering. These results cover the measured

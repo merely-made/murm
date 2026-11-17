@@ -1,6 +1,8 @@
 //! A propagation node's link service against a raw client: the stock request grammar,
 //! error answers and submission policy.
 
+use outrider::PropagationCost;
+use outrider::StampCost;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::Duration;
@@ -71,9 +73,9 @@ async fn pair(seed: u8) -> Pair {
         transfer_limit_kb: 256.0,
         sync_limit_kb: 10_240.0,
         costs: PropagationCosts {
-            propagation: 8,
-            flexibility: 0,
-            peering: 18,
+            propagation: PropagationCost::from_integer(8),
+            flexibility: PropagationCost::from_integer(0),
+            peering: PropagationCost::from_integer(18),
         },
         metadata: vec![(
             Value::from(PROPAGATION_METADATA_NAME),
@@ -97,9 +99,9 @@ async fn pair(seed: u8) -> Pair {
 fn policy() -> NodePolicy {
     NodePolicy {
         costs: PropagationCosts {
-            propagation: 8,
-            flexibility: 0,
-            peering: 18,
+            propagation: PropagationCost::from_integer(8),
+            flexibility: PropagationCost::from_integer(0),
+            peering: PropagationCost::from_integer(18),
         },
         max_transfer_bytes: 2_000,
         allowed: None,
@@ -120,7 +122,7 @@ fn state(policy: NodePolicy) -> Arc<PropagationNode> {
 fn entry(recipient: &PrivateIdentity, index: u8, cost: u16) -> PropagationEntry {
     let stamps = PropagationStamps {
         delivery_cost: None,
-        propagation_cost: cost,
+        propagation_cost: StampCost::from_integer(cost),
         seed: [index; 32],
         max_attempts: 1 << 20,
     };
@@ -307,7 +309,7 @@ async fn a_bad_stamp_resource_throttles_its_identified_sender() {
 async fn a_packet_entry_too_short_for_a_stamp_is_rejected_and_the_rest_kept() {
     let pair = pair(0x62).await;
     let mut policy = policy();
-    policy.costs.propagation = 0;
+    policy.costs.propagation = PropagationCost::ZERO;
     let node = state(policy);
     let good = entry(&pair.client_identity, 1, 0);
     let server = serve(&pair, &node);
@@ -335,7 +337,7 @@ async fn a_packet_entry_too_short_for_a_stamp_is_rejected_and_the_rest_kept() {
 async fn a_packet_the_store_refuses_as_too_large_goes_unproven() {
     let pair = pair(0x62).await;
     let mut policy = policy();
-    policy.costs.propagation = 0;
+    policy.costs.propagation = PropagationCost::ZERO;
     let node = Arc::new(PropagationNode::new(
         PropagationStore::new(PropagationStoreLimits {
             max_message_bytes: 100,
@@ -367,7 +369,7 @@ async fn a_packet_the_store_refuses_as_too_large_goes_unproven() {
 async fn a_stored_packet_is_proven() {
     let pair = pair(0x62).await;
     let mut policy = policy();
-    policy.costs.propagation = 0;
+    policy.costs.propagation = PropagationCost::ZERO;
     let node = state(policy);
     let server = serve(&pair, &node);
     let mut session = open(&pair).await;
@@ -418,7 +420,7 @@ async fn a_resource_past_what_the_store_admits_is_refused_at_advertisement() {
 async fn a_client_transfer_of_two_entries_is_ignored() {
     let pair = pair(0x62).await;
     let mut policy = policy();
-    policy.costs.propagation = 0;
+    policy.costs.propagation = PropagationCost::ZERO;
     let node = state(policy);
     let server = serve(&pair, &node);
     let batch = PropagationBatch {

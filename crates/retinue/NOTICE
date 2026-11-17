@@ -15,7 +15,30 @@ revision, file and line range, and target file.
 
 ### Adapted from RNS
 
-All entries were read from RNS 1.5.7 (PyPI wheel `rns-1.5.7-py3-none-any.whl`,
+RNS 1.6.0 network stamps (2026-11-17) were read from the publisher-signed wheel
+`rns-1.6.0-py3-none-any.whl`, SHA-256
+`fcf2d07eebafea7e56a94542bd74646e451b0f33bb3efb5f914bbbba38b39f36`,
+obtained over Reticulum. Copyright (c) 2016-2026 Mark Qvist, Reticulum License.
+
+- Quantized costs, normalized values, exact threshold table and inclusive
+  verification: `RNS/Stamps.py` 104-196 and 763-866.
+  Target: `src/stamp.rs`.
+- Destination extension framing, signed application data, advertised link cost
+  and stamp admission: `RNS/Destination.py` 286-425 and
+  `RNS/Identity.py` 749-930. Targets: `src/announce.rs`,
+  `src/network_stamp.rs`, `src/endpoint/network_stamps.rs`, `src/node/`.
+- Path request extension and target/tag binding: `RNS/Transport.py`
+  2078-2125, 3680-3745 and 4008-4050. Targets: `src/path.rs`,
+  `src/endpoint/discovery.rs`, `src/endpoint/network_stamps.rs`, `src/node/`.
+- Link work embedded in the ephemeral public key set:
+  `RNS/Stamps.py` 317-387, `RNS/Link.py` 183-200 and 310-373, and
+  `RNS/Transport.py` 2725-2765. Targets: `src/network_stamp.rs`, `src/link/`,
+  `src/endpoint/link_setup.rs`, `src/node/`.
+
+The Rust implementation uses bounded jobs and configurable capacities; Node
+stamp generation receives caller-owned entropy and does not acquire a clock.
+
+The earlier entries below were read from RNS 1.5.7 (PyPI wheel `rns-1.5.7-py3-none-any.whl`,
 SHA-256 0e4aaf8cc47f770da34572d2215b45fea900e104b009551600eb9741a41faddf). The
 behaviour was adopted and the Rust is written for this crate; no Python was
 translated line by line. The findings are recorded in

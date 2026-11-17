@@ -30,6 +30,7 @@ mod link_setup;
 mod listen;
 mod local;
 mod mtu;
+mod network_stamps;
 mod paths;
 #[cfg(feature = "pipe")]
 mod pipe;
@@ -57,6 +58,7 @@ mod transit;
 mod tunnel;
 mod watchdog;
 
+pub use crate::network_stamp::NetworkStampPolicy;
 pub use crate::resource_transfer::ResourceReceiveLimits;
 pub use announces::AnnounceFreshnessPolicy;
 pub use dial::TcpClient;

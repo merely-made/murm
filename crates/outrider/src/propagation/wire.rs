@@ -1,5 +1,6 @@
 //! Wire values: the node announce, stamped entries, messages, and submission batches.
 
+use crate::stamp::StampCost;
 use retinue::hash::full_hash;
 use retinue::identity::{Identity, PrivateIdentity};
 use retinue::token::decrypt_to_identity;
@@ -13,13 +14,46 @@ use super::{
 };
 use crate::announce::delivery_destination;
 use crate::codec::{DEFAULT_MAX_MESSAGE_BYTES, DecodedLxmf, decode_bounded};
-use crate::stamp::{PROPAGATION_WORKBLOCK_ROUNDS, STAMP_LEN, valid_streamed, value_streamed};
+use crate::stamp::{
+    PROPAGATION_WORKBLOCK_ROUNDS, STAMP_LEN, valid_streamed, valid_streamed_cost, value_streamed,
+    value_streamed_fractional,
+};
+
+/// A finite configured or announced propagation cost before threshold quantization.
+/// Stock subtracts raw flexibility before quantizing the resulting admission floor.
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub struct PropagationCost(f64);
+
+impl PropagationCost {
+    pub const ZERO: Self = Self(0.0);
+    pub const fn from_integer(value: u16) -> Self {
+        Self(value as f64)
+    }
+    pub fn from_f64(value: f64) -> Option<Self> {
+        value.is_finite().then_some(Self(value))
+    }
+    pub const fn to_f64(self) -> f64 {
+        self.0
+    }
+    pub fn quantized(self) -> StampCost {
+        StampCost::from_f64(self.0).expect("propagation costs are finite")
+    }
+    pub fn ceil(self) -> u16 {
+        self.0.ceil() as u16
+    }
+}
+
+impl core::fmt::Display for PropagationCost {
+    fn fmt(&self, out: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        self.0.fmt(out)
+    }
+}
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct PropagationCosts {
-    pub propagation: u8,
-    pub flexibility: u8,
-    pub peering: u8,
+    pub propagation: PropagationCost,
+    pub flexibility: PropagationCost,
+    pub peering: PropagationCost,
 }
 
 /// The application data announced by an LXMF propagation node (`LXMRouter.py` 332-346):
@@ -28,7 +62,7 @@ pub struct PropagationCosts {
 /// Decoding is as tolerant as stock's `pn_announce_data_is_valid` (`LXMF.py` 225-250): extra
 /// elements and extra costs are ignored, the legacy flag may be any type, and numbers may be
 /// anything `int()` takes, floats included (lxmd configures its limits as floats). A negative
-/// timebase reads as 0 and costs saturate to 0..=255. Unknown metadata keys remain opaque
+/// timebase reads as 0 and costs quantize on stock's 1/256 grid with its cap of 100. Unknown metadata keys remain opaque
 /// MessagePack.
 #[derive(Clone, Debug, PartialEq)]
 pub struct PropagationAnnounce {
@@ -54,11 +88,16 @@ impl PropagationAnnounce {
             encode_number(self.transfer_limit_kb)?,
             encode_number(self.sync_limit_kb)?,
             Value::Array(vec![
-                Value::from(self.costs.propagation),
-                Value::from(self.costs.flexibility),
-                Value::from(self.costs.peering),
+                encode_number(self.costs.propagation.to_f64().ceil())?,
+                encode_number(self.costs.flexibility.to_f64().ceil())?,
+                encode_number(self.costs.peering.to_f64().ceil())?,
             ]),
             Value::Map(self.metadata.clone()),
+            Value::Array(vec![
+                Value::F64(self.costs.propagation.to_f64()),
+                Value::F64(self.costs.flexibility.to_f64()),
+                Value::F64(self.costs.peering.to_f64()),
+            ]),
         ]);
         encode_value(&value)
     }
@@ -85,6 +124,21 @@ impl PropagationAnnounce {
         };
         let (Value::Array(costs), Value::Map(metadata)) = (costs, metadata) else {
             return Err(PropagationError::InvalidAnnounce);
+        };
+        // Stock validates both legacy and fractional triplets before choosing the latter.
+        let [legacy_p, legacy_f, legacy_peer, ..] = costs.as_slice() else {
+            return Err(PropagationError::InvalidAnnounce);
+        };
+        cost(legacy_p)?;
+        cost(legacy_f)?;
+        cost(legacy_peer)?;
+        let costs = if let Some(value) = parts.get(7) {
+            let Value::Array(fractional) = value else {
+                return Err(PropagationError::InvalidAnnounce);
+            };
+            fractional
+        } else {
+            costs
         };
         let [propagation, flexibility, peering, ..] = costs.as_slice() else {
             return Err(PropagationError::InvalidAnnounce);
@@ -154,9 +208,19 @@ pub(super) fn number(value: &Value) -> Result<f64, PropagationError> {
     .ok_or(PropagationError::InvalidAnnounce)
 }
 
-/// A stamp cost, truncated as `int()` does and held to 0..=255 where stock keeps any integer.
-fn cost(value: &Value) -> Result<u8, PropagationError> {
-    Ok(number(value)?.trunc() as u8)
+/// A finite numeric cost on stock's quantized grid.
+fn cost(value: &Value) -> Result<PropagationCost, PropagationError> {
+    let numeric = match value {
+        Value::String(text) => text
+            .as_str()
+            .and_then(|text| text.trim().parse::<f64>().ok()),
+        Value::Binary(text) => core::str::from_utf8(text)
+            .ok()
+            .and_then(|text| text.trim().parse::<f64>().ok()),
+        _ => number(value).ok(),
+    }
+    .ok_or(PropagationError::InvalidAnnounce)?;
+    PropagationCost::from_f64(numeric).ok_or(PropagationError::InvalidAnnounce)
 }
 
 /// An integer when the value is whole, so integral limits stay byte-identical to stock's.
@@ -229,6 +293,37 @@ impl PropagationEntry {
             PROPAGATION_WORKBLOCK_ROUNDS,
             &self.stamp,
             target,
+        )
+    }
+
+    /// Derive once for node admission and its legacy integer score metadata.
+    pub(super) fn score_stamp_cost(&self, cost: StampCost) -> (u16, bool) {
+        let material = self.transient_id();
+        let mut derivation = crate::stamp::Derivation::new(&material, PROPAGATION_WORKBLOCK_ROUNDS);
+        derivation.advance(PROPAGATION_WORKBLOCK_ROUNDS);
+        (
+            derivation.value(&self.stamp).expect("finished derivation"),
+            derivation
+                .valid_cost(&self.stamp, cost)
+                .expect("finished derivation"),
+        )
+    }
+
+    /// Check the exact fractional threshold without rounding it down to a bit count.
+    pub fn validate_stamp_cost(&self, cost: StampCost) -> bool {
+        valid_streamed_cost(
+            &self.transient_id(),
+            PROPAGATION_WORKBLOCK_ROUNDS,
+            &self.stamp,
+            cost,
+        )
+    }
+
+    pub fn fractional_stamp_value(&self) -> f64 {
+        value_streamed_fractional(
+            &self.transient_id(),
+            PROPAGATION_WORKBLOCK_ROUNDS,
+            &self.stamp,
         )
     }
 

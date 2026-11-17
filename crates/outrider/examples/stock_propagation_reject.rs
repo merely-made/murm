@@ -4,6 +4,8 @@
 //! The first submission works from a stale copy of the node's announce whose cost reads 0,
 //! as a client holding an announce from before the node raised its cost would.
 
+use outrider::PropagationCost;
+use outrider::StampCost;
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -40,7 +42,7 @@ async fn submit(
     let prepared = loop {
         let stamps = PropagationStamps {
             delivery_cost: None,
-            propagation_cost: target,
+            propagation_cost: StampCost::from_integer(target),
             seed: [nonce; 32],
             max_attempts: 1_000_000,
         };
@@ -104,19 +106,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             break (candidate, announce);
         }
     };
-    let floor = u16::from(
-        announce
-            .costs
-            .propagation
-            .saturating_sub(announce.costs.flexibility),
-    );
+    let floor = (announce.costs.propagation.to_f64() - announce.costs.flexibility.to_f64())
+        .max(0.0)
+        .floor() as u16;
     println!(
         "NODE {} cost={} floor={floor}",
         node.destination, announce.costs.propagation
     );
 
     let mut stale = announce.clone();
-    stale.costs.propagation = 0;
+    stale.costs.propagation = PropagationCost::ZERO;
     let stale_node = PeerAnnounce {
         app_data: stale.encode()?,
         ..node.clone()
@@ -135,7 +134,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         other => println!("NOT_REJECTED {other:?}"),
     }
 
-    let target = u16::from(announce.costs.propagation);
+    let target = announce.costs.propagation.ceil();
     let (accepted_id, accepted) =
         submit(&endpoint, &sender, &node, b"ACCEPTED TITLE", target, None).await?;
     match accepted {

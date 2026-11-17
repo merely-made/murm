@@ -1,8 +1,5 @@
 //! Announce ingress: admission, held release, freshness, and relay.
 
-use alloc::vec::Vec;
-
-use std::collections::HashMap;
 use std::io;
 use std::sync::Arc;
 use std::sync::atomic::Ordering;
@@ -69,78 +66,9 @@ pub(super) fn duration_ticks(duration: Duration) -> u64 {
     duration.as_millis().min(u128::from(u64::MAX)) as u64
 }
 
-/// A verified announce deferred by a noisy interface. It retains the ingress fact through
-/// release so a later route cannot be accidentally attributed to a different bearer.
-pub(super) struct HeldAnnounce {
-    pub(super) interface: InterfaceId,
-    pub(super) packet: Packet,
-    pub(super) announce: Announce,
-}
-
-/// The endpoint holds at most this many interfaces' worth of the endpoint `held_capacity`,
-/// so many noisy interfaces (a listener's clients) cannot each fill a full share.
-const HELD_SHARES: usize = 8;
-
-/// Held announces by ingress interface (`Interface.py` 72, 270-297). No interface keeps an
-/// empty queue, and `total` is the sum of the queue lengths.
-#[derive(Default)]
-pub(super) struct HeldAnnounces {
-    by_iface: HashMap<InterfaceId, Vec<HeldAnnounce>>,
-    total: usize,
-}
-
-impl HeldAnnounces {
-    /// Hold `held`, replacing one held for its destination in place (`Interface.py`
-    /// 270-276). False when its interface holds `capacity` or the endpoint `ceiling`.
-    pub(super) fn hold(&mut self, held: HeldAnnounce, capacity: usize, ceiling: usize) -> bool {
-        let iface = held.interface;
-        let queue = self.by_iface.entry(iface).or_default();
-        let destination = held.announce.destination;
-        if let Some(existing) = queue
-            .iter_mut()
-            .find(|existing| existing.announce.destination == destination)
-        {
-            *existing = held;
-            return true;
-        }
-        if queue.len() < capacity && self.total < ceiling {
-            queue.push(held);
-            self.total += 1;
-            return true;
-        }
-        if queue.is_empty() {
-            self.by_iface.remove(&iface);
-        }
-        false
-    }
-
-    /// How many announces `iface` holds (`len(interface.held_announces)`).
-    pub(super) fn held(&self, iface: InterfaceId) -> usize {
-        self.by_iface.get(&iface).map_or(0, Vec::len)
-    }
-
-    /// The fewest-hops announce `iface` holds, the oldest among equals (`Interface.py` 285).
-    pub(super) fn take_nearest(&mut self, iface: InterfaceId) -> Option<HeldAnnounce> {
-        let queue = self.by_iface.get_mut(&iface)?;
-        let (index, _) = queue
-            .iter()
-            .enumerate()
-            .min_by_key(|(_, held)| held.packet.hops)?;
-        let held = queue.remove(index);
-        if queue.is_empty() {
-            self.by_iface.remove(&iface);
-        }
-        self.total -= 1;
-        Some(held)
-    }
-
-    /// Drop everything `iface` holds: it was detached, or its admission row evicted.
-    pub(super) fn purge(&mut self, iface: InterfaceId) {
-        if let Some(queue) = self.by_iface.remove(&iface) {
-            self.total -= queue.len();
-        }
-    }
-}
+mod held;
+use held::HELD_SHARES;
+pub(super) use held::{HeldAnnounce, HeldAnnounces};
 
 /// The freshness ledger and its host policy share one lock. Keeping this guard across address
 /// admission, freshness commit, route replacement, observation publication, and relay
@@ -411,8 +339,12 @@ pub(super) fn process_verified_announce(
     shared: &Arc<Shared>,
     iface: InterfaceId,
     pkt: Packet,
-    announce: Announce,
+    mut announce: Announce,
 ) {
+    // A held announce must meet the policy active when it is released too.
+    if !shared.admit_network_announce(&mut announce) {
+        return;
+    }
     // This guard spans every announce effect: held-release tasks run beside the packet loop,
     // and two candidates must not both pass and publish or relay out of freshness order.
     let mut freshness = shared.announce_freshness.lock().unwrap();
@@ -583,6 +515,7 @@ fn publish_accepted(
             .fetch_add(1, Ordering::Relaxed);
     }
     let destination = announce.destination;
+    shared.remember_network_announce(&announce);
     shared.learn_path(destination, iface, pkt.hops, pkt.transport);
     if admitted {
         let sequence = shared.announce_sequence.fetch_add(1, Ordering::Relaxed) + 1;

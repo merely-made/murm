@@ -12,6 +12,8 @@ use crate::packet::Packet;
 /// started.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub struct TransportCounters {
+    /// Announces, path requests, or link requests refused by network stamp policy.
+    pub refused_stamps: u16,
     /// Relayed announce transmissions for another destination, retries included.
     pub forwarded_announces: u16,
     /// Relayed announces whose retry was dropped because neighbours were heard relaying them

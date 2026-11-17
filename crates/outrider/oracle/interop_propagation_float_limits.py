@@ -84,7 +84,9 @@ def main() -> int:
     # lxmd.py 170-177 lets the message size override the transfer size, so set both.
     (node_config / "config").write_text(
         "[propagation]\nenable_node=yes\nnode_name=Stock Float Oracle\nannounce_at_start=yes\n"
-        "autopeer=no\npropagation_stamp_cost_target=8\npeering_cost=8\n"
+        "autopeer=no\n"
+        f"propagation_stamp_cost_target={float(os.environ.get('OUTRIDER_PROPAGATION_COST', '8'))}\n"
+        "peering_cost=8\n"
         f"propagation_transfer_max_accepted_size={TRANSFER_KB}\n"
         f"propagation_message_max_accepted_size={TRANSFER_KB}\n"
         f"propagation_sync_max_accepted_size={SYNC_KB}\n"

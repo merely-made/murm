@@ -10,6 +10,7 @@
 //! Prepending the packet destination reconstructs the ordinary signed LXMF object used by
 //! direct and propagation delivery. Signature and message-id rules do not fork here.
 
+use crate::stamp::StampCost;
 use retinue::endpoint::{
     Endpoint, InterfaceId, PeerAnnounce, ProofStrategy, ReceivedSingle, SinglePacketReceipt,
 };
@@ -24,7 +25,7 @@ use crate::codec::{
 };
 use crate::delivered::DeliveredCache;
 use crate::inbound::{Verification, check_stamp, unix_now, verify};
-use crate::stamp::{MESSAGE_WORKBLOCK_ROUNDS, STAMP_LEN, find_parallel, valid_streamed};
+use crate::stamp::{MESSAGE_WORKBLOCK_ROUNDS, STAMP_LEN, find_parallel_cost, valid_streamed_cost};
 use crate::ticket::{StampFault, StampOutcome, TICKET_LEN, is_ticket_stamp};
 
 #[derive(Debug)]
@@ -111,10 +112,10 @@ pub fn send_stamped(
     if prepared.stamped_len() - DESTINATION_LEN > retinue::packet::ENCRYPTED_MDU {
         return Err(OpportunisticError::TooLarge);
     }
-    let (stamp, _) = find_parallel(
+    let (stamp, _) = find_parallel_cost(
         &prepared.message_id,
         MESSAGE_WORKBLOCK_ROUNDS,
-        u16::from(target),
+        target,
         stamp_seed,
         max_stamp_attempts,
     )
@@ -189,7 +190,7 @@ pub fn receive_with_stamp_cost(
     received: ReceivedSingle,
     delivered: &DeliveredCache,
     max_message_bytes: usize,
-    stamp_cost: Option<u8>,
+    stamp_cost: Option<StampCost>,
 ) -> Result<ReceivedOpportunistic, OpportunisticError> {
     let no_tickets = |_: &AddressHash| Vec::new();
     receive_with_tickets(
@@ -210,7 +211,7 @@ pub fn receive_with_tickets(
     received: ReceivedSingle,
     delivered: &DeliveredCache,
     max_message_bytes: usize,
-    stamp_cost: Option<u8>,
+    stamp_cost: Option<StampCost>,
     inbound_tickets: impl Fn(&AddressHash) -> Vec<[u8; TICKET_LEN]>,
 ) -> Result<ReceivedOpportunistic, OpportunisticError> {
     let local_destination = delivery_destination(endpoint.identity());
@@ -274,12 +275,7 @@ fn enforce_stamp(
         .as_deref()
         .and_then(|stamp| <&[u8; STAMP_LEN]>::try_from(stamp).ok())
         .ok_or(OpportunisticError::StampRequired(target))?;
-    if !valid_streamed(
-        &message_id,
-        MESSAGE_WORKBLOCK_ROUNDS,
-        stamp,
-        u16::from(target),
-    ) {
+    if !valid_streamed_cost(&message_id, MESSAGE_WORKBLOCK_ROUNDS, stamp, target) {
         return Err(OpportunisticError::InvalidStamp);
     }
     Ok(())
@@ -304,7 +300,7 @@ pub enum OpportunisticError {
     #[error("the signed LXMF object does not fit one encrypted Reticulum packet")]
     TooLarge,
     #[error("the peer requires a delivery stamp with cost {0}")]
-    StampRequired(u8),
+    StampRequired(StampCost),
     #[error("the delivery stamp is invalid")]
     InvalidStamp,
     #[error("the configured proof-of-work attempt budget was exhausted")]

@@ -1,3 +1,5 @@
+use outrider::PropagationCost;
+use outrider::StampCost;
 use std::io::Cursor;
 use std::sync::Arc;
 use std::time::Duration;
@@ -30,9 +32,9 @@ fn node_announce() -> PropagationAnnounce {
         transfer_limit_kb: 256.0,
         sync_limit_kb: 10_240.0,
         costs: PropagationCosts {
-            propagation: 0,
-            flexibility: 0,
-            peering: 0,
+            propagation: PropagationCost::from_integer(0),
+            flexibility: PropagationCost::from_integer(0),
+            peering: PropagationCost::from_integer(0),
         },
         metadata: vec![(
             Value::from(PROPAGATION_METADATA_NAME),
@@ -91,8 +93,8 @@ async fn ratcheted_pair() -> Pair {
 
 fn stamps(delivery_cost: Option<u8>) -> PropagationStamps {
     PropagationStamps {
-        delivery_cost,
-        propagation_cost: 0,
+        delivery_cost: delivery_cost.map(|cost| StampCost::from_integer(cost.into())),
+        propagation_cost: StampCost::from_integer(0),
         seed: [0; 32],
         max_attempts: 100_000,
     }
@@ -352,7 +354,7 @@ async fn fetch_splits_haves_opens_each_entry_and_acknowledges_everything_receive
     let policy = FetchPolicy {
         max_messages: 4,
         transfer_limit_kb: 7,
-        stamp_cost: Some(4),
+        stamp_cost: Some(StampCost::from_integer(4)),
         resource: QUICK,
         ..FetchPolicy::default()
     };

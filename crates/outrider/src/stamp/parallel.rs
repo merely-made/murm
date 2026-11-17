@@ -4,7 +4,7 @@ use std::num::NonZeroUsize;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::thread;
 
-use super::{Derivation, STAMP_LEN};
+use super::{Derivation, STAMP_LEN, StampCost};
 
 /// Attempts a thread makes between looks at whether another has found a stamp.
 const BATCH: u64 = 1 << 10;
@@ -76,6 +76,18 @@ pub fn find_parallel(
     derivation.advance(rounds);
     let threads = thread::available_parallelism().map_or(1, NonZeroUsize::get);
     derivation.mint_parallel(target, seed, max_attempts, threads)
+}
+
+/// Mint an exact quantized cost. The derivation is streamed and attempts are bounded.
+/// This path currently uses one worker; callers retain the same total work bound.
+pub fn find_parallel_cost(
+    material: &[u8],
+    rounds: u32,
+    cost: StampCost,
+    seed: [u8; STAMP_LEN],
+    max_attempts: u64,
+) -> Option<([u8; STAMP_LEN], u16)> {
+    super::find_streamed_cost(material, rounds, cost, seed, max_attempts)
 }
 
 #[cfg(test)]

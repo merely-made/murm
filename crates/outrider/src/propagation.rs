@@ -37,7 +37,8 @@ pub use store::{
     PropagationStoreLimits, StoreReceipt, StoreRestoreReceipt,
 };
 pub use wire::{
-    PropagationAnnounce, PropagationBatch, PropagationCosts, PropagationEntry, PropagationMessage,
+    PropagationAnnounce, PropagationBatch, PropagationCost, PropagationCosts, PropagationEntry,
+    PropagationMessage,
 };
 
 pub const DEFAULT_MAX_PROPAGATION_ANNOUNCE_BYTES: usize = 4 * 1024;

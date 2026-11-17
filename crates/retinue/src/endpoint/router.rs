@@ -65,7 +65,32 @@ pub(super) fn dispatch(
     if shared.tunnel_intercept(iface, &pkt) {
         return;
     }
+    if pkt.packet_type == PacketType::LinkRequest && shared.stamp_policy().enforce {
+        let local = shared
+            .registered
+            .lock()
+            .unwrap()
+            .iter()
+            .any(|r| r.dest == pkt.destination);
+        let cost = if local {
+            shared.own_link_cost(pkt.destination)
+        } else {
+            let stamps = shared.network_stamps.lock().unwrap();
+            stamps
+                .peer_costs
+                .get(&pkt.destination)
+                .copied()
+                .unwrap_or(stamps.policy.link_cost)
+        };
+        if !link::request_stamp_valid(&pkt, cost) {
+            return;
+        }
+    }
     if let Some(request) = crate::path::PathRequest::parse(&pkt) {
+        let stamps = shared.stamp_policy();
+        if stamps.enforce && !request.stamp_valid(stamps.path_cost) {
+            return;
+        }
         handle_path_request(shared, iface, request, ingress_limited);
         return;
     }
@@ -146,7 +171,10 @@ pub(super) fn dispatch(
                 return;
             }
             let decoded = shared.verified_announces.lock().unwrap().decode(&pkt);
-            if let Ok(a) = decoded {
+            if let Ok(mut a) = decoded {
+                if !shared.admit_network_announce(&mut a) {
+                    return;
+                }
                 if pkt.transport.is_some() && !shared.address_book.lock().unwrap().key_conflicts(&a)
                 {
                     shared.hear_rebroadcast(a.destination, pkt.hops);

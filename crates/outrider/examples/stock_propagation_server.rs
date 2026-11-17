@@ -4,6 +4,7 @@
 //! changes and `LINK_CLOSED` as each link ends, so a gate can match the stock side's view
 //! against the node's.
 
+use outrider::PropagationCost;
 use std::fs::OpenOptions;
 use std::io::Write;
 use std::path::{Path, PathBuf};
@@ -73,8 +74,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Gates that mint several stock stamps lower the cost to keep minting short.
     let cost = std::env::var("OUTRIDER_PROPAGATION_COST")
         .ok()
-        .and_then(|cost| cost.parse().ok())
-        .unwrap_or(13);
+        .and_then(|cost| cost.parse::<f64>().ok())
+        .unwrap_or(13.0);
+    let cost = PropagationCost::from_f64(cost).ok_or("propagation cost must be finite")?;
     let mut limits = PropagationStoreLimits::default();
     if large {
         limits.max_message_bytes = 16 * 1024;
@@ -89,8 +91,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         sync_limit_kb: limits.announced_limit_kb(),
         costs: PropagationCosts {
             propagation: cost,
-            flexibility: 3,
-            peering: 8,
+            flexibility: PropagationCost::from_integer(3),
+            peering: PropagationCost::from_integer(8),
         },
         metadata: vec![(
             Value::from(PROPAGATION_METADATA_NAME),

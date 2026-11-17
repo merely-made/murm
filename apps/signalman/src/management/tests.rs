@@ -116,9 +116,9 @@ fn snapshot() -> ManagementSnapshot {
                     transfer_limit_kb: 1.0,
                     sync_limit_kb: 1.0,
                     costs: PropagationCosts {
-                        propagation: 1,
-                        flexibility: 1,
-                        peering: 1,
+                        propagation: outrider::PropagationCost::from_integer(1),
+                        flexibility: outrider::PropagationCost::from_integer(1),
+                        peering: outrider::PropagationCost::from_integer(1),
                     },
                     metadata: Vec::new(),
                 }),

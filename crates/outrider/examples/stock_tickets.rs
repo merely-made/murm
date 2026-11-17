@@ -3,6 +3,7 @@
 //!
 //! Driven by `oracle/interop_tickets.py`, which judges stock's side of each step.
 
+use outrider::StampCost;
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
@@ -28,7 +29,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let address = endpoint.listen_tcp("127.0.0.1:0".parse()?).await?;
     let announce = DeliveryAnnounce {
         display_name: Some(b"Outrider Tickets".to_vec()),
-        stamp_cost: Some(COST),
+        stamp_cost: Some(StampCost::from_integer((COST).into())),
     };
     let destination = outrider::register_delivery(&endpoint, &announce)?;
     println!("LISTENING {}", address.port());
@@ -68,7 +69,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         accepted,
         &delivered,
         outrider::DEFAULT_MAX_MESSAGE_BYTES,
-        Some(COST),
+        Some(StampCost::from_integer(COST.into())),
         inbound,
         Default::default(),
     )
@@ -122,7 +123,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         accepted,
         &delivered,
         outrider::DEFAULT_MAX_MESSAGE_BYTES,
-        Some(COST),
+        Some(StampCost::from_integer(COST.into())),
         inbound,
         Default::default(),
     )

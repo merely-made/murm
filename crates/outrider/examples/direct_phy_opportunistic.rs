@@ -3,6 +3,7 @@
 //! Each message is one ratcheted Reticulum single packet. No link or Resource
 //! session is established.
 
+use outrider::StampCost;
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -77,7 +78,7 @@ async fn transfer(spec: Transfer<'_>) -> Result<(), Box<dyn std::error::Error>> 
         single,
         &outrider::DeliveredCache::default(),
         DEFAULT_MAX_MESSAGE_BYTES,
-        Some(STAMP_COST),
+        Some(StampCost::from_integer(STAMP_COST.into())),
     )?;
 
     if received.message.message_id != receipt.message_id
@@ -177,7 +178,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let right_ratchets = ratchets()?;
     let left_delivery = DeliveryAnnounce {
         display_name: Some(b"Outrider RF Left".to_vec()),
-        stamp_cost: Some(STAMP_COST),
+        stamp_cost: Some(StampCost::from_integer((STAMP_COST).into())),
     };
     let left_app_data = left_delivery.encode()?;
     let left_destination = register_opportunistic(&left, &left_delivery, left_ratchets)?;
@@ -193,7 +194,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tokio::time::sleep(Duration::from_secs(2)).await;
     let right_delivery = DeliveryAnnounce {
         display_name: Some(b"Outrider RF Right".to_vec()),
-        stamp_cost: Some(STAMP_COST),
+        stamp_cost: Some(StampCost::from_integer((STAMP_COST).into())),
     };
     let right_app_data = right_delivery.encode()?;
     let right_destination = register_opportunistic(&right, &right_delivery, right_ratchets)?;

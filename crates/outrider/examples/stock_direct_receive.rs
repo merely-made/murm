@@ -5,6 +5,7 @@
 //! message. This example prints the captured LXMF object and verifies it only
 //! through Outrider and Retinue's public boundaries.
 
+use outrider::StampCost;
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -19,9 +20,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let identity = PrivateIdentity::from_secret_bytes(&RECEIVER_SEED);
     let endpoint = Arc::new(Endpoint::new(identity.clone()));
     let address = endpoint.listen_tcp("127.0.0.1:0".parse()?).await?;
+    let cost = std::env::var("OUTRIDER_STAMP_COST")
+        .ok()
+        .and_then(|cost| cost.parse::<f64>().ok())
+        .unwrap_or(8.0);
+    let cost = StampCost::from_f64(cost).ok_or("stamp cost must be finite")?;
     let delivery_announce = DeliveryAnnounce {
         display_name: Some(b"Outrider Oracle".to_vec()),
-        stamp_cost: Some(8),
+        stamp_cost: Some(cost),
     };
     let destination = outrider::register_delivery(&endpoint, &delivery_announce)?;
 
@@ -71,7 +77,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             accepted,
             &delivered,
             outrider::DEFAULT_MAX_MESSAGE_BYTES,
-            Some(8),
+            Some(cost),
         )
         .await
         {

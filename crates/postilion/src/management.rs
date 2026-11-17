@@ -319,9 +319,9 @@ mod tests {
             transfer_limit_kb: 128.0,
             sync_limit_kb: 64.0,
             costs: PropagationCosts {
-                propagation: 1,
-                flexibility: 2,
-                peering: 3,
+                propagation: outrider::PropagationCost::from_integer(1),
+                flexibility: outrider::PropagationCost::from_integer(2),
+                peering: outrider::PropagationCost::from_integer(3),
             },
             metadata: Vec::new(),
         };

@@ -51,8 +51,31 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
         }
 
         if let Some(request) = PathRequest::parse(packet) {
+            if self.stamp_policy.enforce && !request.stamp_valid(self.stamp_policy.path_cost) {
+                self.refuse_stamp();
+                return actions;
+            }
             self.on_path_request(interface, &request, now, &mut actions);
             return actions;
+        }
+
+        if packet.packet_type == PacketType::LinkRequest && self.stamp_policy.enforce {
+            let cost = if packet.destination == self.destination() {
+                self.stamp_policy.link_cost
+            } else {
+                self.routes
+                    .iter()
+                    .find(|route| {
+                        route.destination == packet.destination
+                            && route.live(now, self.transport.route_ttl)
+                    })
+                    .and_then(|route| route.link_cost)
+                    .unwrap_or(self.stamp_policy.link_cost)
+            };
+            if !crate::link::request_stamp_valid(packet, cost) {
+                self.refuse_stamp();
+                return actions;
+            }
         }
 
         self.expire_transport_state(now);
@@ -76,6 +99,23 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
                 if packet.destination == self.destination() {
                     return actions;
                 }
+                // Enforced stamps are checked before even a repeated announce can
+                // suppress our pending rebroadcast or mutate route/freshness state.
+                let enforced = if self.stamp_policy.enforce {
+                    match Announce::decode(packet) {
+                        Ok(announce)
+                            if announce.stamp_valid(self.stamp_policy.destination_cost) =>
+                        {
+                            Some(announce)
+                        }
+                        _ => {
+                            self.refuse_stamp();
+                            return actions;
+                        }
+                    }
+                } else {
+                    None
+                };
                 // Freshness first: its rejection needs no signature, as the verified announce
                 // would carry the same destination and blob. Freshness belongs to the route, so
                 // a destination without a live one is a first sighting, as after an RNS cull.
@@ -104,7 +144,14 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
                     }
                 };
                 // `Announce::decode` checks the destination binding, then the signature.
-                if let Ok(announce) = Announce::decode(packet) {
+                if let Ok(mut announce) = enforced.map_or_else(|| Announce::decode(packet), Ok) {
+                    if !announce.apply_stamp_policy(
+                        self.stamp_policy.destination_cost,
+                        self.stamp_policy.enforce,
+                    ) {
+                        self.refuse_stamp();
+                        return actions;
+                    }
                     // A known destination announced under another key is rejected outright,
                     // before routes or relaying (RNS `Identity.validate_announce`).
                     if self.book.key_conflicts(&announce) {
@@ -158,6 +205,13 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
                         packet.transport,
                         now,
                     );
+                    if let Some(route) = self
+                        .routes
+                        .iter_mut()
+                        .find(|route| route.destination == announce.destination)
+                    {
+                        route.link_cost = announce.network_stamp.map(|stamp| stamp.link_cost);
+                    }
                     if admitted {
                         actions.push(Action::Learned {
                             destination: announce.destination,

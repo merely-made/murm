@@ -2,7 +2,7 @@
 
 use super::tables::derived_iv;
 use super::{
-    Action, Actions, AppDataTooLarge, InterfaceId, LINK_IDLE_TIMEOUT, MIN_LOGICAL_MTU, Node,
+    Action, Actions, InterfaceId, LINK_IDLE_TIMEOUT, MIN_LOGICAL_MTU, Node, NodeAnnounceError,
     RESOURCE_PROOF_CACHE_TTL,
 };
 use crate::announce::{self, AnnounceBlob, RATCHET_LEN};
@@ -60,7 +60,11 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
                     self.announced_blob = Some(*blob);
                     actions.push(Action::Send { interface, packet });
                 }
-                Err(_) => {
+                Err(NodeAnnounceError::StampUnavailable) => {
+                    self.last_announce = None;
+                    self.refuse_stamp();
+                }
+                Err(NodeAnnounceError::AppDataTooLarge) => {
                     self.refused_payloads = self.refused_payloads.saturating_add(1);
                 }
             }
@@ -150,10 +154,18 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
         &self,
         blob: &AnnounceBlob,
         ratchet: Option<&[u8; RATCHET_LEN]>,
-    ) -> Result<Packet, AppDataTooLarge> {
+    ) -> Result<Packet, NodeAnnounceError> {
         let base = MIN_LOGICAL_MTU as usize + if ratchet.is_some() { RATCHET_LEN } else { 0 };
-        if base + self.app_data.len() > self.logical_mtu as usize {
-            return Err(AppDataTooLarge);
+        let extension = if self.stamp_policy.stamp_destinations {
+            if !self.local_stamp_valid() {
+                return Err(NodeAnnounceError::StampUnavailable);
+            }
+            crate::network_stamp::ANNOUNCE_EXT_LEN
+        } else {
+            0
+        };
+        if base + self.app_data.len() + extension > self.logical_mtu as usize {
+            return Err(NodeAnnounceError::AppDataTooLarge);
         }
         Ok(self.announce(blob, ratchet))
     }
@@ -161,6 +173,21 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
     /// Build this node's announce packet without enforcing the carrier budget.
     /// Use [`Self::try_announce`] for production egress; this builder also serves wire fixtures.
     pub fn announce(&self, blob: &AnnounceBlob, ratchet: Option<&[u8; RATCHET_LEN]>) -> Packet {
+        if self.stamp_policy.stamp_destinations
+            && let Some(stamp) = self.destination_stamp
+        {
+            return announce::build_stamped(
+                &self.identity,
+                self.name_hash,
+                blob,
+                ratchet,
+                &self.app_data,
+                crate::network_stamp::NetworkStamp {
+                    stamp,
+                    link_cost: self.stamp_policy.link_cost,
+                },
+            );
+        }
         announce::build(
             &self.identity,
             self.name_hash,

@@ -10,7 +10,7 @@ pub struct Peer {
     /// The peer's delivery destination: the address a person is told and `/peers` lists.
     pub destination: AddressHash,
     /// The stamp cost it advertises, if any.
-    pub stamp_cost: Option<u8>,
+    pub stamp_cost: Option<retinue::stamp::StampCost>,
     /// The display name from its announce, if it carried one.
     pub name: Option<String>,
     /// The whole announce, because that is what sending takes.
