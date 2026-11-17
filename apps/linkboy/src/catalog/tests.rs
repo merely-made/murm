@@ -85,10 +85,6 @@ fn retained_public_index_promotes_only_receipted_packages() {
         package("retinue.heltec-v4").receipt_hosts,
         ["windows-x86_64"]
     );
-    assert_eq!(
-        package("retinue.heltec-v4-resident").state,
-        CatalogState::Partial
-    );
     assert_eq!(package("retinue.t114").state, CatalogState::Partial);
     assert_eq!(
         package("meshtastic.heltec-mesh-node-t114").state,

@@ -22,6 +22,8 @@ import threading
 import time
 from pathlib import Path
 
+from oracle_version import require_rns
+
 import RNS
 from RNS.Buffer import StreamDataMessage
 
@@ -34,8 +36,7 @@ COMBINED_REPLY = b"retinue-combined-reply"
 
 
 def main() -> int:
-    if RNS.__version__ != "1.5.7":
-        raise RuntimeError(f"expected stock RNS 1.5.7, got {RNS.__version__}")
+    require_rns(RNS.__version__)
     print(f"RNS {RNS.__version__}", flush=True)
     default_target = r"C:\t\cargo-targets\retinue" if os.name == "nt" else str(REPO.parent.parent / "target")
     target = Path(os.environ.get("CARGO_TARGET_DIR", default_target))

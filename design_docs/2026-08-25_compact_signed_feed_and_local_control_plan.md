@@ -353,6 +353,11 @@ Every fixture and donor note carries `official-doc`, `observed-wire`,
 
 ## Findings
 
+- **2026-11-14:** `tinyssb-core` is removed from Murm. Mark, selecting it
+  for removal: "Eh, it's all in git history. If needed, it'll be there." The
+  CF0/CF1 verifier and its synthetic fixtures are in git history before
+  this date. Statuses here are unchanged; MF0 and TP0 would start by
+  restoring or rewriting the verifier.
 - **2026-10-31:** `tinyssb-core` has no consumer. Murm's root workspace member
   list is its only reference on origin/main across `Code/repos`. Mere's
   frontier-sync brief

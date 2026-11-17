@@ -42,8 +42,6 @@ use radio_hand::control::{
 use radio_hand::executive::{BoardStore, StoreFault};
 use radio_hand::settings::{self, Settings};
 use radio_hand::store::{self, HEADER_LEN, Slot, SlotError};
-#[cfg(feature = "tucket-contact-store")]
-mod contacts;
 
 // Count attempts immediately before each NVMC mutation, including failures.
 // These boot-local counters live outside the observation recorder and are never
@@ -515,21 +513,6 @@ impl AbSlotStore for SettingsStore<'_> {
 /// through this. Bundling them is not a convenience: they are one object here, because the
 /// same struct holds the NVMC pages and the hardware RNG.
 impl BoardStore for SettingsStore<'_> {
-    #[cfg(feature = "tucket-contact-store")]
-    fn load_tucket_contacts(
-        &mut self,
-        scope: radio_hand::tucket_contacts::Scope,
-    ) -> Result<Option<radio_hand::tucket_contacts::Snapshot>, radio_hand::tucket_contacts::Fault>
-    {
-        radio_hand::tucket_contacts::load(self, scope).map(|s| s.map(|s| s.snapshot))
-    }
-    #[cfg(feature = "tucket-contact-store")]
-    fn save_tucket_contacts(
-        &mut self,
-        snapshot: &radio_hand::tucket_contacts::Snapshot,
-    ) -> Result<(), radio_hand::tucket_contacts::Fault> {
-        radio_hand::tucket_contacts::save(self, snapshot).map(|_| ())
-    }
     /// The nRF52840's physical noise source, bias-corrected — see [`SettingsStore::new`].
     /// Infallible on this board: the peripheral is always present, so the only reason this
     /// returns a `Result` is that other boards have no such thing.

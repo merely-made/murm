@@ -426,10 +426,6 @@ impl mandrake::Product for Product {
             Some(Condition::Connected) => !connected,
             Some(Condition::Stopped) => {
                 connected
-                    || (matches!(
-                        self.protocol,
-                        ProtocolKind::MeshCore | ProtocolKind::Meshtastic
-                    ) && ctx.runner.state().resident_connecting)
                     || ctx
                         .runner
                         .state()
@@ -475,10 +471,6 @@ impl mandrake::Product for Product {
         });
         if !self.connected_seen.get()
             || connected
-            || (matches!(
-                self.protocol,
-                ProtocolKind::MeshCore | ProtocolKind::Meshtastic
-            ) && ctx.runner.state().resident_connecting)
             || ack != 1
             || rx != 1
             || !previous_complete

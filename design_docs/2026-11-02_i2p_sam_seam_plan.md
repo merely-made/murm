@@ -27,6 +27,7 @@ The [crates.io registry](https://crates.io/api/v1/crates/truchman) reports `truc
   `gemot/design_docs/moothold_docs/implementation_strategy/2026-11-03_moot_relay_pools_plan.md`;
   its scripted and pool-specific public qualification does not close the
   Retinue interoperability gates.
+- 2026-11-14: `murm-i2p` stays although no manifest calls it yet. Mark: "We can keep murm-i2p, on the same rationale that we would allow using alternate reticulum implementations; modular backends fit different profiles. That's the webrender lesson to a tee". External routers such as i2pd remain the alternative.
 
 ## Decision, 2026-11-05: I2P identity is unassociated by default
 

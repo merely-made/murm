@@ -7,7 +7,7 @@ regions = []
 channel_capabilities = []
 state_impact = "unknown"
 license = "GPL-3.0"
-notices = "External Meshtastic firmware. It owns its own device identity, keys, region, channel, and phone application; Linkboy makes no Retinue capability claim for this package."
+notices = "External Meshtastic firmware, Copyright Meshtastic LLC and the Meshtastic firmware contributors, GPL-3.0; complete corresponding source at source_url. This repository does not redistribute it: the owner's copy is downloaded from the vendor on demand. It owns its own device identity, keys, region, channel, and phone application; Linkboy makes no Retinue capability claim for this package."
 source_revision = "54e0d8d0ab2ff56b3a9ce967e53f79e49af560fb"
 source_url = "https://github.com/meshtastic/firmware/tree/54e0d8d0ab2ff56b3a9ce967e53f79e49af560fb"
 origin_url = "https://github.com/meshtastic/firmware/releases/tag/v2.7.26.54e0d8d"
@@ -21,7 +21,7 @@ source_url = "https://github.com/merely-made/murm/tree/main/apps/linkboy"
 notice = "This route is built into Linkboy. It writes the already hash-verified UF2 file to an explicitly selected, readable UF2 bootloader volume and never shells out to an unpinned flasher."
 
 [payload]
-path = "meshtastic-t114-2.7.26.54e0d8d/firmware-heltec-mesh-node-t114-2.7.26.54e0d8d.uf2"
+url = "https://release.meshtastic.org/2.7.26.54e0d8d/firmware-heltec-mesh-node-t114-2.7.26.54e0d8d.uf2"
 format = "uf2"
 byte_length = 1467392
 sha256 = "e038b1067b6fa12ed77853337e0e416425f30a7589a907f8ac1600f21b8d02b9"
@@ -53,5 +53,11 @@ version = "2.7.26.54e0d8d"
 manual_check = "After the board leaves the UF2 bootloader, use Meshtastic's own display, serial console, or mobile app to confirm version 2.7.26.54e0d8d and retain the observed interface fact. This is foreign-firmware evidence; do not claim a Retinue status, BLE, region, or channel capability from it."
 
 [recovery]
-before_write = "Enter the T114's stock UF2 bootloader, select the newly mounted volume explicitly, and keep its root clear of a same-named UF2 file. Linkboy will not infer a board from a drive letter or overwrite an existing file."
-after_failure = "Disconnect and re-enter the stock UF2 bootloader, then retry this verified package on the newly selected volume. To restore Retinue, use the separate verified retinue.t114 UF2 package and record its own receipt; this package does not replace that route."
+before_write = "Double-tap the T114's reset button to enter its stock Adafruit UF2 bootloader, select the newly mounted HT-n5262 volume explicitly, and keep its root clear of a same-named UF2 file. Linkboy will not infer a board from a drive letter or overwrite an existing file."
+after_failure = "This package writes only 0x26000..0xD9200, so the UF2 bootloader and SoftDevice stay intact whatever the application does. Double-tap reset to bring the HT-n5262 volume back, select it explicitly, and write this verified package again. To return to Retinue instead, write a staged retinue.t114 package the same way and record its own receipt."
+
+[qualification]
+hash_source = "Length and sha256 computed on 2026-11-14 from the copy of this file that the repository tracked until protocol_parity D5 removed it; that copy's md5 ddc727065b5e2a311fad8e3523fc5327 equals the md5 release.meshtastic.org publishes for it in firmware-heltec-mesh-node-t114-2.7.26.54e0d8d.mt.json, read 2026-11-14. The vendor publishes no sha256 and no signature for per-board files."
+hash_recorded_on = "2026-11-14"
+structure_checks = "Linkboy's UF2 layout check: every block's magic, the nRF52840 family id 0xADA52840, a complete block sequence, 733696 payload bytes, and a block span of 0x26000..0xD9200 equal to write_ranges and clear of the preserved 0xEA000..0x100000."
+companion_checked = false

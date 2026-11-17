@@ -15,7 +15,11 @@ param(
     [Parameter(Mandatory = $true)]
     [string]$Destination,
 
-    [switch]$LinkboyOnly
+    [switch]$LinkboyOnly,
+
+    # Forwarded to stage-firmware.ps1.
+    [switch]$AllowDirty,
+    [switch]$IgnoreRustVersion
 )
 
 $ErrorActionPreference = 'Stop'
@@ -80,10 +84,7 @@ if ($actualHash -ne $artifact.binary_sha256) {
 
 $stageRoot = New-Item -ItemType Directory -Path $Destination
 $helperRoot = New-Item -ItemType Directory -Path (Join-Path $stageRoot.FullName "helpers\$Platform") -Force
-$firmwareRoot = New-Item -ItemType Directory -Path (Join-Path $stageRoot.FullName 'firmware') -Force
-$packagesRoot = New-Item -ItemType Directory -Path (Join-Path $firmwareRoot.FullName 'packages') -Force
-$v4Root = New-Item -ItemType Directory -Path (Join-Path $firmwareRoot.FullName 'heltec-v4-phy') -Force
-$t114Root = New-Item -ItemType Directory -Path (Join-Path $firmwareRoot.FullName 't114-phy') -Force
+$firmwareRoot = Join-Path $stageRoot.FullName 'firmware'
 $desktopName = if ($Platform.StartsWith('windows-')) { 'signalman-desktop.exe' } else { 'signalman-desktop' }
 $linkboyName = if ($Platform.StartsWith('windows-')) { 'linkboy.exe' } else { 'linkboy' }
 
@@ -92,15 +93,16 @@ if ($binaryPath) {
 }
 Copy-Item -LiteralPath $linkboyPath -Destination (Join-Path $stageRoot.FullName $linkboyName)
 Copy-Item -LiteralPath $espflashPath -Destination (Join-Path $helperRoot.FullName $artifact.executable)
-Copy-Item -LiteralPath (Join-Path $repoRoot 'firmware\packages\index.toml') -Destination $packagesRoot.FullName
-Copy-Item -LiteralPath (Join-Path $repoRoot 'firmware\packages\heltec-v4-current.toml') -Destination $packagesRoot.FullName
-Copy-Item -LiteralPath (Join-Path $repoRoot 'firmware\packages\t114-v51.toml') -Destination $packagesRoot.FullName
-Copy-Item -LiteralPath (Join-Path $repoRoot 'firmware\packages\t114-v51-recovery.md') -Destination $packagesRoot.FullName
-Copy-Item -LiteralPath (Join-Path $repoRoot 'firmware\packages\heltec-v4-current-recovery.md') -Destination $packagesRoot.FullName
-Copy-Item -LiteralPath (Join-Path $repoRoot 'firmware\packages\meshtastic-t114-2.7.26.54e0d8d.toml') -Destination $packagesRoot.FullName
-Copy-Item -LiteralPath (Join-Path $repoRoot 'firmware\packages\meshtastic-t114-2.7.26.54e0d8d') -Destination $packagesRoot.FullName -Recurse
-Copy-Item -LiteralPath (Join-Path $repoRoot 'firmware\heltec-v4-phy\tulle-heltec-v4-phy') -Destination $v4Root.FullName
-Copy-Item -LiteralPath (Join-Path $repoRoot 'firmware\t114-phy\tulle-t114-phy-v51.uf2') -Destination $t114Root.FullName
+# Builds the templated images from HEAD and stages a catalog that verifies; the
+# qualified Meshtastic release is copied as its manifest alone and downloaded on demand
+# (protocol_parity D5).
+& (Join-Path $PSScriptRoot 'stage-firmware.ps1') -Index (Join-Path $repoRoot 'firmware\packages\index.toml') `
+    -Destination $firmwareRoot -LinkboyBinary $linkboyPath -Espflash $espflashPath `
+    -AllowDirty:$AllowDirty -IgnoreRustVersion:$IgnoreRustVersion
+$packagesRoot = Join-Path $firmwareRoot 'packages'
+foreach ($recovery in 'heltec-v4-current-recovery.md', 't114-current-recovery.md') {
+    Copy-Item -LiteralPath (Join-Path $repoRoot "firmware\packages\$recovery") -Destination $packagesRoot
+}
 Copy-Item -LiteralPath (Join-Path $repoRoot 'apps\linkboy\NOTICES.md') -Destination (Join-Path $stageRoot.FullName 'NOTICES.md')
 Copy-Item -LiteralPath (Join-Path $repoRoot 'LICENSE') -Destination (Join-Path $stageRoot.FullName 'LICENSE')
 
@@ -121,7 +123,6 @@ Copy-Item -LiteralPath (Join-Path $repoRoot 'LICENSE') -Destination (Join-Path $
     packages = @(
         'retinue.heltec-v4',
         'retinue.t114',
-        'prns.hopspot.heltec-v4',
         'meshtastic.heltec-mesh-node-t114'
     )
 } | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath (Join-Path $stageRoot.FullName 'stage.json') -Encoding utf8NoBOM

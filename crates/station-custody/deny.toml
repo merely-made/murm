@@ -1,0 +1,12 @@
+# cargo-deny configuration for crates/station-custody, which is its own workspace.
+# The rule and how a skip is argued are in the root deny.toml.
+
+[bans]
+multiple-versions = "deny"
+wildcards = "allow"
+skip = [
+  { crate = "hash32@0.2.1", reason = "heapless 0.7.17 requires it, via postcard 1.1.3 (latest) under notochord (dramatis); goes when heapless moves to hash32 0.3" },
+  { crate = "hashbrown@0.15.5", reason = "petgraph 0.8.3 requires it, via petgraph 0.8.3 (latest) under portolan (eidetic); goes when petgraph moves to hashbrown 0.17" },
+  { crate = "heapless@0.7.17", reason = "postcard 1.1.3 requires it, via postcard 1.1.3 (latest) under notochord (dramatis); goes when postcard moves to heapless 0.9" },
+  { crate = "syn@2.0.119", reason = "most proc-macros (curve25519-dalek-derive, munge_macro, tracing-attributes, zerocopy-derive, zeroize_derive) still require syn 2; goes as they move to syn 3" },
+]

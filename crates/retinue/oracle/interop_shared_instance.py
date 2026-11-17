@@ -33,9 +33,10 @@ import atexit
 import time
 from pathlib import Path
 
+from oracle_version import require_rns
+
 from ingress_harness import REPO, Child, free_port, verdict, wait_until
 
-EXPECTED_RNS = "1.5.7"
 
 
 def example(name: str, env: dict) -> Child:
@@ -94,7 +95,7 @@ def node_main(config_dir: str) -> None:
     """The child side of Node: RNS plus stdin commands, with stock-state taps."""
     import RNS
 
-    assert RNS.__version__ == EXPECTED_RNS, RNS.__version__
+    require_rns(RNS.__version__)
     proofs, announced, links = [0], {}, []
     prove, transmit = RNS.Packet.prove, RNS.Transport.transmit
 

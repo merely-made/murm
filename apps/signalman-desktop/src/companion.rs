@@ -122,6 +122,8 @@ pub enum CompanionEvent {
         stop: Arc<AtomicBool>,
         port: String,
         source: &'static str,
+        /// What the radio reported about its firmware at connect.
+        firmware: Option<signalman::RadioFirmware>,
     },
     Progress,
     Stopped {
@@ -164,7 +166,7 @@ impl CompanionWorker {
                         result = connection => result.map_err(|e| e.to_string())?,
                         _ = async { while !actor_stop.load(Ordering::Relaxed) { tokio::time::sleep(std::time::Duration::from_millis(100)).await; } } => return Err("Companion connection cancelled".into()),
                     };
-                    tx.try_send(CompanionEvent::Connected { protocol, owner: session.owner(), stop: actor_stop.clone(), port: settings.port.display().to_string(), source: "Device firmware owns keys and radio execution." }).map_err(|e| e.to_string())?;
+                    tx.try_send(CompanionEvent::Connected { protocol, owner: session.owner(), stop: actor_stop.clone(), port: settings.port.display().to_string(), source: "Device firmware owns keys and radio execution.", firmware: session.firmware().cloned() }).map_err(|e| e.to_string())?;
                     wake();
                     while !actor_stop.load(Ordering::Relaxed) {
                         if session.poll().await.map_err(|e| e.to_string())? {

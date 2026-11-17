@@ -32,7 +32,7 @@ path = "src/main.rs"
 
 [dependencies]
 hex = "0.4"
-getrandom = "0.3"
+getrandom = "0.4"
 serial2-tokio = "0.1.24"
 # The presentation vocabulary. NOT linkboy: package trust, plans, execution,
 # and recovery decisions stay behind Signalman, and this application renders
@@ -59,24 +59,22 @@ cpal = "=0.18.2"
 # The radio-specific custody adapter shares this repository's radio types.
 # Its wallet authority remains behind Dramatis and Djinn.
 station-custody = { path = "../../crates/station-custody" }
-chartulary = { git = "https://github.com/merely-made/eidetic.git", branch = "main" }
+portolan = { git = "https://github.com/merely-made/eidetic.git", branch = "main" }
 gaz = { git = "https://github.com/merely-made/dramatis.git", branch = "main" }
 muniment = { features = ["redb"], git = "https://github.com/merely-made/eidetic.git", branch = "main" }
 sceno = { git = "https://github.com/merely-made/graphshell.git", branch = "main" }
 scenomise = { git = "https://github.com/merely-made/graphshell.git", branch = "main" }
 seiche = { git = "https://github.com/merely-made/seiche.git", branch = "main" }
 euclid = "0.22"
-pollster = "0.4"
+pollster = "1"
 thiserror = "2"
 
 # The live station actor. Postilion supplies the snapshot type the projection
 # consumes. Djinn releases station-scoped keys and signs grants; Personae
 # supplies the public device id.
 postilion = { version = "0.3.0", path = "../../crates/postilion" }
-radio-hand = { version = "0.0.1", path = "../../crates/radio-hand", features = ["instances"] }
+radio-hand = { version = "0.0.1", path = "../../crates/radio-hand" }
 retinue = { version = "0.3.0", path = "../../crates/retinue" }
-sennet = { version = "0.0.2", path = "../../crates/sennet" }
-tucket = { version = "0.0.2", path = "../../crates/tucket" }
 selvage = { version = "0.1.0", path = "../../crates/selvage" }
 serde = { version = "1", features = ["derive"] }
 zeroize = "1"
@@ -100,7 +98,7 @@ accesskit = "0.25"
 # short-lived random identity on the second attached board.
 retinue = { version = "0.3.0", path = "../../crates/retinue" }
 radio-hand = { version = "0.0.1", path = "../../crates/radio-hand" }
-getrandom = "0.3"
+getrandom = "0.4"
 
 # Genet's graph needs the same patches its own workspace applies; a `[patch]`
 # table does not inherit through a git dep. Taffy is the one vendored fork still

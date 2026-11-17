@@ -236,7 +236,8 @@ mod tests {
                 notice: "Test".into(),
             }],
             payload: Some(PackagePayload {
-                path: "payload".into(),
+                path: Some("payload".into()),
+                url: None,
                 format: PayloadFormat::EspflashElf,
                 byte_length: bytes.len() as u64,
                 sha256: crate::package::sha256_hex(&bytes),
@@ -278,6 +279,8 @@ mod tests {
                 after_failure: "Use the ROM loader.".into(),
             },
             persistent_state: None,
+            full_erase: false,
+            qualification: None,
         };
         FlashPackage::from_parts(manifest, "manifest", "payload", bytes).unwrap()
     }

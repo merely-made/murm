@@ -1,12 +1,12 @@
-/target
+# Unanchored: native, crates/station-custody, apps/signalman-desktop and the
+# other excluded crates are their own workspaces and build beside themselves.
+target/
 # Exact-commit validation records are local evidence artifacts.  A record is
 # valid only for the clean commit it names, so it is never source-controlled.
 /validation/results/
 /testing/receipts/
 /testing/iroh-control/results/
-/testing/protocol-capacity/receipt.json
 /testing/transport-conformance/results/
-/testing/webrtc-evaluation/receipts/
 /validation/signalman-custody/
 /validation/signalman-refresh-*.json
 /validation/signalman-refresh-*.zip
@@ -17,12 +17,6 @@
 # one), so its build directory is a second `target/` the root-anchored rule
 # above does not cover.
 /apps/signalman-desktop/target
-
-# Cargo.lock IS tracked here. This workspace is not a bare library: it builds
-# firmware images that get flashed to real hardware, and tulle tracked its own
-# lockfile for exactly that reason before the 2026-07-23 radio merge. Losing it
-# in the merge is how a fresh resolution picked `fixed` 1.31.0 (rustc >= 1.93)
-# and broke the t114 build on an older default toolchain.
 
 # The oracle's Python venv. Recreate on Python 3.11+ with oracle/requirements.txt (currently rns==1.5.7);
 # see oracle/README.md. The fixtures it produces ARE committed, so tests need no Python.
@@ -54,3 +48,5 @@ cargo-home-*/
 
 # Standalone native consumer build output.
 /native/target/
+# Not tracked: what cargo resolved is a git note on each commit (scripts/record-resolved.sh).
+Cargo.lock

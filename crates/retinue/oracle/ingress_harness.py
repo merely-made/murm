@@ -20,9 +20,10 @@ import threading
 import time
 from pathlib import Path
 
+from oracle_version import require_rns
+
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parent
-EXPECTED_RNS = "1.5.7"
 _children: list["Child"] = []
 _built = False
 
@@ -197,7 +198,7 @@ def node_main(config_dir: str) -> None:
     """The child side of Stock: RNS plus stdin commands, with stock-state taps."""
     import RNS
 
-    assert RNS.__version__ == EXPECTED_RNS, RNS.__version__
+    require_rns(RNS.__version__)
     relayed: dict[str, set] = {}
     path_requests: list[str] = []
     path_responses: list[str] = []

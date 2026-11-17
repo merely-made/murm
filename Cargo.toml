@@ -6,11 +6,8 @@ members = [
     "crates/postilion",
     "crates/retinue",
     "crates/tulle",
-    "crates/tinyssb-core",
     "crates/selvage",
     "crates/seneschal",
-    "crates/sennet",
-    "crates/tucket",
     "crates/outrider",
     "crates/radio-face",
     "crates/radio-hand",
@@ -19,7 +16,6 @@ members = [
     "crates/truchman",
     "firmware/heltec-v4-phy",
     "firmware/t114-phy",
-    "testing/protocol-capacity",
 ]
 
 # `apps/signalman-desktop` is deliberately NOT a member.
@@ -64,11 +60,8 @@ default-members = [
     "crates/postilion",
     "crates/retinue",
     "crates/tulle",
-    "crates/tinyssb-core",
     "crates/selvage",
     "crates/seneschal",
-    "crates/sennet",
-    "crates/tucket",
     "crates/outrider",
     "crates/radio-face",
     "crates/radio-hand",

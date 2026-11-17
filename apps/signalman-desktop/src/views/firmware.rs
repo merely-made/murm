@@ -17,7 +17,14 @@ pub(super) fn choose_firmware(state: &DesktopState) -> Child {
             .attr("class", "empty")
             .attr("role", "alert"),
         ),
-        (Some(_), None) => Box::new(el("div", ()).attr("class", "empty-none")),
+        (Some(_), None) => match &state.firmware_download_note {
+            Some(note) => Box::new(
+                el("div", text(note.clone()))
+                    .attr("role", "status")
+                    .attr("data-firmware-download", "running"),
+            ),
+            None => Box::new(el("div", ()).attr("class", "empty-none")),
+        },
         (None, None) => {
             Box::new(el("div", text("No package catalog is loaded.")).attr("class", "empty"))
         }
@@ -32,9 +39,19 @@ pub(super) fn choose_firmware(state: &DesktopState) -> Child {
                 .enumerate()
                 .map(|(index, package)| -> Child {
                     let selected = state.selected_package == Some(index);
+                    let download = catalog
+                        .offer(&package.package_id)
+                        .filter(|offer| !offer.download_urls.is_empty())
+                        .map(|offer| {
+                            format!(
+                                ", {} {} bytes to download",
+                                offer.version, offer.byte_length
+                            )
+                        })
+                        .unwrap_or_default();
                     Box::new(
                         button(
-                            format!("{} — {:?}", package.package_id, package.state),
+                            format!("{} — {:?}{download}", package.package_id, package.state),
                             move |s: &mut DesktopState, _| s.select_package(index),
                         )
                         .attr("class", if selected { "row selected" } else { "row" })
@@ -50,7 +67,7 @@ pub(super) fn choose_firmware(state: &DesktopState) -> Child {
         (
             heading(
                 "Choose firmware",
-                "Packages this publisher signed, verified against their payload hashes.",
+                "Packages this catalog lists. Every file is checked against the length and SHA-256 the catalog pins; a vendor release is downloaded only when you review it.",
             ),
             el("div", rows).attr("class", "rows").attr("role", "list"),
             catalog_note,
@@ -97,7 +114,10 @@ fn part_hashes(parts: &[linkboy::PackagePartIdentity]) -> String {
                 .offset
                 .map(|offset| format!(" at {offset:#x}"))
                 .unwrap_or_else(|| " in its container".into());
-            format!("{}{}: {}", part.kind, address, part.sha256)
+            format!(
+                "{}{}: {} bytes, {}",
+                part.kind, address, part.byte_length, part.sha256
+            )
         })
         .collect::<Vec<_>>()
         .join("\n")
@@ -135,11 +155,17 @@ pub(super) fn review_changes(state: &DesktopState) -> Child {
                     ),
                     field("Version", review.version.clone()),
                     field("Publisher", review.publisher.clone()),
-                    field("Artifact SHA-256", part_hashes(&review.package_parts)),
+                    field(
+                        "Artifact size and SHA-256",
+                        part_hashes(&review.package_parts),
+                    ),
                     field("License", review.license.clone()),
                     field("Source", review.source_url.clone()),
                     field("Origin", review.origin_url.clone()),
                 ];
+                if !review.downloaded_from.is_empty() {
+                    fields.push(field("Downloaded from", review.downloaded_from.join("\n")));
+                }
                 if let Some(signature) = &review.publisher_signature {
                     fields.extend([
                         field("Publisher signing key", signature.key_id.clone()),
@@ -177,6 +203,14 @@ pub(super) fn review_changes(state: &DesktopState) -> Child {
             el(
                 "div",
                 (
+                    field(
+                        "Erase first",
+                        if review.full_erase {
+                            "All of flash — nothing on the board survives"
+                        } else {
+                            "Only the ranges written"
+                        },
+                    ),
                     ranges("Will write", &review.write_ranges),
                     ranges("Will preserve", &review.preserved_ranges),
                     field("State impact", impact),

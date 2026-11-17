@@ -39,8 +39,8 @@ independent project needs an independent name and non-endorsement language
 > and the standalone repos archived. Reason 1 below argued for separate repos on
 > provenance grounds; the merge does not abandon that discipline, it relocates
 > it. The auditable artifacts are now: each crate's preserved pre-merge history,
-> `crates/sennet/PROVENANCE.md` (the front door for the clean-room story),
-> `crates/tucket/NOTICE` (the MIT derivation record), and the fact that sennet's
+> `apps/signalman/capture/PROVENANCE.md` (the front door for the clean-room story),
+> `apps/signalman/NOTICE` (the MIT derivation record), and the fact that sennet's
 > history demonstrably contains no GPL-schema contact before or after the merge.
 > A reviewer follows the per-crate paper trail, not the repo boundary. Reasons 2
 > and 3 stand unchanged; "separate crates" survives, "separate repos" does not.
@@ -147,6 +147,7 @@ accordingly:
   does — a license you do not need cannot be withheld. Expect scrutiny anyway
   (there is active violation-hunting in that community), so the provenance record
   must be the front door, not an appendix.
+- *Note, 2026-11-14 ([protocol_parity D1](2026-11-02_protocol_parity_plan.md#protocol_parity-d1--foreign-meshes-through-stock-radios)):* Mark ruled "Stock radios only"; Tucket and Sennet are no longer resident adapters, and MeshCore and Meshtastic are reached through stock companion radios. The layering here is kept as decided at the time.
 - **Personality residency and firmware selection:** one radio speaks under one
   exact profile at a time. The
   [listener executive](2026-08-10_listener_executive_and_protocol_leases.md)

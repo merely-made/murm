@@ -9,14 +9,8 @@ publish = false
 [features]
 default = []
 ui-bench = []
-memory-bench = ["dep:protocol-capacity-probe", "cortex-m-rt/paint-stack"]
-tucket-contact-store = ["radio-hand/tucket-contact-store"]
-tucket-endpoint = ["tucket-contact-store", "radio-hand/tucket-endpoint", "dep:tucket"]
-contact-store-bench = ["memory-bench", "tucket-contact-store", "radio-hand/tucket-contact-store-bench"]
-contact-fixture-handoff = ["contact-store-bench"]
 
 [dependencies]
-protocol-capacity-probe = { path = "../../testing/protocol-capacity", optional = true }
 cortex-m = { version = "0.7.7", features = ["critical-section-single-core", "inline-asm"] }
 cortex-m-rt = "0.7.5"
 embassy-executor = { version = "0.10.0", features = ["executor-thread", "platform-cortex-m"] }
@@ -40,11 +34,7 @@ radio-hand = { path = "../../crates/radio-hand", features = ["node"] }
 static_cell = "2.1.1"
 selvage = { path = "../../crates/selvage" }
 heapless = "0.9"
-tucket = { path = "../../crates/tucket", default-features = false, optional = true }
 embedded-alloc = { version = "0.7.0", features = ["llff"] }
-
-[dev-dependencies]
-protocol-capacity-probe = { path = "../../testing/protocol-capacity" }
 
 [lints]
 workspace = true

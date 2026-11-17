@@ -5,7 +5,7 @@ use crate::token::IV_LEN;
 /// Fill `buf` with OS randomness. Link secrecy rests on these bytes being unpredictable, so
 /// this panics rather than hand back weak ones.
 pub(super) fn fill_random(buf: &mut [u8]) {
-    getrandom::getrandom(buf).expect("OS CSPRNG unavailable");
+    getrandom::fill(buf).expect("OS CSPRNG unavailable");
 }
 
 /// A fresh 64-byte link ephemeral seed (`x25519_secret(32) || ed25519_seed(32)`), unique and

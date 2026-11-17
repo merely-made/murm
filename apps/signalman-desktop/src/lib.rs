@@ -31,7 +31,6 @@ pub mod device_mere;
 pub mod flow;
 pub mod messages;
 pub mod network;
-pub mod resident;
 pub mod state;
 pub mod station;
 pub mod survey;
@@ -217,23 +216,17 @@ pub fn default_observation_capture_dir() -> std::path::PathBuf {
 /// Where the packaged firmware catalog lives.
 ///
 /// An installed application carries `firmware/packages` beside its executable.
-/// `SIGNALMAN_CATALOG_PATH` is an explicit staging override. Falling back to
-/// this checkout's package index keeps developer builds usable, but is never a
-/// public-install requirement.
+/// `SIGNALMAN_CATALOG_PATH` is an explicit override, for a developer pointing
+/// at a stage written by `tools/stage-firmware.ps1`. The checkout holds
+/// templates, not built images (protocol_parity D4), so there is no fallback
+/// to it: without a stage the flow reports that no verified catalog loaded.
 pub fn default_catalog_path() -> std::path::PathBuf {
     if let Some(path) = std::env::var_os("SIGNALMAN_CATALOG_PATH") {
         return std::path::PathBuf::from(path);
     }
-    if let Some(path) = installed_catalog_path() {
-        return path;
-    }
-    std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../firmware/packages/index.toml")
-}
-
-fn installed_catalog_path() -> Option<std::path::PathBuf> {
-    let path = std::env::current_exe()
-        .ok()?
-        .parent()?
-        .join("firmware/packages/index.toml");
-    path.is_file().then_some(path)
+    let relative = std::path::Path::new("firmware/packages/index.toml");
+    std::env::current_exe()
+        .ok()
+        .and_then(|exe| exe.parent().map(|dir| dir.join(relative)))
+        .unwrap_or_else(|| relative.to_path_buf())
 }

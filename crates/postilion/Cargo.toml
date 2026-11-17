@@ -14,7 +14,7 @@ categories = ["network-programming"]
 path = "src/lib.rs"
 
 [dependencies]
-getrandom = "0.3"
+getrandom = "0.4"
 heapless = "0.9"
 outrider = { version = "0.3.0", path = "../outrider", features = ["tulle-radio"] }
 retinue = { version = "0.3.0", path = "../retinue", features = ["tulle-radio"] }

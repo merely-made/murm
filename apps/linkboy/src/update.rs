@@ -57,7 +57,11 @@ pub fn authenticated_release(
         version: package.manifest().version.clone(),
         expected_application: package.manifest().expected_application.version.clone(),
         release_sequence: entry.release_sequence,
-        payload_set_sha256: format!("{:x}", digest.finalize()),
+        payload_set_sha256: digest
+            .finalize()
+            .iter()
+            .map(|b| format!("{b:02x}"))
+            .collect(),
     })
 }
 

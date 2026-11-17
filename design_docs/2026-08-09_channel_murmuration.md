@@ -14,6 +14,8 @@ the receipt linked above.
 
 ## Current direction: coordinated runtime personalities
 
+**Note, 2026-11-14 ([protocol_parity D1](2026-11-02_protocol_parity_plan.md#protocol_parity-d1--foreign-meshes-through-stock-radios)).** Mark: "Stock radios only": interoperation with MeshCore and Meshtastic goes through a stock companion radio that holds the keys; "the resident-protocols firmware image and WN7's foreign-adapter condition are withdrawn." Sennet and Tucket are no longer installable personalities, so one firmware hosting foreign protocols side by side is withdrawn. What Murmuration means for Reticulum-only profiles is not decided by this note.
+
 **Murmuration** is the cooperative capability for deliberate runtime switching
 among our own protocol implementations on Tulle. The repository names are
 **Retinue** (Reticulum implementation), **Sennet** (independent mesh messaging
@@ -90,7 +92,7 @@ image, and switching a running personality are three separate operations.
 - [`V4RadioOwner`](../firmware/heltec-v4-phy/src/radio_owner.rs) supplies completed
   event checks, collection protection and quiet-window restore/reset behavior.
   This is an interruption foundation, not a three-stack hot-switch receipt.
-- [Sennet provenance](../crates/sennet/PROVENANCE.md) remains authoritative:
+- [Sennet provenance](../apps/signalman/capture/PROVENANCE.md) remains authoritative:
   public descriptions and black-box serial/RF captures supply protocol facts;
   prohibited third-party source, schemas and generated clients are not inputs.
   GPL/AGPL material remains license-report-only for this work. No external

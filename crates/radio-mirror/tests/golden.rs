@@ -37,9 +37,9 @@ fn golden(name: &str) -> PathBuf {
 }
 
 fn decode_rgb(bytes: &[u8]) -> (u32, u32, Vec<u8>) {
-    let decoder = png::Decoder::new(bytes);
+    let decoder = png::Decoder::new(std::io::Cursor::new(bytes));
     let mut reader = decoder.read_info().unwrap();
-    let mut buffer = vec![0; reader.output_buffer_size()];
+    let mut buffer = vec![0; reader.output_buffer_size().unwrap()];
     let info = reader.next_frame(&mut buffer).unwrap();
     assert_eq!(info.color_type, png::ColorType::Rgb);
     buffer.truncate(info.buffer_size());

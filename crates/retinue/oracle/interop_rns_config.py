@@ -21,10 +21,11 @@ import tempfile
 import time
 from pathlib import Path
 
+from oracle_version import require_rns
+
 from ingress_harness import Child, REPO, free_port, verdict
 
 EXAMPLE = "rns_config_peer"
-EXPECTED_RNS = "1.5.7"
 COMMON = ("    networkname = retinue-config-gate\n    passphrase = same-section-text\n"
           "    ifac_size = 64\n    mode = gateway\n")
 
@@ -47,7 +48,7 @@ def binary() -> Path:
 def case(name: str) -> int:
     import RNS
 
-    assert RNS.__version__ == EXPECTED_RNS, RNS.__version__
+    require_rns(RNS.__version__)
     work = Path(os.environ["RETINUE_RNS_CONFIG_DIR"])
     port = free_port()
     retinue_text, stock_text = ((server_section(port), client_section(port)) if name == "server"

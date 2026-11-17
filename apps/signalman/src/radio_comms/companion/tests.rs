@@ -425,7 +425,7 @@ async fn meshtastic_queue_rejection_and_routing_requests_are_not_acknowledgement
     assert_eq!(delivery(&session.owner, &id), DeliveryStatus::Unknown);
     let mut queue = var_field(4, correlation);
     queue.push(8);
-    sennet::protobuf::write_varint(u64::MAX, &mut queue);
+    protobuf::write_varint(u64::MAX, &mut queue);
     emit(&mut peer, &message_field(11, &queue), false).await;
     session.poll().await.unwrap();
     assert!(matches!(
@@ -533,4 +533,35 @@ async fn meshtastic_packets_during_configuration_are_persisted_after_identity_va
         }
     );
     assert_eq!(session.unwrap().owner.records().unwrap().len(), 1);
+}
+
+#[tokio::test]
+async fn connect_records_the_radios_firmware_as_data() {
+    let (meshcore, _peer) = mc(&[], Journal::default()).await;
+    let firmware = meshcore.firmware().unwrap();
+    assert_eq!(firmware.vendor, crate::firmware::FirmwareVendor::MeshCore);
+    assert_eq!(firmware.version, "v1.17.1");
+
+    let (host, mut peer) = tokio::io::duplex(4096);
+    let (session, ()) = tokio::join!(
+        CompanionSession::connect(
+            host,
+            CompanionProtocol::Meshtastic { channel: 0 },
+            "stock".into(),
+            Journal::default()
+        ),
+        async {
+            let nonce = uint(&read_command(&mut peer, false).await, 3).unwrap();
+            let mut metadata = message_field(1, b"2.7.26.54e0d8d");
+            metadata.extend_from_slice(&var_field(9, 69));
+            emit(&mut peer, &message_field(13, &metadata), false).await;
+            emit(&mut peer, &[0x1a, 2, 8, 1], false).await;
+            emit(&mut peer, &[0x52, 2, 0x18, 1], false).await;
+            emit(&mut peer, &var_field(7, nonce), false).await;
+        }
+    );
+    let firmware = session.unwrap().firmware().cloned().unwrap();
+    assert_eq!(firmware.version, "2.7.26.54e0d8d");
+    assert_eq!(firmware.hw_model, Some(69));
+    assert_eq!(firmware.board(), Some(linkboy::BoardFamily::T114));
 }

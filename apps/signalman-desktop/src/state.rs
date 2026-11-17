@@ -9,6 +9,7 @@
 //! elsewhere and hand their results in, which is what lets the whole six-page
 //! flow be driven in a headless test with no board plugged in.
 
+mod download;
 mod firmware;
 mod messages;
 mod network;
@@ -224,9 +225,6 @@ pub struct DesktopState {
     pub companion_channel: cambium::TextInput,
     pub companion_settings: Vec<crate::companion::CompanionSettings>,
     pending_companion: Option<crate::companion::CompanionSettings>,
-    pub resident_settings: Option<crate::resident::ResidentSettings>,
-    pub resident_connecting: bool,
-    pending_resident: bool,
     pub companion_comms: Vec<(
         signalman::comms_adapter::comms::ProtocolKind,
         signalman::radio_comms::RadioComms,
@@ -263,6 +261,14 @@ pub struct DesktopState {
     /// The verified package catalog, or why it could not be loaded.
     pub catalog: Option<FirmwareCatalog>,
     pub catalog_error: Option<String>,
+    /// A qualified release being fetched and verified before review, and what it is.
+    pub firmware_download: Option<signalman::FirmwareDownloadWorker>,
+    pub firmware_download_note: Option<String>,
+    /// What each connected stock companion reported about its firmware.
+    pub companion_firmware: Vec<(
+        signalman::comms_adapter::comms::ProtocolKind,
+        signalman::RadioFirmware,
+    )>,
 
     pub devices: Vec<DeviceCandidate>,
     pub survey: SurveyState,
@@ -343,9 +349,6 @@ impl DesktopState {
             companion_channel: cambium::TextInput::new("0"),
             companion_settings: Vec::new(),
             pending_companion: None,
-            resident_settings: None,
-            resident_connecting: false,
-            pending_resident: false,
             companion_comms: Vec::new(),
             companion_stops: Vec::new(),
             companion_notices: Vec::new(),
@@ -373,6 +376,9 @@ impl DesktopState {
             installer: FirmwareInstaller::new(),
             catalog,
             catalog_error,
+            firmware_download: None,
+            firmware_download_note: None,
+            companion_firmware: Vec::new(),
             devices: Vec::new(),
             survey: SurveyState::default(),
             selected_device: None,

@@ -54,7 +54,7 @@ truchman = { version = "0.1.1", path = "../../../crates/truchman", optional = tr
 # `time` paces `endpoint_addr`'s brief wait for iroh's interface discovery.
 tokio = { version = "1", features = ["io-util", "sync", "rt", "macros", "time"] }
 snow = { version = "0.10", optional = true }
-thiserror = "1"
+thiserror = "2"
 tracing = "0.1"
 # iroh 1.0 wraps quinn QUIC. The 1.0.3 floor matters: 1.0.2 exact-pinned
 # ed25519-dalek =3.0.0-rc.0, which blocked the dalek 3.0/5.0 finals from
@@ -81,7 +81,7 @@ muniment.workspace = true
 # murm-sync's muniment-backed address book, so p2panda-store's bundled SQLite
 # backend (and sqlx with it) stays out of the graph entirely. Feature
 # unification means EVERY consumer has to opt out, not just one.
-p2panda-net = { package = "p2mere-net", version = "0.10", default-features = false, features = [
+p2panda-net = { package = "p2mere-net", version = "0.11", default-features = false, features = [
   "address_book",
   "iroh_endpoint",
   "iroh_mdns",
@@ -89,7 +89,7 @@ p2panda-net = { package = "p2mere-net", version = "0.10", default-features = fal
   "gossip",
   "sync",
 ] }
-p2panda-core = { package = "p2mere-core", version = "0.10" }
+p2panda-core = { package = "p2mere-core", version = "0.11" }
 # The builder's held seed is cleared on drop (vault lock ruling 51).
 zeroize = "1"
 # Reticulum mesh-networking backend (optional, see [features]). `retinue` is

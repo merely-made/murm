@@ -11,6 +11,7 @@ mod firmware;
 mod messages;
 mod network;
 mod radio;
+mod standing;
 
 use cambium::{AnyView, GenetCtx, GenetElement, button, el, text};
 use linkboy::OwnerStage;

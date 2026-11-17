@@ -1,10 +1,14 @@
 //! Stock Stream API client fields; schema source is recorded in the R4 receipt.
-//! This host client is separate from Sennet's independently authored RF codec.
+//! The generic wire reader in `protobuf` is outside that record (see its module docs).
 use super::frame::invalid;
-use sennet::protobuf::{Reader, Value, write_tag, write_varint};
+use super::protobuf::{Field, Reader, Value, write_tag, write_varint};
 use std::io;
 
-pub(super) fn fields(bytes: &[u8]) -> io::Result<Vec<sennet::protobuf::Field<'_>>> {
+/// Largest text payload a Meshtastic-compatible radio carries in one packet: the
+/// 237-byte radio payload less five bytes of text-port envelope.
+pub const MAX_APPLICATION_PAYLOAD: usize = 237 - 5;
+
+pub(super) fn fields(bytes: &[u8]) -> io::Result<Vec<Field<'_>>> {
     let mut reader = Reader::new(bytes);
     let fields: Vec<_> = reader.by_ref().collect();
     if !reader.is_complete() {

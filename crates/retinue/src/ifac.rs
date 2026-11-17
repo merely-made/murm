@@ -12,6 +12,7 @@ use core::fmt;
 use ed25519_dalek::{Signer, SigningKey};
 use hkdf::Hkdf;
 use sha2::{Digest, Sha256};
+use subtle::ConstantTimeEq;
 
 use crate::{Error, Result};
 
@@ -234,14 +235,7 @@ impl Ifac {
         logical.push(unmasked[1]);
         logical.extend_from_slice(&unmasked[2 + self.size..]);
 
-        let expected = self.code(&logical);
-        let different = expected
-            .iter()
-            .zip(ifac)
-            .fold(0_u8, |difference, (left, right)| {
-                difference | (left ^ right)
-            });
-        if different != 0 {
+        if !bool::from(self.code(&logical).as_slice().ct_eq(ifac)) {
             return Err(Error::BadIfac);
         }
         Ok(logical)
@@ -264,7 +258,8 @@ impl Ifac {
 
 /// RNS's HKDF-SHA256 with an empty context (`HKDF.py` 43-84). Past RFC 5869's 255 blocks,
 /// which a link MTU above 8 KiB needs, RNS wraps the one-byte block counter rather than
-/// refusing, so this does too; below that it is plain HKDF.
+/// refusing, so this does too; below that it is plain HKDF. Hand-written on purpose: the
+/// `hkdf` crate refuses past 255 blocks, and the wrap is wire compatibility (protocol_parity D2).
 fn mask(salt: &[u8], ikm: &[u8], len: usize) -> Vec<u8> {
     use hmac::{Hmac, KeyInit, Mac};
     let (prk, _) = Hkdf::<Sha256>::extract(Some(salt), ikm);

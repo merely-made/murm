@@ -361,3 +361,98 @@ fn sparse_esp_package_writes_every_part_then_requires_its_own_manual_check() {
             .any(|event| matches!(event, FlashEvent::VerifyingApplication))
     );
 }
+
+/// A merged V4 image plus an additional image, built from the sparse fixture's manifest.
+fn merged_esp_package(full_erase: bool) -> FlashPackage {
+    let mut merged = vec![1; 0x1000];
+    merged[0] = 0xE9;
+    let extra = vec![2; 0x1000];
+    let mut manifest = sparse_esp_package().manifest().clone();
+    manifest.parts = [
+        ("merged.bin", FirmwarePartKind::MergedImage, 0, &merged),
+        (
+            "ota.bin",
+            FirmwarePartKind::AdditionalImage,
+            0x650000,
+            &extra,
+        ),
+    ]
+    .iter()
+    .map(|(path, kind, offset, bytes)| PackagePart {
+        kind: kind.clone(),
+        path: Some((*path).into()),
+        url: None,
+        format: PayloadFormat::RawBinary,
+        offset: Some(*offset),
+        byte_length: bytes.len() as u64,
+        sha256: crate::package::sha256_hex(bytes),
+        write_bytes: bytes.len() as u64,
+    })
+    .collect();
+    manifest.targets[0].flash_size = 16 * 1024 * 1024;
+    manifest.full_erase = full_erase;
+    if full_erase {
+        manifest.preserved_ranges.clear();
+        manifest.state_impact = StateImpact::Replaced;
+    } else {
+        manifest.preserved_ranges = vec![FlashRange {
+            start: 0xff0000,
+            length: 0x10000,
+        }];
+    }
+    FlashPackage::from_verified_parts(
+        manifest,
+        "manifest",
+        vec![("merged.bin".into(), merged), ("ota.bin".into(), extra)],
+    )
+    .unwrap()
+}
+
+#[test]
+fn a_merged_image_erases_only_when_stated_then_writes_each_part_at_its_offset() {
+    for full_erase in [true, false] {
+        let mut process = RecordingProcess::default();
+        execute_plan(
+            &plan(FlashRoute::EspRom),
+            &merged_esp_package(full_erase),
+            &mut process,
+            &mut success_device(),
+            Duration::from_secs(1),
+            &mut |_| {},
+        )
+        .expect("a validated merged package executes");
+        let verbs = process
+            .calls
+            .iter()
+            .map(|call| call[0].as_str())
+            .collect::<Vec<_>>();
+        let offsets = process
+            .calls
+            .iter()
+            .filter(|call| call[0] == "write-bin")
+            .map(|call| call[call.len() - 2].as_str())
+            .collect::<Vec<_>>();
+        assert_eq!(offsets, ["0x0", "0x650000"]);
+        let first = &process.calls[0];
+        assert!(
+            first
+                .windows(2)
+                .any(|pair| pair == ["--before", "usb-reset"])
+        );
+        let last = process.calls.last().unwrap();
+        assert!(
+            last.windows(2)
+                .any(|pair| pair == ["--after", "watchdog-reset"])
+        );
+        if full_erase {
+            assert_eq!(verbs, ["erase-flash", "write-bin", "write-bin"]);
+            assert!(
+                process.calls[1]
+                    .windows(2)
+                    .any(|pair| pair == ["--before", "no-reset"])
+            );
+        } else {
+            assert_eq!(verbs, ["write-bin", "write-bin"]);
+        }
+    }
+}

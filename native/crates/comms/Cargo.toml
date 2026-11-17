@@ -32,7 +32,7 @@ async-trait = "0.1"
 murm = { version = "0.0.1", path = "../murm", optional = true }
 # The misfin adapter reads the receive server's mailbox, so it needs the
 # `server` feature (MailboxStore + ReceivedMessage). Errand owns misfin.
-misfin = { version = "0.0.4", git = "https://github.com/merely-made/errand.git", branch = "main", optional = true, features = ["ring", "server"] }
+misfin = { version = ">=0.0.4", git = "https://github.com/merely-made/errand.git", branch = "main", optional = true, features = ["ring", "server"] }
 
 [dev-dependencies]
 tokio = { version = "1", features = ["rt", "macros"] }

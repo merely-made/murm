@@ -1,6 +1,7 @@
 # T114 current firmware recovery
 
-The source-pinned `711816a` package writes only `0x26000..0x72100`.
+The source-pinned `711816a` package wrote only `0x26000..0x72100`; a package staged
+from a later commit states its own range, which must stay below `0xE6000`.
 The S140 SoftDevice, control pair `0xE6000..0xE8000`, announce/settings
 pairs `0xE8000..0xEC000`, and stock bootloader remain outside that range.
 Its immutable payload emits the native-node persistent-state guard.
@@ -9,7 +10,7 @@ Double-tap reset, select the mounted `HT-n5262` volume explicitly, and use:
 
 ```text
 linkboy capture-t114-loader VOLUME LOADER.json
-linkboy flash-volume VOLUME firmware/packages/t114-current.toml t114@2.x --receipt RECEIPT.json
+linkboy flash-volume VOLUME STAGE/firmware/packages/t114-current.toml t114@2.x --receipt RECEIPT.json
 ```
 
 Linkboy validates the complete UF2 and loader facts before writing. After the

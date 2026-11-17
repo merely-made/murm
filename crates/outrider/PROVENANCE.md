@@ -18,7 +18,7 @@ Implementation facts come from three places only:
    LXMF clients and propagation nodes, run and observed, never read.
 
 The excluded implementation inputs are the same as the household's other clean-room crate
-(`crates/sennet/PROVENANCE.md`): third-party protocol implementation source,
+(`apps/signalman/capture/PROVENANCE.md`): third-party protocol implementation source,
 client applications, generated bindings, and implementation-derived API
 references. The Python LXMF package and its client applications serve
 strictly as external oracles. They are under the Reticulum License, which is

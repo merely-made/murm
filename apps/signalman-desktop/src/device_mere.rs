@@ -6,7 +6,7 @@
 
 use std::collections::BTreeMap;
 
-use chartulary::{Author, EdgeId, EditSpec, GraphLog, Identified, NodeKey};
+use portolan::{Author, EdgeId, EditSpec, GraphLog, Identified, NodeKey};
 use signalman::management::{
     ManagementGeneration, ManagementMaterial, ManagementNode, ManagementNodeId, ManagementPresence,
     ManagementRelation, ManagementRelationId, ManagementRole,

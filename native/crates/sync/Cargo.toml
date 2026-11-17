@@ -13,17 +13,17 @@ getrandom = "0.4"
 identity.workspace = true
 stickleback.workspace = true
 muniment = { workspace = true, features = ["json"] }
-p2panda-core = { package = "p2mere-core", version = "0.10" }
-p2panda-store = { package = "p2mere-store", version = "0.10", default-features = false }
-p2panda-sync = { package = "p2mere-sync", version = "0.10" }
-p2panda-net = { package = "p2mere-net", version = "0.10", default-features = false, features = ["address_book", "iroh_endpoint", "iroh_mdns", "discovery", "gossip", "sync"] }
+p2panda-core = { package = "p2mere-core", version = "0.11" }
+p2panda-store = { package = "p2mere-store", version = "0.11", default-features = false }
+p2panda-sync = { package = "p2mere-sync", version = "0.11" }
+p2panda-net = { package = "p2mere-net", version = "0.11", default-features = false, features = ["address_book", "iroh_endpoint", "iroh_mdns", "discovery", "gossip", "sync"] }
 serde = { version = "1", features = ["derive"] }
 tokio = { version = "1", features = ["io-util", "rt", "sync", "time"] }
 tokio-stream = "0.1"
 # Framing and sink/stream adapters for the carrier-neutral LogSync session.
 bytes = "1"
 futures-util = { version = "0.3", default-features = false, features = ["sink"] }
-thiserror = "1"
+thiserror = "2"
 tokio-util = { version = "0.7", default-features = false, features = ["codec"] }
 
 [dev-dependencies]

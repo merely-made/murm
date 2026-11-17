@@ -12,7 +12,7 @@ Run from the oracle/ directory:  ./.venv/bin/python -u interop_tcp_reconnect.py
 """
 from __future__ import annotations
 
-import os, re, shutil, signal, socket, subprocess, sys, tempfile, threading, time
+import os, re, shutil, socket, subprocess, sys, tempfile, threading, time
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -56,8 +56,14 @@ class Proc:
         return None
 
     def kill(self):
-        try: self.p.send_signal(signal.SIGKILL); self.p.wait(5)
-        except Exception: pass
+        if self.p.poll() is not None:
+            return
+        self.p.stdin.close()
+        try:
+            self.p.wait(5)
+        except subprocess.TimeoutExpired:
+            self.p.kill()
+            self.p.wait(5)
 
 
 def hub(cfg: Path, port: int) -> Proc:
@@ -88,7 +94,10 @@ def run_hub(cfg: str, port: int) -> None:
     print(f"STOCK_DEST {d.hash.hex()}", flush=True)
     for line in sys.stdin:
         cmd = line.split()
-        if cmd[:1] == ["ANNOUNCE"]:
+        if cmd[:1] == ["CRASH"]:
+            # Exit the hub itself, even when sys.executable launches it through a venv shim.
+            os._exit(0)
+        elif cmd[:1] == ["ANNOUNCE"]:
             d.announce(); print("ANNOUNCED", flush=True)
         elif cmd[:1] == ["PATH"]:
             target, deadline = bytes.fromhex(cmd[1]), time.time() + float(cmd[2])
@@ -123,7 +132,8 @@ def main() -> int:
         hubs[0].send("ANNOUNCE")
         checks["retinue learns D"] = bool(retinue.expect(rf"LEARNED {d} {iface}", 15))
 
-        hubs[0].kill()
+        hubs[0].send("CRASH")
+        hubs[0].p.wait(5)
         checks["retinue goes offline"] = bool(retinue.expect(rf"ONLINE {iface} false", 15))
         time.sleep(3)
         hubs.append(hub(scratch / "second", port))

@@ -4,12 +4,26 @@
 //! future executor receive this verified object, never an image path whose contents may have
 //! changed since the decision was made.
 
+mod esp_layout;
 mod kinds;
 mod manifest;
+mod template;
 #[cfg(test)]
 mod tests;
 mod uf2_layout;
+pub(crate) use esp_layout::ESP_IMAGE_MAGIC;
+pub(crate) use uf2_layout::uf2_extent;
 mod validate;
+pub use validate::is_download_url;
+
+/// Whether verified parts form a vendor merged ESP32-S3 image and its additional images.
+pub(crate) fn is_merged_esp_layout(parts: &[VerifiedPackagePart]) -> bool {
+    let declared = parts
+        .iter()
+        .map(|part| part.declaration().clone())
+        .collect::<Vec<_>>();
+    validate::is_merged_esp(&declared)
+}
 mod verified;
 
 use std::io;
@@ -21,8 +35,11 @@ pub use kinds::{
 };
 pub use manifest::{
     ExpectedApplication, FlashPackageManifest, HelperArtifact, HelperRequirement, PackagePart,
-    PackagePayload, PackageTarget, PersistentStateCompatibility, PublisherSignature,
-    PublisherSignatureFormat, RecoveryInstructions, helper_platform,
+    PackagePayload, PackageTarget, PartSource, PersistentStateCompatibility, PublisherSignature,
+    PublisherSignatureFormat, Qualification, RecoveryInstructions, helper_platform,
+};
+pub use template::{
+    BuildFacts, PACKAGE_TEMPLATE_SCHEMA, PackageTemplate, TemplateApplication, TemplatePayload,
 };
 pub use verified::{FlashPackage, VerifiedPackagePart, sha256_hex};
 
@@ -61,6 +78,8 @@ pub enum PackageError {
         expected: u64,
         actual: u64,
     },
+    #[error("package part {url} has not been downloaded")]
+    NotFetched { url: String },
     #[error(
         "package part hash mismatch for {}: manifest says {expected}, bytes hash to {actual}",
         path.display()

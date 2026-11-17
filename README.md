@@ -81,16 +81,14 @@ Each crate has its own README with more detail, and here's a generated overview.
 | `seneschal` | Board-management contract: signed control requests and replies, owner and configuration journal. | published |
 | `tulle` | Radio interface layer: serial modem control, direct PHY, medium access. | published |
 | `selvage` | LoRa PHY profiles shared by host and firmware. | published |
-| `sennet` | Meshtastic-compatible mesh. | published |
-| `tucket` | MeshCore interop. | published |
 | `radio-face`, `radio-hand`, `radio-mirror` | On-device UI, board runtime, and the UI's browser (wasm) realization. | workspace only |
 | `retinue-sim` | In-process multi-node route-trace harness. | workspace only |
-| `tinyssb-core` | Allocation-free tinySSB v0 feed verifier. | workspace only |
 
 Apps: `linkboy` (inspects, plans and flashes firmware packages), `signalman`
 (runs a household radio from a serial port), and `signalman-desktop` (its
 desktop face, rooted in its own workspace). Firmware for Heltec V4 and Heltec
-T114 boards is in `firmware/`, with flashable packages in `firmware/packages/`.
+T114 boards is in `firmware/`; `firmware/packages/` holds package templates and the
+index, and a staging step builds the flashable packages (see its README).
 
 ## Status (2026-10-06)
 
@@ -98,22 +96,21 @@ T114 boards is in `firmware/`, with flashable packages in `firmware/packages/`.
   first releases under the Reticulum License (see [License](#license)).
   postilion 0.3.0 and seneschal 0.2.0 were published with them; they stay
   MPL-2.0 and move to retinue 0.3. Earlier releases are MPL-2.0.
-- **Reticulum.** The live oracle is pinned to RNS 1.5.7 and LXMF 1.2.0. The
-  [repin receipt](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/receipts/rns-1.5.7-repin/README.md) passed every
-  lane in a single run: 13 live, 7 LXMF, 12 Resource and 3 routing gates.
-  Routing decisions are identical to 1.5.6. The intermittent `interop_ifac`
-  failure seen on 1.5.4 and 1.5.6 did not recur in 14 runs on the new macOS
-  host. Two held RNS-side defects persist. The 0.2.0
+- **Reticulum.** The live oracle is pinned to RNS 1.6.0 and LXMF 1.3.0.
+  The wheels came over Reticulum and were checked against the publisher's
+  signing identity. The Windows loopback qualification passed 35 Retinue
+  and 18 Outrider gates. See the [wire compatibility plan](design_docs/2026-11-02_wire_compatibility_plan.md)
+  for the receipt and the open network stamp and fractional LXMF cost work. The 0.2.0
   [link lifecycle](design_docs/archive_docs/2026-11-02/2026-10-02_node_link_lifecycle_plan.md) work
   landed: route learning, `open_link(now)`, link-request expiry, and
   own-echo and duplicate filtering. These results cover the measured
   local-TCP scopes; they are not full upstream parity.
-- **Sennet and Tucket.** The [current receipt](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/receipts/sennet-tucket-current/README.md)
-  covers September 30 exchanges with identified stock radios. MeshCore 1.17.1
-  passed endpoint traffic, ACKs, fallback and one-repeater routes at all three
-  path widths. Meshtastic 2.7.26 passed bidirectional encrypted text,
-  rebroadcast, node association and duplicate suppression. Maximum-size stock
-  acceptance, multiple repeaters and broader roles remain open.
+- **Sennet and Tucket.** Since 2026-11-14 MeshCore and Meshtastic meshes are
+  reached through a stock companion radio that holds the keys (Mark: "Stock
+  radios only"); the frame types Signalman's companion client uses live in
+  `apps/signalman/src/radio_comms/companion`, and the two crates left the
+  workspace on 2026-11-14 (their names stay published at 0.0.2). The September 30 native exchanges in the [historical receipt](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/receipts/sennet-tucket-current/README.md)
+  describe code that has since been removed.
 - **Firmware.** T114 bounded transport has an on-air receipt from August 13.
   The [firmware refresh](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/receipts/firmware-refresh/README.md) and its
   [follow-up](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/receipts/firmware-refresh/follow-up/README.md) installed
@@ -209,7 +206,8 @@ its documentation, and the reference implementations. See the
 ## History
 
 `tulle`, `sennet`, and `tucket` merged into this workspace on 2026-07-23 with
-history preserved; their standalone repositories are archived.
+history preserved; their standalone repositories are archived. `sennet` and `tucket` were folded into
+Signalman and removed from the workspace on 2026-11-14.
 
 Retinue was first built from the public-domain Reticulum protocol using two v4s and a T114, 
 the manual, and packet captures from the reference implementations, which were run as

@@ -1,4 +1,4 @@
-"""Offline AutoInterface vectors from stock RNS 1.5.7: no network, no root.
+"""Offline AutoInterface vectors from stock RNS: no network, no root.
 
 Builds stock `AutoInterface` objects with `devices = none0`, so nothing is adopted and no
 socket opens, and records what retinue's `auto` module must reproduce byte for byte:
@@ -22,6 +22,8 @@ import shutil
 import sys
 import tempfile
 from pathlib import Path
+
+from oracle_version import require_rns
 
 HERE = Path(__file__).resolve().parent
 FIXTURE = HERE.parent / "tests" / "fixtures" / "auto_vectors.json"
@@ -56,7 +58,7 @@ def link_locals() -> list[str]:
 def vectors() -> dict:
     import RNS
 
-    assert RNS.__version__ == "1.5.7", f"expected stock RNS 1.5.7, got {RNS.__version__}"
+    require_rns(RNS.__version__)
     groups = []
     for group in GROUPS:
         for scope in SCOPES:
@@ -101,7 +103,11 @@ def run() -> int:
     got = vectors()
     text = json.dumps(got, indent=1) + "\n"
     if "--check" in sys.argv:
-        ok = FIXTURE.read_text(encoding="utf-8") == text
+        expected = json.loads(FIXTURE.read_text(encoding="utf-8"))
+        # The producer version is provenance; the wire vectors must match.
+        ok = {k: v for k, v in expected.items() if k != "rns"} == {
+            k: v for k, v in got.items() if k != "rns"
+        }
         print(f"{len(got['groups'])} groups, {len(got['tokens'])} tokens")
         print(f"AUTO VECTORS: {'PASS' if ok else 'FAIL (stock differs from the fixture)'}")
         return 0 if ok else 1

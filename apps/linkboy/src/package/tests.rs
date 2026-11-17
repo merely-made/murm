@@ -1,3 +1,5 @@
+mod merged;
+
 use super::*;
 
 fn manifest(payload: &[u8]) -> FlashPackageManifest {
@@ -18,7 +20,8 @@ fn manifest(payload: &[u8]) -> FlashPackageManifest {
             notice: "Test helper notice".into(),
         }],
         payload: Some(PackagePayload {
-            path: "payload.bin".into(),
+            path: Some("payload.bin".into()),
+            url: None,
             format: PayloadFormat::EspflashElf,
             byte_length: payload.len() as u64,
             sha256: sha256_hex(payload),
@@ -60,6 +63,8 @@ fn manifest(payload: &[u8]) -> FlashPackageManifest {
             after_failure: "Enter the ROM loader again.".into(),
         },
         persistent_state: None,
+        full_erase: false,
+        qualification: None,
     }
 }
 
@@ -75,7 +80,8 @@ fn sparse_manifest(parts: &[(&str, FirmwarePartKind, u32, &[u8])]) -> FlashPacka
         .iter()
         .map(|(path, kind, offset, bytes)| PackagePart {
             kind: kind.clone(),
-            path: (*path).into(),
+            path: Some((*path).into()),
+            url: None,
             format: PayloadFormat::RawBinary,
             offset: Some(*offset),
             byte_length: bytes.len() as u64,
@@ -334,7 +340,8 @@ fn nrf52840_uf2_without_the_matching_family_id_is_rejected() {
     value.helpers[0].route = FlashRoute::Uf2MassStorage;
     value.helpers[0].program = FlashRoute::Uf2MassStorage.helper().into();
     value.payload = Some(PackagePayload {
-        path: "payload.uf2".into(),
+        path: Some("payload.uf2".into()),
+        url: None,
         format: PayloadFormat::Uf2,
         byte_length: bytes.len() as u64,
         sha256: sha256_hex(&bytes),

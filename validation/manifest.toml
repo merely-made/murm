@@ -5,11 +5,6 @@
 
 version = 1
 
-[[asset_exemption]]
-path = "testing/tucket_t114_ops.py"
-reason = "Attended exact-USB T114 application-only Tucket campaign; verifies package bounds and original live identity/profile restoration. Never an automatic hardware test."
-expires = "2027-01-20"
-
 # This is an inventory and evidence registry, not a second assertion suite.
 # Assertions remain in the Rust tests, oracle scripts, and hardware procedures
 # that own them.  Discovery is deliberately derived from Git so that adding a
@@ -48,7 +43,7 @@ validation_asset_globs = [
     "testing/transport-conformance/interop/OpenRQ-LICENSE.txt",
     "crates/retinue/oracle/*.py",
     "crates/outrider/oracle/*.py",
-    "crates/sennet/capture/*.py",
+    "apps/signalman/capture/*.py",
 ]
 
 [[suite]]
@@ -105,18 +100,6 @@ id = "host-workspace"
 tier = "pr"
 command = ["cargo", "test"]
 
-# The default relay keeps host-only contacts. Exercise the explicit standalone
-# journal feature so its interruption/refusal cases cannot disappear from PRs.
-[[suite]]
-id = "tucket-firmware-contact-store"
-tier = "pr"
-command = ["cargo", "test", "-p", "radio-hand", "--features", "instances,tucket-endpoint,tucket-contact-store-bench", "--lib", "--test", "tucket_contacts", "--test", "instances"]
-
-[[suite]]
-id = "protocol-capacity"
-tier = "local"
-command = ["cargo", "run", "-p", "protocol-capacity-probe", "--features", "host"]
-
 # Portable offline corpus tests. Imported vector provenance and the independent
 # peer's generated fixture are verified by this isolated workspace, which does
 # not build the production protocol/firmware workspaces.
@@ -150,15 +133,9 @@ tier = "pr"
 command = ["cargo", "test", "-p", "retinue", "--no-default-features"]
 
 [[suite]]
-id = "sennet-tucket-sans-io"
+id = "signalman-comms"
 tier = "pr"
-command = ["cargo", "test", "-p", "sennet", "-p", "tucket", "--no-default-features"]
-
-[[suite]]
-id = "sennet-tucket-current-reference"
-tier = "local"
-command = ["python3", "testing/campaigns/sennet-tucket-current/run.py", "--output", "validation/results/sennet-tucket-current"]
-asset_globs = ["testing/campaigns/sennet-tucket-current/*.py", "testing/campaigns/sennet-tucket-current/tests/fixtures/sennet-stock-duplicate-settled.json", "testing/sennet_stock_bench.py", "crates/sennet/capture/capture_config.py", "crates/tucket/tests/*.rs", "crates/sennet/tests/current_boundaries.rs"]
+command = ["cargo", "test", "-p", "signalman", "--features", "comms"]
 
 [[suite]]
 id = "t114-firmware"
@@ -201,30 +178,10 @@ command = ["python3", "-u", "crates/outrider/oracle/interop_propagation_stock.py
 asset_globs = ["crates/outrider/oracle/*.py"]
 
 [[suite]]
-id = "sennet-capture-tooling"
+id = "meshtastic-capture-tooling"
 tier = "local"
-command = ["python3", "-u", "crates/sennet/capture/capture_airmsg.py"]
-asset_globs = ["crates/sennet/capture/*.py"]
-
-[[asset_exemption]]
-path = "testing/protocol-capacity/measure_elf.py"
-reason = "Offline ELF measurement CLI requires a named built target artifact; the protocol parity memory receipt owns its actual input paths, tool comparison and results."
-expires = "2027-01-16"
-
-[[asset_exemption]]
-path = "testing/sennet_pki_stock.py"
-reason = "Attended stock PKI contact/send helper; the guarded Sennet wire/native bench owns physical execution and restoration."
-expires = "2027-01-16"
-
-[[asset_exemption]]
-path = "testing/setup_sennet_stock.py"
-reason = "Attended stock-radio setup/readback helper; the guarded Sennet bench owns physical execution and restoration."
-expires = "2027-01-16"
-
-[[asset_exemption]]
-path = "testing/stock_tucket_bench.py"
-reason = "Attended identified-radio status/setup/restoration helper; the guarded native radio benches own physical execution."
-expires = "2027-01-16"
+command = ["python3", "-u", "apps/signalman/capture/capture_airmsg.py"]
+asset_globs = ["apps/signalman/capture/*.py"]
 
 # This is a physical serial bridge helper, not an executable validation suite.
 # It is intentionally registered as an expiring exemption rather than silently
@@ -260,23 +217,8 @@ reason = "Physical V4 unread-observation retirement helper; board receipt owns e
 expires = "2026-11-01"
 
 [[asset_exemption]]
-path = "testing/mc3_personality_bench.py"
-reason = "Guarded physical MC3 host-personality bench; named board receipt owns execution."
-expires = "2026-11-01"
-
-[[asset_exemption]]
 path = "testing/mc3_board_excursion_bench.py"
 reason = "Guarded physical MC3e V4 board-timer bench; exact-build receipt owns execution."
-expires = "2026-11-01"
-
-[[asset_exemption]]
-path = "testing/mc4_resident_bench.py"
-reason = "Guarded physical MC4c resident-protocol bench; exact-build V4/T114 receipt owns execution."
-expires = "2026-11-01"
-
-[[asset_exemption]]
-path = "testing/protocol-capacity/board_probe.py"
-reason = "Attended target memory campaign; exact USB identities and separately installed bench-only firmware required. Physical receipt owns execution."
 expires = "2026-11-01"
 
 [[asset_exemption]]

@@ -28,17 +28,37 @@ root licence. microReticulum remains a peer/probe lead rather than a donor.
 
 ## Setup
 
-```sh
+```powershell
 py -m venv .venv
-./.venv/Scripts/python.exe -m pip install -r requirements.txt
+./.venv/Scripts/python.exe -m pip install 'cryptography>=3.4.7' 'pyserial>=3.5'
+./.venv/Scripts/python.exe -m pip install --no-index --no-deps --find-links $wheel_dir -r requirements.txt
 ```
 
-`requirements.txt` pins `rns==1.5.4`, Retinue's current compatibility target, and
-`lxmf==1.1.1`, which the Outrider oracle drives. Re-pin deliberately, not on every upstream
-release. The [September 27 repin receipt](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/receipts/rns-1.5.4-repin/README.md)
-records the local live, Outrider, Resource and route/timebase qualification. Open
-firmware, IFAC and buffering boundaries are tracked in the
-[wire compatibility plan](../../../design_docs/2026-11-02_wire_compatibility_plan.md).
+Set `$wheel_dir` to the directory holding the two verified wheels below.
+`requirements.txt` names and hash-pins the RNS 1.6.0 and LXMF 1.3.0 wheels.
+The [wire compatibility plan](../../../design_docs/2026-11-02_wire_compatibility_plan.md)
+records the measured scope and the remaining work.
+
+### Obtain signed upstream releases
+
+Use the publisher's `rngit` service and pin the release signing identity. Set
+`$rns_config` and `$rngit_config` to separate directories for the fetch client;
+use a Reticulum config with only the intended network interfaces. Run from an
+empty download directory. Use a Linux client if Windows `rngit` cannot retain
+a received file while it is open.
+
+```powershell
+$signer = 'bc7291552be7a58f361522990465165c'
+$upstream = 'rns://7649a50d84610232d1416b41d2896aff/reticulum'
+rngit release --rnsconfig $rns_config --config $rngit_config "$upstream/reticulum" fetch '1.6.0:rns-*.whl' --signer $signer
+rngit release --rnsconfig $rns_config --config $rngit_config "$upstream/lxmf" fetch '1.3.0:lxmf-*.whl' --signer $signer
+```
+
+Use `latest:` to discover a new release; keep its signed manifest and qualify
+the exact wheel before moving the pin. A signed release fetched over Reticulum
+and a local Rust/Python wire test are separate pieces of evidence. Set explicit
+config directories even for `rngit release --offline`: some versions start the
+Reticulum instance before doing the local verification.
 
 The separate [September 26 signed-artifact receipt](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/receipts/rns-1.5.4-signed-artifact/README.md)
 qualifies six project-input cases against `rnid 1.5.4`. All match the retained 1.5.2
@@ -118,7 +138,7 @@ signature, placement, and mask hypotheses against stock RNS output.
 239, 240, 255 and 256 wire bytes, using public APIs and a local TCP socket.
 Supply `--output` with a new path: retained captures cannot be overwritten.
 The parent process removes the temporary RNS configuration after child exit.
-`radio-hand --features instances,replay` replays the committed fixture against
+`radio-hand --features replay` replays the committed fixture against
 the firmware carrier, including authentication negatives and the 255-byte
 physical limit. Type2 growth tests are local transformations, not stock captures.
 See the [software receipt](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/receipts/firmware-ifac/README.md);

@@ -74,14 +74,20 @@ stamp**, which bounds what a board can be asked to weigh: message-cost stamps
 run 3,000 rounds, so roughly 5.6 s each, and nothing here can check inbound
 proof-of-work at any rate.
 
-Build and package for both supported bootloader paths:
+Build it with:
 
 ```text
 cargo build -p tulle-t114-phy --release --target thumbv7em-none-eabihf
-cargo objcopy -p tulle-t114-phy --release --target thumbv7em-none-eabihf -- -O binary firmware/t114-phy/tulle-t114-phy-v15.bin
-adafruit-nrfutil dfu genpkg --dev-type 0x52 --application firmware/t114-phy/tulle-t114-phy-v15.bin --application-version 15 --sd-req 0xFFFE firmware/t114-phy/tulle-t114-phy-v15.zip
-python path/to/uf2conv.py -c -b 0x26000 -f 0xADA52840 -o firmware/t114-phy/tulle-t114-phy-v15.uf2 firmware/t114-phy/tulle-t114-phy-v15.bin
 ```
+
+Images are not kept in the repository (protocol_parity D4). The staging step in
+[the packages README](../packages/README.md) runs this build from HEAD with
+`RETINUE_FIRMWARE_REVISION` set, converts the ELF with `rust-objcopy -O binary`, and
+encodes the UF2 with `linkboy make-uf2 BIN UF2 0x26000 0xADA52840`, Linkboy's
+in-repository equivalent of Adafruit's `uf2conv.py`. The one retained built image is
+`tulle-t114-phy-v47.zip`, the serial-DFU recovery package named by
+[t114-v47.toml](../packages/t114-v47.toml): a recovery image must exist before anything
+can be built.
 
 Native-node builds reserve 65,536 announce ordinals per boot by default. An owner building
 for a different reboot/erase-cadence tradeoff can set the decimal Cargo build environment
@@ -89,14 +95,15 @@ variable `RETINUE_ANNOUNCE_LEASE_ORDINALS`; the build rejects zero and values ou
 40-bit wire range. The selected lease is compiled into the board policy. Changing it does
 not alter the reservation record format.
 
-The September 30 [current package](../packages/t114-current.toml) identifies
+The September 30 current package (now built from
+[its template](../packages/t114-current.template.toml)) identified
 source `711816a8124bd58cd8cc314ec4de5009be7df166` and image `t114-native`
 in live status. Its [physical follow-up](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/receipts/firmware-refresh/follow-up/README.md)
 records installation, retained identity/settings sequence, a 1024-byte native
 resource exchange, guarded admission and signed announce ordinals advancing
 across soft resets. Same-image UF2 recovery and physical power-cut acceptance
-remain open. Use the current manifest and recovery instructions for those bytes;
-the versioned commands below and older UI receipts describe earlier artifacts.
+remain open. Those bytes are no longer in the tree; a staged build from a later
+commit is a different image. Older UI receipts below describe earlier artifacts.
 
 The Heltec bootloader's documented path is to double-press reset and copy the
 UF2 onto the `HT-n5262` drive. Serial DFU also accepts the ZIP. The application
@@ -125,12 +132,10 @@ IDENTITY, LINKS, and PEERS. After a five-second fixture expired, the host-only
 pages disappeared and TRAFFIC wrapped directly to STATUS.
 
 The October 16 [physical memory continuation](https://github.com/merely-made/murm/blob/b0e31de8b581940dcd347968585c401e3ad786ca/testing/receipts/protocol-parity-memory/physical/README.md)
-adds an explicit `memory-bench` feature and a `protocol memory` text command.
-Synthetic retained protocol state runs in a separate executor task, with fixed
-heap accounting, oversize refusal and sampled stack checkpoints. These images
-are attended diagnostics; their fixture identities never drive the radio.
-The feature is absent from ordinary builds and does not qualify scheduling or
-worst-case stack use.
+measured an attended `memory-bench` image with synthetic retained Retinue,
+Sennet and Tucket state. That feature, the Tucket-only `tucket-endpoint` service
+and its contact store were withdrawn on 2026-11-14 with the resident protocols;
+the receipt stays as history. The contact flash pair in `memory.x` stays reserved.
 
 For the measured large serial DFU transfer, the inherited eight-second watchdog
 outlasted a software reset and interrupted the helper's erase wait. The tiny

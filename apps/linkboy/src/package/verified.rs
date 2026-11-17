@@ -9,6 +9,7 @@ use super::uf2_layout::validate_uf2_layout;
 use super::validate::validate_manifest;
 use super::{
     FlashPackageManifest, FlashRange, FlashRoute, HelperRequirement, PackageError, PackagePart,
+    PartSource,
 };
 
 /// A manifest whose payload has been read and verified.
@@ -42,6 +43,8 @@ impl VerifiedPackagePart {
 }
 
 impl FlashPackage {
+    /// Load a package whose parts all sit beside its manifest. A downloaded part is refused
+    /// here; `crate::download::load_package` reads it from the firmware cache instead.
     pub fn load(path: impl AsRef<Path>) -> Result<Self, PackageError> {
         let manifest_path = path.as_ref().to_path_buf();
         let text = fs::read_to_string(&manifest_path)?;
@@ -50,9 +53,17 @@ impl FlashPackage {
         let parts = manifest
             .declared_parts()
             .into_iter()
-            .map(|part| {
-                let path = parent.join(&part.path);
-                fs::read(&path).map(|bytes| (path, bytes))
+            .map(|part| match part.source() {
+                Some(PartSource::Local(relative)) => {
+                    let path = parent.join(relative);
+                    Ok(fs::read(&path).map(|bytes| (path, bytes))?)
+                }
+                Some(PartSource::Download(url)) => Err(PackageError::NotFetched {
+                    url: url.to_string(),
+                }),
+                None => Err(PackageError::InvalidField(
+                    "a package part needs exactly one of path and url".into(),
+                )),
             })
             .collect::<Result<Vec<_>, _>>()?;
         Self::from_verified_parts(manifest, manifest_path, parts)
@@ -122,6 +133,7 @@ impl FlashPackage {
             })
             .collect::<Result<Vec<_>, PackageError>>()?;
         validate_uf2_layout(&manifest, &parts)?;
+        super::esp_layout::validate_esp_merged(&parts)?;
         Ok(Self {
             manifest,
             manifest_path: manifest_path.into(),

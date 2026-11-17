@@ -93,41 +93,6 @@ where
     if at_boundary && let Some(command) = radio_hand::settings::name::NameCommand::parse(packet) {
         return name::serve(command, settings, exec, host).await;
     }
-    #[cfg(feature = "memory-bench")]
-    #[cfg(feature = "contact-store-bench")]
-    if at_boundary && (packet == b"contacts bench\n" || packet == b"contacts bench\r\n") {
-        let reply = crate::contact_bench::report();
-        return if host.write_all(reply.as_str().as_bytes()).await.is_ok() {
-            Outcome::Served
-        } else {
-            Outcome::HostGone
-        };
-    }
-    #[cfg(feature = "memory-bench")]
-    if at_boundary && (packet == b"protocol memory\n" || packet == b"protocol memory\r\n") {
-        let values = heap::memory_bench::measure().await;
-        let (stack_free, stack_total) = crate::stack_watermark::measure();
-        let mut reply = radio_face::Text::<320>::empty();
-        let _ = write!(
-            &mut reply,
-            "memory initial={} fragmented={} retained={} final={} peak={} capacity={} failures={} expected_refusals=1 msp_sample={} worker_min_sp_sample={} stack_free={} stack_total={}\r\n",
-            values[0],
-            values[1],
-            values[2],
-            values[3],
-            heap::high_water(),
-            heap::HEAP_SIZE,
-            heap::allocation_failures(),
-            cortex_m::register::msp::read(),
-            heap::memory_bench::sampled_min_sp(),
-            stack_free,
-            stack_total
-        );
-        if host.write_all(reply.as_str().as_bytes()).await.is_err() {
-            return Outcome::HostGone;
-        }
-        return Outcome::Served;
-    }
     if at_boundary && (packet == b"bootloader\n" || packet == b"bootloader\r\n") {
         let _ = host.write_all(b"entering serial bootloader\r\n").await;
         Timer::after_millis(20).await;

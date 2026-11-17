@@ -20,7 +20,7 @@ identity.workspace = true
 stickleback.workspace = true
 muniment.workspace = true
 tokio = { version = "1", features = ["io-util", "time"] }
-thiserror = "1"
+thiserror = "2"
 
 [dev-dependencies]
 transport = { workspace = true, features = ["sync-lane", "test-identity"] }

@@ -14,7 +14,7 @@ impl DesktopState {
     }
 
     pub fn request_observation_start(&mut self) {
-        if self.resident_connecting || !self.companion_settings.is_empty() {
+        if !self.companion_settings.is_empty() {
             self.observation_notice =
                 Some("Disconnect the active radio before collecting serial observations.".into());
             return;

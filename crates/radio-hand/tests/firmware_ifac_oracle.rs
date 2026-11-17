@@ -1,4 +1,4 @@
-#![cfg(any(feature = "instances", feature = "replay"))]
+#![cfg(feature = "replay")]
 
 use radio_hand::retinue_carrier::RetinueCarrier;
 use retinue::packet::{HeaderType, Propagation};

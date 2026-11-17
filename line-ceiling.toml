@@ -6,10 +6,6 @@ path = "vendor/"
 reason = "Vendored upstream sources; their module layout is maintained with the imported dependency."
 
 [[exception]]
-path = "apps/signalman-desktop/src/companion_scenario.rs"
-reason = "Native companion acceptance over real controls and actual journal facts. Existing source-size debt; a responsibility split must preserve Product, Reconnect, Condition and existing module visibility."
-
-[[exception]]
 path = "apps/signalman-desktop/src/main.rs"
 reason = "The window. Existing source-size debt; a responsibility split must preserve Ctx and existing module visibility."
 
@@ -36,10 +32,6 @@ reason = "Src main. Existing source-size debt; a responsibility split must prese
 [[exception]]
 path = "firmware/heltec-v4-phy/src/radio_owner.rs"
 reason = "The V4's single owner for live radio and durable board state. Existing source-size debt; a responsibility split must preserve V4RadioOwner, V4BootOwner, RxSetupFault and existing module visibility."
-
-[[exception]]
-path = "firmware/heltec-v4-phy/src/store.rs"
-reason = "Board glue for the radio-hand settings store, ESP32-S3 side. Existing source-size debt; a responsibility split must preserve Outcome, Error, ReservationError and existing module visibility."
 
 [[exception]]
 path = "native/crates/murm/src/conversation_engine.rs"
@@ -104,15 +96,3 @@ reason = "The unattended sited-station host. Existing source-size debt; a respon
 [[exception]]
 path = "crates/station-custody/src/lib.rs"
 reason = "Persona-backed custody adapter for Djinn-managed Retinue stations. Existing source-size debt; a responsibility split must preserve FirstOwnerCredential, ControllerStatusError, FirstOwnerCredentialError and existing module visibility."
-
-[[exception]]
-path = "testing/webrtc-ping/src/bin/answerer.rs"
-reason = "The C1 headed-receipt answerer, moved in unmodified from its former home. Existing source-size debt; a responsibility split must preserve the signalling fixture, the receipt line and the answerer's module paths."
-
-[[exception]]
-path = "testing/webrtc-ping/src/bin/answerer/turn_client.rs"
-reason = "The probe's TURN client, moved in unmodified from its former home. Existing source-size debt; a responsibility split must preserve its credential minting and module visibility."
-
-[[exception]]
-path = "testing/webrtc-ping/src/lib.rs"
-reason = "The browser-side initiator of the C1 receipt, moved in unmodified from its former home. Existing source-size debt; a responsibility split must preserve the wasm-bindgen exports and the receipt fields."
