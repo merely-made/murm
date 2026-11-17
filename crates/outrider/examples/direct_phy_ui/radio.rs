@@ -9,24 +9,9 @@ use retinue::endpoint::Endpoint;
 use retinue::identity::PrivateIdentity;
 use retinue::iface::tulle::drive;
 use tokio::task::JoinHandle;
-use tulle::PhyProfile;
 use tulle::airtime::AirtimeBudget;
 use tulle::direct_phy_serial::{DirectPhySerialConfig, DirectPhySerialLink, DirectPhyUiControl};
-
-fn profile(bandwidth_hz: u32) -> PhyProfile {
-    PhyProfile {
-        frequency_hz: 906_875_000,
-        bandwidth_hz,
-        spreading_factor: 8,
-        coding_rate_denominator: 5,
-        preamble_symbols: 16,
-        sync_word: 0x12,
-        explicit_header: true,
-        crc: true,
-        invert_iq: false,
-        tx_power_dbm: 17,
-    }
-}
+use tulle::radio_io::PacketRadio;
 
 pub(super) struct RadioPair {
     pub(super) left: Arc<Endpoint>,
@@ -51,15 +36,19 @@ impl RadioPair {
             transmit_timeout: Duration::from_secs(10),
             ..DirectPhySerialConfig::default()
         };
+        let mut profile = postilion::profile(bandwidth_hz);
+        if let Some(power) = std::env::var_os("SIGNALMAN_TX_POWER_DBM") {
+            profile.tx_power_dbm = power.to_str().ok_or("invalid transmit power")?.parse()?;
+        }
         let mut left_radio = DirectPhySerialLink::open(
             left_port,
-            profile(bandwidth_hz),
+            profile,
             AirtimeBudget::new(60_000, 60_000),
             radio_config.clone(),
         )?;
         let mut right_radio = DirectPhySerialLink::open(
             right_port,
-            profile(bandwidth_hz),
+            profile,
             AirtimeBudget::new(60_000, 60_000),
             radio_config,
         )?;
@@ -70,15 +59,17 @@ impl RadioPair {
 
         let left = Arc::new(Endpoint::new(left_identity.clone()));
         let right = Arc::new(Endpoint::new(right_identity.clone()));
-        let logical_mtu = 255 - ifac.as_ref().map_or(0, Ifac::size);
+        let frame_limit = left_radio.max_frame_len().min(right_radio.max_frame_len());
+        let logical_mtu = frame_limit - ifac.as_ref().map_or(0, Ifac::size);
+        println!("frame limit={frame_limit} logical link MTU={logical_mtu}");
         left.set_link_mtu(logical_mtu as u32);
         right.set_link_mtu(logical_mtu as u32);
         let left_interface = match &ifac {
-            Some(ifac) => left.attach_interface_with_ifac(255, ifac.clone())?,
+            Some(ifac) => left.attach_interface_with_ifac(frame_limit, ifac.clone())?,
             None => left.attach_interface(),
         };
         let right_interface = match ifac {
-            Some(ifac) => right.attach_interface_with_ifac(255, ifac)?,
+            Some(ifac) => right.attach_interface_with_ifac(frame_limit, ifac)?,
             None => right.attach_interface(),
         };
         let left_driver = tokio::spawn(drive(left_interface, left_radio));

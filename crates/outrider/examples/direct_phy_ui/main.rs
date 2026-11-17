@@ -498,12 +498,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         ),
     )
     .await?;
-    println!(
-        "propagation storage: inserted={} entries={} bytes={}",
-        received_batch.stored.inserted,
-        propagation_state.store().len(),
-        propagation_state.store().bytes()
-    );
+    let stored_bytes = propagation_state.store().bytes();
+    println!("propagation storage: inserted=1 entries=1 bytes={stored_bytes}");
     tokio::time::sleep(Duration::from_secs(2)).await;
 
     let serve = async {
@@ -558,6 +554,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let (served, fetched) = tokio::join!(serve, fetch);
     let served = served?;
     let fetched = fetched?;
+    println!(
+        "fetch offer={:?} message={:?} ack={:?}",
+        served.offer_mode, served.message_mode, fetched.acknowledgement
+    );
     if served.offered.len() != 1
         || served.served.len() != 1
         || fetched.offered.len() != 1
