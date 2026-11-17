@@ -112,7 +112,8 @@ def main() -> int:
             else "Stock Oracle"
         )
         source = router.register_delivery_identity(
-            sender_identity, display_name=display_name, stamp_cost=8
+            sender_identity, display_name=display_name,
+            stamp_cost=float(os.environ.get("OUTRIDER_STAMP_COST", "8"))
         )
         source.announce()
 

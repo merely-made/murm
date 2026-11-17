@@ -338,7 +338,10 @@ impl Search<'_> {
         }
         let ours = shared.identity.public().hash();
         let tag = self.request.tag().unwrap_or_default();
-        let packet = path_request_via(target, Some(ours), tag);
+        let packet = match (self.request.stamp, <[u8; 16]>::try_from(tag)) {
+            (Some(stamp), Ok(tag)) => crate::path::stamped_path_request(target, ours, &tag, &stamp),
+            _ => path_request_via(target, Some(ours), tag),
+        };
         for seen in ifaces {
             if seen.id != self.iface && seen.online && modes.contains(&seen.mode) {
                 send_path_request(shared, seen.id, &packet, true, self.now);
@@ -399,13 +402,20 @@ fn send_path_request(
 
 /// Ask every interface for `target`'s path; a transport names itself (`Transport.py`
 /// 3279-3325).
-pub(super) fn broadcast_path_request(shared: &Shared, target: AddressHash, tag: &[u8]) {
+pub(super) fn broadcast_path_request(shared: &Arc<Shared>, target: AddressHash, tag: &[u8]) {
+    if super::network_stamps::request_stamped_path(shared, target, tag) {
+        return;
+    }
     let transport = shared.routing.lock().unwrap().forward_announces;
     let requestor = transport.then(|| shared.identity.public().hash());
     let packet = path_request_via(target, requestor, tag);
+    broadcast_path_packet(shared, &packet);
+}
+
+pub(super) fn broadcast_path_packet(shared: &Shared, packet: &Packet) {
     let now = Instant::now();
     for seen in interfaces(shared) {
-        send_path_request(shared, seen.id, &packet, false, now);
+        send_path_request(shared, seen.id, packet, false, now);
     }
 }
 

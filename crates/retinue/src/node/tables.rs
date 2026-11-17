@@ -19,6 +19,8 @@ pub(super) struct Route {
     pub(super) learned: u64,
     /// The learning interface's mode when the route was learned.
     pub(super) mode: InterfaceMode,
+    /// The authenticated link cost from this route's most recent announce.
+    pub(super) link_cost: Option<crate::stamp::StampCost>,
 }
 
 impl Route {

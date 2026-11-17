@@ -1,5 +1,6 @@
 //! Store, snapshot and node-policy behaviour that needs no link.
 
+use crate::stamp::StampCost;
 use std::time::Duration;
 
 use retinue::identity::PrivateIdentity;
@@ -20,7 +21,7 @@ fn entry(recipient: u8, index: u8, body_len: usize, cost: u16) -> PropagationEnt
     let recipient = PrivateIdentity::from_secret_bytes(&[recipient; 64]);
     let stamps = PropagationStamps {
         delivery_cost: None,
-        propagation_cost: cost,
+        propagation_cost: StampCost::from_integer(cost),
         seed: [0; STAMP_LEN],
         max_attempts: 1 << 20,
     };
@@ -229,9 +230,9 @@ fn restore_is_bounded_by_the_limits_not_a_fixed_count() {
 fn node_policy(propagation: u8, flexibility: u8) -> NodePolicy {
     NodePolicy {
         costs: PropagationCosts {
-            propagation,
-            flexibility,
-            peering: 18,
+            propagation: PropagationCost::from_integer(propagation.into()),
+            flexibility: PropagationCost::from_integer(flexibility.into()),
+            peering: PropagationCost::from_integer(18),
         },
         max_transfer_bytes: 1 << 16,
         allowed: None,
@@ -242,8 +243,8 @@ fn node_policy(propagation: u8, flexibility: u8) -> NodePolicy {
 #[test]
 fn stamps_are_admitted_from_cost_minus_flexibility_and_each_entry_stands_alone() {
     let policy = node_policy(8, 3);
-    assert_eq!(policy.stamp_floor(), 5);
-    assert_eq!(node_policy(2, 3).stamp_floor(), 0);
+    assert_eq!(policy.stamp_floor(), StampCost::from_integer(5));
+    assert_eq!(node_policy(2, 3).stamp_floor(), StampCost::from_integer(0));
     let good = entry(0x62, 1, 10, 5);
     let mut bad = entry(0x62, 2, 10, 0);
     while bad.stamp_value() >= 5 {
@@ -354,4 +355,29 @@ fn served_keeps_the_last_message_response_and_counts_them_all() {
     node.answer_get(owner(0x62), fetch(Vec::new()), 2.0, &mut report);
     assert_eq!(report.served, vec![second.transient_id()]);
     assert_eq!(report.served_total, 4);
+}
+
+#[test]
+fn a_fractional_stamp_between_two_costs_is_only_accepted_at_the_lower_cost() {
+    use crate::stamp::{Derivation, PROPAGATION_WORKBLOCK_ROUNDS, STAMP_LEN};
+    let low = StampCost::from_f64(8.25).unwrap();
+    let high = StampCost::from_f64(8.5).unwrap();
+    let mut candidate = entry(0x62, 1, 10, 0);
+    let material = candidate.transient_id();
+    let mut derivation = Derivation::new(&material, PROPAGATION_WORKBLOCK_ROUNDS);
+    derivation.advance(PROPAGATION_WORKBLOCK_ROUNDS);
+    let stamp = (0_u64..100_000)
+        .find_map(|nonce| {
+            let mut stamp = [0; STAMP_LEN];
+            stamp[24..].copy_from_slice(&nonce.to_be_bytes());
+            (derivation.valid_cost(&stamp, low) == Some(true)
+                && derivation.valid_cost(&stamp, high) == Some(false))
+            .then_some(stamp)
+        })
+        .expect("a bounded search finds the chosen fraction interval");
+    candidate.stamp = stamp;
+    let (accepted, rejected) = score_stamps(vec![candidate.clone()], low);
+    assert_eq!((accepted.len(), rejected), (1, 0));
+    let (accepted, rejected) = score_stamps(vec![candidate], high);
+    assert_eq!((accepted.len(), rejected), (0, 1));
 }

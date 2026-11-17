@@ -112,6 +112,8 @@ pub mod lossy;
 #[cfg(feature = "alloc")]
 pub mod msgpack;
 #[cfg(feature = "alloc")]
+pub mod network_stamp;
+#[cfg(feature = "alloc")]
 pub mod node;
 #[cfg(feature = "tokio")]
 pub mod nomadnet;
@@ -135,6 +137,7 @@ pub mod request;
 pub mod resource;
 #[cfg(feature = "alloc")]
 pub mod resource_transfer;
+pub mod stamp;
 #[cfg(feature = "alloc")]
 pub mod token;
 

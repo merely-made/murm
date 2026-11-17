@@ -269,3 +269,17 @@ pub(super) fn signing_seed(identity: &PrivateIdentity) -> [u8; KEY_LEN] {
         .try_into()
         .expect("the Ed25519 half of 64 bytes is 32")
 }
+
+/// Whether a link request's embedded key stamp satisfies the required cost.
+/// The destination binds the stamp to this request's ephemeral signing key.
+pub fn request_stamp_valid(request: &Packet, cost: crate::stamp::StampCost) -> bool {
+    if request.packet_type != PacketType::LinkRequest
+        || !matches!(request.payload.len(), LINK_KEYS_LEN | LINK_REQUEST_LEN)
+    {
+        return false;
+    }
+    let mut material = [0; 48];
+    material[..16].copy_from_slice(request.destination.as_slice());
+    material[16..].copy_from_slice(&request.payload[32..64]);
+    crate::stamp::detached_valid(&material, &request.payload[..32], cost)
+}

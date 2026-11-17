@@ -98,7 +98,8 @@ def main() -> int:
         receiver_identity = RNS.Identity.from_bytes(RECEIVER_SEED)
         router = LXMF.LXMRouter(identity=receiver_identity, storagepath=str(config))
         destination = router.register_delivery_identity(
-            receiver_identity, display_name="Stock Receiver", stamp_cost=8
+            receiver_identity, display_name="Stock Receiver",
+            stamp_cost=float(os.environ.get("OUTRIDER_STAMP_COST", "8"))
         )
 
         def on_delivery(message) -> None:

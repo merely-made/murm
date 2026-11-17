@@ -1,6 +1,7 @@
 //! The node announce carries the node's clock at each announce and path response
 //! (`LXMRouter.py` 193, 332-346), and a re-announce becomes what path responses carry.
 
+use outrider::PropagationCost;
 use std::sync::Arc;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
@@ -40,9 +41,9 @@ async fn announces_and_path_responses_carry_a_current_timebase() {
         transfer_limit_kb: 256.0,
         sync_limit_kb: 10_240.0,
         costs: PropagationCosts {
-            propagation: 16,
-            flexibility: 3,
-            peering: 18,
+            propagation: PropagationCost::from_integer(16),
+            flexibility: PropagationCost::from_integer(3),
+            peering: PropagationCost::from_integer(18),
         },
         metadata: Vec::new(),
     };

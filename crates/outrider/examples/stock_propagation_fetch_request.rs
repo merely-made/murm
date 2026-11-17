@@ -1,5 +1,6 @@
 //! Capture one stock LXMF propagation fetch request through Retinue.
 
+use outrider::PropagationCost;
 use std::sync::Arc;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
@@ -26,9 +27,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         transfer_limit_kb: 256.0,
         sync_limit_kb: 10_240.0,
         costs: PropagationCosts {
-            propagation: 13,
-            flexibility: 3,
-            peering: 8,
+            propagation: PropagationCost::from_integer(13),
+            flexibility: PropagationCost::from_integer(3),
+            peering: PropagationCost::from_integer(8),
         },
         metadata: vec![(
             Value::from(PROPAGATION_METADATA_NAME),

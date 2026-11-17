@@ -100,6 +100,7 @@ impl Endpoint {
         let (single_tx, single_rx) = mpsc::unbounded_channel::<ReceivedSingle>();
 
         let shared = Arc::new(Shared {
+            network_stamps: Mutex::default(),
             lifecycle: Mutex::new(Lifecycle::Running),
             closed_notify: tokio::sync::Notify::new(),
             identity,

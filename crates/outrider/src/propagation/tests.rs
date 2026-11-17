@@ -1,3 +1,4 @@
+use crate::stamp::StampCost;
 use std::time::Duration;
 
 use retinue::identity::{Identity, PrivateIdentity};
@@ -24,7 +25,7 @@ fn sealed(
 ) -> Result<PreparedPropagation, PropagationError> {
     let stamps = PropagationStamps {
         delivery_cost: None,
-        propagation_cost,
+        propagation_cost: StampCost::from_integer(propagation_cost),
         seed: [0; STAMP_LEN],
         max_attempts,
     };
@@ -61,16 +62,24 @@ fn stock_announce_decodes_and_round_trips_exactly() {
     assert_eq!(
         announce.costs,
         PropagationCosts {
-            propagation: 13,
-            flexibility: 3,
-            peering: 8
+            propagation: PropagationCost::from_integer(13),
+            flexibility: PropagationCost::from_integer(3),
+            peering: PropagationCost::from_integer(8)
         }
     );
     assert_eq!(
         announce.name(),
         Some(b"Stock Propagation Oracle".as_slice())
     );
-    assert_eq!(announce.encode().unwrap(), bytes);
+    let encoded = announce.encode().unwrap();
+    assert_eq!(PropagationAnnounce::decode(&encoded).unwrap(), announce);
+    let Value::Array(parts) = decode_one(&encoded).unwrap() else {
+        unreachable!()
+    };
+    assert_eq!(
+        encode_value(&Value::Array(parts[..7].to_vec())).unwrap(),
+        bytes
+    );
 }
 
 /// lxmd announces float limits when configured, may append elements and costs, and stock
@@ -86,6 +95,7 @@ fn tolerant_announce_shapes_decode_as_stock_validates_them() {
     parts[3] = Value::F32(256.5);
     parts[4] = Value::F64(0.38);
     parts[5] = Value::Array(vec![13.into(), Value::F64(3.0), 8.into(), 99.into()]);
+    parts.push(Value::Array(vec![13.into(), 3.into(), 8.into()]));
     parts.push(Value::from("future"));
     let announce =
         PropagationAnnounce::decode(&encode_value(&Value::Array(parts)).unwrap()).unwrap();
@@ -94,7 +104,7 @@ fn tolerant_announce_shapes_decode_as_stock_validates_them() {
     assert_eq!(announce.transfer_limit_kb, 256.5);
     assert_eq!(announce.transfer_limit_bytes(), 256_500);
     assert_eq!(announce.sync_limit_bytes(), 380);
-    assert_eq!(announce.costs.flexibility, 3);
+    assert_eq!(announce.costs.flexibility, PropagationCost::from_integer(3));
     assert_eq!(
         announce.name(),
         Some(b"Stock Propagation Oracle".as_slice())
@@ -155,7 +165,11 @@ fn announces_stock_reads_with_int_are_read() {
     .costs;
     assert_eq!(
         (costs.propagation, costs.flexibility, costs.peering),
-        (255, 0, 8)
+        (
+            PropagationCost::from_integer(300),
+            PropagationCost::from_f64(-2.0).unwrap(),
+            PropagationCost::from_integer(8)
+        )
     );
 }
 
@@ -208,8 +222,8 @@ fn delivery_cost_mints_a_stamp_on_the_message_id_inside_the_encryption() {
     let unstamped = sealed(&sender, recipient.public(), &payload, 0x31, 0, 1).unwrap();
     let ratchet = retinue::hash::NameHash::of(&[0x77; 32]);
     let stamps = PropagationStamps {
-        delivery_cost: Some(8),
-        propagation_cost: 0,
+        delivery_cost: Some(StampCost::from_integer(8)),
+        propagation_cost: StampCost::from_integer(0),
         seed: [0; STAMP_LEN],
         max_attempts: 100_000,
     };
@@ -228,13 +242,13 @@ fn delivery_cost_mints_a_stamp_on_the_message_id_inside_the_encryption() {
     assert_eq!(stamped.ratchet_id, Some(ratchet));
     assert_eq!(stamped.message_id, unstamped.message_id);
     let decoded = stamped.entry.decrypt(&recipient, 4_096).unwrap();
-    assert!(delivery_stamp_valid(&decoded, 8));
+    assert!(delivery_stamp_valid(&decoded, StampCost::from_integer(8)));
     let plain = unstamped.entry.decrypt(&recipient, 4_096).unwrap();
     assert!(plain.payload.stamp.is_none());
-    assert!(!delivery_stamp_valid(&plain, 8));
+    assert!(!delivery_stamp_valid(&plain, StampCost::from_integer(8)));
 
     let exhausted = PropagationStamps {
-        delivery_cost: Some(32),
+        delivery_cost: Some(StampCost::from_integer(32)),
         max_attempts: 1,
         ..stamps
     };
@@ -568,25 +582,4 @@ fn corrupt_or_unknown_store_snapshots_are_rejected_atomically() {
     ));
 }
 
-#[test]
-fn captured_fetch_requests_decode_to_offer_and_selection() {
-    let offer =
-        hex::decode("93cb41da9a05b2533e92c4109dc1a72883468f57fed571e796e9ce9892c0c0").unwrap();
-    assert_eq!(
-        decode_get_request(&decode_fetch_request(&offer).unwrap()).unwrap(),
-        GetRequest::Offer
-    );
-
-    let followup = hex::decode(
-        "93cb41da9a060120c7b3c4109dc1a72883468f57fed571e796e9ce989391c420444444444444444444444444444444444444444444444444444444444444444490cd03e8",
-    )
-    .unwrap();
-    assert_eq!(
-        decode_get_request(&decode_fetch_request(&followup).unwrap()).unwrap(),
-        GetRequest::Fetch {
-            wanted: vec![[0x44; 32]],
-            handled: Vec::new(),
-            limit_kb: Some(FETCH_LIMIT as f64),
-        }
-    );
-}
+mod wire;

@@ -28,7 +28,7 @@ mod wire;
 mod tests;
 
 pub use established::{Inbound, Link};
-pub use handshake::{PendingLink, accept};
+pub use handshake::{PendingLink, accept, request_stamp_valid};
 pub use proof::{DATA_PROOF_LEN, LINK_IDENTIFY_LEN, data_proof_packet, read_data_proof};
 pub use wire::{
     CTX_CACHE_REQUEST, CTX_CHANNEL, CTX_KEEPALIVE, CTX_LINKCLOSE, CTX_LINKIDENTIFY, CTX_LRPROOF,

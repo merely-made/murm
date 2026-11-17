@@ -1,5 +1,6 @@
 //! The client side of a propagation fetch (`LXMRouter.py` 1571-1651).
 
+use crate::stamp::StampCost;
 use retinue::endpoint::{Endpoint, PeerAnnounce, ResourceTransferConfig};
 use retinue::hash::{AddressHash, NameHash, full_hash};
 use retinue::identity::Identity;
@@ -25,7 +26,7 @@ pub struct FetchPolicy {
     /// Leave messages on the node: report no held ids and send no final acknowledgement.
     pub retain_on_node: bool,
     /// The local delivery stamp cost to enforce, as for direct delivery.
-    pub stamp_cost: Option<u8>,
+    pub stamp_cost: Option<StampCost>,
     pub max_entry_bytes: usize,
     pub max_message_bytes: usize,
     pub resource: ResourceTransferConfig,
@@ -213,7 +214,7 @@ fn open(
 
 /// Whether a message carries a delivery stamp worth `cost` on its message id
 /// (`LXMRouter.py` 1930-1946).
-pub fn delivery_stamp_valid(message: &DecodedLxmf, cost: u8) -> bool {
+pub fn delivery_stamp_valid(message: &DecodedLxmf, cost: StampCost) -> bool {
     check_stamp(message, Some(cost), &[]).is_ok()
 }
 

@@ -79,7 +79,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         &LxmfPayload::text(TIMESTAMP, b"PROPAGATION TITLE", content),
         &PropagationStamps {
             delivery_cost: recipient_cost,
-            propagation_cost: u16::from(node.1.costs.propagation),
+            propagation_cost: node.1.costs.propagation.quantized(),
             seed: [0; 32],
             max_attempts: 1_000_000,
         },

@@ -29,6 +29,11 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
             logical_mtu: LINK_MTU,
             refused_payloads: 0,
             transport: TransportConfig::none(),
+            stamp_policy: crate::network_stamp::NetworkStampPolicy {
+                max_attempts: super::DEFAULT_LINK_STAMP_ATTEMPTS,
+                ..Default::default()
+            },
+            destination_stamp: None,
             routes: BoundedVec::new(),
             freshness_policy: FreshnessPolicy::for_node(PEERS, ROUTES),
             freshness: AnnounceFreshness::new(AnnounceFreshnessConfig {

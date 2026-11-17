@@ -1,3 +1,4 @@
+use outrider::StampCost;
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -42,7 +43,7 @@ async fn stamped_opportunistic_delivery_authenticates_without_a_link() {
         &receiver,
         &DeliveryAnnounce {
             display_name: Some(b"Receiver".to_vec()),
-            stamp_cost: Some(8),
+            stamp_cost: Some(StampCost::from_f64(8.5).unwrap()),
         },
         ratchets(),
     )
@@ -70,7 +71,7 @@ async fn stamped_opportunistic_delivery_authenticates_without_a_link() {
         single,
         &DeliveredCache::default(),
         outrider::DEFAULT_MAX_MESSAGE_BYTES,
-        Some(8),
+        Some(StampCost::from_f64(8.5).unwrap()),
     )
     .unwrap();
 

@@ -2,6 +2,7 @@
 
 use std::io::Cursor;
 
+use crate::stamp::StampCost;
 use retinue::destination::DestinationName;
 use retinue::endpoint::Endpoint;
 use retinue::hash::AddressHash;
@@ -21,19 +22,25 @@ pub const DEFAULT_MAX_ANNOUNCE_BYTES: usize = 1024;
 /// (`SF_COMPRESSION`) supported, and outrider implements none. With neither a name nor a cost
 /// there is nothing to say, so the app data is empty.
 ///
-/// The stamp cost lives in 1..=254 as stock's does (`LXMRouter.py` 386-402): a cost of 0 means
-/// none, and anything above 254 is held at 254.
+/// Costs use stock's 1/256 grid and global cap of 100. A zero cost means none.
+/// LXMF 1.3 appends the exact cost after the rounded-up legacy integer.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct DeliveryAnnounce {
     pub display_name: Option<Vec<u8>>,
-    pub stamp_cost: Option<u8>,
+    pub stamp_cost: Option<StampCost>,
 }
 
-/// The highest stamp cost an announce carries.
-pub const MAX_STAMP_COST: u8 = 254;
+/// The largest finite cost stock can search for.
+pub const MAX_STAMP_COST: StampCost = StampCost::MAX;
 
-fn normalize_cost(cost: u64) -> Option<u8> {
-    (cost > 0).then(|| cost.min(u64::from(MAX_STAMP_COST)) as u8)
+fn normalize_cost(cost: &Value) -> Option<StampCost> {
+    let value = match cost {
+        Value::Integer(n) => n.as_f64()?,
+        Value::F32(n) => f64::from(*n),
+        Value::F64(n) => *n,
+        _ => return None,
+    };
+    StampCost::from_f64(value).filter(|cost| *cost > StampCost::ZERO)
 }
 
 impl DeliveryAnnounce {
@@ -45,7 +52,7 @@ impl DeliveryAnnounce {
     }
 
     pub fn encode(&self) -> Result<Vec<u8>, AnnounceError> {
-        let cost = self.stamp_cost.and_then(|cost| normalize_cost(cost.into()));
+        let cost = self.stamp_cost.filter(|cost| *cost > StampCost::ZERO);
         if self.display_name.is_none() && cost.is_none() {
             return Ok(Vec::new());
         }
@@ -53,11 +60,17 @@ impl DeliveryAnnounce {
             .display_name
             .as_ref()
             .map_or(Value::Nil, |name| Value::Binary(name.clone()));
-        let cost = cost.map_or(Value::Nil, Value::from);
+        let legacy_cost = cost.map_or(Value::Nil, |cost| Value::from(cost.ceil()));
+        let fractional_cost = cost.map_or(Value::Nil, |cost| Value::F64(cost.to_f64()));
         let mut encoded = Vec::new();
         rmpv::encode::write_value(
             &mut encoded,
-            &Value::Array(vec![name, cost, Value::Array(Vec::new())]),
+            &Value::Array(vec![
+                name,
+                legacy_cost,
+                Value::Array(Vec::new()),
+                fractional_cost,
+            ]),
         )
         .map_err(|_| AnnounceError::Encode)?;
         if encoded.len() > DEFAULT_MAX_ANNOUNCE_BYTES {
@@ -74,7 +87,8 @@ impl DeliveryAnnounce {
     /// (`LXMF.py` 152-186): an array marker selects the structured form, anything else is
     /// a legacy UTF-8 name with no cost. A name that is not UTF-8 binary reads as absent;
     /// NULs and surrounding whitespace are stripped from one that is. A cost that is not an
-    /// integer reads as absent, where stock keeps it and fails later when it stamps.
+    /// finite integer or float reads as absent. The fourth element, when numeric,
+    /// supersedes the second element as in LXMF 1.3.
     ///
     /// Any app data reads as some delivery announce, so decode only what an `lxmf.delivery`
     /// destination announced, as stock's handler filters by aspect (`Handlers.py` 8-12).
@@ -108,10 +122,13 @@ impl DeliveryAnnounce {
                 .map(|name| name.replace('\0', "").trim().as_bytes().to_vec()),
             _ => None,
         };
-        let stamp_cost = match parts.get(1) {
-            Some(Value::Integer(cost)) => cost.as_u64().and_then(normalize_cost),
-            _ => None,
+        // LXMF 1.3's transition announces append the exact fractional cost; the
+        // second element is its rounded-up legacy fallback.
+        let cost = match parts.get(3) {
+            Some(value @ (Value::Integer(_) | Value::F32(_) | Value::F64(_))) => Some(value),
+            _ => parts.get(1),
         };
+        let stamp_cost = cost.and_then(normalize_cost);
         Ok(Self {
             display_name,
             stamp_cost,
@@ -201,7 +218,7 @@ mod tests {
             announce.display_name.as_deref(),
             Some(b"Stock Oracle".as_slice())
         );
-        assert_eq!(announce.stamp_cost, Some(8));
+        assert_eq!(announce.stamp_cost, Some(StampCost::from_integer(8)));
     }
 
     #[test]
@@ -214,7 +231,7 @@ mod tests {
             announce.display_name.as_deref(),
             Some(b"Stock Receiver".as_slice())
         );
-        assert_eq!(announce.stamp_cost, Some(8));
+        assert_eq!(announce.stamp_cost, Some(StampCost::from_integer(8)));
     }
 
     #[test]
@@ -235,7 +252,7 @@ mod tests {
         let future = hex::decode("94c4014e089100 63".replace(' ', "").as_str()).unwrap();
         let announce = DeliveryAnnounce::decode(&future).unwrap();
         assert_eq!(announce.display_name.as_deref(), Some(b"N".as_slice()));
-        assert_eq!(announce.stamp_cost, Some(8));
+        assert_eq!(announce.stamp_cost, Some(StampCost::from_integer(99)));
     }
 
     /// Outrider implements no compression. An empty feature list is the only encoding that
@@ -244,16 +261,19 @@ mod tests {
     fn we_declare_an_empty_feature_list() {
         let encoded = DeliveryAnnounce {
             display_name: Some(b"Stock Oracle".to_vec()),
-            stamp_cost: Some(8),
+            stamp_cost: Some(StampCost::from_integer(8)),
         }
         .encode()
         .unwrap();
-        assert_eq!(hex::encode(&encoded), "93c40c53746f636b204f7261636c650890");
+        assert_eq!(
+            hex::encode(&encoded),
+            "94c40c53746f636b204f7261636c650890cb4020000000000000"
+        );
 
         let anonymous_cost = DeliveryAnnounce::named("Stock Receiver").encode().unwrap();
         assert_eq!(
             hex::encode(&anonymous_cost),
-            "93c40e53746f636b205265636569766572c090"
+            "94c40e53746f636b205265636569766572c090c0"
         );
     }
 
@@ -262,7 +282,7 @@ mod tests {
     fn our_own_announce_round_trips() {
         let announce = DeliveryAnnounce {
             display_name: Some(b"outrider".to_vec()),
-            stamp_cost: Some(4),
+            stamp_cost: Some(StampCost::from_integer(4)),
         };
         let encoded = announce.encode().unwrap();
         assert_eq!(DeliveryAnnounce::decode(&encoded).unwrap(), announce);
@@ -303,10 +323,10 @@ mod tests {
         let decode = |bytes: &[u8]| DeliveryAnnounce::decode(bytes).unwrap();
         let int_name = decode(&[0x92, 0x07, 0x08]);
         assert_eq!(int_name.display_name, None);
-        assert_eq!(int_name.stamp_cost, Some(8));
+        assert_eq!(int_name.stamp_cost, Some(StampCost::from_integer(8)));
         let str_name = decode(&[0x92, 0xa1, b'N', 0x08]);
         assert_eq!(str_name.display_name, None);
-        assert_eq!(str_name.stamp_cost, Some(8));
+        assert_eq!(str_name.stamp_cost, Some(StampCost::from_integer(8)));
         assert_eq!(decode(&[0x92, 0xc0, 0xa1, b'8']).stamp_cost, None);
         assert_eq!(decode(&[0xff, 0xfe]), DeliveryAnnounce::default());
     }
@@ -318,13 +338,16 @@ mod tests {
         let captured = hex::decode("93c0089100").unwrap();
         let announce = DeliveryAnnounce::decode(&captured).unwrap();
         assert_eq!(announce.display_name, None);
-        assert_eq!(announce.stamp_cost, Some(8));
+        assert_eq!(announce.stamp_cost, Some(StampCost::from_integer(8)));
 
         let ours = DeliveryAnnounce {
             display_name: None,
-            stamp_cost: Some(8),
+            stamp_cost: Some(StampCost::from_integer(8)),
         };
-        assert_eq!(hex::encode(ours.encode().unwrap()), "93c00890");
+        assert_eq!(
+            hex::encode(ours.encode().unwrap()),
+            "94c00890cb4020000000000000"
+        );
         assert_eq!(
             DeliveryAnnounce::decode(&ours.encode().unwrap()).unwrap(),
             ours
@@ -340,19 +363,19 @@ mod tests {
         };
         assert_eq!(decode(&[0x00]), None);
         assert_eq!(decode(&[0xff]), None, "negative");
-        assert_eq!(decode(&[0xcc, 0xfe]), Some(254));
-        assert_eq!(decode(&[0xcd, 0x01, 0x00]), Some(254));
+        assert_eq!(decode(&[0xcc, 0xfe]), Some(StampCost::MAX));
+        assert_eq!(decode(&[0xcd, 0x01, 0x00]), Some(StampCost::MAX));
 
-        let encode = |cost| {
+        let encode = |cost: u16| {
             DeliveryAnnounce {
                 display_name: None,
-                stamp_cost: Some(cost),
+                stamp_cost: Some(StampCost::from_integer(cost)),
             }
             .encode()
             .unwrap()
         };
         assert_eq!(encode(0), Vec::<u8>::new());
-        assert_eq!(hex::encode(encode(255)), "93c0ccfe90");
+        assert_eq!(hex::encode(encode(255)), "94c06490cb4059000000000000");
     }
 
     #[test]
@@ -384,6 +407,44 @@ mod tests {
         let invalid = hex::decode("92c402fffe08").unwrap();
         let announce = DeliveryAnnounce::decode(&invalid).unwrap();
         assert_eq!(announce.display_name, None);
-        assert_eq!(announce.stamp_cost, Some(8));
+        assert_eq!(announce.stamp_cost, Some(StampCost::from_integer(8)));
+    }
+    #[test]
+    fn fractional_fourth_cost_controls_delivery_and_legacy_cost_is_rounded_up() {
+        let encoded = |fourth| {
+            let mut bytes = Vec::new();
+            rmpv::encode::write_value(
+                &mut bytes,
+                &Value::Array(vec![
+                    Value::Nil,
+                    Value::from(9),
+                    Value::Array(Vec::new()),
+                    fourth,
+                ]),
+            )
+            .unwrap();
+            bytes
+        };
+        let announce = DeliveryAnnounce::decode(&encoded(Value::F64(8.5))).unwrap();
+        assert_eq!(announce.stamp_cost, StampCost::from_f64(8.5));
+        let decoded =
+            rmpv::decode::read_value(&mut Cursor::new(announce.encode().unwrap())).unwrap();
+        let Value::Array(parts) = decoded else {
+            panic!("announce array")
+        };
+        assert_eq!(parts[1], Value::from(9));
+        assert_eq!(parts[3], Value::F64(8.5));
+        assert_eq!(
+            DeliveryAnnounce::decode(&encoded(Value::Nil))
+                .unwrap()
+                .stamp_cost,
+            Some(StampCost::from_integer(9))
+        );
+        assert_eq!(
+            DeliveryAnnounce::decode(&encoded(Value::F64(f64::NAN)))
+                .unwrap()
+                .stamp_cost,
+            None
+        );
     }
 }

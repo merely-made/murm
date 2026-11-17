@@ -1,3 +1,5 @@
+use outrider::PropagationCost;
+use outrider::StampCost;
 use std::fs::OpenOptions;
 use std::io::Write;
 use std::path::{Path, PathBuf};
@@ -60,7 +62,7 @@ fn sealed(
 ) -> PreparedPropagation {
     let stamps = PropagationStamps {
         delivery_cost: None,
-        propagation_cost: 0,
+        propagation_cost: StampCost::from_integer(0),
         seed: [0; 32],
         max_attempts: 1,
     };
@@ -99,9 +101,9 @@ fn announce() -> PropagationAnnounce {
         transfer_limit_kb: 256.0,
         sync_limit_kb: 10_240.0,
         costs: PropagationCosts {
-            propagation: 0,
-            flexibility: 0,
-            peering: 0,
+            propagation: PropagationCost::from_integer(0),
+            flexibility: PropagationCost::from_integer(0),
+            peering: PropagationCost::from_integer(0),
         },
         metadata: Vec::new(),
     }

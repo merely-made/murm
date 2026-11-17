@@ -1,6 +1,7 @@
 //! What a receiving lane establishes about a message before handing it over: whether its
 //! signature stands, and what its stamp was worth.
 
+use crate::stamp::StampCost;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use retinue::endpoint::Endpoint;
@@ -59,14 +60,14 @@ pub fn reverify(endpoint: &Endpoint, message: &DecodedLxmf) -> (Verification, Op
 /// cost, no check, no outcome. Every receiving lane checks stamps here.
 pub(crate) fn check_stamp(
     message: &DecodedLxmf,
-    cost: Option<u8>,
+    cost: Option<StampCost>,
     tickets: &[[u8; TICKET_LEN]],
 ) -> Result<Option<StampOutcome>, StampFault> {
     let Some(cost) = cost else {
         return Ok(None);
     };
     let stamp = message.payload.stamp.as_deref();
-    ticket::check_stamp(&message.message_id, stamp, cost, tickets).map(Some)
+    ticket::check_stamp_cost(&message.message_id, stamp, cost, tickets).map(Some)
 }
 
 /// Seconds since the Unix epoch, the clock stock stamps its delivery cache with.
@@ -120,7 +121,11 @@ mod tests {
         let mut payload = LxmfPayload::text(2.0, "t", "c");
         assert_eq!(check_stamp(&signed(&sender, &payload), None, &[]), Ok(None));
         assert_eq!(
-            check_stamp(&signed(&sender, &payload), Some(4), &[]),
+            check_stamp(
+                &signed(&sender, &payload),
+                Some(StampCost::from_integer(4)),
+                &[]
+            ),
             Err(StampFault::Missing)
         );
 
@@ -131,14 +136,14 @@ mod tests {
         payload.stamp = Some(stamp.to_vec());
         let stamped = signed(&sender, &payload);
         assert_eq!(
-            check_stamp(&stamped, Some(4), &[]),
+            check_stamp(&stamped, Some(StampCost::from_integer(4)), &[]),
             Ok(Some(StampOutcome::Work(value)))
         );
         assert!(value >= 4);
         if value < 255 {
             let above = u8::try_from(value + 1).unwrap();
             assert_eq!(
-                check_stamp(&stamped, Some(above), &[]),
+                check_stamp(&stamped, Some(StampCost::from_integer(above as u16)), &[]),
                 Err(StampFault::Invalid)
             );
         }

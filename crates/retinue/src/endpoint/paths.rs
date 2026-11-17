@@ -108,6 +108,9 @@ impl Shared {
         target: AddressHash,
         source_seconds: u64,
     ) -> Option<Packet> {
+        if self.stamp_policy().stamp_destinations && self.own_network_stamp(target).is_none() {
+            return None;
+        }
         let (name, app_data, source) = {
             let reg = self.registered.lock().unwrap();
             let r = reg.iter().find(|r| r.dest == target)?;

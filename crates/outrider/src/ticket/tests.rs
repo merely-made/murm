@@ -235,3 +235,22 @@ mod book {
         ));
     }
 }
+
+#[test]
+fn legacy_integer_check_keeps_high_costs_and_still_accepts_a_ticket() {
+    let material = [5; 32];
+    let ticket = [9; TICKET_LEN];
+    let stamp = ticket_stamp(&ticket, &material);
+    assert_eq!(
+        check_stamp(&material, Some(&stamp), u8::MAX, &[ticket]),
+        Ok(StampOutcome::Ticket)
+    );
+    assert_eq!(
+        check_stamp(&material, Some(&stamp), u8::MAX, &[]),
+        Err(StampFault::Invalid)
+    );
+    assert_eq!(
+        check_stamp(&material, Some(&[0; STAMP_LEN]), 101, &[]),
+        Err(StampFault::Invalid)
+    );
+}

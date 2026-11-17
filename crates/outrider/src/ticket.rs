@@ -11,7 +11,7 @@ use sha2::{Digest, Sha256};
 
 use crate::portable::CodecError;
 use crate::portable::msgpack::{read_array_len, skip};
-use crate::stamp::{MESSAGE_WORKBLOCK_ROUNDS, STAMP_LEN, value_streamed};
+use crate::stamp::{MESSAGE_WORKBLOCK_ROUNDS, STAMP_LEN, StampCost};
 
 #[cfg(feature = "std")]
 mod book;
@@ -92,9 +92,37 @@ pub fn check_stamp(
     {
         return Ok(StampOutcome::Ticket);
     }
-    let work = <&[u8; STAMP_LEN]>::try_from(stamp).map_err(|_| StampFault::Invalid)?;
-    let value = value_streamed(message_id, MESSAGE_WORKBLOCK_ROUNDS, work);
+    let stamp = <&[u8; STAMP_LEN]>::try_from(stamp).map_err(|_| StampFault::Invalid)?;
+    let value = crate::stamp::value_streamed(message_id, MESSAGE_WORKBLOCK_ROUNDS, stamp);
     if value >= u16::from(target) {
+        Ok(StampOutcome::Work(value))
+    } else {
+        Err(StampFault::Invalid)
+    }
+}
+
+/// Check an exact fractional cost, still accepting an issued ticket first.
+pub fn check_stamp_cost(
+    message_id: &[u8; 32],
+    stamp: Option<&[u8]>,
+    target: StampCost,
+    tickets: &[[u8; TICKET_LEN]],
+) -> Result<StampOutcome, StampFault> {
+    let stamp = stamp.ok_or(StampFault::Missing)?;
+    if tickets
+        .iter()
+        .any(|ticket| stamp == ticket_stamp(ticket, message_id))
+    {
+        return Ok(StampOutcome::Ticket);
+    }
+    let work = <&[u8; STAMP_LEN]>::try_from(stamp).map_err(|_| StampFault::Invalid)?;
+    let mut derivation = crate::stamp::Derivation::new(message_id, MESSAGE_WORKBLOCK_ROUNDS);
+    derivation.advance(MESSAGE_WORKBLOCK_ROUNDS);
+    let value = derivation.value(work).expect("finished derivation");
+    if derivation
+        .valid_cost(work, target)
+        .expect("finished derivation")
+    {
         Ok(StampOutcome::Work(value))
     } else {
         Err(StampFault::Invalid)

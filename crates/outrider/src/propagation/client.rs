@@ -1,5 +1,6 @@
 //! Client lanes: prepare and submit entries.
 
+use crate::stamp::StampCost;
 use std::borrow::Cow;
 
 use retinue::endpoint::{
@@ -17,7 +18,7 @@ use super::{
 use crate::announce::delivery_destination;
 use crate::codec::{LxmfPayload, prepare};
 use crate::stamp::{
-    MESSAGE_WORKBLOCK_ROUNDS, PROPAGATION_WORKBLOCK_ROUNDS, STAMP_LEN, find_streamed,
+    MESSAGE_WORKBLOCK_ROUNDS, PROPAGATION_WORKBLOCK_ROUNDS, STAMP_LEN, find_streamed_cost,
 };
 
 #[derive(Clone, Debug)]
@@ -36,9 +37,9 @@ pub struct PreparedPropagation {
 pub struct PropagationStamps {
     /// The recipient's announced delivery cost. When set, a delivery stamp is minted on the
     /// message id and travels inside the encrypted message (`LXMRouter.py` 1822-1826).
-    pub delivery_cost: Option<u8>,
+    pub delivery_cost: Option<StampCost>,
     /// The node's propagation cost, minted on the transient id.
-    pub propagation_cost: u16,
+    pub propagation_cost: StampCost,
     /// Where both searches start. It need not be secret.
     pub seed: [u8; STAMP_LEN],
     /// The attempt budget of each search.
@@ -80,10 +81,10 @@ pub fn prepare_propagation_with(
     if let Some(cost) = stamps.delivery_cost {
         // The message id excludes the stamp, so mint on it before the stamped prepare.
         let message_id = prepare(destination, source, &payload)?.message_id;
-        let (stamp, _) = find_streamed(
+        let (stamp, _) = find_streamed_cost(
             &message_id,
             MESSAGE_WORKBLOCK_ROUNDS,
-            u16::from(cost),
+            cost,
             stamps.seed,
             stamps.max_attempts,
         )
@@ -100,7 +101,7 @@ pub fn prepare_propagation_with(
         encrypted,
     };
     let transient_id = message.transient_id();
-    let (stamp, stamp_value) = find_streamed(
+    let (stamp, stamp_value) = find_streamed_cost(
         &transient_id,
         PROPAGATION_WORKBLOCK_ROUNDS,
         stamps.propagation_cost,
@@ -152,11 +153,11 @@ pub async fn submit_with_resource_config(
     // An inactive node is not refused: stock submits to whichever node it is pointed at, and
     // `announce.active` is the caller's to weigh.
     let announce = PropagationAnnounce::decode(&node.app_data)?;
-    let target = u16::from(announce.costs.propagation);
+    let target = announce.costs.propagation.quantized();
     if batch
         .entries
         .iter()
-        .any(|entry| !entry.validate_stamp(target))
+        .any(|entry| !entry.validate_stamp_cost(target))
     {
         return Err(PropagationError::InvalidStamp);
     }

@@ -1,3 +1,4 @@
+use outrider::StampCost;
 use outrider::{DeliveryAnnounce, LxmfPayload, decode, prepare};
 use retinue::identity::{Identity, PrivateIdentity};
 use serde_json::Value;
@@ -37,7 +38,7 @@ fn direct_capture_replays_without_stock_python() {
         DeliveryAnnounce::decode(&bytes(stock, "sender_announce_app_data")).unwrap(),
         DeliveryAnnounce {
             display_name: Some(b"Stock Oracle".to_vec()),
-            stamp_cost: Some(8),
+            stamp_cost: Some(StampCost::from_integer(8)),
         }
     );
 

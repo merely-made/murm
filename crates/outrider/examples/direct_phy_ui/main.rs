@@ -6,6 +6,8 @@
 //! failure to both on-device UIs. Snapshot bytes remain a host-edge concern:
 //! Tulle carries them opaquely while its packet driver owns each radio.
 
+use outrider::PropagationCost;
+use outrider::StampCost;
 use std::io;
 use std::sync::atomic::Ordering;
 use std::time::{Duration, Instant};
@@ -156,7 +158,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         &pair.left,
         &DeliveryAnnounce {
             display_name: Some(b"Outrider RF Left".to_vec()),
-            stamp_cost: Some(STAMP_COST),
+            stamp_cost: Some(StampCost::from_integer((STAMP_COST).into())),
         },
     )?;
     let left_announce =
@@ -166,7 +168,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         &pair.right,
         &DeliveryAnnounce {
             display_name: Some(b"Outrider RF Right".to_vec()),
-            stamp_cost: Some(STAMP_COST),
+            stamp_cost: Some(StampCost::from_integer((STAMP_COST).into())),
         },
     )?;
     let right_announce =
@@ -248,7 +250,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             accepted,
             &outrider::DeliveredCache::default(),
             DEFAULT_MAX_MESSAGE_BYTES,
-            Some(STAMP_COST),
+            Some(StampCost::from_integer(STAMP_COST.into())),
             resource_config,
         )
         .await?;
@@ -336,7 +338,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         &pair.left,
         &DeliveryAnnounce {
             display_name: Some(b"Outrider RF Left".to_vec()),
-            stamp_cost: Some(STAMP_COST),
+            stamp_cost: Some(StampCost::from_integer((STAMP_COST).into())),
         },
     )?;
     let left_announce =
@@ -346,7 +348,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         &pair.right,
         &DeliveryAnnounce {
             display_name: Some(b"Outrider RF Right".to_vec()),
-            stamp_cost: Some(STAMP_COST),
+            stamp_cost: Some(StampCost::from_integer((STAMP_COST).into())),
         },
     )?;
     let right_announce =
@@ -365,9 +367,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         transfer_limit_kb: 256.0,
         sync_limit_kb: 10_240.0,
         costs: PropagationCosts {
-            propagation: STAMP_COST,
-            flexibility: 3,
-            peering: 8,
+            propagation: PropagationCost::from_integer((STAMP_COST).into()),
+            flexibility: PropagationCost::from_integer(3),
+            peering: PropagationCost::from_integer(8),
         },
         metadata: vec![(
             Value::from(PROPAGATION_METADATA_NAME),
@@ -386,8 +388,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         left_announce.destination,
         &LxmfPayload::text(TIMESTAMP, b"U4 PROPAGATION", propagation_content.clone()),
         &PropagationStamps {
-            delivery_cost: Some(STAMP_COST),
-            propagation_cost: u16::from(STAMP_COST),
+            delivery_cost: Some(StampCost::from_integer((STAMP_COST).into())),
+            propagation_cost: StampCost::from_integer(STAMP_COST.into()),
             seed: [0x20; 32],
             max_attempts: 100_000,
         },
@@ -408,9 +410,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }),
         NodePolicy {
             costs: PropagationCosts {
-                propagation: STAMP_COST,
-                flexibility: 0,
-                peering: STAMP_COST,
+                propagation: PropagationCost::from_integer((STAMP_COST).into()),
+                flexibility: PropagationCost::from_integer(0),
+                peering: PropagationCost::from_integer((STAMP_COST).into()),
             },
             max_transfer_bytes: 4_096,
             allowed: None,
@@ -542,7 +544,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 &FetchPolicy {
                     max_messages: 1,
                     retain_on_node: true,
-                    stamp_cost: Some(STAMP_COST),
+                    stamp_cost: Some(StampCost::from_integer((STAMP_COST).into())),
                     max_entry_bytes: 4_096,
                     max_message_bytes: DEFAULT_MAX_MESSAGE_BYTES,
                     resource: resource_config,

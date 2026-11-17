@@ -47,6 +47,11 @@ impl Shared {
         let (receipt, snapshot) = {
             let mut book = self.address_book.lock().unwrap();
             let receipt = book.clean(book_clock_ms(), &RETENTION, |d| in_use.contains(&d));
+            self.network_stamps
+                .lock()
+                .unwrap()
+                .peer_costs
+                .retain(|destination, _| book.knows(*destination));
             let snapshot = persistence
                 .is_some()
                 .then(|| book.encode_snapshot(&self.identity));

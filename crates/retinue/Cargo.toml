@@ -426,3 +426,7 @@ required-features = ["tokio"]
 
 [lints]
 workspace = true
+
+[[example]]
+name = "network_stamps"
+required-features = ["tokio"]

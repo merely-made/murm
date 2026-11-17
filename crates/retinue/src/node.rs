@@ -42,6 +42,7 @@ mod resources;
 mod routes;
 mod session;
 mod setup;
+mod stamps;
 mod tables;
 #[cfg(test)]
 mod tests;
@@ -50,6 +51,7 @@ mod transit;
 pub use action::{Action, Actions, InterfaceId};
 pub use params::*;
 pub use report::*;
+pub use stamps::{DEFAULT_LINK_STAMP_ATTEMPTS, NodeAnnounceError};
 // The endpoint shares the Node's link dedup rule.
 #[cfg(feature = "tokio")]
 pub(crate) use tables::is_deduplicated_link_context;
@@ -77,6 +79,8 @@ pub struct Node<
     refused_payloads: u64,
     /// The explicit policy for carrying traffic whose destination is not this node.
     transport: TransportConfig,
+    stamp_policy: crate::network_stamp::NetworkStampPolicy,
+    destination_stamp: Option<[u8; crate::network_stamp::STAMP_LEN]>,
     /// Paths learned from verified announces. The book holds the keys to open a link; a route
     /// says where a transport packet goes.
     routes: BoundedVec<Route, ROUTES>,

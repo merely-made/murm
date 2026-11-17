@@ -100,6 +100,7 @@ type Links = Arc<Mutex<HashMap<AddressHash, LinkEntry>>>;
 
 /// Shared router state.
 pub(super) struct Shared {
+    pub(super) network_stamps: Mutex<super::network_stamps::NetworkStamps>,
     pub(super) lifecycle: Mutex<Lifecycle>,
     pub(super) closed_notify: tokio::sync::Notify,
     pub(super) identity: PrivateIdentity,

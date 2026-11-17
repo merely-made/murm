@@ -1,3 +1,5 @@
+use outrider::PropagationCost;
+use outrider::StampCost;
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -29,9 +31,9 @@ async fn stamped_submission_crosses_the_propagation_boundary() {
         transfer_limit_kb: 256.0,
         sync_limit_kb: 10_240.0,
         costs: PropagationCosts {
-            propagation: 8,
-            flexibility: 3,
-            peering: 8,
+            propagation: PropagationCost::from_f64(8.5).unwrap(),
+            flexibility: PropagationCost::from_f64(0.25).unwrap(),
+            peering: PropagationCost::from_f64(8.5).unwrap(),
         },
         metadata: vec![(
             Value::from(PROPAGATION_METADATA_NAME),
@@ -46,7 +48,7 @@ async fn stamped_submission_crosses_the_propagation_boundary() {
 
     let stamps = PropagationStamps {
         delivery_cost: None,
-        propagation_cost: 8,
+        propagation_cost: StampCost::from_f64(8.5).unwrap(),
         seed: [0; 32],
         max_attempts: 100_000,
     };

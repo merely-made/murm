@@ -13,7 +13,8 @@ use sha2::{Digest, Sha256};
 #[cfg(feature = "std")]
 mod parallel;
 #[cfg(feature = "std")]
-pub use parallel::find_parallel;
+pub use parallel::{find_parallel, find_parallel_cost};
+pub use retinue::stamp::StampCost;
 
 pub const STAMP_LEN: usize = 32;
 pub const WORKBLOCK_BYTES_PER_ROUND: usize = 256;
@@ -215,6 +216,83 @@ pub fn find(
     let mut midstate = Sha256::new();
     midstate.update(workblock);
     mint_from(&midstate, target, &mut seed, max_attempts)
+}
+
+/// Exact fractional cost check against a materialized workblock.
+pub fn valid_cost(workblock: &[u8], stamp: &[u8; STAMP_LEN], cost: StampCost) -> bool {
+    let digest: [u8; 32] = Sha256::new()
+        .chain_update(workblock)
+        .chain_update(stamp)
+        .finalize()
+        .into();
+    cost.accepts_digest(&digest)
+}
+
+/// Exact fractional cost check with a bounded streamed workblock derivation.
+pub fn valid_streamed_cost(
+    material: &[u8],
+    rounds: u32,
+    stamp: &[u8; STAMP_LEN],
+    cost: StampCost,
+) -> bool {
+    let mut derivation = Derivation::new(material, rounds);
+    derivation.advance(rounds);
+    derivation.valid_cost(stamp, cost).unwrap_or(false)
+}
+
+/// The fractional stamp value; the integer value APIs remain legacy lower bounds.
+pub fn value_streamed_fractional(material: &[u8], rounds: u32, stamp: &[u8; STAMP_LEN]) -> f64 {
+    let mut derivation = Derivation::new(material, rounds);
+    derivation.advance(rounds);
+    derivation
+        .value_fractional(stamp)
+        .expect("finished derivation")
+}
+
+impl Derivation<'_> {
+    fn digest(&self, stamp: &[u8; STAMP_LEN]) -> Option<[u8; 32]> {
+        if !self.done() {
+            return None;
+        }
+        Some(self.hash.clone().chain_update(stamp).finalize().into())
+    }
+    pub fn valid_cost(&self, stamp: &[u8; STAMP_LEN], cost: StampCost) -> Option<bool> {
+        Some(cost.accepts_digest(&self.digest(stamp)?))
+    }
+    pub fn value_fractional(&self, stamp: &[u8; STAMP_LEN]) -> Option<f64> {
+        Some(retinue::stamp::value_of_digest(&self.digest(stamp)?))
+    }
+    pub fn mint_cost(
+        &self,
+        cost: StampCost,
+        seed: &mut [u8; STAMP_LEN],
+        attempts: u64,
+    ) -> Option<([u8; STAMP_LEN], u16)> {
+        if !self.done() {
+            return None;
+        }
+        for _ in 0..attempts {
+            let digest = self.digest(seed)?;
+            if cost.accepts_digest(&digest) {
+                return Some((*seed, leading_zero_bits(&digest)));
+            }
+            increment(seed);
+        }
+        None
+    }
+}
+
+/// Mint for an exact quantized cost with the caller's existing attempt bound.
+pub fn find_streamed_cost(
+    material: &[u8],
+    rounds: u32,
+    cost: StampCost,
+    mut seed: [u8; STAMP_LEN],
+    max_attempts: u64,
+) -> Option<([u8; STAMP_LEN], u16)> {
+    let mut derivation = Derivation::new(material, rounds);
+    derivation.advance(rounds);
+    derivation.mint_cost(cost, &mut seed, max_attempts)
 }
 
 /// MessagePack's encoding of an unsigned integer, in the narrowest form that holds it.

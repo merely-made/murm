@@ -122,17 +122,19 @@ pub use propagation::{
     DEFAULT_MAX_PROPAGATION_ENTRIES, DEFAULT_MAX_PROPAGATION_STORE_SNAPSHOT_BYTES,
     DEFAULT_MAX_STORED_MESSAGE_BYTES, FETCH_LIMIT, FETCH_PATH_HASH, FetchPolicy,
     FetchedPropagation, MIN_ENCRYPTED_MESSAGE_BYTES, NodePolicy, PROPAGATION_METADATA_NAME,
-    PreparedPropagation, PropagationAnnounce, PropagationBatch, PropagationCosts, PropagationEntry,
-    PropagationError, PropagationFetchReceipt, PropagationMessage, PropagationNode,
-    PropagationStamps, PropagationStore, PropagationStoreLimits, PropagationSubmitReceipt,
-    ReceivedPropagationBatch, RejectedPropagation, ServedFetch, StoreReceipt, StoreRestoreReceipt,
-    announce_propagation, delivery_stamp_valid, fetch as fetch_propagation, prepare_propagation,
-    prepare_propagation_with, propagation_destination, propagation_name, receive_submission,
-    register_propagation, serve_fetch, submit as submit_propagation,
+    PreparedPropagation, PropagationAnnounce, PropagationBatch, PropagationCost, PropagationCosts,
+    PropagationEntry, PropagationError, PropagationFetchReceipt, PropagationMessage,
+    PropagationNode, PropagationStamps, PropagationStore, PropagationStoreLimits,
+    PropagationSubmitReceipt, ReceivedPropagationBatch, RejectedPropagation, ServedFetch,
+    StoreReceipt, StoreRestoreReceipt, announce_propagation, delivery_stamp_valid,
+    fetch as fetch_propagation, prepare_propagation, prepare_propagation_with,
+    propagation_destination, propagation_name, receive_submission, register_propagation,
+    serve_fetch, submit as submit_propagation,
     submit_with_resource_config as submit_propagation_with_resource_config,
 };
 #[cfg(feature = "std")]
 pub use propagation::{PAPER_MDU, PreparedPaper, URI_SCHEMA, prepare_paper, prepare_paper_with};
+pub use retinue::stamp::StampCost;
 pub use stamp::{
     Derivation as StampDerivation, MESSAGE_WORKBLOCK_ROUNDS, PROPAGATION_WORKBLOCK_ROUNDS,
     STAMP_LEN, WORKBLOCK_BYTES_PER_ROUND, find as find_stamp, find_streamed as find_stamp_streamed,
