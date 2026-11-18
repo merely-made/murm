@@ -151,6 +151,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     loop {
         let accepted = endpoint.accept_resource().await?;
+        println!(
+            "ACCEPT interface={} mtu={}",
+            accepted.interface,
+            accepted.session.mtu()
+        );
         let endpoint = Arc::clone(&endpoint);
         let node = Arc::clone(&node);
         tokio::spawn(async move {

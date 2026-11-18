@@ -83,6 +83,7 @@ fn ifac_overhead_counts_against_interface_frame_admission() {
         outbound: queues,
         frame_limit: Arc::new(AtomicUsize::new(actual - 1)),
         wire_overhead: 8,
+        link_mtu_ceiling: None,
         hw_mtu: crate::endpoint::HwMtu::Protocol,
         mode: InterfaceMode::Full,
         online: Arc::new(AtomicBool::new(true)),

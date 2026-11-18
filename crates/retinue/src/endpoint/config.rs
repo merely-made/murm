@@ -83,6 +83,18 @@ impl Endpoint {
         }
     }
 
+    /// Limit new links on one attached interface. The logical MTU excludes IFAC.
+    /// Values use the same bounds as [`Self::set_link_mtu`]. Pass `None` to clear
+    /// the ceiling. Returns false if the interface is gone.
+    pub fn set_interface_link_mtu(&self, id: InterfaceId, ceiling: Option<u32>) -> bool {
+        let mut interfaces = self.shared.interfaces.lock().unwrap();
+        let Some(iface) = interfaces.iter_mut().find(|iface| iface.id == id) else {
+            return false;
+        };
+        iface.link_mtu_ceiling = ceiling.map(|mtu| mtu.clamp(MIN_LINK_MTU, crate::link::MAX_MTU));
+        true
+    }
+
     /// Set a ceiling on the MTU requested and offered by subsequently established links.
     ///
     /// A link takes the smaller of this and what its interface signals: the protocol MTU,

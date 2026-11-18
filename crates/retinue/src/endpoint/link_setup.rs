@@ -249,12 +249,20 @@ impl Endpoint {
         let ephemeral = super::network_stamps::link_seed(&self.shared, dest).await?;
         // The next hop's signalled MTU, or the protocol MTU for want of a route (`Link.py`
         // 304-310), under the configured ceiling.
-        let link_mtu = self.shared.link_mtu.load(Ordering::Relaxed).min(
-            self.shared
-                .path_iface(dest)
-                .and_then(|iface| self.shared.link_mtu_on(iface))
-                .unwrap_or(crate::packet::MTU as u32),
-        );
+        let route = self.shared.path_iface(dest);
+        let broadcast = if route.is_none() {
+            self.shared.broadcast_link_targets()
+        } else {
+            Vec::new()
+        };
+        let path_mtu = route
+            .and_then(|iface| self.shared.link_mtu_on(iface))
+            .unwrap_or_else(|| {
+                broadcast
+                    .iter()
+                    .fold(crate::packet::MTU as u32, |mtu, (_, cap)| mtu.min(*cap))
+            });
+        let link_mtu = self.shared.link_mtu.load(Ordering::Relaxed).min(path_mtu);
         let (pending, request) = link::PendingLink::open(
             dest,
             peer,
@@ -282,9 +290,17 @@ impl Endpoint {
 
         // Out the routed interface, or broadcast for want of a route.
         let send_request = || {
-            match self.shared.path_iface(dest) {
+            match route {
                 Some(iface) => self.shared.send_on(iface, request.clone()),
-                None => self.shared.broadcast(request.clone()),
+                None => {
+                    for (iface, _) in &broadcast {
+                        self.shared.push_to(
+                            *iface,
+                            request.clone(),
+                            super::queue::TrafficClass::Control,
+                        );
+                    }
+                }
             }
             Instant::now()
         };

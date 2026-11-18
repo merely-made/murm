@@ -7,7 +7,6 @@ use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, AtomicU64, AtomicUsize, Ordering};
 
 use crate::ifac::Ifac;
-use crate::link;
 use crate::node::InterfaceMode;
 
 use super::iface_stats::InterfaceStats;
@@ -74,6 +73,7 @@ impl Shared {
             outbound: Arc::clone(&queues),
             frame_limit: Arc::clone(&frame_limit),
             wire_overhead,
+            link_mtu_ceiling: None,
             hw_mtu,
             mode,
             online: Arc::clone(&online),
@@ -167,13 +167,22 @@ impl Shared {
     /// is fixed, else the protocol MTU (`Transport.py` 2543-2549, 3173-3178), and never past
     /// what its frame limit carries.
     pub(super) fn link_mtu_on(&self, iface: InterfaceId) -> Option<u32> {
-        self.with_iface(iface, |i| {
-            let carried = i
-                .frame_limit
-                .load(Ordering::Acquire)
-                .saturating_sub(i.wire_overhead);
-            u32::try_from(carried.min(i.hw_mtu.mtu())).unwrap_or(link::MAX_MTU)
-        })
+        self.with_iface(iface, Iface::link_mtu)
+    }
+
+    /// A pathless request carries one offer across all transmitting interfaces.
+    pub(super) fn broadcast_link_targets(&self) -> Vec<(InterfaceId, u32)> {
+        let policies = self.iface_policies.lock().unwrap().clone();
+        self.interfaces
+            .lock()
+            .unwrap()
+            .iter()
+            .filter(|i| {
+                i.online.load(Ordering::Acquire)
+                    && policies.get(&i.id).copied().unwrap_or_default().outgoing
+            })
+            .map(|i| (i.id, i.link_mtu()))
+            .collect()
     }
 
     /// Whether links learn `iface`'s MTU (`AUTOCONFIGURE_MTU` or `FIXED_MTU`).

@@ -183,6 +183,7 @@ pub(super) struct Iface {
     pub(super) outbound: Arc<OutboundQueues>,
     pub(super) frame_limit: Arc<AtomicUsize>,
     pub(super) wire_overhead: usize,
+    pub(super) link_mtu_ceiling: Option<u32>,
     /// Its hardware MTU policy, which sets the link MTU it signals.
     pub(super) hw_mtu: super::mtu::HwMtu,
     /// Sets the lifetime of routes learned on this interface.
@@ -211,6 +212,16 @@ pub(super) enum QueueAdmission {
 }
 
 impl Iface {
+    pub(super) fn link_mtu(&self) -> u32 {
+        let carried = self
+            .frame_limit
+            .load(Ordering::Acquire)
+            .saturating_sub(self.wire_overhead);
+        u32::try_from(carried.min(self.hw_mtu.mtu()))
+            .unwrap_or(crate::link::MAX_MTU)
+            .min(self.link_mtu_ceiling.unwrap_or(crate::link::MAX_MTU))
+    }
+
     pub(super) fn push(&self, packet: Packet, class: TrafficClass) -> QueueAdmission {
         if !self.online.load(Ordering::Acquire) {
             return QueueAdmission::Offline;
