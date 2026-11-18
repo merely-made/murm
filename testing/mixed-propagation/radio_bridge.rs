@@ -1,5 +1,5 @@
 //! Connect a loopback RNS TCP client to one direct-PHY radio for backend qualification.
-//! Usage: ratspeak_radio SERIAL_PORT TCP_PORT BW_HZ TX_DBM DTR [fragments]
+//! Usage: radio_bridge SERIAL_PORT TCP_PORT BW_HZ TX_DBM DTR raw|paired
 use retinue::hash::full_hash;
 use retinue::iface::hdlc::{Deframer, MAX_FRAME, frame};
 use std::{error::Error, time::Duration};
@@ -73,9 +73,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
         ..Default::default()
     };
     let fragment = match args.next().as_deref() {
-        None => false,
-        Some("fragments") if args.next().is_none() => true,
-        _ => return Err("expected optional fragments mode".into()),
+        Some("raw") if args.next().is_none() => false,
+        Some("paired") if args.next().is_none() => true,
+        _ => return Err("expected raw or paired".into()),
     };
     let listener = tokio::net::TcpListener::bind(("127.0.0.1", port)).await?;
     let mut radio =
@@ -94,6 +94,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 if count == 0 { break; }
                 for packet in decoder.push(&buf[..count]) {
                     let size = packet.len();
+                    eprintln!("{serial} outbound protected_bytes={size} capacity={capacity}");
                     if fragment {
                         for part in fragments(&packet, capacity) {
                             let len = part.len();

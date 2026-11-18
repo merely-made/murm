@@ -150,6 +150,8 @@ cargo build -p tulle-t114-phy --release --target thumbv7em-none-eabihf
 cargo build --manifest-path apps/signalman-desktop/Cargo.toml
 ```
 
+Run the [mixed-backend propagation test](testing/mixed-propagation/README.md) to compare TCP, raw Tulle and paired Tulle fetches in both directions.
+
 ## Portable survey scenes
 
 `signalman::survey::scene::survey_scene` revalidates an admitted `Survey` and

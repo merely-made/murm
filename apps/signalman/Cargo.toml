@@ -66,6 +66,10 @@ tulle = { version = "0.2.0", path = "../../crates/tulle", features = ["serial-as
 zeroize = "1"
 
 [[example]]
+name = "radio_bridge"
+path = "../../testing/mixed-propagation/radio_bridge.rs"
+
+[[example]]
 name = "stock_companion_pair"
 required-features = ["comms"]
 
