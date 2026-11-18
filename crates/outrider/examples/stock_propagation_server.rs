@@ -4,6 +4,9 @@
 //! changes and `LINK_CLOSED` as each link ends, so a gate can match the stock side's view
 //! against the node's.
 
+#[path = "support/mixed_bridge.rs"]
+mod mixed_bridge;
+
 use outrider::PropagationCost;
 use std::fs::OpenOptions;
 use std::io::Write;
@@ -107,6 +110,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         &NODE_SEED,
     )));
     let address = endpoint.listen_tcp("127.0.0.1:0".parse()?).await?;
+    let bridged = mixed_bridge::attach_bridge(&endpoint).await?;
     endpoint.enable_routing();
     let destination = register_propagation(&endpoint, &announce)?;
     println!("LISTENING {}", address.port());
@@ -116,7 +120,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         async move {
             loop {
                 announce_propagation(&endpoint, &announce).expect("fixed announce encodes");
-                tokio::time::sleep(Duration::from_millis(600)).await;
+                tokio::time::sleep(Duration::from_millis(if bridged { 20_000 } else { 600 })).await;
             }
         }
     });
@@ -152,13 +156,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         tokio::spawn(async move {
             match serve_fetch(&endpoint, accepted, &node, now).await {
                 Ok(served) => println!(
-                    "LINK_CLOSED stored={} duplicates={} rejected={} offered={} served={} acknowledged={}",
+                    "LINK_CLOSED stored={} duplicates={} rejected={} offered={} served={} acknowledged={} offer_mode={:?} message_mode={:?}",
                     served.stored.inserted,
                     served.stored.duplicates,
                     served.rejected,
                     served.offered.len(),
                     served.served_total,
-                    served.acknowledged
+                    served.acknowledged,
+                    served.offer_mode,
+                    served.message_mode
                 ),
                 Err(error) => println!("LINK_FAILED {error}"),
             }

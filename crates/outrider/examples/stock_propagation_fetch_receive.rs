@@ -1,5 +1,8 @@
 //! Capture one stock lxmd propagation fetch response through Retinue.
 
+#[path = "support/mixed_bridge.rs"]
+mod mixed_bridge;
+
 use std::io;
 use std::time::Duration;
 
@@ -15,10 +18,13 @@ const RECEIVER_SEED: [u8; 64] = [0x62; 64];
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let address: std::net::SocketAddr = std::env::var("RETINUE_ADDR")?.parse()?;
     let identity = PrivateIdentity::from_secret_bytes(&RECEIVER_SEED);
     let endpoint = Endpoint::new(identity.clone());
-    endpoint.attach_tcp_client(address).await?;
+    if !mixed_bridge::attach_bridge(&endpoint).await? {
+        endpoint
+            .attach_tcp_client(std::env::var("RETINUE_ADDR")?.parse()?)
+            .await?;
+    }
     let delivery = DeliveryAnnounce::named(b"Outrider Propagation Receiver");
     register_opportunistic(&endpoint, &delivery, RatchetStore::new(Default::default())?)?;
     for _ in 0..3 {
