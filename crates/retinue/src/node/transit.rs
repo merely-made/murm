@@ -364,6 +364,7 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
         let mut forwarded = packet.clone();
         forwarded.hops = forwarded.hops.saturating_add(1);
         forwarded.header_type = HeaderType::Type2;
+        forwarded.propagation = crate::packet::Propagation::Transport;
         forwarded.transport = Some(self.identity.hash());
         if forwarded.encoded_len() > self.logical_mtu as usize {
             self.refused_payloads = self.refused_payloads.saturating_add(1);

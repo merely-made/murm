@@ -22,6 +22,28 @@ fn relayed_by(packet: &Packet, relay: u8, hops: u8) -> Packet {
     copy
 }
 
+#[tokio::test(start_paused = true)]
+async fn relayed_announces_set_the_complete_transport_header() {
+    let ep = Endpoint::new(PrivateIdentity::from_secret_bytes(&[0x90; 64]));
+    let mut radio = ep.attach_interface();
+    ep.enable_routing();
+    ep.set_relay_jitter(Duration::ZERO);
+    let (packet, _) = peer_announce(0x8F, "header");
+    assert_eq!(packet.header_type, HeaderType::Type1);
+    assert_eq!(packet.propagation, crate::packet::Propagation::Broadcast);
+    let hops = packet.hops;
+    assert!(radio.sink().deliver(packet));
+
+    let forwarded = next(&mut radio, Duration::from_secs(1))
+        .await
+        .expect("relayed");
+    let decoded = Packet::decode(&forwarded.encode()).expect("wire packet");
+    assert_eq!(decoded.header_type, HeaderType::Type2);
+    assert_eq!(decoded.propagation, crate::packet::Propagation::Transport);
+    assert_eq!(decoded.transport, Some(ep.identity().hash()));
+    assert_eq!(decoded.hops, hops + 1);
+}
+
 /// A single-radio repeater relays back out the radio it heard on, as RNS sends on every
 /// interface, and retries once after the grace (`Transport.py` 765-829).
 #[tokio::test(start_paused = true)]

@@ -19,6 +19,22 @@ fn announcer(seed: u8) -> Node<32, 8, 4> {
 
 const RETRY: u64 = REBROADCAST_GRACE + REBROADCAST_WINDOW;
 
+#[test]
+fn relayed_announces_set_the_complete_transport_header() {
+    let destination = announcer(0x70);
+    let mut relay = transit(0x60, "relay");
+    let announce = destination.announce(&blob([0x70; RAND_HASH_LEN]), None);
+    assert_eq!(announce.header_type, HeaderType::Type1);
+    assert_eq!(announce.propagation, crate::packet::Propagation::Broadcast);
+
+    let forwarded = relayed(&mut relay, IFACE, &announce, 0).expect("relayed");
+    let decoded = Packet::decode(&forwarded.encode()).expect("wire packet");
+    assert_eq!(decoded.header_type, HeaderType::Type2);
+    assert_eq!(decoded.propagation, crate::packet::Propagation::Transport);
+    assert_eq!(decoded.transport, Some(relay.identity.hash()));
+    assert_eq!(decoded.hops, announce.hops + 1);
+}
+
 /// RNS holds a relayed announce for a random 0-0.5 s, sends it on every interface including
 /// the one it came from, and tries once more after the 5 s grace (`Transport.py` 765-829).
 #[test]
