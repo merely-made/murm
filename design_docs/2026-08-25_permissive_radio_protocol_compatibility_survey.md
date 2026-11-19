@@ -46,6 +46,8 @@ must be described accurately rather than as strict clean-room work.
 
 *2026-10-05:* the separate adaptation decision is made. retinue and outrider are now under the Reticulum License, and RNS and LXMF source and the manual may be adapted into those two crates only. RNode firmware (GPL-3.0) stays unread. See the [adoption record](2026-10-05_reticulum_license_adoption.md).
 
+*2026-11-17:* Ratspeak's rsReticulum and rsLXMF moved from AGPL-3.0 to the Reticulum License on 2026-11-08, and the owner ruled them readable and adaptable, along with lelloman's rns-rs and lxmf-rs. Prns stays withdrawn and rsLXST is deferred. See the [Ratspeak amendment](2026-10-05_reticulum_license_adoption.md#amendment-2026-11-17-ratspeak).
+
 ## Finding
 
 Retinue should not grow a universal mesh router. It already has the right lower
@@ -159,9 +161,11 @@ Implementation source was not inspected for the following:
 - official Python [RNS](https://github.com/markqvist/Reticulum/blob/b123a756b0e203070f7ff6325aaa2168504e0d82/LICENSE)
   and [LXMF](https://github.com/markqvist/LXMF/blob/795fdaa2b0777c13033787d933d1afc94a2377cb/LICENSE):
   Reticulum License; black-box boundary;
-- `lelloman/rns-rs` and `lelloman/lxmf-rs`: Reticulum License;
+- `lelloman/rns-rs` and `lelloman/lxmf-rs`: Reticulum License; readable since
+  2026-11-17;
 - [ratspeak/rsReticulum](https://github.com/ratspeak/rsReticulum/blob/main/LICENSE)
-  and `ratspeak/rsLXMF`: AGPL-3.0;
+  and `ratspeak/rsLXMF`: AGPL-3.0 at survey time; Reticulum License since
+  2026-11-08 (`ac9ea27`, `5a6a0cb`), and readable since 2026-11-17;
 - [kageedwards/ferret-rns](https://github.com/kageedwards/ferret-rns/blob/main/LICENSE):
   LGPL-2.1, outside the readable set;
 - [torlando-tech/microLXMF](https://github.com/torlando-tech/microLXMF/blob/main/LICENSE)
@@ -173,6 +177,134 @@ Implementation source was not inspected for the following:
   licence;
 - [thatSFguy/reticulum-specifications](https://github.com/thatSFguy/reticulum-specifications/blob/master/LICENSE):
   CC-BY-4.0, outside the CC0-only documentation gate.
+
+## Implementation refresh (2026-11-17)
+
+This section updates the table and hard-stops list above. Those keep their
+August pins. The refresh was read from each project's README, docs and
+manifests on its default branch on this date. No implementation source was
+read. Only rns-rs was built and run against Retinue; see the hands-on check
+below. A hash is given where one was seen; the other entries are not
+revision-pinned.
+
+Retinue and Outrider are at RNS 1.6.0 and LXMF 1.3.0
+([protocol refresh](2026-11-17_reticulum_protocol_refresh.md)).
+
+### The Reticulum-licensed Rust stacks
+
+Both projects below are readable and adaptable under the
+[2026-11-17 amendment](2026-10-05_reticulum_license_adoption.md#amendment-2026-11-17-ratspeak).
+
+| | Retinue and Outrider | Ratspeak: [rsReticulum](https://github.com/ratspeak/rsReticulum), [rsLXMF](https://github.com/ratspeak/rsLXMF) | lelloman: [rns-rs](https://github.com/lelloman/rns-rs), [lxmf-rs](https://github.com/lelloman/lxmf-rs) |
+| --- | --- | --- | --- |
+| Seen at | this repository | v1.5.0 (`5976f6b`, `b217323`), 2026-11-16 | rns-rs `663e5e3`, 2026-11-17; lxmf-rs 0.3.1 |
+| Upstream baseline | RNS 1.6.0, LXMF 1.3.0 | RNS 1.6.0, LXMF 1.3.0 | RNS 1.6.1 (`884f109`, untagged upstream), tracked commit by commit; LXMF 1.3.0 (`101fd44`) |
+| Core shape | One crate: an allocation-free floor, a `no_std` + alloc sans-io core, and an optional tokio endpoint | Host stack on tokio "full"; firmware uses separate Lite repositories | `rns-crypto` and `rns-core` are `no_std` ("no sockets, no threads"); `rns-net` drives them with sockets and threads |
+| Firmware | Bare-metal T114 and V4 images link the same crate | [rsReticulumLite](https://github.com/ratspeak/rsReticulumLite) and [rsLXMFLite](https://github.com/ratspeak/rsLXMFLite): allocation-free, bare-metal ARM and RISC-V checks in CI, Resources capped at 3,659 bytes with no compression or segments, no propagation node | ESP32 firmware on ESP-IDF for the Heltec V3; ARMv7 cross builds; no bare-metal target is mentioned |
+| Crypto crates | dalek 3, sha2 0.11, hkdf 0.13 | dalek 2, sha2 0.10, hkdf 0.12 | dalek 3, sha2 0.11, hkdf 0.13; optional aws-lc for signing and X25519 |
+| Storage | Caller-owned snapshots | SQLite files in the Python 1.6.0 format (bundled, needs a C compiler) | SQLite stores with legacy import and file fallback; LXMF's SQLite backend deliberately not ported |
+| Daemon and utilities | None; a library | `rnsd-rs`, `lxmd-rs` and twelve more | `rnsd`, `lxmd`, `rns-server` (supervisor and web UI) and fifteen more |
+| Interfaces past the common set | Backbone; the Tulle radio pump and direct-PHY. Weave and RNode BLE are open (interface review L4, L5) | Backbone, BLE RNode, Bluetooth peer, Android USB-OTG. Weave unsupported; UDP joins no multicast group | Backbone, RNode over BLE, Weave (Linux), IPv4 tunnel |
+| Stated limits | See the crate READMEs | Links are pinned to the handshake interface and never reroute; status "experimental" | "Physical radio hardware validation remains unclaimed"; extended tunnel synthesis is ignored by RNS before 1.6.1 |
+| Checks against Python | Signed-wheel oracle, fixtures and receipts | Not described in the README | Vectors from a pinned checkout; CI interop against RNS 1.4.2, 1.5.4, 1.5.5, 1.6.0 and 1.6.1; about 2,961 tests |
+| Distribution | git | git; rsLXMF uses sibling path dependencies | crates.io |
+| Provenance | Source-informed, adapted with a NOTICE ledger since 2026-10-05 | "Written from the reference source, not from a specification" | Derivative port, "not a clean-room design", substantial LLM assistance under human review |
+
+The common interface set is TCP, UDP, Auto, serial, KISS, AX.25, pipe, I2P,
+RNode and the shared instance.
+
+rns-rs adds two opt-in extensions that stock Reticulum lacks: a hook system
+(WASM, native and built-in) and Direct Link, which upgrades a link to direct
+UDP through NAT.
+
+### Hands-on check of rns-rs
+
+rns-rs `663e5e32d526c42ffaf4044ef322cd800b248d10` against Retinue at
+`ab326dc2f9d` and stock RNS 1.6.0, on 2026-11-17. The checkout is
+`Code/crates/rns-rs`. Only its built binaries and docs were used.
+
+**Builds.**
+
+- `rns-crypto` and `rns-core` build for `thumbv7em-none-eabihf` with default
+  features off. Their manifests enable `alloc` features, so the core is
+  `no_std` + alloc, not allocation-free.
+- `rns-net` does not build for Windows MSVC: 147 errors, all Unix socket APIs
+  from `libc`. The daemon and utilities therefore do not build there either.
+- On Fedora (T-PC) `rnsd`, `rnstatus`, `rnpath` and `rnprobe` build with
+  `--no-default-features --features engine-parallel,iface-tcp`. That is
+  pure-Rust crypto and TCP only, not the shipped default.
+
+**Dependency graph.** A crate depending on Retinue (`alloc` only), `rns-core`
+and `rns-crypto` resolves to 46 packages with no duplicate versions.
+
+**Interop.** rns-rs's `rnsd` ran on T-PC as a transport node. Retinue's
+examples and the stock leaf ran on Windows and reached it through SSH port
+forwards, so every socket was a loopback socket. The driver is
+`crates/retinue/oracle/peer_rnsrs.py`. The table is its second full run; the
+times are from that run.
+
+| Case | Hub | Result |
+| --- | --- | --- |
+| Retinue initiator, hub, Retinue responder: resolve, link, echo | Retinue `transport_node` (control) | pass |
+| same | stock `rnsd` 1.6.0 (control) | pass |
+| same | rns-rs `rnsd` | pass |
+| Stock leaf, hub, Retinue responder: learn at 2 hops, link, echo | Retinue (control) | pass |
+| same | stock (control) | pass |
+| same | rns-rs | pass |
+| Stock leaf sends a 2.5 MB uncompressed Resource to Retinue `resource_recv` | none, direct (control) | pass, 0.7 s |
+| same | rns-rs | pass, 4.3 s through the forwards, hash matched |
+
+rns-rs's `rnpath` reported the Retinue responder one hop away, and `rnstatus`
+reported the server interface and its traffic.
+
+**Not covered.** rns-rs as an endpoint (nothing linked to a destination it
+hosts), its shipped feature set with aws-lc, LXMF and lxmf-rs, any radio or
+serial carrier, IFAC, ratchets, network stamps and loss. The rns-rs cases
+passed in every run: three for the pair case, three for the leaf case and three
+for the Resource. The Retinue-hub control for the pair case failed once in
+eleven runs with `NO_ROUTE`; rns-rs is not in that path and the cause is not
+found.
+
+### Changes to entries above
+
+- **Quad4 Reticulum-Go** now carries the Reticulum License; earlier revisions
+  were MIT, 0BSD and Apache-2.0 in turn. It targets RNS 1.6.0 with live interop
+  against the pinned wheel. It is not covered by the 2026-11-17 amendment.
+- **jrl290** `Rusticulum` (formerly `Reticulum-rust`) and `LXMF-rust` now state
+  the Reticulum License in their READMEs; the `LICENSE` files were not read.
+  They port RNS 1.1.3 and LXMF 0.9.4, call themselves work in progress, and
+  state Copilot assistance. They are not covered by the amendment.
+- **Beechat Reticulum-rs** is active (latest commit 2026-11-11) and added a
+  `no_std` feature to its core in August. Still MIT.
+- **FreeTAKTeam LXMF-rs** is at 0.16.1, `EPL-2.0 OR GPL-2.0-or-later`. Its
+  reference is RNS 1.5.2 and LXMF 0.9.6; its RNS 1.5.5 ledger disclaims full
+  parity. The core builds `no_std` + alloc for thumbv7em.
+- **microReticulum** is at 0.5.1. Its roadmap lists Link, Resource, Channel,
+  Buffer and Ratchets; which of them are done was not readable from the page.
+- **torlando-tech reticulum-kt** pins no RNS version, and its README says it is
+  "almost completely AI generated".
+
+### New candidates, listed only
+
+None of these has passed the licence and provenance gate.
+
+- [evelant/rete](https://github.com/evelant/rete), a fork of `s-retlaw/rete`:
+  Rust, `no_std` core without alloc, Embassy and Tokio runtimes, LXMF on hosts.
+  The README says MIT OR Apache-2.0 but no `LICENSE` file was found. Latest
+  commit 2026-04-11.
+- [ReticulaLabs reticulum-sdk](https://github.com/ReticulaLabs/reticulum-sdk)
+  and `reticulum-router`: Rust, transport nodes and ESP32.
+- [Resilum resilum-core](https://github.com/Resilum/resilum-core): Rust
+  multi-transport node that carries LXMF.
+- [reticulum_ex](https://codeberg.org/int32/reticulum_ex): Elixir, work in
+  progress.
+- RetiNet: an AGPL-licensed fork named in the FOSDEM 2026 implementation
+  slides. Seen in a search result only.
+
+### Not read
+
+The rns-rs 1.6.1 parity table and Ratspeak's changelog failed to load, so the
+rns-rs gap list comes from its `UPSTREAM.md` alone.
 
 ## MeshChat is an application contract
 
@@ -298,6 +430,32 @@ foreign signed append-only source, naturally represented by projections and
 replication receipts. Translating entries into chat messages would discard its
 authorship, ordering and conflict semantics. Retinue can eventually carry its
 opaque frames while Mere decides how to project them.
+
+### RadioLib as a driver reference (2026-11-19)
+
+Refines the RadioLib row above. Asked how RadioLib (MIT) could widen hardware
+support, with two routes put: link the C++ in behind a shim, or read it and
+write Rust. The owner: "2, i'd say." RadioLib may be read as a reference for
+Rust radio drivers, as well as a test oracle. Nothing is linked in. Any
+passage adapted carries its MIT notice.
+
+Read 2026-11-19 (README, `src/modules`, `src/hal`, `Hal.h`; release 8.0.0):
+
+- Chip families: CC1101, LLCC68, LR11x0, LR2021, nRF24, RF69, RFM2x, Si443x,
+  STM32WL, SX123x, SX126x, SX127x, SX128x. The firmware's vendored `lora-phy`
+  3.0.1 covers SX126x and SX127x; both boards (T114, Heltec V4) use an SX1262.
+- Its hardware layer is blocking: delay, SPI transfer and a C function pointer
+  for interrupts. The firmware is async on `lora-phy`'s `RadioKind` trait.
+- It holds chip drivers, not board definitions (pins, power chips, displays).
+
+No single Rust equivalent was found by search. Per-chip crates exist and are
+listed only, none read or run: `lr11xx` 0.1.0 (LR1110/1120/1121, depends on
+`lora-phy` ^3.0.1), `lr1120` and `lr2021`, `radio-sx128x` (its readme says
+work in progress), `radio-sx127x`, `radio-sx1231`, `cc1101-embassy`, and the
+rust-iot `radio` traits. A crate that depends on crates.io `lora-phy` would
+need to resolve to the vendored fork, or the build carries two copies.
+
+No driver work is planned from this. It waits on which board comes next.
 
 ### Mixed or blocked adjacent trees
 

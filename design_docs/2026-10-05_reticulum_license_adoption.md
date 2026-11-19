@@ -64,6 +64,39 @@ and point 2 (firmware images are GPLv3) of the
   justified by RNS alone (`RNodeInterface.py` 667-692, 896-925: echoes are
   recorded, never validated). No firmware text or code entered the repository.
 
+## Amendment, 2026-11-17: Ratspeak
+
+**Status:** RULED by the owner. It also covers rns-rs and lxmf-rs.
+
+- **Ratspeak's `rsReticulum` and `rsLXMF` may be read and adapted** into the
+  Reticulum-licensed crates above. Both carried an AGPL-3.0 text from their
+  first public commit (2026-05-06) until 2026-11-08, when Ratspeak replaced it
+  with the Reticulum License (`ac9ea27` and `5a6a0cb`, "Replace invalid AGPL
+  license with Reticulum License"). The owner: "what's important is to accept
+  the terms under which reticulum has been provided and not contravene them.
+  now that ratspeak is on reticulum's license? fair game!"
+- **Prns stays withdrawn.** The owner's distinction is the relicensing conflict
+  with upstream, which Ratspeak has resolved and Prns has not.
+- **Read only revisions at or after those two commits.** Record each
+  adaptation in the crate's `NOTICE` with Ratspeak's file, lines and revision.
+  Adapted portions carry Ratspeak LLC's copyright line beside Mark Qvist's, as
+  their `LICENSE` requires.
+- **Learn first; no wholesale adoption** (owner, 2026-11-18): "I think we can
+  probably learn something from RNS-RS at least. The wholesale adoption of
+  their code, I would always balk at. I think we should try to learn first and
+  foremost." These projects are read for design and method. Adapting a passage
+  stays the exception and is recorded in `NOTICE` as above.
+- **LXST is not covered.** `rsLXST` waits for the owner's discussion with Mark
+  Qvist. Its licence names Ratspeak as the only permitted user, and LXST itself
+  is CC BY-NC-ND 4.0, so neither is an input.
+- **`lelloman/rns-rs` and `lelloman/lxmf-rs` are covered too** (owner, same
+  day: "Extend to rns-rs"). Each has carried the Reticulum License, with Mark
+  Qvist's notice, since its only `LICENSE` commit (`ba917fc`, 2026-02-11;
+  `7d960c8`, 2026-02-13), so there is no revision floor. Its README calls
+  rns-rs a derivative port, written with substantial LLM assistance under
+  human review. `NOTICE` entries carry the "rns-rs contributors" or "lxmf-rs
+  contributors" copyright line.
+
 ## Why
 
 - **Adaptation requires it.** Upstream's manual (RNS 1.5.5,
@@ -124,8 +157,9 @@ and point 2 (firmware images are GPLv3) of the
   Claude, that means the model-training setting is off for any account used to
   read RNS or LXMF source.
 - **Read upstream, not intermediaries.** Third-party RNS derivatives are not
-  inputs. That includes Prns, rns-rs, and the reproduced-source comment blocks
-  in microReticulum.
+  inputs. That includes Prns and the reproduced-source comment blocks in
+  microReticulum. The exceptions since 2026-11-17 are Ratspeak's rsReticulum
+  and rsLXMF, and lelloman's rns-rs and lxmf-rs (amendment above).
 - **History stays as recorded.** Historical receipts keep their evidence
   boundaries. New work is described as source-informed or adapted, never as
   clean-room.

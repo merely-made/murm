@@ -68,5 +68,6 @@ when qualifying a newer RNS peer.
 
 ## Progress
 
+- 2026-11-17: added `crates/retinue/oracle/peer_rnsrs.py`, a local peer gate with rns-rs's `rnsd` (`663e5e3`) as the transport node. Two full runs: the second passed 8 of 8; in the first, the Retinue-hub control for the Retinue pair case ended `NO_ROUTE`, then passed 8 of 8 on repeat. That control has no rns-rs in it, and the cause is not found. Results are in the [survey refresh](2026-08-25_permissive_radio_protocol_compatibility_survey.md#hands-on-check-of-rns-rs).
 - 2026-11-17: implemented the RNS 1.6 network stamp and LXMF 1.3 fractional-cost slice; see the linked protocol refresh and software receipts.
 - 2026-11-02: adopted the reviewed open-work successor; original archived whole. No new implementation or acceptance run.

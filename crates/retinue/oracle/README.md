@@ -292,10 +292,42 @@ local TCP interoperability receipt, not an RF or range receipt. Its result
 directory is intentionally ignored because it contains transient identities,
 ports, raw captures, and exact clean-commit state.
 
+## rns-rs peer gate
+
+`peer_rnsrs.py` runs the built `rnsd` of [rns-rs](https://github.com/lelloman/rns-rs)
+as the transport node between Retinue and stock RNS. It starts the daemon as an
+untouched external process and reads none of its source. Three cases each run against
+a Retinue hub, a stock hub and the rns-rs hub, so a harness fault shows up as a failed
+control:
+
+- Retinue initiator, hub, Retinue responder: resolve, link and echo;
+- stock leaf, hub, Retinue responder: learn at two hops, link and echo;
+- stock leaf sends a 2.5 MB uncompressed Resource to `resource_recv`, direct and
+  through the rns-rs hub.
+
+rns-rs's node driver does not build for Windows, so the hub runs on a Unix host over
+SSH. Its listener is forwarded here and every socket in a case is a loopback socket.
+Build the daemon on that host at the revision under test, then run from this directory:
+
+```powershell
+# on the Unix host, inside the rns-rs checkout
+cargo build -p rns-cli --bin rnsd --bin rnstatus --bin rnpath --no-default-features --features engine-parallel,iface-tcp
+
+# here
+$env:CARGO_TARGET_DIR = 'C:/t/cargo-targets/murm'
+.\.venv\Scripts\python.exe -u .\peer_rnsrs.py --ssh-host $unix_host --rnsd $remote_rnsd --output $receipt
+```
+
+`--case` selects one case. `result.json` records the Retinue revision, the daemon's
+`--version` line and each case's checks. A pass is a local TCP receipt for rns-rs as a
+transport node. It does not cover rns-rs as an endpoint, LXMF, radio carriers, IFAC,
+ratchets or loss. This is a local gate and is not in `run_live.py`.
+
 ## Files
 
 | file | what |
 | --- | --- |
+| `peer_rnsrs.py` | rns-rs's `rnsd` as the transport node between Retinue and stock RNS, with Retinue and stock hubs as controls |
 | `requirements.txt` | the current live-oracle pin: `rns==1.5.4`, `lxmf==1.1.1` |
 | `run_live.py` | the complete mixed-runtime matrix (`GATES`, the 1.5.7 repin `live` lane) |
 | `flake_census.py` | census one gate by failure **mode**, not rate; see below |

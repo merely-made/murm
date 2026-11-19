@@ -388,6 +388,7 @@ Historical gate numbers and dated findings below cite the archived originals.
 - [Protocol and firmware feature parity](2026-11-02_protocol_parity_plan.md): Role-specific Retinue/Tucket/Sennet parity and exact-image resource/product acceptance.
 - [Transport standards and retained repair conformance](2026-11-02_transport_conformance_plan.md): Broader codec/corpus/carrier and retained-repair qualification, device/physical measurements and optional adapters.
 - [Murmuration controller and shared-radio measurements](2026-11-02_murmuration_controller_plan.md): Resident failure and control acceptance, cooperative schedules and MC5 measured shared-radio cost.
+- [One shared transport core for Node and Endpoint](2026-11-18_shared_transport_core_plan.md): T0–T5. Settle 13 behavioural differences between the two drivers against stock RNS, then move transport routing into one clock-free module. Plan only; no code changed.
 - [Retinue I2P SAM seam](2026-11-02_i2p_sam_seam_plan.md): Identity fork, remaining current-cohort interoperability, conditional datagrams and upstream findings; 0.1.1 publication is complete.
 
 Retinue v0 and radio-mirror are archived without separate successors. Their

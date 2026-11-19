@@ -195,6 +195,25 @@ ratchets retain their own owners. A wrapper over `AsyncRead + AsyncWrite`
 does not provide raw datagram reliability, radio segmentation or embedded
 execution. A carrier must first meet the ordered-channel contract.
 
+### Endpoints for mere participation (2026-11-10)
+
+Mere owns the choice of identity tier and permitted carriers. See "Mere
+identity and carriers" in
+`mere/design_docs/mere_docs/technical_architecture/2026-11-06_domain_contract.md`.
+The resident design calls for one endpoint per distinct carrier key on each
+selected carrier. `P2pandaTransport::builder_for` and `ReticulumTransport::builder_for`
+accept derived or unassociated `CarrierKeypair`s. The master key stays in
+custody. [Transport tests](../native/crates/transport/tests/unassociated_key.rs)
+cover those bindings individually. The 2026-11-11 Windows idle sweep measured
+up to 64 endpoints in one process, including the resident personal-sync
+path and a carrier mDNS control. See
+`Code/testing/mere/iroh-endpoint-cost/README.md`. Raw Retinue RNS/LXMF needs
+a separate endpoint for each identity.
+
+The [I2P non-transport node lifetime](2026-11-02_i2p_sam_seam_plan.md#open-phases-and-done-conditions)
+and [channel identity derivation](2026-08-09_channel_murmuration.md#open-questions)
+remain open in their own plans.
+
 ## Phases
 
 Landed phases keep their headings so citations hold. Their done-conditions are
