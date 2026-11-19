@@ -88,11 +88,7 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
         should_cancel: impl FnMut() -> bool,
     ) -> Option<[u8; 64]> {
         let cost = self
-            .routes
-            .iter()
-            .find(|route| {
-                route.destination == destination && route.live(now, self.transport.route_ttl)
-            })
+            .live_route_slot(destination, now)
             .and_then(|route| route.link_cost);
         let required = if self.stamp_policy.stamp_link_requests {
             cost.or(self

@@ -302,7 +302,7 @@ fn foreign_interface_cannot_refresh_or_poison_a_link_bridge() {
     .with_transport_config(TransportConfig::transit());
     let link_id = AddressHash::from_bytes([0xA3; 16]);
     relay.remember_bridge(link_id, AddressHash::from_bytes([0xA4; 16]), 1, 2, 20, 10);
-    relay.bridges[0].proof_deadline = None;
+    relay.bridges[0].entry.proof_deadline = None;
     let mut packet = Packet {
         packet_type: PacketType::Data,
         header_type: HeaderType::Type1,
@@ -313,7 +313,7 @@ fn foreign_interface_cannot_refresh_or_poison_a_link_bridge() {
     };
 
     assert!(relay.ingest(3, &packet, 20).is_empty());
-    assert_eq!(relay.bridges[0].seen, 10);
+    assert_eq!(relay.bridges[0].entry.seen, 10);
     assert!(relay.transit_filter.current.is_empty());
 
     let to_two = relay.ingest(1, &packet, 21);
@@ -322,7 +322,7 @@ fn foreign_interface_cannot_refresh_or_poison_a_link_bridge() {
             .iter()
             .any(|action| matches!(action, Action::Send { interface: 2, .. }))
     );
-    assert_eq!(relay.bridges[0].seen, 21);
+    assert_eq!(relay.bridges[0].entry.seen, 21);
 
     packet.payload = b"return data".to_vec();
     let to_one = relay.ingest(2, &packet, 22);

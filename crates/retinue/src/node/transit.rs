@@ -1,13 +1,18 @@
 //! Carrying traffic for other destinations: bridges, the reverse table and relaying.
 
-use super::tables::{LinkBridge, ReverseEntry, is_deduplicated_link_context};
+use heapless::Vec as BoundedVec;
+
+use super::tables::is_deduplicated_link_context;
 use super::{
-    Action, Actions, InterfaceId, LINK_TRANSPORT_IDLE, Node, TRANSPORT_DEDUP_TIMEOUT,
-    transit_proof_timeout,
+    Action, Actions, InterfaceId, LINK_TRANSPORT_IDLE, Node, REVERSE_TIMEOUT, transit_proof_timeout,
 };
 use crate::hash::AddressHash;
 use crate::link;
 use crate::packet::{HeaderType, Packet, PacketType};
+use crate::transport::{
+    BridgeRecord, LinkBridge, ReverseEntry, find_live, record_bridge, record_reverse,
+    refresh_bridge, restore_reverse, take_reverse,
+};
 
 impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES: usize>
     Node<PEERS, ACTIONS, LINKS, ROUTES>
@@ -21,10 +26,7 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
 
     /// [`Self::transit_is_new`] for a packet whose hash is already in hand.
     fn transit_hash_is_new(&mut self, context: u8, hash: AddressHash, now: u64) -> bool {
-        !is_deduplicated_link_context(context)
-            || self
-                .transit_filter
-                .insert(hash, now, TRANSPORT_DEDUP_TIMEOUT)
+        !is_deduplicated_link_context(context) || self.transit_filter.insert(hash, now)
     }
 
     /// Record a link request this node is about to carry, unvalidated until `proof_deadline`.
@@ -42,51 +44,32 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
         now: u64,
     ) -> bool {
         let bridge = LinkBridge {
-            link_id,
-            destination,
             from,
             out,
+            destination,
             seen: now,
             proof_deadline: Some(proof_deadline),
         };
-        if let Some(existing) = self
-            .bridges
-            .iter_mut()
-            .find(|bridge| bridge.link_id == link_id)
-        {
-            // A retransmitted request: an unproved bridge follows it, a validated one stands.
-            if existing.proof_deadline.is_some() {
-                *existing = bridge;
+        let counters = &mut self.transport_counters;
+        match record_bridge(
+            &mut self.bridges,
+            link_id,
+            bridge,
+            ROUTES,
+            LINK_TRANSPORT_IDLE,
+        ) {
+            BridgeRecord::Known => true,
+            BridgeRecord::New { evicted } => {
+                if evicted.is_some() {
+                    counters.evicted_bridges = counters.evicted_bridges.saturating_add(1);
+                }
+                true
             }
-            return true;
+            BridgeRecord::Refused => {
+                counters.refused_bridges = counters.refused_bridges.saturating_add(1);
+                false
+            }
         }
-        if self.bridges.is_full() {
-            let Some(index) = self
-                .bridges
-                .iter()
-                .enumerate()
-                .filter(|(_, bridge)| bridge.proof_deadline.is_some())
-                .min_by_key(|(_, bridge)| bridge.seen)
-                .or_else(|| {
-                    self.bridges
-                        .iter()
-                        .enumerate()
-                        .filter(|(_, bridge)| {
-                            now.saturating_sub(bridge.seen) >= LINK_TRANSPORT_IDLE
-                        })
-                        .min_by_key(|(_, bridge)| bridge.seen)
-                })
-                .map(|(index, _)| index)
-            else {
-                self.transport_counters.refused_bridges =
-                    self.transport_counters.refused_bridges.saturating_add(1);
-                return false;
-            };
-            self.bridges.swap_remove(index);
-            self.transport_counters.evicted_bridges =
-                self.transport_counters.evicted_bridges.saturating_add(1);
-        }
-        self.bridges.push(bridge).is_ok()
     }
 
     /// Relay a packet already associated with a carried link. Link proofs and data name the
@@ -102,14 +85,13 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
         if !self.transport.relay_packets {
             return false;
         }
-        let Some(index) = self
-            .bridges
-            .iter()
-            .position(|bridge| bridge.link_id == packet.destination)
-        else {
+        let bridge_ttl = self.transport.bridge_ttl;
+        let Some(bridge) = find_live(&self.bridges, &packet.destination, |b| {
+            !b.lapsed(now, bridge_ttl)
+        })
+        .copied() else {
             return false;
         };
-        let bridge = self.bridges[index];
         let out = if interface == bridge.from {
             bridge.out
         } else if interface == bridge.out {
@@ -164,10 +146,7 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
             interface: out,
             packet: forwarded,
         }) {
-            if proves {
-                self.bridges[index].proof_deadline = None;
-            }
-            self.bridges[index].seen = now;
+            refresh_bridge(&mut self.bridges, &packet.destination, now, proves);
             self.transport_counters.forwarded_packets =
                 self.transport_counters.forwarded_packets.saturating_add(1);
         }
@@ -214,10 +193,8 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
             return true;
         }
         let Some(route) = self
-            .routes
-            .iter()
-            .find(|route| route.destination == packet.destination)
-            .copied()
+            .live_route_slot(packet.destination, now)
+            .map(|slot| slot.entry)
         else {
             self.transport_counters.unroutable_packets =
                 self.transport_counters.unroutable_packets.saturating_add(1);
@@ -252,12 +229,12 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
             let link_id = link::link_id(packet).unwrap_or(hash);
             let proof_deadline = now
                 .saturating_add(transit_proof_timeout(route.hops))
-                .saturating_add(self.first_hop_airtime(route.interface));
+                .saturating_add(self.first_hop_airtime(route.iface));
             if !self.remember_bridge(
                 link_id,
                 packet.destination,
                 interface,
-                route.interface,
+                route.iface,
                 proof_deadline,
                 now,
             ) {
@@ -265,14 +242,30 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
             }
         }
         let needs_reverse = packet.packet_type != PacketType::LinkRequest;
-        let displaced = needs_reverse
-            .then(|| self.remember_reverse(hash, interface, route.interface, now))
-            .flatten();
+        // Everything recording the return path displaced, so a refused send puts it back.
+        let mut displaced = BoundedVec::<_, ROUTES>::new();
+        if needs_reverse {
+            let entry = ReverseEntry {
+                received: interface,
+                outbound: route.iface,
+                at: now,
+            };
+            record_reverse(
+                &mut self.reverse,
+                hash,
+                entry,
+                ROUTES,
+                REVERSE_TIMEOUT,
+                |d| {
+                    let _ = displaced.push(d);
+                },
+            );
+        }
         if send(
             self,
             actions,
             Action::Send {
-                interface: route.interface,
+                interface: route.iface,
                 packet: forwarded,
             },
         ) {
@@ -281,47 +274,9 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
             self.transport_counters.forwarded_packets =
                 self.transport_counters.forwarded_packets.saturating_add(1);
         } else if needs_reverse {
-            self.reverse.pop();
-            if let Some((index, entry)) = displaced {
-                let _ = self.reverse.push(entry);
-                let last = self.reverse.len() - 1;
-                self.reverse.swap(index, last);
-            }
+            restore_reverse(&mut self.reverse, &hash, displaced.into_iter().rev());
         }
         true
-    }
-
-    /// Record the way back for a carried packet's proof (RNS `Transport.py` 2104-2110).
-    fn remember_reverse(
-        &mut self,
-        packet: AddressHash,
-        received: InterfaceId,
-        outbound: InterfaceId,
-        now: u64,
-    ) -> Option<(usize, ReverseEntry)> {
-        let index = self
-            .reverse
-            .iter()
-            .position(|entry| entry.packet == packet)
-            .or_else(|| {
-                if self.reverse.is_full() {
-                    self.reverse
-                        .iter()
-                        .enumerate()
-                        .min_by_key(|(_, entry)| entry.seen)
-                        .map(|(index, _)| index)
-                } else {
-                    None
-                }
-            });
-        let displaced = index.map(|index| (index, self.reverse.swap_remove(index)));
-        let _ = self.reverse.push(ReverseEntry {
-            packet,
-            received,
-            outbound,
-            seen: now,
-        });
-        displaced
     }
 
     /// Carry a delivery proof back along a remembered reverse path. The entry is consumed
@@ -331,6 +286,7 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
         &mut self,
         interface: InterfaceId,
         packet: &Packet,
+        now: u64,
         actions: &mut Actions<ACTIONS>,
     ) -> bool {
         if !self.transport.relay_packets
@@ -338,17 +294,16 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
         {
             return false;
         }
-        let Some(index) = self
-            .reverse
-            .iter()
-            .position(|entry| entry.packet == packet.destination)
-        else {
+        let reverse = &mut self.reverse;
+        let Some(received) = take_reverse(
+            reverse,
+            &packet.destination,
+            interface,
+            now,
+            REVERSE_TIMEOUT,
+        ) else {
             return false;
         };
-        let entry = self.reverse.swap_remove(index);
-        if interface != entry.outbound {
-            return false;
-        }
         if packet.hops.saturating_add(1) >= self.transport.max_hops {
             self.transport_counters.hop_limit_dropped =
                 self.transport_counters.hop_limit_dropped.saturating_add(1);
@@ -361,7 +316,7 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
             return true;
         }
         if actions.push(Action::Send {
-            interface: entry.received,
+            interface: received,
             packet: forwarded,
         }) {
             self.transport_counters.forwarded_packets =

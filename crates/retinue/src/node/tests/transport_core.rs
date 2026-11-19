@@ -1,7 +1,7 @@
 //! Behaviour shared by the two transport drivers.
 
-use super::super::tables::ReverseEntry;
 use super::*;
+use crate::transport::{Keyed, ReverseEntry};
 
 fn relay() -> Node<32, 8, 4, 4> {
     Node::new(
@@ -57,21 +57,23 @@ fn return_paths_are_transactional_with_output() {
                 for byte in 0..4 {
                     relay
                         .reverse
-                        .push(ReverseEntry {
-                            packet: if state == "replace" && byte == 1 {
+                        .push(Keyed {
+                            key: if state == "replace" && byte == 1 {
                                 hash
                             } else {
                                 AddressHash::from_bytes([byte; 16])
                             },
-                            received: 7,
-                            outbound: 8,
-                            seen: u64::from(byte),
+                            entry: ReverseEntry {
+                                received: 7,
+                                outbound: 8,
+                                at: u64::from(byte),
+                            },
                         })
                         .unwrap();
                 }
             }
             let before = relay.reverse.clone();
-            let learned = relay.routes[0].learned;
+            let learned = relay.routes[0].entry.learned;
             let mut actions = Actions::new();
             if !accepted {
                 for _ in 0..8 {
@@ -90,21 +92,30 @@ fn return_paths_are_transactional_with_output() {
                     let entry = node
                         .reverse
                         .iter()
-                        .find(|entry| entry.packet == hash)
+                        .find(|entry| entry.key == hash)
                         .expect("return path exists before output admission");
-                    assert_eq!((entry.received, entry.outbound, entry.seen), (1, 2, 10));
-                    assert_eq!(node.routes[0].learned, learned, "route not yet touched");
+                    assert_eq!(
+                        (entry.entry.received, entry.entry.outbound, entry.entry.at),
+                        (1, 2, 10)
+                    );
+                    assert_eq!(
+                        node.routes[0].entry.learned, learned,
+                        "route not yet touched"
+                    );
                     actions.push(action)
                 },
             ));
-            assert_eq!(relay.routes[0].learned, if accepted { 10 } else { learned });
+            assert_eq!(
+                relay.routes[0].entry.learned,
+                if accepted { 10 } else { learned }
+            );
             assert_eq!(
                 relay.transport_counters().forwarded_packets,
                 u16::from(accepted)
             );
             if accepted {
                 assert_eq!(relay.reverse.len(), if state == "empty" { 1 } else { 4 });
-                assert!(relay.reverse.iter().any(|entry| entry.packet == hash));
+                assert!(relay.reverse.iter().any(|entry| entry.key == hash));
             } else {
                 assert_eq!(
                     relay.reverse, before,
@@ -139,11 +150,13 @@ fn interface_removal_purges_return_paths_and_pending_relays() {
     for (byte, received, outbound) in [(1, 1, 2), (2, 2, 1), (3, 2, 3)] {
         relay
             .reverse
-            .push(ReverseEntry {
-                packet: AddressHash::from_bytes([byte; 16]),
-                received,
-                outbound,
-                seen: 0,
+            .push(Keyed {
+                key: AddressHash::from_bytes([byte; 16]),
+                entry: ReverseEntry {
+                    received,
+                    outbound,
+                    at: 0,
+                },
             })
             .unwrap();
     }
@@ -202,18 +215,20 @@ fn transit_precedes_reverse_proofs_and_handles_once() {
         let id = AddressHash::from_bytes([0x72; 16]);
         relay
             .reverse
-            .push(ReverseEntry {
-                packet: id,
-                received: 3,
-                outbound: 1,
-                seen: 0,
+            .push(Keyed {
+                key: id,
+                entry: ReverseEntry {
+                    received: 3,
+                    outbound: 1,
+                    at: 0,
+                },
             })
             .unwrap();
         let mut proof = packet(id);
         proof.packet_type = PacketType::Proof;
         if bridged {
             assert!(relay.remember_bridge(id, id, 1, 2, 1000, 0));
-            relay.bridges[0].proof_deadline = None;
+            relay.bridges[0].entry.proof_deadline = None;
         } else {
             proof.header_type = HeaderType::Type2;
             proof.transport = Some(relay.identity.hash());
@@ -268,7 +283,7 @@ fn carried_packets_filter_duplicates_only_after_bridge_admission() {
         data.context = context;
         assert!(relay.ingest(3, &data, 1).is_empty());
         assert!(relay.ingest(1, &data, 2).is_empty());
-        relay.bridges[0].proof_deadline = None;
+        relay.bridges[0].entry.proof_deadline = None;
         assert!(sent(&relay.ingest(1, &data, 3)).is_some());
         let exempt = !crate::node::is_deduplicated_link_context(context);
         assert_eq!(
@@ -300,7 +315,7 @@ fn carried_links_refresh_only_on_accepted_send() {
         let proves = refusal.starts_with("proof");
         assert!(relay.remember_bridge(id, id, 1, 2, 1000, 10));
         if !proves {
-            relay.bridges[0].proof_deadline = None;
+            relay.bridges[0].entry.proof_deadline = None;
         }
         let mut data = packet(id);
         if proves {
@@ -327,12 +342,12 @@ fn carried_links_refresh_only_on_accepted_send() {
         relay.forward_bridged_packet(from, &data, 100, &mut actions);
         let accepted = matches!(refusal, "accepted" | "proof");
         assert_eq!(
-            relay.bridges[0].seen,
+            relay.bridges[0].entry.seen,
             if accepted { 100 } else { 10 },
             "{refusal}"
         );
         assert_eq!(
-            relay.bridges[0].proof_deadline.is_none(),
+            relay.bridges[0].entry.proof_deadline.is_none(),
             !proves || accepted,
             "{refusal}"
         );
@@ -345,7 +360,7 @@ fn forwarded_count_tracks_only_accepted_output() {
         let mut relay = relay();
         let id = AddressHash::from_bytes([0x75; 16]);
         assert!(relay.remember_bridge(id, id, 1, 2, 1000, 0));
-        relay.bridges[0].proof_deadline = None;
+        relay.bridges[0].entry.proof_deadline = None;
         let mut data = packet(id);
         let mut actions = Actions::new();
         match refusal {
@@ -386,9 +401,12 @@ fn short_link_requests_are_bridged_and_carried() {
         let carried = sent(&relay.ingest(1, &request, 1)).expect("short request is carried");
         assert_eq!(relay.bridges.len(), 1, "short request has a bridge");
         let bridge = relay.bridges[0];
-        assert_eq!((bridge.link_id, bridge.from, bridge.out), (id, 1, 2));
-        assert_eq!(bridge.destination, request.destination);
-        assert!(bridge.proof_deadline.is_some());
+        assert_eq!(
+            (bridge.key, bridge.entry.from, bridge.entry.out),
+            (id, 1, 2)
+        );
+        assert_eq!(bridge.entry.destination, request.destination);
+        assert!(bridge.entry.proof_deadline.is_some());
         assert!(relay.reverse.is_empty());
         assert_eq!(carried.payload, request.payload);
         assert!(
@@ -414,11 +432,13 @@ fn reverse_proofs_keep_header_and_obey_hop_ceiling() {
         let id = AddressHash::from_bytes([0x79; 16]);
         relay
             .reverse
-            .push(ReverseEntry {
-                packet: id,
-                received: 1,
-                outbound: 2,
-                seen: 0,
+            .push(Keyed {
+                key: id,
+                entry: ReverseEntry {
+                    received: 1,
+                    outbound: 2,
+                    at: 0,
+                },
             })
             .unwrap();
         let mut proof = packet(id);

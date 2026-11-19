@@ -55,7 +55,7 @@ pub use stamps::{DEFAULT_LINK_STAMP_ATTEMPTS, NodeAnnounceError};
 // The endpoint shares the Node's link dedup rule.
 #[cfg(feature = "tokio")]
 pub(crate) use tables::is_deduplicated_link_context;
-use tables::{HashGenerations, LinkBridge, ReverseEntry, Route};
+use tables::{Bridges, HashMemory, ReversePaths, Routes};
 
 /// An executor-neutral Reticulum node.
 ///
@@ -83,7 +83,7 @@ pub struct Node<
     destination_stamp: Option<[u8; crate::network_stamp::STAMP_LEN]>,
     /// Paths learned from verified announces. The book holds the keys to open a link; a route
     /// says where a transport packet goes.
-    routes: BoundedVec<Route, ROUTES>,
+    routes: Routes<ROUTES>,
     /// Receive-side announce freshness: the blobs of the announces behind each live route. A
     /// destination without a live route has none, so its next announce is a first sighting.
     freshness: AnnounceFreshness,
@@ -91,18 +91,18 @@ pub struct Node<
     /// Link ids this node is carrying, with their ingress and egress interfaces. Proofs and
     /// link data name the link id, not the destination, so this is how return traffic finds
     /// its way back.
-    bridges: BoundedVec<LinkBridge, ROUTES>,
+    bridges: Bridges<ROUTES>,
     /// Return paths for the proofs of carried packets, consumed by the proof that uses them
     /// and forgotten after [`REVERSE_TIMEOUT`]. The oldest gives way at capacity.
-    reverse: BoundedVec<ReverseEntry, ROUTES>,
+    reverse: ReversePaths<ROUTES>,
     /// Relayed announces awaiting their jittered transmission or retry (RNS's announce table).
     rebroadcasts: Rebroadcasts,
     /// Relayed-announce budgets of the interfaces whose airtime is known.
     announce_caps: BoundedVec<(InterfaceId, AnnounceCap), FIRST_HOP_AIRTIME_INTERFACES>,
     /// Recently relayed packet hashes, so a shared radio hearing its own relay does not loop.
-    transit_filter: HashGenerations<TRANSPORT_DEDUP_HASHES>,
+    transit_filter: HashMemory<TRANSPORT_DEDUP_HASHES>,
     /// Path requests already seen, by target and tag, so each is answered once.
-    path_request_tags: HashGenerations<PATH_REQUEST_TAGS>,
+    path_request_tags: HashMemory<PATH_REQUEST_TAGS>,
     /// Hashes of the link data this node most recently sent, oldest first. A relay's copy of
     /// our packet has the same hash (it excludes hops and header type), so it is known as ours.
     sent_link_data: BoundedVec<AddressHash, { crate::capacity::small::OWN_ECHO_HASHES }>,

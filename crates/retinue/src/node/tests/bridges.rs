@@ -110,11 +110,11 @@ fn a_bridge_carries_nothing_until_the_destination_proves_it() {
     let proof = sent(&destination.ingest(IFACE, &forwarded, 3)).unwrap();
     assert!(relay.ingest(SOURCE_SIDE, &proof, 4).is_empty());
     assert_eq!(relay.transport_counters().unvalidated_link_packets, 3);
-    assert!(relay.bridges[0].proof_deadline.is_some());
+    assert!(relay.bridges[0].entry.proof_deadline.is_some());
 
     let (back, proof) = sent_on(&relay.ingest(DESTINATION_SIDE, &proof, 5)).unwrap();
     assert_eq!(back, SOURCE_SIDE);
-    assert!(relay.bridges[0].proof_deadline.is_none());
+    assert!(relay.bridges[0].entry.proof_deadline.is_none());
     link_up(&source.ingest(IFACE, &proof, 6)).unwrap();
     let data = sent(&source.send(link_id, IFACE, b"after", &[0xA1; 16]).unwrap()).unwrap();
     let (out, _) = sent_on(&relay.ingest(SOURCE_SIDE, &data, 7)).unwrap();
@@ -130,7 +130,7 @@ fn an_unproved_bridge_lapses_at_its_proof_deadline() {
     let proof = sent(&destination.ingest(IFACE, &forwarded, 3)).unwrap();
     let deadline = 2 + LINK_ESTABLISHMENT_TIMEOUT_PER_HOP;
     assert_eq!(transit_proof_timeout(0), LINK_ESTABLISHMENT_TIMEOUT_PER_HOP);
-    assert_eq!(relay.bridges[0].proof_deadline, Some(deadline));
+    assert_eq!(relay.bridges[0].entry.proof_deadline, Some(deadline));
     assert!(relay.ingest(DESTINATION_SIDE, &proof, deadline).is_empty());
     assert!(relay.bridges.is_empty());
     assert_eq!(relay.transport_counters().expired_bridges, 1);
@@ -147,23 +147,30 @@ fn forged_requests_cannot_displace_a_validated_bridge() {
     .with_transport_config(TransportConfig::transit());
     let id = |byte| AddressHash::from_bytes([byte; 16]);
     assert!(relay.remember_bridge(id(1), id(0), 1, 2, 100, 0));
-    relay.bridges[0].proof_deadline = None;
+    relay.bridges[0].entry.proof_deadline = None;
     assert!(relay.remember_bridge(id(2), id(0), 1, 2, 100, 1));
     assert!(relay.remember_bridge(id(3), id(0), 1, 2, 100, 2));
     assert_eq!(relay.transport_counters().evicted_bridges, 1);
-    assert!(relay.bridges.iter().any(|b| b.link_id == id(1)));
-    assert!(!relay.bridges.iter().any(|b| b.link_id == id(2)));
+    assert!(relay.bridges.iter().any(|b| b.key == id(1)));
+    assert!(!relay.bridges.iter().any(|b| b.key == id(2)));
 
     // A replayed request leaves a validated bridge as it was.
     assert!(relay.remember_bridge(id(1), id(0), 3, 3, 100, 3));
-    let validated = relay.bridges.iter().find(|b| b.link_id == id(1)).unwrap();
-    assert_eq!((validated.from, validated.out, validated.seen), (1, 2, 0));
-    assert!(validated.proof_deadline.is_none());
+    let validated = relay.bridges.iter().find(|b| b.key == id(1)).unwrap();
+    assert_eq!(
+        (
+            validated.entry.from,
+            validated.entry.out,
+            validated.entry.seen
+        ),
+        (1, 2, 0)
+    );
+    assert!(validated.entry.proof_deadline.is_none());
 
     relay
         .bridges
         .iter_mut()
-        .for_each(|b| b.proof_deadline = None);
+        .for_each(|b| b.entry.proof_deadline = None);
     assert!(!relay.remember_bridge(id(4), id(0), 1, 2, 100, 4));
     assert_eq!(relay.transport_counters().refused_bridges, 1);
     assert_eq!(relay.bridges.len(), 2);
@@ -202,8 +209,8 @@ fn idle_validated_bridges_yield_but_live_ones_refuse_new_requests() {
     relay
         .bridges
         .iter_mut()
-        .for_each(|b| b.proof_deadline = None);
-    relay.bridges[3].seen = 3;
+        .for_each(|b| b.entry.proof_deadline = None);
+    relay.bridges[3].entry.seen = 3;
 
     let request = next_request(&mut source, &destination, &relay, 0x9A, 10);
     assert!(sent(&relay.ingest(SOURCE_SIDE, &request, 10)).is_none());
@@ -216,9 +223,9 @@ fn idle_validated_bridges_yield_but_live_ones_refuse_new_requests() {
     assert_eq!(out, DESTINATION_SIDE);
     assert_eq!(relay.transport_counters().evicted_bridges, 1);
     let carried_id = link::link_id(&carried).unwrap();
-    assert!(relay.bridges.iter().any(|b| b.link_id == carried_id));
+    assert!(relay.bridges.iter().any(|b| b.key == carried_id));
     assert!(
-        relay.bridges.iter().any(|b| b.seen == 3),
+        relay.bridges.iter().any(|b| b.entry.seen == 3),
         "the most recently heard idle link stays"
     );
 }
@@ -276,10 +283,10 @@ fn without_the_destinations_identity_only_its_side_proves() {
     relay.book.forget(destination.destination());
     let proof = sent(&destination.ingest(IFACE, &forwarded, 3)).unwrap();
     assert!(relay.ingest(SOURCE_SIDE, &proof, 4).is_empty());
-    assert!(relay.bridges[0].proof_deadline.is_some());
+    assert!(relay.bridges[0].entry.proof_deadline.is_some());
     let (back, _) = sent_on(&relay.ingest(DESTINATION_SIDE, &proof, 5)).unwrap();
     assert_eq!(back, SOURCE_SIDE);
-    assert!(relay.bridges[0].proof_deadline.is_none());
+    assert!(relay.bridges[0].entry.proof_deadline.is_none());
 }
 
 /// A proof the relay does not send on, here for the hop ceiling, leaves its bridge
@@ -292,7 +299,7 @@ fn a_proof_validates_its_bridge_only_once_carried() {
     proof.hops = relay.transport.max_hops;
     assert!(relay.ingest(DESTINATION_SIDE, &proof, 4).is_empty());
     assert_eq!(relay.transport_counters().hop_limit_dropped, 1);
-    assert!(relay.bridges[0].proof_deadline.is_some());
+    assert!(relay.bridges[0].entry.proof_deadline.is_some());
 }
 
 /// A packet forwarded with `PATHFINDER_M` hops is refused by the next hop (`Packet.py` 250),

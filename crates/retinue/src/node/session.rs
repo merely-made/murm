@@ -65,7 +65,7 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
         for bridge in &self.bridges {
             report
                 .transit_bridges
-                .push(bridge.link_id)
+                .push(bridge.key)
                 .expect("bridge bound");
         }
         self.links.clear();

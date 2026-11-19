@@ -4,7 +4,6 @@ use alloc::vec::Vec;
 
 use heapless::Vec as BoundedVec;
 
-use super::tables::HashGenerations;
 use super::{
     AppDataTooLarge, DEFAULT_ANNOUNCE_INTERVAL, FreshnessPolicy, LINK_MTU, LogicalMtuError,
     MIN_LOGICAL_MTU, Node, PayloadLimits, REBROADCAST_SLOTS, TransportConfig, TransportCounters,
@@ -14,6 +13,7 @@ use crate::announce_freshness::{AnnounceFreshness, AnnounceFreshnessConfig};
 use crate::hash::{AddressHash, NameHash};
 use crate::identity::PrivateIdentity;
 use crate::rebroadcast::Rebroadcasts;
+use crate::transport::{MemoryProfile, TransitMemory};
 
 impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES: usize>
     Node<PEERS, ACTIONS, LINKS, ROUTES>
@@ -42,8 +42,21 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
             })
             .expect("nonzero fallback freshness capacity"),
             bridges: BoundedVec::new(),
-            transit_filter: HashGenerations::new(),
-            path_request_tags: HashGenerations::new(),
+            transit_filter: TransitMemory::new(
+                MemoryProfile {
+                    capacity: super::TRANSPORT_DEDUP_HASHES,
+                    max_age: Some(super::TRANSPORT_DEDUP_TIMEOUT),
+                },
+                0,
+            ),
+            // No time limit worth the name: a tag is forgotten by count.
+            path_request_tags: TransitMemory::new(
+                MemoryProfile {
+                    capacity: super::PATH_REQUEST_TAGS,
+                    max_age: Some(u64::MAX),
+                },
+                0,
+            ),
             reverse: BoundedVec::new(),
             rebroadcasts: Rebroadcasts::new(REBROADCAST_SLOTS),
             announce_caps: BoundedVec::new(),
@@ -186,7 +199,7 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
             blob_capacity: policy.max_blobs_per_destination,
         })?;
         self.routes
-            .retain(|route| !report.evicted_destinations.contains(&route.destination));
+            .retain(|route| !report.evicted_destinations.contains(&route.key));
         self.transport_counters.evicted_freshness_rows = self
             .transport_counters
             .evicted_freshness_rows

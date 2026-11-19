@@ -277,7 +277,7 @@ fn forgetting_an_interface_culls_its_routes_and_bridges() {
     relay.forget_interface(IFACE + 1);
     assert_eq!(relay.route_count(), 0);
     assert_eq!(relay.bridges.len(), 1);
-    assert_eq!(relay.bridges[0].out, IFACE + 2);
+    assert_eq!(relay.bridges[0].entry.out, IFACE + 2);
 
     source.set_first_hop_airtime(IFACE, 64).unwrap();
     source.forget_interface(IFACE);

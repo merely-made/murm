@@ -4,101 +4,50 @@ use alloc::vec::Vec;
 
 use heapless::Vec as BoundedVec;
 
-use super::{InterfaceId, InterfaceMode};
 use crate::hash::AddressHash;
 use crate::link;
+use crate::transport::{Keyed, LinkBridge, ReverseEntry, RouteEntry, Slot, TransitMemory};
 
-#[derive(Debug, Clone, Copy)]
-pub(super) struct Route {
-    pub(super) destination: AddressHash,
-    pub(super) interface: InterfaceId,
-    /// The next transport hop that announced this destination, if it is not direct.
-    pub(super) transport: Option<AddressHash>,
-    pub(super) hops: u8,
-    /// When the route was learned, or last carried traffic.
-    pub(super) learned: u64,
-    /// The learning interface's mode when the route was learned.
-    pub(super) mode: InterfaceMode,
-    /// The authenticated link cost from this route's most recent announce.
+/// A route as the board keeps it: the shared entry, its destination, and the authenticated
+/// link cost from its most recent announce, which a new route starts without.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(super) struct RouteSlot {
+    pub(super) key: AddressHash,
+    pub(super) entry: RouteEntry<u64>,
     pub(super) link_cost: Option<crate::stamp::StampCost>,
 }
 
-impl Route {
-    /// Whether the route is still usable at `now`, given the configured full-mode lifetime.
-    pub(super) fn live(&self, now: u64, route_ttl: u64) -> bool {
-        now.saturating_sub(self.learned) < self.mode.route_ttl(route_ttl)
+impl Slot for RouteSlot {
+    type Entry = RouteEntry<u64>;
+    fn key(&self) -> AddressHash {
+        self.key
     }
-}
-
-#[derive(Debug, Clone, Copy)]
-pub(super) struct LinkBridge {
-    pub(super) link_id: AddressHash,
-    /// The destination the request named, whose identity signs the proof.
-    pub(super) destination: AddressHash,
-    pub(super) from: InterfaceId,
-    pub(super) out: InterfaceId,
-    pub(super) seen: u64,
-    /// When an unproved link lapses; `None` once the destination's proof has passed.
-    pub(super) proof_deadline: Option<u64>,
-}
-
-impl LinkBridge {
-    pub(super) fn lapsed(&self, now: u64, ttl: u64) -> bool {
-        self.proof_deadline
-            .map_or(now.saturating_sub(self.seen) >= ttl, |deadline| {
-                now >= deadline
-            })
+    fn entry(&self) -> &RouteEntry<u64> {
+        &self.entry
     }
-}
-
-/// Hashes remembered in two generations, as RNS keeps its packet hash list and the one before
-/// it (`Transport.py` 832-834). A full generation becomes the previous one, so a burst forgets
-/// the older half rather than everything. A generation also turns over after `max_age`, and
-/// both are cleared after twice that, so a quiet node does not remember a hash indefinitely.
-#[derive(Debug)]
-pub(super) struct HashGenerations<const N: usize> {
-    pub(super) current: BoundedVec<AddressHash, N>,
-    previous: BoundedVec<AddressHash, N>,
-    started: u64,
-}
-
-impl<const N: usize> HashGenerations<N> {
-    pub(super) const fn new() -> Self {
+    fn entry_mut(&mut self) -> &mut RouteEntry<u64> {
+        &mut self.entry
+    }
+    fn new(key: AddressHash, entry: RouteEntry<u64>) -> Self {
         Self {
-            current: BoundedVec::new(),
-            previous: BoundedVec::new(),
-            started: 0,
+            key,
+            entry,
+            link_cost: None,
         }
     }
-
-    /// Record `hash` at `now`; false if it was already remembered.
-    pub(super) fn insert(&mut self, hash: AddressHash, now: u64, max_age: u64) -> bool {
-        let age = now.saturating_sub(self.started);
-        if age >= max_age.saturating_mul(2) {
-            self.previous.clear();
-            self.current.clear();
-            self.started = now;
-        } else if age >= max_age || self.current.is_full() {
-            self.previous = core::mem::take(&mut self.current);
-            self.started = now;
-        }
-        if self.current.contains(&hash) || self.previous.contains(&hash) {
-            return false;
-        }
-        let _ = self.current.push(hash);
-        true
+    fn into_entry(self) -> RouteEntry<u64> {
+        self.entry
     }
 }
 
-/// The way back for a carried packet's proof: RNS's reverse-table entry, keyed by the
-/// truncated packet hash the proof is addressed to.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub(super) struct ReverseEntry {
-    pub(super) packet: AddressHash,
-    pub(super) received: InterfaceId,
-    pub(super) outbound: InterfaceId,
-    pub(super) seen: u64,
-}
+/// Learned routes, bounded by `ROUTES`.
+pub(super) type Routes<const N: usize> = BoundedVec<RouteSlot, N>;
+/// Carried links, keyed by link id.
+pub(super) type Bridges<const N: usize> = BoundedVec<Keyed<LinkBridge<u64>>, N>;
+/// Return paths, keyed by the truncated packet hash a proof is addressed to.
+pub(super) type ReversePaths<const N: usize> = BoundedVec<Keyed<ReverseEntry<u64>>, N>;
+/// A two-generation hash memory of `N` hashes a generation.
+pub(super) type HashMemory<const N: usize> = TransitMemory<BoundedVec<AddressHash, N>, u64>;
 
 /// One derived resource IV: `full_hash(tag || identity secret || link id || counter)`.
 ///

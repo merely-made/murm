@@ -6,6 +6,7 @@ use crate::announce::Announce;
 use crate::announce_freshness::{AnnounceFreshnessDecision, AnnounceFreshnessReject};
 use crate::packet::{DestinationType, HeaderType, Packet, PacketType};
 use crate::path::PathRequest;
+use crate::transport::find_live;
 
 impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES: usize>
     Node<PEERS, ACTIONS, LINKS, ROUTES>
@@ -63,12 +64,7 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
             let cost = if packet.destination == self.destination() {
                 self.stamp_policy.link_cost
             } else {
-                self.routes
-                    .iter()
-                    .find(|route| {
-                        route.destination == packet.destination
-                            && route.live(now, self.transport.route_ttl)
-                    })
+                self.live_route_slot(packet.destination, now)
                     .and_then(|route| route.link_cost)
                     .unwrap_or(self.stamp_policy.link_cost)
             };
@@ -86,7 +82,7 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
             return actions;
         }
         if packet.packet_type == PacketType::Proof
-            && self.forward_reverse_proof(interface, packet, &mut actions)
+            && self.forward_reverse_proof(interface, packet, now, &mut actions)
         {
             return actions;
         }
@@ -122,10 +118,7 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
                 let Some(candidate) = crate::announce::unverified_candidate(packet) else {
                     return actions;
                 };
-                let route_live = self.routes.iter().any(|route| {
-                    route.destination == candidate.destination
-                        && route.live(now, self.transport.route_ttl)
-                });
+                let route_live = self.live_route_slot(candidate.destination, now).is_some();
                 let accepted = match self.freshness.evaluate(candidate, route_live) {
                     AnnounceFreshnessDecision::Accept(accepted) => accepted,
                     AnnounceFreshnessDecision::Reject(reject) => {
@@ -173,9 +166,10 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
                     let route_ttl = self.transport.route_ttl;
                     let routes = &self.routes;
                     let admitted = self.book.ingest_at(&announce, now, |destination| {
-                        routes.iter().any(|route| {
-                            route.destination == destination && route.live(now, route_ttl)
+                        find_live(routes, &destination, |route| {
+                            route.live(now, |mode| mode.route_ttl(route_ttl))
                         })
+                        .is_some()
                     }) != Ingested::Refused;
                     if !admitted {
                         self.refused_peers = self.refused_peers.saturating_add(1);
@@ -184,7 +178,7 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
                     let record = self.freshness.record_accepted(candidate, accepted);
                     if let Some(evicted) = record.evicted_destination {
                         // A route never outlives its freshness row.
-                        self.routes.retain(|route| route.destination != evicted);
+                        self.routes.retain(|route| route.key != evicted);
                         self.transport_counters.evicted_freshness_rows = self
                             .transport_counters
                             .evicted_freshness_rows
@@ -208,7 +202,7 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
                     if let Some(route) = self
                         .routes
                         .iter_mut()
-                        .find(|route| route.destination == announce.destination)
+                        .find(|route| route.key == announce.destination)
                     {
                         route.link_cost = announce.network_stamp.map(|stamp| stamp.link_cost);
                     }
@@ -246,7 +240,7 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
     ) {
         let fresh = request
             .unique_tag()
-            .is_some_and(|tag| self.path_request_tags.insert(tag, now, u64::MAX));
+            .is_some_and(|tag| self.path_request_tags.insert(tag, now));
         if !fresh {
             self.count_filtered();
             return;

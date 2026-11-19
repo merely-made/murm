@@ -2,12 +2,15 @@
 
 #[cfg(doc)]
 use super::first_hop_airtime;
-use super::tables::Route;
+use super::tables::RouteSlot;
 use super::{
     AirtimeTableFull, InterfaceId, InterfaceMode, InterfaceModeTableFull, NextHop, Node,
     REVERSE_TIMEOUT,
 };
 use crate::hash::AddressHash;
+use crate::transport::{
+    self, Removal, RouteEntry, find_live, record_route, sweep_bridges, sweep_reverse, sweep_routes,
+};
 
 impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES: usize>
     Node<PEERS, ACTIONS, LINKS, ROUTES>
@@ -21,25 +24,18 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
     /// a stale path does not linger until an unrelated new announce arrives.
     pub fn route_to(&mut self, destination: AddressHash, now: u64) -> Option<(InterfaceId, u8)> {
         self.expire_routes(now);
-        self.routes
-            .iter()
-            .find(|route| route.destination == destination)
-            .map(|route| (route.interface, route.hops))
+        self.live_route(destination, now)
+            .map(|route| (route.iface, route.hops))
     }
 
     /// A route's next hop, read-only. A route past its TTL is reported as absent but not
     /// evicted; [`Self::route_to`] and [`Self::poll`] do that.
     pub fn next_hop(&self, destination: AddressHash, now: u64) -> Option<NextHop> {
-        self.routes
-            .iter()
-            .find(|route| {
-                route.destination == destination && route.live(now, self.transport.route_ttl)
-            })
-            .map(|route| NextHop {
-                interface: route.interface,
-                via: route.transport,
-                hops: route.hops,
-            })
+        self.live_route(destination, now).map(|route| NextHop {
+            interface: route.iface,
+            via: route.transport,
+            hops: route.hops,
+        })
     }
 
     /// The first-hop airtime allowance a link request leaving by `interface` adds to its
@@ -118,11 +114,15 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
     /// is gone. RNS culls the same rows when their interface disappears (`Transport.py`
     /// 880-881, 975-978).
     pub fn forget_interface(&mut self, interface: InterfaceId) {
-        self.routes.retain(|route| route.interface != interface);
-        self.bridges
-            .retain(|bridge| bridge.from != interface && bridge.out != interface);
-        self.reverse
-            .retain(|entry| entry.received != interface && entry.outbound != interface);
+        transport::forget_interface(&mut self.routes, interface, |route| {
+            [route.iface, route.iface]
+        });
+        transport::forget_interface(&mut self.bridges, interface, |bridge| {
+            [bridge.from, bridge.out]
+        });
+        transport::forget_interface(&mut self.reverse, interface, |entry| {
+            [entry.received, entry.outbound]
+        });
         self.rebroadcasts.forget_interface(interface);
         self.announce_caps.retain(|(id, _)| *id != interface);
         for (_, cap) in &mut self.announce_caps {
@@ -137,29 +137,40 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
     /// board clock cannot leave a stale route usable merely because it has not polled yet.
     pub(super) fn expire_transport_state(&mut self, now: u64) {
         self.expire_routes(now);
-        while let Some(index) = self
-            .bridges
-            .iter()
-            .position(|bridge| bridge.lapsed(now, self.transport.bridge_ttl))
-        {
-            self.bridges.swap_remove(index);
-            self.transport_counters.expired_bridges =
-                self.transport_counters.expired_bridges.saturating_add(1);
-        }
-        self.reverse
-            .retain(|entry| now.saturating_sub(entry.seen) < REVERSE_TIMEOUT);
+        let counters = &mut self.transport_counters;
+        sweep_bridges(&mut self.bridges, now, self.transport.bridge_ttl, |_, _| {
+            counters.expired_bridges = counters.expired_bridges.saturating_add(1);
+        });
+        sweep_reverse(&mut self.reverse, now, REVERSE_TIMEOUT);
     }
 
     fn expire_routes(&mut self, now: u64) {
-        while let Some(index) = self
-            .routes
-            .iter()
-            .position(|route| !route.live(now, self.transport.route_ttl))
-        {
-            self.routes.swap_remove(index);
-            self.transport_counters.expired_routes =
-                self.transport_counters.expired_routes.saturating_add(1);
-        }
+        let route_ttl = self.transport.route_ttl;
+        let counters = &mut self.transport_counters;
+        sweep_routes(
+            &mut self.routes,
+            now,
+            |mode| mode.route_ttl(route_ttl),
+            |_, _| {
+                counters.expired_routes = counters.expired_routes.saturating_add(1);
+            },
+        );
+    }
+
+    /// A live route's shared entry.
+    fn live_route(&self, destination: AddressHash, now: u64) -> Option<&RouteEntry<u64>> {
+        let route_ttl = self.transport.route_ttl;
+        find_live(&self.routes, &destination, |route| {
+            route.live(now, |mode| mode.route_ttl(route_ttl))
+        })
+    }
+
+    /// A live route with what the board keeps beside it.
+    pub(super) fn live_route_slot(&self, destination: AddressHash, now: u64) -> Option<&RouteSlot> {
+        let route_ttl = self.transport.route_ttl;
+        self.routes.iter().find(|route| {
+            route.key == destination && route.entry.live(now, |mode| mode.route_ttl(route_ttl))
+        })
     }
 
     /// Record a route from a freshness-accepted announce. The accepted announce is the route
@@ -178,54 +189,34 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
         }
         self.expire_routes(now);
         let mode = self.interface_mode(interface);
-        if let Some(route) = self
-            .routes
-            .iter_mut()
-            .find(|route| route.destination == destination)
-        {
-            *route = Route {
-                destination,
-                interface,
-                transport,
-                hops,
-                learned: now,
-                mode,
-                link_cost: None,
-            };
-            return;
-        }
-
-        if self.routes.is_full()
-            && let Some(index) = self
-                .routes
-                .iter()
-                .enumerate()
-                .min_by_key(|(_, route)| route.learned)
-                .map(|(index, _)| index)
-        {
-            self.routes.swap_remove(index);
-            self.transport_counters.evicted_routes =
-                self.transport_counters.evicted_routes.saturating_add(1);
-        }
-        let _ = self.routes.push(Route {
-            destination,
-            interface,
+        let route = RouteEntry {
+            iface: interface,
             transport,
             hops,
             learned: now,
             mode,
-            link_cost: None,
-        });
+        };
+        let route_ttl = self.transport.route_ttl;
+        let counters = &mut self.transport_counters;
+        record_route(
+            &mut self.routes,
+            destination,
+            route,
+            ROUTES,
+            |mode| mode.route_ttl(route_ttl),
+            |_, _, removal| {
+                if removal == Removal::Evicted {
+                    counters.evicted_routes = counters.evicted_routes.saturating_add(1);
+                }
+            },
+        );
     }
 
     /// Mark a route used at `now`, which extends its life as RNS's path timestamp does.
     pub(super) fn touch_route(&mut self, destination: AddressHash, now: u64) {
-        if let Some(route) = self
-            .routes
-            .iter_mut()
-            .find(|route| route.destination == destination)
-        {
-            route.learned = now;
-        }
+        let route_ttl = self.transport.route_ttl;
+        transport::touch_route(&mut self.routes, &destination, now, |mode| {
+            mode.route_ttl(route_ttl)
+        });
     }
 }
