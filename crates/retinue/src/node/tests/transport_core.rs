@@ -86,3 +86,28 @@ fn a_local_type_two_link_request_bypasses_transit_policy() {
         assert_eq!(node.transport_counters().unroutable_packets, 0);
     }
 }
+
+#[test]
+fn carried_packets_filter_duplicates_only_after_bridge_admission() {
+    for context in 0..=u8::MAX {
+        let mut relay = relay();
+        let id = AddressHash::from_bytes([0x73; 16]);
+        assert!(relay.remember_bridge(id, id, 1, 2, 1000, 0));
+        let mut data = packet(id);
+        data.context = context;
+        assert!(relay.ingest(3, &data, 1).is_empty());
+        assert!(relay.ingest(1, &data, 2).is_empty());
+        relay.bridges[0].proof_deadline = None;
+        assert!(sent(&relay.ingest(1, &data, 3)).is_some());
+        let exempt = !crate::node::is_deduplicated_link_context(context);
+        assert_eq!(
+            sent(&relay.ingest(2, &data, 4)).is_some(),
+            exempt,
+            "context {context}"
+        );
+        assert_eq!(
+            relay.transport_counters().forwarded_packets,
+            1 + u16::from(exempt)
+        );
+    }
+}

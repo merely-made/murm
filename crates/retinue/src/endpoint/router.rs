@@ -138,6 +138,11 @@ pub(super) fn dispatch(
             }
             match bridged {
                 Some((a, b, proves)) => {
+                    if pkt.hops.saturating_add(1) < policy.max_hops
+                        && !shared.packet_is_new(pkt.context, pkt.hash())
+                    {
+                        return;
+                    }
                     let link_id = pkt.destination;
                     let out = if iface == a { b } else { a };
                     // As in RNS, the bridge is validated as its proof goes out, not before.

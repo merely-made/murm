@@ -71,3 +71,52 @@ async fn a_local_type_two_link_request_bypasses_transit_policy() {
         assert_eq!(ep.routing_counters().policy_rejected, 0);
     }
 }
+
+#[tokio::test]
+async fn carried_packets_filter_duplicates_only_after_bridge_admission() {
+    for context in 0..=u8::MAX {
+        let ep = Endpoint::new(PrivateIdentity::from_secret_bytes(&[0x71; 64]));
+        let a = ep.attach_interface();
+        let b = ep.attach_interface();
+        let c = ep.attach_interface();
+        ep.enable_routing();
+        let id = AddressHash::from_bytes([0x73; 16]);
+        ep.shared.link_transport.lock().unwrap().insert(
+            id,
+            LinkBridge {
+                from: a.id(),
+                out: b.id(),
+                destination: id,
+                seen: Instant::now(),
+                proof_deadline: Some(Instant::now() + Duration::from_secs(10)),
+            },
+        );
+        let mut data = single_packet(id, vec![0x71; 48]);
+        data.destination_type = DestinationType::Link;
+        data.context = context;
+        route(&ep.shared, c.id(), data.clone());
+        route(&ep.shared, a.id(), data.clone());
+        assert!(b.outbound.queues.pop().is_none());
+        ep.shared
+            .link_transport
+            .lock()
+            .unwrap()
+            .get_mut(&id)
+            .unwrap()
+            .proof_deadline = None;
+        route(&ep.shared, a.id(), data.clone());
+        assert!(b.outbound.queues.pop().is_some());
+        b.outbound.queues.delivery_complete();
+        route(&ep.shared, b.id(), data);
+        let exempt = !crate::node::is_deduplicated_link_context(context);
+        assert_eq!(
+            a.outbound.queues.pop().is_some(),
+            exempt,
+            "context {context}"
+        );
+        assert_eq!(
+            ep.routing_counters().forwarded_packets,
+            1 + u64::from(exempt)
+        );
+    }
+}

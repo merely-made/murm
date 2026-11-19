@@ -82,7 +82,9 @@ async fn a_link_bridge_accepts_only_its_two_interfaces() {
     assert_eq!(to_b.hops, 1);
     b.outbound.queues.delivery_complete();
 
-    route(&endpoint.shared, b.id(), packet.clone());
+    let mut reply = packet.clone();
+    reply.payload = b"bridged reply".to_vec();
+    route(&endpoint.shared, b.id(), reply);
     let to_a = a
         .outbound
         .queues
