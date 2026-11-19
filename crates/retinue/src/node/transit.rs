@@ -352,12 +352,14 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
         {
             return;
         }
+        // Remembered first, as stock (`Transport.py` 2235), so a repeat is filtered, not
+        // counted again at the ceiling.
+        if !self.transit_is_new(packet, now) {
+            return;
+        }
         if packet.hops.saturating_add(1) >= self.transport.max_hops {
             self.transport_counters.hop_limit_dropped =
                 self.transport_counters.hop_limit_dropped.saturating_add(1);
-            return;
-        }
-        if !self.transit_is_new(packet, now) {
             return;
         }
         let mut forwarded = packet.clone();

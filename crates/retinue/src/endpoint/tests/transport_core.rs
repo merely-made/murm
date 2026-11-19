@@ -510,6 +510,29 @@ async fn short_link_requests_are_bridged_and_carried() {
     }
 }
 
+#[tokio::test(start_paused = true)]
+async fn a_repeated_announce_over_the_hop_ceiling_is_remembered_before_it_is_counted() {
+    let ep = Endpoint::new(PrivateIdentity::from_secret_bytes(&[0x71; 64]));
+    let a = ep.attach_interface();
+    let b = ep.attach_interface();
+    ep.enable_routing();
+    let (mut announce, decoded) = peer_announce(0x7f, "ceiling");
+    announce.hops = MAX_HOPS - 1;
+    route(&ep.shared, a.id(), announce.clone());
+    assert_eq!(ep.routing_counters().hop_limit_dropped, 1);
+    // Without a live route the copy is a first sighting and reaches the relay gate again.
+    ep.shared.forget_path(decoded.destination);
+    route(&ep.shared, a.id(), announce);
+    assert!(ep.route_to(decoded.destination).is_some(), "learned again");
+    assert_eq!(
+        ep.routing_counters().hop_limit_dropped,
+        1,
+        "the repeat is filtered, not counted again"
+    );
+    assert!(a.outbound.queues.pop().is_none());
+    assert!(b.outbound.queues.pop().is_none());
+}
+
 #[tokio::test]
 async fn reverse_proofs_keep_header_and_obey_hop_ceiling() {
     for hops in [2, 3] {

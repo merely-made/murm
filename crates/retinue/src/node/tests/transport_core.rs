@@ -423,6 +423,26 @@ fn short_link_requests_are_bridged_and_carried() {
 }
 
 #[test]
+fn a_repeated_announce_over_the_hop_ceiling_is_remembered_before_it_is_counted() {
+    let mut relay = relay();
+    let (_, destination) = pair();
+    let mut announce = destination.announce(&blob([4; RAND_HASH_LEN]), None);
+    announce.hops = relay.transport.max_hops - 1;
+    relay.ingest(1, &announce, 0);
+    assert_eq!(relay.transport_counters().hop_limit_dropped, 1);
+    // Without a live route the copy is a first sighting and reaches the relay gate again.
+    relay.routes.clear();
+    relay.ingest(1, &announce, 1);
+    assert_eq!(relay.route_count(), 1, "learned again");
+    assert_eq!(
+        relay.transport_counters().hop_limit_dropped,
+        1,
+        "the repeat is filtered, not counted again"
+    );
+    assert_eq!(relay.next_rebroadcast(), None);
+}
+
+#[test]
 fn reverse_proofs_keep_header_and_obey_hop_ceiling() {
     for hops in [2, 3] {
         let mut relay = relay();
