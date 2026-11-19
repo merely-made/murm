@@ -144,30 +144,25 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
     fn expire_routes(&mut self, now: u64) {
         let route_ttl = self.transport.route_ttl;
         let counters = &mut self.transport_counters;
-        sweep_routes(
-            &mut self.routes,
-            now,
-            |mode| mode.route_ttl(route_ttl),
-            |_, _| {
-                counters.expired_routes = counters.expired_routes.saturating_add(1);
-            },
-        );
+        sweep_routes(&mut self.routes, now, lifetimes(route_ttl), |_, _| {
+            counters.expired_routes = counters.expired_routes.saturating_add(1);
+        });
     }
 
     /// A live route's shared entry.
     fn live_route(&self, destination: AddressHash, now: u64) -> Option<&RouteEntry<u64>> {
         let route_ttl = self.transport.route_ttl;
         find_live(&self.routes, &destination, |route| {
-            route.live(now, |mode| mode.route_ttl(route_ttl))
+            route.live(now, &lifetimes(route_ttl))
         })
     }
 
     /// A live route with what the board keeps beside it.
     pub(super) fn live_route_slot(&self, destination: AddressHash, now: u64) -> Option<&RouteSlot> {
         let route_ttl = self.transport.route_ttl;
-        self.routes.iter().find(|route| {
-            route.key == destination && route.entry.live(now, |mode| mode.route_ttl(route_ttl))
-        })
+        self.routes
+            .iter()
+            .find(|route| route.key == destination && route.entry.live(now, &lifetimes(route_ttl)))
     }
 
     /// Record a route from a freshness-accepted announce. The accepted announce is the route
@@ -201,7 +196,7 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
             destination,
             route,
             ROUTES,
-            |mode| mode.route_ttl(route_ttl),
+            lifetimes(route_ttl),
             |_, _, removal| {
                 if removal == Removal::Evicted {
                     counters.evicted_routes = counters.evicted_routes.saturating_add(1);
@@ -213,9 +208,7 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
     /// Mark a live route used at `now`; its life does not move.
     pub(super) fn mark_route_used(&mut self, destination: AddressHash, now: u64) {
         let route_ttl = self.transport.route_ttl;
-        transport::mark_route_used(&mut self.routes, &destination, now, |mode| {
-            mode.route_ttl(route_ttl)
-        });
+        transport::mark_route_used(&mut self.routes, &destination, now, lifetimes(route_ttl));
     }
 
     /// Prove a live route alive at `now`: its life starts over in its interface's current
@@ -228,9 +221,15 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
             &destination,
             now,
             |interface| mode_on(modes, interface),
-            |mode| mode.route_ttl(route_ttl),
+            lifetimes(route_ttl),
         );
     }
+}
+
+/// Route lifetimes by mode, given the configured full-mode lifetime. The board takes no
+/// linger: a never-used route lives to its expiry (D29).
+pub(super) fn lifetimes(full: u64) -> impl Fn(InterfaceMode) -> u64 + Copy {
+    move |mode: InterfaceMode| mode.route_ttl(full)
 }
 
 /// The mode `modes` gives `interface`, [`InterfaceMode::Full`] if none.

@@ -88,7 +88,8 @@ pub struct EndpointFacts {
     pub interfaces: Vec<InterfaceId>,
     pub routes: Vec<RouteFact>,
     pub links: Vec<LinkFact>,
-    /// Routes omitted because their captured age reached the route lifetime.
+    /// Routes omitted because, at capture, they were past their lifetime or, never used, past
+    /// their linger.
     pub expired_routes: u64,
 }
 
@@ -102,10 +103,10 @@ impl Endpoint {
     /// As [`Self::route_to`], at a supplied instant, so tests can expire routes without
     /// sleeping. Hosts observe routes through [`Self::route_facts_at`].
     pub(super) fn route_to_at(&self, dest: AddressHash, now: Instant) -> Option<(InterfaceId, u8)> {
-        let route_ttl = self.shared.route_ttl();
+        let life = self.shared.path_life();
         self.shared.write_diagnostic(|| {
             let mut t = self.shared.path_table.lock().unwrap();
-            match find_or_forget(&mut *t, &dest, |e| e.live_at(now, route_ttl)) {
+            match find_or_forget(&mut *t, &dest, |e| e.live_at(now, life)) {
                 Lookup::Live(e) => (Some((e.iface, e.hops)), false),
                 Lookup::Expired(_) => (None, true),
                 Lookup::Missing => (None, false),
@@ -127,7 +128,7 @@ impl Endpoint {
         interfaces: &[InterfaceId],
     ) -> (Vec<RouteFact>, u64) {
         let interfaces: HashSet<_> = interfaces.iter().copied().collect();
-        let route_ttl = self.shared.route_ttl();
+        let life = self.shared.path_life();
         let table = self.shared.path_table.lock().unwrap();
         let mut expired_routes = 0_u64;
         let mut facts = Vec::new();
@@ -138,7 +139,7 @@ impl Endpoint {
             let age = captured_at
                 .checked_duration_since(entry.learned)
                 .unwrap_or_default();
-            if age >= entry.lifetime(route_ttl) {
+            if !entry.live_at(captured_at, life) {
                 expired_routes = expired_routes.saturating_add(1);
                 continue;
             }

@@ -192,3 +192,60 @@ async fn a_full_table_drops_never_used_then_least_recently_used() {
     assert_eq!(held(), [2, 3, 5, 6], "then the route used longest ago");
     assert_eq!(ep.routing_counters().paths_evicted, 3);
 }
+
+/// The desktop culls a never-used route once it outlives stock's linger (D29;
+/// `Transport.py` 228-233, 1145): 12 minutes on a leaf, 1.75 hours on a transport node, and
+/// ten times that on an interface slower than 25 kbit/s. A used route keeps its lifetime.
+#[tokio::test]
+async fn a_never_used_route_is_culled_after_its_linger() {
+    let ep = Endpoint::new(PrivateIdentity::from_secret_bytes(&[0x78; 64]));
+    let fast = ep.attach_interface();
+    let slow = ep.attach_interface();
+    assert!(ep.set_interface_bitrate(slow.id(), Some(24_999)));
+    let learned = Instant::now();
+    let ms = Duration::from_millis(1);
+    let [a, b, c, d, e] = [0xC1, 0xC2, 0xC3, 0xC4, 0xC5].map(|n| AddressHash::from_bytes([n; 16]));
+    for (dest, iface) in [(a, fast.id()), (b, slow.id()), (c, fast.id())] {
+        ep.shared.learn_path_at(dest, iface, 1, None, learned);
+    }
+    ep.shared
+        .path_table
+        .lock()
+        .unwrap()
+        .get_mut(&c)
+        .unwrap()
+        .used = Some(learned);
+
+    let leaf = Duration::from_secs(12 * 60);
+    assert!(ep.route_to_at(a, learned + leaf - ms).is_some());
+    assert!(
+        ep.route_to_at(a, learned + leaf).is_none(),
+        "a leaf lingers 12 minutes"
+    );
+    assert!(ep.route_to_at(b, learned + leaf * 10 - ms).is_some());
+    assert!(
+        ep.route_to_at(b, learned + leaf * 10).is_none(),
+        "ten times on a slow link"
+    );
+    assert!(
+        ep.route_to_at(c, learned + leaf * 10).is_some(),
+        "a used route keeps its lifetime"
+    );
+
+    ep.enable_routing();
+    let transport = Duration::from_secs(105 * 60);
+    for dest in [d, e] {
+        ep.shared.learn_path_at(dest, fast.id(), 1, None, learned);
+    }
+    assert!(ep.route_to_at(d, learned + transport - ms).is_some());
+    assert!(
+        ep.route_to_at(d, learned + transport).is_none(),
+        "a transport node lingers 1.75 hours"
+    );
+    assert!(
+        ep.route_facts_at(learned + transport)
+            .iter()
+            .all(|fact| fact.destination != e),
+        "facts age routes by the same rule"
+    );
+}

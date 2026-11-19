@@ -262,7 +262,7 @@ impl Shared {
         if tunnel.paths.is_empty() {
             return;
         }
-        let route_ttl = self.route_ttl();
+        let life = self.path_life();
         let mode = self.interface_mode(iface);
         let (restored, evicted) = self.write_diagnostic(|| {
             let mut paths = self.path_table.lock().unwrap();
@@ -274,15 +274,15 @@ impl Shared {
                 };
                 let keep = match paths.get(dest) {
                     Some(current) => {
-                        (mirrored.entry.hops <= current.hops || !current.live_at(now, route_ttl))
+                        (mirrored.entry.hops <= current.hops || !current.live_at(now, life))
                             && not_older()
                     }
-                    None => mirrored.entry.live_at(now, route_ttl) && not_older(),
+                    None => mirrored.entry.live_at(now, life) && not_older(),
                 };
                 if !keep {
                     return false;
                 }
-                if !paths.contains_key(dest) && make_path_room(&mut paths, now, route_ttl) {
+                if !paths.contains_key(dest) && make_path_room(&mut paths, now, life) {
                     evicted += 1;
                 }
                 let entry = PathEntry {

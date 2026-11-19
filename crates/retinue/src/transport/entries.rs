@@ -20,12 +20,32 @@ pub(crate) struct RouteEntry<T> {
     pub(crate) used: Option<T>,
 }
 
+/// How long routes live, in milliseconds: a lifetime by the mode a route was learned in,
+/// and optionally a linger by its interface, past which a route never used is not live
+/// (D29). A plain `Fn(InterfaceMode) -> u64` is a lifetime with no linger.
+pub(crate) trait RouteLife {
+    fn lifetime(&self, mode: InterfaceMode) -> u64;
+    /// How long a never-used route on `iface` is kept; `None` keeps it to its lifetime.
+    fn linger(&self, iface: InterfaceId) -> Option<u64>;
+}
+
+impl<F: Fn(InterfaceMode) -> u64> RouteLife for F {
+    fn lifetime(&self, mode: InterfaceMode) -> u64 {
+        self(mode)
+    }
+    fn linger(&self, _: InterfaceId) -> Option<u64> {
+        None
+    }
+}
+
 impl<T: Tick> RouteEntry<T> {
-    /// Whether the route is usable at `now`. `lifetime` gives a route's lifetime in
-    /// milliseconds by the mode it was learned in; the drivers pass
-    /// `InterfaceMode::route_ttl` over their configured full-mode lifetime.
-    pub(crate) fn live(&self, now: T, lifetime: impl Fn(InterfaceMode) -> u64) -> bool {
-        now.millis_since(self.learned) < lifetime(self.mode)
+    /// Whether the route is usable at `now`: younger than its lifetime and, never used,
+    /// younger than its linger. The drivers' lifetime is `InterfaceMode::route_ttl` over
+    /// their configured full-mode lifetime.
+    pub(crate) fn live(&self, now: T, life: &impl RouteLife) -> bool {
+        let age = now.millis_since(self.learned);
+        age < life.lifetime(self.mode)
+            && (self.used.is_some() || life.linger(self.iface).is_none_or(|linger| age < linger))
     }
 }
 

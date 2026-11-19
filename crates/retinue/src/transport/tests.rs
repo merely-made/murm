@@ -173,7 +173,7 @@ fn routes_full_of_dead_never_evict_the_living<S: TestStore<RouteEntry<u64>>>() {
 both!(route_lookups_check_age, RouteEntry<u64>);
 fn route_lookups_check_age<S: TestStore<RouteEntry<u64>>>() {
     let mut store: S = filled(|n| route(1, u64::from(n) * 10));
-    let live = |now| move |r: &RouteEntry<u64>| r.live(now, ttl);
+    let live = |now| move |r: &RouteEntry<u64>| r.live(now, &ttl);
     assert_eq!(find_live(&store, &key(1), live(109)), Some(&route(1, 10)));
     assert_eq!(
         find_live(&store, &key(1), live(110)),
@@ -283,10 +283,52 @@ fn routes_mode_shortens_their_life<S: TestStore<RouteEntry<u64>>>() {
     };
     let _ = store.insert(key(1), roaming);
     let _ = store.insert(key(2), route(1, 0));
-    let live = |now| move |r: &RouteEntry<u64>| r.live(now, ttl);
+    let live = |now| move |r: &RouteEntry<u64>| r.live(now, &ttl);
     assert!(find_live(&store, &key(1), live(TTL / 3 - 1)).is_some());
     assert!(find_live(&store, &key(1), live(TTL / 3)).is_none());
     assert!(find_live(&store, &key(2), live(TTL / 3)).is_some());
+}
+
+/// Lifetimes as [`ttl`], with a linger of 50 on interface 1 and none elsewhere.
+#[derive(Clone, Copy)]
+struct Lingering;
+
+impl RouteLife for Lingering {
+    fn lifetime(&self, mode: InterfaceMode) -> u64 {
+        ttl(mode)
+    }
+    fn linger(&self, iface: InterfaceId) -> Option<u64> {
+        (iface == 1).then_some(50)
+    }
+}
+
+both!(
+    never_used_routes_live_only_as_long_as_their_linger,
+    RouteEntry<u64>
+);
+fn never_used_routes_live_only_as_long_as_their_linger<S: TestStore<RouteEntry<u64>>>() {
+    let mut store = S::default();
+    let used = RouteEntry {
+        used: Some(1),
+        ..route(1, 0)
+    };
+    for (n, entry) in [(1, route(1, 0)), (2, used), (3, route(2, 0))] {
+        let _ = store.insert(key(n), entry);
+    }
+    let live = |n, now| find_live(&store, &key(n), |r| r.live(now, &Lingering)).is_some();
+    assert!(
+        live(1, 49) && !live(1, 50),
+        "never used: gone at its linger"
+    );
+    assert!(live(2, TTL - 1), "a used route keeps its lifetime");
+    assert!(live(3, TTL - 1), "no linger, no cull");
+    assert!(
+        !mark_route_used(&mut store, &key(1), 50, Lingering),
+        "a culled route stays dead"
+    );
+    let mut gone = Vec::new();
+    sweep_routes(&mut store, 50, Lingering, |k, _| gone.push(k));
+    assert_eq!(gone, [key(1)]);
 }
 
 both!(route_sweep_reports_each_dead_route, RouteEntry<u64>);

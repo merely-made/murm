@@ -167,7 +167,7 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
                     let routes = &self.routes;
                     let admitted = self.book.ingest_at(&announce, now, |destination| {
                         find_live(routes, &destination, |route| {
-                            route.live(now, |mode| mode.route_ttl(route_ttl))
+                            route.live(now, &super::routes::lifetimes(route_ttl))
                         })
                         .is_some()
                     }) != Ingested::Refused;

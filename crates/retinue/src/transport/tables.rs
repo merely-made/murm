@@ -1,7 +1,7 @@
 //! The operations both drivers perform on one table. Capacities and lifetimes are the
 //! caller's, in milliseconds; what an operation removed comes back so the caller can count it.
 
-use super::{InterfaceId, LinkBridge, ReverseEntry, RouteEntry, Store, Tick};
+use super::{InterfaceId, LinkBridge, ReverseEntry, RouteEntry, RouteLife, Store, Tick};
 use crate::hash::AddressHash;
 use crate::iface_mode::InterfaceMode;
 
@@ -73,15 +73,15 @@ pub(crate) fn record_route<T: Tick, S: Store<RouteEntry<T>>>(
     key: AddressHash,
     mut route: RouteEntry<T>,
     capacity: usize,
-    lifetime: impl Fn(InterfaceMode) -> u64,
+    life: impl RouteLife,
     mut removed: impl FnMut(AddressHash, RouteEntry<T>, Removal),
 ) -> Option<RouteEntry<T>> {
     let now = route.learned;
-    if let Some(old) = store.get(&key).filter(|old| old.live(now, &lifetime)) {
+    if let Some(old) = store.get(&key).filter(|old| old.live(now, &life)) {
         route.used = old.used;
     }
     if store.get(&key).is_none() {
-        make_route_room(store, now, capacity, &lifetime, &mut removed);
+        make_route_room(store, now, capacity, life, &mut removed);
     }
     store.insert(key, route).ok().flatten()
 }
@@ -102,7 +102,7 @@ pub(crate) fn make_route_room<T: Tick, S: Store<RouteEntry<T>>>(
     store: &mut S,
     now: T,
     capacity: usize,
-    lifetime: impl Fn(InterfaceMode) -> u64,
+    life: impl RouteLife,
     mut removed: impl FnMut(AddressHash, RouteEntry<T>, Removal),
 ) {
     if store.len() < capacity {
@@ -110,14 +110,18 @@ pub(crate) fn make_route_room<T: Tick, S: Store<RouteEntry<T>>>(
     }
     // The dead first: a table full of expired routes must never evict a live one.
     store.retain(
-        |_, entry| entry.live(now, &lifetime),
+        |_, entry| entry.live(now, &life),
         |gone, entry, _| removed(gone, entry, Removal::Expired),
     );
     let standing = |entry: &RouteEntry<T>| {
         Some(entry.used.map_or_else(
-            || Standing::NeverUsed {
-                left: lifetime(entry.mode).saturating_sub(now.millis_since(entry.learned)),
-                learned: entry.learned,
+            || {
+                Standing::NeverUsed {
+                    left: life
+                        .lifetime(entry.mode)
+                        .saturating_sub(now.millis_since(entry.learned)),
+                    learned: entry.learned,
+                }
             },
             Standing::Used,
         ))
@@ -137,10 +141,10 @@ pub(crate) fn mark_route_used<T: Tick, S: Store<RouteEntry<T>>>(
     store: &mut S,
     key: &AddressHash,
     now: T,
-    lifetime: impl Fn(InterfaceMode) -> u64,
+    life: impl RouteLife,
 ) -> bool {
     match store.get_mut(key) {
-        Some(entry) if entry.live(now, lifetime) => {
+        Some(entry) if entry.live(now, &life) => {
             entry.used = Some(now);
             true
         }
@@ -156,10 +160,10 @@ pub(crate) fn prove_route_alive<T: Tick, S: Store<RouteEntry<T>>>(
     key: &AddressHash,
     now: T,
     mode: impl FnOnce(InterfaceId) -> InterfaceMode,
-    lifetime: impl Fn(InterfaceMode) -> u64,
+    life: impl RouteLife,
 ) -> bool {
     match store.get_mut(key) {
-        Some(entry) if entry.live(now, lifetime) => {
+        Some(entry) if entry.live(now, &life) => {
             entry.learned = now;
             entry.used = Some(now);
             entry.mode = mode(entry.iface);
@@ -173,10 +177,10 @@ pub(crate) fn prove_route_alive<T: Tick, S: Store<RouteEntry<T>>>(
 pub(crate) fn sweep_routes<T: Tick, S: Store<RouteEntry<T>>>(
     store: &mut S,
     now: T,
-    lifetime: impl Fn(InterfaceMode) -> u64,
+    life: impl RouteLife,
     expired: impl FnMut(AddressHash, RouteEntry<T>),
 ) {
-    store.sweep(|entry| !entry.live(now, &lifetime), expired);
+    store.sweep(|entry| !entry.live(now, &life), expired);
 }
 
 /// What [`record_bridge`] made of a link request.

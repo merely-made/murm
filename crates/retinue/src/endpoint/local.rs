@@ -89,6 +89,11 @@ impl LocalState {
         self.count.load(Ordering::Acquire) > 0 && self.ifaces.read().unwrap().contains(&id)
     }
 
+    /// Whether any interface leads to a shared instance, so this endpoint is its client.
+    pub(super) fn attached(&self) -> bool {
+        self.count.load(Ordering::Acquire) > 0
+    }
+
     fn insert(&self, id: InterfaceId) {
         let mut ifaces = self.ifaces.write().unwrap();
         ifaces.insert(id);
@@ -350,6 +355,25 @@ mod tests {
         pkt.address_via(Some(AddressHash::from_bytes([0x5d; 16])));
         pkt.hops = hops;
         pkt
+    }
+
+    /// A client of a shared instance keeps never-used routes as a leaf does, 12 minutes, even
+    /// when it forwards (`Transport.py` 451-454).
+    #[tokio::test]
+    async fn a_shared_instance_client_lingers_as_a_leaf() {
+        let ep = Endpoint::new(PrivateIdentity::from_secret_bytes(&[5; 64]));
+        let local = ep.attach_interface().id();
+        ep.shared.local.insert(local);
+        ep.enable_routing();
+        let dest = AddressHash::from_bytes([0x51; 16]);
+        let learned = std::time::Instant::now();
+        ep.shared.learn_path_at(dest, local, 1, None, learned);
+        let leaf = Duration::from_secs(12 * 60);
+        assert!(
+            ep.route_to_at(dest, learned + leaf - Duration::from_millis(1))
+                .is_some()
+        );
+        assert!(ep.route_to_at(dest, learned + leaf).is_none());
     }
 
     #[tokio::test]

@@ -10,7 +10,7 @@ use crate::announce_freshness::{AnnounceFreshness, AnnounceFreshnessCandidate};
 use crate::hash::AddressHash;
 use crate::node::InterfaceMode;
 use crate::packet::Packet;
-use crate::transport::{self, Lookup, Removal, RouteEntry, find_live, find_or_forget};
+use crate::transport::{self, Lookup, Removal, RouteEntry, RouteLife, find_live, find_or_forget};
 
 use super::announces::duration_ticks;
 use super::dedup::SEEN_ANNOUNCES;
@@ -51,10 +51,45 @@ pub(super) const PATH_REQUEST_GATE: Duration = Duration::from_secs(45);
 /// destination, because one interface reaches different destinations through different nodes.
 pub(super) type PathEntry = RouteEntry<Instant>;
 
-/// Route lifetimes by mode, given the policy's full-mode route TTL.
-fn lifetimes(route_ttl: Duration) -> impl Fn(InterfaceMode) -> u64 + Copy {
-    let full = duration_ticks(route_ttl);
-    move |mode: InterfaceMode| mode.route_ttl(full)
+/// How long a never-used route lingers on a transport node: RNS's `UNUSED_PATH_LINGER`,
+/// 1.75 hours (`Transport.py` 228).
+const UNUSED_PATH_LINGER: Duration = Duration::from_secs(105 * 60);
+/// How long one lingers on a leaf, which does not forward or is a shared instance's client:
+/// `UNUSED_PATH_LINGER_LEAF`, 12 minutes (`Transport.py` 229, 451-454).
+const UNUSED_PATH_LINGER_LEAF: Duration = Duration::from_secs(12 * 60);
+/// An interface with a bitrate below this is slow: `PATH_SLOW_BITRATE` (`Transport.py` 232).
+const PATH_SLOW_BITRATE: u64 = 25_000;
+/// How many times longer a never-used route lingers on a slow interface:
+/// `PATH_SLOW_LINGER_FACTOR` (`Transport.py` 233).
+const PATH_SLOW_LINGER_FACTOR: u64 = 10;
+
+/// Route life on the desktop: lifetimes by mode under the policy's full-mode route TTL, and
+/// stock's linger for a route never used (D29).
+#[derive(Clone, Copy)]
+pub(super) struct PathLife<'a> {
+    shared: &'a Shared,
+    full: u64,
+    linger: u64,
+}
+
+impl RouteLife for PathLife<'_> {
+    fn lifetime(&self, mode: InterfaceMode) -> u64 {
+        mode.route_ttl(self.full)
+    }
+
+    fn linger(&self, iface: InterfaceId) -> Option<u64> {
+        // The bitrate known here is the configured one (`Transport.py` 1129-1130).
+        let slow = self
+            .shared
+            .iface_policy(iface)
+            .bitrate_bps
+            .is_some_and(|bps| 0 < bps && bps < PATH_SLOW_BITRATE);
+        Some(if slow {
+            self.linger.saturating_mul(PATH_SLOW_LINGER_FACTOR)
+        } else {
+            self.linger
+        })
+    }
 }
 
 /// Make room for one more route in a full path table at `now`, as a learned route does
@@ -62,27 +97,18 @@ fn lifetimes(route_ttl: Duration) -> impl Fn(InterfaceMode) -> u64 + Copy {
 pub(super) fn make_path_room(
     paths: &mut HashMap<AddressHash, PathEntry>,
     now: Instant,
-    route_ttl: Duration,
+    life: PathLife<'_>,
 ) -> bool {
     let mut evicted = false;
-    transport::make_route_room(
-        paths,
-        now,
-        PATH_TABLE_CAPACITY,
-        lifetimes(route_ttl),
-        |_, _, removal| evicted |= removal == Removal::Evicted,
-    );
+    transport::make_route_room(paths, now, PATH_TABLE_CAPACITY, life, |_, _, removal| {
+        evicted |= removal == Removal::Evicted;
+    });
     evicted
 }
 
 impl PathEntry {
-    /// How long this route lives, given the policy's full-mode route TTL.
-    pub(super) fn lifetime(&self, route_ttl: Duration) -> Duration {
-        Duration::from_millis(lifetimes(route_ttl)(self.mode))
-    }
-
-    pub(super) fn live_at(&self, now: Instant, route_ttl: Duration) -> bool {
-        self.live(now, lifetimes(route_ttl))
+    pub(super) fn live_at(&self, now: Instant, life: PathLife<'_>) -> bool {
+        self.live(now, &life)
     }
 }
 
@@ -90,10 +116,10 @@ impl Shared {
     /// Mark `dest`'s live route used now; its life does not move.
     pub(super) fn mark_path_used(&self, dest: AddressHash) {
         let now = Instant::now();
-        let route_ttl = self.route_ttl();
+        let life = self.path_life();
         self.write_diagnostic(|| {
             let mut paths = self.path_table.lock().unwrap();
-            let marked = transport::mark_route_used(&mut *paths, &dest, now, lifetimes(route_ttl));
+            let marked = transport::mark_route_used(&mut *paths, &dest, now, life);
             ((), marked)
         });
     }
@@ -102,7 +128,7 @@ impl Shared {
     /// mode, and it is marked used.
     pub(super) fn prove_path_alive(&self, dest: AddressHash) {
         let now = Instant::now();
-        let route_ttl = self.route_ttl();
+        let life = self.path_life();
         self.write_diagnostic(|| {
             let mut paths = self.path_table.lock().unwrap();
             let proved = transport::prove_route_alive(
@@ -110,10 +136,25 @@ impl Shared {
                 &dest,
                 now,
                 |iface| self.interface_mode(iface),
-                lifetimes(route_ttl),
+                life,
             );
             ((), proved)
         });
+    }
+
+    /// How routes live now: a transport node lingers longer than a leaf.
+    pub(super) fn path_life(&self) -> PathLife<'_> {
+        let transport = self.routing.lock().unwrap().forward_packets && !self.local.attached();
+        let linger = if transport {
+            UNUSED_PATH_LINGER
+        } else {
+            UNUSED_PATH_LINGER_LEAF
+        };
+        PathLife {
+            shared: self,
+            full: duration_ticks(self.route_ttl()),
+            linger: duration_ticks(linger),
+        }
     }
 
     pub(super) fn route_ttl(&self) -> Duration {
@@ -160,12 +201,9 @@ impl Shared {
     }
 
     pub(super) fn live_route(&self, dest: AddressHash) -> Option<PathEntry> {
-        let route_ttl = self.route_ttl();
+        let life = self.path_life();
         let paths = self.path_table.lock().unwrap();
-        find_live(&*paths, &dest, |entry| {
-            entry.live_at(Instant::now(), route_ttl)
-        })
-        .copied()
+        find_live(&*paths, &dest, |entry| entry.live_at(Instant::now(), life)).copied()
     }
 
     /// Whether a copy that `table` refused should still move the route to `iface`: the same
@@ -229,7 +267,7 @@ impl Shared {
         let mut evicted = Vec::new();
         let learned = self.write_diagnostic(|| {
             let mut t = self.path_table.lock().unwrap();
-            let route_ttl = self.route_ttl();
+            let life = self.path_life();
             let next = PathEntry {
                 iface,
                 transport,
@@ -243,7 +281,7 @@ impl Shared {
                 dest,
                 next,
                 PATH_TABLE_CAPACITY,
-                lifetimes(route_ttl),
+                life,
                 |gone, _, removal| {
                     evicted.push(gone);
                     if removal == Removal::Evicted {
@@ -264,14 +302,14 @@ impl Shared {
     /// Destinations the address book must keep while it is full: those with an unexpired path
     /// or a live link. Each table is locked in turn, never two at once.
     pub(super) fn destinations_in_use(&self) -> HashSet<AddressHash> {
-        let route_ttl = self.route_ttl();
+        let life = self.path_life();
         let now = Instant::now();
         let mut in_use: HashSet<AddressHash> = self
             .path_table
             .lock()
             .unwrap()
             .iter()
-            .filter(|(_, entry)| entry.live_at(now, route_ttl))
+            .filter(|(_, entry)| entry.live_at(now, life))
             .map(|(destination, _)| *destination)
             .collect();
         in_use.extend(
@@ -287,11 +325,11 @@ impl Shared {
     /// The interface to reach `dest`, if a route is known and unexpired. Evicts an expired
     /// route as a side effect, so a stale path never lingers past a lookup.
     pub(super) fn path_iface(&self, dest: AddressHash) -> Option<InterfaceId> {
-        let route_ttl = self.route_ttl();
+        let life = self.path_life();
         let (iface, expired) = self.write_diagnostic(|| {
             let mut t = self.path_table.lock().unwrap();
             let now = Instant::now();
-            match find_or_forget(&mut *t, &dest, |e| e.live_at(now, route_ttl)) {
+            match find_or_forget(&mut *t, &dest, |e| e.live_at(now, life)) {
                 Lookup::Live(e) => ((Some(e.iface), false), false),
                 Lookup::Expired(_) => ((None, true), true),
                 Lookup::Missing => ((None, false), false),

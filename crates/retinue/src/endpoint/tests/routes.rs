@@ -263,6 +263,10 @@ async fn routes_live_a_week_unless_their_interface_mode_shortens_them() {
     ep.shared.learn_path_at(b, roaming.id(), 1, None, learned);
     ep.shared
         .learn_path_at(c, access_point.id(), 1, None, learned);
+    // Used, so the never-used linger does not cut them short.
+    for entry in ep.shared.path_table.lock().unwrap().values_mut() {
+        entry.used = Some(learned);
+    }
 
     let just_before = |h| learned + hours(h) - Duration::from_millis(1);
     assert!(ep.route_to_at(b, just_before(6)).is_some());

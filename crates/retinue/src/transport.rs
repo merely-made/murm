@@ -32,7 +32,7 @@ mod tests;
 
 #[cfg(test)]
 pub(crate) use array::Position;
-pub(crate) use entries::{LinkBridge, ReverseEntry, RouteEntry};
+pub(crate) use entries::{LinkBridge, ReverseEntry, RouteEntry, RouteLife};
 pub(crate) use memory::{MemoryProfile, TransitMemory};
 pub(crate) use tables::*;
 

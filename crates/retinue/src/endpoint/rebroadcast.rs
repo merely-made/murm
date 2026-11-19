@@ -225,16 +225,13 @@ impl Shared {
             core::iter::from_fn(|| state.table.pop_due(now)).collect()
         };
         let next_hops: Vec<Option<InterfaceId>> = {
-            let (paths, at, ttl) = (
-                self.path_table.lock().unwrap(),
-                Instant::now(),
-                self.route_ttl(),
-            );
+            let life = self.path_life();
+            let (paths, at) = (self.path_table.lock().unwrap(), Instant::now());
             due.iter()
                 .map(|r| {
                     paths
                         .get(&r.destination)
-                        .filter(|e| e.live_at(at, ttl))
+                        .filter(|e| e.live_at(at, life))
                         .map(|e| e.iface)
                 })
                 .collect()

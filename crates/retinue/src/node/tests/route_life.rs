@@ -226,3 +226,23 @@ fn a_full_table_drops_never_used_then_least_recently_used() {
     assert_eq!(held(&node), [2, 4, 5], "then the route used longest ago");
     assert_eq!(node.transport_counters().evicted_routes, 3);
 }
+
+/// The board keeps a never-used route until it expires: it takes no linger (D29).
+#[test]
+fn a_never_used_route_lives_to_its_expiry() {
+    let (mut node, peer) = pair();
+    node.ingest(IFACE, &peer.announce(&blob([0x67; RAND_HASH_LEN]), None), 0);
+    let late = DEFAULT_ROUTE_TTL - 1;
+    assert_eq!(
+        node.route_to(peer.destination(), late)
+            .map(|(_, hops)| hops),
+        Some(0)
+    );
+    assert_eq!(used(&node, peer.destination()), Some(None));
+    let _ = node.poll(late, IFACE, None);
+    assert_eq!(node.route_count(), 1, "a sweep keeps it too");
+    assert!(
+        node.route_to(peer.destination(), DEFAULT_ROUTE_TTL)
+            .is_none()
+    );
+}
