@@ -5,6 +5,7 @@ use std::sync::atomic::Ordering;
 
 use crate::hash::AddressHash;
 use crate::packet::{DestinationType, Packet, PacketType};
+use crate::transport::{MemoryProfile, TransitMemory};
 
 use super::shared::Shared;
 
@@ -106,34 +107,19 @@ impl HashWindow {
     }
 }
 
-/// Hashes remembered in two generations, as RNS keeps its packet hash list and the one before
-/// it (`Transport.py` 832-834): once the current generation holds `capacity`, it becomes the
-/// previous one, so a burst forgets the older half rather than everything.
-pub(super) struct HashList {
-    current: HashSet<AddressHash>,
-    previous: HashSet<AddressHash>,
-    capacity: usize,
-}
+/// Hashes remembered in two generations of `capacity`, with no time limit: the shared
+/// transit memory under the desktop's profile. Its clock is never read, so it runs at zero.
+pub(super) type HashList = TransitMemory<HashSet<AddressHash>, u64>;
 
-impl HashList {
-    pub(super) fn new(capacity: usize) -> Self {
-        Self {
-            current: HashSet::new(),
-            previous: HashSet::new(),
+/// An empty [`HashList`] of `capacity` hashes a generation.
+pub(super) fn hash_list(capacity: usize) -> HashList {
+    TransitMemory::new(
+        MemoryProfile {
             capacity,
-        }
-    }
-
-    /// Record a hash; false if it was already remembered.
-    pub(super) fn insert(&mut self, hash: AddressHash) -> bool {
-        if self.previous.contains(&hash) || !self.current.insert(hash) {
-            return false;
-        }
-        if self.current.len() >= self.capacity {
-            self.previous = core::mem::take(&mut self.current);
-        }
-        true
-    }
+            max_age: None,
+        },
+        0,
+    )
 }
 
 /// Packet hashes held per generation by the endpoint's packet filter.
@@ -148,7 +134,7 @@ impl Shared {
     /// (`Transport.py` 1635-1640). Channel is filtered, unlike RNS: see N10.
     pub(super) fn packet_is_new(&self, context: u8, hash: AddressHash) -> bool {
         if !crate::node::is_deduplicated_link_context(context)
-            || self.packet_filter.lock().unwrap().insert(hash)
+            || self.packet_filter.lock().unwrap().insert(hash, 0)
         {
             return true;
         }

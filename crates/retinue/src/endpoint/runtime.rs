@@ -22,7 +22,7 @@ use super::announces::{AnnounceFreshnessPolicy, AnnounceFreshnessState};
 use super::config::{
     DEFAULT_LINK_MTU, DEFAULT_RELIABLE_INITIAL_RTT_MS, DEFAULT_RELIABLE_MAX_WINDOW,
 };
-use super::dedup::{HashList, LinkPacketMemory, PACKET_HASHES, PATH_REQUEST_TAGS};
+use super::dedup::{LinkPacketMemory, PACKET_HASHES, PATH_REQUEST_TAGS, hash_list};
 use super::discovery::Discovery;
 use super::facts::PeerAnnounce;
 use super::inbound::{Accepted, AcceptedResource, InboundLinks};
@@ -141,8 +141,8 @@ impl Endpoint {
             seen_announces: Mutex::new((HashSet::new(), VecDeque::new())),
             verified_announces: Mutex::new(VerifiedAnnounces::new()),
             link_packets: Mutex::new(LinkPacketMemory::new()),
-            packet_filter: Mutex::new(HashList::new(PACKET_HASHES)),
-            path_request_tags: Mutex::new(HashList::new(PATH_REQUEST_TAGS)),
+            packet_filter: Mutex::new(hash_list(PACKET_HASHES)),
+            path_request_tags: Mutex::new(hash_list(PATH_REQUEST_TAGS)),
             announce_freshness: Mutex::new(AnnounceFreshnessState::new(freshness_policy)?),
             route_ttl_ms: AtomicU64::new(freshness_policy.route_ttl_ticks()),
             announce_admission: Mutex::new(

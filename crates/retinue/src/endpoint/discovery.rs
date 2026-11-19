@@ -180,7 +180,7 @@ pub(super) fn handle_path_request(
 ) {
     let fresh = request
         .unique_tag()
-        .is_some_and(|tag| shared.path_request_tags.lock().unwrap().insert(tag));
+        .is_some_and(|tag| shared.path_request_tags.lock().unwrap().insert(tag, 0));
     if !fresh {
         shared
             .routing_stats

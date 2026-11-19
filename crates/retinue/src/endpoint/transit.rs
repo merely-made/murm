@@ -11,6 +11,9 @@ use crate::hash::AddressHash;
 use crate::link;
 use crate::packet::{MTU, Packet, PacketType};
 
+use crate::transport::{self, BridgeRecord, record_bridge, record_reverse};
+
+use super::announces::duration_ticks;
 use super::interface::{InterfaceId, QueueAdmission};
 use super::queue::TrafficClass;
 use super::routing::RoutingPolicy;
@@ -34,25 +37,13 @@ pub(super) const LINK_TRANSPORT_CAPACITY: usize = 4096;
 #[cfg(test)]
 pub(super) const LINK_TRANSPORT_CAPACITY: usize = 4;
 
-/// A link carried through this node: its two interfaces, and whether its destination has
-/// proved it yet.
-#[derive(Clone, Copy, Debug)]
-pub(super) struct LinkBridge {
-    pub(super) from: InterfaceId,
-    pub(super) out: InterfaceId,
-    /// The destination the request named, whose identity signs the proof.
-    pub(super) destination: AddressHash,
-    pub(super) seen: Instant,
-    /// When an unproved link lapses; `None` once the destination's proof has passed.
-    pub(super) proof_deadline: Option<Instant>,
-}
+/// A link carried through this node, on the desktop's clock.
+pub(super) type LinkBridge = transport::LinkBridge<Instant>;
 
 impl LinkBridge {
-    pub(super) fn lapsed(&self, now: Instant) -> bool {
-        self.proof_deadline.map_or(
-            now.duration_since(self.seen) >= LINK_TRANSPORT_TTL,
-            |deadline| now >= deadline,
-        )
+    /// Whether the bridge has lapsed at `now`, under [`LINK_TRANSPORT_TTL`].
+    pub(super) fn lapsed_at(&self, now: Instant) -> bool {
+        self.lapsed(now, duration_ticks(LINK_TRANSPORT_TTL))
     }
 
     /// Whether `pkt`, heard on `iface`, may cross: `None` if not, else whether it is the proof
@@ -91,13 +82,8 @@ pub(super) const REVERSE_TABLE_CAPACITY: usize = 4096;
 #[cfg(test)]
 pub(super) const REVERSE_TABLE_CAPACITY: usize = 4;
 
-/// The way back for a carried packet's proof.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub(super) struct ReverseEntry {
-    received: InterfaceId,
-    outbound: InterfaceId,
-    pub(super) at: Instant,
-}
+/// The way back for a carried packet's proof, on the desktop's clock.
+pub(super) type ReverseEntry = transport::ReverseEntry<Instant>;
 
 /// Make room for one more entry in a bounded table: drop what `expired` says has lapsed,
 /// then, still full, the entry with the smallest `age`, which is returned.
@@ -142,38 +128,23 @@ impl Shared {
         let now = Instant::now();
         let mut table = self.reverse_table.lock().unwrap();
         let mut displaced = Vec::new();
-        if let Some(entry) = table.remove(&packet) {
-            displaced.push((packet, entry));
-        } else if table.len() >= REVERSE_TABLE_CAPACITY {
-            table.retain(|key, entry| {
-                if now.duration_since(entry.at) >= REVERSE_TIMEOUT {
-                    displaced.push((*key, *entry));
-                    false
-                } else {
-                    true
-                }
-            });
-            if table.len() >= REVERSE_TABLE_CAPACITY
-                && let Some(oldest) = table
-                    .iter()
-                    .min_by_key(|(_, entry)| entry.at)
-                    .map(|(key, _)| *key)
-            {
-                displaced.push((oldest, table.remove(&oldest).unwrap()));
-            }
-        }
-        table.insert(
+        let entry = ReverseEntry {
+            received,
+            outbound,
+            at: now,
+        };
+        let timeout = duration_ticks(REVERSE_TIMEOUT);
+        record_reverse(
+            &mut *table,
             packet,
-            ReverseEntry {
-                received,
-                outbound,
-                at: now,
-            },
+            entry,
+            REVERSE_TABLE_CAPACITY,
+            timeout,
+            |gone| displaced.push(gone),
         );
         let accepted = send();
         if !accepted {
-            table.remove(&packet);
-            table.extend(displaced);
+            transport::restore_reverse(&mut *table, &packet, displaced.into_iter().rev());
         }
         accepted
     }
@@ -186,19 +157,17 @@ impl Shared {
         packet: AddressHash,
         arrived: InterfaceId,
     ) -> Option<InterfaceId> {
-        let entry = self.reverse_table.lock().unwrap().remove(&packet)?;
-        (entry.at.elapsed() < REVERSE_TIMEOUT && entry.outbound == arrived)
-            .then_some(entry.received)
+        let mut table = self.reverse_table.lock().unwrap();
+        let timeout = duration_ticks(REVERSE_TIMEOUT);
+        transport::take_reverse(&mut *table, &packet, arrived, Instant::now(), timeout)
     }
 }
 
 impl Shared {
     /// Drop the return paths that run through `iface`.
     pub(super) fn forget_reverse_via(&self, iface: InterfaceId) {
-        self.reverse_table
-            .lock()
-            .unwrap()
-            .retain(|_, entry| entry.received != iface && entry.outbound != iface);
+        let mut table = self.reverse_table.lock().unwrap();
+        transport::forget_interface(&mut *table, iface, |entry| [entry.received, entry.outbound]);
     }
 }
 
@@ -326,33 +295,20 @@ fn admit_link_request(
     };
     let mut bridges = shared.link_transport.lock().unwrap();
     // Prune before inserting, so the work tracks the requests that cause growth.
-    bridges.retain(|_, bridge| !bridge.lapsed(now));
-    if let Some(existing) = bridges.get_mut(&link_id) {
-        // A retransmitted request: an unproved bridge follows it, a validated one stands.
-        if existing.proof_deadline.is_some() {
-            *existing = bridge;
-        }
-        return BridgeAdmission::Known;
+    let ttl = duration_ticks(LINK_TRANSPORT_TTL);
+    transport::sweep_bridges(&mut *bridges, now, ttl, |_, _| {});
+    let idle = duration_ticks(LINK_TRANSPORT_IDLE);
+    match record_bridge(
+        &mut *bridges,
+        link_id,
+        bridge,
+        LINK_TRANSPORT_CAPACITY,
+        idle,
+    ) {
+        BridgeRecord::Known => BridgeAdmission::Known,
+        BridgeRecord::New { .. } => BridgeAdmission::New,
+        BridgeRecord::Refused => BridgeAdmission::Refused,
     }
-    if bridges.len() >= LINK_TRANSPORT_CAPACITY {
-        let Some(stalest) = bridges
-            .iter()
-            .filter(|(_, bridge)| bridge.proof_deadline.is_some())
-            .min_by_key(|(_, bridge)| bridge.seen)
-            .or_else(|| {
-                bridges
-                    .iter()
-                    .filter(|(_, bridge)| now.duration_since(bridge.seen) >= LINK_TRANSPORT_IDLE)
-                    .min_by_key(|(_, bridge)| bridge.seen)
-            })
-            .map(|(id, _)| *id)
-        else {
-            return BridgeAdmission::Refused;
-        };
-        bridges.remove(&stalest);
-    }
-    bridges.insert(link_id, bridge);
-    BridgeAdmission::New
 }
 
 /// Re-address a forwarded packet for the interface it leaves on (stripping our transport

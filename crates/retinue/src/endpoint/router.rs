@@ -9,6 +9,7 @@ use tokio::sync::mpsc;
 use crate::link::{self, Inbound, LinkMode, LinkTrailer};
 use crate::link_liveness::Liveness;
 use crate::packet::{DestinationType, Packet, PacketType};
+use crate::transport::{find_live, refresh_bridge};
 
 use super::announces::admit_verified_announce;
 use super::dedup::LinkPacketAdmission;
@@ -103,8 +104,8 @@ pub(super) fn dispatch(
         let bridged = {
             let bridges = shared.link_transport.lock().unwrap();
             let now = Instant::now();
-            match bridges.get(&pkt.destination) {
-                Some(bridge) if !bridge.lapsed(now) => {
+            match find_live(&*bridges, &pkt.destination, |bridge| !bridge.lapsed_at(now)) {
+                Some(bridge) => {
                     let Some(proves) = bridge.admit(iface, &pkt, &shared.address_book) else {
                         shared
                             .routing_stats
@@ -145,14 +146,9 @@ pub(super) fn dispatch(
                     let link_id = pkt.destination;
                     let out = if iface == a { b } else { a };
                     // As in RNS, the bridge is validated as its proof goes out, not before.
-                    if forward_on(shared, out, pkt, &policy)
-                        && let Some(bridge) =
-                            shared.link_transport.lock().unwrap().get_mut(&link_id)
-                    {
-                        if proves {
-                            bridge.proof_deadline = None;
-                        }
-                        bridge.seen = Instant::now();
+                    if forward_on(shared, out, pkt, &policy) {
+                        let mut bridges = shared.link_transport.lock().unwrap();
+                        refresh_bridge(&mut *bridges, &link_id, Instant::now(), proves);
                     }
                 }
                 None => forward(shared, iface, pkt, &policy),

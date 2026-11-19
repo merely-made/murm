@@ -15,6 +15,10 @@ pub(crate) enum Removal {
 }
 
 /// What a keyed lookup found.
+#[cfg_attr(
+    not(feature = "tokio"),
+    allow(dead_code, reason = "used by the endpoint")
+)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) enum Lookup<V> {
     Live(V),
@@ -33,6 +37,10 @@ pub(crate) fn find_live<'a, V, S: Store<V>>(
 }
 
 /// The entry for `key` if `live` accepts it; one it refuses is removed and reported.
+#[cfg_attr(
+    not(feature = "tokio"),
+    allow(dead_code, reason = "used by the endpoint")
+)]
 pub(crate) fn find_or_forget<V: Copy, S: Store<V>>(
     store: &mut S,
     key: &AddressHash,

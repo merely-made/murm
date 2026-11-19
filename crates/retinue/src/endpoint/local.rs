@@ -16,6 +16,7 @@ use crate::announce_admission::AnnounceIngressPolicy;
 use crate::iface::hdlc;
 use crate::node::InterfaceMode;
 use crate::packet::{HeaderType, Packet, PacketType};
+use crate::transport;
 
 use super::interface::InterfaceId;
 use super::mtu::HwMtu;
@@ -143,13 +144,12 @@ impl Shared {
             drop(links);
             let mut paths = self.path_table.lock().unwrap();
             let before = paths.len();
-            paths.retain(|_, entry| entry.iface != id);
+            transport::forget_interface(&mut *paths, id, |entry| [entry.iface, entry.iface]);
             let culled = paths.len() != before;
             drop(paths);
-            self.link_transport
-                .lock()
-                .unwrap()
-                .retain(|_, bridge| bridge.from != id && bridge.out != id);
+            let mut bridges = self.link_transport.lock().unwrap();
+            transport::forget_interface(&mut *bridges, id, |bridge| [bridge.from, bridge.out]);
+            drop(bridges);
             let changed = culled || !lost.is_empty();
             (lost, changed)
         });

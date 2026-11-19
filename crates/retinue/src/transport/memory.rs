@@ -20,9 +20,6 @@ pub(crate) trait Generation: Default {
     /// Add a hash not already held. A bounded set that is full drops it.
     fn add(&mut self, hash: AddressHash);
     fn len(&self) -> usize;
-    fn is_empty(&self) -> bool {
-        self.len() == 0
-    }
     fn clear(&mut self);
 }
 

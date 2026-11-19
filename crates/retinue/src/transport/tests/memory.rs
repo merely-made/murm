@@ -1,6 +1,7 @@
 //! The transit duplicate memory, against both generation containers.
 
 use super::*;
+use crate::transport::memory::Generation;
 
 const BOARD: MemoryProfile = MemoryProfile {
     capacity: 2,
@@ -62,7 +63,7 @@ fn time_turns_a_generation_over_and_twice_it_clears_both<G: Generation>() {
         "turned over at 60, still remembered"
     );
     assert!(
-        memory.current.is_empty(),
+        memory.current.len() == 0,
         "the check found it in the previous generation"
     );
     assert!(memory.insert(key(2), 100));

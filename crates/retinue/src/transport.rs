@@ -9,13 +9,13 @@
 //! Lookups check age themselves; sweeping is the driver's call (D18). Capacities and time
 //! limits are arguments, so each driver states its own profile (D10).
 
-// The drivers adopt this module in later T2 stages; until then only its tests use it.
+// The board's and desktop's drivers need `alloc`; the floor builds the tables but holds none.
 #![cfg_attr(
-    not(test),
+    not(feature = "alloc"),
     allow(
         dead_code,
         unused_imports,
-        reason = "Node and Endpoint adopt these tables in T2 stages 2 and 3"
+        reason = "the drivers that use these tables need alloc"
     )
 )]
 
@@ -30,9 +30,10 @@ mod tables;
 #[cfg(test)]
 mod tests;
 
+#[cfg(test)]
 pub(crate) use array::Position;
 pub(crate) use entries::{LinkBridge, ReverseEntry, RouteEntry};
-pub(crate) use memory::{Generation, MemoryProfile, TransitMemory};
+pub(crate) use memory::{MemoryProfile, TransitMemory};
 pub(crate) use tables::*;
 
 /// An interface number, as both drivers name one.

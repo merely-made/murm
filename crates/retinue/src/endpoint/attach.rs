@@ -8,6 +8,7 @@ use std::sync::atomic::{AtomicBool, AtomicU64, AtomicUsize, Ordering};
 
 use crate::ifac::Ifac;
 use crate::node::InterfaceMode;
+use crate::transport;
 
 use super::iface_stats::InterfaceStats;
 use super::interface::{Iface, Interface, InterfaceId};
@@ -132,13 +133,12 @@ impl Shared {
             let routes_removed = {
                 let mut paths = self.path_table.lock().unwrap();
                 let before = paths.len();
-                paths.retain(|_, entry| entry.iface != id);
+                transport::forget_interface(&mut *paths, id, |entry| [entry.iface, entry.iface]);
                 paths.len() != before
             };
-            self.link_transport
-                .lock()
-                .unwrap()
-                .retain(|_, bridge| bridge.from != id && bridge.out != id);
+            let mut bridges = self.link_transport.lock().unwrap();
+            transport::forget_interface(&mut *bridges, id, |bridge| [bridge.from, bridge.out]);
+            drop(bridges);
             self.forget_reverse_via(id);
             self.forget_rebroadcasts_on(id);
             self.announce_admission.lock().unwrap().forget_interface(id);

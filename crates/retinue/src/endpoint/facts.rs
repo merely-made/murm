@@ -8,6 +8,7 @@ use std::time::{Duration, Instant};
 
 use crate::hash::AddressHash;
 use crate::identity::Identity;
+use crate::transport::{Lookup, find_or_forget};
 
 use super::interface::InterfaceId;
 use super::runtime::Endpoint;
@@ -104,13 +105,10 @@ impl Endpoint {
         let route_ttl = self.shared.route_ttl();
         self.shared.write_diagnostic(|| {
             let mut t = self.shared.path_table.lock().unwrap();
-            match t.get(&dest) {
-                Some(e) if e.live_at(now, route_ttl) => (Some((e.iface, e.hops)), false),
-                Some(_) => {
-                    t.remove(&dest);
-                    (None, true)
-                }
-                None => (None, false),
+            match find_or_forget(&mut *t, &dest, |e| e.live_at(now, route_ttl)) {
+                Lookup::Live(e) => (Some((e.iface, e.hops)), false),
+                Lookup::Expired(_) => (None, true),
+                Lookup::Missing => (None, false),
             }
         })
     }
