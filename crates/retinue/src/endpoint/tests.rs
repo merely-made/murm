@@ -11,6 +11,7 @@ mod rebroadcast;
 mod reliable;
 mod routes;
 mod transit;
+mod transport_core;
 
 use alloc::vec;
 use alloc::vec::Vec;

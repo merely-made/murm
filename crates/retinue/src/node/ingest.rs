@@ -79,14 +79,14 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
         }
 
         self.expire_transport_state(now);
-        if packet.packet_type == PacketType::Proof
-            && self.forward_reverse_proof(interface, packet, &mut actions)
-        {
-            return actions;
-        }
         if packet.packet_type != PacketType::Announce
             && (self.forward_bridged_packet(interface, packet, now, &mut actions)
                 || self.forward_transport_packet(interface, packet, now, &mut actions))
+        {
+            return actions;
+        }
+        if packet.packet_type == PacketType::Proof
+            && self.forward_reverse_proof(interface, packet, &mut actions)
         {
             return actions;
         }

@@ -27,6 +27,7 @@ mod resources;
 mod routes;
 mod stamps;
 mod transit;
+mod transport_core;
 
 const IFACE: InterfaceId = 0;
 
