@@ -233,10 +233,9 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
         }
         // Only a request that will be sent takes a bridge slot: an unsent one would hold it,
         // or evict another, until its deadline. A full action list refuses the send below.
-        if packet.packet_type == PacketType::LinkRequest
-            && actions.len() < ACTIONS
-            && let Ok(link_id) = link::link_id(packet)
-        {
+        if packet.packet_type == PacketType::LinkRequest && actions.len() < ACTIONS {
+            // A short request's link id covers all its bytes; its destination rejects it.
+            let link_id = link::link_id(packet).unwrap_or(hash);
             let proof_deadline = now
                 .saturating_add(transit_proof_timeout(route.hops))
                 .saturating_add(self.first_hop_airtime(route.interface));

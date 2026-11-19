@@ -205,9 +205,9 @@ pub(super) fn forward(
         // A link request establishes a bridge for its proof and later link data.
         let mut pkt = pkt;
         let mut admitted = None;
-        if pkt.packet_type == PacketType::LinkRequest
-            && let Ok(link_id) = link::link_id(&pkt)
-        {
+        if pkt.packet_type == PacketType::LinkRequest {
+            // A short request's link id covers all its bytes; its destination rejects it.
+            let link_id = link::link_id(&pkt).unwrap_or(hash);
             match admit_link_request(shared, from, out, link_id, &mut pkt) {
                 BridgeAdmission::Refused => {
                     shared

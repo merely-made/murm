@@ -198,3 +198,39 @@ fn forwarded_count_tracks_only_accepted_output() {
         );
     }
 }
+
+#[test]
+fn short_link_requests_are_bridged_and_carried() {
+    for len in [1, 32, 63] {
+        let mut relay = relay();
+        let (_, destination) = pair();
+        relay.ingest(2, &destination.announce(&blob([2; RAND_HASH_LEN]), None), 0);
+        let mut request = packet(destination.destination());
+        request.destination_type = crate::packet::DestinationType::Single;
+        request.packet_type = PacketType::LinkRequest;
+        request.header_type = HeaderType::Type2;
+        request.transport = Some(relay.identity.hash());
+        request.payload = vec![0x76; len];
+        let id = request.hash();
+        let carried = sent(&relay.ingest(1, &request, 1)).expect("short request is carried");
+        assert_eq!(relay.bridges.len(), 1, "short request has a bridge");
+        let bridge = relay.bridges[0];
+        assert_eq!((bridge.link_id, bridge.from, bridge.out), (id, 1, 2));
+        assert_eq!(bridge.destination, request.destination);
+        assert!(bridge.proof_deadline.is_some());
+        assert!(relay.reverse.is_empty());
+        assert_eq!(carried.payload, request.payload);
+        assert!(
+            link::accept(
+                &carried,
+                &destination.identity,
+                &[0x77; 64],
+                LinkTrailer {
+                    mode: LinkMode::Aes256Cbc,
+                    mtu: 500,
+                }
+            )
+            .is_err()
+        );
+    }
+}

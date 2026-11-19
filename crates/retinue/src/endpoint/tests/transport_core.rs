@@ -231,3 +231,44 @@ async fn forwarded_count_tracks_only_accepted_output() {
         );
     }
 }
+
+#[tokio::test]
+async fn short_link_requests_are_bridged_and_carried() {
+    for len in [1, 32, 63] {
+        let ep = Endpoint::new(PrivateIdentity::from_secret_bytes(&[0x71; 64]));
+        let a = ep.attach_interface();
+        let b = ep.attach_interface();
+        ep.enable_routing();
+        let dest = AddressHash::from_bytes([0x76; 16]);
+        ep.shared.learn_path(dest, b.id(), 0, None);
+        let mut request = single_packet(dest, vec![0x76; len]);
+        request.packet_type = PacketType::LinkRequest;
+        request.header_type = HeaderType::Type2;
+        request.transport = Some(ep.identity().hash());
+        let id = request.hash();
+        route(&ep.shared, a.id(), request.clone());
+        let carried = b.outbound.queues.pop().expect("short request is carried");
+        let bridges = ep.shared.link_transport.lock().unwrap();
+        assert_eq!(bridges.len(), 1, "short request has a bridge");
+        let bridge = bridges
+            .get(&id)
+            .expect("id is derived from the short request");
+        assert_eq!((bridge.from, bridge.out), (a.id(), b.id()));
+        assert_eq!(bridge.destination, dest);
+        assert!(bridge.proof_deadline.is_some());
+        assert!(ep.shared.reverse_table.lock().unwrap().is_empty());
+        assert_eq!(carried.payload, request.payload);
+        assert!(
+            link::accept(
+                &carried,
+                &PrivateIdentity::from_secret_bytes(&[0x77; 64]),
+                &[0x78; 64],
+                LinkTrailer {
+                    mode: LinkMode::Aes256Cbc,
+                    mtu: 500,
+                }
+            )
+            .is_err()
+        );
+    }
+}

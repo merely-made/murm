@@ -38,6 +38,11 @@ obtained over Reticulum. Copyright (c) 2016-2026 Mark Qvist, Reticulum License.
 The Rust implementation uses bounded jobs and configurable capacities; Node
 stamp generation receives caller-owned entropy and does not acquire a clock.
 
+Short carried link requests derive an id from all available request bytes and
+take an unvalidated bridge slot. RNS 1.6.0 `RNS/Link.py` 421-427 and
+`RNS/Transport.py` 2364-2374. Targets: `src/node/transit.rs`,
+`src/endpoint/transit.rs`.
+
 The earlier entries below were read from RNS 1.5.7 (PyPI wheel `rns-1.5.7-py3-none-any.whl`,
 SHA-256 0e4aaf8cc47f770da34572d2215b45fea900e104b009551600eb9741a41faddf). The
 behaviour was adopted and the Rust is written for this crate; no Python was
