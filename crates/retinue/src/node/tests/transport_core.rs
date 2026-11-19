@@ -111,3 +111,59 @@ fn carried_packets_filter_duplicates_only_after_bridge_admission() {
         );
     }
 }
+
+#[test]
+fn carried_links_refresh_only_on_accepted_send() {
+    for refusal in [
+        "accepted",
+        "full",
+        "hops",
+        "size",
+        "policy",
+        "duplicate",
+        "proof",
+        "proof-full",
+    ] {
+        let mut relay = relay();
+        let id = AddressHash::from_bytes([0x74; 16]);
+        let proves = refusal.starts_with("proof");
+        assert!(relay.remember_bridge(id, id, 1, 2, 1000, 10));
+        if !proves {
+            relay.bridges[0].proof_deadline = None;
+        }
+        let mut data = packet(id);
+        if proves {
+            data.packet_type = PacketType::Proof;
+            data.context = link::CTX_LRPROOF;
+        }
+        let from = if proves { 2 } else { 1 };
+        let mut actions = Actions::new();
+        match refusal {
+            "full" | "proof-full" => {
+                for _ in 0..8 {
+                    actions.push(Action::Send {
+                        interface: 3,
+                        packet: data.clone(),
+                    });
+                }
+            }
+            "hops" => data.hops = relay.transport.max_hops - 1,
+            "size" => data.payload = vec![0; relay.logical_mtu as usize],
+            "policy" => relay.transport.relay_packets = false,
+            "duplicate" => assert!(relay.transit_is_new(&data, 99)),
+            _ => {}
+        }
+        relay.forward_bridged_packet(from, &data, 100, &mut actions);
+        let accepted = matches!(refusal, "accepted" | "proof");
+        assert_eq!(
+            relay.bridges[0].seen,
+            if accepted { 100 } else { 10 },
+            "{refusal}"
+        );
+        assert_eq!(
+            relay.bridges[0].proof_deadline.is_none(),
+            !proves || accepted,
+            "{refusal}"
+        );
+    }
+}

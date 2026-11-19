@@ -101,9 +101,9 @@ pub(super) fn dispatch(
         // since the two ends may address it differently. Traffic from either end refreshes
         // the bridge; a third interface can neither use nor refresh it.
         let bridged = {
-            let mut bridges = shared.link_transport.lock().unwrap();
+            let bridges = shared.link_transport.lock().unwrap();
             let now = Instant::now();
-            match bridges.get_mut(&pkt.destination) {
+            match bridges.get(&pkt.destination) {
                 Some(bridge) if !bridge.lapsed(now) => {
                     let Some(proves) = bridge.admit(iface, &pkt, &shared.address_book) else {
                         shared
@@ -112,7 +112,6 @@ pub(super) fn dispatch(
                             .fetch_add(1, Ordering::Relaxed);
                         return;
                     };
-                    bridge.seen = now;
                     Some((bridge.from, bridge.out, proves))
                 }
                 _ => None,
@@ -147,11 +146,13 @@ pub(super) fn dispatch(
                     let out = if iface == a { b } else { a };
                     // As in RNS, the bridge is validated as its proof goes out, not before.
                     if forward_on(shared, out, pkt, &policy)
-                        && proves
                         && let Some(bridge) =
                             shared.link_transport.lock().unwrap().get_mut(&link_id)
                     {
-                        bridge.proof_deadline = None;
+                        if proves {
+                            bridge.proof_deadline = None;
+                        }
+                        bridge.seen = Instant::now();
                     }
                 }
                 None => forward(shared, iface, pkt, &policy),

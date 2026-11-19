@@ -120,3 +120,81 @@ async fn carried_packets_filter_duplicates_only_after_bridge_admission() {
         );
     }
 }
+
+#[tokio::test]
+async fn carried_links_refresh_only_on_accepted_send() {
+    for refusal in [
+        "accepted",
+        "full",
+        "hops",
+        "size",
+        "policy",
+        "egress",
+        "offline",
+        "duplicate",
+        "proof",
+        "proof-full",
+    ] {
+        let ep = Endpoint::new(PrivateIdentity::from_secret_bytes(&[0x71; 64]));
+        let a = ep.attach_interface();
+        let b = ep.attach_interface();
+        ep.enable_routing();
+        let id = AddressHash::from_bytes([0x74; 16]);
+        let proves = refusal.starts_with("proof");
+        let before = Instant::now() - Duration::from_secs(1);
+        ep.shared.link_transport.lock().unwrap().insert(
+            id,
+            LinkBridge {
+                from: a.id(),
+                out: b.id(),
+                destination: id,
+                seen: before,
+                proof_deadline: proves.then(|| Instant::now() + Duration::from_secs(10)),
+            },
+        );
+        let mut data = single_packet(id, vec![0x71; 48]);
+        data.destination_type = DestinationType::Link;
+        if proves {
+            data.packet_type = PacketType::Proof;
+            data.context = link::CTX_LRPROOF;
+        }
+        let (from, out) = if proves { (&b, &a) } else { (&a, &b) };
+        match refusal {
+            "full" | "proof-full" => {
+                while ep
+                    .shared
+                    .try_send_on_class(out.id(), data.clone(), TrafficClass::Transit)
+                {
+                }
+            }
+            "hops" => data.hops = MAX_HOPS - 1,
+            "size" => data.payload = vec![0; 600],
+            "policy" => ep.shared.routing.lock().unwrap().forward_packets = false,
+            "egress" => {
+                ep.shared.routing.lock().unwrap().allowed_egress =
+                    super::super::routing::InterfaceSelector::None
+            }
+            "offline" => ep
+                .shared
+                .interfaces
+                .lock()
+                .unwrap()
+                .iter()
+                .find(|i| i.id == out.id())
+                .unwrap()
+                .online
+                .store(false, Ordering::Release),
+            "duplicate" => assert!(ep.shared.packet_is_new(data.context, data.hash())),
+            _ => {}
+        }
+        route(&ep.shared, from.id(), data);
+        let accepted = matches!(refusal, "accepted" | "proof");
+        let bridge = ep.shared.link_transport.lock().unwrap()[&id];
+        assert_eq!(bridge.seen > before, accepted, "{refusal}");
+        assert_eq!(
+            bridge.proof_deadline.is_none(),
+            !proves || accepted,
+            "{refusal}"
+        );
+    }
+}
