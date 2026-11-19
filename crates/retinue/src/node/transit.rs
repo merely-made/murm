@@ -319,6 +319,11 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
         if interface != entry.outbound {
             return false;
         }
+        if packet.hops.saturating_add(1) >= self.transport.max_hops {
+            self.transport_counters.hop_limit_dropped =
+                self.transport_counters.hop_limit_dropped.saturating_add(1);
+            return true;
+        }
         let mut forwarded = packet.clone();
         forwarded.hops = forwarded.hops.saturating_add(1);
         if forwarded.encoded_len() > self.logical_mtu as usize {

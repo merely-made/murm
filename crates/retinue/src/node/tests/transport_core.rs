@@ -234,3 +234,37 @@ fn short_link_requests_are_bridged_and_carried() {
         );
     }
 }
+
+#[test]
+fn reverse_proofs_keep_header_and_obey_hop_ceiling() {
+    for hops in [2, 3] {
+        let mut relay = relay();
+        relay.transport.max_hops = 4;
+        let id = AddressHash::from_bytes([0x79; 16]);
+        relay
+            .reverse
+            .push(ReverseEntry {
+                packet: id,
+                received: 1,
+                outbound: 2,
+                seen: 0,
+            })
+            .unwrap();
+        let mut proof = packet(id);
+        proof.packet_type = PacketType::Proof;
+        proof.hops = hops;
+        let actions = relay.ingest(2, &proof, 1);
+        assert!(relay.reverse.is_empty());
+        if hops == 2 {
+            let mut expected = proof.clone();
+            expected.hops += 1;
+            assert_eq!(sent(&actions).unwrap().encode(), expected.encode());
+        } else {
+            assert!(
+                actions.is_empty(),
+                "proof at the forwarding ceiling is refused"
+            );
+            assert_eq!(relay.transport_counters().hop_limit_dropped, 1);
+        }
+    }
+}

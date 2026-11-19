@@ -10,7 +10,7 @@ use crate::hash::AddressHash;
 use crate::link;
 use crate::packet::{MTU, Packet, PacketType};
 
-use super::interface::InterfaceId;
+use super::interface::{InterfaceId, QueueAdmission};
 use super::queue::TrafficClass;
 use super::routing::RoutingPolicy;
 use super::shared::Shared;
@@ -324,8 +324,28 @@ fn admit_link_request(
 pub(super) fn forward_on(
     shared: &Arc<Shared>,
     out: InterfaceId,
+    pkt: Packet,
+    policy: &RoutingPolicy,
+) -> bool {
+    carry_on(shared, out, pkt, policy, true)
+}
+
+/// Carry a reverse proof with its original header and transport id.
+pub(super) fn forward_reverse_proof_on(
+    shared: &Arc<Shared>,
+    out: InterfaceId,
+    pkt: Packet,
+    policy: &RoutingPolicy,
+) -> bool {
+    carry_on(shared, out, pkt, policy, false)
+}
+
+fn carry_on(
+    shared: &Arc<Shared>,
+    out: InterfaceId,
     mut pkt: Packet,
     policy: &RoutingPolicy,
+    readdress: bool,
 ) -> bool {
     if !policy.allowed_egress.allows(out) {
         shared
@@ -342,9 +362,16 @@ pub(super) fn forward_on(
         return false;
     }
     pkt.hops += 1;
-    pkt.header_type = crate::packet::HeaderType::Type1;
-    pkt.transport = None;
-    let accepted = shared.try_send_on_class(out, pkt, TrafficClass::Transit);
+    let accepted = if readdress {
+        pkt.header_type = crate::packet::HeaderType::Type1;
+        pkt.transport = None;
+        shared.try_send_on_class(out, pkt, TrafficClass::Transit)
+    } else {
+        matches!(
+            shared.push_to(out, pkt, TrafficClass::Transit),
+            QueueAdmission::Queued
+        )
+    };
     if accepted {
         shared
             .routing_stats

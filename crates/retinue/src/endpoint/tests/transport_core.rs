@@ -272,3 +272,32 @@ async fn short_link_requests_are_bridged_and_carried() {
         );
     }
 }
+
+#[tokio::test]
+async fn reverse_proofs_keep_header_and_obey_hop_ceiling() {
+    for hops in [2, 3] {
+        let ep = Endpoint::new(PrivateIdentity::from_secret_bytes(&[0x71; 64]));
+        let a = ep.attach_interface();
+        let b = ep.attach_interface();
+        ep.enable_routing();
+        ep.shared.routing.lock().unwrap().max_hops = 4;
+        let id = AddressHash::from_bytes([0x79; 16]);
+        ep.shared.remember_reverse(id, a.id(), b.id());
+        // A matching path must not stamp a reverse proof with its transport id.
+        ep.shared
+            .learn_path(id, a.id(), 0, Some(AddressHash::from_bytes([0x7A; 16])));
+        let mut proof = single_packet(id, vec![0x71; 48]);
+        proof.packet_type = PacketType::Proof;
+        proof.hops = hops;
+        route(&ep.shared, b.id(), proof.clone());
+        assert!(ep.shared.reverse_table.lock().unwrap().is_empty());
+        if hops == 2 {
+            let mut expected = proof;
+            expected.hops += 1;
+            assert_eq!(a.outbound.queues.pop().unwrap().encode(), expected.encode());
+        } else {
+            assert!(a.outbound.queues.pop().is_none());
+            assert_eq!(ep.routing_counters().hop_limit_dropped, 1);
+        }
+    }
+}

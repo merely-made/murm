@@ -26,7 +26,7 @@ use super::resource_session::register_resource_session;
 use super::shared::{LinkKind, Shared};
 use super::single::deliver_single;
 use super::stream::{StreamFault, register_stream};
-use super::transit::{forward, forward_on};
+use super::transit::{forward, forward_on, forward_reverse_proof_on};
 use super::watchdog::note_link_inbound;
 
 /// Dispatch one inbound packet that arrived on `iface`.
@@ -328,7 +328,7 @@ pub(super) fn dispatch(
             if !matches!(pkt.context, link::CTX_LRPROOF | link::CTX_RESOURCE_PRF) {
                 if let Some(back) = shared.take_reverse(pkt.destination, iface) {
                     if policy.accepts_transit_from(iface) {
-                        forward_on(shared, back, pkt, &policy);
+                        forward_reverse_proof_on(shared, back, pkt, &policy);
                     } else {
                         shared
                             .routing_stats
