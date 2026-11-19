@@ -474,6 +474,49 @@ fn a_relay_leaves_on_every_permitted_interface_the_arrival_one_included() {
 }
 
 #[test]
+fn with_carriage_off_a_packet_is_not_transit() {
+    let mut relay = relay();
+    relay.transport.relay_packets = false;
+    let id = AddressHash::from_bytes([0x7b; 16]);
+    relay
+        .reverse
+        .push(Keyed {
+            key: id,
+            entry: ReverseEntry {
+                received: 2,
+                outbound: 1,
+                at: 0,
+            },
+        })
+        .unwrap();
+    let reverse = relay.reverse.clone();
+    let link_id = AddressHash::from_bytes([0x7d; 16]);
+    assert!(relay.remember_bridge(link_id, link_id, 1, 2, 1000, 0));
+    relay.bridges[0].entry.proof_deadline = None;
+    let bridges = relay.bridges.clone();
+    let (_, destination) = pair();
+    relay.ingest(2, &destination.announce(&blob([5; RAND_HASH_LEN]), None), 0);
+    let counters = relay.transport_counters();
+
+    let mut proof = packet(id);
+    proof.packet_type = PacketType::Proof;
+    let mut data = packet(destination.destination());
+    data.destination_type = crate::packet::DestinationType::Single;
+    data.header_type = HeaderType::Type2;
+    data.transport = Some(relay.identity.hash());
+    for packet in [proof, data, packet(link_id)] {
+        assert!(sent(&relay.ingest(1, &packet, 1)).is_none());
+    }
+    assert_eq!(
+        relay.reverse, reverse,
+        "a proof's return path is kept, nor a new one recorded"
+    );
+    assert_eq!(relay.bridges, bridges);
+    // The board counts nothing for it.
+    assert_eq!(relay.transport_counters(), counters);
+}
+
+#[test]
 fn reverse_proofs_keep_header_and_obey_hop_ceiling() {
     for hops in [2, 3] {
         let mut relay = relay();

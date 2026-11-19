@@ -173,6 +173,20 @@ impl Shared {
         let timeout = duration_ticks(REVERSE_TIMEOUT);
         transport::take_reverse(&mut *table, &packet, arrived, Instant::now(), timeout)
     }
+
+    /// What [`Self::take_reverse`] would yield, leaving the return path in place.
+    pub(super) fn peek_reverse(
+        &self,
+        packet: AddressHash,
+        arrived: InterfaceId,
+    ) -> Option<InterfaceId> {
+        let table = self.reverse_table.lock().unwrap();
+        let (now, timeout) = (Instant::now(), duration_ticks(REVERSE_TIMEOUT));
+        transport::find_live(&*table, &packet, |entry| {
+            !entry.expired(now, timeout) && entry.outbound == arrived
+        })
+        .map(|entry| entry.received)
+    }
 }
 
 impl Shared {

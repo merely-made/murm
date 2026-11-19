@@ -97,7 +97,31 @@ pub(super) fn dispatch(
     }
     // Transit. Announces are relayed from their own arm, so they still reach the book.
     let policy = shared.routing.lock().unwrap().clone();
-    if pkt.packet_type != PacketType::Announce {
+    let addressed_to_us_as_hop = || {
+        pkt.header_type == crate::packet::HeaderType::Type2
+            && pkt.transport == Some(shared.identity.public().hash())
+            && !shared
+                .registered
+                .lock()
+                .unwrap()
+                .iter()
+                .any(|r| r.dest == pkt.destination)
+    };
+    if pkt.packet_type != PacketType::Announce && !policy.forward_packets {
+        // With carriage off nothing is transit (D24): the packet goes on to local handling and
+        // the tables are untouched. One that would have been carried is still counted (D35).
+        let bridged = {
+            let bridges = shared.link_transport.lock().unwrap();
+            let now = Instant::now();
+            find_live(&*bridges, &pkt.destination, |bridge| !bridge.lapsed_at(now)).is_some()
+        };
+        if bridged || addressed_to_us_as_hop() {
+            shared
+                .routing_stats
+                .policy_rejected
+                .fetch_add(1, Ordering::Relaxed);
+        }
+    } else if pkt.packet_type != PacketType::Announce {
         // A packet for a link we bridge crosses to the other side whatever its header type,
         // since the two ends may address it differently. Traffic from either end refreshes
         // the bridge; a third interface can neither use nor refresh it.
@@ -118,17 +142,9 @@ pub(super) fn dispatch(
                 _ => None,
             }
         };
-        let addressed_to_us_as_hop = pkt.header_type == crate::packet::HeaderType::Type2
-            && pkt.transport == Some(shared.identity.public().hash())
-            && !shared
-                .registered
-                .lock()
-                .unwrap()
-                .iter()
-                .any(|r| r.dest == pkt.destination);
-
-        if bridged.is_some() || addressed_to_us_as_hop {
-            // Transit, never ours: a refusal drops it rather than handling it locally.
+        if bridged.is_some() || addressed_to_us_as_hop() {
+            // Transit, never ours: the ingress selector's refusal drops it rather than
+            // handling it locally.
             if !policy.accepts_transit_from(iface) {
                 shared
                     .routing_stats
@@ -332,7 +348,16 @@ pub(super) fn dispatch(
             // A single-packet proof: carry it back the way its packet came, or conclude one
             // of our receipts (RNS `Transport.py` 2724-2761).
             if !matches!(pkt.context, link::CTX_LRPROOF | link::CTX_RESOURCE_PRF) {
-                if let Some(back) = shared.take_reverse(pkt.destination, iface) {
+                if !policy.forward_packets {
+                    // Carriage off: the return path is kept and the proof handled here
+                    // (`Transport.py` 3009), still counted if it would have been carried (D35).
+                    if shared.peek_reverse(pkt.destination, iface).is_some() {
+                        shared
+                            .routing_stats
+                            .policy_rejected
+                            .fetch_add(1, Ordering::Relaxed);
+                    }
+                } else if let Some(back) = shared.take_reverse(pkt.destination, iface) {
                     if policy.accepts_transit_from(iface) {
                         forward_reverse_proof_on(shared, back, pkt, &policy);
                     } else {

@@ -13,6 +13,7 @@ mod route_life;
 mod routes;
 mod transit;
 mod transport_core;
+mod transport_relay;
 
 use alloc::vec;
 use alloc::vec::Vec;
