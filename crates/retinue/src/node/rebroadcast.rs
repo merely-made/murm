@@ -101,8 +101,7 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
 
     /// Pass a due rebroadcast through its interface's mode rule, then its cap where the
     /// airtime is known (`Transport.py` 1458-1585). It leaves where it was heard. The next hop
-    /// is the destination's live route at release (1461-1469), or the ingress interface once
-    /// the bounded route table has evicted it, so a small table never silently stops relaying.
+    /// is the destination's live route at release (1461-1469); without one the relay is refused.
     /// An interface without a cap slot sends uncapped.
     fn offer_rebroadcast(
         &mut self,
@@ -113,9 +112,9 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
         let interface = rebroadcast.interface;
         let from = self
             .next_hop(rebroadcast.destination, now)
-            .map_or(interface, |hop| hop.interface);
-        let (out, from) = (self.interface_mode(interface), self.interface_mode(from));
-        if !announce_permitted(out, Some(from), false, ModeFlags::default()) {
+            .map(|hop| self.interface_mode(hop.interface));
+        let out = self.interface_mode(interface);
+        if !announce_permitted(out, from, false, ModeFlags::default()) {
             return;
         }
         let airtime = self.first_hop_airtime(interface);
@@ -221,9 +220,9 @@ mod tests {
         assert_eq!(sent(&relay.poll(due, 1, None)), [source.destination()]);
     }
 
-    /// A route the bounded table has evicted falls back to the ingress interface.
+    /// A route the bounded table has evicted cannot supply the relay's source interface.
     #[test]
-    fn an_evicted_route_falls_back_to_the_ingress_interface() {
+    fn an_evicted_route_blocks_the_relay() {
         let mut relay = relay::<1>();
         let first = announcer(0x71);
         relay.ingest(1, &first.announce(&blob(0x71), None), 1_000);
@@ -232,6 +231,7 @@ mod tests {
         relay.ingest(1, &second.announce(&blob(0x73), None), 1_000);
         assert!(relay.route_to(first.destination(), 1_000).is_none());
         let relayed = sent(&relay.poll(due + REBROADCAST_WINDOW, 1, None));
-        assert!(relayed.contains(&first.destination()));
+        assert!(!relayed.contains(&first.destination()));
+        assert!(relayed.contains(&second.destination()));
     }
 }

@@ -23,6 +23,30 @@ fn relayed_by(packet: &Packet, relay: u8, hops: u8) -> Packet {
 }
 
 #[tokio::test(start_paused = true)]
+async fn relayed_announces_require_a_live_route_at_release() {
+    for expired in [false, true] {
+        let ep = Endpoint::new(PrivateIdentity::from_secret_bytes(&[0x8E; 64]));
+        let mut radio = ep.attach_interface();
+        ep.enable_routing();
+        ep.set_relay_jitter(Duration::ZERO);
+        let (packet, announce) = peer_announce(0x8D, "live-route");
+        route(&ep.shared, radio.id(), packet);
+        assert!(ep.shared.live_route(announce.destination).is_some());
+        {
+            let mut paths = ep.shared.path_table.lock().unwrap();
+            if expired {
+                paths.get_mut(&announce.destination).unwrap().learned -= ep.shared.route_ttl();
+            } else {
+                paths.remove(&announce.destination);
+            }
+        }
+
+        assert!(next(&mut radio, Duration::from_secs(30)).await.is_none());
+        assert_eq!(ep.routing_counters().forwarded_announces, 0);
+    }
+}
+
+#[tokio::test(start_paused = true)]
 async fn relayed_announces_set_the_complete_transport_header() {
     let ep = Endpoint::new(PrivateIdentity::from_secret_bytes(&[0x90; 64]));
     let mut radio = ep.attach_interface();

@@ -20,6 +20,27 @@ fn announcer(seed: u8) -> Node<32, 8, 4> {
 const RETRY: u64 = REBROADCAST_GRACE + REBROADCAST_WINDOW;
 
 #[test]
+fn relayed_announces_require_a_live_route_at_release() {
+    for expired in [false, true] {
+        let destination = announcer(0x6F);
+        let mut relay = transit(0x5F, "relay");
+        let announce = destination.announce(&blob([0x6F; RAND_HASH_LEN]), None);
+        relay.ingest(IFACE, &announce, 1_000);
+        let due = relay.next_rebroadcast().expect("scheduled");
+        assert!(relay.next_hop(destination.destination(), 1_000).is_some());
+        if expired {
+            relay.transport.route_ttl = 1;
+        } else {
+            relay.routes.clear();
+        }
+
+        assert!(relay.poll(due.max(1_001), IFACE, None).is_empty());
+        assert!(relay.poll(due + RETRY, IFACE, None).is_empty());
+        assert_eq!(relay.transport_counters().forwarded_announces, 0);
+    }
+}
+
+#[test]
 fn relayed_announces_set_the_complete_transport_header() {
     let destination = announcer(0x70);
     let mut relay = transit(0x60, "relay");
@@ -160,7 +181,8 @@ fn a_full_rebroadcast_table_refuses_rather_than_displaces() {
     assert_eq!(relay.transport_counters().refused_rebroadcasts, 1);
     assert_eq!(
         relay.poll(REBROADCAST_WINDOW, IFACE, None).len(),
-        REBROADCAST_SLOTS
+        3,
+        "the refused newcomer holds the fourth live route without a pending relay"
     );
 }
 
@@ -177,7 +199,7 @@ fn re_announcing_cannot_pin_the_rebroadcast_table() {
         relay.ingest(IFACE, &announce(seed, 1), 0);
     }
     let first = relay.poll(REBROADCAST_WINDOW, IFACE, None);
-    assert_eq!(first.len(), REBROADCAST_SLOTS);
+    assert_eq!(first.len(), 4, "only destinations with live routes can relay");
     for seed in 0..REBROADCAST_SLOTS as u8 {
         relay.ingest(IFACE, &announce(seed, 2), REBROADCAST_WINDOW + 1);
     }
