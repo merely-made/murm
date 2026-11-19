@@ -275,14 +275,13 @@ async fn a_slow_interface_is_known_by_bitrate_else_airtime() {
         (&fast_bitrate, false),
         (&slow_bitrate, true),
     ];
-    for (n, (iface, _)) in cases.iter().enumerate() {
+    let leaf = Duration::from_secs(12 * 60);
+    // One case at a time: five routes would overflow the test table of four.
+    for (n, (iface, slow)) in cases.iter().enumerate() {
         let dest = AddressHash::from_bytes([0xD0 + n as u8; 16]);
         ep.shared.learn_path_at(dest, iface.id(), 1, None, learned);
-    }
-    let leaf = Duration::from_secs(12 * 60);
-    for (n, (_, slow)) in cases.iter().enumerate() {
-        let dest = AddressHash::from_bytes([0xD0 + n as u8; 16]);
         let lingers = ep.route_to_at(dest, learned + leaf).is_some();
         assert_eq!(lingers, *slow, "case {n}: slow {slow}");
+        ep.shared.forget_path(dest);
     }
 }
