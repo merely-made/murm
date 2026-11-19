@@ -70,6 +70,7 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
             pending: BoundedVec::new(),
             first_hop_airtime: BoundedVec::new(),
             interface_modes: BoundedVec::new(),
+            interfaces: BoundedVec::new(),
             receivers: BoundedVec::new(),
             max_inbound_resource: crate::resource_transfer::DEFAULT_MAX_RESOURCE_SIZE,
             senders: BoundedVec::new(),

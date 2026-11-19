@@ -23,6 +23,7 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
         now: u64,
     ) -> Actions<ACTIONS> {
         let mut actions = Actions::new();
+        self.name_interface(interface);
 
         // IFAC is the interface's envelope: `Ifac::open` strips the flag, so a packet still
         // carrying it was decoded raw off an interface without IFAC. RNS drops those.

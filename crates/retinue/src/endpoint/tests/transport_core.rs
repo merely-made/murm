@@ -533,6 +533,28 @@ async fn a_repeated_announce_over_the_hop_ceiling_is_remembered_before_it_is_cou
     assert!(b.outbound.queues.pop().is_none());
 }
 
+#[tokio::test(start_paused = true)]
+async fn a_relay_leaves_on_every_permitted_interface_the_arrival_one_included() {
+    let ep = Endpoint::new(PrivateIdentity::from_secret_bytes(&[0x71; 64]));
+    let a = ep.attach_interface();
+    let b = ep.attach_interface();
+    let c = ep.attach_interface();
+    ep.enable_routing();
+    ep.set_relay_jitter(Duration::ZERO);
+    assert!(ep.set_interface_mode(c.id(), InterfaceMode::AccessPoint));
+    let (announce, decoded) = peer_announce(0x70, "fanout");
+    route(&ep.shared, a.id(), announce);
+    ep.shared
+        .release_rebroadcasts(ep.shared.announce_admission_now_ms());
+    for iface in [&a, &b] {
+        let out = iface.outbound.queues.pop().expect("relayed here");
+        assert_eq!(out.destination, decoded.destination);
+    }
+    assert!(c.outbound.queues.pop().is_none(), "not the access point");
+    // The desktop counts a transmission once (inventory row j, D23).
+    assert_eq!(ep.routing_counters().forwarded_announces, 1);
+}
+
 #[tokio::test]
 async fn reverse_proofs_keep_header_and_obey_hop_ceiling() {
     for hops in [2, 3] {

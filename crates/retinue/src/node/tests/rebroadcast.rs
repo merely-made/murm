@@ -59,7 +59,7 @@ fn relayed_announces_set_the_complete_transport_header() {
 /// RNS holds a relayed announce for a random 0-0.5 s, sends it on every interface including
 /// the one it came from, and tries once more after the 5 s grace (`Transport.py` 765-829).
 #[test]
-fn a_relay_sends_after_a_jitter_on_the_ingress_interface_then_retries_once() {
+fn a_relay_sends_after_a_jitter_on_every_known_interface_then_retries_once() {
     let destination = announcer(0x71);
     let mut relay = transit(0x61, "relay");
     let announce = destination.announce(&blob([0x71; RAND_HASH_LEN]), None);
@@ -74,10 +74,11 @@ fn a_relay_sends_after_a_jitter_on_the_ingress_interface_then_retries_once() {
     let Some(Action::Send { interface, packet }) = first.iter().next() else {
         panic!("the rebroadcast is due");
     };
+    assert_eq!(*interface, IFACE + 1, "out the interface it was heard on");
     assert_eq!(
-        *interface,
-        IFACE + 1,
-        "back out the interface it was heard on"
+        sends(&first),
+        [IFACE + 1, IFACE],
+        "and on the one the poll named"
     );
     assert_eq!(packet.hops, 1);
     assert_eq!(packet.transport, Some(relay.identity.hash()));
@@ -89,7 +90,8 @@ fn a_relay_sends_after_a_jitter_on_the_ingress_interface_then_retries_once() {
         Some(packet)
     );
     assert_eq!(relay.next_rebroadcast(), None, "one retry only");
-    assert_eq!(relay.transport_counters().forwarded_announces, 2);
+    // Counted once per accepted send (D23).
+    assert_eq!(relay.transport_counters().forwarded_announces, 4);
 }
 
 /// Two neighbours heard relaying the announce at our hop count end our retry
@@ -207,6 +209,118 @@ fn re_announcing_cannot_pin_the_rebroadcast_table() {
     let newcomer = announcer(0x9F).announce(&blob([0x9F; RAND_HASH_LEN]), None);
     relay.ingest(IFACE, &newcomer, REBROADCAST_WINDOW + 2);
     assert_eq!(relay.transport_counters().refused_rebroadcasts, 0);
+}
+
+/// A board whose poll holds one action, for relays that do not fit.
+fn narrow(seed: u8) -> Node<32, 1, 4, 4> {
+    Node::new(
+        PrivateIdentity::from_secret_bytes(&[seed; 64]),
+        DestinationName::new("retinue", ["narrow"]).name_hash(),
+    )
+    .with_transport_config(TransportConfig::transit())
+}
+
+/// The interfaces a set of actions sends on, in order.
+fn sends<const N: usize>(actions: &Actions<N>) -> alloc::vec::Vec<InterfaceId> {
+    actions
+        .iter()
+        .filter_map(|action| match action {
+            Action::Send { interface, .. } => Some(*interface),
+            _ => None,
+        })
+        .collect()
+}
+
+/// A relay sends on as many interfaces as one poll holds and keeps the rest owed for the next
+/// (D22). An interface whose cap queues it is owed nothing more.
+#[test]
+fn a_relay_that_does_not_fit_carries_its_remainder() {
+    use crate::rebroadcast::{AnnounceCap, CapRate, Offer, Rebroadcast};
+    let mut relay = narrow(0x6B);
+    relay.poll(0, 2, None);
+    relay.poll(0, 3, None);
+    // Interface 3's budget is spent for a long while.
+    let airtime = 1_000_000;
+    relay.set_first_hop_airtime(3, airtime).unwrap();
+    let spender = announcer(0x7A).announce(&blob([0x7A; RAND_HASH_LEN]), None);
+    let mut cap = AnnounceCap::new(QUEUED_ANNOUNCES);
+    let spent = Rebroadcast {
+        destination: spender.destination,
+        packet: spender,
+        interface: 3,
+        emitted: 0,
+        answer: None,
+    };
+    assert!(matches!(
+        cap.offer(spent, 0, CapRate::new(airtime)),
+        Offer::Send(_)
+    ));
+    relay.announce_caps.push((3, cap)).unwrap();
+
+    let announce = announcer(0x7B).announce(&blob([0x7B; RAND_HASH_LEN]), None);
+    relay.ingest(1, &announce, 0);
+    let due = relay.next_rebroadcast().unwrap();
+    assert_eq!(
+        sends(&relay.poll(due, 1, None)),
+        [2],
+        "the first named fits"
+    );
+    assert_eq!(
+        relay.next_rebroadcast(),
+        Some(due),
+        "the remainder is due at once"
+    );
+    assert_eq!(sends(&relay.poll(due, 1, None)), [1]);
+    let counters = relay.transport_counters();
+    assert_eq!(counters.capped_announces, 1, "3 queued it instead");
+    assert_eq!(counters.forwarded_announces, 2);
+    assert_eq!(relay.next_rebroadcast(), Some(due + RETRY), "nothing owed");
+    assert!(relay.poll(due, 1, None).is_empty());
+}
+
+/// An owed interface that is forgotten is owed nothing; forgetting the interface a relay was
+/// heard on purges the relay (D12).
+#[test]
+fn forgetting_an_interface_settles_what_a_relay_owes_it() {
+    for heard_on_forgotten in [false, true] {
+        let mut relay = narrow(0x6C);
+        relay.poll(0, 2, None);
+        relay.poll(0, 3, None);
+        let source = announcer(0x7C);
+        relay.ingest(1, &source.announce(&blob([0x7C; RAND_HASH_LEN]), None), 0);
+        let due = relay.next_rebroadcast().unwrap();
+        assert_eq!(sends(&relay.poll(due, 1, None)), [2]);
+        relay.forget_interface(if heard_on_forgotten { 1 } else { 3 });
+        if heard_on_forgotten {
+            assert!(!relay.rebroadcasts.contains(source.destination()));
+            assert!(relay.poll(due, 2, None).is_empty());
+        } else {
+            assert_eq!(sends(&relay.poll(due, 1, None)), [1]);
+            assert!(relay.poll(due, 1, None).is_empty(), "nothing more owed");
+        }
+    }
+}
+
+/// The table holds the first interfaces named. One named after it is full is served, its
+/// announces learned and relayed, but relays do not go out on it (D34).
+#[test]
+fn an_interface_past_the_table_is_served_but_not_a_relay_target() {
+    let mut relay = transit(0x6D, "relay");
+    let extra = KNOWN_INTERFACES as InterfaceId + 1;
+    for iface in 1..extra {
+        relay.poll(0, iface, None);
+    }
+    let source = announcer(0x7D);
+    relay.ingest(
+        extra,
+        &source.announce(&blob([0x7D; RAND_HASH_LEN]), None),
+        0,
+    );
+    assert_eq!(relay.route_to(source.destination(), 0).unwrap().0, extra);
+    let due = relay.next_rebroadcast().unwrap();
+    let mut out = sends(&relay.poll(due, extra, None));
+    out.sort_unstable();
+    assert_eq!(out, (1..extra).collect::<alloc::vec::Vec<_>>());
 }
 
 /// A shell that wakes at `next_rebroadcast` and polls always makes progress: the next wake is

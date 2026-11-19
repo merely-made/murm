@@ -9,10 +9,12 @@
 
 use alloc::vec::Vec;
 
+use heapless::Vec as BoundedVec;
+
 use crate::hash::AddressHash;
 use crate::node::{
-    ANNOUNCE_CAP_PERCENT, FIRST_HOP_ALLOWANCE_BITS, InterfaceId, LOCAL_REBROADCASTS_MAX,
-    QUEUED_ANNOUNCE_LIFE, REBROADCAST_GRACE, REBROADCAST_WINDOW,
+    ANNOUNCE_CAP_PERCENT, FIRST_HOP_ALLOWANCE_BITS, InterfaceId, KNOWN_INTERFACES,
+    LOCAL_REBROADCASTS_MAX, QUEUED_ANNOUNCE_LIFE, REBROADCAST_GRACE, REBROADCAST_WINDOW,
 };
 use crate::packet::Packet;
 
@@ -26,7 +28,7 @@ const TRANSMISSIONS: u8 = 2;
 pub(crate) struct Rebroadcast {
     pub(crate) destination: AddressHash,
     pub(crate) packet: Packet,
-    /// Where it was heard. A single-radio shell sends it back out there.
+    /// Where it was heard. A relay is purged with this interface (D12).
     pub(crate) interface: InterfaceId,
     /// The announce's emission timebase, so a queue keeps the newest of a destination.
     pub(crate) emitted: u64,
@@ -35,6 +37,9 @@ pub(crate) struct Rebroadcast {
     pub(crate) answer: Option<InterfaceId>,
 }
 
+/// Interfaces a transmission still owes, which did not fit in one poll's actions (D22).
+pub(crate) type Owed = BoundedVec<InterfaceId, KNOWN_INTERFACES>;
+
 #[derive(Debug)]
 struct Entry {
     rebroadcast: Rebroadcast,
@@ -42,6 +47,9 @@ struct Entry {
     sent: u8,
     /// Neighbour rebroadcasts heard at our hop count (RNS `IDX_AT_LCL_RBRD`).
     heard: u8,
+    /// The remainder of the last transmission, and since when it is owed. An entry past its
+    /// last transmission stays only for this.
+    owed: Option<(Owed, u64)>,
 }
 
 /// RNS's announce table, bounded.
@@ -79,13 +87,16 @@ impl Rebroadcasts {
             due: now.saturating_add(delay),
             sent: 0,
             heard: 0,
+            owed: None,
         };
         let destination = entry.rebroadcast.destination;
         let Some(existing) = self.find(destination) else {
             return self.insert(entry);
         };
         if self.entries[existing].rebroadcast.answer.is_none() {
-            entry.sent = self.entries[existing].sent;
+            // One kept only for an owed remainder has no transmission left to take over.
+            let sent = self.entries[existing].sent;
+            entry.sent = if sent < TRANSMISSIONS { sent } else { 0 };
             self.entries[existing] = entry;
             return true;
         }
@@ -117,6 +128,7 @@ impl Rebroadcasts {
             due: now.saturating_add(delay),
             sent: TRANSMISSIONS - 1,
             heard: 0,
+            owed: None,
         };
         let Some(existing) = self.find(entry.rebroadcast.destination) else {
             return self.insert(entry);
@@ -217,10 +229,12 @@ impl Rebroadcasts {
             .entries
             .iter()
             .enumerate()
-            .filter(|(_, entry)| entry.due <= now)
+            .filter(|(_, entry)| entry.due <= now && entry.sent < TRANSMISSIONS)
             .min_by_key(|(_, entry)| entry.due)
             .map(|(index, _)| index)?;
         let entry = &mut self.entries[index];
+        // A new transmission supersedes what the last one still owed.
+        entry.owed = None;
         entry.sent += 1;
         entry.due = now
             .saturating_add(REBROADCAST_GRACE)
@@ -232,13 +246,55 @@ impl Rebroadcasts {
         }
     }
 
-    /// When [`Self::pop_due`] next has something.
+    /// Keep `interfaces` owed by the transmission of `rebroadcast` just taken, for
+    /// [`Self::take_owed`]. An entry past its last transmission is put back for them.
+    pub(crate) fn owe(&mut self, rebroadcast: Rebroadcast, interfaces: Owed, now: u64) {
+        let owed = Some((interfaces, now));
+        if let Some(index) = self.find(rebroadcast.destination) {
+            self.entries[index].owed = owed;
+        } else if self.entries.len() < self.capacity {
+            self.entries.push(Entry {
+                rebroadcast,
+                due: now,
+                sent: TRANSMISSIONS,
+                heard: 0,
+                owed,
+            });
+        }
+    }
+
+    /// Take the longest-owed remainder: the relay and the interfaces it still owes.
+    pub(crate) fn take_owed(&mut self) -> Option<(Rebroadcast, Owed)> {
+        let index = self
+            .entries
+            .iter()
+            .enumerate()
+            .filter_map(|(index, entry)| entry.owed.as_ref().map(|(_, at)| (index, *at)))
+            .min_by_key(|(_, at)| *at)
+            .map(|(index, _)| index)?;
+        let (owed, _) = self.entries[index].owed.take()?;
+        let rebroadcast = if self.entries[index].sent >= TRANSMISSIONS {
+            self.remove(index).rebroadcast
+        } else {
+            self.entries[index].rebroadcast.clone()
+        };
+        Some((rebroadcast, owed))
+    }
+
+    /// When [`Self::pop_due`] or [`Self::take_owed`] next has something.
     pub(crate) fn next_due(&self) -> Option<u64> {
-        self.entries.iter().map(|entry| entry.due).min()
+        self.entries
+            .iter()
+            .map(|entry| match entry.owed {
+                Some((_, at)) => at.min(entry.due),
+                None => entry.due,
+            })
+            .min()
     }
 
     /// Drop every entry heard on `iface` or answering there, held ones included: what was
     /// learned through a carrier that went away (`Transport.py` 3690-3703, per interface).
+    /// Elsewhere `iface` is owed nothing more, and an entry kept only for what it owed goes.
     #[cfg_attr(
         not(feature = "tokio"),
         allow(dead_code, reason = "used by the endpoint")
@@ -248,9 +304,18 @@ impl Rebroadcasts {
             entry.rebroadcast.interface != iface && entry.rebroadcast.answer != Some(iface)
         };
         self.held.retain(keep);
+        for entry in &mut self.entries {
+            if let Some((owed, _)) = &mut entry.owed {
+                owed.retain(|id| *id != iface);
+                if owed.is_empty() {
+                    entry.owed = None;
+                }
+            }
+        }
         let mut index = 0;
         while index < self.entries.len() {
-            if keep(&self.entries[index]) {
+            let entry = &self.entries[index];
+            if keep(entry) && (entry.sent < TRANSMISSIONS || entry.owed.is_some()) {
                 index += 1;
             } else {
                 // Puts back a surviving held entry for the destination.

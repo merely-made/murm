@@ -443,6 +443,37 @@ fn a_repeated_announce_over_the_hop_ceiling_is_remembered_before_it_is_counted()
 }
 
 #[test]
+fn a_relay_leaves_on_every_permitted_interface_the_arrival_one_included() {
+    let mut relay = relay();
+    relay
+        .set_interface_mode(3, InterfaceMode::AccessPoint)
+        .unwrap();
+    relay.poll(0, 2, None);
+    let (_, destination) = pair();
+    relay.ingest(1, &destination.announce(&blob([6; RAND_HASH_LEN]), None), 0);
+    let due = relay.next_rebroadcast().unwrap();
+    let mut out: Vec<InterfaceId> = relay
+        .poll(due, 2, None)
+        .iter()
+        .filter_map(|action| match action {
+            Action::Send { interface, packet }
+                if packet.destination == destination.destination() =>
+            {
+                Some(*interface)
+            }
+            _ => None,
+        })
+        .collect();
+    out.sort_unstable();
+    assert_eq!(out, [1, 2], "not the access point");
+    assert_eq!(
+        relay.transport_counters().forwarded_announces,
+        2,
+        "counted once per accepted send"
+    );
+}
+
+#[test]
 fn reverse_proofs_keep_header_and_obey_hop_ceiling() {
     for hops in [2, 3] {
         let mut relay = relay();

@@ -36,6 +36,7 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
         blob: Option<&AnnounceBlob>,
     ) -> Actions<ACTIONS> {
         let mut actions = Actions::new();
+        self.name_interface(interface);
 
         self.expire_transport_state(now);
 

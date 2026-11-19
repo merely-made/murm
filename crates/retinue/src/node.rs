@@ -133,6 +133,8 @@ pub struct Node<
     first_hop_airtime: BoundedVec<(InterfaceId, u64), FIRST_HOP_AIRTIME_INTERFACES>,
     /// Interfaces whose mode is not [`InterfaceMode::Full`].
     interface_modes: BoundedVec<(InterfaceId, InterfaceMode), INTERFACE_MODE_INTERFACES>,
+    /// The interfaces the shell has named, in naming order: where relayed announces go.
+    interfaces: BoundedVec<InterfaceId, KNOWN_INTERFACES>,
     /// Inbound resource transfers, at most one per link.
     receivers: BoundedVec<(AddressHash, SegmentedReceiver, u64), LINKS>,
     /// The largest inbound resource accepted, in all; see [`Node::set_max_inbound_resource`].

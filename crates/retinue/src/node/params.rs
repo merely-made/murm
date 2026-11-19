@@ -206,6 +206,11 @@ impl InterfaceMode {
 /// How many interfaces can carry a non-default [`InterfaceMode`] at once.
 pub const INTERFACE_MODE_INTERFACES: usize = 4;
 
+/// Interfaces the node learns as the shell first names them, in `ingest`, `poll` or a
+/// per-interface setting: the ones a relayed announce is offered to (D21, D33). The first
+/// named keep their slots; a further interface is served but is not a relay target (D34).
+pub(crate) const KNOWN_INTERFACES: usize = 4;
+
 /// [`Node::set_interface_mode`] refused a new interface: every slot holds another one.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct InterfaceModeTableFull;

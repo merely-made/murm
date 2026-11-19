@@ -5,7 +5,7 @@ use super::{Action, Actions, InterfaceId, Node, QUEUED_ANNOUNCES, REBROADCAST_WI
 use crate::hash::AddressHash;
 use crate::iface_mode::{ModeFlags, announce_permitted};
 use crate::packet::Packet;
-use crate::rebroadcast::{AnnounceCap, CapRate, Offer, Rebroadcast};
+use crate::rebroadcast::{AnnounceCap, CapRate, Offer, Owed, Rebroadcast};
 
 impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES: usize>
     Node<PEERS, ACTIONS, LINKS, ROUTES>
@@ -86,11 +86,16 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
                 self.send_rebroadcast(interface, packet, actions);
             }
         }
+        // What an earlier poll could not hold goes first.
         while actions.len() < ACTIONS {
-            let Some(rebroadcast) = self.rebroadcasts.pop_due(now) else {
-                break;
+            let (rebroadcast, owed) = match self.rebroadcasts.take_owed() {
+                Some((rebroadcast, owed)) => (rebroadcast, Some(owed)),
+                None => match self.rebroadcasts.pop_due(now) {
+                    Some(rebroadcast) => (rebroadcast, None),
+                    None => break,
+                },
             };
-            self.offer_rebroadcast(rebroadcast, now, actions);
+            self.offer_rebroadcast(rebroadcast, owed, now, actions);
         }
         // An idle cap, or one whose airtime was cleared, holds nothing worth a slot.
         let first_hop_airtime = &self.first_hop_airtime;
@@ -99,24 +104,52 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
         });
     }
 
-    /// Pass a due rebroadcast through its interface's mode rule, then its cap where the
-    /// airtime is known (`Transport.py` 1458-1585). It leaves where it was heard. The next hop
-    /// is the destination's live route at release (1461-1469); without one the relay is refused.
-    /// An interface without a cap slot sends uncapped.
+    /// Offer a due rebroadcast to every known interface, or to those an earlier poll still
+    /// owes, each through its mode rule, then its cap where the airtime is known
+    /// (`Transport.py` 1458-1585), as the endpoint does (D2). The next hop is the destination's
+    /// live route at release (1461-1469); without one the relay is refused. An interface whose
+    /// send does not fit in `actions` stays owed (D22).
     fn offer_rebroadcast(
         &mut self,
+        rebroadcast: Rebroadcast,
+        only: Option<Owed>,
+        now: u64,
+        actions: &mut Actions<ACTIONS>,
+    ) {
+        let from = self
+            .next_hop(rebroadcast.destination, now)
+            .map(|hop| self.interface_mode(hop.interface));
+        let mut owed = Owed::new();
+        for index in 0..self.interfaces.len() {
+            let interface = self.interfaces[index];
+            if only.as_ref().is_some_and(|only| !only.contains(&interface)) {
+                continue;
+            }
+            let out = self.interface_mode(interface);
+            if !announce_permitted(out, from, false, ModeFlags::default()) {
+                continue;
+            }
+            if actions.len() >= ACTIONS {
+                // Both are bounded by the interface table.
+                let _ = owed.push(interface);
+                continue;
+            }
+            self.offer_on(interface, rebroadcast.clone(), now, actions);
+        }
+        if !owed.is_empty() {
+            self.rebroadcasts.owe(rebroadcast, owed, now);
+        }
+    }
+
+    /// One interface's share of a relay: sent, or offered to its cap. An interface without a
+    /// cap slot sends uncapped.
+    fn offer_on(
+        &mut self,
+        interface: InterfaceId,
         rebroadcast: Rebroadcast,
         now: u64,
         actions: &mut Actions<ACTIONS>,
     ) {
-        let interface = rebroadcast.interface;
-        let from = self
-            .next_hop(rebroadcast.destination, now)
-            .map(|hop| self.interface_mode(hop.interface));
-        let out = self.interface_mode(interface);
-        if !announce_permitted(out, from, false, ModeFlags::default()) {
-            return;
-        }
         let airtime = self.first_hop_airtime(interface);
         if airtime == 0 {
             self.send_rebroadcast(interface, rebroadcast.packet, actions);
@@ -205,7 +238,8 @@ mod tests {
     }
 
     /// The mode rule reads the route as it stands at release: heard on a roaming interface,
-    /// then re-routed by a path response through a full one, the relay goes out.
+    /// then re-routed by a path response through a full one, the relay goes out on the roaming
+    /// interface as well as the full one.
     #[test]
     fn the_next_hop_is_the_route_at_release() {
         let mut relay = relay::<4>();
@@ -217,7 +251,7 @@ mod tests {
         relay.ingest(2, &response, 1_001);
         assert_eq!(relay.route_to(source.destination(), 1_001).unwrap().0, 2);
         let due = relay.next_rebroadcast().unwrap();
-        assert_eq!(sent(&relay.poll(due, 1, None)), [source.destination()]);
+        assert_eq!(sent(&relay.poll(due, 1, None)), [source.destination(); 2]);
     }
 
     /// A route the bounded table has evicted cannot supply the relay's source interface.

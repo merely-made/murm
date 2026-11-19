@@ -56,6 +56,7 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
         interface: InterfaceId,
         allowance: u64,
     ) -> Result<(), AirtimeTableFull> {
+        self.name_interface(interface);
         let existing = self
             .first_hop_airtime
             .iter()
@@ -87,6 +88,7 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
         interface: InterfaceId,
         mode: InterfaceMode,
     ) -> Result<(), InterfaceModeTableFull> {
+        self.name_interface(interface);
         let existing = self
             .interface_modes
             .iter()
@@ -106,7 +108,7 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
     }
 
     /// Forget a detached interface: its routes, carried links, return paths, pending relays,
-    /// airtime and mode settings. Traffic for those destinations then goes out
+    /// airtime and mode settings, and its slot among the known interfaces. Traffic for those destinations then goes out
     /// without a route, as for any unknown destination, instead of naming an interface that
     /// is gone. RNS culls the same rows when their interface disappears (`Transport.py`
     /// 880-881, 975-978).
@@ -127,6 +129,15 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
         }
         self.first_hop_airtime.retain(|(id, _)| *id != interface);
         self.interface_modes.retain(|(id, _)| *id != interface);
+        self.interfaces.retain(|id| *id != interface);
+    }
+
+    /// Learn an interface the shell names. A full table keeps the first named; a further one
+    /// is served but is not a relay target (D21, D34).
+    pub(super) fn name_interface(&mut self, interface: InterfaceId) {
+        if !self.interfaces.contains(&interface) {
+            let _ = self.interfaces.push(interface);
+        }
     }
 
     /// Remove routes and carried-link records that have outlived the policy that admitted

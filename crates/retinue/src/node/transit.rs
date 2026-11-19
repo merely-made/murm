@@ -336,7 +336,7 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
     }
 
     /// Schedule a verified announce for rebroadcast with this node recorded as the transport
-    /// hop. It leaves from [`Node::poll`], back out the interface it was heard on.
+    /// hop. It leaves from [`Node::poll`] on every known interface its mode rules permit.
     pub(super) fn relay_announce(
         &mut self,
         interface: InterfaceId,
