@@ -194,6 +194,11 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
                 self.transport_counters.hop_limit_dropped.saturating_add(1);
             return true;
         }
+        // Remember eligible packets even when their destination has no route.
+        let hash = packet.hash();
+        if !self.transit_hash_is_new(packet.context, hash, now) {
+            return true;
+        }
         let Some(route) = self
             .routes
             .iter()
@@ -204,11 +209,6 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
                 self.transport_counters.unroutable_packets.saturating_add(1);
             return true;
         };
-        // One hash serves the transit filter and the reverse entry.
-        let hash = packet.hash();
-        if !self.transit_hash_is_new(packet.context, hash, now) {
-            return true;
-        }
         let mut forwarded = packet.clone();
         forwarded.hops = forwarded.hops.saturating_add(1);
         forwarded.header_type = HeaderType::Type1;

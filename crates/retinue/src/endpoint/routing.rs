@@ -113,6 +113,8 @@ impl RoutingPolicy {
 pub struct RoutingCounters {
     /// Data, link, and proof packets forwarded on behalf of others.
     pub forwarded_packets: u64,
+    /// New transit packets dropped because their destination has no live route.
+    pub unroutable_packets: u64,
     /// Relayed announce transmissions on behalf of others, retries included.
     pub forwarded_announces: u64,
     /// Relayed announces whose retry was dropped because neighbours were heard relaying them
@@ -208,6 +210,7 @@ pub struct RoutingCounters {
 #[derive(Debug, Default)]
 pub(super) struct RoutingStats {
     pub(super) forwarded_packets: AtomicU64,
+    pub(super) unroutable_packets: AtomicU64,
     pub(super) forwarded_announces: AtomicU64,
     pub(super) suppressed_rebroadcasts: AtomicU64,
     pub(super) refused_rebroadcasts: AtomicU64,
@@ -249,6 +252,7 @@ impl RoutingStats {
     fn snapshot(&self) -> RoutingCounters {
         RoutingCounters {
             forwarded_packets: self.forwarded_packets.load(Ordering::Relaxed),
+            unroutable_packets: self.unroutable_packets.load(Ordering::Relaxed),
             forwarded_announces: self.forwarded_announces.load(Ordering::Relaxed),
             suppressed_rebroadcasts: self.suppressed_rebroadcasts.load(Ordering::Relaxed),
             refused_rebroadcasts: self.refused_rebroadcasts.load(Ordering::Relaxed),

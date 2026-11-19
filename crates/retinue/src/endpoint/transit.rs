@@ -232,6 +232,11 @@ pub(super) fn forward(
         {
             shared.link_transport.lock().unwrap().remove(&link_id);
         }
+    } else {
+        shared
+            .routing_stats
+            .unroutable_packets
+            .fetch_add(1, Ordering::Relaxed);
     }
 }
 

@@ -25,6 +25,24 @@ fn packet(destination: AddressHash) -> Packet {
 }
 
 #[test]
+fn type_two_route_misses_are_counted_once_and_filtered_before_lookup() {
+    let mut relay = relay();
+    let (_, destination) = pair();
+    let mut data = packet(destination.destination());
+    data.destination_type = crate::packet::DestinationType::Single;
+    data.header_type = HeaderType::Type2;
+    data.transport = Some(relay.identity.hash());
+    assert!(relay.ingest(1, &data, 1).is_empty());
+    assert_eq!(relay.transport_counters().unroutable_packets, 1);
+    assert!(relay.ingest(1, &data, 2).is_empty());
+    assert_eq!(relay.transport_counters().unroutable_packets, 1);
+    relay.ingest(2, &destination.announce(&blob([2; RAND_HASH_LEN]), None), 3);
+    assert!(relay.ingest(1, &data, 4).is_empty());
+    assert_eq!(relay.transport_counters().unroutable_packets, 1);
+    assert_eq!(relay.transport_counters().forwarded_packets, 0);
+}
+
+#[test]
 fn transit_precedes_reverse_proofs_and_handles_once() {
     for bridged in [false, true] {
         let mut relay = relay();

@@ -4,6 +4,30 @@ use super::*;
 use crate::packet::HeaderType;
 
 #[tokio::test]
+async fn type_two_route_misses_are_counted_once_and_filtered_before_lookup() {
+    let ep = Endpoint::new(PrivateIdentity::from_secret_bytes(&[0x71; 64]));
+    let a = ep.attach_interface();
+    let b = ep.attach_interface();
+    ep.enable_routing();
+    let dest = AddressHash::from_bytes([0x7a; 16]);
+    let mut data = single_packet(dest, vec![0x71; 48]);
+    data.header_type = HeaderType::Type2;
+    data.transport = Some(ep.identity().hash());
+    route(&ep.shared, a.id(), data.clone());
+    assert_eq!(ep.routing_counters().unroutable_packets, 1);
+    route(&ep.shared, a.id(), data.clone());
+    assert_eq!(ep.routing_counters().unroutable_packets, 1);
+    assert_eq!(ep.routing_counters().filtered_packets, 1);
+    ep.shared.learn_path(dest, b.id(), 0, None);
+    route(&ep.shared, a.id(), data);
+    assert_eq!(ep.routing_counters().unroutable_packets, 1);
+    assert_eq!(ep.routing_counters().filtered_packets, 2);
+    assert_eq!(ep.routing_counters().forwarded_packets, 0);
+    assert!(a.outbound.queues.pop().is_none());
+    assert!(b.outbound.queues.pop().is_none());
+}
+
+#[tokio::test]
 async fn transit_precedes_reverse_proofs_and_handles_once() {
     for bridged in [false, true] {
         let ep = Endpoint::new(PrivateIdentity::from_secret_bytes(&[0x71; 64]));
