@@ -371,6 +371,54 @@ async fn forwarded_count_tracks_only_accepted_output() {
     }
 }
 
+/// A link request that is not sent leaves the bridge table as it was: nothing it would have
+/// evicted is lost, and a retransmission does not replace its unproved bridge (D36).
+#[tokio::test]
+async fn a_refused_link_request_leaves_the_bridges_as_they_were() {
+    for retransmission in [false, true] {
+        let ep = Endpoint::new(PrivateIdentity::from_secret_bytes(&[0x71; 64]));
+        let a = ep.attach_interface();
+        let b = ep.attach_interface();
+        ep.enable_routing();
+        let dest = AddressHash::from_bytes([0x7e; 16]);
+        ep.shared.learn_path(dest, b.id(), 0, None);
+        let mut request = single_packet(dest, vec![0x7e; 32]);
+        request.packet_type = PacketType::LinkRequest;
+        request.header_type = HeaderType::Type2;
+        request.transport = Some(ep.identity().hash());
+        let link_id = request.hash();
+        let now = Instant::now();
+        for n in 0..LINK_TRANSPORT_CAPACITY as u8 {
+            let key = if retransmission && n == 0 {
+                link_id
+            } else {
+                AddressHash::from_bytes([n + 1; 16])
+            };
+            ep.shared.link_transport.lock().unwrap().insert(
+                key,
+                LinkBridge {
+                    from: a.id(),
+                    out: b.id(),
+                    destination: dest,
+                    seen: now - Duration::from_secs(10 - u64::from(n)),
+                    proof_deadline: Some(now + Duration::from_secs(60)),
+                },
+            );
+        }
+        while ep
+            .shared
+            .try_send_on_class(b.id(), request.clone(), TrafficClass::Transit)
+        {}
+        let before = ep.shared.link_transport.lock().unwrap().clone();
+        route(&ep.shared, a.id(), request);
+        assert_eq!(
+            *ep.shared.link_transport.lock().unwrap(),
+            before,
+            "retransmission {retransmission}"
+        );
+    }
+}
+
 #[tokio::test]
 async fn short_link_requests_are_bridged_and_carried() {
     for len in [1, 32, 63] {

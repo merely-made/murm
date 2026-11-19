@@ -255,6 +255,49 @@ fn an_unsent_request_takes_no_bridge_slot() {
     assert!(relay.bridges.is_empty());
 }
 
+/// A link request that is not sent leaves the bridge table as it was: nothing it would have
+/// evicted is lost, and a retransmission does not replace its unproved bridge (D36).
+#[test]
+fn a_refused_link_request_leaves_the_bridges_as_they_were() {
+    for retransmission in [false, true] {
+        let (mut source, destination) = pair();
+        let mut relay = Node::<32, 0, 4, 4>::new(
+            PrivateIdentity::from_secret_bytes(&[0x44; 64]),
+            DestinationName::new("retinue", ["relay"]).name_hash(),
+        )
+        .with_transport_config(TransportConfig::transit());
+        let announce = destination.announce(&blob([0x78; RAND_HASH_LEN]), None);
+        relay.ingest(DESTINATION_SIDE, &announce, 0);
+        source.ingest(IFACE, &announce, 1);
+        let mut request = sent(
+            &source
+                .open_link(destination.destination(), IFACE, &[0xA0; 64], 1)
+                .unwrap(),
+        )
+        .unwrap();
+        request.header_type = HeaderType::Type2;
+        request.transport = Some(relay.identity.hash());
+        let link_id = link::link_id(&request).unwrap();
+        let id = |byte| AddressHash::from_bytes([byte; 16]);
+        let ids: [AddressHash; 4] = if retransmission {
+            [link_id, id(2), id(3), id(4)]
+        } else {
+            [id(1), id(2), id(3), id(4)]
+        };
+        for (at, link) in ids.into_iter().enumerate() {
+            let at = at as u64;
+            assert!(relay.remember_bridge(link, destination.destination(), 1, 2, 100 + at, at));
+        }
+        let (before, counters) = (relay.bridges.clone(), relay.transport_counters());
+        assert_eq!(relay.ingest(SOURCE_SIDE, &request, 2).overflowed(), 1);
+        assert_eq!(relay.bridges, before, "retransmission {retransmission}");
+        assert_eq!(
+            relay.transport_counters().evicted_bridges,
+            counters.evicted_bridges
+        );
+    }
+}
+
 /// A request whose MTU must be lowered under a link mode this relay cannot encode is
 /// dropped and takes no slot; one that already fits passes as it is.
 #[test]

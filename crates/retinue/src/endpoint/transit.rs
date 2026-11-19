@@ -11,7 +11,7 @@ use crate::hash::AddressHash;
 use crate::link;
 use crate::packet::{MTU, Packet, PacketType};
 
-use crate::transport::{self, BridgeRecord, record_bridge, record_reverse};
+use crate::transport::{self, BridgeRecord, BridgeUndo, record_reverse};
 
 use super::announces::duration_ticks;
 use super::interface::{InterfaceId, QueueAdmission};
@@ -236,17 +236,14 @@ pub(super) fn forward(
         if pkt.packet_type == PacketType::LinkRequest {
             // A short request's link id covers all its bytes; its destination rejects it.
             let link_id = link::link_id(&pkt).unwrap_or(hash);
-            match admit_link_request(shared, from, out, link_id, &mut pkt) {
-                BridgeAdmission::Refused => {
-                    shared
-                        .routing_stats
-                        .policy_rejected
-                        .fetch_add(1, Ordering::Relaxed);
-                    return;
-                }
-                BridgeAdmission::New => admitted = Some(link_id),
-                BridgeAdmission::Known => {}
-            }
+            let Some(undo) = admit_link_request(shared, from, out, link_id, &mut pkt) else {
+                shared
+                    .routing_stats
+                    .policy_rejected
+                    .fetch_add(1, Ordering::Relaxed);
+                return;
+            };
+            admitted = Some((link_id, undo));
         }
         let accepted = if pkt.packet_type == PacketType::LinkRequest {
             forward_on(shared, out, pkt, policy)
@@ -255,9 +252,9 @@ pub(super) fn forward(
         };
         if accepted {
             shared.mark_path_used(dest);
-        } else if let Some(link_id) = admitted {
-            // An unsent request must not hold its new bridge until the deadline.
-            shared.link_transport.lock().unwrap().remove(&link_id);
+        } else if let Some((link_id, undo)) = admitted {
+            // An unsent request leaves the bridges as they were (D36).
+            transport::unsent_request(&mut *shared.link_transport.lock().unwrap(), &link_id, undo);
         }
     } else {
         shared
@@ -267,28 +264,18 @@ pub(super) fn forward(
     }
 }
 
-/// What [`admit_link_request`] made of a request.
-enum BridgeAdmission {
-    /// Drop it.
-    Refused,
-    /// Carry it; its bridge is new.
-    New,
-    /// Carry it; it retransmits a request already bridged.
-    Known,
-}
-
 /// Prepare to carry a link request from `from` to `out`: lower its signalled MTU to what both
 /// interfaces carry, and record an unproved bridge with a proof deadline of the per-hop
 /// allowance for each hop still ahead plus the outbound first-hop airtime. Refuses a request
 /// whose MTU must be lowered under a link mode this node cannot encode, or a full table of
-/// recently heard validated links.
+/// recently heard validated links (`None`); otherwise returns what recording displaced.
 fn admit_link_request(
     shared: &Shared,
     from: InterfaceId,
     out: InterfaceId,
     link_id: AddressHash,
     pkt: &mut Packet,
-) -> BridgeAdmission {
+) -> Option<BridgeUndo<Instant, ()>> {
     let limit = [from, out]
         .into_iter()
         .filter_map(|iface| shared.link_mtu_on(iface))
@@ -300,7 +287,7 @@ fn admit_link_request(
     } else if let Some(limit) = limit
         && link::clamp_request_mtu(pkt, limit).is_err()
     {
-        return BridgeAdmission::Refused;
+        return None;
     }
     let hops = shared
         .path_table
@@ -312,29 +299,22 @@ fn admit_link_request(
     let allowance =
         crate::node::transit_proof_timeout(hops).saturating_add(shared.first_hop_airtime(out));
     let now = Instant::now();
-    let bridge = LinkBridge {
-        from,
-        out,
-        destination: pkt.destination,
-        seen: now,
-        proof_deadline: Some(now + Duration::from_millis(allowance)),
-    };
     let mut bridges = shared.link_transport.lock().unwrap();
     // Prune before inserting, so the work tracks the requests that cause growth.
     let ttl = duration_ticks(LINK_TRANSPORT_TTL);
     transport::sweep_bridges(&mut *bridges, now, ttl, |_, _| {});
-    let idle = duration_ticks(LINK_TRANSPORT_IDLE);
-    match record_bridge(
+    let (record, undo) = transport::admit_request(
         &mut *bridges,
         link_id,
-        bridge,
+        pkt.destination,
+        from,
+        out,
+        now,
+        now + Duration::from_millis(allowance),
         LINK_TRANSPORT_CAPACITY,
-        idle,
-    ) {
-        BridgeRecord::Known => BridgeAdmission::Known,
-        BridgeRecord::New { .. } => BridgeAdmission::New,
-        BridgeRecord::Refused => BridgeAdmission::Refused,
-    }
+        duration_ticks(LINK_TRANSPORT_IDLE),
+    );
+    (record != BridgeRecord::Refused).then_some(undo)
 }
 
 /// Re-address a forwarded packet for the interface it leaves on (stripping our transport

@@ -206,11 +206,37 @@ pub(crate) fn record_bridge<T: Tick, S: Store<LinkBridge<T>>>(
     capacity: usize,
     idle: u64,
 ) -> BridgeRecord {
+    record_bridge_undoably(store, link_id, bridge, capacity, idle).0
+}
+
+/// What [`record_bridge_undoably`] took out of the table, so [`undo_bridge`] can put it back.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum BridgeUndo<T, P> {
+    /// Nothing changed: the request was refused, or a validated bridge stands.
+    Nothing,
+    /// An unproved bridge was replaced in place; this was it.
+    Replaced(LinkBridge<T>),
+    /// A new bridge went in, in place of `evicted` and where it stood, if the table was full.
+    Added {
+        evicted: Option<(AddressHash, LinkBridge<T>, P)>,
+    },
+}
+
+/// [`record_bridge`], also handing back what it displaced.
+pub(crate) fn record_bridge_undoably<T: Tick, S: Store<LinkBridge<T>>>(
+    store: &mut S,
+    link_id: AddressHash,
+    bridge: LinkBridge<T>,
+    capacity: usize,
+    idle: u64,
+) -> (BridgeRecord, BridgeUndo<T, S::Place>) {
     if let Some(existing) = store.get_mut(&link_id) {
+        let mut undo = BridgeUndo::Nothing;
         if existing.proof_deadline.is_some() {
+            undo = BridgeUndo::Replaced(*existing);
             *existing = bridge;
         }
-        return BridgeRecord::Known;
+        return (BridgeRecord::Known, undo);
     }
     let now = bridge.seen;
     let mut evicted = None;
@@ -219,14 +245,43 @@ pub(crate) fn record_bridge<T: Tick, S: Store<LinkBridge<T>>>(
             .least(|entry| entry.proof_deadline.is_some().then_some(entry.seen))
             .or_else(|| store.least(|entry| entry.idle(now, idle).then_some(entry.seen)))
         else {
-            return BridgeRecord::Refused;
+            return (BridgeRecord::Refused, BridgeUndo::Nothing);
         };
-        store.remove(&stalest);
-        evicted = Some(stalest);
+        evicted = store
+            .remove(&stalest)
+            .map(|(entry, place)| (stalest, entry, place));
     }
     match store.insert(link_id, bridge) {
-        Ok(_) => BridgeRecord::New { evicted },
-        Err(_) => BridgeRecord::Refused,
+        Ok(_) => (
+            BridgeRecord::New {
+                evicted: evicted.map(|(key, _, _)| key),
+            },
+            BridgeUndo::Added { evicted },
+        ),
+        Err(_) => (BridgeRecord::Refused, BridgeUndo::Nothing),
+    }
+}
+
+/// Undo a [`record_bridge_undoably`] of `link_id`: the new bridge goes, and what it
+/// displaced comes back where it stood (D36).
+pub(crate) fn undo_bridge<T, S: Store<LinkBridge<T>>>(
+    store: &mut S,
+    link_id: &AddressHash,
+    undo: BridgeUndo<T, S::Place>,
+) {
+    match undo {
+        BridgeUndo::Nothing => {}
+        BridgeUndo::Replaced(old) => {
+            if let Some(entry) = store.get_mut(link_id) {
+                *entry = old;
+            }
+        }
+        BridgeUndo::Added { evicted } => {
+            store.remove(link_id);
+            if let Some((key, entry, place)) = evicted {
+                store.restore(key, entry, place);
+            }
+        }
     }
 }
 

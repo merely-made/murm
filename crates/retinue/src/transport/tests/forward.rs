@@ -218,25 +218,58 @@ fn a_carried_packet_reads_a_live_route_once<S: TestStore<RouteEntry<u64>>>() {
 }
 
 both!(
-    an_unsent_request_gives_up_only_a_new_bridge,
+    an_unsent_request_leaves_the_bridges_as_they_were,
     LinkBridge<u64>
 );
-fn an_unsent_request_gives_up_only_a_new_bridge<S: TestStore<LinkBridge<u64>>>() {
+fn an_unsent_request_leaves_the_bridges_as_they_were<S: TestStore<LinkBridge<u64>>>() {
+    let admit = |store: &mut S, link, seen| {
+        admit_request(
+            store,
+            key(link),
+            key(0xEE),
+            1,
+            2,
+            seen,
+            seen + 30,
+            CAP,
+            IDLE,
+        )
+    };
+    // New, into room.
     let mut store = S::default();
-    let by = route(2, 0);
-    let record = admit_request(&mut store, key(1), key(0xEE), 1, &by, 10, 40, CAP, IDLE);
+    let (record, undo) = admit(&mut store, 1, 10);
     assert_eq!(record, BridgeRecord::New { evicted: None });
     assert_eq!(store.get(&key(1)), Some(&bridge(10, Some(40))));
-    let again = admit_request(&mut store, key(1), key(0xEE), 1, &by, 12, 42, CAP, IDLE);
-    assert_eq!(again, BridgeRecord::Known);
-    unsent_request(&mut store, &key(1), again);
+    unsent_request(&mut store, &key(1), undo);
+    assert_eq!(store, S::default());
+    // A retransmission replaces an unproved bridge; a validated one stands.
+    for deadline in [Some(40), None] {
+        let mut store = S::default();
+        store.insert(key(1), bridge(10, deadline)).unwrap();
+        let before = store.clone();
+        let (record, undo) = admit(&mut store, 1, 12);
+        assert_eq!(record, BridgeRecord::Known);
+        let replaced = deadline.is_some().then_some(bridge(12, Some(42)));
+        assert_eq!(
+            store.get(&key(1)) != before.get(&key(1)),
+            replaced.is_some()
+        );
+        unsent_request(&mut store, &key(1), undo);
+        assert_eq!(store, before, "{deadline:?}");
+    }
+    // New into a full table: the evicted bridge comes back where it stood.
+    let mut store: S = filled(|n| bridge(u64::from(n), Some(1_000)));
+    let before = store.clone();
+    let (record, undo) = admit(&mut store, 9, 20);
     assert_eq!(
-        store.get(&key(1)),
-        Some(&bridge(12, Some(42))),
-        "a retransmission keeps its bridge"
+        record,
+        BridgeRecord::New {
+            evicted: Some(key(1))
+        }
     );
-    unsent_request(&mut store, &key(1), record);
     assert_eq!(store.get(&key(1)), None);
+    unsent_request(&mut store, &key(9), undo);
+    assert_eq!(store, before);
 }
 
 both!(proofs_go_back_by_their_return_path, ReverseEntry<u64>);

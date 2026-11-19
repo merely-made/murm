@@ -10,8 +10,9 @@
 #![allow(dead_code, reason = "the drivers move onto these in T3 B2 and B3")]
 
 use super::{
-    BridgeRecord, InterfaceId, LinkBridge, Lookup, ReverseEntry, RouteEntry, RouteLife, Store,
-    Tick, find_live, find_or_forget, record_bridge, refresh_bridge, take_reverse,
+    BridgeRecord, BridgeUndo, InterfaceId, LinkBridge, Lookup, ReverseEntry, RouteEntry, RouteLife,
+    Store, Tick, find_live, find_or_forget, record_bridge_undoably, refresh_bridge, take_reverse,
+    undo_bridge,
 };
 use crate::hash::AddressHash;
 use crate::iface_mode::{InterfaceMode, ModeFlags, announce_permitted};
@@ -229,9 +230,9 @@ pub(crate) fn live_route<T: Tick, S: Store<RouteEntry<T>>>(
     find_or_forget(routes, destination, |route| route.live(now, &life))
 }
 
-/// Record the unproved bridge for a link request about to be carried by `route` from `from`,
+/// Record the unproved bridge for a link request about to be carried from `from` to `out`,
 /// lapsing at `deadline` without the proof (the per-hop allowance for each hop ahead plus the
-/// outgoing interface's first-hop airtime). What it decided goes to [`unsent_request`] if the
+/// outgoing interface's first-hop airtime). The undo goes to [`unsent_request`] if the
 /// request is then not sent.
 #[allow(clippy::too_many_arguments, reason = "the driver's inputs, each named")]
 pub(crate) fn admit_request<T: Tick, S: Store<LinkBridge<T>>>(
@@ -239,31 +240,30 @@ pub(crate) fn admit_request<T: Tick, S: Store<LinkBridge<T>>>(
     link_id: AddressHash,
     destination: AddressHash,
     from: InterfaceId,
-    route: &RouteEntry<T>,
+    out: InterfaceId,
     now: T,
     deadline: T,
     capacity: usize,
     idle: u64,
-) -> BridgeRecord {
+) -> (BridgeRecord, BridgeUndo<T, S::Place>) {
     let bridge = LinkBridge {
         from,
-        out: route.iface,
+        out,
         destination,
         seen: now,
         proof_deadline: Some(deadline),
     };
-    record_bridge(bridges, link_id, bridge, capacity, idle)
+    record_bridge_undoably(bridges, link_id, bridge, capacity, idle)
 }
 
-/// A link request admitted as `record` was not sent: a new bridge goes (inventory row c).
+/// A link request admitted with `undo` was not sent: the bridge table goes back to what it
+/// was, a new bridge removed and what it displaced put back (inventory row c, D36).
 pub(crate) fn unsent_request<T, S: Store<LinkBridge<T>>>(
     bridges: &mut S,
     link_id: &AddressHash,
-    record: BridgeRecord,
+    undo: BridgeUndo<T, S::Place>,
 ) {
-    if matches!(record, BridgeRecord::New { .. }) {
-        bridges.remove(link_id);
-    }
+    undo_bridge(bridges, link_id, undo);
 }
 
 /// Whether a proof for `key`, heard on `arrived`, is carried back along its return path, and
