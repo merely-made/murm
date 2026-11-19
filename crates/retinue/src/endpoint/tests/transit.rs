@@ -141,6 +141,7 @@ fn transit_fixture() -> (
             hops: 0,
             learned: Instant::now(),
             mode: InterfaceMode::default(),
+            used: None,
         },
     );
     let (pending, mut request) = link::PendingLink::open(
@@ -516,6 +517,7 @@ async fn a_transit_hop_clamps_to_what_both_interfaces_signal() {
                 hops: 0,
                 learned: Instant::now(),
                 mode: InterfaceMode::default(),
+                used: None,
             },
         );
         let (pending, mut request) = link::PendingLink::open(

@@ -11,10 +11,13 @@ pub(crate) struct RouteEntry<T> {
     /// The next transport hop that announced this destination, if it is not direct.
     pub(crate) transport: Option<AddressHash>,
     pub(crate) hops: u8,
-    /// When the route was learned, or last carried traffic.
+    /// When the route was learned; its life runs from here.
     pub(crate) learned: T,
     /// The learning interface's mode when the route was learned.
     pub(crate) mode: InterfaceMode,
+    /// When the route last sent or carried a packet, or `None` if never: RNS's path "used"
+    /// mark (`Transport.py` 4873), which moves nothing else.
+    pub(crate) used: Option<T>,
 }
 
 impl<T: Tick> RouteEntry<T> {

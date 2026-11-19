@@ -36,6 +36,7 @@ fn route(iface: InterfaceId, learned: u64) -> RouteEntry<u64> {
         hops: 1,
         learned,
         mode: InterfaceMode::Full,
+        used: None,
     }
 }
 
@@ -150,17 +151,53 @@ fn route_lookups_check_age<S: TestStore<RouteEntry<u64>>>() {
     assert_eq!(store.len(), CAP - 1);
 }
 
-both!(routes_touch_only_when_live, RouteEntry<u64>);
-fn routes_touch_only_when_live<S: TestStore<RouteEntry<u64>>>() {
+both!(routes_are_marked_used_only_when_live, RouteEntry<u64>);
+fn routes_are_marked_used_only_when_live<S: TestStore<RouteEntry<u64>>>() {
     let mut store: S = filled(|n| route(1, u64::from(n) * 10));
-    assert!(touch_route(&mut store, &key(2), 50, ttl));
-    assert_eq!(store.get(&key(2)).map(|r| r.learned), Some(50));
+    assert!(mark_route_used(&mut store, &key(2), 50, ttl));
+    assert_eq!(store.get(&key(2)).map(|r| r.used), Some(Some(50)));
+    assert_eq!(
+        store.get(&key(2)).map(|r| r.learned),
+        Some(20),
+        "use does not extend a route's life"
+    );
     assert!(
-        !touch_route(&mut store, &key(1), 110, ttl),
+        !mark_route_used(&mut store, &key(1), 110, ttl),
         "a dead route stays dead"
     );
-    assert_eq!(store.get(&key(1)).map(|r| r.learned), Some(10));
-    assert!(!touch_route(&mut store, &key(9), 50, ttl));
+    assert_eq!(store.get(&key(1)).map(|r| r.used), Some(None));
+    assert!(!mark_route_used(&mut store, &key(9), 50, ttl));
+}
+
+both!(replacing_a_route_keeps_its_used_mark, RouteEntry<u64>);
+fn replacing_a_route_keeps_its_used_mark<S: TestStore<RouteEntry<u64>>>() {
+    let used = |n| RouteEntry {
+        used: Some(n),
+        ..route(1, 0)
+    };
+    let mut store = S::default();
+    let _ = store.insert(key(1), used(5));
+    let _ = store.insert(key(2), used(5));
+    record_route(&mut store, key(1), route(2, 50), CAP, ttl, |_, _, _| {});
+    assert_eq!(
+        store.get(&key(1)),
+        Some(&RouteEntry {
+            used: Some(5),
+            ..route(2, 50)
+        })
+    );
+    record_route(&mut store, key(3), route(2, 50), CAP, ttl, |_, _, _| {});
+    assert_eq!(
+        store.get(&key(3)).map(|r| r.used),
+        Some(None),
+        "a new route is unused"
+    );
+    record_route(&mut store, key(2), route(2, TTL), CAP, ttl, |_, _, _| {});
+    assert_eq!(
+        store.get(&key(2)).map(|r| r.used),
+        Some(None),
+        "a route past its lifetime hands on nothing"
+    );
 }
 
 both!(routes_mode_shortens_their_life, RouteEntry<u64>);

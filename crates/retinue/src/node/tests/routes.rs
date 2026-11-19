@@ -219,10 +219,22 @@ fn interface_modes_shorten_route_lifetimes() {
     );
 }
 
-/// RNS refreshes a path whenever it carries a packet. A source addressing its relay, and
-/// a relay carrying transit, each keep the route alive past its learned-at expiry.
+/// The used mark of `destination`'s route on `node`, if it has one.
+pub(super) fn used<const P: usize, const A: usize, const L: usize, const R: usize>(
+    node: &Node<P, A, L, R>,
+    destination: AddressHash,
+) -> Option<Option<u64>> {
+    node.routes
+        .iter()
+        .find(|route| route.key == destination)
+        .map(|route| route.entry.used)
+}
+
+/// Sending or carrying by a route marks it used and moves nothing else (RNS `Transport.py`
+/// 1618, 2387): a source addressing its relay, a direct send and a relay carrying transit
+/// each leave the route to expire when it was due.
 #[test]
-fn a_route_in_use_is_refreshed() {
+fn a_route_in_use_is_marked_not_extended() {
     let (mut source, mut relay, destination) = source_via_relay();
     let late = DEFAULT_ROUTE_TTL - 1;
     let request = sent(
@@ -232,19 +244,36 @@ fn a_route_in_use_is_refreshed() {
     )
     .unwrap();
     assert_eq!(request.transport, Some(relay.identity.hash()));
+    assert_eq!(used(&source, destination.destination()), Some(Some(late)));
     assert!(
         source
             .next_hop(destination.destination(), DEFAULT_ROUTE_TTL)
-            .is_some(),
-        "addressing the relay refreshed the source's route"
+            .is_none(),
+        "addressing the relay does not extend the source's route"
     );
 
+    assert_eq!(used(&relay, destination.destination()), Some(None));
     assert!(sent(&relay.ingest(IFACE, &request, late)).is_some());
+    assert_eq!(used(&relay, destination.destination()), Some(Some(late)));
     assert!(
         relay
             .next_hop(destination.destination(), DEFAULT_ROUTE_TTL)
-            .is_some(),
-        "carrying transit refreshed the relay's route"
+            .is_none(),
+        "carrying transit does not extend the relay's route"
+    );
+
+    let (mut direct, peer) = pair();
+    direct.ingest(IFACE, &peer.announce(&blob([0x7F; RAND_HASH_LEN]), None), 0);
+    direct.open_link(peer.destination(), IFACE, &[0x9C; 64], 5);
+    assert_eq!(
+        used(&direct, peer.destination()),
+        Some(Some(5)),
+        "a direct send marks too"
+    );
+    assert!(
+        direct
+            .next_hop(peer.destination(), DEFAULT_ROUTE_TTL)
+            .is_none()
     );
 }
 

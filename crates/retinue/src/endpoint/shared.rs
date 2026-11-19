@@ -17,7 +17,7 @@ use crate::identity::PrivateIdentity;
 use crate::iface_mode::{ModeFlags, announce_permitted};
 use crate::link::{self, Link};
 use crate::link_liveness::Liveness;
-use crate::packet::{Packet, PacketType};
+use crate::packet::{DestinationType, Packet, PacketType};
 use crate::resource::Advertisement;
 use crate::resource_transfer::PROOF_CACHE_ANSWERS;
 
@@ -467,16 +467,24 @@ impl Shared {
     /// (header-type-2), so the node forwards it.
     pub(super) fn address_for(&self, iface: InterfaceId, mut pkt: Packet) -> Packet {
         // By destination, not interface: one radio reaches A via X and B via Y.
-        let via = self
+        let route = self
             .path_table
             .lock()
             .unwrap()
             .get(&pkt.destination)
-            .and_then(|entry| entry.transport);
-        if via.is_some() {
-            self.touch_path(pkt.destination);
+            .map(|entry| entry.transport);
+        // RNS marks a path used by any packet it sends by one, direct or through a relay;
+        // announces and plain or group packets are not sent by path (`Transport.py` 1612-1618).
+        if route.is_some()
+            && pkt.packet_type != PacketType::Announce
+            && !matches!(
+                pkt.destination_type,
+                DestinationType::Plain | DestinationType::Group
+            )
+        {
+            self.mark_path_used(pkt.destination);
         }
-        pkt.address_via(via);
+        pkt.address_via(route.flatten());
         let _ = iface;
         pkt
     }

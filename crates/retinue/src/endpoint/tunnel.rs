@@ -439,6 +439,7 @@ mod tests {
             hops,
             learned: at,
             mode: crate::node::InterfaceMode::Full,
+            used: None,
         };
         Mirrored {
             entry,

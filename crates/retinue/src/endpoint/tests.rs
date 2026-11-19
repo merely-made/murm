@@ -9,6 +9,7 @@ mod path_requests;
 mod ratchets;
 mod rebroadcast;
 mod reliable;
+mod route_life;
 mod routes;
 mod transit;
 mod transport_core;

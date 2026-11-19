@@ -113,7 +113,7 @@ pub(super) fn dispatch(
                             .fetch_add(1, Ordering::Relaxed);
                         return;
                     };
-                    Some((bridge.from, bridge.out, proves))
+                    Some((bridge.from, bridge.out, bridge.destination, proves))
                 }
                 _ => None,
             }
@@ -137,7 +137,7 @@ pub(super) fn dispatch(
                 return;
             }
             match bridged {
-                Some((a, b, proves)) => {
+                Some((a, b, destination, proves)) => {
                     if pkt.hops.saturating_add(1) < policy.max_hops
                         && !shared.packet_is_new(pkt.context, pkt.hash())
                     {
@@ -149,6 +149,9 @@ pub(super) fn dispatch(
                     if forward_on(shared, out, pkt, &policy) {
                         let mut bridges = shared.link_transport.lock().unwrap();
                         refresh_bridge(&mut *bridges, &link_id, Instant::now(), proves);
+                        drop(bridges);
+                        // The link's destination route is in use (`Transport.py` 2440).
+                        shared.mark_path_used(destination);
                     }
                 }
                 None => forward(shared, iface, pkt, &policy),

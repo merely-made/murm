@@ -270,6 +270,7 @@ async fn a_dialed_interface_keeps_its_id_and_routes_across_reconnects() {
             hops: 1,
             learned: Instant::now(),
             mode: InterfaceMode::Full,
+            used: None,
         },
     );
 

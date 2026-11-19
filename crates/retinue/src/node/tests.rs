@@ -24,6 +24,7 @@ mod liveness;
 mod rebroadcast;
 mod recovery;
 mod resources;
+mod route_life;
 mod routes;
 mod stamps;
 mod transit;

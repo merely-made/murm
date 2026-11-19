@@ -65,17 +65,22 @@ pub(crate) fn forget_interface<V, S: Store<V>>(
     store.retain(|_, entry| !on(entry).contains(&iface), |_, _, _| {});
 }
 
-/// Record a route, replacing any for `key`. A new key in a full table first drops the
-/// routes past their lifetime, then the one learned longest ago. Returns the replaced route.
+/// Record a route, replacing any for `key`. A live route it replaces hands on its used mark
+/// (RNS `Transport.py` 2510, 2726); a new one starts as `route` has it. A new key in a full
+/// table first drops the routes past their lifetime, then the one learned longest ago.
+/// Returns the replaced route.
 pub(crate) fn record_route<T: Tick, S: Store<RouteEntry<T>>>(
     store: &mut S,
     key: AddressHash,
-    route: RouteEntry<T>,
+    mut route: RouteEntry<T>,
     capacity: usize,
     lifetime: impl Fn(InterfaceMode) -> u64,
     mut removed: impl FnMut(AddressHash, RouteEntry<T>, Removal),
 ) -> Option<RouteEntry<T>> {
     let now = route.learned;
+    if let Some(old) = store.get(&key).filter(|old| old.live(now, &lifetime)) {
+        route.used = old.used;
+    }
     if store.len() >= capacity && store.get(&key).is_none() {
         // The dead first: a table full of expired routes must never evict a live one.
         store.retain(
@@ -92,9 +97,10 @@ pub(crate) fn record_route<T: Tick, S: Store<RouteEntry<T>>>(
     store.insert(key, route).ok().flatten()
 }
 
-/// Mark a live route used at `now`, which extends its life as RNS's path timestamp does.
-/// Returns whether it was touched.
-pub(crate) fn touch_route<T: Tick, S: Store<RouteEntry<T>>>(
+/// Mark a live route used at `now`. Its life does not move: RNS sets only the path's used
+/// mark when it sends or carries by one (`Transport.py` 1618, 2387, 2440). Returns whether
+/// it was marked.
+pub(crate) fn mark_route_used<T: Tick, S: Store<RouteEntry<T>>>(
     store: &mut S,
     key: &AddressHash,
     now: T,
@@ -102,7 +108,7 @@ pub(crate) fn touch_route<T: Tick, S: Store<RouteEntry<T>>>(
 ) -> bool {
     match store.get_mut(key) {
         Some(entry) if entry.live(now, lifetime) => {
-            entry.learned = now;
+            entry.used = Some(now);
             true
         }
         _ => false,

@@ -85,10 +85,10 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
         let hop = self.next_hop(destination, now);
         let via = hop.and_then(|hop| hop.via);
         request.address_via(via);
-        if via.is_some() {
-            // RNS refreshes a path each time it inserts a packet into transport by it
-            // (`Transport.py` 1406, 1426).
-            self.touch_route(destination, now);
+        if hop.is_some() {
+            // RNS marks a path used by any packet it sends by one, direct or through a relay
+            // (`Transport.py` 1618).
+            self.mark_route_used(destination, now);
         }
         let deadline = now
             .saturating_add(link_request_timeout(hop.map_or(0, |hop| hop.hops)))

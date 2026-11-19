@@ -195,6 +195,7 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
             hops,
             learned: now,
             mode,
+            used: None,
         };
         let route_ttl = self.transport.route_ttl;
         let counters = &mut self.transport_counters;
@@ -212,10 +213,10 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
         );
     }
 
-    /// Mark a route used at `now`, which extends its life as RNS's path timestamp does.
-    pub(super) fn touch_route(&mut self, destination: AddressHash, now: u64) {
+    /// Mark a live route used at `now`; its life does not move.
+    pub(super) fn mark_route_used(&mut self, destination: AddressHash, now: u64) {
         let route_ttl = self.transport.route_ttl;
-        transport::touch_route(&mut self.routes, &destination, now, |mode| {
+        transport::mark_route_used(&mut self.routes, &destination, now, |mode| {
             mode.route_ttl(route_ttl)
         });
     }

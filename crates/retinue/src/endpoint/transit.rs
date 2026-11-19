@@ -228,7 +228,7 @@ pub(super) fn forward(
             shared.send_with_reverse(hash, from, out, || forward_on(shared, out, pkt, policy))
         };
         if accepted {
-            shared.touch_path(dest);
+            shared.mark_path_used(dest);
         } else if let Some(link_id) = admitted {
             // An unsent request must not hold its new bridge until the deadline.
             shared.link_transport.lock().unwrap().remove(&link_id);

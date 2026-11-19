@@ -98,16 +98,14 @@ fn return_paths_are_transactional_with_output() {
                         (entry.entry.received, entry.entry.outbound, entry.entry.at),
                         (1, 2, 10)
                     );
-                    assert_eq!(
-                        node.routes[0].entry.learned, learned,
-                        "route not yet touched"
-                    );
+                    assert_eq!(node.routes[0].entry.used, None, "route not yet marked");
                     actions.push(action)
                 },
             ));
+            assert_eq!(relay.routes[0].entry.used, accepted.then_some(10));
             assert_eq!(
-                relay.routes[0].entry.learned,
-                if accepted { 10 } else { learned }
+                relay.routes[0].entry.learned, learned,
+                "use moves nothing else"
             );
             assert_eq!(
                 relay.transport_counters().forwarded_packets,

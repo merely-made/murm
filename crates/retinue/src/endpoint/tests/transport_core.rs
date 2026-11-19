@@ -97,13 +97,10 @@ async fn return_paths_are_transactional_with_output() {
                     _ => {}
                 }
                 // Queue setup can address packets too; measure only the carried send.
-                ep.shared
-                    .path_table
-                    .lock()
-                    .unwrap()
-                    .get_mut(&dest)
-                    .unwrap()
-                    .learned = learned;
+                if let Some(entry) = ep.shared.path_table.lock().unwrap().get_mut(&dest) {
+                    entry.learned = learned;
+                    entry.used = None;
+                }
                 let generation = ep.shared.diagnostic_generation.load(Ordering::Acquire);
                 route(&ep.shared, a.id(), data);
                 let accepted = refusal == "accepted";
@@ -124,16 +121,21 @@ async fn return_paths_are_transactional_with_output() {
                         "{state}/{refusal}: refused send restores the table"
                     );
                 }
+                let entry = ep.shared.path_table.lock().unwrap()[&dest];
                 assert_eq!(
-                    ep.shared.path_table.lock().unwrap()[&dest].learned > learned,
+                    entry.used.is_some(),
                     accepted,
-                    "{state}/{refusal}: only accepted output touches the route"
+                    "{state}/{refusal}: only accepted output marks the route used"
+                );
+                assert_eq!(
+                    entry.learned, learned,
+                    "{state}/{refusal}: and moves nothing else"
                 );
                 assert_eq!(ep.routing_counters().forwarded_packets, u64::from(accepted));
                 assert_eq!(
                     ep.shared.diagnostic_generation.load(Ordering::Acquire) - generation,
                     u64::from(accepted),
-                    "{state}/{refusal}: route touched exactly once on acceptance"
+                    "{state}/{refusal}: route marked exactly once on acceptance"
                 );
             }
         }

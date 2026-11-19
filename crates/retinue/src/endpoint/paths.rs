@@ -69,15 +69,14 @@ impl PathEntry {
 }
 
 impl Shared {
-    /// Mark `dest`'s live route used now. RNS refreshes a path's timestamp whenever it
-    /// carries a packet (`Transport.py` 1406, 1426, 2113), so a route in use does not lapse.
-    pub(super) fn touch_path(&self, dest: AddressHash) {
+    /// Mark `dest`'s live route used now; its life does not move.
+    pub(super) fn mark_path_used(&self, dest: AddressHash) {
         let now = Instant::now();
         let route_ttl = self.route_ttl();
         self.write_diagnostic(|| {
             let mut paths = self.path_table.lock().unwrap();
-            let touched = transport::touch_route(&mut *paths, &dest, now, lifetimes(route_ttl));
-            ((), touched)
+            let marked = transport::mark_route_used(&mut *paths, &dest, now, lifetimes(route_ttl));
+            ((), marked)
         });
     }
 
@@ -201,6 +200,7 @@ impl Shared {
                 hops,
                 learned: now,
                 mode,
+                used: None,
             };
             // The dead go first, then, every route live, the quietest peer.
             let replaced = transport::record_route(

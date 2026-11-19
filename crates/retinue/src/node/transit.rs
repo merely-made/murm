@@ -147,6 +147,8 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
             packet: forwarded,
         }) {
             refresh_bridge(&mut self.bridges, &packet.destination, now, proves);
+            // The link's destination route is in use (`Transport.py` 2440).
+            self.mark_route_used(bridge.destination, now);
             self.transport_counters.forwarded_packets =
                 self.transport_counters.forwarded_packets.saturating_add(1);
         }
@@ -269,8 +271,8 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
                 packet: forwarded,
             },
         ) {
-            // A route carrying transit is in use, and RNS refreshes it (`Transport.py` 2113).
-            self.touch_route(packet.destination, now);
+            // A route carrying transit is in use (`Transport.py` 2387).
+            self.mark_route_used(packet.destination, now);
             self.transport_counters.forwarded_packets =
                 self.transport_counters.forwarded_packets.saturating_add(1);
         } else if needs_reverse {

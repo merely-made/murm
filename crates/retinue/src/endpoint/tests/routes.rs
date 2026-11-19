@@ -87,6 +87,7 @@ async fn diagnostic_capture_waits_for_an_inflight_writer() {
                     hops: 1,
                     learned: Instant::now(),
                     mode: InterfaceMode::Full,
+                    used: None,
                 },
             );
             ((), true)
@@ -272,10 +273,11 @@ async fn routes_live_a_week_unless_their_interface_mode_shortens_them() {
     assert!(ep.route_to_at(a, learned + hours(7 * 24)).is_none());
 }
 
-/// A route carrying traffic is refreshed, as RNS refreshes a path when it inserts a packet
-/// into transport or forwards transit along it. A direct local send does not refresh.
+/// Sending or carrying by a route marks it used and moves nothing else (RNS `Transport.py`
+/// 1618, 2387): a send through a relay, a direct send and carried transit each leave the
+/// route to expire when it was due.
 #[tokio::test]
-async fn a_route_in_use_is_refreshed() {
+async fn a_route_in_use_is_marked_not_extended() {
     let ep = Endpoint::new(PrivateIdentity::from_secret_bytes(&[0x62; 64]));
     let a = ep.attach_interface();
     let b = ep.attach_interface();
@@ -283,35 +285,47 @@ async fn a_route_in_use_is_refreshed() {
     let aged = Instant::now()
         .checked_sub(Duration::from_secs(60 * 60))
         .expect("the monotonic clock predates an hour");
-    let learned = |dest| ep.shared.path_table.lock().unwrap()[&dest].learned;
+    let entry = |dest| ep.shared.path_table.lock().unwrap()[&dest];
     let [via_relay, direct, onward] = [0xB1, 0xB2, 0xB3].map(|n| AddressHash::from_bytes([n; 16]));
     let relay = AddressHash::from_bytes([0xBF; 16]);
     ep.shared
         .learn_path_at(via_relay, a.id(), 2, Some(relay), aged);
     ep.shared.learn_path_at(direct, a.id(), 0, None, aged);
     ep.shared.learn_path_at(onward, b.id(), 0, None, aged);
+    let due = aged + ep.shared.route_ttl();
 
     ep.shared
         .queue_single(via_relay, single_packet(via_relay, vec![1; 64]));
     assert_eq!(a.outbound.queues.pop().unwrap().transport, Some(relay));
     a.outbound.queues.delivery_complete();
-    assert!(
-        learned(via_relay) > aged,
-        "inserting into transport refreshes"
+    assert!(entry(via_relay).used.is_some_and(|at| at > aged));
+    assert_eq!(
+        entry(via_relay).learned,
+        aged,
+        "sending through a relay marks only"
     );
 
     ep.shared
         .queue_single(direct, single_packet(direct, vec![2; 64]));
     assert!(a.outbound.queues.pop().is_some());
     a.outbound.queues.delivery_complete();
-    assert_eq!(learned(direct), aged, "a direct send does not");
+    assert!(entry(direct).used.is_some(), "a direct send marks too");
+    assert_eq!(entry(direct).learned, aged);
 
     let mut transit = single_packet(onward, vec![3; 64]);
     transit.header_type = crate::packet::HeaderType::Type2;
     transit.transport = Some(ep.identity().hash());
     route(&ep.shared, a.id(), transit);
     assert!(b.outbound.queues.pop().is_some());
-    assert!(learned(onward) > aged, "carrying transit refreshes");
+    assert!(entry(onward).used.is_some(), "carrying transit marks");
+    assert_eq!(entry(onward).learned, aged);
+
+    for dest in [via_relay, direct, onward] {
+        assert!(
+            ep.route_to_at(dest, due).is_none(),
+            "each expires when it was due"
+        );
+    }
 }
 
 /// Detaching an interface culls the routes learned on it and the bridges that cross it, so
