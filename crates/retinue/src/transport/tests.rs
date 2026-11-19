@@ -90,8 +90,11 @@ fn filled<V: Copy, S: TestStore<V>>(make: impl Fn(u8) -> V) -> S {
     store
 }
 
-both!(routes_replace_then_evict_the_stalest, RouteEntry<u64>);
-fn routes_replace_then_evict_the_stalest<S: TestStore<RouteEntry<u64>>>() {
+both!(
+    routes_replace_then_evict_the_soonest_to_expire,
+    RouteEntry<u64>
+);
+fn routes_replace_then_evict_the_soonest_to_expire<S: TestStore<RouteEntry<u64>>>() {
     let mut store: S = filled(|n| route(1, u64::from(n)));
     let mut gone = Vec::new();
     let replaced = record_route(&mut store, key(2), route(3, 10), CAP, ttl, |k, _, why| {
@@ -105,7 +108,7 @@ fn routes_replace_then_evict_the_stalest<S: TestStore<RouteEntry<u64>>>() {
     assert_eq!(
         gone,
         [(key(1), Removal::Evicted)],
-        "the stalest live route goes"
+        "the never-used route soonest to expire goes"
     );
     assert_eq!(store.len(), CAP);
     assert_eq!(store.get(&key(2)).map(|r| r.iface), Some(3));

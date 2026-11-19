@@ -25,7 +25,7 @@ use crate::packet::{DestinationType, HeaderType, Packet, PacketType, Propagation
 
 use super::entropy::fill_random;
 use super::interface::InterfaceId;
-use super::paths::{PATH_TABLE_CAPACITY, PathEntry, make_path_room};
+use super::paths::{PATH_TABLE_CAPACITY, PathEntry, make_room_for_path};
 use super::shared::Shared;
 
 /// A tunnel, and each path mirrored into it, lives this long unrefreshed (`TUNNEL_TIMEOUT`,
@@ -282,7 +282,7 @@ impl Shared {
                 if !keep {
                     return false;
                 }
-                if !paths.contains_key(dest) && make_path_room(&mut paths, now, life) {
+                if !paths.contains_key(dest) && make_room_for_path(&mut paths, now, life) {
                     evicted += 1;
                 }
                 let entry = PathEntry {

@@ -3,7 +3,7 @@
 use super::*;
 
 /// The transport table is a fixed board resource: expired paths go first, then the
-/// quietest live route makes room. A flood cannot turn it into a lifetime allocation.
+/// never-used route soonest to expire makes room. A flood cannot turn it into a lifetime allocation.
 #[test]
 fn transport_routes_expire_then_evict_at_their_bound() {
     let mut relay = Node::<8, 8, 4, 2>::new(
@@ -37,7 +37,7 @@ fn transport_routes_expire_then_evict_at_their_bound() {
     assert_eq!(
         relay.route_to(a.destination(), 2),
         None,
-        "the quietest live route was evicted"
+        "the never-used route soonest to expire was evicted"
     );
     assert_eq!(relay.transport_counters().evicted_routes, 1);
 

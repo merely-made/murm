@@ -57,7 +57,8 @@ const UNUSED_PATH_LINGER: Duration = Duration::from_secs(105 * 60);
 /// How long one lingers on a leaf, which does not forward or is a shared instance's client:
 /// `UNUSED_PATH_LINGER_LEAF`, 12 minutes (`Transport.py` 229, 451-454).
 const UNUSED_PATH_LINGER_LEAF: Duration = Duration::from_secs(12 * 60);
-/// An interface with a bitrate below this is slow: `PATH_SLOW_BITRATE` (`Transport.py` 232).
+/// An interface with a bitrate below this, or a first-hop airtime longer than one MTU takes
+/// at it, is slow: `PATH_SLOW_BITRATE` (`Transport.py` 232).
 const PATH_SLOW_BITRATE: u64 = 25_000;
 /// How many times longer a never-used route lingers on a slow interface:
 /// `PATH_SLOW_LINGER_FACTOR` (`Transport.py` 233).
@@ -78,12 +79,10 @@ impl RouteLife for PathLife<'_> {
     }
 
     fn linger(&self, iface: InterfaceId) -> Option<u64> {
-        // The bitrate known here is the configured one (`Transport.py` 1129-1130).
-        let slow = self
-            .shared
-            .iface_policy(iface)
-            .bitrate_bps
-            .is_some_and(|bps| 0 < bps && bps < PATH_SLOW_BITRATE);
+        // Slow by the configured bitrate, else by the carrier's airtime for one MTU, as the
+        // announce cap reads it (`Transport.py` 1129-1130). Neither known is not slow.
+        let slow = self.shared.first_hop_airtime(iface)
+            > crate::node::first_hop_airtime(PATH_SLOW_BITRATE);
         Some(if slow {
             self.linger.saturating_mul(PATH_SLOW_LINGER_FACTOR)
         } else {
@@ -94,7 +93,7 @@ impl RouteLife for PathLife<'_> {
 
 /// Make room for one more route in a full path table at `now`, as a learned route does
 /// ([`transport::make_route_room`]). Returns whether a live route was evicted.
-pub(super) fn make_path_room(
+pub(super) fn make_room_for_path(
     paths: &mut HashMap<AddressHash, PathEntry>,
     now: Instant,
     life: PathLife<'_>,

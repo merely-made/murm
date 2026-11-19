@@ -125,9 +125,9 @@ async fn diagnostic_capture_waits_for_an_inflight_writer() {
     assert_eq!(generation, ep.diagnostic_generation());
 }
 
-/// The path table is capped, and forgets the peer that has gone quietest.
+/// The path table is capped, and forgets the never-used route soonest to expire.
 #[tokio::test]
-async fn a_full_path_table_forgets_the_quietest_peer() {
+async fn a_full_path_table_forgets_the_never_used_route_soonest_to_expire() {
     let ep = Endpoint::new(PrivateIdentity::from_secret_bytes(&[0x34; 64]));
     let iface = InterfaceId::from(1_u32);
     let quiet = AddressHash::from_bytes([0x01; 16]);
@@ -152,7 +152,7 @@ async fn a_full_path_table_forgets_the_quietest_peer() {
     assert!(table.contains_key(&newcomer), "the newcomer is learned");
     assert!(
         !table.contains_key(&quiet),
-        "and the peer that had gone quietest is what made room",
+        "and the never-used route soonest to expire is what made room",
     );
     drop(table);
     assert_eq!(
