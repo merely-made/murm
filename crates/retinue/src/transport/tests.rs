@@ -582,3 +582,6 @@ fn bridge_at_instant(at: std::time::Instant) -> LinkBridge<std::time::Instant> {
         proof_deadline: Some(at),
     }
 }
+
+// After `both!`, which it uses.
+mod forward;
