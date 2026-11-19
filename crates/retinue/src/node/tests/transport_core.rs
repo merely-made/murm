@@ -167,3 +167,34 @@ fn carried_links_refresh_only_on_accepted_send() {
         );
     }
 }
+
+#[test]
+fn forwarded_count_tracks_only_accepted_output() {
+    for refusal in ["accepted", "full", "size", "hops"] {
+        let mut relay = relay();
+        let id = AddressHash::from_bytes([0x75; 16]);
+        assert!(relay.remember_bridge(id, id, 1, 2, 1000, 0));
+        relay.bridges[0].proof_deadline = None;
+        let mut data = packet(id);
+        let mut actions = Actions::new();
+        match refusal {
+            "full" => {
+                for _ in 0..8 {
+                    assert!(actions.push(Action::Send {
+                        interface: 2,
+                        packet: data.clone()
+                    }));
+                }
+            }
+            "size" => data.payload = vec![0; 600],
+            "hops" => data.hops = relay.transport.max_hops - 1,
+            _ => {}
+        }
+        relay.forward_bridged_packet(1, &data, 1, &mut actions);
+        assert_eq!(
+            relay.transport_counters().forwarded_packets,
+            u16::from(refusal == "accepted"),
+            "{refusal}"
+        );
+    }
+}

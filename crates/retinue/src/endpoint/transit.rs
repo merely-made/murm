@@ -341,12 +341,15 @@ pub(super) fn forward_on(
             .fetch_add(1, Ordering::Relaxed);
         return false;
     }
-    shared
-        .routing_stats
-        .forwarded_packets
-        .fetch_add(1, Ordering::Relaxed);
     pkt.hops += 1;
     pkt.header_type = crate::packet::HeaderType::Type1;
     pkt.transport = None;
-    shared.try_send_on_class(out, pkt, TrafficClass::Transit)
+    let accepted = shared.try_send_on_class(out, pkt, TrafficClass::Transit);
+    if accepted {
+        shared
+            .routing_stats
+            .forwarded_packets
+            .fetch_add(1, Ordering::Relaxed);
+    }
+    accepted
 }

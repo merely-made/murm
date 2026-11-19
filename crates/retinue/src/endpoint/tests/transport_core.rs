@@ -198,3 +198,36 @@ async fn carried_links_refresh_only_on_accepted_send() {
         );
     }
 }
+
+#[tokio::test]
+async fn forwarded_count_tracks_only_accepted_output() {
+    for refusal in ["accepted", "full", "size", "offline", "hops"] {
+        let ep = Endpoint::new(PrivateIdentity::from_secret_bytes(&[0x71; 64]));
+        let a = ep.attach_interface();
+        ep.enable_routing();
+        let mut data = single_packet(AddressHash::from_bytes([0x75; 16]), vec![0x71; 48]);
+        match refusal {
+            "full" => {
+                while ep
+                    .shared
+                    .try_send_on_class(a.id(), data.clone(), TrafficClass::Transit)
+                {
+                }
+            }
+            "size" => data.payload = vec![0; 600],
+            "offline" => ep.shared.interfaces.lock().unwrap()[0]
+                .online
+                .store(false, Ordering::Release),
+            "hops" => data.hops = MAX_HOPS - 1,
+            _ => {}
+        }
+        let policy = ep.shared.routing.lock().unwrap().clone();
+        let accepted = super::super::transit::forward_on(&ep.shared, a.id(), data, &policy);
+        assert_eq!(accepted, refusal == "accepted");
+        assert_eq!(
+            ep.routing_counters().forwarded_packets,
+            u64::from(accepted),
+            "{refusal}"
+        );
+    }
+}
