@@ -140,6 +140,8 @@ pub mod resource_transfer;
 pub mod stamp;
 #[cfg(feature = "alloc")]
 pub mod token;
+// Both drivers' transport tables; allocation-free, so it builds with the floor.
+mod transport;
 
 #[cfg(feature = "alloc")]
 pub use address_book::{AddressBook, Peer};
