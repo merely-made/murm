@@ -119,7 +119,13 @@ pub(super) fn dispatch(
             }
         };
         let addressed_to_us_as_hop = pkt.header_type == crate::packet::HeaderType::Type2
-            && pkt.transport == Some(shared.identity.public().hash());
+            && pkt.transport == Some(shared.identity.public().hash())
+            && !shared
+                .registered
+                .lock()
+                .unwrap()
+                .iter()
+                .any(|r| r.dest == pkt.destination);
 
         if bridged.is_some() || addressed_to_us_as_hop {
             // Transit, never ours: a refusal drops it rather than handling it locally.

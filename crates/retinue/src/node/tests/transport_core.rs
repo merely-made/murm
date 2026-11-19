@@ -62,3 +62,27 @@ fn transit_precedes_reverse_proofs_and_handles_once() {
         }
     }
 }
+
+#[test]
+fn a_local_type_two_link_request_bypasses_transit_policy() {
+    for routing in [false, true] {
+        let mut node = relay();
+        node.transport.relay_packets = routing;
+        let (pending, mut request) = link::PendingLink::open(
+            node.destination(),
+            *node.identity.public(),
+            &[0x73; 64],
+            LinkTrailer {
+                mode: LinkMode::Aes256Cbc,
+                mtu: 500,
+            },
+        );
+        request.header_type = HeaderType::Type2;
+        request.transport = Some(node.identity.hash());
+        let proof = sent(&node.ingest(1, &request, 0)).expect("local destination accepts");
+        assert!(pending.prove(&proof).is_ok());
+        assert!(node.bridges.is_empty());
+        assert_eq!(node.transport_counters().forwarded_packets, 0);
+        assert_eq!(node.transport_counters().unroutable_packets, 0);
+    }
+}

@@ -37,3 +37,37 @@ async fn transit_precedes_reverse_proofs_and_handles_once() {
         assert_eq!(b.outbound.queues.pop().is_some(), bridged);
     }
 }
+
+#[tokio::test]
+async fn a_local_type_two_link_request_bypasses_transit_policy() {
+    for routing in [false, true] {
+        let ep = Endpoint::new(PrivateIdentity::from_secret_bytes(&[0x71; 64]));
+        let a = ep.attach_interface();
+        if routing {
+            ep.enable_routing();
+        }
+        let name = DestinationName::new("retinue", ["local"]);
+        let dest = name.destination_hash(ep.identity());
+        ep.register(name, b"");
+        while a.outbound.queues.pop().is_some() {
+            a.outbound.queues.delivery_complete();
+        }
+        let (pending, mut request) = link::PendingLink::open(
+            dest,
+            *ep.identity(),
+            &[0x73; 64],
+            LinkTrailer {
+                mode: LinkMode::Aes256Cbc,
+                mtu: 500,
+            },
+        );
+        request.header_type = HeaderType::Type2;
+        request.transport = Some(ep.identity().hash());
+        route(&ep.shared, a.id(), request);
+        let proof = a.outbound.queues.pop().expect("local destination accepts");
+        assert!(pending.prove(&proof).is_ok());
+        assert!(ep.shared.link_transport.lock().unwrap().is_empty());
+        assert_eq!(ep.routing_counters().forwarded_packets, 0);
+        assert_eq!(ep.routing_counters().policy_rejected, 0);
+    }
+}
