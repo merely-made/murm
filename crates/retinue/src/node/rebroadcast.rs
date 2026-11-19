@@ -3,9 +3,10 @@
 
 use super::{Action, Actions, InterfaceId, Node, QUEUED_ANNOUNCES, REBROADCAST_WINDOW};
 use crate::hash::AddressHash;
-use crate::iface_mode::{ModeFlags, announce_permitted};
+use crate::iface_mode::ModeFlags;
 use crate::packet::Packet;
 use crate::rebroadcast::{AnnounceCap, CapRate, Offer, Owed, Rebroadcast};
+use crate::transport::{relay_targets, release_from};
 
 impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES: usize>
     Node<PEERS, ACTIONS, LINKS, ROUTES>
@@ -116,19 +117,21 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
         now: u64,
         actions: &mut Actions<ACTIONS>,
     ) {
-        let from = self
-            .next_hop(rebroadcast.destination, now)
-            .map(|hop| self.interface_mode(hop.interface));
+        let route_ttl = self.transport.route_ttl;
+        let from = release_from(
+            &self.routes,
+            &rebroadcast.destination,
+            now,
+            super::routes::lifetimes(route_ttl),
+        )
+        .map(|hop| self.interface_mode(hop));
+        let known = self
+            .interfaces
+            .iter()
+            .map(|&id| (id, self.interface_mode(id), ModeFlags::default()));
+        let targets: Owed = relay_targets(from, known, only.as_deref()).collect();
         let mut owed = Owed::new();
-        for index in 0..self.interfaces.len() {
-            let interface = self.interfaces[index];
-            if only.as_ref().is_some_and(|only| !only.contains(&interface)) {
-                continue;
-            }
-            let out = self.interface_mode(interface);
-            if !announce_permitted(out, from, false, ModeFlags::default()) {
-                continue;
-            }
+        for interface in targets {
             if actions.len() >= ACTIONS {
                 // Both are bounded by the interface table.
                 let _ = owed.push(interface);

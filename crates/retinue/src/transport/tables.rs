@@ -183,7 +183,7 @@ pub(crate) fn sweep_routes<T: Tick, S: Store<RouteEntry<T>>>(
     store.sweep(|entry| !entry.live(now, &life), expired);
 }
 
-/// What [`record_bridge`] made of a link request.
+/// What [`record_bridge_undoably`] made of a link request.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) enum BridgeRecord {
     /// A retransmitted request for a bridge already held. An unproved bridge was replaced
@@ -199,6 +199,7 @@ pub(crate) enum BridgeRecord {
 /// stalest unproved bridge makes room, or failing one, a bridge unheard for `idle`
 /// milliseconds. A recently heard validated link is never displaced, so forged requests
 /// cannot evict carried links. Lapsed bridges are not pruned here: that is the caller's sweep.
+#[cfg(test)]
 pub(crate) fn record_bridge<T: Tick, S: Store<LinkBridge<T>>>(
     store: &mut S,
     link_id: AddressHash,
@@ -222,7 +223,8 @@ pub(crate) enum BridgeUndo<T, P> {
     },
 }
 
-/// [`record_bridge`], also handing back what it displaced.
+/// Record an unproved bridge by the rules of `record_bridge`, handing back what it displaced
+/// so a refused send can [`undo_bridge`].
 pub(crate) fn record_bridge_undoably<T: Tick, S: Store<LinkBridge<T>>>(
     store: &mut S,
     link_id: AddressHash,
