@@ -182,6 +182,20 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
         now: u64,
         actions: &mut Actions<ACTIONS>,
     ) -> bool {
+        self.forward_transport_packet_with(interface, packet, now, actions, |_, actions, action| {
+            actions.push(action)
+        })
+    }
+
+    /// Keep output admission observable while the return path is being prepared.
+    pub(super) fn forward_transport_packet_with(
+        &mut self,
+        interface: InterfaceId,
+        packet: &Packet,
+        now: u64,
+        actions: &mut Actions<ACTIONS>,
+        send: impl FnOnce(&Self, &mut Actions<ACTIONS>, Action) -> bool,
+    ) -> bool {
         if !self.transport.relay_packets
             || packet.header_type != HeaderType::Type2
             || packet.transport != Some(self.identity.hash())
@@ -250,19 +264,29 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
                 return true;
             }
         }
-        if actions.push(Action::Send {
-            interface: route.interface,
-            packet: forwarded,
-        }) {
+        let needs_reverse = packet.packet_type != PacketType::LinkRequest;
+        let displaced = needs_reverse
+            .then(|| self.remember_reverse(hash, interface, route.interface, now))
+            .flatten();
+        if send(
+            self,
+            actions,
+            Action::Send {
+                interface: route.interface,
+                packet: forwarded,
+            },
+        ) {
             // A route carrying transit is in use, and RNS refreshes it (`Transport.py` 2113).
             self.touch_route(packet.destination, now);
-            if packet.packet_type != PacketType::LinkRequest {
-                // RNS's reverse entry, so the packet's proof can come back (`Transport.py`
-                // 2104-2110). A link request's bridge was admitted before forwarding.
-                self.remember_reverse(hash, interface, route.interface, now);
-            }
             self.transport_counters.forwarded_packets =
                 self.transport_counters.forwarded_packets.saturating_add(1);
+        } else if needs_reverse {
+            self.reverse.pop();
+            if let Some((index, entry)) = displaced {
+                let _ = self.reverse.push(entry);
+                let last = self.reverse.len() - 1;
+                self.reverse.swap(index, last);
+            }
         }
         true
     }
@@ -274,24 +298,30 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
         received: InterfaceId,
         outbound: InterfaceId,
         now: u64,
-    ) {
-        self.reverse.retain(|entry| entry.packet != packet);
-        if self.reverse.is_full()
-            && let Some(index) = self
-                .reverse
-                .iter()
-                .enumerate()
-                .min_by_key(|(_, entry)| entry.seen)
-                .map(|(index, _)| index)
-        {
-            self.reverse.swap_remove(index);
-        }
+    ) -> Option<(usize, ReverseEntry)> {
+        let index = self
+            .reverse
+            .iter()
+            .position(|entry| entry.packet == packet)
+            .or_else(|| {
+                if self.reverse.is_full() {
+                    self.reverse
+                        .iter()
+                        .enumerate()
+                        .min_by_key(|(_, entry)| entry.seen)
+                        .map(|(index, _)| index)
+                } else {
+                    None
+                }
+            });
+        let displaced = index.map(|index| (index, self.reverse.swap_remove(index)));
         let _ = self.reverse.push(ReverseEntry {
             packet,
             received,
             outbound,
             seen: now,
         });
+        displaced
     }
 
     /// Carry a delivery proof back along a remembered reverse path. The entry is consumed

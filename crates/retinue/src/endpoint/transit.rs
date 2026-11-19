@@ -1,5 +1,6 @@
 //! Carrying others' traffic: link bridges, the reverse table, and forwarding.
 
+use alloc::vec::Vec;
 use std::collections::HashMap;
 use std::sync::atomic::Ordering;
 use std::sync::{Arc, Mutex};
@@ -91,6 +92,7 @@ pub(super) const REVERSE_TABLE_CAPACITY: usize = 4096;
 pub(super) const REVERSE_TABLE_CAPACITY: usize = 4;
 
 /// The way back for a carried packet's proof.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(super) struct ReverseEntry {
     received: InterfaceId,
     outbound: InterfaceId,
@@ -119,21 +121,46 @@ pub(super) fn make_room<V, A: Ord>(
 
 impl Shared {
     /// Remember the way back for a carried packet's proof (RNS `Transport.py` 2104-2110).
+    #[cfg(test)]
     pub(super) fn remember_reverse(
         &self,
         packet: AddressHash,
         received: InterfaceId,
         outbound: InterfaceId,
     ) {
+        self.send_with_reverse(packet, received, outbound, || true);
+    }
+
+    /// Record before output admission and restore every displaced row on refusal.
+    fn send_with_reverse(
+        &self,
+        packet: AddressHash,
+        received: InterfaceId,
+        outbound: InterfaceId,
+        send: impl FnOnce() -> bool,
+    ) -> bool {
         let now = Instant::now();
         let mut table = self.reverse_table.lock().unwrap();
-        if !table.contains_key(&packet) {
-            make_room(
-                &mut table,
-                REVERSE_TABLE_CAPACITY,
-                |entry| now.duration_since(entry.at) >= REVERSE_TIMEOUT,
-                |entry| entry.at,
-            );
+        let mut displaced = Vec::new();
+        if let Some(entry) = table.remove(&packet) {
+            displaced.push((packet, entry));
+        } else if table.len() >= REVERSE_TABLE_CAPACITY {
+            table.retain(|key, entry| {
+                if now.duration_since(entry.at) >= REVERSE_TIMEOUT {
+                    displaced.push((*key, *entry));
+                    false
+                } else {
+                    true
+                }
+            });
+            if table.len() >= REVERSE_TABLE_CAPACITY
+                && let Some(oldest) = table
+                    .iter()
+                    .min_by_key(|(_, entry)| entry.at)
+                    .map(|(key, _)| *key)
+            {
+                displaced.push((oldest, table.remove(&oldest).unwrap()));
+            }
         }
         table.insert(
             packet,
@@ -143,6 +170,12 @@ impl Shared {
                 at: now,
             },
         );
+        let accepted = send();
+        if !accepted {
+            table.remove(&packet);
+            table.extend(displaced);
+        }
+        accepted
     }
 
     /// Consume the return path for a proof addressed to `packet`, yielding the interface to
@@ -219,17 +252,16 @@ pub(super) fn forward(
                 BridgeAdmission::New => admitted = Some(link_id),
                 BridgeAdmission::Known => {}
             }
-        } else if pkt.packet_type != PacketType::LinkRequest {
-            // RNS records a reverse entry for every other carried packet, so its proof can
-            // come back the same way (`Transport.py` 2104-2110).
-            shared.remember_reverse(hash, from, out);
         }
-        // A route carrying transit is in use, and RNS refreshes it (`Transport.py` 2113).
-        shared.touch_path(dest);
-        // A request that never left must not hold the slot it was given until its deadline.
-        if !forward_on(shared, out, pkt, policy)
-            && let Some(link_id) = admitted
-        {
+        let accepted = if pkt.packet_type == PacketType::LinkRequest {
+            forward_on(shared, out, pkt, policy)
+        } else {
+            shared.send_with_reverse(hash, from, out, || forward_on(shared, out, pkt, policy))
+        };
+        if accepted {
+            shared.touch_path(dest);
+        } else if let Some(link_id) = admitted {
+            // An unsent request must not hold its new bridge until the deadline.
             shared.link_transport.lock().unwrap().remove(&link_id);
         }
     } else {
@@ -367,16 +399,22 @@ fn carry_on(
         return false;
     }
     pkt.hops += 1;
-    let accepted = if readdress {
+    if readdress {
         pkt.header_type = crate::packet::HeaderType::Type1;
         pkt.transport = None;
-        shared.try_send_on_class(out, pkt, TrafficClass::Transit)
-    } else {
-        matches!(
-            shared.push_to(out, pkt, TrafficClass::Transit),
-            QueueAdmission::Queued
-        )
-    };
+        // Address without touching the route; the caller commits its use after acceptance.
+        let via = shared
+            .path_table
+            .lock()
+            .unwrap()
+            .get(&pkt.destination)
+            .and_then(|entry| entry.transport);
+        pkt.address_via(via);
+    }
+    let accepted = matches!(
+        shared.push_to(out, pkt, TrafficClass::Transit),
+        QueueAdmission::Queued
+    );
     if accepted {
         shared
             .routing_stats

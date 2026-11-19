@@ -28,6 +28,119 @@ async fn type_two_route_misses_are_counted_once_and_filtered_before_lookup() {
 }
 
 #[tokio::test]
+async fn return_paths_are_transactional_with_output() {
+    for state in ["empty", "full", "replace", "expired"] {
+        for refusal in ["accepted", "full", "offline", "size", "egress", "outgoing"] {
+            for via in [None, Some(AddressHash::from_bytes([0x7b; 16]))] {
+                let ep = Endpoint::new(PrivateIdentity::from_secret_bytes(&[0x71; 64]));
+                let a = ep.attach_interface();
+                let b = ep.attach_interface();
+                ep.enable_routing();
+                let dest = AddressHash::from_bytes([0x7c; 16]);
+                ep.shared.learn_path(dest, b.id(), 0, via);
+                let learned = Instant::now() - Duration::from_secs(10);
+                ep.shared
+                    .path_table
+                    .lock()
+                    .unwrap()
+                    .get_mut(&dest)
+                    .unwrap()
+                    .learned = learned;
+                let mut data = single_packet(dest, vec![0x71; 48]);
+                data.header_type = HeaderType::Type2;
+                data.transport = Some(ep.identity().hash());
+                if refusal == "size" {
+                    data.payload = vec![0; 600];
+                }
+                let hash = data.hash();
+                if state != "empty" {
+                    for byte in 0..REVERSE_TABLE_CAPACITY as u8 {
+                        let key = if state == "replace" && byte == 1 {
+                            hash
+                        } else {
+                            AddressHash::from_bytes([byte; 16])
+                        };
+                        ep.shared.remember_reverse(key, 7, 8);
+                        let age = if state == "expired" {
+                            REVERSE_TIMEOUT + Duration::from_secs(u64::from(byte) + 1)
+                        } else {
+                            Duration::from_secs(u64::from(byte) + 1)
+                        };
+                        ep.shared
+                            .reverse_table
+                            .lock()
+                            .unwrap()
+                            .get_mut(&key)
+                            .unwrap()
+                            .at = Instant::now() - age;
+                    }
+                }
+                let before = ep.shared.reverse_table.lock().unwrap().clone();
+                match refusal {
+                    "full" => {
+                        while ep.shared.try_send_on_class(
+                            b.id(),
+                            data.clone(),
+                            TrafficClass::Transit,
+                        ) {}
+                    }
+                    "offline" => ep.shared.interfaces.lock().unwrap()[1]
+                        .online
+                        .store(false, Ordering::Release),
+                    "egress" => {
+                        ep.shared.routing.lock().unwrap().allowed_egress =
+                            super::super::routing::InterfaceSelector::None
+                    }
+                    "outgoing" => {
+                        assert!(ep.set_interface_outgoing(b.id(), false));
+                    }
+                    _ => {}
+                }
+                // Queue setup can address packets too; measure only the carried send.
+                ep.shared
+                    .path_table
+                    .lock()
+                    .unwrap()
+                    .get_mut(&dest)
+                    .unwrap()
+                    .learned = learned;
+                let generation = ep.shared.diagnostic_generation.load(Ordering::Acquire);
+                route(&ep.shared, a.id(), data);
+                let accepted = refusal == "accepted";
+                let after = ep.shared.reverse_table.lock().unwrap();
+                if accepted {
+                    assert!(after.contains_key(&hash));
+                    assert_eq!(
+                        after.len(),
+                        if matches!(state, "empty" | "expired") {
+                            1
+                        } else {
+                            REVERSE_TABLE_CAPACITY
+                        }
+                    );
+                } else {
+                    assert_eq!(
+                        *after, before,
+                        "{state}/{refusal}: refused send restores the table"
+                    );
+                }
+                assert_eq!(
+                    ep.shared.path_table.lock().unwrap()[&dest].learned > learned,
+                    accepted,
+                    "{state}/{refusal}: only accepted output touches the route"
+                );
+                assert_eq!(ep.routing_counters().forwarded_packets, u64::from(accepted));
+                assert_eq!(
+                    ep.shared.diagnostic_generation.load(Ordering::Acquire) - generation,
+                    u64::from(accepted),
+                    "{state}/{refusal}: route touched exactly once on acceptance"
+                );
+            }
+        }
+    }
+}
+
+#[tokio::test]
 async fn transit_precedes_reverse_proofs_and_handles_once() {
     for bridged in [false, true] {
         let ep = Endpoint::new(PrivateIdentity::from_secret_bytes(&[0x71; 64]));

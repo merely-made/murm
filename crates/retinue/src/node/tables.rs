@@ -92,7 +92,7 @@ impl<const N: usize> HashGenerations<N> {
 
 /// The way back for a carried packet's proof: RNS's reverse-table entry, keyed by the
 /// truncated packet hash the proof is addressed to.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(super) struct ReverseEntry {
     pub(super) packet: AddressHash,
     pub(super) received: InterfaceId,

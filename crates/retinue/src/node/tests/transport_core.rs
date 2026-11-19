@@ -43,6 +43,79 @@ fn type_two_route_misses_are_counted_once_and_filtered_before_lookup() {
 }
 
 #[test]
+fn return_paths_are_transactional_with_output() {
+    for state in ["empty", "full", "replace"] {
+        for accepted in [false, true] {
+            let mut relay = relay();
+            let (_, destination) = pair();
+            relay.ingest(2, &destination.announce(&blob([2; RAND_HASH_LEN]), None), 0);
+            let mut data = packet(destination.destination());
+            data.header_type = HeaderType::Type2;
+            data.transport = Some(relay.identity.hash());
+            let hash = data.hash();
+            if state != "empty" {
+                for byte in 0..4 {
+                    relay
+                        .reverse
+                        .push(ReverseEntry {
+                            packet: if state == "replace" && byte == 1 {
+                                hash
+                            } else {
+                                AddressHash::from_bytes([byte; 16])
+                            },
+                            received: 7,
+                            outbound: 8,
+                            seen: u64::from(byte),
+                        })
+                        .unwrap();
+                }
+            }
+            let before = relay.reverse.clone();
+            let learned = relay.routes[0].learned;
+            let mut actions = Actions::new();
+            if !accepted {
+                for _ in 0..8 {
+                    assert!(actions.push(Action::Send {
+                        interface: 2,
+                        packet: data.clone()
+                    }));
+                }
+            }
+            assert!(relay.forward_transport_packet_with(
+                1,
+                &data,
+                10,
+                &mut actions,
+                |node, actions, action| {
+                    let entry = node
+                        .reverse
+                        .iter()
+                        .find(|entry| entry.packet == hash)
+                        .expect("return path exists before output admission");
+                    assert_eq!((entry.received, entry.outbound, entry.seen), (1, 2, 10));
+                    assert_eq!(node.routes[0].learned, learned, "route not yet touched");
+                    actions.push(action)
+                },
+            ));
+            assert_eq!(relay.routes[0].learned, if accepted { 10 } else { learned });
+            assert_eq!(
+                relay.transport_counters().forwarded_packets,
+                u16::from(accepted)
+            );
+            if accepted {
+                assert_eq!(relay.reverse.len(), if state == "empty" { 1 } else { 4 });
+                assert!(relay.reverse.iter().any(|entry| entry.packet == hash));
+            } else {
+                assert_eq!(
+                    relay.reverse, before,
+                    "{state}: refused send restores the table"
+                );
+            }
+        }
+    }
+}
+
+#[test]
 fn transit_precedes_reverse_proofs_and_handles_once() {
     for bridged in [false, true] {
         let mut relay = relay();
