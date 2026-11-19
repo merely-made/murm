@@ -1,7 +1,7 @@
 //! The path table, path requests, and path responses.
 
 use alloc::vec::Vec;
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::sync::atomic::Ordering;
 use std::time::{Duration, Instant};
 
@@ -21,8 +21,8 @@ use super::runtime::Endpoint;
 use super::shared::Shared;
 
 /// The most destinations a path table will hold, so strangers' announces cannot grow memory
-/// without bound. Expired routes go first; then the oldest `learned`, which re-announces
-/// refresh, so the quietest peer is evicted. Far above what a LoRa mesh sees.
+/// without bound. Expired routes go first; then never-used routes, the soonest to expire
+/// first; then the route used longest ago (D30). Far above what a LoRa mesh sees.
 #[cfg(not(test))]
 pub(super) const PATH_TABLE_CAPACITY: usize = 4096;
 #[cfg(test)]
@@ -55,6 +55,24 @@ pub(super) type PathEntry = RouteEntry<Instant>;
 fn lifetimes(route_ttl: Duration) -> impl Fn(InterfaceMode) -> u64 + Copy {
     let full = duration_ticks(route_ttl);
     move |mode: InterfaceMode| mode.route_ttl(full)
+}
+
+/// Make room for one more route in a full path table at `now`, as a learned route does
+/// ([`transport::make_route_room`]). Returns whether a live route was evicted.
+pub(super) fn make_path_room(
+    paths: &mut HashMap<AddressHash, PathEntry>,
+    now: Instant,
+    route_ttl: Duration,
+) -> bool {
+    let mut evicted = false;
+    transport::make_route_room(
+        paths,
+        now,
+        PATH_TABLE_CAPACITY,
+        lifetimes(route_ttl),
+        |_, _, removal| evicted |= removal == Removal::Evicted,
+    );
+    evicted
 }
 
 impl PathEntry {
@@ -220,7 +238,6 @@ impl Shared {
                 mode,
                 used: None,
             };
-            // The dead go first, then, every route live, the quietest peer.
             let replaced = transport::record_route(
                 &mut *t,
                 dest,

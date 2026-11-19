@@ -111,6 +111,51 @@ fn routes_replace_then_evict_the_stalest<S: TestStore<RouteEntry<u64>>>() {
     assert_eq!(store.get(&key(2)).map(|r| r.iface), Some(3));
 }
 
+both!(
+    full_routes_drop_never_used_then_least_recently_used,
+    RouteEntry<u64>
+);
+fn full_routes_drop_never_used_then_least_recently_used<S: TestStore<RouteEntry<u64>>>() {
+    // 1 and 2 used at 30 and 20; 3 never used, learned at 3; 4 never used, roaming, learned
+    // at 4, so it expires first though it was learned last.
+    let mut store: S = filled(|n| match n {
+        1 => RouteEntry {
+            used: Some(30),
+            ..route(1, 1)
+        },
+        2 => RouteEntry {
+            used: Some(20),
+            ..route(1, 2)
+        },
+        3 => route(1, 3),
+        _ => RouteEntry {
+            mode: InterfaceMode::Roaming,
+            ..route(1, 4)
+        },
+    });
+    let mut gone = Vec::new();
+    for n in 5..=8 {
+        record_route(
+            &mut store,
+            key(n),
+            RouteEntry {
+                used: Some(31),
+                ..route(1, 10)
+            },
+            CAP,
+            ttl,
+            |k, _, why| {
+                gone.push((k, why));
+            },
+        );
+    }
+    let evicted = [4, 3, 2, 1].map(|n| (key(n), Removal::Evicted));
+    assert_eq!(
+        gone, evicted,
+        "never used, soonest to expire first; then least recently used"
+    );
+}
+
 both!(routes_full_of_dead_never_evict_the_living, RouteEntry<u64>);
 fn routes_full_of_dead_never_evict_the_living<S: TestStore<RouteEntry<u64>>>() {
     let mut store: S = filled(|n| route(1, if n == 3 { 150 } else { 0 }));

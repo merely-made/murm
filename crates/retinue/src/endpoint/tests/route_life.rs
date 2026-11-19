@@ -141,3 +141,54 @@ async fn an_own_link_proves_its_destination_alive() {
     assert_eq!(route.used, Some(route.learned));
     assert_eq!(route.mode, InterfaceMode::Roaming);
 }
+
+/// A full table drops, after the routes past their lifetime, the never-used routes, the one
+/// that would expire soonest first, and then the route used longest ago (D30).
+#[tokio::test]
+async fn a_full_table_drops_never_used_then_least_recently_used() {
+    let ep = Endpoint::new(PrivateIdentity::from_secret_bytes(&[0x77; 64]));
+    let a = ep.attach_interface();
+    let peers = [1, 2, 3, 4, 5, 6, 7].map(|n| AddressHash::from_bytes([n; 16]));
+    let aged = Instant::now() - Duration::from_secs(60);
+    let at = |s: u64| aged + Duration::from_secs(s);
+    let learn = |n: usize, s| ep.shared.learn_path_at(peers[n], a.id(), 1, None, at(s));
+    let use_at = |n: usize, s| {
+        ep.shared
+            .path_table
+            .lock()
+            .unwrap()
+            .get_mut(&peers[n])
+            .unwrap()
+            .used = Some(at(s));
+    };
+    let held = || {
+        let table = ep.shared.path_table.lock().unwrap();
+        let mut held: Vec<_> = (0..peers.len())
+            .filter(|n| table.contains_key(&peers[*n]))
+            .collect();
+        held.sort_unstable();
+        held
+    };
+    for n in 0..PATH_TABLE_CAPACITY {
+        learn(n, n as u64);
+    }
+    use_at(0, 10);
+    learn(4, 11);
+    assert_eq!(
+        held(),
+        [0, 2, 3, 4],
+        "the never-used route learned first goes"
+    );
+    use_at(2, 12);
+    use_at(3, 13);
+    learn(5, 14);
+    assert_eq!(
+        held(),
+        [0, 2, 3, 5],
+        "a never-used route goes before used ones"
+    );
+    use_at(5, 15);
+    learn(6, 16);
+    assert_eq!(held(), [2, 3, 5, 6], "then the route used longest ago");
+    assert_eq!(ep.routing_counters().paths_evicted, 3);
+}

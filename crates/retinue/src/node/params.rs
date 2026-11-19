@@ -177,8 +177,8 @@ impl core::error::Error for AirtimeTableFull {}
 ///
 /// A route's announce freshness lives exactly as long as the route, so a shorter lifetime
 /// would let an older emission back in once it lapsed. Traffic marks a route used without
-/// extending it, and `ROUTES` bounds the table: the quietest route is evicted to admit a new
-/// destination.
+/// extending it, and `ROUTES` bounds the table: to admit a new destination, a never-used
+/// route goes first, then the one used longest ago.
 pub const DEFAULT_ROUTE_TTL: u64 = 604_800_000;
 
 /// Route lifetime on an [`InterfaceMode::AccessPoint`] interface: one day, RNS's

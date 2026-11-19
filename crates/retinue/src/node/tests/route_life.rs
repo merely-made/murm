@@ -176,3 +176,53 @@ fn an_own_link_proves_its_destination_alive() {
     assert!(source.next_hop(peer, 200 + ROAMING_ROUTE_TTL - 1).is_some());
     assert!(source.next_hop(peer, 200 + ROAMING_ROUTE_TTL).is_none());
 }
+
+/// A full table drops, after the routes past their lifetime, the never-used routes, the one
+/// that would expire soonest first, and then the route used longest ago (D30).
+#[test]
+fn a_full_table_drops_never_used_then_least_recently_used() {
+    let mut node = Node::<16, 8, 4, 3>::new(
+        PrivateIdentity::from_secret_bytes(&[0x77; 64]),
+        DestinationName::new("retinue", ["full"]).name_hash(),
+    );
+    let peers: Vec<_> = (1..=6_u8)
+        .map(|seed| {
+            Node::<16, 8, 4, 3>::new(
+                PrivateIdentity::from_secret_bytes(&[seed; 64]),
+                DestinationName::new("retinue", ["peer"]).name_hash(),
+            )
+        })
+        .collect();
+    let learn = |node: &mut Node<16, 8, 4, 3>, n: usize, at| {
+        let announce = peers[n].announce(&blob([n as u8 + 1; RAND_HASH_LEN]), None);
+        node.ingest(IFACE, &announce, at);
+    };
+    let held = |node: &Node<16, 8, 4, 3>| {
+        let mut held: Vec<_> = (0..6)
+            .filter(|n| used(node, peers[*n].destination()).is_some())
+            .collect();
+        held.sort_unstable();
+        held
+    };
+    for n in 0..3 {
+        learn(&mut node, n, n as u64);
+    }
+    node.open_link(peers[0].destination(), IFACE, &[0x78; 64], 5);
+    learn(&mut node, 3, 6);
+    assert_eq!(
+        held(&node),
+        [0, 2, 3],
+        "the never-used route learned first goes"
+    );
+    node.open_link(peers[2].destination(), IFACE, &[0x79; 64], 7);
+    learn(&mut node, 4, 8);
+    assert_eq!(
+        held(&node),
+        [0, 2, 4],
+        "a never-used route goes before used ones"
+    );
+    node.open_link(peers[4].destination(), IFACE, &[0x7A; 64], 9);
+    learn(&mut node, 5, 10);
+    assert_eq!(held(&node), [2, 4, 5], "then the route used longest ago");
+    assert_eq!(node.transport_counters().evicted_routes, 3);
+}

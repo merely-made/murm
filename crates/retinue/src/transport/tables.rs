@@ -67,8 +67,7 @@ pub(crate) fn forget_interface<V, S: Store<V>>(
 
 /// Record a route, replacing any for `key`. A live route it replaces hands on its used mark
 /// (RNS `Transport.py` 2510, 2726); a new one starts as `route` has it. A new key in a full
-/// table first drops the routes past their lifetime, then the one learned longest ago.
-/// Returns the replaced route.
+/// table first makes room ([`make_route_room`]). Returns the replaced route.
 pub(crate) fn record_route<T: Tick, S: Store<RouteEntry<T>>>(
     store: &mut S,
     key: AddressHash,
@@ -81,20 +80,54 @@ pub(crate) fn record_route<T: Tick, S: Store<RouteEntry<T>>>(
     if let Some(old) = store.get(&key).filter(|old| old.live(now, &lifetime)) {
         route.used = old.used;
     }
-    if store.len() >= capacity && store.get(&key).is_none() {
-        // The dead first: a table full of expired routes must never evict a live one.
-        store.retain(
-            |_, entry| entry.live(now, &lifetime),
-            |gone, entry, _| removed(gone, entry, Removal::Expired),
-        );
-        if store.len() >= capacity
-            && let Some(stalest) = store.least(|entry| Some(entry.learned))
-            && let Some((entry, _)) = store.remove(&stalest)
-        {
-            removed(stalest, entry, Removal::Evicted);
-        }
+    if store.get(&key).is_none() {
+        make_route_room(store, now, capacity, &lifetime, &mut removed);
     }
     store.insert(key, route).ok().flatten()
+}
+
+/// Which route a full table gives up first: one never used, the soonest to expire first,
+/// then the one used longest ago (D30). `left` is in whole milliseconds, so `learned` breaks
+/// its ties.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+enum Standing<T> {
+    NeverUsed { left: u64, learned: T },
+    Used(T),
+}
+
+/// Make room for one more route in a full table at `now`: drop the routes past their
+/// lifetime, then, still full, the route that stands lowest ([`Standing`]). Each route
+/// taken out goes to `removed`.
+pub(crate) fn make_route_room<T: Tick, S: Store<RouteEntry<T>>>(
+    store: &mut S,
+    now: T,
+    capacity: usize,
+    lifetime: impl Fn(InterfaceMode) -> u64,
+    mut removed: impl FnMut(AddressHash, RouteEntry<T>, Removal),
+) {
+    if store.len() < capacity {
+        return;
+    }
+    // The dead first: a table full of expired routes must never evict a live one.
+    store.retain(
+        |_, entry| entry.live(now, &lifetime),
+        |gone, entry, _| removed(gone, entry, Removal::Expired),
+    );
+    let standing = |entry: &RouteEntry<T>| {
+        Some(entry.used.map_or_else(
+            || Standing::NeverUsed {
+                left: lifetime(entry.mode).saturating_sub(now.millis_since(entry.learned)),
+                learned: entry.learned,
+            },
+            Standing::Used,
+        ))
+    };
+    if store.len() >= capacity
+        && let Some(lowest) = store.least(standing)
+        && let Some((entry, _)) = store.remove(&lowest)
+    {
+        removed(lowest, entry, Removal::Evicted);
+    }
 }
 
 /// Mark a live route used at `now`. Its life does not move: RNS sets only the path's used

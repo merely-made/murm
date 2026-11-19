@@ -148,7 +148,8 @@ pub struct RoutingCounters {
     /// Valid announces learned locally but not relayed because their destination was rate
     /// blocked on this incoming interface.
     pub relay_rate_limited_announces: u64,
-    /// Routes dropped, the quietest first, to make room in a full path table.
+    /// Routes dropped to make room in a full path table: never-used ones first, then the
+    /// least recently used.
     pub paths_evicted: u64,
     /// Announces rejected because their exact freshness blob is in this destination's live
     /// route history. Packet-loop de-duplication is separate and runs later.
