@@ -1,8 +1,8 @@
 # One shared transport core for Node and Endpoint
 
-**Status, 2026-11-19: T0, T1 and T2 done and on `main`.** T2 is `be5a388`,
-`7a2a36c` and `b4cf3b7` (fast-forwarded from the lane branch). Row 1 moved to
-T3 (D13). T3 has not started and begins with row 1's fork.
+**Status, 2026-11-19: T0, T1, T2 and T2a done and on `main`; T3's forks are
+ruled (D21 to D27).** Route life follows stock 1.6.0 (phase T2a, D25 and D28
+to D32), `main` at `e6c0cec`. T3's code is next; none is written.
 
 **For:** the owner, 2026-11-18: "reducing duplicated code sounds good to me."
 
@@ -198,6 +198,133 @@ and set two choices aside. Each answer is the option's name as chosen.
 
 Links: area retinue transport · refines D16 · plans T2 · summary shared entries carry no key and are generic over time; the driver passes the route lifetime
 
+### T3 rulings, D21 to D24 (2026-11-19)
+
+Put with the evidence in "T3 inventory of the forwarding decisions". Each
+answer is the option's name as chosen.
+
+- **D21, how the board gets its interface list (row 1, refines D13):** options
+  were a list the board learns as interfaces are named; an explicit attach
+  call; or the list passed at each poll. Answer: "Learned as named". The board
+  keeps one bounded interface table. An interface joins when the shell first
+  names it in `ingest`, `poll` or a per-interface setting, and leaves on
+  `forget_interface`. No caller or test changes; a single-radio board behaves
+  as now.
+- **D22, a relay that does not fit in one poll:** one due relay becomes
+  several sends under D2, and a poll returns at most `ACTIONS` actions.
+  Options: carry the remainder; wait for room for all; send what fits and drop
+  the rest. Answer: "Carry the remainder". The board sends on as many
+  interfaces as fit and keeps the entry with the interfaces still owed.
+- **D23, statistics:** the shared functions return a decision with a reason,
+  and the drivers count seven of those reasons differently today (inventory
+  rows d to k). Options: reasons shared and counters as today; the same
+  counters in both now; add only the missing ones. Answer: "Reasons shared,
+  counters as today". No public counter changes in T3; the differences are a
+  follow-on.
+- **D24, carriage switched off while a bridge or return path exists
+  (inventory row a, T0 row 25):** the board treats the packet as not transit
+  and leaves the tables alone; the desktop drops and counts it, consuming a
+  proof's return path first. Stock with transport off skips its transport
+  block (`Transport.py:2271`, `2884`, `3009`). Options: the board's rule; the
+  desktop's rule; leave both. Answer: "Board's rule, as stock". The desktop
+  changes: with carriage off the packet goes on to local handling and the
+  return path is not consumed. Its per-interface ingress selector still
+  drops, after checking that carriage is on.
+
+Links: area retinue transport · refines D2, D13 · draws on T3 inventory · plans T3 · summary the board learns its interfaces as named and carries a relay's remainder; reasons are shared and counters stay; carriage off means not transit
+
+### T3 rulings, D25 to D27 (2026-11-19)
+
+Put with the evidence in "Stock 1.6.0 against the T3 differences". Each answer
+is the option's name as chosen.
+
+- **D25, a route's life when it carries traffic (T0 row 24, corrected):**
+  both drivers extend a route's life each time it carries a packet; stock
+  1.6.0 only marks the path used, moves expiry on an announce or on proven
+  liveness, and culls never-used paths. Options: follow stock after T3, once
+  in the shared core (recommended here); follow stock before T3; keep
+  Retinue's rule as an intended difference. Answer: "Follow stock, before
+  T3". This is phase T2a.
+- **D26, order of the announce relay gate (T0 row 26):** the board checks the
+  hop ceiling and then remembers the hash; the desktop remembers, then
+  rate-blocks, then checks the hop ceiling; stock remembers first. Options:
+  the desktop's order; the board's order. Answer: "Desktop's order". On the
+  board a repeated over-limit announce is filtered, not counted again.
+- **D27, hop count on a carried link's packets (T0 row 27, candidate):** stock
+  carries a link packet only if its hop count matches the count recorded for
+  that side; neither driver records or checks one. Options: record it and
+  decide later; add the check after T3; intended difference. Answer: "Record
+  it, decide later". Not ruled; not part of T3.
+
+Two differences were not put as questions because sharing leaves one answer.
+The shared sequence reads the route once per carried packet, where the desktop
+reads it up to three times (inventory row b); and a new bridge whose request
+is not sent is removed, which is the desktop's code and the board's effect
+(row c; stock keeps it, as D9 already departs from stock for return paths).
+
+Links: area retinue transport · refines D9 · draws on Stock 1.6.0 against the T3 differences · plans T2a, T3 · summary route life follows stock 1.6.0 before T3; the announce gate remembers first; the bridge hop check is recorded, not ruled
+
+### T2a rulings, D28 to D30 (2026-11-19)
+
+Put with the evidence in "T2a inventory". Each answer is the option's name as
+chosen.
+
+- **D28, which events move a route's expiry besides an announce:** options
+  were both of stock's events; our own links only; announces only. Answer:
+  "Both of stock's events". Expiry moves when this node, as initiator,
+  establishes a link, and when it carries a link proof whose signature it
+  verified. A proof passed on the side check alone moves nothing. The board's
+  pending link gains the destination hash.
+- **D29, the never-used cull:** stock culls a never-used path after 1.75 h on
+  a transport node and 12 min on a leaf, ten times that under 25 kbit/s. The
+  board does not originate path requests. Options: the desktop only, with
+  stock's numbers; both drivers; record "used" with no cull yet. Answer:
+  "Desktop only, stock's numbers". The shared core takes the linger time as a
+  parameter; the board passes none until it can ask for paths.
+- **D30, what goes first in a full table:** options were never-used, then
+  least recently used; oldest announce (today's code); never-used, then
+  oldest announce. Answer: "Never-used, then least recently used". Expired
+  routes first; then never-used routes, soonest expiry first; then the route
+  used longest ago.
+
+What D25 carries without a further question, each as stock does it:
+
+- Sending or carrying by a route marks it used and moves nothing else. A send
+  by a direct route marks it too (`Transport.py:1618`); today only a send
+  through a relay touches the route.
+- Carrying across a bridge marks the link destination's route used (`2440`).
+- An announce that replaces a route keeps its "used" mark (`2510`, `2726`).
+- Timing stays as ruled and as it is: a carried packet marks the route once
+  the send is accepted (D9); our own send marks it before the send.
+- Not taken: stock's unused-path pool of 2048 (D30 covers a full table), and
+  its path state (unknown, unresponsive, responsive).
+
+Links: area retinue transport · refines D25 · draws on T2a inventory · plans T2a · summary expiry moves on an announce, an own link and a verified carried link proof; the desktop culls never-used routes with stock's linger; a full table drops never-used routes first, then the least recently used
+
+### T2a rulings, D31 and D32 (2026-11-19)
+
+Put after the lane's four commits were read. Each answer is the option's name
+as chosen.
+
+- **D31, announce replay after a cull (refines D29):** a replayed or older
+  announce is refused only while a live route exists
+  (`announce_freshness.rs:222`). Once the desktop culls a never-used route,
+  12 min on a leaf or 1.75 h on a transport node, the next announce for it is
+  a first sighting, where before that took the 7-day lifetime. Stock keeps
+  its replay memory on the path entry it culls and behaves the same. Options:
+  accept it, as stock; keep refusing older announces for the full lifetime
+  with a third freshness state; no cull for now. Answer: "Accept it, as
+  stock". A known property: a leaf desktop has 12 minutes of replay
+  protection for a destination it has never used.
+- **D32, which interface is slow (refines D29):** stock lingers ten times
+  longer under 25 kbit/s. The lane counted only a configured bitrate; the LoRa
+  station in postilion sets an airtime allowance and no bitrate
+  (`crates/postilion/src/station.rs:66`). Options: bitrate, else infer from
+  the airtime allowance; bitrate only. Answer: "Bitrate, else airtime". More
+  than 160 ms for a 500-byte packet is under 25 kbit/s.
+
+Links: area retinue transport · refines D29 · plans T2a · summary the cull's replay window is accepted as stock's; a slow interface is known by bitrate, else by airtime allowance
+
 ## Phases and done-conditions
 
 ### T0. Settle the differences
@@ -246,6 +373,25 @@ own sweep.
 filter are each defined once; the allocation-free floor and the `alloc`-off
 build still build.
 
+### T2a. Route life as stock 1.6.0
+
+Ruled by D25, before T3. Carrying or sending by a route marks it used and no
+longer extends its life. A route's expiry moves when it is learned from an
+announce and on the events stock treats as proof that the destination is
+alive. A never-used route is culled after a linger time. One change to the
+shared route entry and operations, with each driver's call sites, failing
+test first, the same rule asserted in both drivers.
+
+**Forks, returned and ruled (D28 to D30):** expiry moves on an announce, on
+our own link being established and on a verified carried link proof; the
+desktop culls never-used routes with stock's linger times and the board does
+not; a full table drops expired routes, then never-used ones, then the least
+recently used.
+
+**Done when:** a route that only carries traffic expires at the time it was
+due when learned, in both drivers, under same-named tests; the Rust suite,
+the live suite and `peer_rnsrs.py` pass; the firmware images build.
+
 ### T3. Share the forwarding decisions
 
 Move bridge admission, type-2 forwarding, reverse-proof handling and the
@@ -253,9 +399,11 @@ announce relay gate into the shared module as functions that return a decision.
 Drivers keep locking, queues, `Actions`, statistics and policy selection.
 
 Row 1 lands here (D13): the core takes the list of attached, permitted
-interfaces as an input, and Node gains whatever it needs to supply that list
-and to carry unfinished sends across polls. That API comes back as a fork
-before code.
+interfaces as an input. The board learns its interfaces as the shell names
+them (D21) and carries the unsent remainder of a relay across polls (D22).
+The functions return a decision with a reason and each driver keeps its
+counters (D23). With carriage off a packet is not transit (D24). The announce
+gate remembers the hash first (D26).
 
 **Done when:** neither `node/` nor `endpoint/` decides whether or where a
 carried packet goes; each only supplies inputs and carries out the decision.
@@ -291,6 +439,11 @@ recorded beside the figures from before T2.
   only the endpoint has.
 - The interop gate shape (one script and one example program per gate) and the
   receipt layer. Both were measured on 2026-11-18 and are outside this plan.
+- The seven statistics the drivers count differently (T3 inventory rows d
+  to k), left as they are by D23.
+- The hop-count check on a carried link's packets (D27, candidate row 27).
+- A carried link request is stamp-checked by both drivers; stock checks only
+  at the destination. Noticed in T3's stock reading; not ruled.
 - The link-data echo windows (`LinkPacketMemory`, `sent_link_data`,
   `received_link_data`) are written twice and are not part of T2 (D17).
 - The scan for the oldest entry on every insert into a full table, and the
@@ -516,6 +669,174 @@ desktop prunes; bridge eviction is one ranked pass. Not measured: `heapless`
 0.9's `IndexMap`, a fixed-capacity map already among retinue's dependencies;
 time on a Cortex-M4; anything with the desktop's locks.
 
+### T3 inventory of the forwarding decisions (2026-11-19)
+
+A read-only lane listed, step by step with file and line, how each driver
+decides the four things T3 shares, at `d90113e`: carrying a link request and
+crossing a bridge; type-2 forwarding; carrying a proof back; and the announce
+relay gate at receipt and at release. Checked here against the source: the
+board's release loop and `poll`, both bridged paths, the desktop's proof arm,
+its announce gate and release, and its forward tail. The rest is the lane's
+reading. Paths start at `crates/retinue/src/`.
+
+The rows T1 converged read as ruled in both drivers (2 to 8, 11, 13, 20, 22,
+23). Row 1 is still open in code: the board sends a relay only on
+`rebroadcast.interface` (`node/rebroadcast.rs:112`).
+
+What the board knows about interfaces, for row 1 (D13):
+
+- It keeps no list of attached interfaces. It has three per-interface tables
+  of four entries each: non-default modes (`interface_modes`), airtime
+  allowances (`first_hop_airtime`) and announce caps (`announce_caps`).
+- `ingest(interface, packet, now)` and `poll(now, interface, blob)` each take
+  one interface (`node/ingest.rs:19`, `node/poll.rs:32`).
+- Every caller outside the crate's tests passes one interface: `radio-hand`
+  (`RADIO = 0`, and it ignores the interface of a `Send`,
+  `channel/node.rs:215`), `Instance`, `retinue-sim`, the fuzz target. Only the
+  `path_request_oracle` example ingests on several. No caller outside tests
+  sets an interface mode on a Node. About 320 test call sites name an
+  interface without declaring it first.
+- A relay that does not fit in one `poll` stays in the rebroadcast table and
+  is taken by the next: the release loop pops only while `Actions` has room
+  (`node/rebroadcast.rs:89`), and relays run last in `poll`. `ACTIONS` is 8 on
+  the boards and 1 in one test (`tests/node_pause/forced.rs:88`).
+- A carried data packet, bridged packet or proof is sent in the same `ingest`
+  or lost; nothing re-offers it.
+
+Differences the T0 table does not list. Those marked "outcome" change what
+happens to a packet; the others change only which statistic moves.
+
+| # | Difference | Node | Endpoint | Kind |
+|---|---|---|---|---|
+| a | Carriage switched off while a bridge or return path exists | not transit: the packet goes on to local handling and the tables are untouched (`node/transit.rs:85`, `178`, `292`) | dropped and counted; a proof's return path is consumed before the policy is asked (`endpoint/router.rs:132`, `325`) | outcome |
+| b | One read of the route per carried packet | one live route gives interface, next hop and hop count | the interface is read live, then the next hop and the hop count are read again without a liveness check (`endpoint/transit.rs:279`, `362`) | outcome, only if the route changes between reads |
+| c | A new bridge whose request is not sent | recorded only if the action list has room; never removed (`node/transit.rs:227`) | recorded, then removed if the send is refused (`endpoint/transit.rs:232`) | same result by different means |
+| d | Order of the announce relay gate | hop ceiling, then duplicate memory, then size (`node/transit.rs:345`) | duplicate memory, then rate block, then hop ceiling (`endpoint/announces.rs:441`) | statistics: a repeat of a refused announce is counted again on the board, once on the desktop |
+| e | Packet for a bridge on a third interface | dropped, not counted (`node/transit.rs:99`) | dropped, `policy_rejected` (`endpoint/router.rs:109`) | statistics |
+| f | Traffic ahead of the link proof, or a bad proof | `unvalidated_link_packets` | `policy_rejected` | statistics |
+| g | A duplicate carried packet | not counted | `filtered_packets` | statistics |
+| h | Bridge evicted, bridge refused | `evicted_bridges`, `refused_bridges` | eviction not counted; refusal is `policy_rejected` | statistics |
+| i | Link-request stamp refused | `refused_stamps`, checked after the path-request branch | not counted, checked before it | statistics and order |
+| j | Relayed announce counted | once per accepted send | once per transmission if any interface took it | statistics; matters once the board fans out |
+| k | Lapsed bridges pruned | every packet and poll, `expired_bridges` | every link request, not counted | D18; statistics |
+
+Stock, read here for (a): with transport off, stock skips its whole transport
+block (`Transport.py:2271`) and consults neither the link table for a link
+proof (`2884`) nor the reverse table for a proof (`3009`; the entry is not
+popped), so the packet goes on to local handling. The board matches. Row 24
+(stock marks a link's destination path as used when carrying bridged traffic)
+is still a candidate, not ruled.
+
+### Stock 1.6.0 against the T3 differences (2026-11-19)
+
+A second read-only lane read stock RNS 1.6.0 for seven of the differences
+above. Read again here: the lines for the path "used" mark and expiry. The
+rest is the lane's reading. Lines are `Transport.py` in the 1.6.0 wheel.
+
+- **A route's life when it carries traffic (corrects candidate row 24).**
+  Both drivers extend a route's life each time it carries a packet
+  (`transport/tables.rs:97`, called at `node/transit.rs:273` and
+  `endpoint/transit.rs:231`); the comments cite lines of an older RNS. Stock
+  1.6.0 does not. Carrying by path (`2387`), carrying across a link (`2440`)
+  and sending (`1618`) set only the path's "used" mark. Expiry is set when the
+  path is learned and moved only by `mark_path_responsive` (`3633`), whose
+  comment reads "Marking a path live must only occur on events that
+  cryptographically prove recent destination liveness". The "used" mark keeps
+  a path out of the never-used cull (`1145`; 1.75 h on a transport node,
+  12 min on a leaf, `228`). Retinue has no "used" mark and no never-used cull.
+  Neither driver marks anything when carrying across a bridge.
+- **A link packet whose hop count is wrong.** Stock carries a packet across
+  its link table only if its hop count equals the count recorded for that
+  side (`2408` to `2424`). Neither driver records or checks hop counts on a
+  bridge. On a third interface all three drop the packet and remember
+  nothing.
+- **Order of the announce relay gate (inventory row d).** Stock remembers the
+  announce's hash before any relay check (`2235`), limits hops early (`2022`,
+  `2489`), suppresses repeats by the freshness of the random blob (`2499` to
+  `2578`), then rate-limits (`2584`), then inserts (`2607`). The desktop
+  remembers before its rate and hop checks, as stock; the board checks hops
+  first.
+- **A carried link request that is not sent (row c).** Stock writes the link
+  entry before transmitting and never removes it (`2374`, `2386`);
+  `Transport.transmit` returns nothing. The desktop removes a new bridge on a
+  refused send; the board records one only when the send will fit.
+- **Hop count for the proof timeout (row b).** Stock uses the path entry's
+  hops, floored at one, plus the first-hop extra (`2298`, `2333`). Both
+  drivers use the route's hops plus one and the same extra
+  (`node/params.rs:140`). The desktop reads the route a second time for it.
+- **Stamp check on a carried link request (row i).** Stock checks a link
+  request's stamp only at its destination (`Link.py:195`), never when carrying
+  one. Both drivers check carried requests against the route's announced cost
+  when their policy enforces stamps (`node/ingest.rs:63`,
+  `endpoint/router.rs:69`). Noticed; not part of this plan.
+- **Own receipt after carrying a proof.** Stock carries a proof and then also
+  tries its own receipts (`3009` to `3036`). Both drivers stop after
+  carrying, as D8 ruled.
+
+### T2a inventory: route life in stock 1.6.0 and in Retinue (2026-11-19)
+
+A read-only lane listed every place stock and both drivers set, extend or
+remove a route. Read again here: stock's liveness callers, the carried-over
+"used" mark and the linger selection. The rest is the lane's reading. Stock
+lines are `Transport.py` unless named.
+
+Stock 1.6.0:
+
+- A path entry holds a timestamp, an absolute expiry and a "used" time (0 is
+  never used) (`4866` to `4873`).
+- An accepted announce writes a new entry: timestamp now, expiry now plus the
+  lifetime for the receiving interface's mode (7 days, 1 day for access
+  point, 6 hours for roaming), and "used" carried over from the entry it
+  replaces (`2494`, `2510`, `2726`). A rate-blocked announce moves none of
+  the three (`2717`).
+- Sending by a path (`1618`, before the send, direct paths included),
+  carrying by a path (`2387`) and carrying across a link (`2440`, on the
+  link destination's path) set "used" only.
+- `mark_path_responsive` sets timestamp, expiry and "used" (`3632`). It is
+  called when this node, as initiator, validates a link proof (`Link.py:513`)
+  and when a transport node validates the signature of a link proof it is
+  carrying (`2938`), plus two link-rebalancing cases (`2907`, `2983`). A
+  proved packet receipt and a concluded resource call nothing.
+- The cull runs every 5 s (`1014`): a path past expiry goes; a path whose
+  interface is gone goes; a never-used path goes once its timestamp is older
+  than the linger time (`1137` to `1148`). Linger is 1.75 h on a transport
+  node and 12 min on a leaf (`228`, `451`), ten times that on an interface
+  under 25 kbit/s (`232`). Every 5 min, never-used paths beyond 2048 are
+  culled, fast interfaces first, soonest expiry first (`1150`).
+- No lookup checks expiry; a path is usable until the cull removes it.
+- A separate path state (unknown, unresponsive, responsive) lets a
+  same-emission announce with more hops replace an unresponsive path
+  (`2573`). Not part of D25.
+
+Retinue:
+
+- `RouteEntry` holds `learned` and the learning interface's mode; a route is
+  live while `now - learned` is under the mode's lifetime
+  (`transport/entries.rs:9`). There is no "used" mark.
+- `touch_route` sets `learned = now`. Callers: the board when opening a link
+  through a relay, before the send (`node/links.rs:91`), and when carrying a
+  type-2 packet, after acceptance (`node/transit.rs:273`); the desktop when
+  addressing any of its own packets through a relay, before the send
+  (`endpoint/shared.rs:477`), and when carrying, after acceptance
+  (`endpoint/transit.rs:231`). A send by a direct route touches nothing.
+  Carrying across a bridge touches nothing.
+- Routes are learned only from announces (and on the desktop from a gravity
+  repoint and a tunnel restore, which keeps the mirrored `learned`).
+- At capacity both drivers drop expired routes, then the one with the oldest
+  `learned`.
+- Nothing distinguishes a transport node from a leaf in route life. The board
+  does not originate path requests; the desktop does.
+- Where a link is established as initiator, the destination hash is in scope
+  on the desktop (`endpoint/link_setup.rs:325`) and is not stored with the
+  board's pending link (`node/links.rs:243`). Where a carried link proof's
+  signature is checked, the bridge holds the destination
+  (`node/transit.rs:109`, `endpoint/transit.rs:53`); both drivers also pass a
+  proof on the side check alone when the destination's identity is unknown.
+- Tests that assert traffic extends a route's life: `a_route_in_use_is_refreshed`
+  in `node/tests/routes.rs:225` and `endpoint/tests/routes.rs:278`,
+  `return_paths_are_transactional_with_output` in both `transport_core.rs`
+  files, and `routes_touch_only_when_live` in `transport/tests.rs:154`.
+
 ### rns-rs boundary (2026-11-18)
 
 Read at `663e5e32d526c42ffaf4044ef322cd800b248d10`, with a clean checkout.
@@ -714,3 +1035,62 @@ options are in this file's history and in the T0 table.
   branches and targets are removed, the measurement branch
   (`transport-core-t2-measure`, `04d72d3`) with them: its numbers are in
   "T2 storage measurement" and its benchmark is not kept.
+- 2026-11-19: T3 assessed in two read-only lanes: an inventory of the four
+  decision sequences and of what the board knows about interfaces, and a
+  stock 1.6.0 reading of seven differences the T0 table did not list. Both
+  were checked here in part (see their Findings sections). Two rounds went to
+  the owner: D21 to D24, then D25 to D27. The route-life finding (D25) adds
+  phase T2a ahead of T3; a third read-only lane is listing stock's and
+  Retinue's route-lifetime code for it. No code is written.
+- 2026-11-19: T2a's inventory came back and was checked in part; its three
+  forks were put to the owner and ruled (D28 to D30). T2a's code started in an
+  opus lane on branch `transport-core-t2a` in
+  `Code/worktrees/murm-transport-core-t2a`, cut from `d90113e`: four changes,
+  failing test first, the same rule asserted in both drivers.
+- 2026-11-19: the T2a lane committed its four changes on `transport-core-t2a`
+  (`ecef260`, `53d734f`, `3f242e6`, `1bb946a`), no fork. Read here against the
+  rulings: the shared rule, the board, the desktop, and the desktop's lock
+  order (route-life checks read interface state while holding the path table;
+  nothing takes the path table while holding the interface, policy or routing
+  locks). `run_live.py` at `1bb946a`: 35 of 35. Two questions went to the
+  owner (D31, D32). The lane's other readings stand as built: a
+  shared-instance client that forwards still proves a route from a carried
+  proof (stock has no reachable case); a board link refused by a full link
+  table moves nothing; an announce hands on the used mark only from a live
+  route; the own-send mark excludes announces. The lane is adding one commit
+  for D32 and for test names that still state the old eviction rule.
+- 2026-11-19: the lane's fifth commit, `e6c0cec`, decides a slow interface by
+  `Shared::first_hop_airtime` (the configured bitrate, else the airtime
+  allowance) against the airtime of one MTU at 25 kbit/s
+  (`endpoint/paths.rs:84`), and renames two tests and one helper whose names
+  stated the old eviction rule. Read here. T2a is 32 files, 1193 lines
+  added and 209 removed; the test count rises by 22. 
+  - Existing tests changed under D25 and D28: `a_route_in_use_is_refreshed`
+    in both drivers (renamed `a_route_in_use_is_marked_not_extended`; the
+    route is now gone at its lifetime, and a direct send marks it too);
+    `return_paths_are_transactional_with_output` in both (asserts the used
+    mark, not `learned`); `routes_touch_only_when_live` (renamed
+    `routes_are_marked_used_only_when_live`);
+    `open_link_addresses_the_first_relay` on the board (expiry moves from
+    1 + lifetime to 5 + lifetime, because the link established at 5 proves
+    the route); and the setup of
+    `routes_live_a_week_unless_their_interface_mode_shortens_them` on the
+    desktop (marks its routes used so the linger does not cut them).
+  - Run here at `e6c0cec`: nextest 856 of 857 (the known timing test);
+    no-alloc tests 58 of 58; thumb `alloc` check builds; `peer_rnsrs.py` 8 of
+    8 against rns-rs `663e5e3`, rebuilt on the Unix host and removed after;
+    T114 image builds; V4 image builds with `--ignore-rust-version`.
+    `run_live.py` passed 35 of 35 at `1bb946a` and was not rerun for the
+    fifth commit, which changes only the linger's slow test and names.
+  - T114 image against T2 (`b4cf3b7`): text 376,670 to 377,630 bytes (960
+    more), bss 138,812 to 139,772 (960 more).
+  - Public surface: unchanged. The board's pending link holds its destination
+    (private).
+  T2a's done-condition is met on the branch. Not merged.
+- 2026-11-19: the owner was shown the gates and three readings the lane built
+  without a ruling (a forwarding shared-instance client extends a route from a
+  carried, verified proof; a board link refused for a full link table moves
+  nothing; a path response we send does not mark the route used) and said
+  "Commit, merge, push." `main` fast-forwarded from `d90113e` to `e6c0cec`,
+  the tree the gates ran on. The lane's worktree, branch and build target
+  were removed.
