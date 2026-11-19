@@ -85,7 +85,8 @@ fn open_link_addresses_the_first_relay() {
     let back = sent(&relay.ingest(IFACE, &proof, 4)).unwrap();
     assert!(link_up(&source.ingest(IFACE, &back, 5)).is_some());
 
-    let expired = 1 + DEFAULT_ROUTE_TTL;
+    // The link proved the destination alive at 5, which started the route's life over.
+    let expired = 5 + DEFAULT_ROUTE_TTL;
     assert_eq!(source.next_hop(destination.destination(), expired), None);
     assert_eq!(
         source.route_count(),

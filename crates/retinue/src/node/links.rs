@@ -93,7 +93,7 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
         let deadline = now
             .saturating_add(link_request_timeout(hop.map_or(0, |hop| hop.hops)))
             .saturating_add(self.first_hop_airtime(interface));
-        let _ = self.pending.push((attempt, deadline, now));
+        let _ = self.pending.push((attempt, destination, deadline, now));
 
         actions.push(Action::Send {
             interface,
@@ -236,11 +236,11 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
             .pending
             .iter()
             .enumerate()
-            .find_map(|(index, (attempt, _, _))| Some((index, attempt.prove(packet).ok()?)))
+            .find_map(|(index, (attempt, _, _, _))| Some((index, attempt.prove(packet).ok()?)))
         else {
             return;
         };
-        let (_, _, opened) = self.pending.swap_remove(index);
+        let (_, destination, _, opened) = self.pending.swap_remove(index);
         if self.links.is_full() {
             self.refused_links = self.refused_links.saturating_add(1);
             return;
@@ -260,6 +260,8 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
             .links
             .push((link, packet.clone(), Liveness::initiator(rtt, now)));
         self.bind_link_interface(link_id, interface);
+        // An established link proves its destination alive (`Link.py` 513).
+        self.prove_route_alive(destination, now);
         actions.push(Action::LinkUp { link_id });
         actions.push(Action::Send {
             interface,

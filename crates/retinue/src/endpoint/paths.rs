@@ -80,6 +80,24 @@ impl Shared {
         });
     }
 
+    /// Prove `dest`'s live route alive now: its life starts over in its interface's current
+    /// mode, and it is marked used.
+    pub(super) fn prove_path_alive(&self, dest: AddressHash) {
+        let now = Instant::now();
+        let route_ttl = self.route_ttl();
+        self.write_diagnostic(|| {
+            let mut paths = self.path_table.lock().unwrap();
+            let proved = transport::prove_route_alive(
+                &mut *paths,
+                &dest,
+                now,
+                |iface| self.interface_mode(iface),
+                lifetimes(route_ttl),
+            );
+            ((), proved)
+        });
+    }
+
     pub(super) fn route_ttl(&self) -> Duration {
         Duration::from_millis(self.route_ttl_ms.load(Ordering::Relaxed))
     }

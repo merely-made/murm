@@ -50,7 +50,7 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
                 .push(link.close_packet(&iv()))
                 .expect("link bound");
         }
-        for (pending, _, _) in &self.pending {
+        for (pending, _, _, _) in &self.pending {
             report
                 .pending_links
                 .push(pending.link_id())
@@ -154,7 +154,7 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
     /// Drop link requests unanswered at their deadline, returning their link ids.
     pub(super) fn expire_link_requests(&mut self, now: u64) -> BoundedVec<AddressHash, LINKS> {
         let mut expired_ids = BoundedVec::new();
-        self.pending.retain(|(attempt, deadline, _)| {
+        self.pending.retain(|(attempt, _, deadline, _)| {
             let expired = now >= *deadline;
             if expired {
                 let _ = expired_ids.push(attempt.link_id());

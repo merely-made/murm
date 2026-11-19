@@ -115,6 +115,27 @@ pub(crate) fn mark_route_used<T: Tick, S: Store<RouteEntry<T>>>(
     }
 }
 
+/// Prove a live route alive at `now`, as RNS does only on events that cryptographically
+/// prove the destination's recent liveness (`Transport.py` 3632-3641): its life starts over,
+/// in `mode` of its interface now, and it is marked used. Returns whether it was proved.
+pub(crate) fn prove_route_alive<T: Tick, S: Store<RouteEntry<T>>>(
+    store: &mut S,
+    key: &AddressHash,
+    now: T,
+    mode: impl FnOnce(InterfaceId) -> InterfaceMode,
+    lifetime: impl Fn(InterfaceMode) -> u64,
+) -> bool {
+    match store.get_mut(key) {
+        Some(entry) if entry.live(now, lifetime) => {
+            entry.learned = now;
+            entry.used = Some(now);
+            entry.mode = mode(entry.iface);
+            true
+        }
+        _ => false,
+    }
+}
+
 /// Remove the routes past their lifetime at `now`, handing each to `expired`.
 pub(crate) fn sweep_routes<T: Tick, S: Store<RouteEntry<T>>>(
     store: &mut S,

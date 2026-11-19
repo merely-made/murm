@@ -324,6 +324,8 @@ impl Endpoint {
             result = &mut rx => match result {
                 Ok((link, iface)) => {
                     guard.armed = false; // router removed both entries on success
+                    // An established link proves its destination alive (`Link.py` 513).
+                    self.shared.prove_path_alive(dest);
                     if self.shared.is_running() {
                         // The responder activates the link on our RTT report, so it
                         // must precede any application packet.

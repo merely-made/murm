@@ -79,3 +79,100 @@ fn carrying_across_a_bridge_marks_the_destination_route_used() {
         assert_eq!(relay.routes[0].entry.learned, 0);
     }
 }
+
+/// The relay's route to a destination whose link it carried, once the destination's signed
+/// proof has come back and its send was `accepted` or refused.
+fn route_after_a_carried_proof(accepted: bool) -> crate::transport::RouteEntry<u64> {
+    let mut relay = relay();
+    let (mut source, mut destination) = pair();
+    let announce = destination.announce(&blob([0x65; RAND_HASH_LEN]), None);
+    source.ingest(IFACE, &relayed(&mut relay, 2, &announce, 0).unwrap(), 1);
+    relay
+        .set_interface_mode(2, InterfaceMode::AccessPoint)
+        .unwrap();
+    let request = sent(
+        &source
+            .open_link(destination.destination(), IFACE, &[0x66; 64], 10)
+            .unwrap(),
+    )
+    .unwrap();
+    let forwarded = sent(&relay.ingest(1, &request, 10)).unwrap();
+    let proof = sent(&destination.ingest(IFACE, &forwarded, 11)).unwrap();
+    let mut actions = Actions::new();
+    if !accepted {
+        while actions.push(Action::Send {
+            interface: 3,
+            packet: proof.clone(),
+        }) {}
+    }
+    assert!(relay.forward_bridged_packet(2, &proof, 20, &mut actions));
+    relay
+        .routes
+        .iter()
+        .find(|r| r.key == destination.destination())
+        .unwrap()
+        .entry
+}
+
+/// Carrying a link proof whose signature this node verified proves the destination alive
+/// once the proof is sent (RNS `Transport.py` 2928-2938): the route's life starts over in its
+/// interface's current mode. A proof passed on the side check alone, the destination's
+/// identity unknown, marks the route used and moves nothing else.
+#[test]
+fn a_verified_carried_link_proof_proves_its_destination_alive() {
+    let route = route_after_a_carried_proof(true);
+    assert_eq!(
+        (route.learned, route.used, route.mode),
+        (20, Some(20), InterfaceMode::AccessPoint)
+    );
+    let route = route_after_a_carried_proof(false);
+    assert_eq!(
+        (route.learned, route.used, route.mode),
+        (0, Some(10), InterfaceMode::Full),
+        "a refused send proves nothing"
+    );
+
+    let mut relay = relay();
+    let destination = AddressHash::from_bytes([0x75; 16]);
+    relay.learn_route(destination, 2, 1, None, 0);
+    let id = AddressHash::from_bytes([0x76; 16]);
+    assert!(relay.remember_bridge(id, destination, 1, 2, 1000, 10));
+    let mut proof = link_packet(id);
+    proof.packet_type = PacketType::Proof;
+    proof.context = link::CTX_LRPROOF;
+    relay.forward_bridged_packet(2, &proof, 100, &mut Actions::new());
+    assert_eq!(relay.bridges[0].entry.proof_deadline, None, "carried");
+    let route = relay.routes[0].entry;
+    assert_eq!(
+        (route.learned, route.used),
+        (0, Some(100)),
+        "an unverified proof only marks"
+    );
+}
+
+/// Establishing a link as its initiator proves the destination alive (RNS `Link.py` 513,
+/// `Transport.py` 3632-3641): the route's life starts over in its interface's current mode,
+/// and it is marked used.
+#[test]
+fn an_own_link_proves_its_destination_alive() {
+    let (mut source, mut destination) = pair();
+    let peer = destination.destination();
+    source.ingest(
+        IFACE,
+        &destination.announce(&blob([0x63; RAND_HASH_LEN]), None),
+        0,
+    );
+    source
+        .set_interface_mode(IFACE, InterfaceMode::Roaming)
+        .unwrap();
+    let request = sent(&source.open_link(peer, IFACE, &[0x64; 64], 100).unwrap()).unwrap();
+    let proof = sent(&destination.ingest(IFACE, &request, 101)).unwrap();
+    assert!(link_up(&source.ingest(IFACE, &proof, 200)).is_some());
+    let route = source.routes[0].entry;
+    assert_eq!(
+        (route.learned, route.used, route.mode),
+        (200, Some(200), InterfaceMode::Roaming)
+    );
+    assert!(source.next_hop(peer, 200 + ROAMING_ROUTE_TTL - 1).is_some());
+    assert!(source.next_hop(peer, 200 + ROAMING_ROUTE_TTL).is_none());
+}

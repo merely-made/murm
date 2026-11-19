@@ -46,30 +46,42 @@ impl LinkBridge {
         self.lapsed(now, duration_ticks(LINK_TRANSPORT_TTL))
     }
 
-    /// Whether `pkt`, heard on `iface`, may cross: `None` if not, else whether it is the proof
-    /// that validates the bridge once carried. Only the two sides may use it, nothing crosses
-    /// before the proof, and the proof must come from the destination's side under its
-    /// signature (the side alone when its identity is unknown).
+    /// Whether `pkt`, heard on `iface`, may cross, and as what. Only the two sides may use
+    /// it, nothing crosses before the proof, and the proof must come from the destination's
+    /// side under its signature (the side alone when its identity is unknown).
     pub(super) fn admit(
         &self,
         iface: InterfaceId,
         pkt: &Packet,
         book: &Mutex<AddressBook>,
-    ) -> Option<bool> {
+    ) -> Option<Crossing> {
         if iface != self.from && iface != self.out {
             return None;
         }
         if pkt.packet_type != PacketType::Proof || pkt.context != link::CTX_LRPROOF {
-            return self.proof_deadline.is_none().then_some(false);
+            return self.proof_deadline.is_none().then_some(Crossing::Traffic);
         }
-        let signed = iface == self.out
-            && book
-                .lock()
-                .unwrap()
-                .resolve(self.destination)
-                .is_none_or(|peer| link::proof_is_signed_by(pkt, &peer.identity));
-        signed.then_some(true)
+        let checked = book
+            .lock()
+            .unwrap()
+            .resolve(self.destination)
+            .map(|peer| link::proof_is_signed_by(pkt, &peer.identity));
+        match (iface == self.out, checked) {
+            (true, Some(true)) => Some(Crossing::Proof { verified: true }),
+            (true, None) => Some(Crossing::Proof { verified: false }),
+            _ => None,
+        }
     }
+}
+
+/// What [`LinkBridge::admit`] lets cross.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(super) enum Crossing {
+    /// A packet of a validated link.
+    Traffic,
+    /// The destination's proof, which validates the bridge once carried; `verified` when
+    /// its signature was checked against the destination's identity.
+    Proof { verified: bool },
 }
 
 /// How long a carried packet's return path is kept for its proof (RNS

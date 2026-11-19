@@ -27,7 +27,7 @@ use super::resource_session::register_resource_session;
 use super::shared::{LinkKind, Shared};
 use super::single::deliver_single;
 use super::stream::{StreamFault, register_stream};
-use super::transit::{forward, forward_on, forward_reverse_proof_on};
+use super::transit::{Crossing, forward, forward_on, forward_reverse_proof_on};
 use super::watchdog::note_link_inbound;
 
 /// Dispatch one inbound packet that arrived on `iface`.
@@ -106,14 +106,14 @@ pub(super) fn dispatch(
             let now = Instant::now();
             match find_live(&*bridges, &pkt.destination, |bridge| !bridge.lapsed_at(now)) {
                 Some(bridge) => {
-                    let Some(proves) = bridge.admit(iface, &pkt, &shared.address_book) else {
+                    let Some(crossing) = bridge.admit(iface, &pkt, &shared.address_book) else {
                         shared
                             .routing_stats
                             .policy_rejected
                             .fetch_add(1, Ordering::Relaxed);
                         return;
                     };
-                    Some((bridge.from, bridge.out, bridge.destination, proves))
+                    Some((bridge.from, bridge.out, bridge.destination, crossing))
                 }
                 _ => None,
             }
@@ -137,7 +137,7 @@ pub(super) fn dispatch(
                 return;
             }
             match bridged {
-                Some((a, b, destination, proves)) => {
+                Some((a, b, destination, crossing)) => {
                     if pkt.hops.saturating_add(1) < policy.max_hops
                         && !shared.packet_is_new(pkt.context, pkt.hash())
                     {
@@ -148,10 +148,17 @@ pub(super) fn dispatch(
                     // As in RNS, the bridge is validated as its proof goes out, not before.
                     if forward_on(shared, out, pkt, &policy) {
                         let mut bridges = shared.link_transport.lock().unwrap();
+                        let proves = crossing != Crossing::Traffic;
                         refresh_bridge(&mut *bridges, &link_id, Instant::now(), proves);
                         drop(bridges);
-                        // The link's destination route is in use (`Transport.py` 2440).
-                        shared.mark_path_used(destination);
+                        if crossing == (Crossing::Proof { verified: true }) {
+                            // A verified proof proves its destination alive (`Transport.py`
+                            // 2928-2938).
+                            shared.prove_path_alive(destination);
+                        } else {
+                            // The link's destination route is in use (`Transport.py` 2440).
+                            shared.mark_path_used(destination);
+                        }
                     }
                 }
                 None => forward(shared, iface, pkt, &policy),

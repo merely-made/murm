@@ -77,10 +77,7 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
     /// The mode of `interface`: [`InterfaceMode::Full`] unless [`Self::set_interface_mode`]
     /// set another.
     pub fn interface_mode(&self, interface: InterfaceId) -> InterfaceMode {
-        self.interface_modes
-            .iter()
-            .find(|(id, _)| *id == interface)
-            .map_or(InterfaceMode::Full, |(_, mode)| *mode)
+        mode_on(&self.interface_modes, interface)
     }
 
     /// Set the mode of `interface`, which bounds the lifetime of routes learned on it from
@@ -220,4 +217,26 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
             mode.route_ttl(route_ttl)
         });
     }
+
+    /// Prove a live route alive at `now`: its life starts over in its interface's current
+    /// mode, and it is marked used.
+    pub(super) fn prove_route_alive(&mut self, destination: AddressHash, now: u64) {
+        let route_ttl = self.transport.route_ttl;
+        let modes = &self.interface_modes;
+        transport::prove_route_alive(
+            &mut self.routes,
+            &destination,
+            now,
+            |interface| mode_on(modes, interface),
+            |mode| mode.route_ttl(route_ttl),
+        );
+    }
+}
+
+/// The mode `modes` gives `interface`, [`InterfaceMode::Full`] if none.
+fn mode_on(modes: &[(InterfaceId, InterfaceMode)], interface: InterfaceId) -> InterfaceMode {
+    modes
+        .iter()
+        .find(|(id, _)| *id == interface)
+        .map_or(InterfaceMode::Full, |(_, mode)| *mode)
 }

@@ -111,7 +111,7 @@ async fn a_link_bridge_accepts_only_its_two_interfaces() {
 /// A routing endpoint with a radio side `a` and an IFAC'd 255-byte side `b`, a learned
 /// destination behind `b`, and that destination's link request, addressed through the
 /// endpoint and asking for 500 bytes.
-fn transit_fixture() -> (
+pub(super) fn transit_fixture() -> (
     Endpoint,
     Interface,
     Interface,

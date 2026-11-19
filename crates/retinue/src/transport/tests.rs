@@ -169,6 +169,35 @@ fn routes_are_marked_used_only_when_live<S: TestStore<RouteEntry<u64>>>() {
     assert!(!mark_route_used(&mut store, &key(9), 50, ttl));
 }
 
+both!(proving_a_route_alive_starts_its_life_over, RouteEntry<u64>);
+fn proving_a_route_alive_starts_its_life_over<S: TestStore<RouteEntry<u64>>>() {
+    let mut store: S = filled(|n| route(u32::from(n), u64::from(n) * 10));
+    let mode = |iface| {
+        if iface == 2 {
+            InterfaceMode::Roaming
+        } else {
+            InterfaceMode::Full
+        }
+    };
+    assert!(prove_route_alive(&mut store, &key(2), 50, mode, ttl));
+    let proved = RouteEntry {
+        used: Some(50),
+        mode: InterfaceMode::Roaming,
+        ..route(2, 50)
+    };
+    assert_eq!(
+        store.get(&key(2)),
+        Some(&proved),
+        "in its interface's mode now"
+    );
+    assert!(
+        !prove_route_alive(&mut store, &key(1), 110, mode, ttl),
+        "a dead route stays dead"
+    );
+    assert_eq!(store.get(&key(1)), Some(&route(1, 10)));
+    assert!(!prove_route_alive(&mut store, &key(9), 50, mode, ttl));
+}
+
 both!(replacing_a_route_keeps_its_used_mark, RouteEntry<u64>);
 fn replacing_a_route_keeps_its_used_mark<S: TestStore<RouteEntry<u64>>>() {
     let used = |n| RouteEntry {

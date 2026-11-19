@@ -132,7 +132,7 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
                 liveness.last_inbound().saturating_add(LINK_IDLE_TIMEOUT),
             ]
         });
-        let requests = self.pending.iter().map(|(_, deadline, _)| *deadline);
+        let requests = self.pending.iter().map(|(_, _, deadline, _)| *deadline);
         links
             .chain(requests)
             .chain(self.next_rebroadcast())

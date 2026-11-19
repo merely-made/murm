@@ -124,9 +124,10 @@ pub struct Node<
     /// The interface each link was established on, which its packets must arrive by
     /// (`Link.py` 938-941). Entries for links since dropped are pruned on the next bind.
     link_interfaces: BoundedVec<(AddressHash, InterfaceId), LINKS>,
-    /// Links we opened, awaiting the peer's proof, each with the time it expires unanswered
-    /// and the time it was sent, from which the proof's arrival measures the link RTT.
-    pending: BoundedVec<(PendingLink, u64, u64), LINKS>,
+    /// Links we opened, awaiting the peer's proof, each with its destination, the time it
+    /// expires unanswered and the time it was sent, from which the proof's arrival measures
+    /// the link RTT.
+    pending: BoundedVec<(PendingLink, AddressHash, u64, u64), LINKS>,
     /// Per-interface first-hop airtime allowances, added to a request's deadline. An
     /// interface with no entry gets none.
     first_hop_airtime: BoundedVec<(InterfaceId, u64), FIRST_HOP_AIRTIME_INTERFACES>,

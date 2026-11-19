@@ -106,12 +106,15 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
         // unknown here, the side check stands alone. The proof validates the bridge only
         // once it is on its way to the initiator.
         let proves = packet.packet_type == PacketType::Proof && packet.context == link::CTX_LRPROOF;
+        // Whether the proof's signature was checked against the destination's identity.
+        let mut verified = false;
         if proves {
-            let signed = interface == bridge.out
-                && self
-                    .book
-                    .resolve(bridge.destination)
-                    .is_none_or(|peer| link::proof_is_signed_by(packet, &peer.identity));
+            let checked = self
+                .book
+                .resolve(bridge.destination)
+                .map(|peer| link::proof_is_signed_by(packet, &peer.identity));
+            verified = checked == Some(true);
+            let signed = interface == bridge.out && checked != Some(false);
             if !signed {
                 self.transport_counters.unvalidated_link_packets = self
                     .transport_counters
@@ -147,8 +150,13 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
             packet: forwarded,
         }) {
             refresh_bridge(&mut self.bridges, &packet.destination, now, proves);
-            // The link's destination route is in use (`Transport.py` 2440).
-            self.mark_route_used(bridge.destination, now);
+            if verified {
+                // A verified proof proves its destination alive (`Transport.py` 2928-2938).
+                self.prove_route_alive(bridge.destination, now);
+            } else {
+                // The link's destination route is in use (`Transport.py` 2440).
+                self.mark_route_used(bridge.destination, now);
+            }
             self.transport_counters.forwarded_packets =
                 self.transport_counters.forwarded_packets.saturating_add(1);
         }
