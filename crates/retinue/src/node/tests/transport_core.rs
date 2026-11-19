@@ -116,6 +116,86 @@ fn return_paths_are_transactional_with_output() {
 }
 
 #[test]
+fn interface_removal_purges_return_paths_and_pending_relays() {
+    let mut relay = relay();
+    let (source, destination) = pair();
+    let lost = destination.announce(&blob([2; RAND_HASH_LEN]), None);
+    let kept = source.announce(&blob([3; RAND_HASH_LEN]), None);
+    relay.ingest(2, &lost, 0);
+    relay.ingest(2, &kept, 0);
+    // The pending relay was heard on 1, but its destination is still reachable on 2.
+    relay.schedule_rebroadcast(1, lost.clone(), 0, 0);
+    assert!(relay.rebroadcasts.answer(
+        crate::rebroadcast::Rebroadcast {
+            destination: kept.destination,
+            packet: kept.clone(),
+            interface: 2,
+            emitted: 0,
+            answer: Some(1),
+        },
+        0,
+        0
+    ));
+    for (byte, received, outbound) in [(1, 1, 2), (2, 2, 1), (3, 2, 3)] {
+        relay
+            .reverse
+            .push(ReverseEntry {
+                packet: AddressHash::from_bytes([byte; 16]),
+                received,
+                outbound,
+                seen: 0,
+            })
+            .unwrap();
+    }
+    let survivor = relay.reverse[2];
+    relay.forget_interface(1);
+    assert_eq!(relay.reverse.as_slice(), &[survivor]);
+    assert_eq!(relay.next_hop(lost.destination, 1).unwrap().interface, 2);
+    assert!(!relay.rebroadcasts.contains(lost.destination));
+    let restored = relay.rebroadcasts.pop_due(REBROADCAST_WINDOW).unwrap();
+    assert_eq!(
+        (restored.destination, restored.interface, restored.answer),
+        (kept.destination, 2, None)
+    );
+    relay.forget_interface(1);
+    assert_eq!(relay.reverse.as_slice(), &[survivor]);
+}
+
+#[test]
+fn interface_removal_purges_cap_queues_by_recorded_interface() {
+    use crate::rebroadcast::{AnnounceCap, CapRate, Offer, Rebroadcast};
+    let mut relay = relay();
+    let on = |byte, interface, answer| Rebroadcast {
+        destination: AddressHash::from_bytes([byte; 16]),
+        packet: packet(AddressHash::from_bytes([byte; 16])),
+        interface,
+        emitted: 0,
+        answer,
+    };
+    let rate = CapRate::new(100);
+    for iface in [1, 2] {
+        relay.set_first_hop_airtime(iface, 100).unwrap();
+        let mut cap = AnnounceCap::new(4);
+        assert!(matches!(cap.offer(on(0, 2, None), 0, rate), Offer::Send(_)));
+        for pending in [on(1, 1, None), on(2, 2, Some(1)), on(3, 2, None)] {
+            assert!(matches!(cap.offer(pending, 0, rate), Offer::Queued));
+        }
+        relay.announce_caps.push((iface, cap)).unwrap();
+    }
+    relay.forget_interface(1);
+    assert_eq!(relay.announce_caps.len(), 1);
+    let (iface, cap) = &mut relay.announce_caps[0];
+    assert_eq!(*iface, 2);
+    assert_eq!(cap.queued(), 1);
+    let due = cap.next_due().unwrap();
+    assert_eq!(
+        cap.pop_due(due, rate).unwrap().destination,
+        AddressHash::from_bytes([3; 16])
+    );
+    assert_eq!(cap.queued(), 0);
+}
+
+#[test]
 fn transit_precedes_reverse_proofs_and_handles_once() {
     for bridged in [false, true] {
         let mut relay = relay();

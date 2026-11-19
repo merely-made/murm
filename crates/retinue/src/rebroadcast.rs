@@ -413,6 +413,13 @@ impl AnnounceCap {
         (!self.queue.is_empty()).then_some(self.allowed_at)
     }
 
+    /// Drop queued relays heard on `iface` or answering there.
+    pub(crate) fn forget_interface(&mut self, iface: InterfaceId) {
+        self.queue.retain(|queued| {
+            queued.rebroadcast.interface != iface && queued.rebroadcast.answer != Some(iface)
+        });
+    }
+
     /// Charge a recursive path request of `len` bytes to this budget, or refuse it while
     /// announces queue or the budget is spent (`Transport.py` 3301-3318).
     #[cfg_attr(

@@ -139,6 +139,8 @@ impl Shared {
                 .lock()
                 .unwrap()
                 .retain(|_, bridge| bridge.from != id && bridge.out != id);
+            self.forget_reverse_via(id);
+            self.forget_rebroadcasts_on(id);
             self.announce_admission.lock().unwrap().forget_interface(id);
             self.held_announces.lock().unwrap().purge(id);
             self.held_release_wake.notify_waiters();

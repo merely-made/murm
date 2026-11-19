@@ -115,6 +115,9 @@ impl Shared {
         let mut state = self.rebroadcasts.lock().unwrap();
         state.table.forget_interface(iface);
         state.caps.remove(&iface);
+        for cap in state.caps.values_mut() {
+            cap.forget_interface(iface);
+        }
     }
 
     /// Whether a recursive path request of `len` bytes may go out on `iface` now, charging its
@@ -189,7 +192,7 @@ impl Shared {
     /// the modes its rule chain leaves to its last branch (1518-1585), so relays to roaming,
     /// boundary and internal interfaces go uncapped there; every mode is capped here. Returns
     /// when to come back.
-    fn release_rebroadcasts(&self, now: u64) -> Option<u64> {
+    pub(super) fn release_rebroadcasts(&self, now: u64) -> Option<u64> {
         let egress = self.routing.lock().unwrap().allowed_egress.clone();
         let policies = self.iface_policies.lock().unwrap().clone();
         let policy = |id| policies.get(&id).copied().unwrap_or_default();

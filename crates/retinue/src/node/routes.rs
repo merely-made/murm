@@ -112,8 +112,8 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
         Ok(())
     }
 
-    /// Forget a detached interface: the routes learned on it, the carried links that cross
-    /// it, and its airtime and mode settings. Traffic for those destinations then goes out
+    /// Forget a detached interface: its routes, carried links, return paths, pending relays,
+    /// airtime and mode settings. Traffic for those destinations then goes out
     /// without a route, as for any unknown destination, instead of naming an interface that
     /// is gone. RNS culls the same rows when their interface disappears (`Transport.py`
     /// 880-881, 975-978).
@@ -121,6 +121,13 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize, const ROUTES:
         self.routes.retain(|route| route.interface != interface);
         self.bridges
             .retain(|bridge| bridge.from != interface && bridge.out != interface);
+        self.reverse
+            .retain(|entry| entry.received != interface && entry.outbound != interface);
+        self.rebroadcasts.forget_interface(interface);
+        self.announce_caps.retain(|(id, _)| *id != interface);
+        for (_, cap) in &mut self.announce_caps {
+            cap.forget_interface(interface);
+        }
         self.first_hop_airtime.retain(|(id, _)| *id != interface);
         self.interface_modes.retain(|(id, _)| *id != interface);
     }
