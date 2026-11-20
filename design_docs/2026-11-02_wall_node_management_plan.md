@@ -452,3 +452,22 @@ Choose V4 heap from measured high-water and refusal behavior. Decide unsigned, b
   243,319, T114 381,022. Tests: station-custody 20, 6 and 9; postilion 34;
   radio-hand 147 and 165 with `replay`. Nothing in this piece has run against
   a board, a port or djinn.
+- 2026-11-20: both V4s reflashed through Linkboy with the node package
+  staged from `92fa956b73b` (sha256 `1b21c769...7ba2`); each reports that
+  build. The `applied` line on hardware: SB2 (unclaimed, node channel)
+  `region=US915 freq=906875000 bw=250000 sf=11 cr=5 preamble=16 sync=2b
+  reg=24b4 power=17 relay=unclaimed`; SB1 (commissioned) `sf=8 ... sync=12
+  reg=1424 power=17 relay=claimed announces=0 packets=0`. So SB1's committed
+  profile is already the trunk profile with sync 0x12, and the SB1 run only
+  has to turn the relay flags on.
+- 2026-11-20: stock RNS 1.6.0 and the node hear each other on that profile.
+  Two radios, not a relay result: RNS through the T114 in the RNode channel
+  (SF8, 250 kHz, CR 4/5, 906.875 MHz), SB1 booted as a node on its committed
+  config with relay off. RNS heard the node's announce (167 bytes), and the
+  node decoded RNS's (`rx=2 peers=1 routes=1 rxbad=0`), with the node
+  listening for a 16-symbol preamble and the RNode channel sending 8. The
+  same attempt through SB2 in the RNode channel failed before any radio
+  traffic: RNS could not detect the device in four tries. Likely cause, not
+  established: opening the port resets the board and an unclaimed V4 then
+  waits out its 20 s claim window. Boards were put back: T114 and SB1 in the
+  modem channel, SB2 in the node channel.
