@@ -449,15 +449,10 @@ async fn main(spawner: Spawner) {
                 )
                 .await
             }
-            Err(control_boot::ControlBootError::Runtime(error)) => {
-                let _ = error;
+            Err(error @ control_boot::ControlBootError::Runtime(_)) => {
                 owner.radio_fault(12, "CONTROL BOOT");
-                host::serve_status_only(
-                    usb_rx,
-                    usb_tx,
-                    b"tulle/heltec-v4 phy control runtime boot failed\r\n",
-                )
-                .await
+                let line = control_boot::runtime_failure_line(&error);
+                host::serve_status_only(usb_rx, usb_tx, line).await
             }
         }
     } else {

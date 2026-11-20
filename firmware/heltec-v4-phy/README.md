@@ -65,7 +65,9 @@ and link lifetimes stay at the transit defaults whatever the configuration's
 accepts the two flags in a candidate or first-write configuration; the modem
 image still refuses them, and a modem image booted on a board whose committed
 configuration has either flag on fails WN1 control recovery into the
-status-only boot (`control runtime boot failed`).
+status-only boot with fault 12, whose status line names the cause and the
+fix: `control runtime boot failed: committed config relays; flash the node
+image`.
 
 The node needs nothing on USB and writes no banner. Every host write in the
 node loop is bounded at 100 ms; one that runs out stops host writes until the

@@ -101,6 +101,17 @@ pub(crate) enum ControlBootError {
     Runtime(RuntimeError<crate::control_store::ControlError, V4ConfigError>),
 }
 
+/// The status-only line for a failed control boot. A committed configuration that relays
+/// needs the node image (D4): this image refuses to run it and says so, with the fix.
+pub(crate) fn runtime_failure_line(error: &ControlBootError) -> &'static [u8] {
+    match error {
+        ControlBootError::Runtime(RuntimeError::Apply(
+            V4ConfigError::ResidentReticulumRelayUnsupported,
+        )) => b"tulle/heltec-v4 phy control runtime boot failed: committed config relays; flash the node image\r\n",
+        _ => b"tulle/heltec-v4 phy control runtime boot failed\r\n",
+    }
+}
+
 /// Proof that board startup observed an actual ESP reset before WN1 recovery.
 ///
 /// This is deliberately non-`Copy`, has no public fields, and is consumed by the only safe boot
