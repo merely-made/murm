@@ -9,6 +9,9 @@ use radio_hand::control::{
 };
 use serde::Serialize;
 
+use super::applied::AppliedRecord;
+use super::expire::ExpiryRecord;
+
 /// The configuration this run sent, field by field.
 #[derive(Serialize, Clone, Debug, PartialEq, Eq)]
 pub struct CandidateRecord {
@@ -108,12 +111,19 @@ pub struct LifecycleRecord {
     pub lifetime_ms: u64,
     pub steps: Vec<StepRecord>,
     pub status_before: Option<StatusRecord>,
+    /// The board's `applied` line before the apply: what a rollback must bring back.
+    pub applied_before: Option<AppliedRecord>,
     pub candidate_generation: Option<u64>,
     pub deadline_ms: Option<u64>,
-    /// The configuration the board reported as applied. The V4's provisional answer carries
-    /// no configuration, so this stays empty and says so in `notes`.
-    pub applied_reported: Option<CandidateRecord>,
+    /// The board's `applied` line after the apply.
+    pub applied_during: Option<AppliedRecord>,
+    /// Whether that line shows the candidate, power aside (the board clamps it).
+    pub applied_matches_candidate: Option<bool>,
     pub status_during: Option<StatusRecord>,
+    /// For `expire`: the late commit's refusal and whether the earlier radio came back.
+    pub expiry: Option<ExpiryRecord>,
+    /// For `expire`: the board's `applied` line after the late commit.
+    pub applied_after: Option<AppliedRecord>,
     pub status_after: Option<StatusRecord>,
     pub known_good_after: Option<u64>,
     pub outcome: String,

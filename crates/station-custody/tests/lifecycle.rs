@@ -206,10 +206,22 @@ async fn a_relay_on_sync_0x12_candidate_reaches_the_board_radio_exactly() {
     let sent = &record.candidate;
     assert!(sent.relay_announces && sent.relay_packets);
     assert_eq!((sent.sync_word.as_str(), sent.max_hops), ("0x12", 8));
+    // The board's own applied line says the same, read over the wire.
+    let during = record.applied_during.expect("applied line after the apply");
+    assert_eq!(record.applied_matches_candidate, Some(true));
     assert_eq!(
-        record.applied_reported, None,
-        "the board's answer carries no configuration"
+        (during.frequency_hz, during.bandwidth_hz, during.spreading_factor),
+        (904_375_000, 125_000, 9)
     );
+    assert_eq!(
+        (during.sync_word.as_str(), during.sync_register.as_str()),
+        ("0x12", "0x1424")
+    );
+    assert_eq!(
+        (during.relay, during.relay_announces, during.relay_packets),
+        ("claimed", Some(true), Some(true))
+    );
+    assert_eq!(record.applied_before.unwrap().sync_word, "0x2b");
 }
 
 #[tokio::test]
@@ -231,24 +243,67 @@ async fn apply_then_revert_restores_known_good() {
     assert_no_token("output", bench.lines.join("\n").as_bytes());
 }
 
+/// What every expiry run shows over the wire, whichever refusal came back.
+fn assert_expiry_evidence(record: &LifecycleRecord, refusal: &str) {
+    let expiry = record.expiry.as_ref().expect("expiry evidence");
+    assert_eq!(expiry.refusal, refusal);
+    assert!(expiry.restored);
+    assert_ne!(record.applied_during, record.applied_before, "the candidate ran");
+    assert_eq!(
+        record.applied_after, record.applied_before,
+        "the radio from before the apply came back"
+    );
+    assert_eq!(record.known_good_after, Some(1));
+    let names: Vec<&str> = record.steps.iter().map(|s| s.step).collect();
+    assert_eq!(
+        names,
+        ["status-before", "apply", "status-during", "late-commit", "status-after"],
+        "nothing sent during the wait but the late commit after it"
+    );
+    let counters: Vec<u64> = record.steps.iter().map(|s| s.counter).collect();
+    assert_eq!(counters, [1, 2, 3, 4, 5]);
+    let sequences: Vec<u64> = record.steps.iter().filter_map(|s| s.sequence).collect();
+    assert_eq!(sequences, [1, 2], "apply and the late commit each spend one");
+    assert_eq!(record.steps[3].outcome, format!("refused {refusal}"));
+}
+
 #[tokio::test]
-async fn apply_then_expiry_rolls_back_on_the_board_and_status_is_read_after() {
+async fn an_expired_candidate_is_shown_by_invalid_commit_and_the_earlier_radio() {
     let mut bench = bench(None).await;
     let record = bench.run(&plan(Then::Expire, 1_000)).await.unwrap();
-    let after = record.status_after.expect("status read after the deadline");
-    assert_eq!(after.known_good_generation, 1);
-    assert_eq!(record.known_good_after, Some(1));
-    let counters: Vec<u64> = record.steps.iter().map(|s| s.counter).collect();
-    assert_eq!(counters, [1, 2, 3, 4], "nothing sent during the wait");
-    let board = bench.board.lock().await;
+    assert_expiry_evidence(&record, "InvalidCommit");
+    assert_eq!(record.expiry.as_ref().unwrap().rechecks, 0);
+    assert_no_token("record", &serde_json::to_vec(&record).unwrap());
+    assert_no_token("output", bench.lines.join("\n").as_bytes());
+}
+
+#[tokio::test]
+async fn a_board_yet_to_expire_answers_transaction_expired_and_the_line_is_read_again() {
+    let mut bench = bench(None).await;
+    // The board rolls back 800 ms late, as a V4 does while its radio is not quiet; the late
+    // commit lands about 500 ms past the deadline, before that.
+    bench.board.lock().await.expiry_hold = Duration::from_millis(800);
+    let mut plan = plan(Then::Expire, 1_000);
+    plan.expiry_margin = Duration::from_millis(500);
+    let record = bench.run(&plan).await.unwrap();
+    assert_expiry_evidence(&record, "TransactionExpired");
+    assert!(record.expiry.unwrap().rechecks >= 1, "read again until restored");
+}
+
+#[tokio::test]
+async fn a_radio_not_restored_within_the_margin_fails_the_run() {
+    let mut bench = bench(None).await;
+    bench.board.lock().await.expiry_hold = Duration::from_secs(5);
+    let failure = bench.run(&plan(Then::Expire, 1_000)).await.unwrap_err();
+    assert_eq!(failure.step, "radio-after");
     assert!(
-        !board.armed(),
-        "the board rolled the candidate back by itself"
+        failure.message.contains("TransactionExpired"),
+        "{}",
+        failure.message
     );
-    assert_eq!(
-        board.hardware.radio.applied.last(),
-        Some(&initial_configuration())
-    );
+    let expiry = failure.record.expiry.clone().expect("the refusal is recorded");
+    assert!(!expiry.restored);
+    assert_eq!(failure.record.applied_after, failure.record.applied_during);
 }
 
 #[tokio::test]

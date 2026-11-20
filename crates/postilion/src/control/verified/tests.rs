@@ -344,6 +344,34 @@ async fn provisional_apply_then_commit_moves_known_good() {
     assert!(state.provisional().is_none());
 }
 
+#[tokio::test]
+async fn a_diagnostic_line_skips_other_lines_and_drops_its_ending() {
+    let (client, mut board) = tokio::io::duplex(2048);
+    let board_task = tokio::spawn(async move {
+        let mut probe = [0_u8; 8];
+        board.read_exact(&mut probe).await.unwrap();
+        assert_eq!(&probe, b"applied\n");
+        board
+            .write_all(b"unrelated\r\napplied region=US915 sync=2b\r\n")
+            .await
+            .unwrap();
+        board
+    });
+    let mut transport = UsbControlTransport::from_io(
+        client,
+        UsbControlConfig {
+            response_timeout: Duration::from_secs(2),
+            ..UsbControlConfig::default()
+        },
+    );
+    let line = transport
+        .diagnostic_line(b"applied\n", "applied ")
+        .await
+        .unwrap();
+    assert_eq!(line, "applied region=US915 sync=2b");
+    let _board = board_task.await.unwrap();
+}
+
 #[test]
 fn taking_a_commit_token_zeroes_its_source() {
     let mut source = [0x5c; COMMIT_TOKEN_LEN];

@@ -1,12 +1,13 @@
 //! The controller lifecycle in one invocation (wall_node_management D17, D18): signed Status,
 //! ProvisionalApply of a candidate built from arguments, signed Status as evidence, then
-//! exactly one of Commit, Revert, or a wait past the board's deadline and a Status read.
+//! exactly one of Commit, Revert, or a wait past the board's deadline with a late commit as
+//! the probe (D22).
 //!
 //! The controller key stays inside this crate, released by the caller's authority. The commit
 //! token lives only in a [`CommitTokenHolder`] for the length of the run. Every outer counter
 //! and mutation sequence is spent durably in [`ControllerState`] before the frame carrying it
 //! is sent. A controller-side timeout is never reported as an expiry: only what the board
-//! answers after its deadline is evidence.
+//! answers after its deadline, and the radio its `applied` line shows (D20), are evidence.
 
 use std::fmt;
 use std::time::Duration;
@@ -16,14 +17,19 @@ use postilion::control::verified::{
     CommitToken, ControlClient, ControlClientError, ControlExchange, Mutation, UsbControlError,
     VerifiedStatus,
 };
+use radio_hand::applied::AppliedRadio;
 use radio_hand::control::{ChangeId, NodeId, PublicConfigurationV1, Refusal};
 
 use crate::FirstOwnerCredential;
 
+mod applied;
+mod expire;
 mod record;
 mod state;
 mod token;
 
+pub use applied::{AppliedLineSource, AppliedRecord, matches_candidate};
+pub use expire::ExpiryRecord;
 pub use record::{CandidateRecord, LifecycleRecord, StatusRecord, StepRecord};
 pub use state::{ControllerState, FileControllerState};
 pub use token::{CommitTokenHolder, InMemoryTokenHolder};
@@ -33,7 +39,8 @@ pub use token::{CommitTokenHolder, InMemoryTokenHolder};
 pub enum Then {
     Commit,
     Revert,
-    /// Send nothing until the lifetime and margin have passed, then read Status.
+    /// Send nothing until the lifetime and margin have passed, then send the late commit and
+    /// require the earlier radio back (D22).
     Expire,
 }
 
@@ -54,7 +61,8 @@ pub struct LifecyclePlan {
     pub candidate: PublicConfigurationV1,
     pub lifetime_ms: u64,
     pub then: Then,
-    /// For [`Then::Expire`]: how long past the lifetime to wait before reading Status.
+    /// For [`Then::Expire`]: how long past the lifetime to wait before the late commit, and
+    /// how long to keep reading the `applied` line after a `TransactionExpired`.
     pub expiry_margin: Duration,
 }
 
@@ -126,7 +134,9 @@ fn refusal(reason: Refusal) -> String {
             "the mutation sequence record is too far ahead of the board's"
         }
         Refusal::TransactionConflict => "a candidate is already armed; let it expire or revert it",
-        Refusal::InvalidCommit => "no armed candidate matches this change",
+        Refusal::InvalidCommit => {
+            "no armed candidate matches this change; it may already have expired or been reverted"
+        }
         Refusal::InvalidArguments => "the lifetime or configuration is out of range",
         Refusal::Unauthorized => "this controller's grant does not permit the change",
         _ => "see the refusal name",
@@ -153,14 +163,14 @@ pub async fn run_lifecycle<C, S, H>(
     report: &mut dyn FnMut(&str),
 ) -> Result<LifecycleRecord, LifecycleFailure>
 where
-    C: ControlExchange,
+    C: ControlExchange + AppliedLineSource,
     C::Error: CarrierSilence + fmt::Display,
     S: ControllerState,
     H: CommitTokenHolder,
 {
     let change = ChangeId(uuid::Uuid::new_v4().into_bytes());
     let mut record = LifecycleRecord {
-        schema: "station-claim.lifecycle/v1",
+        schema: "station-claim.lifecycle/v2",
         node: hex(&plan.node.0),
         change: hex(&change.0),
         action: plan.then.name(),
@@ -168,16 +178,21 @@ where
         lifetime_ms: plan.lifetime_ms,
         steps: Vec::new(),
         status_before: None,
+        applied_before: None,
         candidate_generation: None,
         deadline_ms: None,
-        applied_reported: None,
+        applied_during: None,
+        applied_matches_candidate: None,
         status_during: None,
+        expiry: None,
+        applied_after: None,
         status_after: None,
         known_good_after: None,
         outcome: "incomplete".into(),
         notes: vec![
-            "the provisional answer carries no applied configuration; signed Status carries no \
-             radio fields"
+            "signed Status and the provisional answer carry no radio fields; the applied \
+             profiles are the board's unsigned applied line, and the candidate comparison \
+             leaves out power, which the board clamps"
                 .into(),
         ],
     };
@@ -210,6 +225,13 @@ where
         before.status.known_good_generation().0,
         before.status.generation_watermark().0
     ));
+    // The radio before the apply: what an expiry or a revert must bring back.
+    let earlier = match read_applied(&mut client).await {
+        Ok(applied) => applied,
+        Err(message) => fail!("radio-before", message),
+    };
+    record.applied_before = Some(AppliedRecord::of(&earlier));
+    report(&format!("radio-before {}", radio_summary(&earlier)));
 
     // Apply. Counter and sequence are spent before the frame leaves.
     let (counter, sequence) = match reserve_both(state) {
@@ -257,6 +279,18 @@ where
         )),
         Err((step, message)) => fail!(step, message),
     }
+    // What the board is running now.
+    let during = match read_applied(&mut client).await {
+        Ok(applied) => applied,
+        Err(message) => fail!("radio-during", message),
+    };
+    let matches = matches_candidate(&during, &plan.candidate);
+    record.applied_during = Some(AppliedRecord::of(&during));
+    record.applied_matches_candidate = Some(matches);
+    report(&format!(
+        "radio-during {} matches-candidate={matches}",
+        radio_summary(&during)
+    ));
 
     match plan.then {
         Then::Commit => {
@@ -331,22 +365,22 @@ where
             }
         }
         Then::Expire => {
-            holder.discard();
-            let wait = Duration::from_millis(plan.lifetime_ms) + plan.expiry_margin;
-            report(&format!(
-                "waiting {} ms past apply; sending nothing",
-                wait.as_millis()
-            ));
-            tokio::time::sleep(wait).await;
+            let late = expire::Late {
+                state: &mut *state,
+                holder: &mut *holder,
+                receipt: &mut receipt,
+                expected_generation: before.known_good_generation,
+                earlier,
+            };
+            if let Err((step, message)) =
+                expire::evidence(&mut client, late, plan, &mut record, report).await
+            {
+                fail!(step, message)
+            }
             match status(&mut client, state, &mut record, "status-after").await {
                 Ok(after) => {
                     record.status_after = Some(StatusRecord::of(&after.status));
                     record.known_good_after = Some(after.known_good_generation.0);
-                    record.notes.push(
-                        "status v1 carries no armed-candidate field: after an expiry it shows \
-                         the same known-good generation and watermark as while armed"
-                            .into(),
-                    );
                 }
                 Err((step, message)) => fail!(step, message),
             }
@@ -399,6 +433,32 @@ where
             Err((name, message))
         }
     }
+}
+
+/// Ask the board for its `applied` line and read it.
+async fn read_applied<C>(client: &mut ControlClient<'_, C>) -> Result<AppliedRadio, String>
+where
+    C: AppliedLineSource,
+{
+    let line = client
+        .carrier_mut()
+        .applied_line()
+        .await
+        .map_err(|error| format!("the board's applied line: {error}"))?;
+    AppliedRadio::parse(&line).ok_or_else(|| format!("the board's applied line did not parse: {line}"))
+}
+
+fn radio_summary(applied: &AppliedRadio) -> String {
+    format!(
+        "freq={} bw={} sf={} cr={} sync=0x{:02x} power={} relay={:?}",
+        applied.frequency_hz,
+        applied.bandwidth_hz,
+        applied.spreading_factor,
+        applied.coding_rate_denominator,
+        applied.sync_word,
+        applied.tx_power_dbm,
+        applied.relay
+    )
 }
 
 fn reserve_both<S: ControllerState>(state: &mut S) -> Result<(u64, u64), String> {

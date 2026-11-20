@@ -148,6 +148,11 @@ impl<'a, C> ControlClient<'a, C> {
         self.carrier
     }
 
+    /// The carrier, between signed exchanges, for the unsigned diagnostics it also carries.
+    pub fn carrier_mut(&mut self) -> &mut C {
+        &mut self.carrier
+    }
+
     pub const fn node(&self) -> NodeId {
         self.node
     }

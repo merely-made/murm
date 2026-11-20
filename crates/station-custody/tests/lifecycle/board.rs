@@ -1,12 +1,14 @@
 //! An in-process V4-shaped board: the real `ControlRuntime` and the real shared carrier
 //! (`radio_hand::control::carrier`) behind the literal USB framing, with in-memory flash and a
 //! radio that records every configuration applied to it. It rolls an armed candidate back at
-//! its board deadline as the V4 loop does, with no host frame.
+//! its board deadline as the V4 loop does, with no host frame, and answers the unsigned
+//! `applied` probe at a line boundary with what its radio last applied (D20).
 
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 use heapless::Vec as BoundedVec;
+use radio_hand::applied::{AppliedRadio, Relay};
 use radio_hand::control::carrier::{ControlBoard, ControlCarrier, NoEntropy, expire_provisional};
 use radio_hand::control::{
     AbSlotStore, BoardRecoveryFacts, BootState, COMMIT_TOKEN_LEN, ConfigApplier, ConfigGeneration,
@@ -200,6 +202,9 @@ pub struct Board {
     served: usize,
     /// Signed frames from another controller, served internally after this many host frames.
     pub interject: Option<(usize, std::vec::Vec<std::vec::Vec<u8>>)>,
+    /// How long past its deadline the board waits before rolling back, as a V4 does while its
+    /// radio is not quiet. Zero rolls back on time.
+    pub expiry_hold: Duration,
 }
 
 impl Board {
@@ -275,6 +280,7 @@ impl Board {
             start: Instant::now(),
             served: 0,
             interject: None,
+            expiry_hold: Duration::ZERO,
         }
     }
 
@@ -282,22 +288,23 @@ impl Board {
         start.elapsed().as_millis() as u64
     }
 
-    /// The armed candidate's deadline, as an instant on this host.
+    /// When the board will roll the armed candidate back, as an instant on this host.
     pub fn deadline(&self) -> Option<Instant> {
         self.runtime
             .provisional_deadline_ms()
-            .map(|ms| self.start + Duration::from_millis(ms))
+            .map(|ms| self.start + Duration::from_millis(ms) + self.expiry_hold)
     }
 
-    /// Roll back a candidate whose board deadline has passed, as the V4 loop does.
+    /// Roll back a candidate whose board deadline (and hold) has passed, as the V4 loop does.
     pub async fn expire_if_due(&mut self) {
         let start = self.start;
+        let hold = self.expiry_hold.as_millis() as u64;
         let (x, y, b, p) = &mut *self.buffers;
         let mut scratch = DurableScratch::new(x, y, b, p).unwrap();
         if self
             .runtime
             .provisional_deadline_ms()
-            .is_some_and(|deadline| Self::now_ms(start) >= deadline)
+            .is_some_and(|deadline| Self::now_ms(start) >= deadline + hold)
         {
             expire_provisional(&mut self.hardware, &mut self.runtime, &mut scratch, || {
                 Self::now_ms(start)
@@ -351,13 +358,30 @@ impl Board {
     pub fn armed(&self) -> bool {
         self.runtime.state().unwrap().provisional().is_some()
     }
+
+    /// The `applied` line for what the radio last applied. This board does not clamp power;
+    /// its relay flags are the applied configuration's, as on a node.
+    pub fn applied_line(&self) -> String {
+        let public = self.hardware.radio.applied.last().expect("boot applied known-good");
+        let transport = public.reticulum_transport();
+        let relay = Relay::Claimed {
+            announces: transport.relay_announces,
+            packets: transport.relay_packets,
+        };
+        AppliedRadio::new(public.region(), &public.requested_reticulum_phy(), relay)
+            .render()
+            .as_str()
+            .to_string()
+    }
 }
 
-/// Run the board on the board end of a duplex: deframe KISS command frames, serve each, and
-/// roll back at the deadline without waiting for a frame.
+/// Run the board on the board end of a duplex: deframe KISS command frames, serve each, answer
+/// `applied` lines outside frames, and roll back at the deadline without waiting for a frame.
 pub async fn run(board: Arc<Mutex<Board>>, mut io: DuplexStream) {
     let mut deframer = selvage::kiss::Deframer::<MAX_CONTROL_COMMAND_FRAME_LEN>::new();
     let mut bytes = [0_u8; 256];
+    let mut in_frame = false;
+    let mut text = std::vec::Vec::new();
     loop {
         let deadline = board.lock().await.deadline();
         let wake = async {
@@ -373,6 +397,22 @@ pub async fn run(board: Arc<Mutex<Board>>, mut io: DuplexStream) {
                     return;
                 }
                 for &byte in &bytes[..count] {
+                    if byte == selvage::kiss::FEND {
+                        in_frame = !in_frame;
+                        text.clear();
+                    } else if !in_frame {
+                        if byte == b'\n' {
+                            if radio_hand::applied::is_query(&[&text[..], b"\n"].concat()) {
+                                let line = board.lock().await.applied_line();
+                                if io.write_all(line.as_bytes()).await.is_err() {
+                                    return;
+                                }
+                            }
+                            text.clear();
+                        } else {
+                            text.push(byte);
+                        }
+                    }
                     if deframer.push(byte) {
                         let frame = deframer.frame().to_vec();
                         let reply = board.lock().await.serve(&frame).await;

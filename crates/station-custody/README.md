@@ -91,7 +91,7 @@ never rewound by this adapter.
 (wall_node_management D17, D18): signed Status, a ProvisionalApply of a
 candidate built from the arguments, signed Status again as evidence, then
 exactly one of commit, revert, or a wait past the board's deadline followed by
-a Status read:
+a late commit (D22):
 
 ```text
 station-claim lifecycle \
@@ -110,9 +110,18 @@ when the run ends; it is never printed, written or recorded. The outer counter
 temporary file and rename, before the frame carrying them is sent; status
 spends a counter only. The run record, refused if it already exists, carries
 the change id, every counter and sequence used, the generations, the board
-deadline, the configuration sent and the outcome, and no secret. The board's
-answers carry no applied configuration and signed Status carries no radio
-fields. A silent board is reported with what to check: the scope, a counter
+deadline, the configuration sent and the outcome, and no secret.
+
+Signed Status and the board's answers carry no radio fields, so the tool also
+reads the board's unsigned `applied` line (D20): before the apply, after it
+(recorded with whether it matches the candidate, power aside, since the board
+clamps it), and after an expiry. With `--then expire` the tool waits out the
+lifetime and `--expiry-margin-ms`, then sends the commit the board should no
+longer take. `InvalidCommit` means the board already rolled back;
+`TransactionExpired` means the candidate is past its deadline but the board has
+not run its expiry yet, so the line is read again for up to the margin. The run
+succeeds only if the line shows the profile from before the apply; a late
+commit the board accepts fails the run. A silent board is reported with what to check: the scope, a counter
 record behind the board, a radio that was mid-frame, and for an apply a
 profile the board cannot run.
 

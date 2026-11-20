@@ -91,6 +91,59 @@ impl<T> UsbControlTransport<T> {
     }
 }
 
+/// The longest unsigned diagnostic line [`UsbControlTransport::diagnostic_line`] keeps.
+const MAX_DIAGNOSTIC_LINE: usize = 256;
+
+impl<T> UsbControlTransport<T>
+where
+    T: AsyncRead + AsyncWrite + Unpin,
+{
+    /// Send one unsigned text probe (such as `applied\n`) between signed exchanges and return
+    /// the first line that starts with `prefix`, without its line ending. Other lines are
+    /// skipped. The answer is diagnostics: it carries no authority.
+    ///
+    /// # Errors
+    /// I/O failure, the stream ending, or no matching line within the response timeout.
+    pub async fn diagnostic_line(
+        &mut self,
+        probe: &[u8],
+        prefix: &str,
+    ) -> Result<String, UsbControlError> {
+        self.io.write_all(probe).await.map_err(UsbControlError::Io)?;
+        self.io.flush().await.map_err(UsbControlError::Io)?;
+        tokio::time::timeout(self.config.response_timeout, async {
+            let mut line = Vec::with_capacity(MAX_DIAGNOSTIC_LINE);
+            let mut bytes = [0_u8; 256];
+            loop {
+                let read = self
+                    .io
+                    .read(&mut bytes)
+                    .await
+                    .map_err(UsbControlError::Io)?;
+                if read == 0 {
+                    return Err(UsbControlError::Eof);
+                }
+                for &byte in &bytes[..read] {
+                    if byte != b'\n' {
+                        if line.len() < MAX_DIAGNOSTIC_LINE {
+                            line.push(byte);
+                        }
+                        continue;
+                    }
+                    let text = String::from_utf8_lossy(&line);
+                    let text = text.trim_end_matches('\r');
+                    if text.starts_with(prefix) {
+                        return Ok(text.to_string());
+                    }
+                    line.clear();
+                }
+            }
+        })
+        .await
+        .unwrap_or(Err(UsbControlError::Timeout))
+    }
+}
+
 impl<T> ControlExchange for UsbControlTransport<T>
 where
     T: AsyncRead + AsyncWrite + Unpin,

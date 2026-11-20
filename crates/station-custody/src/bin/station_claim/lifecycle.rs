@@ -1,7 +1,7 @@
-//! `station-claim lifecycle`: apply a candidate built from arguments, read Status as evidence,
-//! then commit, revert, or wait out the board's deadline, all in this one invocation (D17,
-//! D18). The commit token never leaves this process's memory; the run record carries no
-//! secret.
+//! `station-claim lifecycle`: apply a candidate built from arguments, read Status and the
+//! board's `applied` line as evidence, then commit, revert, or wait out the board's deadline
+//! and probe it with a late commit, all in this one invocation (D17, D18, D20, D22). The
+//! commit token never leaves this process's memory; the run record carries no secret.
 
 use std::collections::BTreeMap;
 use std::error::Error;
