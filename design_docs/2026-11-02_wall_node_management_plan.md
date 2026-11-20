@@ -1,6 +1,6 @@
 # Wall node and carrier-agnostic management: remaining work
 
-**Status (2026-11-20): in progress, WN2 software half; the node image builds and is on main, nothing has run on a board.** Adopted as a plan on 2026-11-02. The [original wall-node plan](archive_docs/2026-11-02/2026-08-30_wall_node_management_plan.md) retains its decisions, WN0–WN8 history and scoped evidence. The [coordination agreement](2026-08-09_retinue_work_lanes.md#coordinated-appliance-listening-and-observation-work-2026-09-06) governs shared interruption and observation; the magnetic pocket-node plan reuses the control contracts without replacing this V4 appliance work.
+**Status (2026-11-20): in progress; WN2's software half (WN2a to WN2c) is built and host-tested, nothing has run on a board, and the heap figure and bench run (WN2d, WN2e) are open.** Adopted as a plan on 2026-11-02. The [original wall-node plan](archive_docs/2026-11-02/2026-08-30_wall_node_management_plan.md) retains its decisions, WN0–WN8 history and scoped evidence. The [coordination agreement](2026-08-09_retinue_work_lanes.md#coordinated-appliance-listening-and-observation-work-2026-09-06) governs shared interruption and observation; the magnetic pocket-node plan reuses the control contracts without replacing this V4 appliance work.
 
 ## Phases and done-conditions
 
@@ -47,14 +47,15 @@ pin, where the older text says 1.5.2.
   takes effect on the next packet (D6); after a live profile change the
   first-hop allowance is recomputed from the profile then running. Both loops
   share one carrier in `radio-hand`, with host tests of its ordering (D7); the
-  node reads the flags in force from the radio owner (D9).
+  node reads the flags in force from the radio owner (D9). *Built 2026-11-20*;
+  see Progress for what the model covers.
 - **WN2c, relay from the config (D2).** The node build accepts
   `relay_announces` and `relay_packets`, applies them at boot and on a live
   change, and relays both on an unclaimed board. *Done when* each flag alone
   and both together are tested against the node's transport settings. The
   modem-only image keeps refusing a committed config with a relay flag on and
   names the cause (D4). The V4 node does not echo resources (D5) and refuses
-  resources addressed to itself (D8).
+  resources addressed to itself (D8). *Built 2026-11-20.*
 - **WN2d, the heap figure.** Build with a provisional heap, run the flood on
   the bench, and choose the heap size and its refusal boundary from the
   measured peak. The number is the owner's.
@@ -130,6 +131,22 @@ pin, where the older text says 1.5.2.
   In the node build it also keeps that config's relay flags. No Seneschal
   change.
 
+### wall_node_management D10 and D11 (2026-11-20)
+
+- **D10, how the node image is flashed (new):** the package rules make a
+  Linkboy plan the only path that may write a board
+  (`firmware/packages/README.md`), and the one V4 template builds the modem
+  image. The owner: "Own template, not in the public index". A
+  `retinue.heltec-v4-node` template with the same preserved range, built by
+  the staging script, listed in a bench index until the bench run passes.
+- **D11, the bench boards (new):** asked whether the three attached boards'
+  serial ports could be opened for read-only probes, the owner: "Consider
+  those free game to change. Nothin' sacred about them, they're the testing
+  boards. I plan to give one to a friend later but you can do a week of tests
+  with them both and the t114, at least." Both V4s (USB parents ending FB:28
+  and FA:64) and the T114 may be flashed, reset and reconfigured for this
+  work. Secrets and commit tokens still stay out of public evidence.
+
 ## Decisions and constraints
 
 Transport authentication does not confer board-local authority. Grants bind actual keys; durable outer counters and mutation-sequence retirement are separate from semantic transaction identity. `Changed`, `Replayed`, `Ready` and reset-required preserve distinct meanings. Board-owned recovery facts cannot be asserted by candidate configuration. A signature does not encrypt credentials. A quiet witness must cover live flash and apply; once stopping starts, cancellation or uncertain hardware state fails to a reset boundary. The first useful appliance is USB lifecycle then native LoRa forwarding, with WiFi afterward; WN0 target fixture and later carriers are real debts but are not asserted as blockers for that integration.
@@ -178,3 +195,29 @@ Choose V4 heap from measured high-water and refusal behavior. Decide unsigned, b
   signed commands in the node loop and the live relay change, which stopped
   at the fork D7 settles. Not tested: the new status line (the V4 firmware's
   tests do not run on the host). D7 to D9 ruled.
+- 2026-11-20: WN2b and the rest of WN2c built on the lane and checked in its
+  worktree. The carrier is `radio_hand::control::carrier` behind a
+  `ControlBoard` trait (quiet readiness, commit entropy); the V4 file is its
+  adapter, and the modem image grew 392 bytes. The node loop takes a KISS FEND
+  at a line boundary as the start of a control frame, answers the status
+  request from the boot snapshot, serves commands through the carrier, and
+  waits on the provisional deadline as a fourth branch of its wait. After each
+  served command or expiry it follows the owner's last applied config (relay
+  flags and first-hop allowance); boot reads the same place. The inbound limit
+  is a per-board setting, 0 on the V4. Host tests added: six on the carrier
+  (preflight before the verifier advances, token before verification, a
+  runtime error discards the verifier, silent refusals, one reset on a drop at
+  entry, apply and finish, expiry waiting for a quiet boundary), four on node
+  work around the quiet window, three on a running node following the flags
+  and a revert, two on the inbound limit with its positive control. In the
+  node tests the send, arm and collect are fakes that follow the V4 owner's
+  rule; the carrier and runtime are the real code. What the loop does with a
+  deadline that falls inside a send or a collect: nothing races either, so the
+  rollback runs on a later turn, late by that operation, by any host read or
+  frame already waiting, and by 200 ms for each attempt the radio was not
+  quiet for; no reset. Sizes, text bytes: V4 modem 374,659, T114 380,750 (112
+  more, the explicit default limit), V4 node 612,411; the UART image builds.
+  `radio-hand` tests: 150, 175 with `replay`. Not run: the V4 firmware's own
+  tests, and anything on a board. Both V4s and the T114 are attached to the
+  dev machine. The node image has no Linkboy package yet, which the package
+  rules require before a write.
