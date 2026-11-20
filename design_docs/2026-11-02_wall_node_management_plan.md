@@ -1,6 +1,6 @@
 # Wall node and carrier-agnostic management: remaining work
 
-**Status (2026-11-20): in progress; WN2's software half (WN2a to WN2c) is built and host-tested, nothing has run on a board, and the heap figure and bench run (WN2d, WN2e) are open.** Adopted as a plan on 2026-11-02. The [original wall-node plan](archive_docs/2026-11-02/2026-08-30_wall_node_management_plan.md) retains its decisions, WN0–WN8 history and scoped evidence. The [coordination agreement](2026-08-09_retinue_work_lanes.md#coordinated-appliance-listening-and-observation-work-2026-09-06) governs shared interruption and observation; the magnetic pocket-node plan reuses the control contracts without replacing this V4 appliance work.
+**Status (2026-11-20): in progress; WN2's software half (WN2a to WN2c) is built and host-tested, and the node image boots and announces on one V4 with nothing on the air to hear. The heap figure and bench run (WN2d, WN2e) are open.** Adopted as a plan on 2026-11-02. The [original wall-node plan](archive_docs/2026-11-02/2026-08-30_wall_node_management_plan.md) retains its decisions, WN0–WN8 history and scoped evidence. The [coordination agreement](2026-08-09_retinue_work_lanes.md#coordinated-appliance-listening-and-observation-work-2026-09-06) governs shared interruption and observation; the magnetic pocket-node plan reuses the control contracts without replacing this V4 appliance work.
 
 ## Phases and done-conditions
 
@@ -62,7 +62,8 @@ pin, where the older text says 1.5.2.
 - **WN2e, the bench run (D3).** The archived plan's physical procedure, steps
   5 and 6, with the [transit receipt spec](2026-08-14_transit_link_receipt_spec.md)'s
   relay-off control before and after the success. This closes WN2's
-  done-condition above.
+  done-condition above. The unclaimed V4 runs it first and the commissioned
+  one second (D12); the payload and hosts are D13 and D14.
 
 ### wall_node_management D1 to D3 (2026-11-20)
 
@@ -147,6 +148,24 @@ pin, where the older text says 1.5.2.
   and FA:64) and the T114 may be flashed, reset and reconfigured for this
   work. Secrets and commit tokens still stay out of public evidence.
 
+### wall_node_management D12 to D14 (2026-11-20)
+
+- **D12, which V4 relays in the bench run (new):** the archived procedure
+  names the commissioned board (FB:28, SB1), whose committed config has relay
+  off, so it needs the controller's apply and commit first, never yet run on
+  hardware; the other (FA:64, SB2) is unclaimed and relays under D2. The
+  owner: "SB2 first, then SB1". SB2 gives forwarding, the power cycle and the
+  relay-off control; the SB1 run with the controller is the one that closes
+  WN2 as the procedure words it.
+- **D13, the held-out payload (new):** the owner: "Random packet each way".
+  256 random bytes generated at run time in each direction over a link
+  through the relay, with the sha256 logged by sender and receiver.
+- **D14, where the two endpoints run (new):** the owner: "Both on this
+  laptop". Two stock RNS 1.6.0 instances with separate config directories, no
+  shared instance, no AutoInterface or IP interface, one RNode each. The
+  relay-off control before and after the success is what shows they cannot
+  reach each other another way.
+
 ## Decisions and constraints
 
 Transport authentication does not confer board-local authority. Grants bind actual keys; durable outer counters and mutation-sequence retirement are separate from semantic transaction identity. `Changed`, `Replayed`, `Ready` and reset-required preserve distinct meanings. Board-owned recovery facts cannot be asserted by candidate configuration. A signature does not encrypt credentials. A quiet witness must cover live flash and apply; once stopping starts, cancellation or uncertain hardware state fails to a reset boundary. The first useful appliance is USB lifecycle then native LoRa forwarding, with WiFi afterward; WN0 target fixture and later carriers are real debts but are not asserted as blockers for that integration.
@@ -221,3 +240,24 @@ Choose V4 heap from measured high-water and refusal behavior. Decide unsigned, b
   tests, and anything on a board. Both V4s and the T114 are attached to the
   dev machine. The node image has no Linkboy package yet, which the package
   rules require before a write.
+- 2026-11-20: the node image has a Linkboy package (D10):
+  `firmware/packages/heltec-v4-node.template.toml`, a bench index and a
+  recovery page; the staging script builds it with `--features node`, and the
+  public index and the modem package's staged bytes are unchanged. Staged from
+  `90ae4030342` (11,132,452-byte ELF, sha256 `30bd2647...77e4`, 682,576 bytes
+  written) and flashed through Linkboy to the second V4 (USB parent ending
+  FA:64, name SB2) with the pinned espflash 4.5.0: write range
+  `0x0..0x3f0000`, preserved `0x3f0000..0x400000`. First run on a board:
+  status reports `build=90ae403... image=v4-node-usb` with the identity, name
+  and reservation it had before; after `channel node` and a boot with no host
+  attached it reports `channel=node`, the reservation advanced by one lease
+  (1,179,648 to 1,245,184), one announce sent, `transport=1` (an unclaimed
+  board, D2), and `heap=0/98304 highwater=332 failed=0`, unchanged four
+  minutes later. Nothing else was on the air, so nothing was received or
+  forwarded: this is a boot, not a relay result. Found on that boot and fixed:
+  the `node` status line was cut off at `timebase=` on every board, because
+  its names alone are 239 bytes and its buffer was 224; the buffer is 384 and
+  the T114 image is 264 bytes larger. The board still runs the image without
+  that fix. The first V4 (FB:28, SB1) is on the modem image in the RNode
+  channel; the T114 is on its native image in the modem channel and reports a
+  watchdog reset with one crash record, not looked into.
