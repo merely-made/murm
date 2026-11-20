@@ -194,6 +194,16 @@ def crate_roots(paths: list[str], roots: tuple[str, ...]) -> list[str]:
     return sorted(crate_sources)
 
 
+def library_has_unsafe(package: str, unsafe_paths: list[str]) -> bool:
+    """Whether a crate root's own sources carry unsafe.
+
+    Only `src/` decides the crate-level lint: a file under `tests/`, `examples/` or
+    `benches/` compiles as its own crate, so it needs its own exception and count, but
+    it does not make the library give up `forbid(unsafe_code)`.
+    """
+    return any(path.startswith(f"{package}src/") for path in unsafe_paths)
+
+
 def audit(root: Path) -> dict[str, Any]:
     paths = git_files(root)
     policy_path = root / "validation/security/unsafe-policy.toml"
@@ -225,7 +235,7 @@ def audit(root: Path) -> dict[str, Any]:
 
     for crate_root in crate_roots(paths, roots):
         package = crate_root.removesuffix("src/lib.rs").removesuffix("src/main.rs")
-        package_unsafe = any(path.startswith(package) for path in present)
+        package_unsafe = library_has_unsafe(package, list(present))
         source = (root / crate_root).read_text(encoding="utf-8")
         required = exception_lint if package_unsafe else safe_lint
         if required not in source:
@@ -247,6 +257,10 @@ def self_test() -> None:
         raise AuditError("lexer self-test did not ignore comments and strings")
     if unsafe_lines('r#"unsafe"#\n#[unsafe(link_section = ".x")]') != [2]:
         raise AuditError("lexer self-test did not distinguish raw strings and attributes")
+    if library_has_unsafe("crates/a/", ["crates/a/tests/t.rs", "crates/a/examples/e.rs"]):
+        raise AuditError("crate-rule self-test counted a test or example as library unsafe")
+    if not library_has_unsafe("crates/a/", ["crates/a/src/deep/m.rs"]):
+        raise AuditError("crate-rule self-test missed unsafe under src")
 
 
 def main() -> int:

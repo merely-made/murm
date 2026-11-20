@@ -97,6 +97,12 @@ reason = "Recovery tests invoke the reset-gated control runtime constructor only
 review_by = "2027-09-09"
 
 [[exception]]
+path = "crates/station-custody/tests/lifecycle/board.rs"
+expected_unsafe = 1
+reason = "The station-claim lifecycle tests' in-process board invokes the reset-gated control runtime constructor only to model a fresh board boot. An integration test is its own crate, so the library keeps forbid(unsafe_code)."
+review_by = "2027-11-20"
+
+[[exception]]
 path = "firmware/heltec-v4-phy/src/control_boot.rs"
 expected_unsafe = 2
 reason = "The startup-only reset marker and the resident runtime construction form the V4 boot-recovery boundary before host or radio service."
