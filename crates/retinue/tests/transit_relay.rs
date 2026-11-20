@@ -272,9 +272,10 @@ fn spawn_responder(
 ) -> tokio::task::JoinHandle<(usize, Vec<([u8; 32], [u8; 32])>)> {
     tokio::spawn(async move {
         let name = responder_name();
+        // `register` announces; the timed ones follow an interval later.
         responder.register(name.clone(), b"transit");
         let deadline = tokio::time::Instant::now() + window;
-        let mut next_announce = tokio::time::Instant::now();
+        let mut next_announce = tokio::time::Instant::now() + Duration::from_secs(5);
         let mut accepted = 0;
         let mut exchanges = Vec::new();
         while tokio::time::Instant::now() < deadline {
@@ -444,7 +445,6 @@ async fn a_requester_that_hears_the_responder_directly_drops_the_rebroadcast() {
     let responder = Arc::clone(&bench.responder);
     let name = responder_name();
     responder.register(name.clone(), b"transit");
-    responder.announce(&name, b"transit");
     let dest = responder_dest();
 
     let announce =

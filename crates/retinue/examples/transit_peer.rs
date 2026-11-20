@@ -240,9 +240,11 @@ async fn responder(
         "RESPONDER_DEST {}",
         name.destination_hash(identity.public())
     );
+    // `register` announces; the timed ones follow an interval later, not on top of it.
     endpoint.register(name.clone(), b"transit");
+    println!("ANNOUNCED {}", stamp(started));
     let deadline = tokio::time::Instant::now() + window;
-    let mut next_announce = tokio::time::Instant::now();
+    let mut next_announce = tokio::time::Instant::now() + every;
     let mut inbound = 0_u32;
     let mut exchanged = 0_u32;
     while tokio::time::Instant::now() < deadline {
