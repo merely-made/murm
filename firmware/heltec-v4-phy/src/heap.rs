@@ -2,7 +2,8 @@
 //!
 //! The allocator type and its guarantees are shared with the T114: see [`radio_hand::heap`].
 //! This file keeps what is the V4's own: the global allocator static, its fixed memory, its
-//! size, and the `heap` probe line, which uses the T114's format so one bench reads both.
+//! size, and the `heap` probe line: the T114's fields, so one bench reads both, then the
+//! failed-allocation count the T114 line does not carry.
 
 use core::fmt::Write as _;
 
@@ -28,16 +29,17 @@ pub unsafe fn init() {
     unsafe { HEAP.init(start, HEAP_SIZE) };
 }
 
-/// The `heap` probe's reply: live and peak allocation, in the T114's format.
-pub fn report() -> radio_face::Text<64> {
-    let mut reply = radio_face::Text::<64>::empty();
+/// The `heap` probe's reply: the T114's line, then failed allocations since boot.
+pub fn report() -> radio_face::Text<80> {
+    let mut reply = radio_face::Text::<80>::empty();
     let _ = write!(
         &mut reply,
-        "heap={}/{} highwater={} free={}\r\n",
+        "heap={}/{} highwater={} free={} failed={}\r\n",
         HEAP.used(),
         HEAP_SIZE,
         HEAP.high_water(),
         HEAP.free(),
+        HEAP.allocation_failures(),
     );
     reply
 }

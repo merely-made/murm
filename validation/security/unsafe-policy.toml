@@ -26,9 +26,15 @@ review_by = "2027-10-16"
 
 [[exception]]
 path = "firmware/t114-phy/src/heap.rs"
-expected_unsafe = 11
-reason = "One-time fixed-allocator initialization and TrackingHeap forwarding. Bench-only direct oversize allocation/refusal avoids global-shim allocation elision; any unexpected success is released with its exact layout."
-review_by = "2027-10-16"
+expected_unsafe = 2
+reason = "The T114's one-time initialization of radio-hand's TrackingHeap over its fixed static array, called once from the first statement of main before any allocation."
+review_by = "2027-11-20"
+
+[[exception]]
+path = "crates/radio-hand/src/heap.rs"
+expected_unsafe = 7
+reason = "The shared TrackingHeap behind the node feature: its one-shot init forwards to embedded-alloc's LLFF heap, and GlobalAlloc alloc/dealloc forward to it while counting high water and failed allocations. Each firmware owns the static and the fixed region."
+review_by = "2027-11-20"
 
 [[exception]]
 path = "firmware/t114-phy/src/crash.rs"
@@ -99,14 +105,14 @@ review_by = "2027-09-09"
 [[exception]]
 path = "firmware/heltec-v4-phy/src/main.rs"
 expected_unsafe = 2
-reason = "V4 startup mints the reset marker once after reset; the optional resident-protocols image also initializes its aligned static 64 KiB LLFF heap exactly once before any allocation or task construction."
-review_by = "2027-09-13"
+reason = "V4 startup mints the reset marker once after reset; the node build also initializes its static heap once, right after the control fixture check and before any allocation."
+review_by = "2027-11-20"
 
 [[exception]]
 path = "firmware/heltec-v4-phy/src/heap.rs"
-expected_unsafe = 21
-reason = "Fixed LLFF heap, GlobalAlloc accounting, and linker-bounded sampled SP. Bench-only direct oversize allocation/refusal avoids global-shim elision; an unexpected success is released with its exact layout. Focused tests exercise the local allocator."
-review_by = "2027-10-16"
+expected_unsafe = 2
+reason = "The node build's one-time initialization of radio-hand's TrackingHeap over its fixed static 96 KiB array, called once from main before any allocation. The modem image does not compile this file."
+review_by = "2027-11-20"
 
 [[exception]]
 path = "firmware/heltec-v4-phy/examples/protocol_capacity.rs"

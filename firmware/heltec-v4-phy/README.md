@@ -73,8 +73,9 @@ The node needs nothing on USB and writes no banner. Every host write in the
 node loop is bounded at 100 ms; one that runs out stops host writes until the
 host next sends bytes, so radio service, beats and wakes never wait on a host.
 The loop answers the shared probes (`status`, `sync`, `gnss`, `timebase`,
-`ui`, `region`, `channel`, `name`, `air`), `heap` in the T114's format
-(`heap=<used>/<size> highwater=<peak> free=<free>`), and the node channel's own
+`ui`, `region`, `channel`, `name`, `air`), `heap` with the T114's fields and
+the failed allocations since boot (`heap=<used>/<size> highwater=<peak>
+free=<free> failed=<count>`), and the node channel's own
 `node`, `face` and `replay` lines. The V4 node does not echo completed inbound
 resources back on their link (the T114 does): a peer that opens a link cannot
 spend a wall relay's airtime that way. Signed control commands are not served in
