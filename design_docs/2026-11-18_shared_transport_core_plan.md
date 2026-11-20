@@ -1,8 +1,9 @@
 # One shared transport core for Node and Endpoint
 
-**Status, 2026-11-19: T0, T1, T2 and T2a done and on `main`; T3's forks are
-ruled (D21 to D27).** Route life follows stock 1.6.0 (phase T2a, D25 and D28
-to D32), `main` at `e6c0cec`. T3's code is next; none is written.
+**Status, 2026-11-19: T0, T1, T2, T2a and T3 done and on `main`.** Route life
+follows stock 1.6.0 (phase T2a, D25 and D28 to D32). Both drivers take their forwarding decisions from
+`transport/forward.rs` (T3, D21 to D26 and D33 to D36), `main` at `00da22d`.
+T4 is next; no T4 work is done.
 
 **For:** the owner, 2026-11-18: "reducing duplicated code sounds good to me."
 
@@ -325,6 +326,63 @@ as chosen.
 
 Links: area retinue transport · refines D29 · plans T2a · summary the cull's replay window is accepted as stock's; a slow interface is known by bitrate, else by airtime allowance
 
+### T3 rulings, D33 and D34 (2026-11-19)
+
+Two things D21 left open, put before the lane reached the interface table.
+Each answer is the option's name as chosen.
+
+- **D33, the size of the board's interface table (refines D21):** the board's
+  three per-interface tables (modes, airtime, announce caps) are each fixed at
+  4 by a constant; today's boards name one interface and the V4 node will name
+  two. Options: fixed at four; a fifth `Node` parameter with default 4 (the 13
+  places that spell out Node's parameters change). Answer: "Fixed at four".
+  One constant; `Node`'s type does not change.
+- **D34, a further interface when the table is full (refines D21):** `ingest`
+  and `poll` return no error, so the board cannot refuse as
+  `set_interface_mode` does. Options: served, not a relay target; the same
+  with a new public counter; replace the least recently named. Answer:
+  "Served, not a relay target". Packets on the extra interface are handled
+  and carried as now; relayed announces do not fan out to it; the first
+  interfaces named keep their slots; nothing counts it.
+
+Links: area retinue transport · refines D21 · plans T3 · summary the board's interface table holds four; a fifth interface is served but is not a relay target
+
+### T3 fork ruling, D35 (2026-11-19)
+
+The T3 lane set D24's desktop change aside. Checked here against the source.
+
+- **D35, whether carriage off still counts (refines D24, applies D23):**
+  today the desktop counts `policy_rejected` for a packet it would have
+  carried (`endpoint/router.rs:132`, `336`); the board and stock count
+  nothing. Two public integration tests assert the count is 1
+  (`tests/endpoint_transit_policy.rs:92`, `222`). Options: still counted;
+  not counted (the lane's recommendation). Answer: "Still counted". With
+  carriage off the packet goes on to local handling and a proof's return path
+  is kept, as D24 ruled, and `policy_rejected` still moves once. The desktop
+  looks up the return path without consuming it. The board keeps counting
+  nothing; that difference joins the statistics follow-on.
+
+Links: area retinue transport · refines D24 · applies D23 · plans T3 · summary carriage off is not transit on the desktop, and policy_rejected still counts it
+
+### T3 fork ruling, D36 (2026-11-19)
+
+The T3 lane set this aside after writing the shared functions. Checked here
+against the source. It corrects inventory row c, which this plan called the
+same result by different means.
+
+- **D36, a carried link request that is not sent, with the bridge table full
+  (applies D15):** recording the new bridge evicts another. The board records
+  only if the send will fit (`node/transit.rs:237`), so an unsent request
+  evicts nothing. The desktop records, evicts, then removes only the new
+  bridge on refusal (`endpoint/transit.rs:260`), so the evicted bridge is
+  lost. Options: put back what was displaced; room as an input, each driver
+  as today (the lane's recommendation); remove the new bridge only. Answer:
+  "Put back what was displaced". A refused send leaves the bridge table as it
+  was, in both drivers, by one shared sequence. The desktop changes; the
+  board's result stays and it counts an eviction once the send is accepted.
+
+Links: area retinue transport · applies D15 · refines D9 · plans T3 · summary a refused link request leaves the bridge table as it was, in both drivers
+
 ## Phases and done-conditions
 
 ### T0. Settle the differences
@@ -400,7 +458,8 @@ Drivers keep locking, queues, `Actions`, statistics and policy selection.
 
 Row 1 lands here (D13): the core takes the list of attached, permitted
 interfaces as an input. The board learns its interfaces as the shell names
-them (D21) and carries the unsent remainder of a relay across polls (D22).
+them (D21), up to four (D33, D34), and carries the unsent remainder of a relay
+across polls (D22).
 The functions return a decision with a reason and each driver keeps its
 counters (D23). With carriage off a packet is not transit (D24). The announce
 gate remembers the hash first (D26).
@@ -1094,3 +1153,101 @@ options are in this file's history and in the T0 table.
   "Commit, merge, push." `main` fast-forwarded from `d90113e` to `e6c0cec`,
   the tree the gates ran on. The lane's worktree, branch and build target
   were removed.
+- 2026-11-19: T3's code started in an opus lane on branch `transport-core-t3`
+  in `Code/worktrees/murm-transport-core-t3`, cut from `113232d`. Part A
+  converges in place, one commit each: the board's announce gate order (D26),
+  carriage off on the desktop (D24), the board's interface table and relay
+  fan-out (D2, D13, D21, D22, D33, D34). Part B moves the decisions: the
+  shared functions alone, then `Node`, then `Endpoint`. The lane stops after
+  Part A's first two commits, after the fan-out, after the shared functions,
+  and at the end.
+- 2026-11-19: the lane stopped with two commits and one fork. Read here
+  against the rulings; nothing sent back.
+  - `074b586`: the board's announce gate is duplicate memory, hop ceiling,
+    size (`node/transit.rs:355`). No existing test changed.
+  - `0f3be58`: the board's interface table (`KNOWN_INTERFACES = 4`,
+    crate-private; learned in `ingest`, `poll`, `set_first_hop_airtime` and
+    `set_interface_mode`) and relay fan-out. The owed interfaces live on the
+    relay's entry in `crate::rebroadcast`; the desktop never sets them. Two
+    board tests changed under D2: the ingress-interface relay test, renamed,
+    now expects both interfaces and four counted sends; and
+    `the_next_hop_is_the_route_at_release` expects two sends.
+  - Consequences of keeping the remainder on the entry, as built: neighbours
+    that end a relay end its remainder; a newer announce or the relay's own
+    retry replaces it; a full table can evict it; it passes the mode rule and
+    the live-route check again when offered. A relay heard on an interface
+    with no table slot leaves only on the table's interfaces.
+  - Lane gates at `0f3be58`: nextest 863 of 864 (the known timing test);
+    no-alloc 58 of 58; thumb check builds.
+  - The fork, carriage off on the desktop, was ruled as D35.
+  - Found: `a_slow_interface_is_known_by_bitrate_else_airtime`
+    (`endpoint/tests/route_life.rs`, from T2a, on `main`) learns five routes
+    into the test table of four, so one is evicted by map order. Reproduced
+    here: 3 failures in 10 runs, each "case 0". The lane fixes the test.
+- 2026-11-19: the lane stopped after three more commits, with one fork.
+  Read here against the rulings and against each driver's present order of
+  checks; nothing sent back.
+  - `1937d08`: the flaky test checks each case alone; 20 of 20 in the lane.
+  - `2b818c2`: carriage off on the desktop (D24, D35), at
+    `endpoint/router.rs:100` and the proof arm, with `Shared::peek_reverse`.
+    No existing assertion changed; the two public tests pass as they are.
+    Four relay tests moved unchanged to `endpoint/tests/transport_relay.rs`
+    for the line ceiling.
+  - `3a1930a`: the shared decisions in `transport/forward.rs` (386 lines),
+    no driver changed: `admit_crossing`, `cross_gate`, `crossed`,
+    `forward_hop`, `live_route`, `admit_request`, `unsent_request`,
+    `reverse_proof`, `relay_gate`, `release_from`, `relay_targets`, returning
+    `Transit` with a `Refusal`, or a `RelayRefusal`. Each function holds at
+    most one table; a step on another table (the duplicate memory, the route,
+    the egress selector) comes in as a closure, so the desktop never holds
+    two table locks in an order it does not use today.
+  - As built, not ruled: the size check and link-request MTU clamp on the
+    board, and the link-MTU clamp and queue refusal on the desktop, stay with
+    each driver as part of sending, between the decision and the send.
+  - Lane gates at `3a1930a`: nextest 881 of 882 (the known timing test);
+    no-alloc 68 of 68; thumb check builds.
+  - The fork, an unsent link request with the bridge table full, was ruled
+    as D36.
+- 2026-11-19: the lane finished: eight commits on `transport-core-t3`, tip
+  `00da22d`, 27 files under `crates/retinue/src/`, 2009 lines added and 548
+  removed, no public item changed. Read here: the board's transit file, the
+  desktop's bridged path and forward tail; nothing sent back.
+  - `650422f` (D36): `record_bridge_undoably` returns what recording
+    displaced and `undo_bridge` puts it back in place; the desktop's refused
+    link request no longer loses the bridge it evicted or leaves a
+    retransmission's replacement. Same-named test in both drivers,
+    `a_refused_link_request_leaves_the_bridges_as_they_were`; the board's
+    passed before and after.
+  - `907a6f7`: `Node` onto the shared decisions. `evicted_bridges` counts
+    once the send is accepted.
+  - `00da22d`: `Endpoint` onto them. One route read per carried packet
+    (`Shared::path_entry`, row b). The desktop's own `LinkBridge::admit`,
+    `Crossing`, `accepts_transit_from` and `peek_reverse` are gone.
+  - Where each decision is made and called. Bridge crossing: `admit_crossing`,
+    `cross_gate`, `crossed`; `node/transit.rs:103`, `endpoint/router.rs:113`.
+    Type-2 forwarding: `forward_hop`, `admit_request`, `unsent_request`;
+    `node/transit.rs:197`, `endpoint/transit.rs:211`. Reverse proofs:
+    `reverse_proof`; `node/transit.rs:342`, `endpoint/transit.rs:145`.
+    Announce gate: `relay_gate` at receipt (`node/transit.rs:392`,
+    `endpoint/announces.rs:438`), `release_from` and `relay_targets` at
+    release (`node/rebroadcast.rs:121`, `endpoint/rebroadcast.rs:232`).
+  - Left with the drivers, as built and not ruled: the board checks that the
+    send will fit before recording a bridge, so a full action list with a
+    table full of validated links still counts no `refused_bridges` (D23);
+    the desktop's single send point keeps its egress and hop-ceiling checks,
+    which the shared gates now run first and which one test calls directly;
+    the size and MTU steps noted above.
+  - Run here at `00da22d`: nextest 883 of 884 (the known timing test);
+    no-alloc tests 68 of 68; thumb `alloc` check builds; `run_live.py` 35 of
+    35 against stock RNS 1.6.0; `peer_rnsrs.py` 8 of 8 against rns-rs
+    `663e5e3`, rebuilt on the Unix host and removed after; T114 image builds;
+    V4 image builds with `--ignore-rust-version`.
+  - T114 image: text 380,670 bytes, bss 139,844. Against T2a (`e6c0cec`):
+    3,040 more text, 72 more bss. Against the tree before T2 (`5befe56`):
+    6,056 more text, 1,176 more bss.
+  T3's done-condition is met on the branch, with the three steps above left
+  to the drivers. Not merged.
+- 2026-11-19: the owner was shown the gates and the three steps left with
+  the drivers and said "Merge, commit, push, proceed." `main` fast-forwarded
+  from `113232d` to `00da22d`, the tree the gates ran on. The lane's
+  worktree, branch and build target were removed.
