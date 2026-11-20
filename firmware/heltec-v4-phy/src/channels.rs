@@ -238,7 +238,7 @@ fn decimal(mut value: u64, out: &mut [u8; 20]) -> usize {
     len
 }
 
-/// Answer the probes both channels share: `status`, `sync`, `ui`, `region`, `channel`, and
+/// Answer the probes both channels share: `status`, `ui`, `region`, `channel`, and
 /// the V4's storage-only `timebase` report/reservation probe. A lease reserved here is an
 /// inspectable persistence artifact, never permission for the modem to emit announces; the
 /// node build reserves its own at boot before it arms receive.
@@ -268,10 +268,6 @@ pub async fn probe<L: HostLink>(
                     .as_bytes(),
             )
             .await;
-        return Outcome::Served;
-    }
-    if packet == b"sync\n" || packet == b"sync\r\n" {
-        let _ = host.write_all(b"2b 24b4\r\n").await;
         return Outcome::Served;
     }
     if packet == b"gnss\n" || packet == b"gnss\r\n" {

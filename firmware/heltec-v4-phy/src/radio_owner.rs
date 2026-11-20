@@ -20,6 +20,7 @@ use radio_hand::settings::Settings;
 use radio_hand::store::Slot;
 
 use crate::{channels, control_store, power, store, wake_input};
+mod applied;
 #[cfg(feature = "node")]
 mod node_lease;
 #[cfg(feature = "node")]
@@ -563,6 +564,9 @@ impl<RK: RadioKind, DLY: DelayNs> V4RadioOwner<RK, DLY> {
                 d.wait_frames,
             );
             let _ = host.write_all(reply.as_str().as_bytes()).await;
+            return channels::Outcome::Served;
+        }
+        if self.probe_applied(packet, host).await {
             return channels::Outcome::Served;
         }
         channels::probe(

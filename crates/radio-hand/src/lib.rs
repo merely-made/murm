@@ -25,6 +25,7 @@
 extern crate std;
 
 pub mod announce_reservation;
+pub mod applied;
 pub mod board_status;
 #[cfg(feature = "radio")]
 pub mod channel;

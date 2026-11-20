@@ -346,20 +346,6 @@ async fn main(spawner: Spawner) {
         }
     };
 
-    let mut online_line = radio_face::Text::<320>::empty();
-    let _ = write!(
-        &mut online_line,
-        "tulle/heltec-v4 phy online; version={}; sx1262 online; sync=2b reg=24b4; longfast=906875000; build={}; image={}",
-        env!("CARGO_PKG_VERSION"),
-        option_env!("RETINUE_FIRMWARE_REVISION").unwrap_or("unidentified"),
-        if cfg!(feature = "host-uart-low-power") {
-            "v4-modem-uart"
-        } else if cfg!(feature = "node") {
-            "v4-node-usb"
-        } else {
-            "v4-modem-usb"
-        },
-    );
     local_status.radio = radio_face::RadioState::Online;
     local_status.fault = None;
     ui::publish(local_status, radio_face::LedSignal::Idle);
@@ -458,6 +444,26 @@ async fn main(spawner: Spawner) {
     } else {
         (button, None)
     };
+
+    // Written after boot recovery, so `sync=` and `reg=` are the profile recovery left
+    // applied (D20). `status` repeats this boot line; `sync` and `applied` stay live.
+    let applied = owner.applied();
+    let mut online_line = radio_face::Text::<320>::empty();
+    let _ = write!(
+        &mut online_line,
+        "tulle/heltec-v4 phy online; version={}; sx1262 online; sync={:02x} reg={:04x}; longfast=906875000; build={}; image={}",
+        env!("CARGO_PKG_VERSION"),
+        applied.sync_word,
+        applied.sync_register(),
+        option_env!("RETINUE_FIRMWARE_REVISION").unwrap_or("unidentified"),
+        if cfg!(feature = "host-uart-low-power") {
+            "v4-modem-uart"
+        } else if cfg!(feature = "node") {
+            "v4-node-usb"
+        } else {
+            "v4-modem-usb"
+        },
+    );
 
     owner.enable_observations();
 
