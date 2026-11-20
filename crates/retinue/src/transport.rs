@@ -34,7 +34,6 @@ mod tests;
 #[cfg(test)]
 pub(crate) use array::Position;
 pub(crate) use entries::{LinkBridge, ReverseEntry, RouteEntry, RouteLife};
-#[allow(unused_imports, reason = "the drivers move onto these in T3 B2 and B3")]
 pub(crate) use forward::*;
 pub(crate) use memory::{MemoryProfile, TransitMemory};
 pub(crate) use tables::*;

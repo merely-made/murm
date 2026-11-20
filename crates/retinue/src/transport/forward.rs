@@ -7,8 +7,6 @@
 //! counters (D23). A step that touches a table the decision does not hold comes in as a
 //! closure, so the desktop never holds two of its table locks at once.
 
-#![allow(dead_code, reason = "the drivers move onto these in T3 B2 and B3")]
-
 use super::{
     BridgeRecord, BridgeUndo, InterfaceId, LinkBridge, Lookup, ReverseEntry, RouteEntry, RouteLife,
     Store, Tick, find_live, find_or_forget, record_bridge_undoably, refresh_bridge, take_reverse,
@@ -221,6 +219,10 @@ pub(crate) fn forward_hop<T: Tick>(
 }
 
 /// A destination's route if live at `now`, a lapsed one removed, read once per carried packet.
+#[cfg_attr(
+    not(feature = "tokio"),
+    allow(dead_code, reason = "the board sweeps instead (D18)")
+)]
 pub(crate) fn live_route<T: Tick, S: Store<RouteEntry<T>>>(
     routes: &mut S,
     destination: &AddressHash,

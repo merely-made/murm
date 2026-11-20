@@ -1,17 +1,19 @@
 //! Carrying others' traffic: link bridges, the reverse table, and forwarding.
 
 use alloc::vec::Vec;
+use core::cell::Cell;
 use std::collections::HashMap;
+use std::sync::Arc;
 use std::sync::atomic::Ordering;
-use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
-use crate::address_book::AddressBook;
 use crate::hash::AddressHash;
 use crate::link;
 use crate::packet::{MTU, Packet, PacketType};
 
-use crate::transport::{self, BridgeRecord, BridgeUndo, record_reverse};
+use crate::transport::{
+    self, BridgeRecord, BridgeUndo, Carriage, Refusal, Transit, forward_hop, record_reverse,
+};
 
 use super::announces::duration_ticks;
 use super::interface::{InterfaceId, QueueAdmission};
@@ -39,50 +41,6 @@ pub(super) const LINK_TRANSPORT_CAPACITY: usize = 4;
 
 /// A link carried through this node, on the desktop's clock.
 pub(super) type LinkBridge = transport::LinkBridge<Instant>;
-
-impl LinkBridge {
-    /// Whether the bridge has lapsed at `now`, under [`LINK_TRANSPORT_TTL`].
-    pub(super) fn lapsed_at(&self, now: Instant) -> bool {
-        self.lapsed(now, duration_ticks(LINK_TRANSPORT_TTL))
-    }
-
-    /// Whether `pkt`, heard on `iface`, may cross, and as what. Only the two sides may use
-    /// it, nothing crosses before the proof, and the proof must come from the destination's
-    /// side under its signature (the side alone when its identity is unknown).
-    pub(super) fn admit(
-        &self,
-        iface: InterfaceId,
-        pkt: &Packet,
-        book: &Mutex<AddressBook>,
-    ) -> Option<Crossing> {
-        if iface != self.from && iface != self.out {
-            return None;
-        }
-        if pkt.packet_type != PacketType::Proof || pkt.context != link::CTX_LRPROOF {
-            return self.proof_deadline.is_none().then_some(Crossing::Traffic);
-        }
-        let checked = book
-            .lock()
-            .unwrap()
-            .resolve(self.destination)
-            .map(|peer| link::proof_is_signed_by(pkt, &peer.identity));
-        match (iface == self.out, checked) {
-            (true, Some(true)) => Some(Crossing::Proof { verified: true }),
-            (true, None) => Some(Crossing::Proof { verified: false }),
-            _ => None,
-        }
-    }
-}
-
-/// What [`LinkBridge::admit`] lets cross.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub(super) enum Crossing {
-    /// A packet of a validated link.
-    Traffic,
-    /// The destination's proof, which validates the bridge once carried; `verified` when
-    /// its signature was checked against the destination's identity.
-    Proof { verified: bool },
-}
 
 /// How long a carried packet's return path is kept for its proof (RNS
 /// `Transport.REVERSE_TIMEOUT`).
@@ -164,6 +122,7 @@ impl Shared {
     /// Consume the return path for a proof addressed to `packet`, yielding the interface to
     /// carry it out on if it arrived on the one the packet left by (RNS `Transport.py`
     /// 2733-2744).
+    #[cfg(test)]
     pub(super) fn take_reverse(
         &self,
         packet: AddressHash,
@@ -174,18 +133,26 @@ impl Shared {
         transport::take_reverse(&mut *table, &packet, arrived, Instant::now(), timeout)
     }
 
-    /// What [`Self::take_reverse`] would yield, leaving the return path in place.
-    pub(super) fn peek_reverse(
+    /// Whether `proof`, heard on `arrived`, goes back along its return path, and out which
+    /// interface ([`transport::reverse_proof`]).
+    pub(super) fn carry_back(
         &self,
-        packet: AddressHash,
+        proof: &Packet,
         arrived: InterfaceId,
-    ) -> Option<InterfaceId> {
-        let table = self.reverse_table.lock().unwrap();
-        let (now, timeout) = (Instant::now(), duration_ticks(REVERSE_TIMEOUT));
-        transport::find_live(&*table, &packet, |entry| {
-            !entry.expired(now, timeout) && entry.outbound == arrived
-        })
-        .map(|entry| entry.received)
+        policy: &RoutingPolicy,
+    ) -> Transit<InterfaceId> {
+        let mut table = self.reverse_table.lock().unwrap();
+        transport::reverse_proof(
+            &mut *table,
+            &proof.destination,
+            arrived,
+            false,
+            proof.hops,
+            Instant::now(),
+            duration_ticks(REVERSE_TIMEOUT),
+            &carriage(policy, arrived),
+            |out| policy.allowed_egress.allows(out),
+        )
     }
 }
 
@@ -197,71 +164,106 @@ impl Shared {
     }
 }
 
-/// Forward a header-type-2 packet addressed to us as a transport hop, toward its
-/// destination. `from` is the interface it arrived on.
+/// The desktop's carriage inputs for a packet heard on `iface`.
+pub(super) fn carriage(policy: &RoutingPolicy, iface: InterfaceId) -> Carriage {
+    Carriage {
+        on: policy.forward_packets,
+        ingress: policy.allowed_ingress.allows(iface),
+        max_hops: policy.max_hops,
+    }
+}
+
+/// Count a transit refusal as the desktop always has (D23). A duplicate was counted by the
+/// packet filter that found it.
+pub(super) fn count_refusal(shared: &Shared, refusal: Refusal) {
+    let stats = &shared.routing_stats;
+    let counter = match refusal {
+        Refusal::ThirdInterface | Refusal::Unvalidated | Refusal::Ingress | Refusal::Egress => {
+            &stats.policy_rejected
+        }
+        Refusal::HopLimit => &stats.hop_limit_dropped,
+        Refusal::Unroutable => &stats.unroutable_packets,
+        Refusal::Duplicate => return,
+    };
+    counter.fetch_add(1, Ordering::Relaxed);
+}
+
+/// Count a packet that would have been carried with carriage off (D35).
+pub(super) fn count_carriage_off(shared: &Shared) {
+    shared
+        .routing_stats
+        .policy_rejected
+        .fetch_add(1, Ordering::Relaxed);
+}
+
+/// Forward a header-type-2 packet addressed to us as a transport hop (`addressed`), toward
+/// its destination. `from` is the interface it arrived on. Hands the packet back when it is
+/// not transit, for local handling.
 pub(super) fn forward(
     shared: &Arc<Shared>,
     from: InterfaceId,
     pkt: Packet,
     policy: &RoutingPolicy,
-) {
-    if pkt.hops.saturating_add(1) >= policy.max_hops {
-        shared
-            .routing_stats
-            .hop_limit_dropped
-            .fetch_add(1, Ordering::Relaxed);
-        return;
-    }
-    // A copy already carried is a loop or a second path, never new work.
-    // One hash serves the packet filter and the reverse entry.
-    let hash = pkt.hash();
-    if !shared.packet_is_new(pkt.context, hash) {
-        return;
-    }
-    let dest = pkt.destination;
-
-    let next = shared.path_iface(dest);
-    if let Some(out) = next {
-        // Refuse before recording a bridge that policy would never carry.
-        if !policy.allowed_egress.allows(out) {
+    addressed: bool,
+) -> Option<Packet> {
+    // One hash, taken when the filter is asked, serves it and the reverse entry.
+    let hashed = Cell::new(None);
+    let decision = forward_hop(
+        addressed,
+        pkt.hops,
+        &carriage(policy, from),
+        || {
+            let hash = pkt.hash();
+            hashed.set(Some(hash));
+            shared.packet_is_new(pkt.context, hash)
+        },
+        || shared.path_entry(pkt.destination),
+        |out| policy.allowed_egress.allows(out),
+    );
+    let route = match decision {
+        Transit::Local => return Some(pkt),
+        Transit::CarriageOff => {
+            count_carriage_off(shared);
+            return Some(pkt);
+        }
+        Transit::Refused(refusal) => {
+            count_refusal(shared, refusal);
+            return None;
+        }
+        Transit::Carry(route) => route,
+    };
+    let hash = hashed.get().unwrap_or_else(|| pkt.hash());
+    let (dest, out) = (pkt.destination, route.iface);
+    // A link request establishes a bridge for its proof and later link data.
+    let mut pkt = pkt;
+    let mut admitted = None;
+    if pkt.packet_type == PacketType::LinkRequest {
+        // A short request's link id covers all its bytes; its destination rejects it.
+        let link_id = link::link_id(&pkt).unwrap_or(hash);
+        let Some(undo) = admit_link_request(shared, from, out, route.hops, link_id, &mut pkt)
+        else {
             shared
                 .routing_stats
                 .policy_rejected
                 .fetch_add(1, Ordering::Relaxed);
-            return;
-        }
-        // A link request establishes a bridge for its proof and later link data.
-        let mut pkt = pkt;
-        let mut admitted = None;
-        if pkt.packet_type == PacketType::LinkRequest {
-            // A short request's link id covers all its bytes; its destination rejects it.
-            let link_id = link::link_id(&pkt).unwrap_or(hash);
-            let Some(undo) = admit_link_request(shared, from, out, link_id, &mut pkt) else {
-                shared
-                    .routing_stats
-                    .policy_rejected
-                    .fetch_add(1, Ordering::Relaxed);
-                return;
-            };
-            admitted = Some((link_id, undo));
-        }
-        let accepted = if pkt.packet_type == PacketType::LinkRequest {
-            forward_on(shared, out, pkt, policy)
-        } else {
-            shared.send_with_reverse(hash, from, out, || forward_on(shared, out, pkt, policy))
+            return None;
         };
-        if accepted {
-            shared.mark_path_used(dest);
-        } else if let Some((link_id, undo)) = admitted {
-            // An unsent request leaves the bridges as they were (D36).
-            transport::unsent_request(&mut *shared.link_transport.lock().unwrap(), &link_id, undo);
-        }
-    } else {
-        shared
-            .routing_stats
-            .unroutable_packets
-            .fetch_add(1, Ordering::Relaxed);
+        admitted = Some((link_id, undo));
     }
+    // Addressed by the route read once (inventory row b).
+    let via = Address::Via(route.transport);
+    let accepted = if pkt.packet_type == PacketType::LinkRequest {
+        carry_on(shared, out, pkt, policy, via)
+    } else {
+        shared.send_with_reverse(hash, from, out, || carry_on(shared, out, pkt, policy, via))
+    };
+    if accepted {
+        shared.mark_path_used(dest);
+    } else if let Some((link_id, undo)) = admitted {
+        // An unsent request leaves the bridges as they were (D36).
+        transport::unsent_request(&mut *shared.link_transport.lock().unwrap(), &link_id, undo);
+    }
+    None
 }
 
 /// Prepare to carry a link request from `from` to `out`: lower its signalled MTU to what both
@@ -273,6 +275,7 @@ fn admit_link_request(
     shared: &Shared,
     from: InterfaceId,
     out: InterfaceId,
+    hops: u8,
     link_id: AddressHash,
     pkt: &mut Packet,
 ) -> Option<BridgeUndo<Instant, ()>> {
@@ -289,12 +292,6 @@ fn admit_link_request(
     {
         return None;
     }
-    let hops = shared
-        .path_table
-        .lock()
-        .unwrap()
-        .get(&pkt.destination)
-        .map_or(0, |entry| entry.hops);
     // RNS adds the outbound interface's MTU airtime (`Transport.py` 2059-2062, 3200-3202).
     let allowance =
         crate::node::transit_proof_timeout(hops).saturating_add(shared.first_hop_airtime(out));
@@ -326,7 +323,14 @@ pub(super) fn forward_on(
     pkt: Packet,
     policy: &RoutingPolicy,
 ) -> bool {
-    carry_on(shared, out, pkt, policy, true)
+    // Address without touching the route; the caller commits its use after acceptance.
+    let via = shared
+        .path_table
+        .lock()
+        .unwrap()
+        .get(&pkt.destination)
+        .and_then(|entry| entry.transport);
+    carry_on(shared, out, pkt, policy, Address::Via(via))
 }
 
 /// Carry a reverse proof with its original header and transport id.
@@ -336,7 +340,16 @@ pub(super) fn forward_reverse_proof_on(
     pkt: Packet,
     policy: &RoutingPolicy,
 ) -> bool {
-    carry_on(shared, out, pkt, policy, false)
+    carry_on(shared, out, pkt, policy, Address::Keep)
+}
+
+/// How a carried packet is addressed for the interface it leaves on.
+#[derive(Clone, Copy)]
+enum Address {
+    /// Its original header and transport id, as a reverse proof keeps them.
+    Keep,
+    /// Header type 1, or 2 through this next transport hop.
+    Via(Option<AddressHash>),
 }
 
 fn carry_on(
@@ -344,7 +357,7 @@ fn carry_on(
     out: InterfaceId,
     mut pkt: Packet,
     policy: &RoutingPolicy,
-    readdress: bool,
+    address: Address,
 ) -> bool {
     if !policy.allowed_egress.allows(out) {
         shared
@@ -361,16 +374,9 @@ fn carry_on(
         return false;
     }
     pkt.hops += 1;
-    if readdress {
+    if let Address::Via(via) = address {
         pkt.header_type = crate::packet::HeaderType::Type1;
         pkt.transport = None;
-        // Address without touching the route; the caller commits its use after acceptance.
-        let via = shared
-            .path_table
-            .lock()
-            .unwrap()
-            .get(&pkt.destination)
-            .and_then(|entry| entry.transport);
         pkt.address_via(via);
     }
     let accepted = matches!(

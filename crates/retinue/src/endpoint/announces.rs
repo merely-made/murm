@@ -15,6 +15,7 @@ use crate::announce_freshness::{
     AnnounceFreshnessReject,
 };
 use crate::packet::Packet;
+use crate::transport::{RelayRefusal, relay_gate};
 
 use super::facts::PeerAnnounce;
 use super::interface::InterfaceId;
@@ -413,46 +414,43 @@ pub(super) fn process_verified_announce(
 
     // A path response answers one requester: RNS learns from it but never rebroadcasts it or
     // rate-counts it, so one path request cannot flood the mesh.
-    if pkt.context == crate::path::CTX_PATH_RESPONSE {
-        return;
-    }
-
+    let policy = shared.routing.lock().unwrap().clone();
     // RNS rate-counts every path-updating announce arriving on an interface with a rate rule,
     // relayed or not (`Transport.py` 2299-2333). An interface's own rule applies always; the
     // endpoint's only to a transport, as RNS sets `default_ar_*` (`Reticulum.py` 968-971).
-    let policy = shared.routing.lock().unwrap().clone();
-    let now = shared.announce_admission_now_ms();
-    let rate_override = shared.iface_policy(iface).announce_rate;
-    let mut admission = shared.announce_admission.lock().unwrap();
-    let rate = rate_override.or_else(|| {
-        policy
-            .forward_announces
-            .then(|| admission.policy().destination_rate())
-            .flatten()
-    });
-    let blocked = rate.is_some_and(|rate| {
-        admission.observe_destination(destination, rate, now) == DestinationVerdict::BlockRelay
-    });
-    drop(admission);
-
+    let rate_blocked = || {
+        let now = shared.announce_admission_now_ms();
+        let rate_override = shared.iface_policy(iface).announce_rate;
+        let mut admission = shared.announce_admission.lock().unwrap();
+        let rate = rate_override.or_else(|| {
+            policy
+                .forward_announces
+                .then(|| admission.policy().destination_rate())
+                .flatten()
+        });
+        rate.is_some_and(|rate| {
+            admission.observe_destination(destination, rate, now) == DestinationVerdict::BlockRelay
+        })
+    };
     // Relay as a transport node: hops+1, stamped with our identity so downstream peers
     // address replies through us, from the rebroadcast table.
     let repointed = accepted.is_none();
-    if !policy.relays_announce_from(iface) || !(repointed || shared.announce_is_new(pkt.hash())) {
-        return;
-    }
-    if blocked {
-        shared
-            .routing_stats
-            .relay_rate_limited_announces
-            .fetch_add(1, Ordering::Relaxed);
-        return;
-    }
-    if pkt.hops.saturating_add(1) >= policy.max_hops {
-        shared
-            .routing_stats
-            .hop_limit_dropped
-            .fetch_add(1, Ordering::Relaxed);
+    let gate = relay_gate(
+        pkt.context == crate::path::CTX_PATH_RESPONSE,
+        rate_blocked,
+        policy.relays_announce_from(iface),
+        || repointed || shared.announce_is_new(pkt.hash()),
+        pkt.hops,
+        policy.max_hops,
+    );
+    let refused = match gate {
+        Ok(()) => None,
+        Err(RelayRefusal::RateLimited) => Some(&shared.routing_stats.relay_rate_limited_announces),
+        Err(RelayRefusal::HopLimit) => Some(&shared.routing_stats.hop_limit_dropped),
+        Err(_) => return,
+    };
+    if let Some(counter) = refused {
+        counter.fetch_add(1, Ordering::Relaxed);
         return;
     }
     let mut fwd = pkt;

@@ -10,7 +10,7 @@ use crate::announce_freshness::{AnnounceFreshness, AnnounceFreshnessCandidate};
 use crate::hash::AddressHash;
 use crate::node::InterfaceMode;
 use crate::packet::Packet;
-use crate::transport::{self, Lookup, Removal, RouteEntry, RouteLife, find_live, find_or_forget};
+use crate::transport::{self, Lookup, Removal, RouteEntry, RouteLife, find_live};
 
 use super::announces::duration_ticks;
 use super::dedup::SEEN_ANNOUNCES;
@@ -324,12 +324,16 @@ impl Shared {
     /// The interface to reach `dest`, if a route is known and unexpired. Evicts an expired
     /// route as a side effect, so a stale path never lingers past a lookup.
     pub(super) fn path_iface(&self, dest: AddressHash) -> Option<InterfaceId> {
+        self.path_entry(dest).map(|entry| entry.iface)
+    }
+
+    /// [`Self::path_iface`], with the whole route, read once.
+    pub(super) fn path_entry(&self, dest: AddressHash) -> Option<PathEntry> {
         let life = self.path_life();
-        let (iface, expired) = self.write_diagnostic(|| {
+        let (entry, expired) = self.write_diagnostic(|| {
             let mut t = self.path_table.lock().unwrap();
-            let now = Instant::now();
-            match find_or_forget(&mut *t, &dest, |e| e.live_at(now, life)) {
-                Lookup::Live(e) => ((Some(e.iface), false), false),
+            match transport::live_route(&mut *t, &dest, Instant::now(), life) {
+                Lookup::Live(e) => ((Some(e), false), false),
                 Lookup::Expired(_) => ((None, true), true),
                 Lookup::Missing => ((None, false), false),
             }
@@ -337,7 +341,7 @@ impl Shared {
         if expired {
             self.discovery.forget(dest);
         }
-        iface
+        entry
     }
 
     /// Whether a path request for `dest` may go out now, under the per-destination floor and

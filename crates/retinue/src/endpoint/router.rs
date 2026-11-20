@@ -9,9 +9,9 @@ use tokio::sync::mpsc;
 use crate::link::{self, Inbound, LinkMode, LinkTrailer};
 use crate::link_liveness::Liveness;
 use crate::packet::{DestinationType, Packet, PacketType};
-use crate::transport::{find_live, refresh_bridge};
+use crate::transport::{RouteTouch, Transit, admit_crossing, cross_gate, crossed};
 
-use super::announces::admit_verified_announce;
+use super::announces::{admit_verified_announce, duration_ticks};
 use super::dedup::LinkPacketAdmission;
 use super::discovery::handle_path_request;
 use super::entropy::{ephemeral_seed, next_iv};
@@ -27,7 +27,10 @@ use super::resource_session::register_resource_session;
 use super::shared::{LinkKind, Shared};
 use super::single::deliver_single;
 use super::stream::{StreamFault, register_stream};
-use super::transit::{Crossing, forward, forward_on, forward_reverse_proof_on};
+use super::transit::{
+    LINK_TRANSPORT_TTL, carriage, count_carriage_off, count_refusal, forward, forward_on,
+    forward_reverse_proof_on,
+};
 use super::watchdog::note_link_inbound;
 
 /// Dispatch one inbound packet that arrived on `iface`.
@@ -97,91 +100,86 @@ pub(super) fn dispatch(
     }
     // Transit. Announces are relayed from their own arm, so they still reach the book.
     let policy = shared.routing.lock().unwrap().clone();
-    let addressed_to_us_as_hop = || {
-        pkt.header_type == crate::packet::HeaderType::Type2
-            && pkt.transport == Some(shared.identity.public().hash())
-            && !shared
-                .registered
-                .lock()
-                .unwrap()
-                .iter()
-                .any(|r| r.dest == pkt.destination)
-    };
-    if pkt.packet_type != PacketType::Announce && !policy.forward_packets {
-        // With carriage off nothing is transit (D24): the packet goes on to local handling and
-        // the tables are untouched. One that would have been carried is still counted (D35).
-        let bridged = {
-            let bridges = shared.link_transport.lock().unwrap();
-            let now = Instant::now();
-            find_live(&*bridges, &pkt.destination, |bridge| !bridge.lapsed_at(now)).is_some()
-        };
-        if bridged || addressed_to_us_as_hop() {
-            shared
-                .routing_stats
-                .policy_rejected
-                .fetch_add(1, Ordering::Relaxed);
-        }
-    } else if pkt.packet_type != PacketType::Announce {
+    let pkt = if pkt.packet_type == PacketType::Announce {
+        pkt
+    } else {
         // A packet for a link we bridge crosses to the other side whatever its header type,
         // since the two ends may address it differently. Traffic from either end refreshes
         // the bridge; a third interface can neither use nor refresh it.
-        let bridged = {
+        let carriage = carriage(&policy, iface);
+        let proves = pkt.packet_type == PacketType::Proof && pkt.context == link::CTX_LRPROOF;
+        let admitted = {
             let bridges = shared.link_transport.lock().unwrap();
-            let now = Instant::now();
-            match find_live(&*bridges, &pkt.destination, |bridge| !bridge.lapsed_at(now)) {
-                Some(bridge) => {
-                    let Some(crossing) = bridge.admit(iface, &pkt, &shared.address_book) else {
-                        shared
-                            .routing_stats
-                            .policy_rejected
-                            .fetch_add(1, Ordering::Relaxed);
-                        return;
-                    };
-                    Some((bridge.from, bridge.out, bridge.destination, crossing))
-                }
-                _ => None,
-            }
+            admit_crossing(
+                &*bridges,
+                &pkt.destination,
+                iface,
+                proves,
+                Instant::now(),
+                duration_ticks(LINK_TRANSPORT_TTL),
+                &carriage,
+                |destination| {
+                    shared
+                        .address_book
+                        .lock()
+                        .unwrap()
+                        .resolve(destination)
+                        .map(|peer| link::proof_is_signed_by(&pkt, &peer.identity))
+                },
+            )
         };
-        if bridged.is_some() || addressed_to_us_as_hop() {
-            // Transit, never ours: the ingress selector's refusal drops it rather than
-            // handling it locally.
-            if !policy.accepts_transit_from(iface) {
-                shared
-                    .routing_stats
-                    .policy_rejected
-                    .fetch_add(1, Ordering::Relaxed);
+        match admitted {
+            Transit::Carry(cross) => {
+                let gate = cross_gate(
+                    &carriage,
+                    pkt.hops,
+                    cross.out,
+                    || shared.packet_is_new(pkt.context, pkt.hash()),
+                    |out| policy.allowed_egress.allows(out),
+                );
+                if let Err(refusal) = gate {
+                    count_refusal(shared, refusal);
+                    return;
+                }
+                let link_id = pkt.destination;
+                // As in RNS, the bridge is validated as its proof goes out, not before.
+                if forward_on(shared, cross.out, pkt, &policy) {
+                    let mut bridges = shared.link_transport.lock().unwrap();
+                    let touch = crossed(&mut *bridges, &link_id, Instant::now(), &cross);
+                    drop(bridges);
+                    match touch {
+                        RouteTouch::ProveAlive(destination) => shared.prove_path_alive(destination),
+                        RouteTouch::MarkUsed(destination) => shared.mark_path_used(destination),
+                    }
+                }
                 return;
             }
-            match bridged {
-                Some((a, b, destination, crossing)) => {
-                    if pkt.hops.saturating_add(1) < policy.max_hops
-                        && !shared.packet_is_new(pkt.context, pkt.hash())
-                    {
-                        return;
-                    }
-                    let link_id = pkt.destination;
-                    let out = if iface == a { b } else { a };
-                    // As in RNS, the bridge is validated as its proof goes out, not before.
-                    if forward_on(shared, out, pkt, &policy) {
-                        let mut bridges = shared.link_transport.lock().unwrap();
-                        let proves = crossing != Crossing::Traffic;
-                        refresh_bridge(&mut *bridges, &link_id, Instant::now(), proves);
-                        drop(bridges);
-                        if crossing == (Crossing::Proof { verified: true }) {
-                            // A verified proof proves its destination alive (`Transport.py`
-                            // 2928-2938).
-                            shared.prove_path_alive(destination);
-                        } else {
-                            // The link's destination route is in use (`Transport.py` 2440).
-                            shared.mark_path_used(destination);
-                        }
-                    }
-                }
-                None => forward(shared, iface, pkt, &policy),
+            // Transit, never ours: a refusal drops it rather than handling it locally.
+            Transit::Refused(refusal) => {
+                count_refusal(shared, refusal);
+                return;
             }
-            return;
+            // With carriage off nothing is transit (D24): local handling, still counted (D35).
+            Transit::CarriageOff => {
+                count_carriage_off(shared);
+                pkt
+            }
+            Transit::Local => {
+                let addressed = pkt.header_type == crate::packet::HeaderType::Type2
+                    && pkt.transport == Some(shared.identity.public().hash())
+                    && !shared
+                        .registered
+                        .lock()
+                        .unwrap()
+                        .iter()
+                        .any(|r| r.dest == pkt.destination);
+                match forward(shared, iface, pkt, &policy, addressed) {
+                    Some(pkt) => pkt,
+                    None => return,
+                }
+            }
         }
-    }
+    };
     match pkt.packet_type {
         PacketType::Announce => {
             // An echo of our own announce: drop it before it costs a signature check or
@@ -348,25 +346,19 @@ pub(super) fn dispatch(
             // A single-packet proof: carry it back the way its packet came, or conclude one
             // of our receipts (RNS `Transport.py` 2724-2761).
             if !matches!(pkt.context, link::CTX_LRPROOF | link::CTX_RESOURCE_PRF) {
-                if !policy.forward_packets {
+                match shared.carry_back(&pkt, iface, &policy) {
+                    Transit::Carry(back) => {
+                        forward_reverse_proof_on(shared, back, pkt, &policy);
+                        return;
+                    }
+                    Transit::Refused(refusal) => {
+                        count_refusal(shared, refusal);
+                        return;
+                    }
                     // Carriage off: the return path is kept and the proof handled here
                     // (`Transport.py` 3009), still counted if it would have been carried (D35).
-                    if shared.peek_reverse(pkt.destination, iface).is_some() {
-                        shared
-                            .routing_stats
-                            .policy_rejected
-                            .fetch_add(1, Ordering::Relaxed);
-                    }
-                } else if let Some(back) = shared.take_reverse(pkt.destination, iface) {
-                    if policy.accepts_transit_from(iface) {
-                        forward_reverse_proof_on(shared, back, pkt, &policy);
-                    } else {
-                        shared
-                            .routing_stats
-                            .policy_rejected
-                            .fetch_add(1, Ordering::Relaxed);
-                    }
-                    return;
+                    Transit::CarriageOff => count_carriage_off(shared),
+                    Transit::Local => {}
                 }
                 if shared.conclude_single_receipt(&pkt) {
                     return;

@@ -9,9 +9,10 @@ use std::sync::atomic::Ordering;
 use std::time::{Duration, Instant};
 
 use crate::hash::AddressHash;
-use crate::iface_mode::{InterfaceMode, ModeFlags, announce_permitted};
+use crate::iface_mode::{InterfaceMode, ModeFlags};
 use crate::packet::Packet;
 use crate::rebroadcast::{AnnounceCap, CapRate, Offer, Rebroadcast, Rebroadcasts};
+use crate::transport::{relay_targets, release_from};
 
 use super::entropy::fill_random;
 use super::interface::{InterfaceId, QueueAdmission};
@@ -228,12 +229,7 @@ impl Shared {
             let life = self.path_life();
             let (paths, at) = (self.path_table.lock().unwrap(), Instant::now());
             due.iter()
-                .map(|r| {
-                    paths
-                        .get(&r.destination)
-                        .filter(|e| e.live_at(at, life))
-                        .map(|e| e.iface)
-                })
+                .map(|r| release_from(&*paths, &r.destination, at, life))
                 .collect()
         };
         let (mut capped, mut dropped) = (0, 0);
@@ -260,14 +256,14 @@ impl Shared {
                 let from = next_hop.and_then(|hop| modes.iter().find(|(id, _)| *id == hop));
                 let to_internal = next_hop.is_some_and(|hop| policy(hop).announces_to_internal);
                 let mut out = Vec::new();
-                for &(id, mode) in &ifaces {
+                let known = ifaces.iter().map(|&(id, mode)| {
                     let flags = ModeFlags {
                         from_internal: policy(id).announces_from_internal,
                         to_internal,
                     };
-                    if !announce_permitted(mode, from.map(|m| m.1), false, flags) {
-                        continue;
-                    }
+                    (id, mode, flags)
+                });
+                for id in relay_targets(from.map(|m| m.1), known, None) {
                     let Some(rate) = rate(id) else {
                         out.push((id, rebroadcast.packet.clone()));
                         continue;

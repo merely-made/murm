@@ -97,11 +97,6 @@ impl RoutingPolicy {
         }
     }
 
-    /// Whether a packet arriving on `iface` may be forwarded at all under this policy.
-    pub(super) fn accepts_transit_from(&self, iface: InterfaceId) -> bool {
-        self.forward_packets && self.allowed_ingress.allows(iface)
-    }
-
     /// Whether an announce arriving on `iface` may be re-broadcast under this policy.
     pub(super) fn relays_announce_from(&self, iface: InterfaceId) -> bool {
         self.forward_announces && self.allowed_ingress.allows(iface)
