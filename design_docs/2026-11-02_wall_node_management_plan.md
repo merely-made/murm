@@ -239,6 +239,20 @@ pin, where the older text says 1.5.2.
   in this piece". The token becomes a zeroizing type and the commit buffers
   are cleared after the send.
 
+### wall_node_management D22 (2026-11-20)
+
+- **D22, what counts as expiry evidence (refines D20):** D20 took the
+  board's `TransactionExpired` to a late commit as the evidence. After the
+  board rolls a candidate back, a late commit is refused `InvalidCommit`,
+  because the rollback clears the candidate
+  (`crates/seneschal/src/control/durable/model/transaction.rs:166`);
+  `TransactionExpired` comes only while the candidate is still armed past
+  its deadline. Confirmed against the real runtime. The owner: "Either
+  refusal plus the restored radio". The tool records which refusal came
+  back and requires the board's `applied` line to show the earlier profile:
+  `InvalidCommit` with the old profile is a rollback; `TransactionExpired`
+  means the board has not run its expiry yet, so the line is read again.
+
 ## Decisions and constraints
 
 Transport authentication does not confer board-local authority. Grants bind actual keys; durable outer counters and mutation-sequence retirement are separate from semantic transaction identity. `Changed`, `Replayed`, `Ready` and reset-required preserve distinct meanings. Board-owned recovery facts cannot be asserted by candidate configuration. A signature does not encrypt credentials. A quiet witness must cover live flash and apply; once stopping starts, cancellation or uncertain hardware state fails to a reset boundary. The first useful appliance is USB lifecycle then native LoRa forwarding, with WiFi afterward; WN0 target fixture and later carriers are real debts but are not asserted as blockers for that integration.
@@ -410,3 +424,12 @@ Choose V4 heap from measured high-water and refusal behavior. Decide unsigned, b
   tests pass. Seven end-to-end tests against the real runtime and carrier
   passed in the working tree and are held back for D19. Nothing has run
   against a board, a port or djinn. D19 to D21 ruled.
+- 2026-11-20: commits were blocked for a time by `dependency bans native`
+  after another machine's p2mere 0.12 bump; fixed in `native/deny.toml`
+  (`b3fd90bd451`: five dead skips removed, one argued skip for `lru` 0.18.5).
+  Built on the lane and waiting to land: the lifecycle's seven end-to-end
+  tests with the audit change (D19); the zeroizing commit token in postilion
+  (D21); and the V4's `applied` line with a live `sync` reply and a banner
+  written after boot recovery (D20), at about 2 KiB on each V4 image. Left
+  as they are: `status` repeats the boot banner, and the status-only boots
+  still answer `sync` with fixed text. D22 ruled.
