@@ -346,6 +346,10 @@ required-features = ["tokio"]
 name = "tulle_interface"
 required-features = ["tulle-radio"]
 
+[[test]]
+name = "transit_relay"
+required-features = ["tulle-radio"]
+
 [[example]]
 name = "node_link"
 required-features = ["tulle-radio"]
