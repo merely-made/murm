@@ -40,6 +40,7 @@ mod authority;
 mod control;
 mod head;
 mod lease;
+pub mod lifecycle;
 
 pub use authority::{
     DjinnStationAuthority, ReleasedSennetStation, ReleasedTucketStation, SIGNALMAN_APP, declaration,

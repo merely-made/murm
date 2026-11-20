@@ -87,6 +87,35 @@ board has already accepted is refused with silence; the command then reports a
 carrier timeout. The record starts at one for a freshly claimed board and is
 never rewound by this adapter.
 
+`lifecycle` runs the controller's configuration lifecycle in one invocation
+(wall_node_management D17, D18): signed Status, a ProvisionalApply of a
+candidate built from the arguments, signed Status again as evidence, then
+exactly one of commit, revert, or a wait past the board's deadline followed by
+a Status read:
+
+```text
+station-claim lifecycle \
+  --authority-root PATH --port COM6 --node NODE_HEX \
+  --region us915 --frequency-hz 906875000 --bandwidth-hz 250000 \
+  --spreading-factor 11 --coding-rate 5 --preamble-symbols 16 \
+  --sync-word 0x2b --tx-power-dbm 17 \
+  --relay-announces on --relay-packets on --max-hops 8 \
+  --lifetime-ms 60000 --then commit|revert|expire --record RUN.json
+```
+
+The board-minted commit token stays in this process's memory and is zeroed
+when the run ends; it is never printed, written or recorded. The outer counter
+(`first-owner-controller-counter.json`) and the mutation sequence
+(`first-owner-controller-sequence.json`) are each spent, with a synced
+temporary file and rename, before the frame carrying them is sent; status
+spends a counter only. The run record, refused if it already exists, carries
+the change id, every counter and sequence used, the generations, the board
+deadline, the configuration sent and the outcome, and no secret. The board's
+answers carry no applied configuration and signed Status carries no radio
+fields. A silent board is reported with what to check: the scope, a counter
+record behind the board, a radio that was mid-frame, and for an apply a
+profile the board cannot run.
+
 This private integration package has its own workspace, excluded from Murm's
 default radio workspace. Its radio dependencies are paths within this repository;
 Signalman's desktop uses the same package by path. Dramatis/Personae and Djinn

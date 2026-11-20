@@ -7,9 +7,10 @@
 
 //! Explicit USB first-owner claim through an existing Signalman credential.
 //!
-//! This command has three explicit lifecycle actions: `init` creates a controller scope,
-//! `claim` requires that existing scope, and `status` asks an already-claimed board for its
-//! control status under the same controller identity. None of them opens or bootstraps a
+//! This command has four explicit actions: `init` creates a controller scope, `claim`
+//! requires that existing scope, `status` asks an already-claimed board for its control status
+//! under the same controller identity, and `lifecycle` applies a candidate and commits,
+//! reverts or lets it expire in one invocation (wall_node_management D17, D18). None of them opens or bootstraps a
 //! wallet: the controller's scoped keys are released by djinn (dramatis repo plan, D11, D17),
 //! and with djinn absent or Locked the controller is pending (D12).
 //!
@@ -25,10 +26,9 @@ use std::io;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 
-use station_custody::{
-    DjinnStationAuthority, claim_first_owner, first_owner_controller_fingerprint,
-    first_owner_status,
-};
+#[path = "station_claim/lifecycle.rs"]
+mod lifecycle;
+
 use personae::RetainedKeys;
 use postilion::control::first_owner::{
     ClaimOutcome, FirstOwnerController, UsbFirstOwnerConfig, UsbFirstOwnerTransport,
@@ -37,11 +37,17 @@ use postilion::control::first_owner::{
 use postilion::control::verified::{UsbControlConfig, UsbControlTransport};
 use radio_hand::control::{ControlStatusBootFact, ControlStatusEvidence, NodeId};
 use radio_hand::region::Region;
+use station_custody::lifecycle::{ControllerState, FileControllerState};
+use station_custody::{
+    DjinnStationAuthority, claim_first_owner, first_owner_controller_fingerprint,
+    first_owner_status,
+};
 
 enum Command {
     Init { authority_root: PathBuf },
     Claim(ClaimArgs),
     Status(StatusArgs),
+    Lifecycle(lifecycle::LifecycleArgs),
 }
 
 struct StatusArgs {
@@ -50,7 +56,9 @@ struct StatusArgs {
     node: NodeId,
 }
 
-/// The controller's outer replay counter, persisted beside the scope record.
+/// The controller's outer replay counter, persisted beside the scope record. The library's
+/// `FileControllerState` writes it; this shape is the file format tests read back.
+#[cfg_attr(not(test), allow(dead_code))]
 #[derive(serde::Serialize, serde::Deserialize, Clone, Copy, PartialEq, Eq, Debug)]
 struct ControllerCounter {
     /// The highest counter this controller has ever offered a board under this scope.
@@ -79,6 +87,7 @@ async fn run() -> Result<(), Box<dyn Error>> {
         Command::Init { authority_root } => initialize_controller_scope(&authority_root),
         Command::Claim(args) => claim(args).await,
         Command::Status(args) => status(args).await,
+        Command::Lifecycle(args) => lifecycle::run(args).await,
     }
 }
 
@@ -150,43 +159,14 @@ fn parse_node(value: &str) -> Result<NodeId, Box<dyn Error>> {
 /// A missing record starts at one, which is the first counter a freshly claimed board's
 /// zeroed grant accepts. The write goes to a sibling temporary file, is synced, and is then
 /// renamed over the record, so an interruption leaves either the old record or the new one.
+/// The lifecycle command spends the same record through the library's `FileControllerState`.
 fn reserve_next_counter(authority_root: &Path) -> Result<u64, Box<dyn Error>> {
-    let path = controller_counter_path(authority_root);
-    let last_used = match std::fs::read_to_string(&path) {
-        Ok(text) => {
-            let record: ControllerCounter = serde_json::from_str(&text).map_err(|error| {
-                io::Error::new(
-                    io::ErrorKind::InvalidData,
-                    format!(
-                        "invalid first-owner controller counter at {}: {error}",
-                        path.display()
-                    ),
-                )
-            })?;
-            record.last_used
-        },
-        Err(error) if error.kind() == io::ErrorKind::NotFound => 0,
-        Err(error) => return Err(error.into()),
-    };
-    let next = last_used
-        .checked_add(1)
-        .ok_or("first-owner controller counter is exhausted")?;
-    let temporary = path.with_extension("json.tmp");
-    let contents = serde_json::to_vec(&ControllerCounter { last_used: next })?;
-    let mut file = OpenOptions::new()
-        .write(true)
-        .create(true)
-        .truncate(true)
-        .open(&temporary)?;
-    file.write_all(&contents)?;
-    file.sync_all()?;
-    drop(file);
-    std::fs::rename(&temporary, &path)?;
-    Ok(next)
+    Ok(FileControllerState::new(authority_root).reserve_counter()?)
 }
 
+#[cfg(test)]
 fn controller_counter_path(authority_root: &Path) -> PathBuf {
-    authority_root.join("first-owner-controller-counter.json")
+    FileControllerState::new(authority_root).counter_path()
 }
 
 async fn claim(args: ClaimArgs) -> Result<(), Box<dyn Error>> {
@@ -211,7 +191,7 @@ async fn claim(args: ClaimArgs) -> Result<(), Box<dyn Error>> {
         ClaimOutcome::Committed => println!("claim outcome=committed"),
         ClaimOutcome::CommittedCleanupPending => {
             println!("claim outcome=committed-cleanup-pending")
-        },
+        }
     }
     Ok(())
 }
@@ -287,10 +267,13 @@ fn parse_command() -> Result<Command, Box<dyn Error>> {
                 return Err(format!("unknown argument {flag}").into());
             }
             Ok(Command::Init { authority_root })
-        },
+        }
         "claim" => parse_claim_args(&mut values).map(Command::Claim),
         "status" => parse_status_args(&mut values).map(Command::Status),
-        _ => Err(format!("unknown command {command:?}; use init, claim, or status").into()),
+        "lifecycle" => lifecycle::parse(&mut values).map(Command::Lifecycle),
+        _ => Err(
+            format!("unknown command {command:?}; use init, claim, status, or lifecycle").into(),
+        ),
     }
 }
 
@@ -369,7 +352,8 @@ fn parse_region(value: &str) -> Result<Region, Box<dyn Error>> {
 
 fn print_usage() {
     println!(
-        "usage:\n  station-claim init --authority-root PATH\n  station-claim claim --authority-root PATH --port PORT --region us915|eu868|eu433|anz915|jp920 --frequency-hz HZ --bandwidth-hz HZ --tx-power-dbm DBM\n  station-claim status --authority-root PATH --port PORT --node NODE_HEX"
+        "usage:\n  station-claim init --authority-root PATH\n  station-claim claim --authority-root PATH --port PORT --region us915|eu868|eu433|anz915|jp920 --frequency-hz HZ --bandwidth-hz HZ --tx-power-dbm DBM\n  station-claim status --authority-root PATH --port PORT --node NODE_HEX\n{}",
+        lifecycle::USAGE
     );
 }
 
