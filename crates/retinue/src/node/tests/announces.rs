@@ -187,7 +187,7 @@ fn a_failed_announce_can_be_retried_before_the_interval() {
 /// on the requesting interface only, once per tag; it ignores tagless requests, requests
 /// relayed past their first hop, and requests for anyone else.
 #[test]
-fn path_requests_for_this_node_are_answered_once_on_their_interface() {
+fn a_path_request_is_answered_once_on_its_own_interface() {
     let mut n = node();
     let me = n.destination();
     let request = |tag: u8| crate::path::path_request(me, &[tag; crate::path::TAG_LEN]);
@@ -228,7 +228,7 @@ fn path_requests_for_this_node_are_answered_once_on_their_interface() {
 /// A relay rebroadcasts a node's own announce, so the node hears itself. The echo must not
 /// make the node its own peer, while genuine peers still learn it through the relay.
 #[test]
-fn own_announce_echoed_by_a_relay_is_not_a_peer() {
+fn an_echo_of_our_own_announce_is_dropped() {
     let (mut a, mut b) = pair();
     let mut relay = Node::<32, 8, 4, 4>::new(
         PrivateIdentity::from_secret_bytes(&[0x46; 64]),

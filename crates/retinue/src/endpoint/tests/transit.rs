@@ -219,7 +219,7 @@ async fn a_carried_request_waits_for_the_outbound_airtime() {
 /// A request whose MTU must be lowered under a link mode this node cannot encode is
 /// dropped and takes no slot; one that already fits is carried as it is.
 #[tokio::test]
-async fn a_carried_request_that_cannot_be_clamped_is_dropped() {
+async fn a_relay_drops_a_request_it_cannot_clamp() {
     let (endpoint, a, b, _, pending, mut request) = transit_fixture();
     request.payload[link::LINK_KEYS_LEN] = 0xe0;
     route(&endpoint.shared, a.id(), request.clone());
@@ -294,7 +294,7 @@ async fn a_proof_validates_its_bridge_only_once_carried() {
 /// signed by another identity, and the real proof heard from the initiator's side are all
 /// dropped. The real proof from the destination's side validates the bridge.
 #[tokio::test]
-async fn a_carried_link_waits_for_its_destinations_proof() {
+async fn a_bridge_carries_nothing_until_the_destination_proves_it() {
     let (endpoint, a, b, responder, pending, request) = transit_fixture();
     let link_id = pending.link_id();
     route(&endpoint.shared, a.id(), request);

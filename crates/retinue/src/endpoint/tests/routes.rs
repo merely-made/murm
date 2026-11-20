@@ -335,7 +335,7 @@ async fn a_route_in_use_is_marked_not_extended() {
 /// Detaching an interface culls the routes learned on it and the bridges that cross it, so
 /// a send to that destination falls back to broadcast on what is left.
 #[tokio::test]
-async fn detaching_an_interface_culls_its_routes_and_bridges() {
+async fn forgetting_an_interface_culls_its_routes_and_bridges() {
     let ep = Endpoint::new(PrivateIdentity::from_secret_bytes(&[0x63; 64]));
     let gone = ep.attach_interface();
     let kept = ep.attach_interface();

@@ -103,7 +103,7 @@ fn an_expired_route_admits_any_announce_as_a_first_sighting() {
 /// A transport answering `request_path` from its cache sends the blob it already relayed
 /// (`Transport.py` 3459-3530). Once the route has gone, that same blob restores it.
 #[test]
-fn a_same_blob_announce_restores_an_expired_route() {
+fn a_cached_path_response_restores_an_expired_route() {
     let mut n = Node::<8, 8, 4, 4>::new(
         PrivateIdentity::from_secret_bytes(&[0x91; 64]),
         DestinationName::new("retinue", ["node"]).name_hash(),
@@ -169,7 +169,7 @@ fn a_live_route_admits_only_a_later_emission() {
 /// and still relayed, as RNS relays from its path table rather than its known
 /// destinations. Because the route changed, the freshness candidate is committed.
 #[test]
-fn address_book_refusal_still_learns_and_relays_the_route() {
+fn address_book_refusal_still_learns_the_path() {
     let mut n = Node::<1, 8, 4, 4>::new(
         PrivateIdentity::from_secret_bytes(&[0x85; 64]),
         DestinationName::new("retinue", ["node"]).name_hash(),

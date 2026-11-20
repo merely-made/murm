@@ -220,7 +220,7 @@ fn the_transit_filter_outlasts_the_route_table() {
 /// A packet addressed through another transport is not this node's to handle, even when
 /// it names this node's destination: RNS filters it before dispatch.
 #[test]
-fn a_type_two_packet_for_another_transport_is_dropped() {
+fn a_type_two_packet_for_another_transport_is_not_dispatched() {
     let (mut a, mut b) = pair();
     a.ingest(IFACE, &b.announce(&blob([2; RAND_HASH_LEN]), None), 0);
     let mut request = sent(&a.open_link(b.destination(), IFACE, &[0x31; 64], 0).unwrap()).unwrap();
@@ -294,7 +294,7 @@ fn non_transit_sender_addresses_its_first_relay_and_forwards_nothing() {
 }
 
 #[test]
-fn foreign_interface_cannot_refresh_or_poison_a_link_bridge() {
+fn a_link_bridge_accepts_only_its_two_interfaces() {
     let mut relay = Node::<8, 8, 4, 4>::new(
         PrivateIdentity::from_secret_bytes(&[0x45; 64]),
         DestinationName::new("retinue", ["relay"]).name_hash(),

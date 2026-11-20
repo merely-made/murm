@@ -242,7 +242,7 @@ fn expire_route(ep: &Endpoint, destination: AddressHash) {
 /// RNS culls a path row with its random blobs (`Transport.py` 957-978, 1086-1090), so the
 /// next announce is a first sighting whatever its emission time or hops.
 #[tokio::test]
-async fn expired_routes_admit_any_announce_as_a_first_sighting() {
+async fn an_expired_route_admits_any_announce_as_a_first_sighting() {
     let ep = short_ttl_endpoint(0x45);
     let first_iface = ep.attach_interface().id();
     let replacement_iface = ep.attach_interface().id();
@@ -341,7 +341,7 @@ async fn address_book_refusal_still_learns_the_path() {
 /// A full book admits a newcomer by evicting the least recently heard peer whose path
 /// has gone stale, and the newcomer is relayed whether or not the book takes it.
 #[tokio::test]
-async fn a_full_address_book_evicts_a_peer_whose_path_expired() {
+async fn a_full_book_evicts_a_peer_whose_route_expired() {
     let ep = Endpoint::new(PrivateIdentity::from_secret_bytes(&[0x4B; 64]));
     let a = ep.attach_interface();
     ep.enable_routing();

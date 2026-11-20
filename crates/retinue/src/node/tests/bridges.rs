@@ -139,7 +139,7 @@ fn an_unproved_bridge_lapses_at_its_proof_deadline() {
 /// At capacity a new request displaces the stalest unproved bridge, never a validated
 /// one; with every slot validated it is refused and not carried.
 #[test]
-fn forged_requests_cannot_displace_a_validated_bridge() {
+fn a_full_transit_table_never_evicts_a_validated_link() {
     let mut relay = Node::<8, 8, 4, 2>::new(
         PrivateIdentity::from_secret_bytes(&[0x45; 64]),
         DestinationName::new("retinue", ["relay"]).name_hash(),

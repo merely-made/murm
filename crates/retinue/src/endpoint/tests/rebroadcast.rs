@@ -71,7 +71,7 @@ async fn relayed_announces_set_the_complete_transport_header() {
 /// A single-radio repeater relays back out the radio it heard on, as RNS sends on every
 /// interface, and retries once after the grace (`Transport.py` 765-829).
 #[tokio::test(start_paused = true)]
-async fn a_single_interface_endpoint_relays_on_its_ingress_and_retries_once() {
+async fn a_relay_sends_after_a_jitter_on_every_known_interface_then_retries_once() {
     let ep = Endpoint::new(PrivateIdentity::from_secret_bytes(&[0x91; 64]));
     let mut radio = ep.attach_interface();
     ep.enable_routing();
