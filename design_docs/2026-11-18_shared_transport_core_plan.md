@@ -1,9 +1,10 @@
 # One shared transport core for Node and Endpoint
 
-**Status, 2026-11-19: T0, T1, T2, T2a and T3 done and on `main`.** Route life
-follows stock 1.6.0 (phase T2a, D25 and D28 to D32). Both drivers take their forwarding decisions from
-`transport/forward.rs` (T3, D21 to D26 and D33 to D36), `main` at `00da22d`.
-T4 is next; no T4 work is done.
+**Status, 2026-11-19: done. T0 to T5 are on `main` at `bc017a2`.** `Node` and
+`Endpoint` share their transit tables (T2) and forwarding decisions (T3) in
+`crate::transport`; route life follows stock 1.6.0 (T2a); the shared module's
+tests run at the real table sizes (T4). What each driver still decides is
+listed under "Deferred and follow-on".
 
 **For:** the owner, 2026-11-18: "reducing duplicated code sounds good to me."
 
@@ -383,6 +384,24 @@ same result by different means.
 
 Links: area retinue transport · applies D15 · refines D9 · plans T3 · summary a refused link request leaves the bridge table as it was, in both drivers
 
+### T4 ruling, D37 (2026-11-19)
+
+Put with the numbers in "T4 inventory of the mirrored tests". It rewrites
+T4, which said driver tests "keep only what a driver owns".
+
+- **D37, how far the paired driver tests go:** 32 tests share a name across
+  the drivers (950 board lines, 1,139 desktop lines); 26 mix a shared
+  decision with what a driver owns, 5 are driver-owned, 1 asserts only a
+  shared decision but runs through each driver. Options: keep the pairs and
+  fill the gaps; slim the pairs, as the plan said; one body for both drivers
+  over a common rig. Answer: "Keep the pairs, fill the gaps". The pairs stay
+  as end-to-end checks that each driver calls the shared decision correctly.
+  T4 adds the shared tests still missing, runs the shared table tests at the
+  real sizes (16 and 4096, beside 4), and gives the mirrors with different
+  names one name. No test is removed.
+
+Links: area retinue transport · refines T4 · draws on T4 inventory · plans T4 · summary the paired driver tests stay; T4 fills the shared gaps, tests at real sizes and aligns names
+
 ## Phases and done-conditions
 
 ### T0. Settle the differences
@@ -470,16 +489,41 @@ carried packet goes; each only supplies inputs and carries out the decision.
 ### T4. Test the shared core once
 
 One behaviour suite runs against the shared module at the board and desktop
-capacities. Driver tests keep only what a driver owns.
+capacities. The paired driver tests stay as end-to-end checks of each driver
+(D37); mirrors under different names take one name.
 
-**Done when:** each behaviour from the mirrored test files is asserted in one
-place; the count of tests removed and kept is recorded here.
+**Done when:** every shared decision a paired test asserts has a test in the
+shared module, or the gap is named here; the shared table tests pass at 4, at
+16 over the array and at 4096 over the map; and the counts of tests added,
+renamed and kept are recorded here.
 
 ### T5. Qualify
 
 **Done when:** the Rust suite, the live suite and `peer_rnsrs.py` pass at the
 final revision; the firmware images build, and their flash and RAM figures are
 recorded beside the figures from before T2.
+
+**Result (2026-11-19).** The final revision is `bc017a2`. The Rust suite ran
+there: nextest 920 of 921 (the known timing test,
+`reliable_exchange_survives_loss_including_identify`), no-alloc tests 69 of
+69, thumb `alloc` check builds. The live suite (35 of 35 against stock RNS
+1.6.0), `peer_rnsrs.py` (8 of 8 against rns-rs `663e5e3`) and both firmware
+builds ran at `00da22d`, the last revision that changed non-test code; T4
+after it changed tests and named the desktop's table sizes. The owner
+accepted those runs for the final revision.
+
+| T114 image | text | bss |
+|---|---|---|
+| Before T2 (`5befe56`) | 374,614 | 138,668 |
+| After T2 (`b4cf3b7`) | 376,670 | 138,812 |
+| After T2a (`e6c0cec`) | 377,630 | 139,772 |
+| After T3 (`00da22d`), final | 380,670 | 139,844 |
+
+Over the whole plan: 6,056 bytes more flash, 1,176 bytes more RAM. The V4
+image builds (with `--ignore-rust-version`: its toolchain is 1.97.0 against a
+required 1.97.1) and has no figure here because it holds none of this code:
+it never enables `retinue/alloc`, which `Node` and the transport need
+(`firmware/heltec-v4-phy/Cargo.toml:20`).
 
 ## Constraints
 
@@ -500,6 +544,17 @@ recorded beside the figures from before T2.
   receipt layer. Both were measured on 2026-11-18 and are outside this plan.
 - The seven statistics the drivers count differently (T3 inventory rows d
   to k), left as they are by D23.
+- What each driver still decides after T3 and T4, each covered by a paired
+  driver test and by no shared test: the order "bridge, then type-2 hop, then
+  return-path proof, handled once"; a short link request's id and a link
+  request recording no return path; what makes a packet "addressed" to this
+  hop; which packet contexts skip the duplicate memory; which side of a
+  return path an interface removal purges. Lines are in the 2026-11-19
+  progress entries. Also left with the drivers in T3: the board's check that
+  a send will fit before it records a bridge, the desktop send point's own
+  egress and hop-ceiling checks, and the size and MTU steps.
+- `reliable_exchange_survives_loss_including_identify` fails at its 20 s
+  limit in every run of this plan; it predates the plan and was left alone.
 - The hop-count check on a carried link's packets (D27, candidate row 27).
 - A carried link request is stamp-checked by both drivers; stock checks only
   at the destination. Noticed in T3's stock reading; not ruled.
@@ -896,6 +951,48 @@ Retinue:
   `return_paths_are_transactional_with_output` in both `transport_core.rs`
   files, and `routes_touch_only_when_live` in `transport/tests.rs:154`.
 
+### T4 inventory of the mirrored tests (2026-11-19)
+
+A read-only lane read the shared module's tests and the tests that carry the
+same name in both drivers, at `22e7592`. Checked here: the counts, the
+`both!` macro and its capacity, and one pair's body. The per-pair verdicts
+are the lane's reading. Paths start at `crates/retinue/src/`.
+
+- **Counts.** `node/` has 146 tests, `endpoint/` 170. The shared module has
+  46 test bodies (20 in `transport/tests.rs`, 3 in `transport/tests/memory.rs`,
+  10 in `transport/tests/forward.rs`, 13 in `rebroadcast/tests.rs`); 26 of
+  them run twice, over a bounded array and over `HashMap`, so 72 tests.
+- **Capacities.** Every shared table test runs at 4 entries (`CAP`,
+  `transport/tests.rs:14`). Board fixtures hold 2 to 4 routes. The desktop's
+  tables compile to 4 under `cfg(test)` (`endpoint/paths.rs:29`). Nothing in
+  the crate runs at 16 routes or at 4096.
+- **The 32 same-named pairs** total 950 lines on the board and 1,139 on the
+  desktop. The lane's verdicts: 1 asserts only a shared decision
+  (`an_announce_that_replaces_a_route_keeps_its_used_mark`), 5 assert only
+  what a driver owns (link MTU floor, a key conflict in the address book, the
+  forwarded count, link-interface binding, the relayed header), and 26 are
+  mixed. Even the one "shared" pair drives each driver end to end (`ingest`,
+  then the stored route).
+- **What the mixed pairs keep for the driver:** the counters, which differ by
+  name or by value in 6 pairs (`evicted_routes` against `paths_evicted`;
+  `forwarded_announces` 2 against 1; `policy_rejected` 3 against unchanged);
+  the packet as sent; that a decision is applied only on accepted output; and
+  how a refusal is produced (a full `Actions` on the board; a full queue, an
+  offline interface or a selector on the desktop).
+- **Shared tests already assert the decision** for 27 of the 32 pairs. None
+  for: the announce cap's purge on interface removal (pair 20) and the order
+  "bridge before return path, handled once" (pair 29). Partial for the local
+  link request (pair 2) and the short link request's bridge (pair 27).
+- **Mirrors under different names:** 10 more pairs the lane is confident of
+  (five in `node/tests/bridges.rs` against `endpoint/tests/transit.rs`), and
+  about 8 likely by name. About 25 board and 17 desktop transit tests have no
+  counterpart.
+- **One body for both drivers** would need a common rig over: time (`u64`
+  milliseconds per call against `Instant` and the paused tokio clock), how a
+  relay is released (`poll` against timers), how a send is refused, two
+  counter structs, and two ways of building packets. All 32 desktop tests
+  are `#[tokio::test]`; the board's are plain.
+
 ### rns-rs boundary (2026-11-18)
 
 Read at `663e5e32d526c42ffaf4044ef322cd800b248d10`, with a clean checkout.
@@ -1251,3 +1348,75 @@ options are in this file's history and in the T0 table.
   the drivers and said "Merge, commit, push, proceed." `main` fast-forwarded
   from `113232d` to `00da22d`, the tree the gates ran on. The lane's
   worktree, branch and build target were removed.
+- 2026-11-19: T4's inventory came back and was checked in part; its one
+  fork was put to the owner and ruled (D37). T4's tests started in an opus
+  lane on branch `transport-core-t4` in
+  `Code/worktrees/murm-transport-core-t4`, cut from `22e7592`: the shared
+  table tests at the real sizes, the shared tests still missing, then one
+  name for each mirror. It changes tests only.
+- 2026-11-19: the T4 lane committed three changes on `transport-core-t4`
+  (`815bf54`, `e769e56`, `087950e`) and set one choice aside. Read here: the
+  scope of each commit, the non-test diff, and the sized test macro.
+  - Real sizes: 14 table bodies now run over the array at 4 and 16 and over
+    the map at 4 and 4096; two array-only bodies at 4 and 16; the memory's
+    full-generation body at 2, 32 and 32,768. The board's 16 is read from
+    `Node`'s default parameters. 32 real-size tests; none failed. The bridge
+    and return-path bodies moved to `transport/tests/bridges.rs` for the line
+    ceiling.
+  - The only non-test change: the desktop's three capacities and
+    `PACKET_HASHES` gained names the shared tests can read
+    (`DESKTOP_PATH_TABLE_CAPACITY` and two like it, re-exported under
+    `cfg(test)`). Production values are unchanged.
+  - Added shared tests: the announce cap's purge on interface removal
+    (`rebroadcast/tests.rs:195`); a packet not addressed to this hop skips
+    every transit check (`transport/tests/forward.rs:206`); and the neighbour
+    count of two carrying across our first send (`rebroadcast/tests.rs:183`),
+    a partial the lane found among the pairs the inventory called covered.
+  - Named gaps, decided in each driver and left untested in the shared
+    module. The order "bridge, then type-2 hop, then return-path proof,
+    handled once": `node/ingest.rs:79`, `endpoint/router.rs:111` to `181` and
+    `349`. A short link request's id falling back to the packet hash, and a
+    link request recording no return path: `node/transit.rs:256`, `282`;
+    `endpoint/transit.rs:248`, `261`. What makes a packet "addressed" to this
+    hop: `node/transit.rs:190`, `endpoint/router.rs:168`. Which packet
+    contexts skip the duplicate memory, and that admission precedes it:
+    `node/transit.rs:422`, `endpoint/dedup.rs:135`. Which side of a return
+    path an interface removal purges: `node/routes.rs:122`,
+    `endpoint/transit.rs:169`. Minor: `reverse_proof` is not tested at the
+    hop boundary itself.
+  - Renames: 13 mirrors took one name each (8 files, name lines only). Names
+    shared across the drivers went from 32 to 45. Twelve likely mirrors were
+    left because one body asserts more than the other.
+  - Run here at `087950e`: nextest 918 of 919 (the known timing test);
+    no-alloc tests 69 of 69; thumb `alloc` check builds.
+  - The choice set aside: the memory's equivalence test
+    (`turning_over_late_answers_as_turning_over_early`) runs 500 inserts over
+    6 keys at capacity 2 against a list model. Options: scale it with a
+    set-based model; board size only; leave it at 2. The owner: "Scale it,
+    set-based model" (applies D37). The lane is adding that as a fourth
+    commit.
+- 2026-11-19: the lane's fourth commit, `bc017a2`, scales the equivalence
+  test: keys are three times the capacity; inserts are 250 per slot up to
+  256 keys and 25 per slot beyond (250 per slot took 17.9 s at the desktop
+  size); the reference model holds two hash sets and is written apart from
+  `TransitMemory`; every run asserts at least eight turn-overs. At capacity 2
+  it is the same 500 inserts as before. Runs: array 2 and 32, set 2 and
+  32,768 (819,200 inserts, 12 turn-overs, 2.1 s here). The lane broke the
+  model's turn-over condition by one insert and all four runs failed, then
+  restored it.
+  - Run here at `bc017a2`: nextest 920 of 921 (the known timing test);
+    no-alloc tests 69 of 69; thumb `alloc` check builds.
+  - Counts for T4's done-condition. Removed: none. Kept: every driver test
+    (`node::tests` 144, `endpoint::tests` 125 by the lane's listing, which
+    leaves out test modules inline in source files). Renamed: 13. Added to
+    the shared module: 3 bodies, 46 to 49; expanded over storage and size, 72
+    to 109 tests.
+  T4's done-condition is met on the branch: four commits, tip `bc017a2`. Not
+  merged. It changes no non-test code beyond naming the desktop's table
+  sizes, so the board image and the wire behaviour are those T3's gates ran
+  on at `00da22d`.
+- 2026-11-19: asked whether to close on T3's interop results or rerun the
+  live suite, the peer gate and the firmware builds on the T4 branch first,
+  the owner chose the first. `main` fast-forwarded from `22e7592` to
+  `bc017a2`. T5 is recorded under its phase. The lane's worktree, branch and
+  build target were removed. The plan is done.

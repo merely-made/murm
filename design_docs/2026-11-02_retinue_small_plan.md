@@ -69,8 +69,9 @@ per-interface policy. `crate::rebroadcast` already has this shape: a clock-free
 struct that takes `now` and returns a decision, with the driver owning locks,
 containers and sends. rns-rs is organised the same way, with one `no_std`
 transport engine under two drivers (its `docs/engines.md`; docs only, no source
-read). The work is planned in the
-[shared transport core plan](2026-11-18_shared_transport_core_plan.md).
+read). The work was planned in the
+[shared transport core plan](2026-11-18_shared_transport_core_plan.md) and
+landed on 2026-11-19.
 
 ## Deferred and follow-on
 
