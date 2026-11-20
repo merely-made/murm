@@ -166,6 +166,31 @@ pin, where the older text says 1.5.2.
   relay-off control before and after the success is what shows they cannot
   reach each other another way.
 
+### wall_node_management D15 (2026-11-20)
+
+- **D15, who the endpoints are (refines D13 and D14):** D13 and D14 were put
+  as two stock RNS endpoints on RNode-channel radios. That cannot reach the
+  node as built: the RNode channel transmits with sync word 0x12 and an
+  8-symbol preamble (`crates/radio-hand/src/rnode/pending.rs:12`), and the
+  node runs the board's default profile, Meshtastic LongFast with sync 0x2B
+  (`firmware/heltec-v4-phy/src/main.rs:372`). On the bench, RNS 1.6.0 through
+  SB1 sent three announces; the node on SB2 logged one bad frame and decoded
+  none, and RNS heard none of the node's. The owner: "Retinue on SB2, stock
+  RNS on SB1". The SB2 run uses Retinue desktop endpoints through direct-PHY
+  modems, the [transit receipt spec](2026-08-14_transit_link_receipt_spec.md)'s
+  fixture; in the SB1 run the controller's apply sets the RNode air profile
+  together with relay-on, and stock RNS 1.6.0 on RNode-channel radios is the
+  endpoint. D13's payload and D14's single host stand for both runs.
+
+### wall_node_management D16 (2026-11-20)
+
+- **D16, how the payload crosses (refines D13):** D13's 256 random bytes do
+  not fit one link packet on direct PHY: a radio frame is at most 255 bytes
+  (`crates/selvage/src/wire.rs:35`) and a link packet carries about 175 after
+  its header and encryption. Asked whether they cross over the link's stream,
+  the owner: "Yes, the stream". 256 random bytes each way over the endpoint's
+  stream, two frames per direction, sha256 logged by sender and receiver.
+
 ## Decisions and constraints
 
 Transport authentication does not confer board-local authority. Grants bind actual keys; durable outer counters and mutation-sequence retirement are separate from semantic transaction identity. `Changed`, `Replayed`, `Ready` and reset-required preserve distinct meanings. Board-owned recovery facts cannot be asserted by candidate configuration. A signature does not encrypt credentials. A quiet witness must cover live flash and apply; once stopping starts, cancellation or uncertain hardware state fails to a reset boundary. The first useful appliance is USB lifecycle then native LoRa forwarding, with WiFi afterward; WN0 target fixture and later carriers are real debts but are not asserted as blockers for that integration.
@@ -261,3 +286,51 @@ Choose V4 heap from measured high-water and refusal behavior. Decide unsigned, b
   that fix. The first V4 (FB:28, SB1) is on the modem image in the RNode
   channel; the T114 is on its native image in the modem channel and reports a
   watchdog reset with one crash record, not looked into.
+- 2026-11-20: the board was reflashed from `ebb91e2bd44` (sha256
+  `2fad0183...bde11`) and reports the whole `node` line. Each boot as a node
+  takes one 65,536 lease: the reservation stood at 1,507,328 after five.
+  The comment at `crates/radio-hand/src/rnode/pending.rs:9` says every
+  direct-PHY profile uses sync 0x12; the boards report 0x2B. D15 ruled.
+- 2026-11-20: two-radio check, not a relay result.
+  `crates/retinue/examples/node_link.rs` on the desktop, through SB1 in the
+  modem channel, heard the SB2 node's boot announce (167 bytes at -39 dBm),
+  sent a link request and received the proof (118 bytes at -38 dBm): one run
+  of one passed in 35.3 s. The node then reported `tx=2 rx=1 links=1`,
+  `heap=100/98304 highwater=404 failed=0` and the face event `link up`.
+  At -39 dBm across the desk, 60 dB on each end radio leaves the relay about
+  -99 dBm from each end and puts the ends 120 dB further apart. The owner has
+  the antenna cables the boards came with and no attenuators yet.
+- 2026-11-20: the direct-PHY fixture exists on the lane branch (`7ba04ada971`,
+  not yet merged): `crates/retinue/examples/transit_peer.rs`, a responder and
+  a requester aimed at the responder's destination, and
+  `testing/wn2_transit_bench.py` with `control`, `run` and `collect` phases.
+  Run on the three boards with no attenuation, T114 and SB1 as modems. None of
+  it is a relay result. The relay-off control failed as it should with the
+  ends in earshot: link in 2.1 s on `hops=0 next_hop=direct`, the responder
+  accepting one link, 256 bytes each way over the stream with matching sha256
+  at both ends (D16). With the relay on, the node heard the traffic and
+  rebroadcast the responder's announces (`fwdannounce` 0 to 3, `peers=1
+  routes=1`), `fwdpacket` stayed 0, and the requester again linked directly.
+  The requester never reported a relayed copy of the announce; why is not
+  established. No test anywhere runs an endpoint through the bounded node to
+  another endpoint: `endpoint_multi.rs` has endpoint, transport endpoint,
+  endpoint, and `node/tests/routes.rs` has three nodes. A host test of that
+  path is being written before the attenuators arrive.
+- 2026-11-20: the via-relay path has a host test on the lane branch
+  (`f47ade7037e`, `crates/retinue/tests/transit_relay.rs`, three tests, 25 s):
+  a requester that cannot hear the responder learns it only from the bounded
+  node's rebroadcast, links through it and exchanges the D16 payload with
+  matching hashes while the node's forwarded-announce and forwarded-packet
+  counters move; with both relay flags off it fails and the responder accepts
+  nothing; and a requester that also hears the responder directly drops the
+  node's copy as a replay (`crates/retinue/src/endpoint/announces.rs:361`) and
+  stays direct, which is what the bench showed. The lane reads stock RNS 1.6.0
+  as ignoring that copy too, and reports one thing not run down: one
+  `announce()` call on the responder put two announce frames on the air.
+- 2026-11-20: first heap figures for WN2d, from `node_stress` through SB1
+  against the SB2 node, 96 KiB heap. Three 40-announce waves (96 of 120
+  heard) filled the tables, `peers=32 routes=16` with 80 route evictions:
+  27,016 bytes in use, high water 27,312, no failed allocation. Four links
+  held and the rest refused, on a fresh boot: 400 bytes in use, high water
+  764. Not measured: carried links and forwarded packets, which need the two
+  ends isolated. The heap size is not chosen.
