@@ -45,13 +45,16 @@ pin, where the older text says 1.5.2.
   model shows no radio action during guarded work and exactly one receive
   restore or reset on every exit and cancellation point. A live relay change
   takes effect on the next packet (D6); after a live profile change the
-  first-hop allowance is recomputed from the profile then running.
+  first-hop allowance is recomputed from the profile then running. Both loops
+  share one carrier in `radio-hand`, with host tests of its ordering (D7); the
+  node reads the flags in force from the radio owner (D9).
 - **WN2c, relay from the config (D2).** The node build accepts
   `relay_announces` and `relay_packets`, applies them at boot and on a live
   change, and relays both on an unclaimed board. *Done when* each flag alone
   and both together are tested against the node's transport settings. The
   modem-only image keeps refusing a committed config with a relay flag on and
-  names the cause (D4). The V4 node does not echo resources (D5).
+  names the cause (D4). The V4 node does not echo resources (D5) and refuses
+  resources addressed to itself (D8).
 - **WN2d, the heap figure.** Build with a provisional heap, run the flood on
   the bench, and choose the heap size and its refusal boundary from the
   measured peak. The number is the owner's.
@@ -91,8 +94,8 @@ pin, where the older text says 1.5.2.
   echoes each completed inbound resource back on its link
   (`crates/radio-hand/src/channel/node.rs:221`), which on a wall relay lets
   any peer that opens a link spend the relay's airtime and heap. The owner:
-  "Off on V4, per-board setting". The T114 keeps it on. Whether the V4 can
-  also refuse the inbound transfer without a Retinue change is not ruled.
+  "Off on V4, per-board setting". The T114 keeps it on. Refusing the inbound
+  transfer itself is D8.
 - **D6, a live relay change and carried links (refines D1):**
   `set_transport_config` swaps the policy and keeps routes and bridges, and
   the three forwarding paths check the flag per packet
@@ -100,6 +103,32 @@ pin, where the older text says 1.5.2.
   once". Carried links stop on the next packet and their endpoints time out; a
   provisional apply reverted inside the bridge lifetime resumes them. No
   Retinue change.
+
+### wall_node_management D7 to D9 (2026-11-20)
+
+- **D7, where the signed-command carrier lives (new):** the carrier that
+  verifies and serves signed commands is 162 lines in the V4 firmware
+  (`firmware/heltec-v4-phy/src/control_carrier.rs`), which no host test
+  reaches; the quiet window under it has eight host tests in `radio-hand`.
+  Moved into `radio-hand`, it cost the modem image 388 to 428 bytes of
+  374,267 in the lane's two drafts. The owner: "Move it to radio-hand". Both
+  loops call the one carrier, and its ordering is tested on the host with a
+  fake board, including drops at entry, apply and finish.
+- **D8, resources addressed to the V4 node (refines D5):** with echo off the
+  node still reassembled any resource sent to it; neither board sets a limit,
+  so Retinue's default of 64 MiB applied (`crates/retinue/src/node/setup.rs:75`)
+  against a 96 KiB heap. `set_max_inbound_resource`
+  (`crates/retinue/src/node/resources.rs:127`) refuses an offer before
+  reassembly and counts it. The owner: "Refuse all, per-board limit". The
+  limit is a per-board setting beside echo, 0 on the V4; WN4's Reticulum
+  carrier raises it when it needs resources. The T114 is unchanged.
+- **D9, where the node reads the config in force (new):** Seneschal keeps a
+  provisional candidate's config private
+  (`crates/seneschal/src/control/durable/model.rs:167`); the V4 radio owner
+  already keeps the profile of the last config it applied, and boot, apply,
+  revert and expiry all pass through its apply. The owner: "The radio owner".
+  In the node build it also keeps that config's relay flags. No Seneschal
+  change.
 
 ## Decisions and constraints
 
@@ -136,3 +165,16 @@ Choose V4 heap from measured high-water and refusal behavior. Decide unsigned, b
   unclaimed board waits out the 20 s claim window at each boot before the node
   starts. `validation/security/unsafe-policy.toml` does not yet list the moved
   heap. D4 to D6 ruled.
+- 2026-11-20: three pieces of the second checkpoint built, checked and merged.
+  The modem-only image's status-only line names a relay-on config and the fix
+  (D4; 160 bytes). Echo is a per-board setting, on for the T114 and off for
+  the V4 (D5; the T114 image is 24 bytes smaller). The V4 `heap` reply ends
+  `failed=<count>`. The unsafe audit's entries for the four heap files are
+  current; it still prints three exceptions with no unsafe left
+  (`firmware/stack_watermark.rs` and the two `protocol_capacity.rs` examples)
+  and `crates/truchman` without `#![forbid(unsafe_code)]`, which this work did
+  not touch. Sizes, text bytes: V4 modem 374,267, T114 380,638, V4 node
+  609,903. `radio-hand` tests: 140, and 160 with `replay`. Not built yet:
+  signed commands in the node loop and the live relay change, which stopped
+  at the fork D7 settles. Not tested: the new status line (the V4 firmware's
+  tests do not run on the host). D7 to D9 ruled.
