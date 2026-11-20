@@ -12,6 +12,8 @@ use seneschal::control::{
     TransactionId,
 };
 
+use zeroize::{Zeroize, Zeroizing};
+
 use super::super::sign_request;
 
 /// Carrier-neutral exchange of one signed outer command for one WN0 response.
@@ -60,15 +62,40 @@ pub struct Mutation {
     pub expected_generation: ConfigGeneration,
 }
 
+/// The token a board mints at a provisional apply. It is zeroed when dropped, is not
+/// `Copy` or `Clone`, and its `Debug` shows nothing of it.
+#[derive(Default, PartialEq, Eq)]
+pub struct CommitToken(Zeroizing<[u8; COMMIT_TOKEN_LEN]>);
+
+impl CommitToken {
+    /// Moves the token out of `source`, zeroing it there.
+    pub fn take_from(source: &mut [u8; COMMIT_TOKEN_LEN]) -> Self {
+        let token = Self(Zeroizing::new(*source));
+        source.zeroize();
+        token
+    }
+
+    /// The token's bytes, for building the commit.
+    pub fn expose(&self) -> &[u8; COMMIT_TOKEN_LEN] {
+        &self.0
+    }
+}
+
+impl std::fmt::Debug for CommitToken {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("CommitToken([redacted])")
+    }
+}
+
 /// The board's answer to a provisional apply: what a commit must name.
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(PartialEq, Eq)]
 pub struct ProvisionalReceipt {
     pub transaction: TransactionId,
     pub counter: u64,
     pub change: ChangeId,
     pub candidate_generation: ConfigGeneration,
     pub deadline_ms: u64,
-    pub commit_token: [u8; COMMIT_TOKEN_LEN],
+    pub commit_token: CommitToken,
 }
 
 impl std::fmt::Debug for ProvisionalReceipt {
@@ -183,15 +210,17 @@ where
         }
         .encode();
         let request = self.mutation_request(Operation::ProvisionalApply, mutation, &arguments)?;
-        let response = self.send(&request, counter).await?;
+        let mut response = self.send(&request, counter).await?;
         let ResponseBody::Provisional {
             deadline_ms,
             commit_token,
             ..
-        } = response.body
+        } = &mut response.body
         else {
             return Err(ControlClientError::UnexpectedBody);
         };
+        let deadline_ms = *deadline_ms;
+        let commit_token = CommitToken::take_from(commit_token);
         let candidate_generation = response
             .effective_generation
             .ok_or(ControlClientError::UnexpectedBody)?;
@@ -205,21 +234,25 @@ where
         })
     }
 
-    /// Confirms the exact armed candidate a [`ProvisionalReceipt`] describes.
+    /// Confirms the exact armed candidate a [`ProvisionalReceipt`] describes. Every
+    /// buffer that held the token here is zeroed before this returns.
     pub async fn commit(
         &mut self,
         counter: u64,
         mutation: Mutation,
         receipt: &ProvisionalReceipt,
     ) -> Result<AppliedReceipt, ControlClientError<C::Error>> {
-        let arguments = CommitArguments {
+        let mut named = CommitArguments {
             change: receipt.change,
             candidate_generation: receipt.candidate_generation,
-            commit_token: receipt.commit_token,
-        }
-        .encode();
-        let request = self.mutation_request(Operation::Commit, mutation, &arguments)?;
-        self.applied(&request, counter).await
+            commit_token: *receipt.commit_token.expose(),
+        };
+        let arguments = Zeroizing::new(named.encode());
+        named.commit_token.zeroize();
+        let mut request = self.mutation_request(Operation::Commit, mutation, &*arguments)?;
+        let applied = self.applied(&request, counter).await;
+        request.arguments.as_mut_slice().zeroize();
+        applied
     }
 
     /// Abandons the armed candidate named by `change` and restores known-good now.
@@ -274,13 +307,16 @@ where
         request: &Request,
         counter: u64,
     ) -> Result<Response, ControlClientError<C::Error>> {
-        let wire = sign_request(
-            request,
-            self.signer,
-            AddressHash::from_bytes(self.node.0),
-            counter,
-        )
-        .map_err(ControlClientError::Signing)?;
+        // Zeroed on drop: a commit's signed bytes carry its token.
+        let wire = Zeroizing::new(
+            sign_request(
+                request,
+                self.signer,
+                AddressHash::from_bytes(self.node.0),
+                counter,
+            )
+            .map_err(ControlClientError::Signing)?,
+        );
         let response = self
             .carrier
             .exchange(&wire)

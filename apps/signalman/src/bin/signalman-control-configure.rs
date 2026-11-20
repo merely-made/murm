@@ -7,7 +7,8 @@
 //! A candidate left unconfirmed rolls back on the board when its lifetime passes.
 
 use postilion::control::verified::{
-    ControlClient, Mutation, ProvisionalReceipt, UsbControlConfig, UsbControlTransport,
+    CommitToken, ControlClient, Mutation, ProvisionalReceipt, UsbControlConfig,
+    UsbControlTransport,
 };
 use radio_hand::control::{
     COMMIT_TOKEN_LEN, ChangeId, ConfigGeneration, ManagementCarrierSet, NodeId,
@@ -136,13 +137,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 hex::encode(receipt.change.0),
                 receipt.candidate_generation.0,
                 receipt.deadline_ms,
-                hex::encode(receipt.commit_token),
+                hex::encode(receipt.commit_token.expose()),
             );
         }
         "commit" => {
             let candidate_generation = ConfigGeneration(next(&mut args, "candidate generation")?);
-            let commit_token: [u8; COMMIT_TOKEN_LEN] =
+            let mut parsed: [u8; COMMIT_TOKEN_LEN] =
                 parse_hex16(&args.next().ok_or_else(|| usage().to_owned())?, "token")?;
+            let commit_token = CommitToken::take_from(&mut parsed);
             if args.next().is_some() {
                 return Err(usage().into());
             }

@@ -319,8 +319,12 @@ async fn provisional_apply_then_commit_moves_known_good() {
         .unwrap();
     assert_eq!(provisional.candidate_generation, ConfigGeneration(4));
     assert_eq!(provisional.deadline_ms, 61_000);
-    assert_eq!(provisional.commit_token, [0x5c; COMMIT_TOKEN_LEN]);
+    assert_eq!(provisional.commit_token.expose(), &[0x5c; COMMIT_TOKEN_LEN]);
     assert!(!format!("{provisional:?}").contains("5c"));
+    assert_eq!(
+        format!("{:?}", provisional.commit_token),
+        "CommitToken([redacted])"
+    );
 
     let committed = controller
         .commit(
@@ -338,6 +342,14 @@ async fn provisional_apply_then_commit_moves_known_good() {
     assert_eq!(state.known_good().generation, ConfigGeneration(4));
     assert_eq!(state.known_good().configuration.public, candidate);
     assert!(state.provisional().is_none());
+}
+
+#[test]
+fn taking_a_commit_token_zeroes_its_source() {
+    let mut source = [0x5c; COMMIT_TOKEN_LEN];
+    let token = super::CommitToken::take_from(&mut source);
+    assert_eq!(source, [0; COMMIT_TOKEN_LEN]);
+    assert_eq!(token.expose(), &[0x5c; COMMIT_TOKEN_LEN]);
 }
 
 #[tokio::test]

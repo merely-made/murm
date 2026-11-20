@@ -13,10 +13,10 @@ use std::time::Duration;
 
 use personae::IdentityProvider;
 use postilion::control::verified::{
-    ControlClient, ControlClientError, ControlExchange, Mutation, UsbControlError, VerifiedStatus,
+    CommitToken, ControlClient, ControlClientError, ControlExchange, Mutation, UsbControlError,
+    VerifiedStatus,
 };
 use radio_hand::control::{ChangeId, NodeId, PublicConfigurationV1, Refusal};
-use zeroize::Zeroize;
 
 use crate::FirstOwnerCredential;
 
@@ -233,7 +233,7 @@ where
             fail!("apply", message)
         }
     };
-    holder.keep(&mut receipt.commit_token);
+    holder.keep(std::mem::take(&mut receipt.commit_token));
     record.steps.push(step(
         "apply",
         counter,
@@ -267,9 +267,7 @@ where
             let Some(token) = holder.release() else {
                 fail!("commit", "no commit token is held".into())
             };
-            let mut named = receipt;
-            named.commit_token = *token;
-            drop(token);
+            receipt.commit_token = token;
             let committed = client
                 .commit(
                     counter,
@@ -277,10 +275,11 @@ where
                         sequence,
                         expected_generation: before.known_good_generation,
                     },
-                    &named,
+                    &receipt,
                 )
                 .await;
-            named.commit_token.zeroize();
+            // Dropping the replaced token zeroes it.
+            receipt.commit_token = CommitToken::default();
             match committed {
                 Ok(applied) => {
                     record.steps.push(step(

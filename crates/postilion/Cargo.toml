@@ -24,6 +24,7 @@ seneschal = { version = "0.2.0", path = "../seneschal", features = ["retinue"] }
 thiserror = "2"
 tokio = { version = "1.53.1", features = ["io-util", "macros", "rt", "sync", "time"] }
 tulle = { version = "0.2.0", path = "../tulle", features = ["serial-async"] }
+zeroize = "1"
 
 [lints]
 workspace = true

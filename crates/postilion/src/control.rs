@@ -9,6 +9,7 @@ use retinue::command::{Command, TargetClass};
 use retinue::hash::AddressHash;
 use retinue::identity::PrivateIdentity;
 use seneschal::control::{self, Request, Response};
+use zeroize::{Zeroize, Zeroizing};
 
 /// The local, physical-presence first-owner carrier and controller flow.
 pub mod first_owner;
@@ -41,9 +42,10 @@ pub fn sign_request(
     target: AddressHash,
     counter: u64,
 ) -> Result<Vec<u8>, Error> {
-    let mut payload = [0_u8; control::MAX_REQUEST_LEN];
+    // Both intermediates are zeroed: a commit's request carries its token.
+    let mut payload = Zeroizing::new([0_u8; control::MAX_REQUEST_LEN]);
     let length =
-        control::encode_request(request, &mut payload).map_err(|_| Error::RequestTooLarge)?;
+        control::encode_request(request, &mut *payload).map_err(|_| Error::RequestTooLarge)?;
     let command = Command {
         key_id: signer.hash(),
         class: TargetClass::Node,
@@ -54,7 +56,11 @@ pub fn sign_request(
     };
     command
         .sign(signer)
-        .map(|bytes| bytes.to_vec())
+        .map(|mut bytes| {
+            let wire = bytes.to_vec();
+            bytes.as_mut_slice().zeroize();
+            wire
+        })
         .map_err(Error::Signing)
 }
 

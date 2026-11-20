@@ -18,7 +18,7 @@ mod tests;
 mod usb;
 
 pub use client::{
-    AppliedReceipt, ControlClient, ControlClientError, ControlExchange, Mutation,
+    AppliedReceipt, CommitToken, ControlClient, ControlClientError, ControlExchange, Mutation,
     ProvisionalReceipt, VerifiedStatus,
 };
 pub use usb::{UsbControlConfig, UsbControlError, UsbControlTransport};

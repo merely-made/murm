@@ -9,6 +9,7 @@ use seneschal::control::{
     MAX_CONTROL_RESPONSE_FRAME_LEN, Response, decode_response_frame, encode_command_frame,
 };
 use tokio::io::{AsyncRead, AsyncReadExt, AsyncWrite, AsyncWriteExt};
+use zeroize::Zeroizing;
 
 use super::ControlExchange;
 
@@ -97,11 +98,12 @@ where
     type Error = UsbControlError;
 
     async fn exchange(&mut self, command: &[u8]) -> Result<Response, Self::Error> {
-        let mut frame = [0_u8; MAX_CONTROL_COMMAND_FRAME_LEN];
+        // Both framings are zeroed on drop: a commit's command carries its token.
+        let mut frame = Zeroizing::new([0_u8; MAX_CONTROL_COMMAND_FRAME_LEN]);
         let frame_len =
-            encode_command_frame(command, &mut frame).map_err(UsbControlError::Malformed)?;
-        let mut wire = [0_u8; 2 + MAX_CONTROL_COMMAND_FRAME_LEN * 2];
-        let wire_len = selvage::kiss::encode_into(&frame[..frame_len], &mut wire)
+            encode_command_frame(command, &mut *frame).map_err(UsbControlError::Malformed)?;
+        let mut wire = Zeroizing::new([0_u8; 2 + MAX_CONTROL_COMMAND_FRAME_LEN * 2]);
+        let wire_len = selvage::kiss::encode_into(&frame[..frame_len], &mut *wire)
             .expect("the fixed command KISS buffer is sufficient");
         self.io
             .write_all(&wire[..wire_len])
@@ -110,11 +112,12 @@ where
         self.io.flush().await.map_err(UsbControlError::Io)?;
 
         tokio::time::timeout(self.config.response_timeout, async {
-            let mut bytes = [0_u8; 256];
+            // A provisional answer carries the token: zeroed on drop.
+            let mut bytes = Zeroizing::new([0_u8; 256]);
             loop {
                 let read = self
                     .io
-                    .read(&mut bytes)
+                    .read(&mut *bytes)
                     .await
                     .map_err(UsbControlError::Io)?;
                 if read == 0 {
