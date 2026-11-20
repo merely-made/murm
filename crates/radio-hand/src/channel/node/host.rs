@@ -33,7 +33,9 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize>
             let status = exec.status();
             let transport = self.node.transport_counters();
             let transport_on = self.node.transport_config().relay_packets;
-            let mut out = radio_face::Text::<224>::empty();
+            // 239 bytes of names and CRLF, then 22 values: 365 with every counter at its
+            // widest. A buffer the line outgrows cuts it off without its line ending.
+            let mut out = radio_face::Text::<384>::empty();
             let _ = write!(
                 &mut out,
                 "node tx={} rx={} peers={} links={} refusedlinks={} refusedpeers={} \
