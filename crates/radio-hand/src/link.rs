@@ -17,6 +17,9 @@
 //!
 //! See `design_docs/archive_docs/2026-11-02/2026-07-31_retinue_small_plan.md`, structural decision 3.
 
+mod write_gate;
+pub use write_gate::WriteGate;
+
 /// Why a link operation could not complete.
 ///
 /// One variant, because one is all the protocol above can act on: either the peer is still

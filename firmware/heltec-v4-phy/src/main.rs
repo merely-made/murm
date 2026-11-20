@@ -63,8 +63,12 @@ mod control_fixture;
 mod control_store;
 mod front_end;
 mod gnss;
+#[cfg(feature = "node")]
+mod heap;
 mod host;
 mod murmuration;
+#[cfg(feature = "node")]
+mod node;
 #[cfg(all(feature = "host-usb", not(feature = "host-uart-low-power")))]
 mod physical_presence;
 mod power;
@@ -130,6 +134,11 @@ async fn ignore_host<R: embedded_io_async::Read>(
 #[esp_rtos::main]
 async fn main(spawner: Spawner) {
     control_fixture::verify();
+    // Safety: once, before anything allocates; the fixture check above does not.
+    #[cfg(feature = "node")]
+    unsafe {
+        heap::init()
+    };
     let peripherals = esp_hal::init(Config::default());
     #[cfg(feature = "rf-sleep-proof")]
     let proof_reset_reason = esp_hal::system::reset_reason()
@@ -340,16 +349,17 @@ async fn main(spawner: Spawner) {
     let mut online_line = radio_face::Text::<320>::empty();
     let _ = write!(
         &mut online_line,
-        "tulle/heltec-v4 phy online; version={}; sx1262 online; sync=2b reg=24b4; longfast=906875000; build={}; image={}\r\n",
+        "tulle/heltec-v4 phy online; version={}; sx1262 online; sync=2b reg=24b4; longfast=906875000; build={}; image={}",
         env!("CARGO_PKG_VERSION"),
         option_env!("RETINUE_FIRMWARE_REVISION").unwrap_or("unidentified"),
         if cfg!(feature = "host-uart-low-power") {
             "v4-modem-uart"
+        } else if cfg!(feature = "node") {
+            "v4-node-usb"
         } else {
             "v4-modem-usb"
         },
     );
-    let online = online_line.as_str().as_bytes();
     local_status.radio = radio_face::RadioState::Online;
     local_status.fault = None;
     ui::publish(local_status, radio_face::LedSignal::Idle);
@@ -459,6 +469,34 @@ async fn main(spawner: Spawner) {
     spawner.spawn(ui::button_task(button).unwrap());
 
     let mut host = host::SplitHost::new(usb_rx, usb_tx);
+
+    // The node build: lease, then node, before receive is first armed. Byte 1 (the T114's
+    // legacy node) is served as a node request without the T114's migration write: no V4
+    // image ever ran that emitter, so there is no downgrade for a rewrite to guard.
+    #[cfg(feature = "node")]
+    let node = settings
+        .filter(|stored| stored.channel.requests_native_node())
+        .map(|stored| node::assemble(&mut owner, &stored));
+    #[cfg(feature = "node")]
+    if matches!(node, Some(Err(_))) {
+        // As the T114: the modem stays up for repair, and nothing announces this boot.
+        owner.radio_fault(7, "TIMEBASE");
+        let _ = write!(&mut online_line, "; timebase=fault FALLBACK=modem");
+    }
+    let _ = write!(&mut online_line, "\r\n");
+    let online = online_line.as_str().as_bytes();
+    #[cfg(feature = "node")]
+    if let Some(Ok(channel)) = node {
+        node::serve(
+            owner,
+            channel,
+            control_ready,
+            online,
+            &identity_line[..identity_line_len],
+            host,
+        )
+        .await
+    }
 
     // The channel selector. The RNode loop never returns: switching back is a persisted
     // byte and a reboot, and no banner is written because a host opening that port expects

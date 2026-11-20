@@ -20,6 +20,10 @@ use radio_hand::settings::Settings;
 use radio_hand::store::Slot;
 
 use crate::{channels, control_store, power, store, wake_input};
+#[cfg(feature = "node")]
+mod node_lease;
+#[cfg(feature = "node")]
+pub use node_lease::NodeLeaseError;
 mod quiet_store;
 
 /// The non-copy custody boundary for one V4 image.
@@ -38,6 +42,9 @@ pub struct V4RadioOwner<RK: RadioKind, DLY: DelayNs> {
     region: Region,
     boot_owner_available: bool,
     radio_service_started: bool,
+    /// Set by the first receive arming attempt; the node build's boot lease must precede it.
+    #[cfg(feature = "node")]
+    receive_armed_once: bool,
     observations: Option<OwnerObservations>,
     /// The executive's counters for the whole boot; each per-call executive counts into it.
     diag: AirDiag,
@@ -271,6 +278,8 @@ impl<RK: RadioKind, DLY: DelayNs> V4RadioOwner<RK, DLY> {
             region: settings.map(|settings| settings.region).unwrap_or_default(),
             boot_owner_available: true,
             radio_service_started: false,
+            #[cfg(feature = "node")]
+            receive_armed_once: false,
             observations: None,
             diag: AirDiag::default(),
         }
@@ -385,6 +394,10 @@ impl<RK: RadioKind, DLY: DelayNs> V4RadioOwner<RK, DLY> {
         self.radio_service_started = true;
         if !self.radio.prepare_rx {
             return Ok(false);
+        }
+        #[cfg(feature = "node")]
+        {
+            self.receive_armed_once = true;
         }
         if self
             .lora

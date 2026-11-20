@@ -44,9 +44,10 @@ pub fn region_probe(packet: &[u8]) -> Option<Option<Region>> {
 pub enum ChannelProbe {
     Report,
     Set(BootChannel),
-    /// A channel the vocabulary knows but this board cannot serve (`channel node` needs an
-    /// allocator the V4 does not carry). Answered rather than ignored, so the line does not
-    /// fall through into whatever the active channel parses.
+    /// A channel the vocabulary knows but this image cannot serve (`channel node` needs the
+    /// allocator only the node build carries). Answered rather than ignored, so the line does
+    /// not fall through into whatever the active channel parses.
+    #[cfg_attr(feature = "node", allow(dead_code))]
     Unavailable,
 }
 
@@ -58,6 +59,9 @@ pub fn channel_probe(packet: &[u8]) -> Option<ChannelProbe> {
         b"channel" => Some(ChannelProbe::Report),
         b"channel modem" => Some(ChannelProbe::Set(BootChannel::Modem)),
         b"channel rnode" => Some(ChannelProbe::Set(BootChannel::Rnode)),
+        #[cfg(feature = "node")]
+        b"channel node" => Some(ChannelProbe::Set(BootChannel::Node)),
+        #[cfg(not(feature = "node"))]
         b"channel node" => Some(ChannelProbe::Unavailable),
         _ => None,
     }
@@ -235,9 +239,9 @@ fn decimal(mut value: u64, out: &mut [u8; 20]) -> usize {
 }
 
 /// Answer the probes both channels share: `status`, `sync`, `ui`, `region`, `channel`, and
-/// the V4's storage-only `timebase` report/reservation probe. The on-air successor gate remains
-/// open: this board still has no native Node channel, so a verified lease is an inspectable
-/// persistence artifact rather than permission for the modem to emit announces.
+/// the V4's storage-only `timebase` report/reservation probe. A lease reserved here is an
+/// inspectable persistence artifact, never permission for the modem to emit announces; the
+/// node build reserves its own at boot before it arms receive.
 ///
 /// `region` and `channel` persist and reset. The reply is a courtesy and the reboot is the
 /// contract, same as the T114: once the settings are committed the board must come back on
@@ -405,6 +409,10 @@ pub async fn probe<L: HostLink>(
             (_, ChannelProbe::Unavailable) => &b"channel node unavailable on this board\r\n"[..],
             (Some(current), ChannelProbe::Report) => match current.channel {
                 BootChannel::Modem => &b"channel=modem\r\n"[..],
+                // The node build serves both node bytes; see `main` on the legacy one.
+                BootChannel::LegacyNode | BootChannel::Node if cfg!(feature = "node") => {
+                    &b"channel=node\r\n"[..]
+                }
                 BootChannel::LegacyNode | BootChannel::Node => {
                     &b"channel=node unavailable on this board\r\n"[..]
                 }

@@ -33,6 +33,39 @@ manifest) is produced by the staging step described in
 [the packages README](../packages/README.md), which runs this build from HEAD with
 `RETINUE_FIRMWARE_REVISION` and `SOURCE_DATE_EPOCH` set.
 
+## Node build
+
+The `node` feature builds the USB image as a standalone Reticulum transport
+node (boot line `image=v4-node-usb`):
+
+```text
+cargo +esp build -p tulle-heltec-v4-phy --release --features node --target xtensa-esp32s3-none-elf -Zbuild-std=core,alloc
+```
+
+Only this build links an allocator (radio-hand's tracking heap over a fixed
+96 KiB array, provisional until a measured run), the shared node channel
+(`Node<32, 8, 4>` behind `radio_hand::channel::node::NodeChannel`) and
+Retinue's allocating core. The modem image carries none of them. `node`
+cannot be combined with `host-uart-low-power` or `rf-sleep-proof`.
+
+`channel node` stores the node choice and reboots; the modem image still
+answers `channel node unavailable on this board`. When the stored channel asks
+for the node, boot runs WN1 control recovery first, then reserves this boot's
+announce lease in flash before receive is first armed, builds the node from the
+stored identity, and enters the node loop, which never returns. A failed lease
+or a refused node keeps the modem for repair, with `timebase=fault
+FALLBACK=modem` on the boot line and a TIMEBASE fault on the screen. `channel
+modem` and `channel rnode` stay available as recovery channels.
+
+The node needs nothing on USB and writes no banner. Every host write in the
+node loop is bounded at 100 ms; one that runs out stops host writes until the
+host next sends bytes, so radio service, beats and wakes never wait on a host.
+The loop answers the shared probes (`status`, `sync`, `gnss`, `timebase`,
+`ui`, `region`, `channel`, `name`, `air`), `heap` in the T114's format
+(`heap=<used>/<size> highwater=<peak> free=<free>`), and the node channel's own
+`node`, `face` and `replay` lines. Signed control commands are not served in
+the node loop yet.
+
 ## On-device status face
 
 `name` reports the public device label. `name set SB1` saves up to 16 printable
