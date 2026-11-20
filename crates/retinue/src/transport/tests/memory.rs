@@ -125,24 +125,42 @@ fn time_turns_a_generation_over_and_twice_it_clears_both<G: Generation>() {
 
 // The endpoint turned a generation over as it filled, the board as the next hash arrived.
 // Both answer every insert alike, so either serves both drivers.
-both_generations!(turning_over_late_answers_as_turning_over_early);
-fn turning_over_late_answers_as_turning_over_early<G: Generation>() {
-    let mut memory = TransitMemory::<G, u64>::new(DESKTOP, 0);
-    let (mut current, mut previous) = (Vec::new(), Vec::new());
+// Keys and inserts scale with capacity: at 2, 500 inserts over 6 keys. Past a byte of keys
+// a tenth as many inserts per slot still turns over about twelve times, in under two seconds.
+both_generations!(turning_over_late_answers_as_turning_over_early, sized);
+fn turning_over_late_answers_as_turning_over_early<G: Generation>(capacity: usize) {
+    use std::collections::HashSet;
+    let profile = MemoryProfile {
+        capacity,
+        ..DESKTOP
+    };
+    let mut memory = TransitMemory::<G, u64>::new(profile, 0);
+    let (mut current, mut previous) = (HashSet::new(), HashSet::new());
+    let mut turned = 0_usize;
     let mut eager = |hash: AddressHash| {
         if previous.contains(&hash) || current.contains(&hash) {
             return false;
         }
-        current.push(hash);
-        if current.len() >= DESKTOP.capacity {
+        current.insert(hash);
+        if current.len() >= capacity {
             previous = core::mem::take(&mut current);
+            turned += 1;
         }
         true
     };
-    let mut state = 7_u32;
-    for _ in 0..500 {
+    let keys = 3 * capacity;
+    let (mut state, mut high) = (7_u32, 11_u32);
+    let per_slot = if keys > 256 { 25 } else { 250 };
+    for _ in 0..per_slot * capacity {
         state = state.wrapping_mul(1_103_515_245).wrapping_add(12_345);
-        let hash = key((state >> 16) as u8 % 6);
+        // Up to a byte of keys draws one byte, as at 2; more draws two more from a second stream.
+        let mut draw = usize::from((state >> 16) as u8);
+        if keys > 256 {
+            high = high.wrapping_mul(1_103_515_245).wrapping_add(12_345);
+            draw += 256 * (high >> 16) as usize;
+        }
+        let hash = nth(draw % keys);
         assert_eq!(memory.insert(hash, 0), eager(hash));
     }
+    assert!(turned >= 8, "{turned} turn-overs at {capacity}");
 }
