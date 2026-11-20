@@ -12,6 +12,8 @@ const DESKTOP: MemoryProfile = MemoryProfile {
     max_age: None,
 };
 
+/// Run a body over the bounded array and, with `std`, the set. One that takes a capacity
+/// also runs at each driver's own: the board's per generation, and the desktop's.
 macro_rules! both_generations {
     ($name:ident) => {
         mod $name {
@@ -29,21 +31,68 @@ macro_rules! both_generations {
             }
         }
     };
+    ($name:ident, sized) => {
+        mod $name {
+            use super::*;
+
+            #[test]
+            fn array() {
+                super::$name::<heapless::Vec<AddressHash, 2>>(2);
+            }
+
+            #[cfg(feature = "alloc")]
+            #[test]
+            fn board() {
+                use crate::node::TRANSPORT_DEDUP_HASHES;
+                super::$name::<heapless::Vec<AddressHash, TRANSPORT_DEDUP_HASHES>>(
+                    TRANSPORT_DEDUP_HASHES,
+                );
+            }
+
+            #[cfg(feature = "tokio")]
+            #[test]
+            fn set() {
+                super::$name::<std::collections::HashSet<AddressHash>>(2);
+            }
+
+            #[cfg(feature = "tokio")]
+            #[test]
+            fn desktop() {
+                super::$name::<std::collections::HashSet<AddressHash>>(
+                    crate::endpoint::PACKET_HASHES,
+                );
+            }
+        }
+    };
 }
 
-both_generations!(a_full_generation_becomes_the_previous_one);
-fn a_full_generation_becomes_the_previous_one<G: Generation>() {
-    let mut memory = TransitMemory::<G, u64>::new(DESKTOP, 0);
+both_generations!(a_full_generation_becomes_the_previous_one, sized);
+fn a_full_generation_becomes_the_previous_one<G: Generation>(capacity: usize) {
+    let profile = MemoryProfile {
+        capacity,
+        ..DESKTOP
+    };
+    let mut memory = TransitMemory::<G, u64>::new(profile, 0);
     assert!(memory.insert(key(1), 0));
     assert!(!memory.insert(key(1), 0), "a repeat");
-    assert!(memory.insert(key(2), 0));
-    assert!(memory.insert(key(3), 0), "turns the full generation over");
+    for n in 2..=capacity {
+        assert!(memory.insert(nth(n), 0));
+    }
+    assert!(
+        memory.insert(nth(capacity + 1), 0),
+        "turns the full generation over"
+    );
     assert!(
         !memory.insert(key(1), 0),
         "the previous generation still counts"
     );
-    assert!(memory.insert(key(4), 0));
-    assert!(memory.insert(key(5), 0), "turns over again");
+    for n in capacity + 2..=2 * capacity {
+        assert!(memory.insert(nth(n), 0));
+    }
+    assert!(
+        memory.insert(nth(2 * capacity + 1), 0),
+        "turns over again"
+    );
     assert!(
         memory.insert(key(1), 0),
         "two generations back is forgotten"

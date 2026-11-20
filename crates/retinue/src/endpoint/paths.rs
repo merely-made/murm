@@ -24,9 +24,12 @@ use super::shared::Shared;
 /// without bound. Expired routes go first; then never-used routes, the soonest to expire
 /// first; then the route used longest ago (D30). Far above what a LoRa mesh sees.
 #[cfg(not(test))]
-pub(super) const PATH_TABLE_CAPACITY: usize = 4096;
+pub(super) const PATH_TABLE_CAPACITY: usize = DESKTOP_PATH_TABLE_CAPACITY;
 #[cfg(test)]
 pub(super) const PATH_TABLE_CAPACITY: usize = 4;
+
+/// [`PATH_TABLE_CAPACITY`] outside the endpoint's tests, so the shared tests can run at it.
+pub(crate) const DESKTOP_PATH_TABLE_CAPACITY: usize = 4096;
 
 /// The least time between path requests we broadcast for one destination, so a peer sending
 /// traffic we cannot verify cannot make us broadcast once per packet.

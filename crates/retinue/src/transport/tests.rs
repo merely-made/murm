@@ -1,5 +1,6 @@
 //! Every table operation against both containers, with the same assertions: each body is
-//! generic over the store and instantiated once per container.
+//! generic over the store and instantiated once per container. A body that fills its table
+//! also runs at each driver's real size: the board's array at 16, the desktop's map at 4096.
 
 use core::fmt::Debug;
 use std::vec::Vec;
@@ -16,6 +17,18 @@ const TTL: u64 = 100;
 const IDLE: u64 = 50;
 const TIMEOUT: u64 = 80;
 
+/// The board's table size: `Node`'s default `ROUTES`, which bounds its routes, bridges and
+/// return paths.
+#[cfg(feature = "alloc")]
+const BOARD: usize = routes_of(core::marker::PhantomData::<crate::node::Node>);
+
+#[cfg(feature = "alloc")]
+const fn routes_of<const P: usize, const A: usize, const L: usize, const R: usize>(
+    _: core::marker::PhantomData<crate::node::Node<P, A, L, R>>,
+) -> usize {
+    R
+}
+
 /// Route lifetimes by mode: roaming routes live a third as long.
 fn ttl(mode: InterfaceMode) -> u64 {
     if mode == InterfaceMode::Roaming {
@@ -27,6 +40,15 @@ fn ttl(mode: InterfaceMode) -> u64 {
 
 fn key(n: u8) -> AddressHash {
     AddressHash::from_bytes([n; 16])
+}
+
+/// The `n`th key: [`key`] below 256, and a distinct key for every `n` below 2^24.
+fn nth(n: usize) -> AddressHash {
+    let [low, mid, high, ..] = n.to_le_bytes();
+    let mut bytes = [low; 16];
+    bytes[0] ^= mid;
+    bytes[1] ^= high;
+    AddressHash::from_bytes(bytes)
 }
 
 fn route(iface: InterfaceId, learned: u64) -> RouteEntry<u64> {
@@ -62,7 +84,9 @@ fn reverse(at: u64) -> ReverseEntry<u64> {
 trait TestStore<V>: Store<V> + Default + Clone + PartialEq + Debug {}
 impl<V, S: Store<V> + Default + Clone + PartialEq + Debug> TestStore<V> for S {}
 
-/// Run a generic body against the bounded array and, with `std`, the map.
+/// Run a generic body against the bounded array and, with `std`, the map. With a desktop
+/// size named, the body takes its capacity and also runs over the array at the board's size
+/// and over the map at that one.
 macro_rules! both {
     ($name:ident, $entry:ty) => {
         mod $name {
@@ -80,29 +104,61 @@ macro_rules! both {
             }
         }
     };
+    ($name:ident, $entry:ty, $desktop:ident) => {
+        mod $name {
+            use super::*;
+
+            #[test]
+            fn array() {
+                super::$name::<BoundedVec<Keyed<$entry>, CAP>>(CAP);
+            }
+
+            #[cfg(feature = "alloc")]
+            #[test]
+            fn board() {
+                super::$name::<BoundedVec<Keyed<$entry>, BOARD>>(BOARD);
+            }
+
+            #[cfg(feature = "tokio")]
+            #[test]
+            fn map() {
+                super::$name::<std::collections::HashMap<AddressHash, $entry>>(CAP);
+            }
+
+            #[cfg(feature = "tokio")]
+            #[test]
+            fn desktop() {
+                super::$name::<std::collections::HashMap<AddressHash, $entry>>(
+                    crate::endpoint::$desktop,
+                );
+            }
+        }
+    };
 }
 
-fn filled<V: Copy, S: TestStore<V>>(make: impl Fn(u8) -> V) -> S {
+/// A table of `cap` entries, keyed `nth(1)` to `nth(cap)`.
+fn filled<V: Copy, S: TestStore<V>>(cap: usize, make: impl Fn(usize) -> V) -> S {
     let mut store = S::default();
-    for n in 1..=CAP as u8 {
-        assert!(matches!(store.insert(key(n), make(n)), Ok(None)));
+    for n in 1..=cap {
+        assert!(matches!(store.insert(nth(n), make(n)), Ok(None)));
     }
     store
 }
 
 both!(
     routes_replace_then_evict_the_soonest_to_expire,
-    RouteEntry<u64>
+    RouteEntry<u64>,
+    DESKTOP_PATH_TABLE_CAPACITY
 );
-fn routes_replace_then_evict_the_soonest_to_expire<S: TestStore<RouteEntry<u64>>>() {
-    let mut store: S = filled(|n| route(1, u64::from(n)));
+fn routes_replace_then_evict_the_soonest_to_expire<S: TestStore<RouteEntry<u64>>>(cap: usize) {
+    let mut store: S = filled(cap, |n| route(1, n as u64));
     let mut gone = Vec::new();
-    let replaced = record_route(&mut store, key(2), route(3, 10), CAP, ttl, |k, _, why| {
+    let replaced = record_route(&mut store, key(2), route(3, 10), cap, ttl, |k, _, why| {
         gone.push((k, why));
     });
     assert_eq!(replaced, Some(route(1, 2)), "a known key is replaced");
     assert!(gone.is_empty(), "replacing makes no room");
-    record_route(&mut store, key(9), route(1, 11), CAP, ttl, |k, _, why| {
+    record_route(&mut store, nth(cap + 5), route(1, 11), cap, ttl, |k, _, why| {
         gone.push((k, why));
     });
     assert_eq!(
@@ -110,18 +166,26 @@ fn routes_replace_then_evict_the_soonest_to_expire<S: TestStore<RouteEntry<u64>>
         [(key(1), Removal::Evicted)],
         "the never-used route soonest to expire goes"
     );
-    assert_eq!(store.len(), CAP);
+    assert_eq!(store.len(), cap);
     assert_eq!(store.get(&key(2)).map(|r| r.iface), Some(3));
 }
 
 both!(
     full_routes_drop_never_used_then_least_recently_used,
-    RouteEntry<u64>
+    RouteEntry<u64>,
+    DESKTOP_PATH_TABLE_CAPACITY
 );
-fn full_routes_drop_never_used_then_least_recently_used<S: TestStore<RouteEntry<u64>>>() {
+fn full_routes_drop_never_used_then_least_recently_used<S: TestStore<RouteEntry<u64>>>(
+    cap: usize,
+) {
+    let recent = RouteEntry {
+        used: Some(31),
+        ..route(1, 10)
+    };
     // 1 and 2 used at 30 and 20; 3 never used, learned at 3; 4 never used, roaming, learned
-    // at 4, so it expires first though it was learned last.
-    let mut store: S = filled(|n| match n {
+    // at 4, so it expires first though it was learned last. Any further slots hold routes
+    // used later than all four.
+    let mut store: S = filled(cap, |n| match n {
         1 => RouteEntry {
             used: Some(30),
             ..route(1, 1)
@@ -131,26 +195,17 @@ fn full_routes_drop_never_used_then_least_recently_used<S: TestStore<RouteEntry<
             ..route(1, 2)
         },
         3 => route(1, 3),
-        _ => RouteEntry {
+        4 => RouteEntry {
             mode: InterfaceMode::Roaming,
             ..route(1, 4)
         },
+        _ => recent,
     });
     let mut gone = Vec::new();
-    for n in 5..=8 {
-        record_route(
-            &mut store,
-            key(n),
-            RouteEntry {
-                used: Some(31),
-                ..route(1, 10)
-            },
-            CAP,
-            ttl,
-            |k, _, why| {
-                gone.push((k, why));
-            },
-        );
+    for n in cap + 1..=cap + 4 {
+        record_route(&mut store, nth(n), recent, cap, ttl, |k, _, why| {
+            gone.push((k, why));
+        });
     }
     let evicted = [4, 3, 2, 1].map(|n| (key(n), Removal::Evicted));
     assert_eq!(
@@ -159,23 +214,35 @@ fn full_routes_drop_never_used_then_least_recently_used<S: TestStore<RouteEntry<
     );
 }
 
-both!(routes_full_of_dead_never_evict_the_living, RouteEntry<u64>);
-fn routes_full_of_dead_never_evict_the_living<S: TestStore<RouteEntry<u64>>>() {
-    let mut store: S = filled(|n| route(1, if n == 3 { 150 } else { 0 }));
+both!(
+    routes_full_of_dead_never_evict_the_living,
+    RouteEntry<u64>,
+    DESKTOP_PATH_TABLE_CAPACITY
+);
+fn routes_full_of_dead_never_evict_the_living<S: TestStore<RouteEntry<u64>>>(cap: usize) {
+    let mut store: S = filled(cap, |n| route(1, if n == 3 { 150 } else { 0 }));
     let mut gone = Vec::new();
-    record_route(&mut store, key(9), route(1, 160), CAP, ttl, |k, _, why| {
+    record_route(&mut store, nth(cap + 5), route(1, 160), cap, ttl, |k, _, why| {
         gone.push((k, why));
     });
     gone.sort_by_key(|(k, _)| *k);
-    let expired = [1, 2, 4].map(|n| (key(n), Removal::Expired));
+    let mut expired: Vec<_> = (1..=cap)
+        .filter(|&n| n != 3)
+        .map(|n| (nth(n), Removal::Expired))
+        .collect();
+    expired.sort_by_key(|(k, _)| *k);
     assert_eq!(gone, expired);
     assert_eq!(store.len(), 2);
     assert!(store.get(&key(3)).is_some());
 }
 
-both!(route_lookups_check_age, RouteEntry<u64>);
-fn route_lookups_check_age<S: TestStore<RouteEntry<u64>>>() {
-    let mut store: S = filled(|n| route(1, u64::from(n) * 10));
+both!(
+    route_lookups_check_age,
+    RouteEntry<u64>,
+    DESKTOP_PATH_TABLE_CAPACITY
+);
+fn route_lookups_check_age<S: TestStore<RouteEntry<u64>>>(cap: usize) {
+    let mut store: S = filled(cap, |n| route(1, n as u64 * 10));
     let live = |now| move |r: &RouteEntry<u64>| r.live(now, &ttl);
     assert_eq!(find_live(&store, &key(1), live(109)), Some(&route(1, 10)));
     assert_eq!(
@@ -183,7 +250,7 @@ fn route_lookups_check_age<S: TestStore<RouteEntry<u64>>>() {
         None,
         "past its lifetime"
     );
-    assert_eq!(store.len(), CAP, "a read-only lookup removes nothing");
+    assert_eq!(store.len(), cap, "a read-only lookup removes nothing");
     assert_eq!(
         find_or_forget(&mut store, &key(1), live(110)),
         Lookup::Expired(route(1, 10))
@@ -196,12 +263,16 @@ fn route_lookups_check_age<S: TestStore<RouteEntry<u64>>>() {
         find_or_forget(&mut store, &key(2), live(110)),
         Lookup::Live(route(1, 20))
     );
-    assert_eq!(store.len(), CAP - 1);
+    assert_eq!(store.len(), cap - 1);
 }
 
-both!(routes_are_marked_used_only_when_live, RouteEntry<u64>);
-fn routes_are_marked_used_only_when_live<S: TestStore<RouteEntry<u64>>>() {
-    let mut store: S = filled(|n| route(1, u64::from(n) * 10));
+both!(
+    routes_are_marked_used_only_when_live,
+    RouteEntry<u64>,
+    DESKTOP_PATH_TABLE_CAPACITY
+);
+fn routes_are_marked_used_only_when_live<S: TestStore<RouteEntry<u64>>>(cap: usize) {
+    let mut store: S = filled(cap, |n| route(1, n as u64 * 10));
     assert!(mark_route_used(&mut store, &key(2), 50, ttl));
     assert_eq!(store.get(&key(2)).map(|r| r.used), Some(Some(50)));
     assert_eq!(
@@ -214,12 +285,16 @@ fn routes_are_marked_used_only_when_live<S: TestStore<RouteEntry<u64>>>() {
         "a dead route stays dead"
     );
     assert_eq!(store.get(&key(1)).map(|r| r.used), Some(None));
-    assert!(!mark_route_used(&mut store, &key(9), 50, ttl));
+    assert!(!mark_route_used(&mut store, &nth(cap + 5), 50, ttl));
 }
 
-both!(proving_a_route_alive_starts_its_life_over, RouteEntry<u64>);
-fn proving_a_route_alive_starts_its_life_over<S: TestStore<RouteEntry<u64>>>() {
-    let mut store: S = filled(|n| route(u32::from(n), u64::from(n) * 10));
+both!(
+    proving_a_route_alive_starts_its_life_over,
+    RouteEntry<u64>,
+    DESKTOP_PATH_TABLE_CAPACITY
+);
+fn proving_a_route_alive_starts_its_life_over<S: TestStore<RouteEntry<u64>>>(cap: usize) {
+    let mut store: S = filled(cap, |n| route(n as u32, n as u64 * 10));
     let mode = |iface| {
         if iface == 2 {
             InterfaceMode::Roaming
@@ -243,7 +318,7 @@ fn proving_a_route_alive_starts_its_life_over<S: TestStore<RouteEntry<u64>>>() {
         "a dead route stays dead"
     );
     assert_eq!(store.get(&key(1)), Some(&route(1, 10)));
-    assert!(!prove_route_alive(&mut store, &key(9), 50, mode, ttl));
+    assert!(!prove_route_alive(&mut store, &nth(cap + 5), 50, mode, ttl));
 }
 
 both!(replacing_a_route_keeps_its_used_mark, RouteEntry<u64>);
@@ -334,224 +409,89 @@ fn never_used_routes_live_only_as_long_as_their_linger<S: TestStore<RouteEntry<u
     assert_eq!(gone, [key(1)]);
 }
 
-both!(route_sweep_reports_each_dead_route, RouteEntry<u64>);
-fn route_sweep_reports_each_dead_route<S: TestStore<RouteEntry<u64>>>() {
-    let mut store: S = filled(|n| route(1, u64::from(n) * 10));
+both!(
+    route_sweep_reports_each_dead_route,
+    RouteEntry<u64>,
+    DESKTOP_PATH_TABLE_CAPACITY
+);
+fn route_sweep_reports_each_dead_route<S: TestStore<RouteEntry<u64>>>(cap: usize) {
+    let mut store: S = filled(cap, |n| route(1, n as u64 * 10));
     let mut gone = Vec::new();
     sweep_routes(&mut store, 125, ttl, |k, _| gone.push(k));
     gone.sort();
     assert_eq!(gone, [key(1), key(2)]);
-    assert_eq!(store.len(), 2);
+    assert_eq!(store.len(), cap - 2);
 }
 
-both!(routes_forget_an_interface, RouteEntry<u64>);
-fn routes_forget_an_interface<S: TestStore<RouteEntry<u64>>>() {
-    let mut store: S = filled(|n| route(u32::from(n % 2), 0));
+both!(
+    routes_forget_an_interface,
+    RouteEntry<u64>,
+    DESKTOP_PATH_TABLE_CAPACITY
+);
+fn routes_forget_an_interface<S: TestStore<RouteEntry<u64>>>(cap: usize) {
+    let mut store: S = filled(cap, |n| route((n % 2) as u32, 0));
     forget_interface(&mut store, 1, |r| [r.iface, r.iface]);
-    assert_eq!(store.len(), 2);
+    assert_eq!(store.len(), cap / 2);
     assert!(store.get(&key(1)).is_none() && store.get(&key(3)).is_none());
-}
-
-both!(bridges_follow_a_retransmitted_request, LinkBridge<u64>);
-fn bridges_follow_a_retransmitted_request<S: TestStore<LinkBridge<u64>>>() {
-    let mut store = S::default();
-    let new = record_bridge(&mut store, key(1), bridge(0, Some(100)), CAP, IDLE);
-    assert_eq!(new, BridgeRecord::New { evicted: None });
-    let again = record_bridge(&mut store, key(1), bridge(5, Some(200)), CAP, IDLE);
-    assert_eq!(again, BridgeRecord::Known);
-    assert_eq!(
-        store.get(&key(1)),
-        Some(&bridge(5, Some(200))),
-        "unproved follows"
-    );
-    assert!(refresh_bridge(&mut store, &key(1), 7, true));
-    assert_eq!(
-        store.get(&key(1)),
-        Some(&bridge(7, None)),
-        "the proof validates"
-    );
-    let known = record_bridge(&mut store, key(1), bridge(9, Some(300)), CAP, IDLE);
-    assert_eq!(known, BridgeRecord::Known);
-    assert_eq!(
-        store.get(&key(1)),
-        Some(&bridge(7, None)),
-        "a validated bridge stands"
-    );
-    assert!(refresh_bridge(&mut store, &key(1), 8, false));
-    assert_eq!(store.get(&key(1)), Some(&bridge(8, None)));
-    assert!(!refresh_bridge(&mut store, &key(2), 8, false));
-}
-
-both!(bridges_make_room_from_unproved_then_idle, LinkBridge<u64>);
-fn bridges_make_room_from_unproved_then_idle<S: TestStore<LinkBridge<u64>>>() {
-    // Validated 1 and 2, unproved 3 (seen 30) and 4 (seen 20).
-    let mut store: S = filled(|n| {
-        let deadline = (n > 2).then_some(1000);
-        bridge(if n == 4 { 20 } else { u64::from(n) * 10 }, deadline)
-    });
-    let unproved = record_bridge(&mut store, key(5), bridge(40, Some(1000)), CAP, IDLE);
-    assert_eq!(
-        unproved,
-        BridgeRecord::New {
-            evicted: Some(key(4))
-        }
-    );
-    let unproved = record_bridge(&mut store, key(6), bridge(40, Some(1000)), CAP, IDLE);
-    assert_eq!(
-        unproved,
-        BridgeRecord::New {
-            evicted: Some(key(3))
-        }
-    );
-    for n in [5, 6] {
-        refresh_bridge(&mut store, &key(n), 40, true);
-    }
-    // Every slot validated; 1 and 2 were last heard at 10 and 20.
-    let busy = record_bridge(&mut store, key(7), bridge(59, Some(1000)), CAP, IDLE);
-    assert_eq!(
-        busy,
-        BridgeRecord::Refused,
-        "no validated bridge is idle at 59"
-    );
-    let idle = record_bridge(&mut store, key(7), bridge(70, Some(1000)), CAP, IDLE);
-    assert_eq!(
-        idle,
-        BridgeRecord::New {
-            evicted: Some(key(1))
-        }
-    );
-    assert_eq!(store.len(), CAP);
-}
-
-both!(bridges_lapse_at_deadline_or_ttl, LinkBridge<u64>);
-fn bridges_lapse_at_deadline_or_ttl<S: TestStore<LinkBridge<u64>>>() {
-    let mut store: S = filled(|n| match n {
-        1 => bridge(0, Some(50)),
-        2 => bridge(0, Some(500)),
-        3 => bridge(0, None),
-        _ => bridge(450, None),
-    });
-    let live = |now| move |b: &LinkBridge<u64>| !b.lapsed(now, 500);
-    assert!(find_live(&store, &key(1), live(49)).is_some());
-    assert!(
-        find_live(&store, &key(1), live(50)).is_none(),
-        "at its proof deadline"
-    );
-    let mut gone = Vec::new();
-    sweep_bridges(&mut store, 500, 500, |k, _| gone.push(k));
-    gone.sort();
-    assert_eq!(gone, [key(1), key(2), key(3)]);
-    assert_eq!(store.len(), 1);
-    forget_interface(&mut store, 2, |b| [b.from, b.out]);
-    assert_eq!(store.len(), 0);
-}
-
-/// Record into `store`, then undo, and check nothing moved.
-fn record_then_restore<S: TestStore<ReverseEntry<u64>>>(mut store: S, key: AddressHash, now: u64) {
-    let before = store.clone();
-    let mut displaced = Vec::new();
-    record_reverse(&mut store, key, reverse(now), CAP, TIMEOUT, |d| {
-        displaced.push(d);
-    });
-    assert_eq!(store.get(&key), Some(&reverse(now)));
-    assert!(store.len() <= CAP);
-    restore_reverse(&mut store, &key, displaced.into_iter().rev());
-    assert_eq!(store, before, "a refused send leaves the table as it was");
-}
-
-both!(reverse_paths_restore_exactly, ReverseEntry<u64>);
-fn reverse_paths_restore_exactly<S: TestStore<ReverseEntry<u64>>>() {
-    record_then_restore(S::default(), key(9), 10);
-    let full = || filled::<_, S>(|n| reverse(u64::from(n)));
-    record_then_restore(full(), key(2), 10);
-    record_then_restore(full(), key(9), 10);
-    // Two expired (1 and 2 at 82), then still room: nothing live is evicted.
-    record_then_restore(full(), key(9), 82);
-    record_then_restore(full(), key(9), 1000);
-}
-
-both!(reverse_paths_make_room_dead_first, ReverseEntry<u64>);
-fn reverse_paths_make_room_dead_first<S: TestStore<ReverseEntry<u64>>>() {
-    let mut store: S = filled(|n| reverse(u64::from(n)));
-    let mut displaced = Vec::new();
-    record_reverse(&mut store, key(9), reverse(10), CAP, TIMEOUT, |d| {
-        displaced.push(d.key);
-    });
-    assert_eq!(displaced, [key(1)], "the oldest goes when all are live");
-    displaced.clear();
-    record_reverse(&mut store, key(8), reverse(83), CAP, TIMEOUT, |d| {
-        displaced.push(d.key);
-    });
-    displaced.sort();
-    assert_eq!(
-        displaced,
-        [key(2), key(3)],
-        "the expired go, and nothing live"
-    );
-    assert_eq!(store.len(), 3);
-}
-
-both!(reverse_paths_are_consumed_by_their_proof, ReverseEntry<u64>);
-fn reverse_paths_are_consumed_by_their_proof<S: TestStore<ReverseEntry<u64>>>() {
-    let mut store: S = filled(|n| reverse(u64::from(n)));
-    assert_eq!(take_reverse(&mut store, &key(1), 2, 10, TIMEOUT), Some(1));
-    assert_eq!(
-        take_reverse(&mut store, &key(1), 2, 10, TIMEOUT),
-        None,
-        "consumed"
-    );
-    assert_eq!(
-        take_reverse(&mut store, &key(2), 1, 10, TIMEOUT),
-        None,
-        "wrong side"
-    );
-    assert!(store.get(&key(2)).is_none(), "consumed either way");
-    assert_eq!(
-        take_reverse(&mut store, &key(3), 2, 83, TIMEOUT),
-        None,
-        "expired"
-    );
-    sweep_reverse(&mut store, 84, TIMEOUT);
-    assert_eq!(store.len(), 0);
-    let _ = store.insert(key(5), reverse(0));
-    forget_interface(&mut store, 1, |r| [r.received, r.outbound]);
-    assert_eq!(store.len(), 0);
 }
 
 /// The board's ties go to the earliest slot, and its removals swap the last slot in.
 #[test]
 fn the_array_keeps_the_boards_order() {
-    let mut store: BoundedVec<Keyed<ReverseEntry<u64>>, CAP> = filled(|_| reverse(5));
+    the_array_keeps_the_boards_order_at::<CAP>();
+}
+
+#[cfg(feature = "alloc")]
+#[test]
+fn the_array_keeps_the_boards_order_at_the_boards_size() {
+    the_array_keeps_the_boards_order_at::<BOARD>();
+}
+
+fn the_array_keeps_the_boards_order_at<const N: usize>() {
+    let mut store: BoundedVec<Keyed<ReverseEntry<u64>>, N> = filled(N, |_| reverse(5));
     assert_eq!(
         store.least(|r| Some(r.at)),
         Some(key(1)),
         "first of equal ranks"
     );
     let mut displaced = None;
-    record_reverse(&mut store, key(9), reverse(6), CAP, TIMEOUT, |d| {
+    record_reverse(&mut store, nth(N + 5), reverse(6), N, TIMEOUT, |d| {
         displaced = Some(d);
     });
     assert_eq!(displaced.map(|d| d.place), Some(Position::Swapped(0)));
     let keys: Vec<_> = store.iter().map(|slot| slot.key).collect();
-    assert_eq!(keys, [key(4), key(2), key(3), key(9)]);
-    let mut store: BoundedVec<Keyed<RouteEntry<u64>>, CAP> = filled(|n| route(1, u64::from(n)));
+    let swapped: Vec<_> = [N].into_iter().chain(2..N).chain([N + 5]).map(nth).collect();
+    assert_eq!(keys, swapped);
+    let mut store: BoundedVec<Keyed<RouteEntry<u64>>, N> = filled(N, |n| route(1, n as u64));
     sweep_routes(&mut store, 102, ttl, |_, _| {});
     let keys: Vec<_> = store.iter().map(|slot| slot.key).collect();
-    assert_eq!(keys, [key(4), key(3)], "each dead slot takes the last");
-    let mut store: BoundedVec<Keyed<RouteEntry<u64>>, CAP> = filled(|n| route(u32::from(n), 0));
+    let swept: Vec<_> = [N, N - 1].into_iter().chain(3..N - 1).map(nth).collect();
+    assert_eq!(keys, swept, "each dead slot takes the last");
+    let mut store: BoundedVec<Keyed<RouteEntry<u64>>, N> = filled(N, |n| route(n as u32, 0));
     forget_interface(&mut store, 2, |r| [r.iface, r.iface]);
     let keys: Vec<_> = store.iter().map(|slot| slot.key).collect();
-    assert_eq!(keys, [key(1), key(3), key(4)], "retain keeps order");
+    let kept: Vec<_> = [1].into_iter().chain(3..=N).map(nth).collect();
+    assert_eq!(keys, kept, "retain keeps order");
 }
 
 /// A full array refuses a new key rather than growing.
 #[test]
 fn a_full_array_refuses_a_new_key() {
-    let mut store: BoundedVec<Keyed<LinkBridge<u64>>, CAP> = filled(|_| bridge(0, None));
-    let refused = Store::insert(&mut store, key(9), bridge(1, None));
+    a_full_array_refuses_a_new_key_at::<CAP>();
+}
+
+#[cfg(feature = "alloc")]
+#[test]
+fn a_full_array_refuses_a_new_key_at_the_boards_size() {
+    a_full_array_refuses_a_new_key_at::<BOARD>();
+}
+
+fn a_full_array_refuses_a_new_key_at<const N: usize>() {
+    let mut store: BoundedVec<Keyed<LinkBridge<u64>>, N> = filled(N, |_| bridge(0, None));
+    let refused = Store::insert(&mut store, nth(N + 5), bridge(1, None));
     assert_eq!(refused, Err(bridge(1, None)));
     // A capacity above the array's bound cannot make room either.
-    let over = record_bridge(&mut store, key(9), bridge(1, None), CAP + 1, IDLE);
+    let over = record_bridge(&mut store, nth(N + 5), bridge(1, None), N + 1, IDLE);
     assert_eq!(over, BridgeRecord::Refused);
 }
 
@@ -583,5 +523,6 @@ fn bridge_at_instant(at: std::time::Instant) -> LinkBridge<std::time::Instant> {
     }
 }
 
-// After `both!`, which it uses.
+// After `both!`, which they use.
+mod bridges;
 mod forward;

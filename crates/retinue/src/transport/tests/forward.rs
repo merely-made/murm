@@ -219,19 +219,20 @@ fn a_carried_packet_reads_a_live_route_once<S: TestStore<RouteEntry<u64>>>() {
 
 both!(
     an_unsent_request_leaves_the_bridges_as_they_were,
-    LinkBridge<u64>
+    LinkBridge<u64>,
+    DESKTOP_LINK_TRANSPORT_CAPACITY
 );
-fn an_unsent_request_leaves_the_bridges_as_they_were<S: TestStore<LinkBridge<u64>>>() {
+fn an_unsent_request_leaves_the_bridges_as_they_were<S: TestStore<LinkBridge<u64>>>(cap: usize) {
     let admit = |store: &mut S, link, seen| {
         admit_request(
             store,
-            key(link),
+            nth(link),
             key(0xEE),
             1,
             2,
             seen,
             seen + 30,
-            CAP,
+            cap,
             IDLE,
         )
     };
@@ -258,9 +259,9 @@ fn an_unsent_request_leaves_the_bridges_as_they_were<S: TestStore<LinkBridge<u64
         assert_eq!(store, before, "{deadline:?}");
     }
     // New into a full table: the evicted bridge comes back where it stood.
-    let mut store: S = filled(|n| bridge(u64::from(n), Some(1_000)));
+    let mut store: S = filled(cap, |n| bridge(n as u64, Some(1_000)));
     let before = store.clone();
-    let (record, undo) = admit(&mut store, 9, 20);
+    let (record, undo) = admit(&mut store, cap + 5, 20);
     assert_eq!(
         record,
         BridgeRecord::New {
@@ -268,7 +269,7 @@ fn an_unsent_request_leaves_the_bridges_as_they_were<S: TestStore<LinkBridge<u64
         }
     );
     assert_eq!(store.get(&key(1)), None);
-    unsent_request(&mut store, &key(9), undo);
+    unsent_request(&mut store, &nth(cap + 5), undo);
     assert_eq!(store, before);
 }
 

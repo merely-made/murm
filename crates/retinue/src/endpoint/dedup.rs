@@ -123,7 +123,7 @@ pub(super) fn hash_list(capacity: usize) -> HashList {
 }
 
 /// Packet hashes held per generation by the endpoint's packet filter.
-pub(super) const PACKET_HASHES: usize = 32_768;
+pub(crate) const PACKET_HASHES: usize = 32_768;
 
 /// Path request tags held per generation, RNS's `max_pr_tags` (`Transport.py` 195).
 pub(super) const PATH_REQUEST_TAGS: usize = 16_000;

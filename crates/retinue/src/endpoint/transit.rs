@@ -35,9 +35,12 @@ pub(super) const LINK_TRANSPORT_IDLE: Duration =
 /// [`LINK_TRANSPORT_IDLE`]; a recently heard validated link is never displaced, so forged
 /// requests cannot evict carried links or grow the table.
 #[cfg(not(test))]
-pub(super) const LINK_TRANSPORT_CAPACITY: usize = 4096;
+pub(super) const LINK_TRANSPORT_CAPACITY: usize = DESKTOP_LINK_TRANSPORT_CAPACITY;
 #[cfg(test)]
 pub(super) const LINK_TRANSPORT_CAPACITY: usize = 4;
+
+/// [`LINK_TRANSPORT_CAPACITY`] outside the endpoint's tests, so the shared tests can run at it.
+pub(crate) const DESKTOP_LINK_TRANSPORT_CAPACITY: usize = 4096;
 
 /// A link carried through this node, on the desktop's clock.
 pub(super) type LinkBridge = transport::LinkBridge<Instant>;
@@ -48,9 +51,12 @@ pub(super) const REVERSE_TIMEOUT: Duration = Duration::from_secs(8 * 60);
 
 /// Carried packets whose return path is remembered at once. At capacity the oldest goes.
 #[cfg(not(test))]
-pub(super) const REVERSE_TABLE_CAPACITY: usize = 4096;
+pub(super) const REVERSE_TABLE_CAPACITY: usize = DESKTOP_REVERSE_TABLE_CAPACITY;
 #[cfg(test)]
 pub(super) const REVERSE_TABLE_CAPACITY: usize = 4;
+
+/// [`REVERSE_TABLE_CAPACITY`] outside the endpoint's tests, so the shared tests can run at it.
+pub(crate) const DESKTOP_REVERSE_TABLE_CAPACITY: usize = 4096;
 
 /// The way back for a carried packet's proof, on the desktop's clock.
 pub(super) type ReverseEntry = transport::ReverseEntry<Instant>;

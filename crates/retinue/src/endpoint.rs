@@ -101,3 +101,11 @@ pub use routing::{InterfaceSelector, RoutingCounters, RoutingPolicy};
 pub use runtime::Endpoint;
 pub use single::{ProofStrategy, ReceivedSingle, SingleDelivery, SinglePacketReceipt};
 pub use stream::LinkStream;
+
+// The desktop's table sizes, which the shared transport tests also run at.
+#[cfg(test)]
+pub(crate) use dedup::PACKET_HASHES;
+#[cfg(test)]
+pub(crate) use paths::DESKTOP_PATH_TABLE_CAPACITY;
+#[cfg(test)]
+pub(crate) use transit::{DESKTOP_LINK_TRANSPORT_CAPACITY, DESKTOP_REVERSE_TABLE_CAPACITY};
