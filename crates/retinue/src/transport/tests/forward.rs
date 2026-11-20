@@ -200,6 +200,35 @@ fn the_hop_sequence_keeps_its_order() {
     }
 }
 
+/// A packet not addressed to this node as its transport hop, such as a type-2 request for
+/// one of its own destinations, is local whatever the carriage policy, and nothing is asked.
+#[test]
+fn a_packet_not_addressed_to_this_hop_bypasses_every_transit_check() {
+    let refused = Carriage {
+        ingress: false,
+        ..ON
+    };
+    for carriage in [ON, off(), refused] {
+        for hops in [0, 3] {
+            let asked = Cell::new(false);
+            let ask = |answer| {
+                asked.set(true);
+                answer
+            };
+            let decision = forward_hop::<u64>(
+                false,
+                hops,
+                &carriage,
+                || ask(false),
+                || ask(false).then_some(route(2, 0)),
+                |_| ask(false),
+            );
+            assert_eq!(decision, Transit::Local, "{carriage:?} at {hops} hops");
+            assert!(!asked.get(), "{carriage:?} at {hops} hops: nothing asked");
+        }
+    }
+}
+
 both!(a_carried_packet_reads_a_live_route_once, RouteEntry<u64>);
 fn a_carried_packet_reads_a_live_route_once<S: TestStore<RouteEntry<u64>>>() {
     let mut store = S::default();

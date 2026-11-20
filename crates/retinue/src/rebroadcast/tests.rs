@@ -180,6 +180,39 @@ fn forgetting_an_interface_drops_what_it_carried() {
 }
 
 #[test]
+fn one_neighbour_before_our_first_send_and_one_after_end_our_retry() {
+    let destination = AddressHash::from_bytes([1; 16]);
+    let mut table = Rebroadcasts::new(4);
+    table.schedule(rebroadcast(1, 2, 0), 0, 100);
+    assert!(!table.heard(destination, 2, 100), "before our send it counts");
+    assert!(table.pop_due(100).is_some());
+    assert!(table.heard(destination, 2, 101), "the second neighbour ends it");
+    assert_eq!(table.len(), 0);
+    assert!(table.pop_due(100 + REBROADCAST_GRACE + REBROADCAST_WINDOW).is_none());
+}
+
+#[test]
+fn forgetting_an_interface_drops_the_cap_queue_it_carried() {
+    let rate = CapRate::new(100);
+    let on = |seed, iface, answer| Rebroadcast {
+        interface: iface,
+        answer,
+        ..rebroadcast(seed, 1, 0)
+    };
+    let mut cap = AnnounceCap::new(4);
+    assert!(matches!(cap.offer(on(0, 2, None), 0, rate), Offer::Send(_)));
+    for queued in [on(1, 1, None), on(2, 2, Some(1)), on(3, 2, None)] {
+        assert!(matches!(cap.offer(queued, 0, rate), Offer::Queued));
+    }
+    cap.forget_interface(1);
+    assert_eq!(cap.queued(), 1, "heard on 1, or answering there, goes");
+    let due = cap.next_due().unwrap();
+    let kept = cap.pop_due(due, rate).unwrap();
+    assert_eq!(kept.destination, AddressHash::from_bytes([3; 16]));
+    assert_eq!(cap.queued(), 0);
+}
+
+#[test]
 fn a_recursive_path_request_spends_the_announce_budget() {
     let rate = CapRate::from_bitrate(1_200, 2);
     let mut cap = AnnounceCap::new(4);
