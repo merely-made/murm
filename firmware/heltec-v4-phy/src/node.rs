@@ -59,8 +59,9 @@ pub fn assemble<RK: RadioKind, DLY: DelayNs>(
         retinue::identity::PrivateIdentity::from_secret_bytes(&settings.identity),
         retinue::destination::DestinationName::new("retinue", ["node"]).name_hash(),
     );
-    // A wall relay does not echo (D5): a peer with a link must not spend its airtime.
-    let channel = NodeChannel::new(node, lease, Echo::Off).map_err(NodeRefused::Timebase)?;
+    // A wall relay does not echo (D5) and refuses every resource addressed to it (D8): a peer
+    // with a link must not spend its airtime or its heap.
+    let channel = NodeChannel::new(node, lease, Echo::Off, 0).map_err(NodeRefused::Timebase)?;
     let channel = NODE.init(channel);
     // Boot's own apply is followed here, so the loop starts with no change pending.
     owner.take_config_change();

@@ -110,13 +110,15 @@ pub struct NodeChannel<const PEERS: usize = 32, const ACTIONS: usize = 8, const 
 impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize>
     NodeChannel<PEERS, ACTIONS, LINKS>
 {
-    /// `echo` is the board's choice for the loopback service (D5).
+    /// `echo` is the board's choice for the loopback service (D5), and
+    /// `max_inbound_resource` its limit on resources addressed to the node (D8; 0 refuses all).
     pub fn new(
         node: Node<PEERS, ACTIONS, LINKS>,
         lease: crate::announce_reservation::ActiveLease,
         echo: Echo,
+        max_inbound_resource: usize,
     ) -> Result<Self, retinue::announce::TimebaseError> {
-        Self::build(node, lease, Default::default(), echo)
+        Self::build(node, lease, Default::default(), echo, max_inbound_resource)
     }
 
     /// Credentials and carrier MTU are fixed before this channel starts serving.
@@ -125,19 +127,23 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize>
         lease: crate::announce_reservation::ActiveLease,
         carrier: crate::retinue_carrier::RetinueCarrier,
         echo: Echo,
+        max_inbound_resource: usize,
     ) -> Result<Self, NodeChannelConfigError> {
         carrier
             .configure_node(&mut node)
             .map_err(NodeChannelConfigError::Mtu)?;
-        Self::build(node, lease, carrier, echo).map_err(NodeChannelConfigError::Timebase)
+        Self::build(node, lease, carrier, echo, max_inbound_resource)
+            .map_err(NodeChannelConfigError::Timebase)
     }
 
     fn build(
-        node: Node<PEERS, ACTIONS, LINKS>,
+        mut node: Node<PEERS, ACTIONS, LINKS>,
         lease: crate::announce_reservation::ActiveLease,
         carrier: crate::retinue_carrier::RetinueCarrier,
         echo: Echo,
+        max_inbound_resource: usize,
     ) -> Result<Self, retinue::announce::TimebaseError> {
+        crate::node_echo::limit_inbound(&mut node, max_inbound_resource);
         Ok(Self {
             node,
             carrier,

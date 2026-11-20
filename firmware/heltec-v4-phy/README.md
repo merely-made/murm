@@ -80,7 +80,9 @@ the failed allocations since boot (`heap=<used>/<size> highwater=<peak>
 free=<free> failed=<count>`), and the node channel's own
 `node`, `face` and `replay` lines. The V4 node does not echo completed inbound
 resources back on their link (the T114 does): a peer that opens a link cannot
-spend a wall relay's airtime that way. On a claimed board the node loop answers
+spend a wall relay's airtime that way. It also refuses every resource
+addressed to it at the offer, before any reassembly (inbound limit 0; the T114
+keeps Retinue's default). On a claimed board the node loop answers
 the unsigned control status request and serves signed commands with the modem
 loop's carrier and quiet window; an unconfirmed provisional change rolls back
 at its deadline with no host frame.
