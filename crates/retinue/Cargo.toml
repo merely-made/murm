@@ -359,6 +359,10 @@ name = "node_data"
 required-features = ["tulle-radio"]
 
 [[example]]
+name = "transit_peer"
+required-features = ["tulle-radio"]
+
+[[example]]
 name = "node_stress"
 required-features = ["tulle-radio"]
 
