@@ -16,8 +16,9 @@ publish = false
 radio = ["dep:lora-phy", "dep:embassy-time", "dep:embassy-futures"]
 # The node channel. Separate from `radio` because it is the one part of this crate that
 # needs an allocator: `retinue`'s sans-io core is `no_std + alloc`, so a board asks for
-# this only once it has a global allocator to link against.
-node = ["radio", "replay"]
+# this only once it has a global allocator to link against. The allocator type every such
+# board uses, `heap::TrackingHeap`, comes with it; each firmware keeps its own static.
+node = ["radio", "replay", "dep:embedded-alloc"]
 # The fixture-replay codec. Radio-free on purpose: nothing here touches `lora-phy`, so a
 # host test can link it and assert the bytes a board must reproduce.
 replay = ["dep:retinue", "retinue/alloc"]
@@ -33,6 +34,7 @@ heapless = "0.9"
 lora-modulation = "0.1.5"
 lora-phy = { path = "../../vendor/lora-phy", optional = true }
 embassy-futures = { version = "0.1.2", optional = true }
+embedded-alloc = { version = "0.7.0", features = ["llff"], optional = true }
 embassy-time = { version = "0.5.1", optional = true }
 radio-face = { path = "../radio-face" }
 retinue = { path = "../retinue", default-features = false, optional = true }

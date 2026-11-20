@@ -35,6 +35,8 @@ pub mod dispatch;
 pub mod executive;
 pub mod front_end;
 pub mod gnss;
+#[cfg(feature = "node")]
+pub mod heap;
 pub mod link;
 pub mod observation;
 pub mod phy;

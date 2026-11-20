@@ -34,7 +34,6 @@ radio-hand = { path = "../../crates/radio-hand", features = ["node"] }
 static_cell = "2.1.1"
 selvage = { path = "../../crates/selvage" }
 heapless = "0.9"
-embedded-alloc = { version = "0.7.0", features = ["llff"] }
 
 [lints]
 workspace = true
