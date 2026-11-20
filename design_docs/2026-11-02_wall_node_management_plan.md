@@ -433,3 +433,22 @@ Choose V4 heap from measured high-water and refusal behavior. Decide unsigned, b
   written after boot recovery (D20), at about 2 KiB on each V4 image. Left
   as they are: `status` repeats the boot banner, and the status-only boots
   still answer `sync` with fixed text. D22 ruled.
+- 2026-11-20: the controller's evidence path landed (D19 to D22), checked in
+  the lane's worktree. `station-claim lifecycle` reads the board's unsigned
+  `applied` line before the apply, after it and after a late commit, and
+  records whether the applied profile matches the candidate (power aside,
+  which the board clamps). `--then expire` sends the late commit, records the
+  refusal, and requires the earlier profile back, re-reading for up to the
+  margin after `TransactionExpired`. Nine end-to-end tests run the real
+  runtime and carrier through postilion's USB transport over an in-memory
+  link; none of the expiry tests looks inside the board. The branch where the
+  board accepts a late commit is untested, since the runtime never does.
+  Postilion's `CommitToken` is zeroizing and neither `Copy` nor `Clone`; not
+  cleared are Retinue's signing buffer and Selvage's KISS deframer. The V4's
+  `applied` line reports region, frequency, bandwidth, spreading factor,
+  coding rate, preamble, sync word and register, clamped power, and on the
+  node build the relay flags; `sync` is live and the banner is written after
+  boot recovery. Text bytes: V4 modem 376,703, V4 node 615,747, V4 UART
+  243,319, T114 381,022. Tests: station-custody 20, 6 and 9; postilion 34;
+  radio-hand 147 and 165 with `replay`. Nothing in this piece has run against
+  a board, a port or djinn.
