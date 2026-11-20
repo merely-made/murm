@@ -57,11 +57,13 @@ or a refused node keeps the modem for repair, with `timebase=fault
 FALLBACK=modem` on the boot line and a TIMEBASE fault on the screen. `channel
 modem` and `channel rnode` stay available as recovery channels.
 
-Relaying follows the control configuration, read once at boot. A claimed
-board relays announces and packets as its committed `relay_announces` and
-`relay_packets` say; an unclaimed board relays both. The hop limit and route
-and link lifetimes stay at the transit defaults whatever the configuration's
-`max_hops` says. A change takes effect at the next boot. Only the node build
+Relaying follows the control configuration in force. A claimed board relays
+announces and packets as the `relay_announces` and `relay_packets` of the last
+configuration it applied say (boot recovery, provisional apply, revert or
+expiry); an unclaimed board relays both. A change applies from the next
+packet, with routes and carried links kept, and the first-hop allowance
+follows the profile then running. The hop limit and route and link lifetimes
+stay at the transit defaults whatever the configuration's `max_hops` says. Only the node build
 accepts the two flags in a candidate or first-write configuration; the modem
 image still refuses them, and a modem image booted on a board whose committed
 configuration has either flag on fails WN1 control recovery into the

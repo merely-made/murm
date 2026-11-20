@@ -471,7 +471,7 @@ async fn main(spawner: Spawner) {
     #[cfg(feature = "node")]
     let node = settings
         .filter(|stored| stored.channel.requests_native_node())
-        .map(|stored| node::assemble(&mut owner, &stored, control_ready.as_ref()));
+        .map(|stored| node::assemble(&mut owner, &stored));
     #[cfg(feature = "node")]
     if matches!(node, Some(Err(_))) {
         // As the T114: the modem stays up for repair, and nothing announces this boot.

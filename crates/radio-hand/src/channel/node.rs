@@ -160,6 +160,16 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize>
         })
     }
 
+    /// Follow the configuration in force: relay flags from the next packet, and the radio's
+    /// first-hop allowance for `profile`. See [`crate::node_relay::follow`].
+    pub fn follow(
+        &mut self,
+        source: crate::node_relay::RelaySource,
+        profile: &selvage::PhyProfile,
+    ) {
+        crate::node_relay::follow(&mut self.node, source, RADIO, profile);
+    }
+
     /// The node, for a host that wants to report on it. N6's panels read through here.
     pub fn node(&self) -> &Node<PEERS, ACTIONS, LINKS> {
         &self.node

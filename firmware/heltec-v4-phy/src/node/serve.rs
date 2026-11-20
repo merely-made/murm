@@ -47,6 +47,11 @@ where
     let mut heartbeat = Heartbeat::new(channel.heartbeat());
 
     loop {
+        // A served command or an expiry applied a configuration: the node follows it before
+        // the next packet (D6, D9), with the allowance of the profile now running.
+        if owner.take_config_change() {
+            channel.follow(owner.relay_in_force(), &owner.profile());
+        }
         {
             let _awake = power::Awake::new();
             match owner.ensure_rx().await {

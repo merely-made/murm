@@ -45,6 +45,9 @@ pub struct V4RadioOwner<RK: RadioKind, DLY: DelayNs> {
     /// Set by the first receive arming attempt; the node build's boot lease must precede it.
     #[cfg(feature = "node")]
     receive_armed_once: bool,
+    /// The node build's record of the configuration in force (D9).
+    #[cfg(feature = "node")]
+    in_force: node_lease::InForce,
     observations: Option<OwnerObservations>,
     /// The executive's counters for the whole boot; each per-call executive counts into it.
     diag: AirDiag,
@@ -286,6 +289,8 @@ impl<RK: RadioKind, DLY: DelayNs> V4RadioOwner<RK, DLY> {
             radio_service_started: false,
             #[cfg(feature = "node")]
             receive_armed_once: false,
+            #[cfg(feature = "node")]
+            in_force: node_lease::InForce::default(),
             observations: None,
             diag: AirDiag::default(),
         }
@@ -589,7 +594,11 @@ impl<RK: RadioKind, DLY: DelayNs> V4RadioOwner<RK, DLY> {
             .apply_profile(&configuration.public.requested_reticulum_phy())
             .await;
         match classify_profile_apply_result(code) {
-            V4ProfileApplyResult::Accepted => Ok(()),
+            V4ProfileApplyResult::Accepted => {
+                #[cfg(feature = "node")]
+                self.in_force.applied(configuration);
+                Ok(())
+            }
             V4ProfileApplyResult::SafeRefusal => {
                 self.region = previous_region;
                 Err(V4ConfigError::ProfileRejected { code })
