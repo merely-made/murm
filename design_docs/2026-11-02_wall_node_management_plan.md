@@ -191,6 +191,27 @@ pin, where the older text says 1.5.2.
   the owner: "Yes, the stream". 256 random bytes each way over the endpoint's
   stream, two frames per direction, sha256 logged by sender and receiver.
 
+### wall_node_management D17 and D18 (2026-11-20)
+
+- **D17, the controller for the commissioned-board run (new):** no host tool
+  can send relay-on or a chosen radio profile.
+  `apps/signalman/src/bin/signalman-control-configure.rs:116` builds its
+  candidate from `postilion::profile` with relay off, and reads the raw key
+  from an environment variable; the granted Mere controller key is released
+  by djinn inside `station-custody` and never exported, and
+  `crates/station-custody/src/bin/station-claim.rs:284` has only `init`,
+  `claim` and `status`. The library is complete
+  (`crates/postilion/src/control/verified/client.rs:171`). The owner: "Add it
+  to station-claim now". Apply, commit and revert under djinn custody, with
+  the relay flags and every radio field as arguments. This is WN1's open
+  applied-and-committed receipt, taken up here because the SB1 run needs it.
+- **D18, the commit token between apply and commit (new):** the procedure
+  keeps it in protected controller state and out of receipts; today's tool
+  prints it. The owner: "In memory, one invocation". One command applies,
+  shows the status evidence and commits, reverts or lets the candidate
+  expire before it exits. The holder is a seam so a store can be added when
+  a commit on another carrier needs one.
+
 ## Decisions and constraints
 
 Transport authentication does not confer board-local authority. Grants bind actual keys; durable outer counters and mutation-sequence retirement are separate from semantic transaction identity. `Changed`, `Replayed`, `Ready` and reset-required preserve distinct meanings. Board-owned recovery facts cannot be asserted by candidate configuration. A signature does not encrypt credentials. A quiet witness must cover live flash and apply; once stopping starts, cancellation or uncertain hardware state fails to a reset boundary. The first useful appliance is USB lifecycle then native LoRa forwarding, with WiFi afterward; WN0 target fixture and later carriers are real debts but are not asserted as blockers for that integration.
@@ -334,3 +355,21 @@ Choose V4 heap from measured high-water and refusal behavior. Decide unsigned, b
   held and the rest refused, on a fresh boot: 400 bytes in use, high water
   764. Not measured: carried links and forwarded packets, which need the two
   ends isolated. The heap size is not chosen.
+- 2026-11-20: the fixture's double announce was its own: `Endpoint::register`
+  announces by design and the responder announced again at once. Fixed in
+  `transit_peer.rs` and the host test (`390217f0996`); not rerun on the
+  boards. `link_peer.rs` has the same pattern and was left.
+- 2026-11-20: read-only assessment of the SB1 run, spot-checked against the
+  code. The board side is ready: a public configuration carries frequency,
+  bandwidth, spreading factor, coding rate, preamble, sync word and power
+  (`crates/selvage/src/profile.rs:10`), nothing restricts the sync word, and
+  an apply reprograms all of it (`crates/radio-hand/src/service.rs:42`). Our
+  RNode channel puts host data on the air verbatim and drops anything over
+  255 bytes (`crates/radio-hand/src/channel/rnode.rs:198`), so its frames
+  decode in the node once the profiles match; stock RNode hardware, which
+  adds a leading byte, would not. Open for that run: the profile itself; the
+  status banner and `sync` probe report `2b` whatever is applied
+  (`firmware/heltec-v4-phy/src/channels.rs:273`); signed Status carries no
+  radio fields; a refused profile earns silence; and stock RNS on a radio
+  interface keeps a 500-byte link MTU, so D16's 256-byte write may exceed one
+  255-byte frame there. D17 and D18 ruled.
