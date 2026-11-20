@@ -13,7 +13,7 @@ compile_error!("the node build excludes the `rf-sleep-proof` bench");
 use lora_phy::DelayNs;
 use lora_phy::mod_traits::RadioKind;
 use radio_hand::announce_reservation::DEFAULT_LEASE;
-use radio_hand::channel::node::{NodeChannel, RADIO};
+use radio_hand::channel::node::{Echo, NodeChannel, RADIO};
 use radio_hand::node_relay::{RelaySource, transport_config};
 use radio_hand::settings::Settings;
 use retinue::node::{FIRST_HOP_ALLOWANCE_BITS, Node};
@@ -90,6 +90,7 @@ pub fn assemble<RK: RadioKind, DLY: DelayNs>(
     )
     .with_transport_config(transport_config(relay_source(control)));
     let _ = node.set_first_hop_airtime(RADIO, allowance);
-    let channel = NodeChannel::new(node, lease).map_err(NodeRefused::Timebase)?;
+    // A wall relay does not echo (D5): a peer with a link must not spend its airtime.
+    let channel = NodeChannel::new(node, lease, Echo::Off).map_err(NodeRefused::Timebase)?;
     Ok(NODE.init(channel))
 }

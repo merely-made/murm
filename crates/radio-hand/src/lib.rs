@@ -39,6 +39,8 @@ pub mod gnss;
 pub mod heap;
 pub mod link;
 #[cfg(feature = "replay")]
+pub mod node_echo;
+#[cfg(feature = "replay")]
 pub mod node_relay;
 pub mod observation;
 pub mod phy;

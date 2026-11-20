@@ -162,7 +162,7 @@ async fn main(spawner: Spawner) {
     let mut timebase_fault = native_node_requested && (native_guard_fault || lease.is_err());
     let _lease = lease.ok().flatten();
     let native_channel = node.zip(_lease).and_then(|(node, lease)| {
-        NodeChannel::new(node, lease)
+        NodeChannel::new(node, lease, radio_hand::channel::node::Echo::On)
             .map_err(|_| timebase_fault = true)
             .ok()
     });

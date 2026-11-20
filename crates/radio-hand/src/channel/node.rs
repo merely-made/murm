@@ -23,6 +23,8 @@ use retinue::packet::{Packet, PacketType};
 use crate::channel::{Channel, ChannelInfo, Event};
 use crate::executive::Executive;
 use crate::link::{Flow, HostLink};
+pub use crate::node_echo::Echo;
+use crate::node_echo::{EchoOutcome, echo_resource};
 
 mod host;
 
@@ -87,6 +89,8 @@ pub struct NodeChannel<const PEERS: usize = 32, const ACTIONS: usize = 8, const 
     /// Frames that arrived but did not decode as a packet. Ordinary weather on a shared
     /// band, where any Meshtastic or MeshCore traffic on the same sync word lands here.
     undecoded: u16,
+    /// Whether completed inbound resources go back on their link. The board's choice.
+    echo: Echo,
     /// Resources echoed back on their link by the loopback service.
     echoes: u16,
     /// Echoes refused because the link was gone or a transfer still held it.
@@ -106,11 +110,13 @@ pub struct NodeChannel<const PEERS: usize = 32, const ACTIONS: usize = 8, const 
 impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize>
     NodeChannel<PEERS, ACTIONS, LINKS>
 {
+    /// `echo` is the board's choice for the loopback service (D5).
     pub fn new(
         node: Node<PEERS, ACTIONS, LINKS>,
         lease: crate::announce_reservation::ActiveLease,
+        echo: Echo,
     ) -> Result<Self, retinue::announce::TimebaseError> {
-        Self::build(node, lease, Default::default())
+        Self::build(node, lease, Default::default(), echo)
     }
 
     /// Credentials and carrier MTU are fixed before this channel starts serving.
@@ -118,17 +124,19 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize>
         mut node: Node<PEERS, ACTIONS, LINKS>,
         lease: crate::announce_reservation::ActiveLease,
         carrier: crate::retinue_carrier::RetinueCarrier,
+        echo: Echo,
     ) -> Result<Self, NodeChannelConfigError> {
         carrier
             .configure_node(&mut node)
             .map_err(NodeChannelConfigError::Mtu)?;
-        Self::build(node, lease, carrier).map_err(NodeChannelConfigError::Timebase)
+        Self::build(node, lease, carrier, echo).map_err(NodeChannelConfigError::Timebase)
     }
 
     fn build(
         node: Node<PEERS, ACTIONS, LINKS>,
         lease: crate::announce_reservation::ActiveLease,
         carrier: crate::retinue_carrier::RetinueCarrier,
+        echo: Echo,
     ) -> Result<Self, retinue::announce::TimebaseError> {
         Ok(Self {
             node,
@@ -142,6 +150,7 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize>
             timebase_exhausted: 0,
             timebase: TimebaseGenerator::firmware_lease(lease.floor(), lease.reserved_through())?,
             undecoded: 0,
+            echo,
             echoes: 0,
             echo_refused: 0,
             heard: heapless::Vec::new(),
@@ -194,7 +203,8 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize>
     /// Carry out what the node decided.
     ///
     /// Sends pass through the executive. A completed inbound resource is echoed back on its
-    /// link (the loopback service); everything else is a report the node already recorded.
+    /// link when the board chose [`Echo::On`] (the loopback service); everything else is a
+    /// report the node already recorded.
     async fn perform<L, RK, DLY>(
         &mut self,
         exec: &mut Executive<'_, RK, DLY>,
@@ -220,43 +230,42 @@ impl<const PEERS: usize, const ACTIONS: usize, const LINKS: usize>
                 }
                 // The loopback service: what arrives whole goes back whole, metadata and
                 // all, on the same link. N5's byte-exact both-directions receipt drives this.
+                // Off by the board's choice (D5), it is only a report.
                 Action::Resource {
                     link_id,
                     data,
                     metadata,
                 } => {
-                    let mut random_hash = [0_u8; retinue::resource::RANDOM_HASH_LEN];
-                    let mut iv = [0_u8; retinue::token::IV_LEN];
-                    if exec.random(&mut random_hash).is_err() || exec.random(&mut iv).is_err() {
-                        self.unseeded = self.unseeded.saturating_add(1);
-                        continue;
-                    }
-                    let mut label = Text::<24>::empty();
-                    let _ = write!(&mut label, "echo {}b", data.len());
-                    let now = Self::now();
-                    let started = match &metadata {
-                        Some(metadata) => self.node.publish_with_metadata(
-                            link_id,
-                            RADIO,
-                            &data,
-                            metadata,
-                            random_hash,
-                            &iv,
-                            now,
-                        ),
-                        None => self
-                            .node
-                            .publish(link_id, RADIO, &data, random_hash, &iv, now),
+                    let entropy = || {
+                        let mut random_hash = [0_u8; retinue::resource::RANDOM_HASH_LEN];
+                        let mut iv = [0_u8; retinue::token::IV_LEN];
+                        (exec.random(&mut random_hash).is_ok() && exec.random(&mut iv).is_ok())
+                            .then_some((random_hash, iv))
                     };
-                    match started {
-                        Some(actions) => {
+                    match echo_resource(
+                        self.echo,
+                        &mut self.node,
+                        RADIO,
+                        link_id,
+                        &data,
+                        metadata.as_deref(),
+                        entropy,
+                        Self::now(),
+                    ) {
+                        EchoOutcome::Off => {}
+                        EchoOutcome::Unseeded => self.unseeded = self.unseeded.saturating_add(1),
+                        EchoOutcome::Started(actions) => {
+                            let mut label = Text::<24>::empty();
+                            let _ = write!(&mut label, "echo {}b", data.len());
                             self.echoes = self.echoes.saturating_add(1);
                             self.note_event(EventKind::Delivered, label.as_str());
                             echo = Some(actions);
                         }
                         // The link vanished or a transfer is still running on it. Counted,
                         // not retried: the peer that wants the echo will ask again.
-                        None => self.echo_refused = self.echo_refused.saturating_add(1),
+                        EchoOutcome::Refused => {
+                            self.echo_refused = self.echo_refused.saturating_add(1)
+                        }
                     }
                 }
                 // The face's living panels: peers stamp the recency table, links write the
