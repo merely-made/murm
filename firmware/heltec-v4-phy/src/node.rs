@@ -23,6 +23,7 @@ use crate::control_boot::ControlReady;
 use crate::radio_owner::{NodeLeaseError, V4RadioOwner};
 
 mod bounded_host;
+mod control;
 mod serve;
 
 pub use serve::serve;

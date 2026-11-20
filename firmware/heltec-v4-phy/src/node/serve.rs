@@ -5,10 +5,12 @@
 //! node's own heartbeat and `wake_at` deadline, as on the T114, so announces, relays and link
 //! timers keep time with nobody attached.
 //!
-//! No banner and no session: USB startup stays quiet, and the host only observes. Every host
-//! write goes through [`BoundedHost`], so nothing a host does or fails to do holds the radio.
+//! No banner and no session: USB startup stays quiet. The host observes, and a claimed board's
+//! controller sends signed commands ([`NodeControl`]); every host write goes through
+//! [`BoundedHost`], so nothing a host does or fails to do holds the radio.
 
-use embassy_futures::select::{Either3, select3};
+use embassy_futures::select::{Either4, select4};
+use embassy_time::{Instant, Timer};
 use lora_phy::DelayNs;
 use lora_phy::mod_traits::RadioKind;
 use radio_hand::channel::{Channel as _, ChannelInfo as _, Event};
@@ -17,18 +19,19 @@ use radio_hand::link::HostLink;
 
 use super::V4NodeChannel;
 use super::bounded_host::BoundedHost;
+use super::control::NodeControl;
 use crate::control_boot::ControlReady;
 use crate::radio_owner::{RxSetupFault, V4RadioOwner};
 use crate::{channels, heap, power, wake_input};
 
 /// The board as a node, forever.
 ///
-/// `control_ready` is held for the life of the loop: the next checkpoint serves signed
-/// commands from it here, through the owner's quiet window, at host line boundaries.
+/// `control_ready` serves signed commands and the status request through the owner's quiet
+/// window, and its armed candidate's deadline is waited on as the modem loop waits on it.
 pub async fn serve<RK, DLY, L>(
     mut owner: V4RadioOwner<RK, DLY>,
     channel: &'static mut V4NodeChannel,
-    _control_ready: Option<ControlReady>,
+    control_ready: Option<ControlReady>,
     online: &[u8],
     identity_line: &[u8],
     host: L,
@@ -39,6 +42,7 @@ where
     L: HostLink,
 {
     let mut host = BoundedHost::new(host);
+    let mut control = NodeControl::new(control_ready);
     // Outside the loop, so a busy host cannot reset the announce cadence.
     let mut heartbeat = Heartbeat::new(channel.heartbeat());
 
@@ -72,15 +76,23 @@ where
                 owner.wait_rx_irq().await
             }
         };
-        let woken = select3(
+        // An unconfirmed provisional change rolls back on time without a host frame.
+        let expiry = async {
+            match control.deadline_ms() {
+                Some(deadline_ms) => Timer::at(Instant::from_millis(deadline_ms)).await,
+                None => core::future::pending::<()>().await,
+            }
+        };
+        let woken = select4(
             host.read(&mut host_packet),
             radio_wait,
             heartbeat.next(channel.wake_at()),
+            expiry,
         )
         .await;
         let _awake = power::Awake::new();
         match woken {
-            Either3::Second(Ok(())) => {
+            Either4::Second(Ok(())) => {
                 // Deliberately not raced: the frame is in the radio until it is read out.
                 let Some(frame) = (match owner.collect(&mut radio_frame).await {
                     Ok(frame) => frame,
@@ -105,15 +117,22 @@ where
                     )
                     .await;
             }
-            Either3::Second(Err(_)) => owner.radio_fault(6, "RADIO RX"),
-            Either3::Third(tick) => {
+            Either4::Second(Err(_)) => owner.radio_fault(6, "RADIO RX"),
+            Either4::Third(tick) => {
                 let mut exec = owner.executive();
                 let _ = channel.serve(&mut exec, &mut host, tick).await;
             }
-            Either3::First(Err(_)) | Either3::First(Ok(0)) => {}
-            Either3::First(Ok(length)) => {
+            Either4::Fourth(()) => control.expire(&mut owner).await,
+            Either4::First(Err(_)) | Either4::First(Ok(0)) => {}
+            Either4::First(Ok(length)) => {
                 owner.note_host_activity();
                 let packet = &host_packet[..length];
+                if control.claims(packet) {
+                    control
+                        .host_bytes(&mut owner, channel, &mut host, packet)
+                        .await;
+                    continue;
+                }
                 if channel.at_boundary() {
                     if packet == b"heap\n" || packet == b"heap\r\n" {
                         let _ = host.write_all(heap::report().as_str().as_bytes()).await;

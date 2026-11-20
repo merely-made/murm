@@ -28,6 +28,9 @@ pub(super) enum Ev {
     Apply,
     Restore,
     Reset,
+    NodeSend,
+    NodeArm,
+    NodeCollect,
 }
 
 #[derive(Clone, Default)]
@@ -63,6 +66,25 @@ pub(super) struct Board {
     pub(super) reset: bool,
 }
 
+impl Board {
+    /// The node's own radio work. A reset board does none: it is rebooting.
+    pub(super) fn node_send(&mut self) {
+        assert!(!self.reset, "a reset board does no radio work");
+        self.log.push(Ev::NodeSend);
+        self.rx_owed = true;
+    }
+    pub(super) fn node_arm(&mut self) {
+        assert!(!self.reset, "a reset board does no radio work");
+        if self.rx_owed {
+            self.log.push(Ev::NodeArm);
+            self.rx_owed = false;
+        }
+    }
+    pub(super) fn node_collect(&mut self) {
+        assert!(!self.reset, "a reset board does no radio work");
+        self.log.push(Ev::NodeCollect);
+    }
+}
 struct EntryReset(Log);
 
 impl Drop for EntryReset {
@@ -444,4 +466,108 @@ fn expiry_waits_for_a_quiet_boundary_then_rolls_back() {
     );
     assert_eq!(log.last(), Some(&Ev::Restore));
     assert!(rig.runtime.provisional_deadline_ms().is_none());
+}
+
+fn is_node(ev: &Ev) -> bool {
+    matches!(ev, Ev::NodeSend | Ev::NodeArm | Ev::NodeCollect)
+}
+
+/// No node send, receive arm or collect between quiet entry and its end.
+fn assert_no_node_work_while_quiet(log: &[Ev]) {
+    let mut quiet = false;
+    for ev in log {
+        match ev {
+            Ev::Enter => quiet = true,
+            Ev::Restore | Ev::Reset => quiet = false,
+            ev if is_node(ev) => assert!(!quiet, "{ev:?} inside the quiet window: {log:?}"),
+            _ => {}
+        }
+    }
+}
+
+/// One node-loop turn as the V4 node loop runs it: receive armed, a frame collected, a relay
+/// sent, receive armed again before the next wait.
+fn node_turn(board: &mut Board) {
+    board.node_arm();
+    board.node_collect();
+    board.node_send();
+    board.node_arm();
+}
+
+#[test]
+fn node_work_stops_inside_the_quiet_window_and_resumes_after() {
+    let mut rig = Rig::new();
+    let frame = Rig::apply_frame(&rig.operator, 1, 60_000);
+    node_turn(&mut rig.board);
+    block_on(rig.serve(&frame));
+    // The beat after the command: the node announces and re-arms as before.
+    rig.board.node_send();
+    rig.board.node_arm();
+    let log = rig.board.log.take();
+    assert_no_node_work_while_quiet(&log);
+    assert_eq!(count(&log, Ev::Enter), 1);
+    assert_eq!(count(&log, Ev::Restore), 1);
+    assert_eq!(count(&log, Ev::Reset), 0);
+    let restore = log.iter().position(|ev| *ev == Ev::Restore).unwrap();
+    assert_eq!(&log[restore + 1..], [Ev::NodeSend, Ev::NodeArm]);
+    assert!(!rig.host.written.is_empty());
+}
+
+#[test]
+fn a_node_owing_a_receive_arm_is_not_quiet_until_it_rearms() {
+    let mut rig = Rig::new();
+    let frame = Rig::apply_frame(&rig.operator, 1, 60_000);
+    rig.board.node_send();
+    block_on(rig.serve(&frame));
+    assert!(rig.host.written.is_empty());
+    rig.board.node_arm();
+    block_on(rig.serve(&frame));
+    assert!(
+        !rig.host.written.is_empty(),
+        "the same counter, once quiet is possible"
+    );
+    assert_no_node_work_while_quiet(&rig.board.log.take());
+}
+
+#[test]
+fn a_dropped_serve_leaves_the_node_stopped_for_its_reset() {
+    for pend in [Pend::Entry, Pend::Apply, Pend::Finish] {
+        let mut rig = Rig::new();
+        let frame = Rig::apply_frame(&rig.operator, 1, 60_000);
+        node_turn(&mut rig.board);
+        rig.board.pend = Some(pend);
+        assert!(poll_once_and_drop(rig.serve(&frame)));
+        let log = rig.board.log.take();
+        assert_no_node_work_while_quiet(&log);
+        assert_eq!(count(&log, Ev::Reset), 1, "{pend:?}");
+        assert_eq!(count(&log, Ev::Restore), 0, "{pend:?}");
+        let enter = log.iter().position(|ev| *ev == Ev::Enter).unwrap();
+        assert!(
+            !log[enter..].iter().any(is_node),
+            "{pend:?}: nothing after entry"
+        );
+        // The guard's drop latched the reset where the V4 resets synchronously; an entry
+        // dropped before its guard exists resets from the entry future instead.
+        if pend != Pend::Entry {
+            assert!(rig.board.reset, "{pend:?}");
+        }
+    }
+}
+
+#[test]
+fn expiry_in_the_node_loop_waits_for_the_rearm_then_rolls_back_and_the_node_resumes() {
+    let mut rig = Rig::new();
+    block_on(rig.serve(&Rig::apply_frame(&rig.operator, 1, 1_000)));
+    rig.board.log.take();
+    rig.board.node_send();
+    assert!(!rig.expire(2_000), "a send left receive to re-arm");
+    rig.board.node_arm();
+    assert!(rig.expire(2_000));
+    node_turn(&mut rig.board);
+    let log = rig.board.log.take();
+    assert_no_node_work_while_quiet(&log);
+    assert_eq!(count(&log, Ev::Restore), 1);
+    assert!(rig.runtime.provisional_deadline_ms().is_none());
+    let restore = log.iter().position(|ev| *ev == Ev::Restore).unwrap();
+    assert!(log[restore + 1..].contains(&Ev::NodeSend));
 }
