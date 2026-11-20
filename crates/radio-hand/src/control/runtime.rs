@@ -12,7 +12,7 @@ use heapless::Vec;
 mod quiet;
 use quiet::ActiveQuietGuard;
 pub use quiet::{LiveOutcome, QuietExit, QuietGuard, QuietWindow};
-#[cfg(feature = "control-retinue")]
+#[cfg(any(feature = "control-retinue", test))]
 mod inbound;
 mod types;
 mod verified;

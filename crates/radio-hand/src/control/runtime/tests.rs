@@ -1,5 +1,6 @@
 mod authority;
 mod basic;
+mod carrier;
 mod commit;
 mod fakes;
 #[cfg(feature = "control-retinue")]

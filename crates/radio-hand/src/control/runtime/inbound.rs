@@ -1,6 +1,5 @@
 use super::*;
 
-#[cfg(feature = "control-retinue")]
 impl ControlRuntime {
     #[allow(clippy::too_many_arguments)]
     pub async fn arm_inbound<Q>(

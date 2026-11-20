@@ -423,7 +423,6 @@ pub fn apply_request(transaction: u8) -> Request {
     }
 }
 
-#[cfg(feature = "control-retinue")]
 pub fn encoded_request(request: &Request) -> Vec<u8, { crate::control::MAX_REQUEST_LEN }> {
     let mut bytes = [0; crate::control::MAX_REQUEST_LEN];
     let length = crate::control::encode_request(request, &mut bytes).unwrap();
@@ -481,7 +480,6 @@ pub fn scratch<'a>(
     DurableScratch::new(a, b, body, page).unwrap()
 }
 
-#[cfg(feature = "control-retinue")]
 pub fn operator() -> retinue::identity::PrivateIdentity {
     let mut secret = [0; retinue::identity::IDENTITY_LEN];
     secret[..32].fill(0x11);
@@ -489,7 +487,6 @@ pub fn operator() -> retinue::identity::PrivateIdentity {
     retinue::identity::PrivateIdentity::from_secret_bytes(&secret)
 }
 
-#[cfg(feature = "control-retinue")]
 pub fn state_for_operator(operator: &retinue::identity::PrivateIdentity) -> DurableState {
     DurableState::new(
         NodeId([0x10; 16]),
@@ -506,7 +503,6 @@ pub fn state_for_operator(operator: &retinue::identity::PrivateIdentity) -> Dura
     .unwrap()
 }
 
-#[cfg(feature = "control-retinue")]
 pub fn signed_command(
     operator: &retinue::identity::PrivateIdentity,
     payload: &[u8],

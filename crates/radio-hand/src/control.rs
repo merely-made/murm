@@ -7,6 +7,10 @@
 //! journal writes against flash and radio, and the WN0 volatile admission seam.
 
 mod admission;
+// The carrier names Retinue's verifier: boards with `control-retinue`, and every test build,
+// whose dev-dependencies link the verifier anyway.
+#[cfg(any(feature = "control-retinue", test))]
+pub mod carrier;
 mod runtime;
 #[cfg(test)]
 mod test_authority;
