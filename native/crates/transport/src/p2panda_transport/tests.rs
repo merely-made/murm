@@ -901,18 +901,20 @@ async fn a_peer_off_the_overlay_that_closes_reads_not_connected_within_a_second(
         "not subscribed, so the count decides: {listed:?}"
     );
 
+    // Observe Alice while Bob shuts down. Waiting for Bob's entire endpoint
+    // to drain first would include that drain in Alice's detection time.
     let closing = std::time::Instant::now();
-    within("close", Duration::from_secs(10), bob.close())
-        .await
-        .unwrap();
+    let (closed, not_connected) = tokio::join!(
+        within("close", Duration::from_secs(10), bob.close()),
+        within("not connected", Duration::from_secs(5), async {
+            while reads_connected(&alice, bob_id, topic, true).await {
+                tokio::time::sleep(Duration::from_millis(20)).await;
+            }
+            closing.elapsed()
+        }),
+    );
+    closed.unwrap();
     drop(bob);
-    let not_connected = within("not connected", Duration::from_secs(5), async {
-        while reads_connected(&alice, bob_id, topic, true).await {
-            tokio::time::sleep(Duration::from_millis(20)).await;
-        }
-        closing.elapsed()
-    })
-    .await;
     let path = reads_connected(&alice, bob_id, topic, false).await;
     println!(
         "closed peer off the overlay: not connected {not_connected:?}; path still active {path}"
