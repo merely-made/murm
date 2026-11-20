@@ -147,6 +147,12 @@ pwsh apps/signalman-desktop/tools/stage-firmware.ps1 -Index firmware/packages/in
   application image `espflash save-image` reports plus its `0x10000` offset; the write range
   runs from 0 to the first preserved range. espflash must be 4.5.0, the helper the template
   names. `-IgnoreRustVersion` is for an esp toolchain older than the declared rust-version.
+- Heltec V4 node (`retinue.heltec-v4-node`, wall_node_management D10): the same build with
+  `--features node` and `-Zbuild-std=core,alloc`, staged the same way as
+  `heltec-v4-phy/tulle-heltec-v4-phy-node`. The template schema has no build field, so the
+  script keys the features on the package. It is listed only in the bench catalog
+  `heltec-v4-node-bench-index.toml`, not in `index.toml`, until the WN2 bench run passes; its
+  recovery page is [Heltec V4 node recovery](heltec-v4-node-recovery.md).
 - Heltec T114: `cargo build -p tulle-t114-phy --release --target thumbv7em-none-eabihf`,
   `rust-objcopy -O binary`, then `linkboy make-uf2 BIN UF2 0x26000 0xADA52840`; the write range
   and `write_bytes` come from the UF2 blocks.

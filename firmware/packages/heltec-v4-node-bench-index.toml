@@ -1,0 +1,18 @@
+# V4 node bench catalog (wall_node_management D10).
+#
+# Not the public catalog: the node image is listed here until the WN2 bench run passes,
+# and index.toml does not name it. Stage it with stage-firmware.ps1 like any index.
+schema = "retinue.package-index/v1"
+publisher = "Merely Made"
+version = "1"
+
+[[packages]]
+package_id = "retinue.heltec-v4-node"
+release_sequence = 1
+manifest = "heltec-v4-node.toml"
+firmware_publisher = "Merely Made"
+state = "partial"
+instructions_url = "https://github.com/merely-made/murm/blob/main/firmware/packages/README.md"
+recovery_url = "https://github.com/merely-made/murm/blob/main/firmware/packages/heltec-v4-node-recovery.md"
+installer_receipts = []
+recovery_receipts = []

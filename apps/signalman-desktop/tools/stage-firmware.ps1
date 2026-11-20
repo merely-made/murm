@@ -41,6 +41,32 @@ function Invoke-Checked {
     }
 }
 
+# Build one V4 image and return its stage-catalog arguments. Both V4 builds write the same
+# ELF path and stage-catalog reads payloads last, so each ELF is copied into the scratch.
+function Build-V4Image {
+    param([string]$PackageId, [string]$Name, [string[]]$BuildFlags)
+    if (-not $Espflash) { throw 'The V4 package needs -Espflash to report its write size.' }
+    $espflashVersion = & $Espflash --version
+    if ($espflashVersion -notmatch '\b4\.5\.0\b') {
+        throw "The V4 template names espflash 4.5.0; found $espflashVersion"
+    }
+    # The app descriptor records its build time; the commit time makes it repeat.
+    $env:SOURCE_DATE_EPOCH = $commitTime
+    $build = @('+esp', 'build', '-p', 'tulle-heltec-v4-phy', '--release',
+        '--target', 'xtensa-esp32s3-none-elf') + $BuildFlags
+    if ($IgnoreRustVersion) { $build += '--ignore-rust-version' }
+    # Out-Host keeps tool output out of this function's return value.
+    Invoke-Checked 'cargo' $build | Out-Host
+    Remove-Item Env:SOURCE_DATE_EPOCH
+    $elf = Join-Path $work "$Name.elf"
+    Copy-Item -LiteralPath (Join-Path $targetDir 'xtensa-esp32s3-none-elf\release\tulle-heltec-v4-phy') -Destination $elf
+    $image = Join-Path $work "$Name.app.bin"
+    Invoke-Checked $Espflash @('save-image', '--chip', 'esp32s3', $elf, $image) | Out-Host
+    # espflash writes the application at 0x10000, after bootloader and partition table.
+    $writeBytes = 0x10000 + (Get-Item -LiteralPath $image).Length
+    return @('--payload', $PackageId, $elf, '--write-bytes', $PackageId, "$writeBytes")
+}
+
 $destinationFull = [System.IO.Path]::GetFullPath($Destination)
 if ($destinationFull.StartsWith($repoRoot + [System.IO.Path]::DirectorySeparatorChar, [System.StringComparison]::OrdinalIgnoreCase)) {
     throw "Stage outside the repository; built images are not kept in it: $destinationFull"
@@ -72,25 +98,13 @@ try {
     foreach ($manifest in $templated) {
         switch ($manifest) {
             'heltec-v4-current' {
-                if (-not $Espflash) { throw 'The V4 package needs -Espflash to report its write size.' }
-                $espflashVersion = & $Espflash --version
-                if ($espflashVersion -notmatch '\b4\.5\.0\b') {
-                    throw "The V4 template names espflash 4.5.0; found $espflashVersion"
-                }
-                # The app descriptor records its build time; the commit time makes it repeat.
-                $env:SOURCE_DATE_EPOCH = $commitTime
-                $build = @('+esp', 'build', '-p', 'tulle-heltec-v4-phy', '--release',
-                    '--target', 'xtensa-esp32s3-none-elf', '-Zbuild-std=core')
-                if ($IgnoreRustVersion) { $build += '--ignore-rust-version' }
-                Invoke-Checked 'cargo' $build
-                Remove-Item Env:SOURCE_DATE_EPOCH
-                $elf = Join-Path $targetDir 'xtensa-esp32s3-none-elf\release\tulle-heltec-v4-phy'
-                $image = Join-Path $work 'tulle-heltec-v4-phy.app.bin'
-                Invoke-Checked $Espflash @('save-image', '--chip', 'esp32s3', $elf, $image)
-                # espflash writes the application at 0x10000, after bootloader and partition table.
-                $writeBytes = 0x10000 + (Get-Item -LiteralPath $image).Length
-                $stageArgs += @('--payload', 'retinue.heltec-v4', $elf,
-                    '--write-bytes', 'retinue.heltec-v4', "$writeBytes")
+                $stageArgs += Build-V4Image 'retinue.heltec-v4' 'tulle-heltec-v4-phy' @('-Zbuild-std=core')
+            }
+            # The node build (wall_node_management D10). The template schema has no build
+            # field, so the features are keyed on the package here.
+            'heltec-v4-node' {
+                $stageArgs += Build-V4Image 'retinue.heltec-v4-node' 'tulle-heltec-v4-phy-node' @(
+                    '-Zbuild-std=core,alloc', '--features', 'node')
             }
             't114-current' {
                 Invoke-Checked 'cargo' @('build', '-p', 'tulle-t114-phy', '--release',
