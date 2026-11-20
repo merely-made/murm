@@ -95,15 +95,20 @@ pub enum V4QuietError {
 
 /// A configuration the current direct V4 image cannot honestly realize.
 ///
-/// The image presently has only its local wired/USB host link. It does not run a resident
-/// Reticulum relay and has no WN2, Wi-Fi, BLE, control carrier, or credential subsystem.
+/// The image presently has only its local wired/USB host link. Only the node build runs a
+/// resident Reticulum relay; none has Wi-Fi, BLE, another carrier, or a credential subsystem.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum V4ConfigError {
     PublicConfigurationInvalid,
     SealedCredentialsUnsupported,
+    #[cfg_attr(feature = "node", allow(dead_code))]
     ResidentReticulumRelayUnsupported,
-    UnsupportedManagementCarriers { requested_mask: u8 },
-    ProfileRejected { code: u8 },
+    UnsupportedManagementCarriers {
+        requested_mask: u8,
+    },
+    ProfileRejected {
+        code: u8,
+    },
 }
 
 /// A bounded transient profile operation could not be completed with known hardware state.
@@ -171,7 +176,7 @@ const fn classify_quiet_preflight(
 ///
 /// This runs before any pending-sector erase. It rechecks the portable
 /// region/PHY validation as well as the V4-only absence of credentials,
-/// resident relay transport, and non-USB management. Hardware application is
+/// resident relay transport (modem image only), and non-USB management. Hardware application is
 /// deliberately later, after a valid durable resume/boot path owns the radio.
 pub(crate) fn first_write_configuration_feasible(
     configuration: &DurableConfig,
@@ -183,8 +188,9 @@ pub(crate) fn first_write_configuration_feasible(
     if !configuration.sealed_credentials.is_empty() {
         return Err(V4ConfigError::SealedCredentialsUnsupported);
     }
+    // Only the node build runs a resident relay to honour the flags (D2); it reads them at boot.
     let transport = configuration.public.reticulum_transport();
-    if transport.relay_announces || transport.relay_packets {
+    if !cfg!(feature = "node") && (transport.relay_announces || transport.relay_packets) {
         return Err(V4ConfigError::ResidentReticulumRelayUnsupported);
     }
     let requested_mask = configuration.public.enabled_management_carriers().mask();
@@ -844,7 +850,11 @@ mod tests {
         );
         assert_eq!(
             first_write_configuration_feasible(&config(true, LOCAL_WIRED_USB_MASK, false)),
-            Err(V4ConfigError::ResidentReticulumRelayUnsupported)
+            if cfg!(feature = "node") {
+                Ok(())
+            } else {
+                Err(V4ConfigError::ResidentReticulumRelayUnsupported)
+            }
         );
         assert_eq!(
             first_write_configuration_feasible(&config(false, LOCAL_WIRED_USB_MASK | 2, false)),

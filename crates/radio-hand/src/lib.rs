@@ -38,6 +38,8 @@ pub mod gnss;
 #[cfg(feature = "node")]
 pub mod heap;
 pub mod link;
+#[cfg(feature = "replay")]
+pub mod node_relay;
 pub mod observation;
 pub mod phy;
 pub mod profiles;

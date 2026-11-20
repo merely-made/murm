@@ -57,6 +57,16 @@ or a refused node keeps the modem for repair, with `timebase=fault
 FALLBACK=modem` on the boot line and a TIMEBASE fault on the screen. `channel
 modem` and `channel rnode` stay available as recovery channels.
 
+Relaying follows the control configuration, read once at boot. A claimed
+board relays announces and packets as its committed `relay_announces` and
+`relay_packets` say; an unclaimed board relays both. The hop limit and route
+and link lifetimes stay at the transit defaults whatever the configuration's
+`max_hops` says. A change takes effect at the next boot. Only the node build
+accepts the two flags in a candidate or first-write configuration; the modem
+image still refuses them, and a modem image booted on a board whose committed
+configuration has either flag on fails WN1 control recovery into the
+status-only boot (`control runtime boot failed`).
+
 The node needs nothing on USB and writes no banner. Every host write in the
 node loop is bounded at 100 ms; one that runs out stops host writes until the
 host next sends bytes, so radio service, beats and wakes never wait on a host.
