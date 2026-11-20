@@ -212,6 +212,33 @@ pin, where the older text says 1.5.2.
   expire before it exits. The holder is a seam so a store can be added when
   a commit on another carrier needs one.
 
+### wall_node_management D19 to D21 (2026-11-20)
+
+- **D19, where the lifecycle's end-to-end tests live (new):** they run the
+  real control runtime, whose only constructor is `unsafe`; one such call
+  under `crates/station-custody/tests/` made `unsafe_audit.py` ask the crate
+  to drop `#![forbid(unsafe_code)]`. Five `radio-hand` test files already
+  carry exceptions for the same call
+  (`validation/security/unsafe-policy.toml:63`). The owner: "Per-file
+  exception, audit rule scoped to src". An integration test is its own crate,
+  so the library keeps `forbid` and the compiler enforces it.
+- **D20, how a controller sees the applied radio and an expiry (new):**
+  signed Status reads the same while a candidate is armed and after it rolls
+  back (`crates/seneschal/src/control/status.rs:178`), an apply returns no
+  applied configuration (`crates/radio-hand/src/control/runtime/inbound.rs:122`),
+  and the V4's `sync` probe and banner are fixed text. The owner:
+  "Diagnostics plus a commit probe". No wire change: the V4 reports the
+  applied profile and relay flags on an unsigned line, the banner and `sync`
+  probe report what is applied, and after the deadline the tool sends the
+  commit and takes the board's `TransactionExpired` as the expiry evidence.
+  A Status that carries these facts is not ruled.
+- **D21, the commit token below the holder (refines D18):** postilion's
+  `ProvisionalReceipt` is `Copy` with the token as a plain array
+  (`crates/postilion/src/control/verified/client.rs:64`) and `commit` leaves
+  it in unzeroized buffers. Asked whether to close that now, the owner: "Yes,
+  in this piece". The token becomes a zeroizing type and the commit buffers
+  are cleared after the send.
+
 ## Decisions and constraints
 
 Transport authentication does not confer board-local authority. Grants bind actual keys; durable outer counters and mutation-sequence retirement are separate from semantic transaction identity. `Changed`, `Replayed`, `Ready` and reset-required preserve distinct meanings. Board-owned recovery facts cannot be asserted by candidate configuration. A signature does not encrypt credentials. A quiet witness must cover live flash and apply; once stopping starts, cancellation or uncertain hardware state fails to a reset boundary. The first useful appliance is USB lifecycle then native LoRa forwarding, with WiFi afterward; WN0 target fixture and later carriers are real debts but are not asserted as blockers for that integration.
@@ -373,3 +400,13 @@ Choose V4 heap from measured high-water and refusal behavior. Decide unsigned, b
   radio fields; a refused profile earns silence; and stock RNS on a radio
   interface keeps a 500-byte link MTU, so D16's 256-byte write may exceed one
   255-byte frame there. D17 and D18 ruled.
+- 2026-11-20: `station-claim lifecycle` built (D17, D18): one invocation reads
+  signed Status, applies a candidate built from arguments (both relay flags
+  and every radio field), reads Status again, then commits, reverts or waits
+  out the deadline; the token is held in memory only. The outer counter stays
+  in its file and the mutation sequence has one beside it; each value is
+  written before it is used, so a crash can skip one and never repeats one.
+  The generation is read from the board each run. 20 library and 6 command
+  tests pass. Seven end-to-end tests against the real runtime and carrier
+  passed in the working tree and are held back for D19. Nothing has run
+  against a board, a port or djinn. D19 to D21 ruled.
